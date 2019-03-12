@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  db:
+    image: __DB_TAG__
+    volumes:
+      - __DATA_DIR__/db:/var/lib/mysql
+    ports:
+      - "__DB_PORT__:3306"
+    expose:
+      - 3306
+  server:
+    image: __SERVER_TAG__
+    volumes:
+      - __DATA_DIR__/server:/opt/ara/data
+    ports:
+      - "__SERVER_PORT__:8080"
+    expose:
+      - 8080
+    depends_on:
+      - db
+    command: "--spring.datasource.url=jdbc:mysql://host.docker.internal:__DB_PORT__/ara?useUnicode=yes&characterEncoding=UTF-8"

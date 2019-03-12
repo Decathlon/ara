@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+
+    <project id="1" code="p" name="Any" default_at_startup="false"/>
+
+    <execution/>
+
+    <!-- Simulating an existing problem and freshly inserted errors: the problem now has to be assigned automatically to errors -->
+    <problem id="1" project_id="1" name="Matching a few errors to come" status="OPEN" blamed_team_id="2" defect_id="1"
+             creation_date_time="2018-01-01 12:00:00.0"/>
+    <problem_pattern id="11" problem_id="1" exception="OneID_Error when calling 1ID service"
+                     scenario_name_starts_with="false" step_starts_with="false" step_definition_starts_with="false"/>
+
+</dataset>

@@ -1,0 +1,33 @@
+@startuml
+
+ExecutionDiscovererService -> PullFetcher: getJobHistory
+ExecutionDiscovererService <-- PullFetcher: List[Build]
+loop foreach Build
+  ExecutionDiscovererService -> ExecutionCrawlerService: crawl
+  note over ExecutionCrawlerService: Asynchronous processing
+  ExecutionCrawlerService -> Fetcher: completeBuildInformation
+  ExecutionCrawlerService -> Fetcher: getCycleDefinition
+  ExecutionCrawlerService <-- Fetcher: CycleDef
+  ExecutionCrawlerService -> Fetcher: getTree
+  ExecutionCrawlerService <-- Fetcher: ExecutionTree
+  loop foreach Run
+    note over ExecutionCrawlerService: Each Run not already indexed
+    ExecutionCrawlerService -> Fetcher: completeBuildInformation
+    alt type of Run is Cucumber
+      ExecutionCrawlerService -> Fetcher: getCucumberReport
+      ExecutionCrawlerService <-- Fetcher: List[Feature]
+      ExecutionCrawlerService -> Fetcher: getCucumberStepDefinitions
+      ExecutionCrawlerService <-- Fetcher: List[String]
+    else type of Run is Postman
+      ExecutionCrawlerService -> Fetcher: getNewmanReportPaths
+      ExecutionCrawlerService <-- Fetcher: List[String]
+      loop foreach Artifact
+        ExecutionCrawlerService -> Fetcher: streamNewmanResult
+        ExecutionCrawlerService <-- Fetcher
+      end
+     end
+  end
+  ExecutionCrawlerService -> Fetcher: onDoneExecutionIndexingFinished
+end
+
+@enduml

@@ -1,0 +1,32 @@
+[
+  {
+    "id": 399,
+    "name": "Account",
+    "assignableToProblems": true,
+    "assignableToFunctionalities": true
+  },
+  {
+    "id": 398,
+    "name": "Buy",
+    "assignableToProblems": true,
+    "assignableToFunctionalities": true
+  },
+  {
+    "id": 397,
+    "name": "Catalog",
+    "assignableToProblems": true,
+    "assignableToFunctionalities": true
+  },
+  {
+    "id": 400,
+    "name": "Infrastructure",
+    "assignableToProblems": true,
+    "assignableToFunctionalities": false
+  },
+  {
+    "id": 396,
+    "name": "Marketing",
+    "assignableToProblems": true,
+    "assignableToFunctionalities": true
+  }
+]

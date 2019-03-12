@@ -1,0 +1,8 @@
+seleniumService.getSessionId()
+=> 42
+backendService.importProductsInCart()
+=> OK
+seleniumService.loadCartPage()
+=> OK
+seleniumService.getCartProductCount()
+=> 1

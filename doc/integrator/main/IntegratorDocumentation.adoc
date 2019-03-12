@@ -1,0 +1,357 @@
+= ARA's Integrator Documentation
+
+Here is how to set up ARA, configure it, and plug the continuous integration of your project onto ARA.
+
+== Install ARA
+
+The simplest way to install and run ARA is to use the Docker-compose script.
+
+Open the <<../../../docker/README.adoc#head, Run ARA Using Docker>> document
+and follow the first two sections: "Pre-Requisite" and "Getting Started as an Ops".
+
+== Enable or Disable an experimental feature
+
+ARA may contains some unstable feature, which are still under beta tests, and which are disabled on
+Production instances and clones.
+
+You can still enable some of them by using the `<host>:<port>/api/features` HTTP API (see the swagger
+documentation of ARA for more details), but please note that those features are experimental and that
+you may encounter unstable behavior if you're using them. If you do, please send us a copy of your ARA logs and
+the context of execution / error in an issue in the project repository, it will help us a lot :)
+
+The features can also be enable or not directly at the ARA instance startup following this rule :
+
+* the value is setted in system property `-Dara.features.<code>=<state>`
+* if not, the value is setted in the spring application.properties file `ara.features.<code>=<state>`
+* if not, the value is `false`.
+
+Where `code` is the code of the feature you want to enable. (You can list all available features with
+a GET call on `<host>:<port>/api/features`).
+
+Note that a feature state will be store in your instance memory and not your Database, so if you
+have 2 ARA instances running on the same database, you can enable a feature on only one instance and not
+the other one.
+
+== Configure a Project in ARA
+
+Once ARA is up and running, you will have to set up a project in ARA. +
+Projects in ARA are spaces isolated from each other, where all your application test results will get uploaded and reports will be viewable and manipulated by the whole team.
+
+* Go to https://{{your-ara-domain-name}}/#/management/projects +
+  image:create-project.png[]
+* You can click the `[ + CREATE THE DEMO PROJECT ]` button,
+  play with it and its project settings to be more familiar with what an ARA project looks like.
+  You can remove and/or re-create the demo project at any time.
+* Once you are ready, click the `[ + ADD ]` green button in https://{{your-ara-domain-name}}/#/management/projects to create your own project
+
+Then, to setup the project, select "MANAGE PROJECT" in the top-left project's drop-down list:
+
+image:manage-project.png[]
+
+Configure each screen: *provide at least one of each of the configuration entities described below*. +
+A documentation text is displayed on each screen and each field of the ADD popup dialogs.
+
+* *Teams:* just provide it/them a name: +
+  image:manage-teams.png[]
+* *Sources:* source repositories contain your test files: +
+  image:manage-sources.png[]
+* *Test types:* declare the test types that will be executed (a source can be run by several test types): +
+  image:manage-types.png[]
+* *Countries:* they represent different configurations in which your solution will be tested by all (or some of the) declared test types: +
+  image:manage-countries.png[]
+* *Severities:* they allow to partition your Cucumber scenarios and Postman requests into groups that can have various degrees of quality exigences +
+  (quality exigences can vary from execution to executions, so the quality threshold of each severity is declared later): +
+  image:manage-severities.png[]
+* *Cycles:* configure at least one cycle per source branch on which you run automated tests, and optionaly provide more cycles for one or more branches: +
+  image:manage-cycles.png[]
+
+Additionally, it is strongly recommended to setup "Email Reports" in the Settings screen. +
+You also can configure "Defects" settings to link ARA problems to your bug tracker system: +
+image:manage-settings.png[]
+
+Your project is now ready to receive its test reports.
+
+== Send Execution Reports to ARA
+
+Basically, here is what you need to send to ARA:
+
+* When running Cucumber scenarios, the system gives you *a report.json file*.
+* When running Newman collection(s), the system gives you *report JSON files*.
+
+You can run several of these (they are called runs), and ship all of these grouped in one unit: the execution. +
+You need to upload these files with some meta-data files and folders in order to add semantics to the report files. +
+The whole set of folders and files is zipped, sent to ARA, and you are done.
+
+=== Key Concepts
+
+First, you need to know some additional key concepts (that were not configured when creating a project in ARA):
+
+* A *cycle* represents a test of a branch by one or more test types
+* An *execution* is the grouping of tests on several countries and/or different test types: they form one coherent test execution that can serve as making a build eligible or not
+* A *run* represents the single unit of one test-type being executed for one country on one execution
+
+=== [[tree]] Create a ZIP File
+
+Here is the overall structure of a ZIP for an execution, with a concrete example:
+
+* *the-execution-file-to-upload-to-ara.zip*
+** *1542018261233/* - A folder whose name is the timestamp (UTC/GMT+0 number of milliseconds since January 1st, 1970) when the execution started on the continuous integration server
+*** *cycleDefinition.json* - the file describing what tests are supposed to be run by this execution
+                             (if executed, sub-folders will contain the outputs of each run,
+                             and if one sub-folder is missing or does not contain reports,
+                             then ARA will know something went wrong and will invalidate the execution because of missing expected runs;
+                             the file also describes what are the quality thresholds to use to validate this execution)
+*** *buildInformation.json* - describes the URL of the job on the continuous integration server where to find logs,
+                              the status of the job, information about the version that was deployed and tested...
+*** *fr/* - The code of the country where the tests contained in this folder were executed;
+            there can be several such country folders (at least one is required, otherwise the execution will be marked as INCOMPLETE)
+**** *buildInformation.json* - describes the URL of the job on the continuous integration server where to find logs and
+                               the status of the job that deployed the version with this specific country configuration
+**** *api/* - The code of a test type that ran for the country;
+              there can be several such test-type folders (at least one is required, otherwise the execution will be marked as INCOMPLETE)
+***** *buildInformation.json* - describes the URL of the job on the continuous integration server where to find logs and
+                                the status of the job that executed the specific test-type and country couple
+***** *reports/* - (if the test type is from a Postman source)
+                   folder containing a hierarchy of *.json files being the Newman reports of ran collections;
+                   the sub-folders structure reflects the sub-folders structure of the ran collection files, relative to the source VCS URL;
+                   to be indexed into ARA
+***** *report.json* - (if the test type is from a Cucumber source)
+                      Cucumber report file to be indexed into ARA
+***** *stepDefinitions.json* - (if the test type is from a Cucumber source)
+                               a JSON array containing all step definition regular expressions that were used in the
+                               Cucumber run: will be used to create problem aggregation rules that match a
+                               step definition instead of a specific instance of the step; optional.
+
+=== The cycleDefinition.json File
+
+This file is created at the very beginning of the execution. +
+It describes what the execution *is expected* to run. +
+Some jobs in the execution can fail to start or be skipped due to earlier failures. +
+With the cycleDefinition.json file, ARA is shielded from such missing data:
+if one of the sub-jobs did not run, ARA will show a failed execution because of missing results, instead of showing a succeed execution because no test failed.
+
+To construct a cycleDefinition.json, see Javadoc of:
+
+* link:../../../server/src/main/java/com/decathlon/ara/ci/bean/CycleDef.java[CycleDef]
+* link:../../../server/src/main/java/com/decathlon/ara/ci/bean/PlatformRule.java[PlatformRule]
+* link:../../../server/src/main/java/com/decathlon/ara/ci/bean/QualityThreshold.java[QualityThreshold]
+
+==== Example of a Single-Country, Two-Types cycleDefinition.json
+
+```json
+{
+  "blockingValidation": true,       // If quality percentage is below thresholds, make the build not-eligible
+  // This execution ran tests on platforms (a single one in this example): ...
+  "platforms_rules": {
+    // ... the "integration-platform" one
+    "integration-platform": [
+      // This is a list of countries that will be deployed on that platform: here, only one
+      {
+        "enabled": true,            // If false, it has the same effect than if it was not present: must be true to include the runs of that country in ARA
+        "blockingValidation": true, // All test-type runs of this country are INCLUDED IN THRESHOLDS (false to make them informational)
+        "testTypes": "api,firefox", // These two types will be run for that country (codes of types in ARA)
+        "country": "fr",            // The country used for running these test types
+        "severityTags": "all"       // Indicates the enabled severities in these runs: either "all" or a list of severity codes separated by ",": if a severity is declared to be enabled but no executed scenario matching the severity is found, the execution will be marked as INCOMPLETE: if a cycle runs only a sub-set of severities, make it explicit here to avoid such false-error
+      }
+    ]
+  },
+  // ALL of the following "failure" thresholds explained below MUST be met for the build to be declared as eligible
+  // This object lists all severities declared in ARA (at least one must be declared)
+  "qualityThresholds": {
+    "sanity-check": {
+      "failure": 100, // All @severity-sanity-check scenarios must succeed
+      "warning": 100
+    },
+    "high": {
+      "failure": 90,  // At least 90% of all @severity-high scenarios must succeed
+      "warning": 95   // If between 90% and 95% of all @severity-high scenarios pass, a small warning icon will appear to let people know there is not so much remaining margin for error
+    },
+    "medium": {
+      "failure": 80,  // At least 80% of all @severity-high scenarios must succeed
+      "warning": 85
+    }
+  }
+}
+```
+
+=== The buildInformation.json File
+
+Each job folder have a buildInformation.json file. +
+This file describes information about the job that ran either the execution, a deployment or a run or a test-type.
+
+To construct a buildInformation.json, see Javadoc of
+<<../../server/src/main/java/com/decathlon/ara/ci/bean/Build.java, Build>>.
+
+==== Example of an Execution's buildInformation.json
+
+```json
+{
+  "url": "https://build.company.com/demo/master/day/42/", // The link to the continuous integration job to put into ARA for this execution
+  "result": "SUCCESS",                                    // The result of : either ABORTED, FAILURE, NOT_BUILT, SUCCESS, or UNSTABLE: will be shown alongside the job link in ARA
+  "timestamp": 1542018261233,                             // Number of UNIX milliseconds representing the date & time at which the job started (since January 1st, 1970 UTC/GMT+0)
+  "release": "v2",                                        // The current release of your application that is being tested
+  "version": "724b1de228b72047d865d96f3c518164575caa37",  // The version of the build of your application that is being tested
+  "versionTimestamp": 1542018261233                       // The date & time when the version of you application has been built (UNIX milliseconds since January 1st, 1970 UTC/GMT+0)
+}
+```
+
+==== Example of an Country Deployment's buildInformation.json
+
+Same as the execution's buildInformation.json, but with less information:
+
+```json
+{
+  "url": "https://build.company.com/demo/master/day/fr/43/",
+  "result": "SUCCESS",
+  "timestamp": 1542018261233
+}
+```
+
+==== Example of an Run's buildInformation.json
+
+Same as the execution's buildInformation.json, but with less information:
+
+```json
+{
+  "url": "https://build.company.com/demo/master/day/fr/api/44/",
+  "result": "SUCCESS",
+  "timestamp": 1542018261233
+}
+```
+
+=== The Cucumber's report.json File
+
+This is just the report.json produced by running Cucumber.
+
+=== The Cucumber's stepDefinitions.json File
+
+This file is optional. +
+It lets users create aggregation rules matching Cucumber steps definitions (regular expressions) instead of just steps (scenario contents). +
+For instance, the step "^Step number (\\d+)$" can be used in a scenario as "Step number 1" and "Step number 2". +
+If both steps fail, it could be because the step definition is erroneous, and users would want to create a problem with just one rule aggregating both step "instances". +
+If the file is not provided, ARA will threat numbers and double-quoted strings in steps as parameters and will thus try to guess what were the underlying step definitions. +
+But this is very basic, error-prone, and don't account for more complex regular expressions. +
+By extracting a stepDefinitions.json array file, you will be assured that ARA will let users create relevant rules.
+
+If you decide to provide this file, it must contain a JSON array of all step definitions glue used by a Cucumber run.
+
+Example:
+
+```json
+[
+  "^A step$",
+  "^A step with number (\\d+) parameter$",
+  "^A step with string \"([^\"]*)\" parameter$",
+]
+```
+
+As an example, in Java, just include the ara-lib library. +
+Here is how to find it with Maven:
+
+```xml
+<dependency>
+    <groupId>com.decathlon.ara</groupId>
+    <artifactId>ara-lib</artifactId>
+    <version>${ara.version}</version>
+</dependency>
+```
+
+The library declares the cucumber dependency as provided: you will need a working Cucumber dependency in your project
+for the extractor to work: it will need to access your glue code.
+
+Then, use the `com.decathlon.ara.lib.StepDefinitionExtractor` class like this:
+
+```java
+String outputDirectory = System.getProperty("user.dir"); // Create stepDefinitions.json in the current directory
+String gluePackage = "com.company.project.tests.cucumber.glue"; // Base package containing all @Given, @When, @Then...
+StepDefinitionExtractor.extract(outputDirectory, gluePackage);
+```
+
+If you have made an implementation of StepDefinitionExtractor for another language/Cucumber-flavour,
+we would be glad to include it in the open-source repository of ARA.
+
+=== Send the Execution ZIP File to ARA
+
+Once you created the folders and files structure described above (see <<tree, Create a ZIP File>>), just zip the content. +
+The execution's timestamp folder must be at the root of the ZIP.
+
+Then, send it to ARA: +
+*TODO when the HTTP connector will be done.*
+
+== Upload Cucumber Scenarios and Postman Requests to ARA
+
+There is an optional additional step to feed ARA with all data it needs from your project.
+
+=== Why?
+
+If you need:
+
+* the tracking of @ignore Cucumber scenarios
+* functionality coverage of automated tests
+* team association for Cucumber scenarios and Postman requests (through functionalities)
+
+Then, whenever a push is done on your main/default branch of your version control system,
+you need to upload the Cucumber scenarios and Postman collections to ARA, so ARA can keep track of them.
+
+This is done independently of executions, because executions can run a sub-set of scenarios, or run them several times (one run with @country-all + @country-fr, and another run with @country-all + @country-us...) or exclude all the @ignore scenarios.
+
+=== How?
+
+If you have several sources, you need to upload them individually. +
+In ARA terminology, a source is a Version Control System (Git...) URL
+to a folder containing either .feature Cucumber files or Postman collections;
+a source can be used several times by different test types
+(same .features files used by both "Web desktop" and "Web mobile" test types, for instance).
+
+==== How to Upload Collections of a Postman Source?
+
+ZIP all you *.json collections, while keeping the parent directories.
+
+For instance, you have Postman collections like `src/main/resources/team1/subteamA/collection1.json`
+and the matching ARA source have VCS URL pointing to the folder `src/main/resources` of your project,
+then ZIP all JSON collections in this `src/main/resources`.
+The ZIP file will then contain a `team1` folder, and a `subteamA` sub-folder, containing the JSON files.
+
+Upload it to:
+
+* URL: `{{ara-domain}}/api/projects/{{project-code}}/scenarios/upload-postman/{{source-code}}`
+* HTTP method: `POST`
+* HTTP header: `Content-Type: multipart/form-data`
+* HTTP body: a form field named `file` with the ZIP file content
+
+==== How to Upload Scenarios of a Cucumber Source?
+
+Run Cucumber with the command-line options `--dryRun --reports json` (or its equivalent JUnit annotations).
+
+This will create a `report.json` without running the scenarios.
+
+Upload it to:
+
+* URL: `{{ara-domain}}/api/projects/{{project-code}}/scenarios/upload/{{source-code}}`
+* HTTP method: `POST`
+* HTTP body: the `report.json` file
+
+== Going Further: More Meta-Data for Executed Cucumber Scenarios
+
+ARA works fine by just feeding it with a Cucumber report.json.
+
+ARA optionally offers you to display more meta-data to help user debug scenarios more easily. +
+But you need to modify how you run your Cucumber scenarios and embed special data into the report. +
+To do so, please follow this documentation: <<../embed/EmbedCucumberScenarioMetaData.adoc#head, Embed Cucumber Scenario Meta-Data for ARA>>
+
+== Bonus: Custom Cucumber to Allow Several Steps to Fail in a Single Scenario
+
+Sometimes, you need to let several steps of a Cucumber scenario to fail.
+
+For instance, a scenario can go through a slow process on a website, and check several information are well displayed at the end. +
+You may want each check to have its own Cucumber step for better debugging what information is not displayed correctly. +
+By default, Cucumber will stop the scenario at the first failed step. +
+If the first check step fails, you then have no idea if the following checks would pass or fail.
+
+You can use this Cucumber fork in order to mark some @Then steps as "soft-failures", and allow
+
+https://github.com/slaout/cucumber-jvm
+
+ARA supports this.
+
+As an extra, this fork also enable you to run scenarios in parallel (and not just feature files), and annotate some scenarios to run synchronously.

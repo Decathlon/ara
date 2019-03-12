@@ -1,0 +1,183 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.decathlon.ara</groupId>
+        <artifactId>ara-parent</artifactId>
+        <version>2.4.3</version>
+    </parent>
+    <artifactId>ara-generated-cucumber-report</artifactId>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>1.8</java.version>
+        <cucumberfork.version>1.2.4</cucumberfork.version>
+    </properties>
+
+    <dependencies>
+        <!-- IMPORTANT: All dependencies are "compile" for them not to be declared as a dependency of the JAR: -->
+        <!-- Including the JAR should only import its generated resources, and not the libraries used during the generation -->
+
+        <dependency>
+            <groupId>com.decathlon.ara</groupId>
+            <artifactId>ara-lib</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+            <exclusions>
+                <!-- ara-lib is designed to integrate with the project's provided version of Cucumber: -->
+                <!-- we override it with a Cucumber fork having another groupId -->
+                <exclusion>
+                    <groupId>info.cukes</groupId>
+                    <artifactId>cucumber-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>info.cukes</groupId>
+                    <artifactId>cucumber-java</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>info.cukes</groupId>
+                    <artifactId>cucumber-spring</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>info.cukes</groupId>
+                    <artifactId>cucumber-junit</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Cucumber -->
+        <dependency>
+            <groupId>com.github.slaout.fork.info.cukesthreads</groupId>
+            <artifactId>cucumber-core</artifactId>
+            <version>${cucumberfork.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.slaout.fork.info.cukesthreads</groupId>
+            <artifactId>cucumber-java</artifactId>
+            <version>${cucumberfork.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.slaout.fork.info.cukesthreads</groupId>
+            <artifactId>cucumber-spring</artifactId>
+            <version>${cucumberfork.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.slaout.fork.info.cukesthreads</groupId>
+            <artifactId>cucumber-junit</artifactId>
+            <version>${cucumberfork.version}</version>
+            <scope>compile</scope>
+            <exclusions>
+                <!-- JUnit: we need 4.12 and not the 4.11 included with cucumber-junit because of -->
+                <!-- https://github.com/junit-team/junit4/blob/master/doc/ReleaseNotes4.12.md#pull-request-583-pull-request-720-fix-handling-of-assertionerror-and-assumptionviolatedexception-in-expectedexception-rule -->
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- JUnit: we need 4.12 and not the 4.11 included with cucumber-junit because of -->
+        <!-- https://github.com/junit-team/junit4/blob/master/doc/ReleaseNotes4.12.md#pull-request-583-pull-request-720-fix-handling-of-assertionerror-and-assumptionviolatedexception-in-expectedexception-rule -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+
+            <!-- Generate the .json files to export in the JAR to produce -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <executions>
+                    <execution>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <mainClass>ara.ReportGenerator</mainClass>
+                    <arguments>
+                        <argument>${project.build.directory}/generated-resources</argument>
+                    </arguments>
+                    <classpathScope>compile</classpathScope>
+                </configuration>
+            </plugin>
+
+            <!-- Not necessary for this project to run on Maven, but necessary for IntelliJ to run server's tests correctly -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>add-resource</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>add-resource</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/generated-resources</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Override JAR generation to only include the two files we generated -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
+                <executions>
+                    <execution>
+                        <id>default-jar</id>
+                        <configuration>
+                            <classesDirectory>${project.build.directory}/generated-resources</classesDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

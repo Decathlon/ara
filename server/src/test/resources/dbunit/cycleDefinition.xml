@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+    <project id="1" code="p" name="Any" default_at_startup="false"/>
+
+    <!-- Not ordered to test service ordering result  -->
+    <cycle_definition id="200" project_id="1" branch="develop" name="cycle1" branch_position="2"/>
+    <cycle_definition id="202" project_id="1" branch="stab" name="cycle3" branch_position="3"/>
+    <cycle_definition id="201" project_id="1" branch="master" name="cycle2" branch_position="1"/>
+    <cycle_definition id="199" project_id="1" branch="stab" name="cycle4" branch_position="3"/>
+
+    <execution id="1" cycle_definition_id="202" branch="stab" name="cycle3" release="1711"
+               version="1711.1709245958" build_date_time="2017-09-24 11:59:58.0"
+               test_date_time="2017-09-26 11:59:58.0" job_url="any1"
+               status="DONE" acceptance="NEW" blocking_validation="false" quality_status="PASSED"/>
+</dataset>

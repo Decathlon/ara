@@ -1,0 +1,29 @@
+=== Intellij Code Style
+
+The best way to import ARA's code style into Intellij
+is to do a symbolic link directly in Intellij's preferences folder.
+
+==== Intellij's Preferences Folder
+
+For a Windows user, this folder can be found in you user home directory:
+`C:\Users\<USERNAME>\.IntelliJIdea<VERSION>\config\codestyles\`
+
+For a Mac user:
+`/Users/<USERNAME>/Library/Preferences/IntellijIdea<VERSION>/codestyles/`
+
+And for a Linux user:
+`/home/<USERNAME>/.IntelliJIdea<VERSION>/config/codestyles/`
+
+==== Set Code Style
+
+In Intellij's codestyles preferences folder, type:
+
+`ln -s <PATH_TO_ARA_REPOSITORY>/ide-resources/intellij/codestyles/ara-code-style.xml .`
+
+Or, on Windows:
+
+`mklink ara-code-style.xml <PATH_TO_ARA_REPOSITORY>\ide-resources\intellij\codestyles\ara-code-style.xml
+
+You may want to remove all other code style file, so Intellij can automatically
+set default ARA's code style. If not, you need to set manually the code style in
+Intellij's preferences windows.

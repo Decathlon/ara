@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+    <project id="1" code="p" name="Any" default_at_startup="false"/>
+
+    <!-- Not ordered, to test service ordering results -->
+    <team id="3" project_id="1" name="Team B" assignable_to_problems="true" assignable_to_functionalities="true"/>
+    <team id="1" project_id="1" name="Team A" assignable_to_problems="true" assignable_to_functionalities="true"/>
+    <team id="2" project_id="1" name="Team C" assignable_to_problems="true" assignable_to_functionalities="true"/>
+
+    <!-- To test setting assignable_to_* to false when there are assigned entities -->
+    <problem id="3" project_id="1" name="Any" status="OPEN" blamed_team_id="3"
+             creation_date_time="2018-01-01 12:00:00.0"/>
+    <functionality id="3" project_id="1" order="3" type="FUNCTIONALITY" name="Any" team_id="3"
+                   creation_date_time="2018-01-01 12:00:00.0" update_date_time="2018-01-01 12:00:00.0"/>
+</dataset>

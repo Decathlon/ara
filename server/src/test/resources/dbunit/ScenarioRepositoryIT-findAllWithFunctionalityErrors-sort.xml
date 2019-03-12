@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+
+    <project id="1" code="p" name="Any" default_at_startup="false"/>
+
+    <source id="2" project_id="1" code="sourceA" name="Source A" letter="A" technology="CUCUMBER" vcs_url="urlA"
+            default_branch="branchA" postman_country_root_folders="false"/>
+    <source id="1" project_id="1" code="sourceB" name="Source B" letter="B" technology="POSTMAN" vcs_url="urlB"
+            default_branch="branchB" postman_country_root_folders="true"/>
+
+    <functionality id="1" project_id="1" order="1" type="FUNCTIONALITY" name="any"
+                   creation_date_time="2018-01-01 12:00:00.0" update_date_time="2018-01-01 12:00:00.0"/>
+
+    <!-- Several KO scenarios, inserted unordered, to test ordering -->
+
+    <scenario name="nameB"
+              id="5" source_id="1" feature_file="any" feature_name="featureA" ignored="false" line="5" content="any"/>
+
+    <scenario name="nameA"
+              id="3" source_id="1" feature_file="any" feature_name="featureB" ignored="false" line="6" content="any"/>
+
+    <scenario name="nameC"
+              id="6" source_id="2" feature_file="any" feature_name="featureB" ignored="false" line="4" content="any"/>
+
+    <scenario name="nameC"
+              id="4" source_id="1" feature_file="any" feature_name="featureB" ignored="false" line="1" content="any"/>
+
+    <scenario name="nameC"
+              id="2" source_id="1" feature_file="any" feature_name="featureB" ignored="false" line="3" content="any"/>
+
+    <scenario name="nameC"
+              id="1" source_id="1" feature_file="any" feature_name="featureB" ignored="false" line="2" content="any"/>
+
+</dataset>

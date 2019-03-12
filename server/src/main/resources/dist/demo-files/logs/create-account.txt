@@ -1,0 +1,12 @@
+seleniumService.getSessionId()
+=> 42
+seleniumService.loadCreateAccountPage()
+=> OK
+seleniumService.typeLogin("hara-kiri")
+=> OK
+seleniumService.typePassword("karate")
+=> OK
+seleniumService.clickCreateAccount()
+=> OK
+seleniumService.getErrorMessageIfAny()
+=> "Log in failed for occult reasons."

@@ -1,0 +1,36 @@
+body {
+  background: aliceblue;
+  font-family: sans-serif;
+}
+
+h1 {
+  background: cadetblue;
+  color: white;
+  text-align: center;
+}
+
+h2 {
+  color: cadetblue;
+}
+
+thead, tfoot {
+  font-weight: bold;
+}
+
+button {
+  background: darkblue;
+  color: white;
+  border: none;
+  font-weight: bold;
+  padding: 3px 6px;
+}
+
+button:disabled {
+  background: gray;
+}
+
+.error {
+  background: orangered;
+  color: white;
+  padding: 3px;
+}

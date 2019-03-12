@@ -1,0 +1,525 @@
+{
+  "collection": {
+    "_": {
+      "postman_id": "84c3fda0-009b-4482-811a-85bb39962376"
+    },
+    "item": [
+      {
+        "id": "33e3556f-8ae5-46d4-b41c-ae50a7ac8eda",
+        "name": "all",
+        "item": [
+          {
+            "id": "34d49546-3d42-446f-850d-987c4d64752f",
+            "name": "@severity-sanity-check Functionality {{F-Catalog-List}}: List all our useless products",
+            "request": {
+              "url": {
+                "path": [
+                  "get"
+                ],
+                "host": [
+                  "{{baseUrl}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "method": "GET",
+              "body": {
+                "mode": "raw",
+                "raw": ""
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "de5bfcd0-2833-4b6b-b83c-7633c9caa14c",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"Status code is 200\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "});",
+                    "",
+                    "pm.test(\"The server should return 3 useless products\", function () {",
+                    "    // Trust us, they are here!",
+                    "});",
+                    ""
+                  ],
+                  "_lastExecutionId": "cafa256c-22d0-409b-972a-d522b7a9d283"
+                }
+              }
+            ]
+          }
+        ],
+        "event": []
+      }
+    ],
+    "event": [],
+    "variable": [],
+    "info": {
+      "_postman_id": "84c3fda0-009b-4482-811a-85bb39962376",
+      "name": "Our Lovely Store - Choose a product",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    }
+  },
+  "environment": {
+    "id": "3a067ce3-dad7-44ea-a2f1-d2d6a546eb2d",
+    "name": "integ",
+    "values": [
+      {
+        "type": "any",
+        "value": "https://postman-echo.com",
+        "key": "baseUrl"
+      },
+      {
+        "type": "any",
+        "value": "true",
+        "key": "failing"
+      }
+    ]
+  },
+  "globals": {
+    "id": "16e128d3-a230-411f-a976-108df1154e88",
+    "values": []
+  },
+  "run": {
+    "stats": {
+      "iterations": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "items": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "scripts": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "prerequests": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "requests": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "tests": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "assertions": {
+        "total": 2,
+        "pending": 0,
+        "failed": 0
+      },
+      "testScripts": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "prerequestScripts": {
+        "total": 0,
+        "pending": 0,
+        "failed": 0
+      }
+    },
+    "timings": {
+      "responseAverage": 735,
+      "started": 1548064838815,
+      "completed": 1548064839630
+    },
+    "executions": [
+      {
+        "cursor": {
+          "position": 0,
+          "iteration": 0,
+          "length": 1,
+          "cycles": 1,
+          "empty": false,
+          "eof": false,
+          "bof": true,
+          "cr": false,
+          "ref": "818e3846-5d7b-4422-bde7-a34360469cc0",
+          "httpRequestId": "00708b31-05fa-4c2c-aca0-85866df993c4"
+        },
+        "item": {
+          "id": "34d49546-3d42-446f-850d-987c4d64752f",
+          "name": "@severity-sanity-check Functionality {{F-Catalog-List}}: List all our useless products",
+          "request": {
+            "url": {
+              "path": [
+                "get"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "GET",
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "de5bfcd0-2833-4b6b-b83c-7633c9caa14c",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"The server should return 3 useless products\", function () {",
+                  "    // Trust us, they are here!",
+                  "});",
+                  ""
+                ],
+                "_lastExecutionId": "cafa256c-22d0-409b-972a-d522b7a9d283"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "https",
+            "path": [
+              "get"
+            ],
+            "host": [
+              "postman-echo",
+              "com"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.6.0"
+            },
+            {
+              "key": "Accept",
+              "value": "*/*"
+            },
+            {
+              "key": "Host",
+              "value": "postman-echo.com"
+            },
+            {
+              "key": "accept-encoding",
+              "value": "gzip, deflate"
+            }
+          ],
+          "method": "GET",
+          "body": {
+            "mode": "raw",
+            "raw": ""
+          }
+        },
+        "response": {
+          "id": "df13b088-839a-4de0-827a-a9e4916fd3ae",
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Encoding",
+              "value": "gzip"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Date",
+              "value": "Mon, 21 Jan 2019 10:00:40 GMT"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"e0-vXVF258bnzd4wtNIGKuSNWtO4nU\""
+            },
+            {
+              "key": "Server",
+              "value": "nginx"
+            },
+            {
+              "key": "set-cookie",
+              "value": "sails.sid=s%3AAjJjqiJvG-KmuzvTW21o2YPXmAZlAZ_A.xuqyWEpojXh%2BcpT2SFqceG%2F%2F3ZcX5DJiDbSZonf%2FPrw; Path=/; HttpOnly"
+            },
+            {
+              "key": "Vary",
+              "value": "Accept-Encoding"
+            },
+            {
+              "key": "Content-Length",
+              "value": "169"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              97,
+              114,
+              103,
+              115,
+              34,
+              58,
+              123,
+              125,
+              44,
+              34,
+              104,
+              101,
+              97,
+              100,
+              101,
+              114,
+              115,
+              34,
+              58,
+              123,
+              34,
+              120,
+              45,
+              102,
+              111,
+              114,
+              119,
+              97,
+              114,
+              100,
+              101,
+              100,
+              45,
+              112,
+              114,
+              111,
+              116,
+              111,
+              34,
+              58,
+              34,
+              104,
+              116,
+              116,
+              112,
+              115,
+              34,
+              44,
+              34,
+              104,
+              111,
+              115,
+              116,
+              34,
+              58,
+              34,
+              112,
+              111,
+              115,
+              116,
+              109,
+              97,
+              110,
+              45,
+              101,
+              99,
+              104,
+              111,
+              46,
+              99,
+              111,
+              109,
+              34,
+              44,
+              34,
+              97,
+              99,
+              99,
+              101,
+              112,
+              116,
+              34,
+              58,
+              34,
+              42,
+              47,
+              42,
+              34,
+              44,
+              34,
+              97,
+              99,
+              99,
+              101,
+              112,
+              116,
+              45,
+              101,
+              110,
+              99,
+              111,
+              100,
+              105,
+              110,
+              103,
+              34,
+              58,
+              34,
+              103,
+              122,
+              105,
+              112,
+              44,
+              32,
+              100,
+              101,
+              102,
+              108,
+              97,
+              116,
+              101,
+              34,
+              44,
+              34,
+              117,
+              115,
+              101,
+              114,
+              45,
+              97,
+              103,
+              101,
+              110,
+              116,
+              34,
+              58,
+              34,
+              80,
+              111,
+              115,
+              116,
+              109,
+              97,
+              110,
+              82,
+              117,
+              110,
+              116,
+              105,
+              109,
+              101,
+              47,
+              55,
+              46,
+              54,
+              46,
+              48,
+              34,
+              44,
+              34,
+              120,
+              45,
+              102,
+              111,
+              114,
+              119,
+              97,
+              114,
+              100,
+              101,
+              100,
+              45,
+              112,
+              111,
+              114,
+              116,
+              34,
+              58,
+              34,
+              52,
+              52,
+              51,
+              34,
+              125,
+              44,
+              34,
+              117,
+              114,
+              108,
+              34,
+              58,
+              34,
+              104,
+              116,
+              116,
+              112,
+              115,
+              58,
+              47,
+              47,
+              112,
+              111,
+              115,
+              116,
+              109,
+              97,
+              110,
+              45,
+              101,
+              99,
+              104,
+              111,
+              46,
+              99,
+              111,
+              109,
+              47,
+              103,
+              101,
+              116,
+              34,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 735,
+          "responseSize": 224
+        },
+        "id": "34d49546-3d42-446f-850d-987c4d64752f",
+        "assertions": [
+          {
+            "assertion": "Status code is 200",
+            "skipped": false
+          },
+          {
+            "assertion": "The server should return 3 useless products",
+            "skipped": false
+          }
+        ]
+      }
+    ],
+    "transfers": {
+      "responseTotal": 169
+    },
+    "failures": [],
+    "error": null
+  }
+}

@@ -1,0 +1,124 @@
+= Structured Embeddings Format
+
+Here is a description of the file format of structured embeddings used by ARA, followed by an example data file.
+
+== Data Format
+
+A StructuredEmbeddings "File" is composed of:
+
+* `File`:
+  ** `'<!--'` (begin of HTML comment to hide the JSON-data to users)
+  ** `'StructuredEmbeddings_v'` (magic-value to recognize the HTML as a StructuredEmbeddings structure)
+  ** `fileFormatVersion` (version of the file-format used to create the HTML, for backward and forward compatibility)
+  ** `'='`
+  ** `jsonContentArray` (the embeddings in a format easily parsed by a machine, like ARA)
+  ** `'-->'` (end of HTML comment)
+  ** `htmlRepresentation` (0..n)
+* `fileFormatVersion`: (following a kind of Semantic Versioning: https://semver.org/)
+  ** `major` (breaking-changes between versions; a reader implementation may read versions UP TO the version it was
+              designed: later versions should not be attempted to be parsed, as data will be in an incompatible format,
+              so a version=`'1'` reader should throw an error when reading a major `'2'` or later versioned file;
+              currently only `'1'` is known)
+  ** `'.'`
+  ** `minor` (read-compatible additions; minor increments add backward-compatible features to the format: older readers
+              may safely read a later minor-version, but are not allowed to write back the parsed data into a new file,
+              as the new features could become skipped by the ignorant writer version; currently only `'0'` is known)
+  ** `'.'`
+  ** `patch` (read-and-write-compatible additions: new features can be safely parsed and ignored by an older
+              implementation, and this implementation is allowed to write back the parsed data into a new file: the new
+              features will be transparently saved back, without the reader knowing it)
+* `jsonContentArray`: (an array with all embeddings as JSON objects;
+                       the array is HTML-escaped, as it is contained in an HTML comment)
+  ** `'['`
+  ** {`jsonEmbedding`|`','`} (0..n)
+  ** `']'`
+* `jsonEmbedding`: (one embedding as a JSON object has such JSON format) +
+  ** `{` +
+     `"data":...,` (the embedded data, either as a String or as a JSON object) +
+     `"kind":"...",` (a String representing the machine-readable description of the embedded data; eg. `errorLogs`) +
+     `"name":"...",` (a String representing the user visible description of the embedded data; eg. `Error logs`) +
+     `"type":"...",` (a String defining the data type; default values are `text`, `object`, `image`, `link`, `video`
+                      but users can define other ones: implementations not understanding the new types still can read
+                      data as a JSON data (string, object, array, number) and just display the HTML representation) +
+     `"priority":"...",` (a String representing the priority used to sort the embedding; can be one of the
+                          EmbeddingPriority values; additional values that are not in the enum are allowed and can be
+                          ignored by applications not using such data: `priorityOrder` is the only source of truth
+                          regarding ordering of embeddings) +
+     `"priorityOrder":...` (an integer representing the priority used to sort the embeddings; lower numbers come
+                            first; writers are advised to pre-sort objects by their priority in the saved array, but are
+                            not forced to: a reader must re-order embeddings by their priority to ensure good sorting,
+                            while retaining their original index in the array, because HTML equivalents use indexes from
+                            the array where they are stored in file) +
+     `}`
+* `htmlRepresentation` (user-visible HTML representation of one embedding, usually with a title and content)
+  ** `some arbitrary HTML content` (0..n characters) (used only when viewing all embeddings as a single HTML file:
+                                                      visible titles and containing divs)
+  ** `'<!--START:index='` (beginning of the embedding's HTML representation)
+  ** `index` (integer index of the embedding, regarding its position in the `jsonContentArray`;
+              some embeddings can have no HTML representation, such as priority=HIDDEN ones:
+              readers must handle this case)
+  ** `'-->'`
+  ** `the HTML representation of the embedding` (0..n characters) (can be parsed by a tool that will display embeddings
+                                                                   one by one: the title can be gathered in the JSON
+                                                                   `name` of the embedding)
+  ** `'<!--STOP:index='` (end of the embedding's HTML representation)
+  ** `index` (same integer index of the embedding)
+  ** `'-->'`
+  ** `some arbitrary HTML content` (0..n characters)
+
+== Example
+
+Here is a fully-formed example of data (indented only for clarity purpose):
+
+```html
+<!--StructuredEmbeddings_v1.0.0=[
+    {
+        "data": [
+            {
+                "name": "Accessibility Scenario 1",
+                "result": "A-"
+            },
+            {
+                "name": "Accessibility Scenario 2",
+                "result": "A"
+            }
+        ],
+        "kind": "accessibility",
+        "name": "Accessibility Results",
+        "type": "object",
+        "priority": "OUTPUT_SMALL",
+        "priorityOrder": 300
+    },
+    {
+        "data": "2017.12.31&#x2d;23h59m59.999",
+        "kind": "startDateTime",
+        "name": "Scenario start date &amp; time",
+        "type": "text",
+        "priority": "TECHNICAL_DEBUG_SMALL",
+        "priorityOrder": 900
+    },
+    {
+        "data": "hidden!",
+        "kind": "hiddenText",
+        "name": null,
+        "type": "text",
+        "priority": "HIDDEN",
+        "priorityOrder": 1200
+    }
+]-->
+
+<h3 style="margin: 16px 0 4px 0;">Accessibility Results</h3>
+<div style="font-weight: bold;">
+    <!--START:index=0-->
+    Accessibility Scenario 1: <span style="color: orange;">A-</span><br>
+    Accessibility Scenario 2: <span style="color: green;">A</span>
+    <!--STOP:index=0-->
+</div>
+
+<h3 style="margin: 16px 0 4px 0;">Scenario start date &amp; time</h3>
+<div>
+    <!--START:index=1-->
+    2017.12.31-23h59m59.999
+    <!--STOP:index=1-->
+</div>
+```

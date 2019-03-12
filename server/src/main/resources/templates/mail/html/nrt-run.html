@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <body>
+        <div th:fragment="nrt-run">
+            <div class="Row" th:with="haveQualities=${!#maps.isEmpty(run.qualitiesPerSeverity) && run.qualitiesPerSeverity['*'] != null && run.qualitiesPerSeverity['*'].total > 0}">
+                <div class="Col span4" style="padding-top: 6px;">
+                    <strong>[[${#strings.toUpperCase(run.country.code) + ':'}]]</strong>
+                    [[${run.type.name}]]
+                    <div style="line-height: 10px; margin-top: -4px; margin-left: 1px;">
+                        <em style="font-size: 10px; color: #9ea7b4;">[[${run.platform}]]</em>
+                    </div>
+                </div>
+                <th:block th:switch="${!haveQualities}">
+                    <div th:class="${'Col span' + (24 - 4)}" th:case="true" style="padding: 6px 0 13px 18px; color: #ED3F14;">
+                        <div th:each="countryDeployment : ${execution.countryDeployments}" th:if="${countryDeployment.country.code == run.country.code}">
+                            <th:block th:switch="${countryDeployment.status.name() != 'DONE' || countryDeployment.result.name() == 'ABORTED' || countryDeployment.result.name() == 'FAILURE' || countryDeployment.result.name() == 'NOT_BUILT'}">
+                                <div th:case="true">
+                                    <th:block th:switch="${countryDeployment.status.name() == 'PENDING' || countryDeployment.status.name() == 'RUNNING'}">
+                                        <span th:case="true" style="color: #0082C3;">
+                                            Deployment on <strong>[[${countryDeployment.platform}]]</strong>:
+                                        </span>
+                                        <span th:case="false">
+                                            The country <strong>[[${countryDeployment.country.name}]]</strong> did not deploy on <strong>[[${countryDeployment.platform}]]</strong>
+                                        </span>
+                                    </th:block>
+                                    <span th:if="${countryDeployment.status}" th:class="${countryDeployment.status}">([[${#strings.toLowerCase(countryDeployment.status)}]])</span>
+                                    <span th:if="${countryDeployment.result}" th:class="${countryDeployment.result}">([[${#strings.toLowerCase(countryDeployment.result)}]])</span>
+                                    <a th:if="${countryDeployment.jobUrl}" th:href="${countryDeployment.jobUrl + 'console'}" target="_blank" style="text-decoration: none;">
+                                        <span class="Button" style="margin-left: 8px;">SHOW LOGS</span>
+                                    </a>
+                                </div>
+                                <div th:case="false">
+                                    <span th:if="${run.status}" th:class="${run.status}">([[${#strings.toLowerCase(run.status)}]])</span>
+                                    <span th:if="${run.status.name() == 'DONE'}" style="color: #ED3F14;">
+                                        No result (test failed to launch, initialize or report)
+                                    </span>
+                                    <a th:if="${run.jobUrl}" th:href="${run.jobUrl + 'console'}" target="_blank" style="text-decoration: none;">
+                                        <span class="Button" style="margin-left: 8px;">SHOW LOGS</span>
+                                    </a>
+                                </div>
+                            </th:block>
+                        </div>
+                    </div>
+                    <th:block th:case="false">
+                        <div th:class="${'Col span' + ((24 - 4) / #arrays.length(execution.qualitySeverities))}" th:each="qualitySeverity : ${execution.qualitySeverities}">
+                            <div th:replace="mail/html/nrt-progress.html :: nrt-progress (
+                                    execution=${execution},
+                                    run=${run},
+                                    counts=${run.qualitiesPerSeverity[qualitySeverity.severity.code]},
+                                    severityCode=${qualitySeverity.severity.code},
+                                    small=false)"></div>
+                        </div>
+                    </th:block>
+                </th:block>
+            </div>
+        </div>
+    </body>
+</html>

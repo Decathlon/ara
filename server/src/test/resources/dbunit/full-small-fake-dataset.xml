@@ -1,0 +1,267 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+
+    <!--
+        Here is a high-level view of the fake structure of scenarios and the spread of errors.
+        It is used to construct a varied dataset allowing to test all cases:
+
+        Feature A
+            :41 Scenario a [high]                                        42:failed:Step 1&#xA;43:failed:Step 2&#xA;44:failed:Step 3
+            :42    Step 1            Exception 1    error 111
+            :43    Step 2            Exception 2    error 121 211
+            :44    Step 3            Exception 3    error 122 212
+            :45 Scenario b [sanity-check]                                46:failed:Step 2&#xA;47:failed:Step 4
+            :46    Step 2            Exception 3    error 221
+            :47    Step 4            Exception 4    error 222 231
+            :48 Scenario c [high]                                        49:failed:Step 1
+            :49    Step 1            Exception 5    error 123
+        Feature B
+            :41 Scenario d [high]                                        42:failed:Step 1&#xA;43:failed:Step 5
+            :42    Step 1            Exception 1    error 112
+            :43    Step 5            Exception 2    error 113
+            :44 Scenario e [sanity-check]                                45:failed:Step 6&#xA;46:failed:Step 2
+            :45    Step 6            Exception 6    error 311 232
+            :46    Step 2            Exception 7    error 223 233 312
+        Feature C
+            :41 Scenario d [medium]                                      42:failed:Step 7&#xA;43:failed:Step 8
+            :42    Step 7            Exception 1    error 124 313
+            :43    Step 8            Exception 2    error 314
+
+        We then have 3 problems (+ 1 to be created by tests):
+            * OPEN    with root cause  "Step 2"
+            * CLOSED  with root cause  "Scenario b" + "Exception"
+            * OPEN                     "Scenario d" + "cn" + "firefox"
+    -->
+
+
+    <!-- configuration -->
+
+
+    <project id="1" code="p" name="Any" default_at_startup="false"/>
+
+
+    <country id="1" project_id="1" code="cn" name="China"/>
+    <country id="2" project_id="1" code="nl" name="Netherlands"/>
+
+    <root_cause id="1" project_id="1" name="Environment was not updated"/>
+    <root_cause id="2" project_id="1" name="Network conditions"/>
+    <root_cause id="3" project_id="1" name="NRT was not updated"/>
+    <root_cause id="4" project_id="1" name="NRT was too brittle"/>
+    <root_cause id="5" project_id="1" name="Regression"/>
+
+    <team id="2" project_id="1" name="Buy" assignable_to_problems="true" assignable_to_functionalities="true"/>
+    <team id="6" project_id="1" name="CIS" assignable_to_problems="true" assignable_to_functionalities="true"/>
+    <team id="25" project_id="1" name="Search &amp; Choose" assignable_to_problems="true" assignable_to_functionalities="true"/>
+
+    <team id="101" project_id="1" name="Team only for problems" assignable_to_problems="true" assignable_to_functionalities="false"/>
+    <team id="102" project_id="1" name="Team only for functionalities" assignable_to_problems="false"
+          assignable_to_functionalities="true"/>
+
+    <source id="1" project_id="1" code="API" name="API" letter="A" technology="CUCUMBER" vcs_url="apiUrl/{{branch}}"
+            default_branch="develop" postman_country_root_folders="false"/>
+    <source id="2" project_id="1" code="WEB" name="Web" letter="W" technology="CUCUMBER" vcs_url="webUrl/{{branch}}"
+            default_branch="develop" postman_country_root_folders="false"/>
+
+    <type id="1" project_id="1" code="api" name="API" is_browser="false" is_mobile="false" source_id="1"/>
+    <type id="2" project_id="1" code="firefox" name="Desktop" is_browser="true" is_mobile="false" source_id="2"/>
+
+
+    <functionality id="666" project_id="1" order="1" type="FUNCTIONALITY" name="F 666" team_id="6"
+                   creation_date_time="2018-01-01 12:00:00.0" update_date_time="2018-01-01 12:00:00.0"/>
+    <functionality id="777" project_id="1" order="1" type="FUNCTIONALITY" name="F 777" team_id="25"
+                   creation_date_time="2018-01-01 12:00:00.0" update_date_time="2018-01-01 12:00:00.0"/>
+
+
+    <!-- cycle-definition -->
+
+
+    <cycle_definition id="1" project_id="1" branch="develop" name="day" branch_position="1"/>
+    <cycle_definition id="2" project_id="1" branch="develop" name="night" branch_position="1"/>
+    <cycle_definition id="3" project_id="1" branch="stab" name="night" branch_position="2"/>
+
+
+    <!-- execution -->
+
+
+    <execution id="1" cycle_definition_id="1" branch="develop" name="day" release="1711" version="1711.1709245958"
+               build_date_time="2017-09-24 11:59:58.0" test_date_time="2017-09-25 11:59:58.0"
+               job_url="http://execution.jobs.org/1/" status="DONE" acceptance="NEW"/>
+    <execution id="2" cycle_definition_id="1" branch="develop" name="day" release="1711" version="1711.1709245756"
+               build_date_time="2017-09-24 12:57:56.0" test_date_time="2017-09-25 12:57:56.0"
+               job_url="http://execution.jobs.org/2/" status="DONE" acceptance="NEW"/>
+    <execution id="3" cycle_definition_id="3" branch="stab" name="night" release="1710" version="1710.1710245554"
+               build_date_time="2017-09-24 10:55:54.0" test_date_time="2017-09-25 10:55:54.0"
+               job_url="http://execution.jobs.org/3/" status="DONE" acceptance="DISCARDED"
+               discard_reason="Was not in the mood"/>
+
+    <!-- country_deployment -->
+
+
+    <country_deployment id="10021" execution_id="2" country_id="1" platform="euin2" status="PENDING"/>
+    <country_deployment id="10022" execution_id="2" country_id="2" platform="euin2" status="PENDING"/>
+
+
+    <!-- run -->
+
+
+    <run id="11" execution_id="1" status="DONE" country_id="1" type_id="2" platform="euin"
+         job_url="http://run.jobs.org/11/"/>
+    <run id="12" execution_id="1" status="DONE" country_id="1" type_id="1" platform="euin"
+         job_url="http://run.jobs.org/12/"/>
+
+    <run id="21" execution_id="2" status="DONE" country_id="2" type_id="2" platform="euin2"
+         job_url="http://run.jobs.org/21/"/>
+    <run id="22" execution_id="2" status="DONE" country_id="2" type_id="1" platform="euin2"
+         job_url="http://run.jobs.org/22/"/>
+    <run id="23" execution_id="2" status="DONE" country_id="1" type_id="2" platform="euin"
+         job_url="http://run.jobs.org/23/"/>
+
+    <run id="31" execution_id="3" status="DONE" country_id="1" type_id="1" platform="euin"
+         job_url="http://run.jobs.org/31/"/>
+
+
+    <!-- executed_scenario -->
+
+
+    <executed_scenario id="111" run_id="11" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Scenario a" cucumber_id="a;scenario-a" line="41" screenshot_url="http://screenshot.org/"
+                       video_url="http://video.org/"
+                       content="42:failed:Step 1&#xA;43:failed:Step 2&#xA;44:failed:Step 3"/>
+    <executed_scenario id="112" run_id="11" feature_file="b.feature" feature_name="Feature B" severity="high"
+                       name="Scenario d" cucumber_id="b;scenario-d" line="41" screenshot_url="http://screenshot.org/"
+                       video_url="http://video.org/" content="42:failed:Step 1&#xA;43:failed:Step 5"/>
+    <!--cuted_scenario id="113" run_id="11" feature_file="b.feature" feature_name="Feature B" severity="high" name="Scenario d" cucumber_id="b;scenario-d" line="41" screenshot_url="http://screenshot.org/" video_url="http://video.org/" content="42:failed:Step 1&#xA;43:failed:Step 5"/>-->
+
+    <executed_scenario id="121" run_id="12" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Scenario a" cucumber_id="a;scenario-a" line="41" screenshot_url="http://screenshot.org/"
+                       video_url="http://video.org/"
+                       content="42:failed:Step 1&#xA;43:failed:Step 2&#xA;44:failed:Step 3"/>
+    <!--cuted_scenario id="122" run_id="12" feature_file="a.feature" feature_name="Feature A" severity="high" name="Scenario a" cucumber_id="a;scenario-a" line="41" screenshot_url="http://screenshot.org/" video_url="http://video.org/" content="42:failed:Step 1&#xA;43:failed:Step 2&#xA;44:failed:Step 3"/>-->
+    <executed_scenario id="123" run_id="12" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Scenario c" cucumber_id="a;scenario-c" line="48" screenshot_url="http://screenshot.org/"
+                       video_url="http://video.org/" content="49:failed:Step 1"/>
+    <executed_scenario id="124" run_id="12" feature_file="c.feature" feature_name="Feature C" severity="medium"
+                       name="Scenario d" cucumber_id="c;scenario-d" line="41" screenshot_url="http://screenshot.org/"
+                       video_url="http://video.org/" content="42:failed:Step 7&#xA;43:failed:Step 8"/>
+
+
+    <executed_scenario id="211" run_id="21" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Scenario a" cucumber_id="a;scenario-a" line="41" screenshot_url="http://screenshot.org/"
+                       video_url="http://video.org/"
+                       content="42:failed:Step 1&#xA;43:failed:Step 2&#xA;44:failed:Step 3"/>
+    <!--cuted_scenario id="212" run_id="21" feature_file="a.feature" feature_name="Feature A" severity="high" name="Scenario a" cucumber_id="a;scenario-a" line="41" screenshot_url="http://screenshot.org/" video_url="http://video.org/" content="42:failed:Step 1&#xA;43:failed:Step 2&#xA;44:failed:Step 3"/>-->
+
+    <executed_scenario id="221" run_id="22" feature_file="a.feature" feature_name="Feature A" severity="sanity-check"
+                       name="Scenario b" cucumber_id="a;scenario-b" line="45" screenshot_url="http://screenshot.org/"
+                       video_url="http://video.org/" content="46:failed:Step 2&#xA;47:failed:Step 4"/>
+    <!--cuted_scenario id="222" run_id="22" feature_file="a.feature" feature_name="Feature A" severity="sanity-check" name="Scenario b" cucumber_id="a;scenario-b" line="45" screenshot_url="http://screenshot.org/" video_url="http://video.org/" content="46:failed:Step 2&#xA;47:failed:Step 4"/>-->
+    <executed_scenario id="223" run_id="22" feature_file="b.feature" feature_name="Feature B" severity="sanity-check"
+                       name="Functionalities 42, 666: Scenario e" cucumber_id="b;scenario-e" line="44"
+                       screenshot_url="http://screenshot.org/" video_url="http://video.org/"
+                       content="45:failed:Step 6&#xA;46:failed:Step 2"/>
+
+    <executed_scenario id="231" run_id="23" feature_file="a.feature" feature_name="Feature A" severity="sanity-check"
+                       name="Scenario b" cucumber_id="a;scenario-b" line="45" screenshot_url="http://screenshot.org/"
+                       video_url="http://video.org/" content="46:failed:Step 2&#xA;47:failed:Step 4"/>
+    <executed_scenario id="232" run_id="23" feature_file="b.feature" feature_name="Feature B" severity="sanity-check"
+                       name="Functionalities 42, 666: Scenario e" cucumber_id="b;scenario-e" line="44"
+                       screenshot_url="http://screenshot.org/" video_url="http://video.org/"
+                       content="45:failed:Step 6&#xA;46:failed:Step 2"/>
+    <!--cuted_scenario id="233" run_id="23" feature_file="b.feature" feature_name="Feature B" severity="sanity-check" name="Functionalities 42, 666: Scenario e" cucumber_id="b;scenario-e" line="44" screenshot_url="http://screenshot.org/" video_url="http://video.org/" content="45:failed:Step 6&#xA;46:failed:Step 2"/>-->
+
+
+    <executed_scenario id="311" run_id="31" feature_file="b.feature" feature_name="Feature B" severity="sanity-check"
+                       name="Functionalities 42, 666: Scenario e" cucumber_id="b;scenario-e" line="44"
+                       screenshot_url="http://screenshot.org/" video_url="http://video.org/"
+                       content="45:failed:Step 6&#xA;46:failed:Step 2"/>
+    <!--cuted_scenario id="312" run_id="31" feature_file="b.feature" feature_name="Feature B" severity="sanity-check" name="Functionalities 42, 666: Scenario e" cucumber_id="b;scenario-e" line="44" screenshot_url="http://screenshot.org/" video_url="http://video.org/" content="45:failed:Step 6&#xA;46:failed:Step 2"/>-->
+    <executed_scenario id="313" run_id="31" feature_file="c.feature" feature_name="Feature C" severity="medium"
+                       name="Scenario d" cucumber_id="c;scenario-d" line="41" screenshot_url="http://screenshot.org/"
+                       video_url="http://video.org/" content="42:failed:Step 7&#xA;43:failed:Step 8"/>
+    <!--cuted_scenario id="314" run_id="31" feature_file="c.feature" feature_name="Feature C" severity="medium" name="Scenario d" cucumber_id="c;scenario-d" line="41" screenshot_url="http://screenshot.org/" video_url="http://video.org/" content="42:failed:Step 7&#xA;43:failed:Step 8"/>-->
+
+
+    <!-- error -->
+
+
+    <error id="111" executed_scenario_id="111" step="Step 1" step_definition="^Step 1$" step_line="42"
+           exception="Exception 1"/>
+    <error id="112" executed_scenario_id="112" step="Step 1" step_definition="^Step 1$" step_line="42"
+           exception="Exception 1"/>
+    <error id="113" executed_scenario_id="112" step="Step 5" step_definition="^Step 5$" step_line="43"
+           exception="Exception 2"/>
+
+    <error id="121" executed_scenario_id="121" step="Step 2" step_definition="^Step 2$" step_line="43"
+           exception="Exception 2"/>
+    <error id="122" executed_scenario_id="121" step="Step 3" step_definition="^Step 3$" step_line="44"
+           exception="Exception 3"/>
+    <error id="123" executed_scenario_id="123" step="Step 1" step_definition="^Step 1$" step_line="49"
+           exception="Exception 5"/>
+    <error id="124" executed_scenario_id="124" step="Step 7" step_definition="^Step 7$" step_line="42"
+           exception="Exception 1"/>
+
+
+    <error id="211" executed_scenario_id="211" step="Step 2" step_definition="^Step 2$" step_line="43"
+           exception="Exception 2"/>
+    <error id="212" executed_scenario_id="211" step="Step 3" step_definition="^Step 3$" step_line="44"
+           exception="Exception 3"/>
+
+    <error id="221" executed_scenario_id="221" step="Step 2" step_definition="^Step 2$" step_line="45"
+           exception="Exception 3"/>
+    <error id="222" executed_scenario_id="221" step="Step 4" step_definition="^Step 4$" step_line="46"
+           exception="Exception 4"/>
+    <error id="223" executed_scenario_id="223" step="Step 2" step_definition="^Step 2$" step_line="45"
+           exception="Exception 7"/>
+
+    <error id="231" executed_scenario_id="231" step="Step 4" step_definition="^Step 4$" step_line="46"
+           exception="Exception 4"/>
+    <error id="232" executed_scenario_id="232" step="Step 6" step_definition="^Step 6$" step_line="44"
+           exception="Exception 6"/>
+    <error id="233" executed_scenario_id="232" step="Step 2" step_definition="^Step 2$" step_line="45"
+           exception="Exception 7"/>
+
+
+    <error id="311" executed_scenario_id="311" step="Step 6" step_definition="^Step 6$" step_line="44"
+           exception="Exception 6"/>
+    <error id="312" executed_scenario_id="311" step="Step 2" step_definition="^Step 2$" step_line="45"
+           exception="Exception 7"/>
+    <error id="313" executed_scenario_id="313" step="Step 7" step_definition="^Step 7$" step_line="42"
+           exception="Exception 1"/>
+    <error id="314" executed_scenario_id="313" step="Step 8" step_definition="^Step 8$" step_line="43"
+           exception="Exception 2"/>
+
+
+    <!-- problem -->
+
+
+    <problem id="1001" project_id="1" name="Step 2 needs rework" status="OPEN" blamed_team_id="2"
+             comment="Not working anymore" defect_id="1" root_cause_id="3" creation_date_time="2018-01-01 12:01:00.0"/>
+    <problem id="1002" project_id="1" name="Scenario b throws exceptions" status="CLOSED" blamed_team_id="6"
+             comment="This is a comment" root_cause_id="5" creation_date_time="2018-01-01 12:02:00.0"/>
+    <problem id="1003" project_id="1" name="Scenario d is unstable on China desktop" status="OPEN" blamed_team_id="25"
+             comment="Everything is in the title" creation_date_time="2018-01-01 12:03:00.0"/>
+
+
+    <problem_pattern id="1011" problem_id="1001" step="Step 2" scenario_name_starts_with="false"
+                     step_starts_with="false" step_definition_starts_with="false"/>
+    <problem_pattern id="1021" problem_id="1002" scenario_name="Scenario b" exception="Exception"
+                     scenario_name_starts_with="false" step_starts_with="false" step_definition_starts_with="false"/>
+    <problem_pattern id="1031" problem_id="1003" scenario_name="Scenario d" country_id="1" type_id="2"
+                     scenario_name_starts_with="false" step_starts_with="false" step_definition_starts_with="false"/>
+
+
+    <problem_occurrence error_id="121" problem_pattern_id="1011"/>
+    <problem_occurrence error_id="211" problem_pattern_id="1011"/>
+    <problem_occurrence error_id="221" problem_pattern_id="1011"/>
+    <problem_occurrence error_id="223" problem_pattern_id="1011"/>
+    <problem_occurrence error_id="233" problem_pattern_id="1011"/>
+    <problem_occurrence error_id="312" problem_pattern_id="1011"/>
+
+    <problem_occurrence error_id="221" problem_pattern_id="1021"/>
+    <problem_occurrence error_id="222" problem_pattern_id="1021"/>
+    <problem_occurrence error_id="231" problem_pattern_id="1021"/>
+
+    <problem_occurrence error_id="112" problem_pattern_id="1031"/>
+    <problem_occurrence error_id="113" problem_pattern_id="1031"/>
+
+</dataset>

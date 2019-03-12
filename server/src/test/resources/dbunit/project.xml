@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+    <!-- Not ordered, to test service ordering results -->
+    <project id="3" code="project-z" name="Project B" default_at_startup="false"/>
+    <project id="1" code="project-y" name="Project A" default_at_startup="false"/>
+    <project id="2" code="project-x" name="Project C" default_at_startup="true"/>
+
+    <!-- Updating a project should not delete its communications -->
+    <communication id="1" project_id="1" code="any" name="any" type="TEXT" message="any"/>
+</dataset>

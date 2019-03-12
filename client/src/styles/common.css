@@ -1,0 +1,251 @@
+/* HEADER */
+.ivu-menu-primary { background-color: #0082c3 !important; }
+.ivu-menu-primary .ivu-menu-item-active { background-color: #135b95 !important; }
+
+/* SUB-MENU */
+.subMenu {
+  margin: -16px -16px 16px -16px !important;
+  text-align: center;
+  background: white;
+  height: 60px;
+  line-height: 60px;
+  color: #495060;
+  font-size: 14px;
+}
+.subMenu.inPopup {
+  margin: -16px -16px 16px -16px !important;
+  border-bottom: 1px solid #E9EAEC !important;
+}
+.subMenu .ivu-menu-item {
+  float: none !important;
+  display: inline-block;
+  margin: auto 8px;
+}
+
+/* POPUP MODAL */
+
+.noFooter .ivu-modal-footer {
+  display: none;
+}
+
+.ivu-modal {
+  margin-bottom: 32px !important;
+}
+
+/* SPINNER */
+
+.spinnable {
+  position: relative;
+}
+
+/* GENERAL STYLE */
+html, body {
+  background-color: #F5F7F9 !important;
+}
+h1 {
+  font-weight: normal;
+}
+h2 {
+  margin-top: 16px;
+}
+
+/* DROPDOWNS */
+
+.ivu-select-dropdown {
+  max-height: 40vh !important;
+  overflow: auto !important;
+}
+
+.ivu-dropdown-item {
+  text-align: left;
+}
+.ivu-dropdown-item > div {
+  padding: 7px 16px;
+  margin: -7px -16px;
+}
+.ivu-dropdown-item .ivu-icon {
+  margin-right: 4px;
+  width: 11px;
+  text-align: center;
+}
+
+/* DATA TABLES */
+.table {
+  margin: 0 0 8px 0;
+  background: white;
+  border-spacing: 0;
+  border-collapse: collapse;
+  border: 1px solid #DDDEE1;
+  border-radius: 4px;
+  width: 100%;
+}
+.table > thead > tr > th {
+  text-align: left;
+  background-color: #F8F8F9;
+  border: 1px solid #E9EAEC;
+}
+.table > thead > tr > th,
+.table > tbody > tr > td {
+  padding: 2px 4px;
+  border: 1px solid #E9EAEC;
+}
+
+.table > tbody > tr:hover > td {
+  background-color: #EBF7FF;
+}
+
+table > thead > tr > th {
+  white-space: nowrap;
+}
+
+.ivu-table td {
+  height: 32px !important;
+}
+
+/* PAGES */
+.ivu-page.mini {
+  margin-right: -10px;
+}
+
+/* CARDS */
+.card {
+  border: 1px solid #E9EAEC;
+  border-radius: 4px;
+  background: white;
+}
+
+/* EXCEPTIONS */
+pre, code {
+  padding: 0;
+  margin: 0;
+}
+pre code {
+  display: block;
+  padding: 8px;
+}
+
+/* FORMS */
+.ivu-form-item {
+  margin-bottom: 10px;
+}
+
+/* PROBLEMS */
+.problem { background-color: #ED3F14; color: white; margin-right: 4px; margin-bottom: 4px; padding: 1px 3px; border-radius: 3px; display: inline-block; }
+.problem.OPEN { background-color: #FF9900; }
+.problem.CLOSED { background-color: #FF9900; }
+.problem.REAPPEARED { background-color: #ED3F14; }
+.problem.success { background-color: #19BE6B; }
+.problem:hover { color: white; }
+.problem .blamedTeam { background-color: rgba(255, 255, 255, 0.33); padding: 1px 3px; margin: -1px 2px -1px -3px; display: inline-block; }
+.problem .defectId { background-color: rgba(0, 0, 0, 0.16); padding: 1px 3px; margin: -1px -3px -1px 2px; display: inline-block; border-radius: 0 3px 3px 0; color: white; }
+.problem .defectId.NONEXISTENT { font-weight: bold; background-color: #ED3F14; padding-left: 4px; }
+
+/* EXECUTIONS */
+.discardHeader {
+  background: white;
+  text-align: center;
+  padding: 16px;
+  border-radius: 4px;
+  font-weight: 1.5;
+  color: #ED3F14;
+  border: 1px solid #EEE8E3; /* Redish version of the blueish border */
+  margin-bottom: 1em;
+}
+.discardHeader.running {
+  color: #0082C3;
+  border-color: #E5EAED; /* Blueish border */
+}
+.discardHeader strong {
+  font-weight: bold;
+}
+.discardHeader .ivu-btn {
+  margin-left: 8px;
+}
+.discardReason {
+  display: inline-block;
+  border: 2px solid #ED3F14;
+  color: #ED3F14;
+  padding: 0 2px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+/* FIX https://github.com/iview/iview/issues/2708 */
+
+.ivu-btn-group:not(.ivu-btn-group-vertical)>.ivu-dropdown:last-child:not(:first-child)>.ivu-dropdown-rel>.ivu-btn {
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+}
+.ivu-btn-group:not(.ivu-btn-group-vertical)>.ivu-dropdown:first-child:not(:last-child)>.ivu-dropdown-rel>.ivu-btn {
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.ivu-btn-group .ivu-btn+.ivu-dropdown>.ivu-dropdown-rel>.ivu-btn, .ivu-btn-group+.ivu-dropdown>.ivu-dropdown-rel>.ivu-btn {
+  margin-left: -1px;
+}
+.ivu-btn-group .ivu-dropdown+.ivu-btn {
+  margin-left: -4px !important;
+}
+
+.ivu-btn-group>.ivu-dropdown>.ivu-dropdown-rel>.ivu-btn {
+  position: relative;
+  /* float: left; HAD TO COMMENT THAT FOR THE DROPDOWN POPUP TO BE PLACED CORRECTLY BELOW THE BUTTON */
+}
+
+/* Collapsible helps */
+
+.ivu-collapse-header:hover {
+  color: #57a3f3 !important;
+}
+.ivu-icon-md-help-circle {
+  padding-left: 16px;
+  transform: none !important;
+}
+
+/* */
+
+.sideButton {
+  display: block !important;
+  width: 232px;
+  margin: 8px 0;
+}
+
+/**
+ * Use this class if the tooltip (title HTML attribute)
+ * is hidding a useful and variable data point (like the date of the visible information, or the remaining of the truncated visible information)
+ * BUT NOT if the data is only explicitely detailing the action (eg. tooltip is "This button is to go to such screen") or explaining a data (eg. "Beligum" for displayed "BE": this is always the same value and only represent a small added value)
+ * AND NOT if the object is clickable (link, button...), as this would override the link hand-cursor.
+ */
+.dataInTooltip {
+  cursor: help;
+  border-bottom: 1px dotted;
+}
+
+.ivu-tooltip-inner {
+  max-width: 700px !important;
+}
+
+/** Animated spin icon */
+
+.animated-spin-icon {
+  animation: spin-icon-animation 1s linear infinite;
+}
+@keyframes spin-icon-animation {
+  from { transform: rotate(0deg); }
+  50%  { transform: rotate(180deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/** Scenarios */
+
+.severityStyle { padding: 2px 4px; border: 1px solid cadetblue; color: cadetblue; border-radius: 3px; font-weight: normal; }
+.severityStyle.none { color: #ED3F14; border-color: #ED3F14; }
+
+/** Align icons with text baseline */
+
+.ivu-icon { vertical-align: -1px; }
+
+/** Remove "Monospaced Number" (serif) font */
+
+.ivu-page-item a { font-family: inherit; }

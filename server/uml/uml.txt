@@ -1,0 +1,319 @@
+@startuml
+
+package "Project Segmentation" <<Rectangle>> {
+
+    class project {
+        {static} + id : bigint(20)
+        + code : varchar(32) *U1
+        + name : varchar(64) *U2
+        + default_at_startup : boolean()
+    }
+
+}
+
+package "Configuration Tables" <<Rectangle>> {
+
+    class setting {
+        {static} + id : bigint(20)
+        + project_id : bigint(20) *U1
+        + code : varchar(64) *U1
+        + value : varchar(512) NULLABLE
+    }
+    setting --* project
+
+    class country {
+        {static} + id : bigint(20)
+        + project_id : bigint(20) *U1 *U2
+        + code : varchar(2) *U1
+        + name : varchar(40) *U2
+    }
+    country --* project
+
+    class root_cause {
+        {static} + id : bigint(20)
+        + project_id : bigint(20) *U1
+        + name : varchar(128) *U1
+    }
+    root_cause --* project
+
+    class team {
+        {static} + id : bigint(20)
+        + project_id : bigint(20) *U1
+        + name : varchar(128) *U1
+        + assignable_to_problems : boolean()
+        + assignable_to_functionalities : boolean()
+    }
+    team --* project
+
+  together {
+
+    class type {
+        {static} + id : bigint(20)
+        + project_id : bigint(20) *U1 *U2
+        + code : varchar(16) *U1
+        + name : varchar(50) *U2
+        + is_browser : boolean()
+        + is_mobile : boolean()
+        + source_id : bigint(20) NULLABLE
+    }
+    type -right-* source
+    type --* project
+
+    class source {
+        {static} + id : bigint(20)
+        + project_id : bigint(20) *U1 *U2 *U3
+        + code : varchar(16) *U1
+        + name : varchar(32) *U2
+        + letter : char(1) *U3
+        + technology : varchar(16)
+        + vcs_url : varchar(256)
+        + default_branch : varchar(16)
+        + postman_country_root_folders : boolean()
+    }
+    source --* project
+
+  }
+
+    class severity {
+        {static} + id : bigint(20)
+        + project_id : bigint(20) *U1 *U2 *U3 *U4 *U5
+        + code : varchar(32) *U1
+        + position : int(11) *U2
+        + name : varchar(32) *U3
+        + short_name : varchar(16) *U4
+        + initials : varchar(8) *U5
+        + default_on_missing : boolean()
+    }
+    severity --* project
+
+    class cycle_definition {
+        {static} + id : bigint(20)
+        + project_id : bigint(20) *U1
+        + branch : varchar(16) *U1
+        + name : varchar(16) *U1
+    }
+    cycle_definition --* project
+
+    class communication {
+        {static} + id : bigint(20)
+        + project_id : bigint(20) *U1 *U2
+        + code : varchar(32) *U1
+        + name : varchar(64) *U2
+        + type : varchar(4)
+        + message : longtext()
+    }
+    communication --* project
+
+}
+
+package "Execution Indexation" <<Rectangle>> {
+
+    class execution {
+        {static} + id : bigint(20)
+        + cycle_definition_id : bigint(20) *U1
+        + branch : varchar(16)
+        + name : varchar(16)
+        + release : varchar(32) NULLABLE
+        + version : varchar(64) NULLABLE
+        + build_date_time : datetime() NULLABLE
+        + job_url : varchar(256) *U2
+        + job_link : varchar(256) NULLABLE *U3
+        + test_date_time : datetime() *U1
+        + estimated_duration : bigint(20) NULLABLE
+        + duration : bigint(20) NULLABLE
+        + status : varchar(16)
+        + result : varchar(16) NULLABLE
+        + discard_reason : varchar(512) NULLABLE
+        + acceptance : varchar(16)
+        + blocking_validation : boolean() NULLABLE
+        + quality_thresholds : varchar(256) NULLABLE
+        + quality_status : varchar(10) NULLABLE
+        + quality_severities : varchar(4096) NULLABLE
+    }
+    execution --* cycle_definition
+
+    class execution_completion_request {
+        {static} + job_url : varchar(256)
+    }
+
+    class country_deployment {
+        {static} + id : bigint(20)
+        + execution_id : bigint(20) *U1
+        + country_id : bigint(20) *U1
+        + platform : varchar(32)
+        + job_url : varchar(256) NULLABLE *U2
+        + job_link : varchar(256) NULLABLE *U3
+        + status : varchar(16)
+        + result : varchar(16) NULLABLE
+        + start_date_time : datetime()
+        + estimated_duration : bigint(20) NULLABLE
+        + duration : bigint(20) NULLABLE
+    }
+    country_deployment --* execution
+    country_deployment --* country
+
+    class run {
+        {static} + id : bigint(20)
+        + execution_id : bigint(20) *U1
+        + country_id : bigint(20) *U1
+        + type_id : bigint(20) *U1
+        + comment : varchar(256) NULLABLE
+        + platform : varchar(32)
+        + job_url : varchar(256) NULLABLE *U2
+        + job_link : varchar(256) NULLABLE *U3
+        + status : varchar(16)
+        + start_date_time : datetime()
+        + estimated_duration : bigint(20) NULLABLE
+        + duration : bigint(20) NULLABLE
+        + country_tags : varchar(32) NULLABLE
+        + severity_tags : varchar(64) NULLABLE
+        + include_in_thresholds : boolean() NULLABLE
+    }
+    run --* execution
+    run --* country
+    run --* type
+
+    class error {
+        {static} + id : bigint(20)
+        + executed_scenario_id : bigint(20) *U1
+        + step : varchar(2048) *IA
+        + step_definition : varchar(2048) *IB
+        + step_line : int(11) *U1
+        + exception : longtext() *IC
+    }
+    error -right-* executed_scenario
+
+    class executed_scenario {
+        {static} + id : bigint(20)
+        + run_id : bigint(20) *U1
+        + feature_file : varchar(256) *U1 *IA
+        + feature_name : varchar(256) *IB
+        + feature_tags : varchar(256) NULLABLE
+        + tags : varchar(256) NULLABLE
+        + severity : varchar(32)
+        + name : varchar(512) *U1 *IC
+        + line : int(11) *U1
+        + cucumber_id : varchar(640) *ID
+        + scenario_content : longtext()
+        + start_date_time : datetime() NULLABLE
+        + screenshot_url : varchar(512) NULLABLE
+        + video_url : varchar(512) NULLABLE
+        + logs_url : varchar(512) NULLABLE
+        + http_requests_url : varchar(512) NULLABLE
+        + java_script_errors_url : varchar(512) NULLABLE
+        + diff_report_url : varchar(512) NULLABLE
+        + cucumber_report_url : varchar(512) NULLABLE
+        + api_server : varchar(16) NULLABLE
+        + selenium_node : varchar(128) NULLABLE
+    }
+    executed_scenario --* run
+
+}
+
+package "Problem Assignation" <<Rectangle>> {
+
+    class problem {
+        {static} + id : bigint(20)
+        + project_id : bigint(20) *U1 *U2
+        + name : varchar(256) *U1
+        + comment : longtext() NULLABLE
+        + status : varchar(21)
+        + blamed_team_id : bigint(20) NULLABLE
+        + defect_id : varchar(32) NULLABLE *U2
+        + defect_existence : varchar(11) NULLABLE
+        + closing_date_time : datetime() NULLABLE
+        + root_cause_id : bigint(20) NULLABLE
+        + creation_date_time : datetime()
+        + first_seen_date_time : datetime()
+        + last_seen_date_time : datetime()
+    }
+    problem --* project
+    problem --* team
+    problem --* root_cause
+
+    class problem_pattern {
+        {static} + id : bigint(20)
+        + problem_id : bigint(20)
+        + feature_file : varchar(256) NULLABLE
+        + feature_name : varchar(256) NULLABLE
+        + scenario_name : varchar(512) NULLABLE
+        + scenario_name_starts_with : boolean()
+        + step : varchar(2048) NULLABLE
+        + step_starts_with : boolean()
+        + step_definition : varchar(2048) NULLABLE
+        + step_definition_starts_with : boolean()
+        + exception : longtext() NULLABLE
+        + release : varchar(32) NULLABLE
+        + country_id : bigint(20) NULLABLE
+        + type_id : bigint(20) NULLABLE
+        + type_is_browser : boolean() NULLABLE
+        + type_is_mobile : boolean() NULLABLE
+        + platform : varchar(32) NULLABLE
+    }
+    problem_pattern -right-* problem
+    problem_pattern --* country
+    problem_pattern --* type
+
+    class problem_occurrence {
+        {static} + error_id : bigint(20)
+        {static} + problem_pattern_id : bigint(20)
+    }
+    problem_occurrence -left-* error
+    problem_occurrence --* problem_pattern
+
+}
+
+package "Functionality Coverage" <<Rectangle>> {
+
+    class functionality {
+        {static} + id : bigint(20)
+        + project_id : bigint(20) *U1 *U2
+        + parent_id : bigint(20) NULLABLE *U1 *U2 *IA
+        + order : double() *U1
+        + type : varchar(13)
+        + name : varchar(512) *U2
+        + country_codes : varchar(128) NULLABLE
+        + team_id : bigint(20) NULLABLE
+        + severity : varchar(32) NULLABLE
+        + created : varchar(10) NULLABLE
+        + started : boolean() NULLABLE
+        + not_automatable : boolean() NULLABLE
+        + covered_scenarios : int(11) NULLABLE
+        + ignored_scenarios : int(11) NULLABLE
+        + covered_country_scenarios : varchar(512) NULLABLE
+        + ignored_country_scenarios : varchar(512) NULLABLE
+        + comment : longtext() NULLABLE
+        + creation_date_time : datetime()
+        + update_date_time : datetime()
+    }
+    functionality --* project
+    functionality --* functionality
+    functionality --* team
+
+    class scenario {
+        {static} + id : bigint(20)
+        + source_id : bigint(20) *U1
+        + feature_file : varchar(256) *U1
+        + feature_name : varchar(256)
+        + feature_tags : varchar(256) NULLABLE
+        + tags : varchar(256) NULLABLE
+        + ignored : boolean()
+        + country_codes : varchar(128) NULLABLE
+        + severity : varchar(32) NULLABLE
+        + name : varchar(512) *U1
+        + wrong_functionality_ids : varchar(256) NULLABLE
+        + line : int(11) *U1
+        + content : longtext()
+    }
+    scenario --* source
+
+    class functionality_coverage {
+        {static} + functionality_id : bigint(20)
+        {static} + scenario_id : bigint(20)
+    }
+    functionality_coverage --* functionality
+    functionality_coverage --* scenario
+
+}
+
+@enduml

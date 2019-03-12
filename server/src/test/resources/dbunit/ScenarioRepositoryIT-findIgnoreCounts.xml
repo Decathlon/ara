@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+
+    <project id="1" code="p" name="Any" default_at_startup="false"/>
+
+    <source id="1" project_id="1" code="sourceA" name="Source A" letter="A" technology="CUCUMBER" vcs_url="urlA"
+            default_branch="branchA" postman_country_root_folders="false"/>
+    <source id="2" project_id="1" code="sourceB" name="Source B" letter="B" technology="POSTMAN" vcs_url="urlB"
+            default_branch="branchB" postman_country_root_folders="true"/>
+
+
+    <scenario id="1" source_id="1" ignored="false" severity="medium" feature_file="any" feature_name="Any"
+              name="any" line="1" content="any"/>
+
+    <scenario id="2" source_id="1" ignored="true" severity="medium" feature_file="any" feature_name="Any"
+              name="any" line="2" content="any"/>
+    <scenario id="3" source_id="1" ignored="true" severity="medium" feature_file="any" feature_name="Any"
+              name="any" line="3" content="any"/>
+
+    <scenario id="4" source_id="2" ignored="false" severity="medium" feature_file="any" feature_name="Any"
+              name="any" line="4" content="any"/>
+    <scenario id="5" source_id="2" ignored="false" severity="medium" feature_file="any" feature_name="Any"
+              name="any" line="5" content="any"/>
+    <scenario id="6" source_id="2" ignored="false" severity="medium" feature_file="any" feature_name="Any"
+              name="any" line="6" content="any"/>
+
+    <scenario id="7" source_id="2" ignored="true" severity="medium" feature_file="any" feature_name="Any"
+              name="any" line="7" content="any"/>
+    <scenario id="8" source_id="2" ignored="true" severity="medium" feature_file="any" feature_name="Any"
+              name="any" line="8" content="any"/>
+    <scenario id="9" source_id="2" ignored="true" severity="medium" feature_file="any" feature_name="Any"
+              name="any" line="9" content="any"/>
+    <scenario id="10" source_id="2" ignored="true" severity="high" feature_file="any" feature_name="Any"
+              name="any" line="10" content="any"/>
+
+</dataset>

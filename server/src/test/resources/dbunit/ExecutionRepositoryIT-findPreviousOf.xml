@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+
+    <project id="1" code="p" name="Any" default_at_startup="false"/>
+
+    <cycle_definition id="1" project_id="1" branch="develop" name="day" branch_position="1"/>
+    <cycle_definition id="2" project_id="1" branch="develop" name="night" branch_position="1"/>
+    <cycle_definition id="3" project_id="1" branch="stab" name="night" branch_position="2"/>
+
+    <execution id="1" cycle_definition_id="1" branch="develop" name="day" release="R" version="V"
+               build_date_time="2017-09-24 10:55:54.0" test_date_time="2017-09-25 08:55:54.0" job_url="1" status="DONE"
+               acceptance="NEW"/>
+    <execution id="2" cycle_definition_id="1" branch="develop" name="day" release="R" version="V"
+               build_date_time="2017-09-24 10:55:54.0" test_date_time="2017-09-25 09:55:54.0" job_url="2" status="DONE"
+               acceptance="NEW"/>
+    <execution id="3" cycle_definition_id="1" branch="develop" name="day" release="R" version="V"
+               build_date_time="2017-09-24 10:55:54.0" test_date_time="2017-09-25 10:55:54.0" job_url="3" status="DONE"
+               acceptance="NEW"/>
+    <execution id="4" cycle_definition_id="1" branch="develop" name="day" release="R" version="V"
+               build_date_time="2017-09-24 10:55:54.0" test_date_time="2017-09-25 11:55:54.0" job_url="4" status="DONE"
+               acceptance="NEW"/>
+    <execution id="5" cycle_definition_id="3" branch="stab" name="night" release="R" version="V"
+               build_date_time="2017-09-24 10:55:54.0" test_date_time="2017-09-25 09:55:54.0" job_url="5" status="DONE"
+               acceptance="NEW"/>
+    <execution id="6" cycle_definition_id="3" branch="stab" name="night" release="R" version="V"
+               build_date_time="2017-09-24 10:55:54.0" test_date_time="2017-09-25 10:55:54.0" job_url="6" status="DONE"
+               acceptance="NEW"/>
+    <execution id="7" cycle_definition_id="2" branch="develop" name="night" release="R" version="V"
+               build_date_time="2017-09-24 10:55:54.0" test_date_time="2017-09-25 10:55:54.0" job_url="7" status="DONE"
+               acceptance="NEW"/>
+
+</dataset>

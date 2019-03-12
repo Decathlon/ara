@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+    <project id="1" code="p" name="Any" default_at_startup="false"/>
+
+    <!-- Not ordered to test service ordering result  -->
+    <communication id="3" project_id="1" code="code3" name="name3" type="TEXT" message="message3"/>
+    <communication id="1" project_id="1" code="code1" name="name1" type="TEXT" message="message1"/>
+    <communication id="2" project_id="1" code="code2" name="name2" type="HTML" message="message2"/>
+</dataset>

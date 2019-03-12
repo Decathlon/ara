@@ -1,0 +1,28 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+nbproject/private/
+build/
+nbbuild/
+dist/
+!src/main/resources/dist/
+nbdist/
+.nb-gradle/
+
+# Temporary DbUnit file
+src/test/resources/dbunit/freshly-created-dataset-to-rename.xml

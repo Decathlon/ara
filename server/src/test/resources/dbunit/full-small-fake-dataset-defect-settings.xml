@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+    <setting id="1" project_id="1" code="defect.indexer" value="testAdapter"/>
+    <setting id="2" project_id="1" code="defect.urlFormat" value="http://test.defects.org/{{id}}"/>
+</dataset>

@@ -1,0 +1,19 @@
+=== Eclipse Formatter Configuration
+
+==== Eclipse Code Formatter
+
+Go to Window -> Preferences -> Java -> Code Style -> Formatter. +
+Import the codestyles/ara-code-style.xml file.
+
+Then, either:
+
+* configure the "ARA" profile globally in Eclipse or
+* configure the "ARA" profile for the ARA project and ts sub-modules.
+
+==== Organize Imports
+
+Go to Window -> Preferences -> Java -> Code Style -> Organize Imports.
+
+* Click "Remove" for all packages: the list should be empty
+* Click "New..." and type "*" in the dialog box; confirm
+* Click "New Static..." and type "*" in the dialog box; confirm

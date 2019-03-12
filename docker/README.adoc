@@ -1,0 +1,112 @@
+= Run ARA Using Docker
+
+Here is how to build, run and publish a Docker image for ARA and its database.
+
+== Pre-Requisite: Install Make
+
+You will need `make` to be available on the command line.
+
+=== On Unix
+
+Install the package `cmake`, `autoconf` or `build-essential`.
+
+=== On Git for Windows
+
+* Go to https://sourceforge.net/projects/ezwinports/files/[ezwinports],
+* Download `make-4.1-2-without-guile-w32-bin.zip` (get the version without guile),
+* Extract the ZIP,
+* Copy the contents to your `Git\mingw64\`, merging the folders, but do NOT overwrite/replace any existing files.
+
+== Getting Started as an Ops
+
+To run ARA, follow these simple steps:
+
+* You will need this `docker` folder: +
+  either it is already on your hard-drive, or you need to download it
+* Be sure to have a version of ARA. +
+  Either by building one from the sources or by downloading a pre-built one.
+* Execute this command from this `docker` folder, after having replaced the `...` by the version to be run:
+
+```shell
+make run-version COMMIT_REF=...
+```
+
+If the ports 3306 and/or 8080 are not free on your machine, use this modified command, replacing 3306 and/or 8080 by the ports you would like to use:
+
+```shell
+make run-version COMMIT_REF=... DB_PORT=3306 SERVER_PORT=8080
+```
+
+ARA will then be accessible here (or to the port you specified instead of 8080): +
+`http://localhost:8080/`
+
+You will be able to create a demo project and play with it.
+
+Data (database, assets from the indexed executions...) will be written to the folder `data`. +
+You can delete this folder at any time to "reset" ARA; or backup it to make sure no data will be lost.
+
+Press Ctrl+C in the command line window to stop ARA.
+
+Note: the first time you run ARA, you will be asked to configure the SMTP server on which ARA will connect to send emails on new executions.
+
+When complete, the configuration is stored in `data/config/application.properties`:
+you will be able to change the configuration later,
+or customize other applications configuration options.
+
+
+== Getting Started as a Developer
+
+When developing, you will want to rebuild Docker images and test them. +
+All the above information are still valid,
+but instead of using the target `run-version` with a `COMMIT_REF`,
+just use the target `run` without any `COMMIT_REF`:
+it will build the Docker images before running them.
+
+The JAR from your workspace will be used to build the Docker images. +
+The ara-server image will take the server/target/ara-*.jar file (which itself includes the ara-client JAR).
+
+To build or rebuild the JAR file, just use this command:
+
+```shell
+make package-server
+```
+
+Or, to speed up the process during development:
+
+```shell
+make package-server SKIP_TESTS=true
+```
+
+== Technical Details
+
+Here are the three components of ARA:
+
+* The ara-server Docker image: it runs the server (both back and front parts) on port 8080,
+* The ara-db Docker image: it runs the MarioDB/MySQL server on port 3306,
+* The ara docker-compose script: it runs both the database and the Web server.
+
+All Docker images' run-scripts and docker-compose script persist state to the `data` folder.
+
+== Modifying the Docker Images
+
+If you are developing ARA, you may need to adjust the ARA Docker images and rebuild them individually, with or without running them after build.
+
+Here are all the available `make` targets:
+
+* `build`:          Build ara-db & ara-server images
+* `build-db`:       Build ara-db image
+* `build-server`:   Build ara-server image
+* `package-server`: Build the ARA JAR to be integrated into the ara-server Docker image (quite long, so it needs to be called manually, and you can speed it up with SKIP_TESTS=true)
+* `push`:           Build ara-db & ara-server images and push them to Docker registry
+* `push-db`:        Build and push ara-db image to Docker registry
+* `push-server`:    Build and push ara-server image to Docker registry
+* `run`:            Build and run ara-db & ara-server images with docker-compose
+* `run-db`:         Build and run ara-db image
+* `run-server`:     Build and run ara-server image
+* `run-version`:    Run pre-existing ara-db & ara-server images with docker-compose (use COMMIT_REF=... to select the version to run)
+
+Except `run-version` (which is a user-centric target), all other targets rebuild the image(s) before running it/them.
+
+All targets are designed so that once you're done testing the image(s), just press Ctrl+C and the container(s) will be stopped and removed.
+
+They all persist their data in `data` directly in this `docker` folder, so you can continue execution or "reset" them by deleting the folder, or even override some configuration options with the `data/config/application.properties` file.

@@ -1,0 +1,74 @@
+= ARA's Developer Documentation
+
+== Getting Started in Two Minutes
+
+Here is basically what you will need to set up on your development machine:
+
+* *Create a database and start it:*
+  ** Run `./manage-db.sh create && ./manage-db.sh start` from the `db` folder.
+* *Build the server part and start it:* +
+  ** Run `mvn install -Pdev_in` in the project's root folder to build the server and its dependencies
+     (you can speed up the build by running `mvn install -Pdev_in -DskipTests -DskipITs -DskipPitest` instead).
+  ** Run `java -Dspring.profiles.active=dev -jar server/target/ara-server-*.jar` to launch the back-end server. +
+  ** APIs are available here: http://localhost:8080/swagger-ui.html +
+  ** When modifying the server, just run `mvn install -Pdev_in` in the `server` folder to not rebuild all dependencies, this time.
+* *Build the client part and start it:*
+  ** Run `npm install` (this is part of the above `mvn install`, so you can skip it if you have already done that).
+  ** Run `npm run dev` in the `client` folder to start the front-end server.
+  ** ARA's GUI is available at http://localhost:8081 (and it connects to the back-end launched above).
+
+More information are provided below and in linked detailed documentations.
+
+== Technical Details of the Project
+
+=== Modules
+
+Follow links for module-specific documentations:
+
+* *<<../client/README.adoc#head, client>>*: the front-end with the user experience
+  (generates static files packaged as a JAR to be included in the server JAR)
+* *db*: a script to create an ARA database using Docker:
+  use the parameter `create` to create one database server
+  with both the `ara-dev` (to run both client and server for manual tests)
+  and `ara-dev-in` (for integration tests of the server project) schemas,
+  or use the parameter `help` for more information about available commands
+  (start, stop, destroy, mysqladmin, shell, purge)
+* *doc*: <<../integrator/main/IntegratorDocumentation.adoc#head, integrator>>,
+  <<../user/main/UserDocumentation.adoc#head, user>> and
+  <<../developer/DeveloperDocumentation.adoc#head, developer>> documentations
+* *<<../docker/README.adoc#head, docker>>*: Dockerfiles for database and server,
+  as well as a docker-compose script to run ARA with no prerequisite (except docker and make)
+* *generated-cucumber-report*: contains Cucumber feature files used to generate report files
+  used on the server integration tests to run into all possible cases while indexing such reports
+* *ide-resources*: IDE <<../ide-resources/eclipse/README.adoc#head, configuration for Eclipse>> and
+  <<../ide-resources/intellij/README.adoc#head, configuration for IntelliJ>>
+* *<<../server/README.adoc#head, server>>*: the back-end which handles the logic and communication with the database
+  (depends on the `generated-cucumber-report` projects for integration tests,
+  and includes the `client` project to only have one server to start in production)
+
+=== How to View/Edit the Documentation
+
+In order to edit and view rendered ASCII-arts (images with Ditaa and UML with PlantUML),
+you need to download and install AsciidocFX + GraphViz: they contain all "plugins" like Ditaaa and PlantUML:
+
+* Install AsciidocFX : +
+  https://asciidocfx.com/#truehow-to-install-asciidocfx
+* Install GraphViz: +
+  http://www.graphviz.org/download/ +
+  Choose eg. "Stable 2.38 Windows install packages"
+
+Note: on the AsciidocFX page, you can see how to create UML, ASCII-art, directory-listing, math expressions, graphics...
+
+You can open and edit the .adoc files with AsciidocFX.
+
+Once AsciidocFX + GraphViz is installed, the AsciiDoc plugin in IntelliJ IDEA will display ASCII-art and
+UML generated images for you without any further installation nor configuration. This is pretty neat.
+
+Useful links:
+
+* AsciiDoctor syntax: +
+  https://asciidoctor.org/docs/asciidoc-syntax-quick-reference/
+* Ditaa syntax for ASCII-art: +
+  http://ditaa.sourceforge.net/#usage
+* PlantUML syntax for UML diagrams: +
+  http://plantuml.com/sitemap-language-specification

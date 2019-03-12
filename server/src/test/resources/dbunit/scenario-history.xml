@@ -1,0 +1,222 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+
+    <!-- configuration -->
+
+
+    <project id="1" code="p" name="Any" default_at_startup="false"/>
+
+
+    <country id="1" project_id="1" code="cn" name="China"/>
+    <country id="2" project_id="1" code="be" name="Belgium"/>
+
+    <source id="1" project_id="1" code="API" name="API" letter="A" technology="CUCUMBER" vcs_url="apiUrl/{{branch}}"
+            default_branch="develop" postman_country_root_folders="false"/>
+    <source id="2" project_id="1" code="WEB" name="Web" letter="W" technology="CUCUMBER" vcs_url="webUrl/{{branch}}"
+            default_branch="develop" postman_country_root_folders="false"/>
+
+    <type id="1" project_id="1" code="api" name="API" is_browser="false" is_mobile="false" source_id="1"/>
+    <type id="2" project_id="1" code="firefox" name="Desktop" is_browser="true" is_mobile="false" source_id="2"/>
+
+    <team id="6" project_id="1" name="Team 6" assignable_to_problems="true" assignable_to_functionalities="true"/>
+
+    <functionality id="666" project_id="1" order="1" type="FUNCTIONALITY" name="F 666" team_id="6"
+                   creation_date_time="2018-01-01 12:00:00.0" update_date_time="2018-01-01 12:00:00.0"/>
+
+
+    <!--
+      The data:
+      - Two dates (having the same hierarchy of data)
+      - Each date has 3 executions, with branch/cycleName = develop/day, develop/night & stab/night
+      - Each execution has 3 runs, with countryCode/runType = cn/api, cn/firefox & nl/firefox _BUT_ day/develop has no cn/firefox
+      - Each run has 1 scenario with the cucumberId we try to get, and another one with another cucumberId to test it is not returned
+        > Some of them are success, other have errors: unidentified and identified (with problems)
+        > One of the run (the last one: night/stab nl/firefox) has two scenarios with the same cucumberId to test both are retrieved
+    -->
+
+    <cycle_definition id="1" project_id="1" branch="develop" name="day" branch_position="1"/>
+    <cycle_definition id="2" project_id="1" branch="develop" name="night" branch_position="1"/>
+    <cycle_definition id="3" project_id="1" branch="stab" name="night" branch_position="2"/>
+
+    <!-- execution -->
+
+
+    <!-- Note: "inserted" here from latest to oldest, to test the scenarios are sorted correctly from oldest to latest -->
+
+    <execution id="11" cycle_definition_id="1" branch="develop" name="day" release="ANY" version="ANY" build_date_time="2018-01-01 12:59:59.0"
+               test_date_time="2018-01-01 12:59:59.0" job_url="http://any/11" status="DONE" acceptance="NEW"/>
+    <execution id="12" cycle_definition_id="2" branch="develop" name="night" release="ANY" version="ANY" build_date_time="2018-01-01 11:59:59.0"
+               test_date_time="2018-01-01 11:59:59.0" job_url="http://any/12" status="DONE" acceptance="NEW"/>
+    <execution id="13" cycle_definition_id="3" branch="stab" name="night" release="ANY" version="ANY" build_date_time="2018-01-01 10:59:59.0"
+               test_date_time="2018-01-01 10:59:59.0" job_url="http://any/13" status="DONE" acceptance="NEW"/>
+
+    <execution id="21" cycle_definition_id="1" branch="develop" name="day" release="ANY" version="ANY" build_date_time="2017-12-31 12:59:59.0"
+               test_date_time="2017-12-31 12:59:59.0" job_url="http://any/21" status="DONE" acceptance="NEW"/>
+    <execution id="22" cycle_definition_id="2" branch="develop" name="night" release="ANY" version="ANY" build_date_time="2017-12-31 11:59:59.0"
+               test_date_time="2017-12-31 11:59:59.0" job_url="http://any/22" status="DONE" acceptance="NEW"/>
+    <execution id="23" cycle_definition_id="3" branch="stab" name="night" release="ANY" version="ANY" build_date_time="2017-12-31 10:59:59.0"
+               test_date_time="2017-12-31 10:59:59.0" job_url="http://any/23" status="DONE" acceptance="NEW"/>
+
+
+    <!-- run -->
+
+
+    <!-- Note: "inserted" here in reverse country & type code orders, to test the scenarios are sorted correctly by country and type code -->
+
+    <run id="111" execution_id="11" status="DONE" country_id="1" type_id="2" platform="any"
+         job_url="http://any/111"/>
+    <!-- No cn/firefox for test reasons -->
+    <run id="113" execution_id="11" status="DONE" country_id="2" type_id="1" platform="any"
+         job_url="http://any/113"/>
+
+    <run id="121" execution_id="12" status="DONE" country_id="1" type_id="2" platform="any"
+         job_url="http://any/121"/>
+    <run id="122" execution_id="12" status="DONE" country_id="1" type_id="1" platform="any"
+         job_url="http://any/122"/>
+    <run id="123" execution_id="12" status="DONE" country_id="2" type_id="1" platform="any"
+         job_url="http://any/123"/>
+
+    <run id="131" execution_id="13" status="DONE" country_id="1" type_id="2" platform="any"
+         job_url="http://any/131"/>
+    <run id="132" execution_id="13" status="DONE" country_id="1" type_id="1" platform="any"
+         job_url="http://any/132"/>
+    <run id="133" execution_id="13" status="DONE" country_id="2" type_id="1" platform="any"
+         job_url="http://any/133"/>
+
+    <run id="211" execution_id="21" status="DONE" country_id="1" type_id="2" platform="any"
+         job_url="http://any/211"/>
+    <run id="212" execution_id="21" status="DONE" country_id="1" type_id="1" platform="any"
+         job_url="http://any/212"/>
+    <run id="213" execution_id="21" status="DONE" country_id="2" type_id="1" platform="any"
+         job_url="http://any/213"/>
+
+    <run id="221" execution_id="22" status="DONE" country_id="1" type_id="2" platform="any"
+         job_url="http://any/221"/>
+    <run id="222" execution_id="22" status="DONE" country_id="1" type_id="1" platform="any"
+         job_url="http://any/222"/>
+    <run id="223" execution_id="22" status="DONE" country_id="2" type_id="1" platform="any"
+         job_url="http://any/223"/>
+
+    <run id="231" execution_id="23" status="DONE" country_id="1" type_id="2" platform="any"
+         job_url="http://any/231"/>
+    <run id="232" execution_id="23" status="DONE" country_id="1" type_id="1" platform="any"
+         job_url="http://any/232"/>
+    <run id="233" execution_id="23" status="DONE" country_id="2" type_id="1" platform="any"
+         job_url="http://any/233"/>
+
+
+    <!-- executed_scenario -->
+
+
+    <executed_scenario id="1111" run_id="111" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Functionalities 42, 666: Scenario a" cucumber_id="a;scenario-a" line="42"
+                       content="42:failed:Step 1&#xA;43:failed:Step 2"/>
+    <executed_scenario id="1131" run_id="113" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Functionalities 42, 666: Scenario a" cucumber_id="a;scenario-a" line="42"
+                       content="42:failed:Step 1&#xA;43:failed:Step 2"/>
+    <executed_scenario id="1211" run_id="121" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Functionalities 42, 666: Scenario a" cucumber_id="a;scenario-a" line="42"
+                       content="42:failed:Step 1&#xA;43:failed:Step 2"/>
+    <executed_scenario id="1221" run_id="122" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Functionalities 42, 666: Scenario a" cucumber_id="a;scenario-a" line="42"
+                       content="42:failed:Step 1&#xA;43:failed:Step 2"/>
+    <executed_scenario id="1231" run_id="123" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Functionalities 42, 666: Scenario a" cucumber_id="a;scenario-a" line="42"
+                       content="42:failed:Step 1&#xA;43:failed:Step 2"/>
+    <executed_scenario id="1311" run_id="131" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Functionalities 42, 666: Scenario a" cucumber_id="a;scenario-a" line="42"
+                       content="42:failed:Step 1&#xA;43:failed:Step 2"/>
+    <executed_scenario id="1321" run_id="132" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Functionalities 42, 666: Scenario a" cucumber_id="a;scenario-a" line="42"
+                       content="42:failed:Step 1&#xA;43:failed:Step 2"/>
+    <executed_scenario id="1331" run_id="133" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Functionalities 42, 666: Scenario a" cucumber_id="a;scenario-a" line="42"
+                       content="42:failed:Step 1&#xA;43:failed:Step 2"/>
+    <executed_scenario id="2111" run_id="211" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Functionalities 42, 666: Scenario a" cucumber_id="a;scenario-a" line="42"
+                       content="42:failed:Step 1&#xA;43:failed:Step 2"/>
+    <executed_scenario id="2121" run_id="212" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Functionalities 42, 666: Scenario a" cucumber_id="a;scenario-a" line="42"
+                       content="42:failed:Step 1&#xA;43:failed:Step 2"/>
+    <executed_scenario id="2131" run_id="213" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Functionalities 42, 666: Scenario a" cucumber_id="a;scenario-a" line="42"
+                       content="42:failed:Step 1&#xA;43:failed:Step 2"/>
+    <executed_scenario id="2211" run_id="221" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Functionalities 42, 666: Scenario a" cucumber_id="a;scenario-a" line="42"
+                       content="42:failed:Step 1&#xA;43:failed:Step 2"/>
+    <executed_scenario id="2221" run_id="222" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Functionalities 42, 666: Scenario a" cucumber_id="a;scenario-a" line="42"
+                       content="42:failed:Step 1&#xA;43:failed:Step 2"/>
+    <executed_scenario id="2231" run_id="223" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Functionalities 42, 666: Scenario a" cucumber_id="a;scenario-a" line="42"
+                       content="42:failed:Step 1&#xA;43:failed:Step 2"/>
+    <executed_scenario id="2311" run_id="231" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Functionalities 42, 666: Scenario a" cucumber_id="a;scenario-a" line="42"
+                       content="42:failed:Step 1&#xA;43:failed:Step 2"/>
+    <executed_scenario id="2321" run_id="232" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Functionalities 42, 666: Scenario a" cucumber_id="a;scenario-a" line="42"
+                       content="42:failed:Step 1&#xA;43:failed:Step 2"/>
+    <executed_scenario id="2331" run_id="233" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Functionalities 42, 666: Scenario a" cucumber_id="a;scenario-a" line="42"
+                       content="42:failed:Step 1&#xA;43:failed:Step 2"/>
+    <executed_scenario id="2333" run_id="233" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Functionalities 42, 666: Scenario a" cucumber_id="a;scenario-a" line="102"
+                       content="102:failed:Step 1&#xA;103:failed:Step 2"/>
+
+    <executed_scenario id="1112" run_id="111" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Scenario b" cucumber_id="a;scenario-b" line="42" content="42:passed:Any"/>
+    <executed_scenario id="1132" run_id="113" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Scenario b" cucumber_id="a;scenario-b" line="42" content="42:passed:Any"/>
+    <executed_scenario id="1212" run_id="121" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Scenario b" cucumber_id="a;scenario-b" line="42" content="42:passed:Any"/>
+    <executed_scenario id="1222" run_id="122" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Scenario b" cucumber_id="a;scenario-b" line="42" content="42:passed:Any"/>
+    <executed_scenario id="1232" run_id="123" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Scenario b" cucumber_id="a;scenario-b" line="42" content="42:passed:Any"/>
+    <executed_scenario id="1312" run_id="131" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Scenario b" cucumber_id="a;scenario-b" line="42" content="42:passed:Any"/>
+    <executed_scenario id="1322" run_id="132" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Scenario b" cucumber_id="a;scenario-b" line="42" content="42:passed:Any"/>
+    <executed_scenario id="1332" run_id="133" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Scenario b" cucumber_id="a;scenario-b" line="42" content="42:passed:Any"/>
+    <executed_scenario id="2112" run_id="211" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Scenario b" cucumber_id="a;scenario-b" line="42" content="42:passed:Any"/>
+    <executed_scenario id="2122" run_id="212" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Scenario b" cucumber_id="a;scenario-b" line="42" content="42:passed:Any"/>
+    <executed_scenario id="2132" run_id="213" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Scenario b" cucumber_id="a;scenario-b" line="42" content="42:passed:Any"/>
+    <executed_scenario id="2212" run_id="221" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Scenario b" cucumber_id="a;scenario-b" line="42" content="42:passed:Any"/>
+    <executed_scenario id="2222" run_id="222" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Scenario b" cucumber_id="a;scenario-b" line="42" content="42:passed:Any"/>
+    <executed_scenario id="2232" run_id="223" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Scenario b" cucumber_id="a;scenario-b" line="42" content="42:passed:Any"/>
+    <executed_scenario id="2312" run_id="231" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Scenario b" cucumber_id="a;scenario-b" line="42" content="42:passed:Any"/>
+    <executed_scenario id="2322" run_id="232" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Scenario b" cucumber_id="a;scenario-b" line="42" content="42:passed:Any"/>
+    <executed_scenario id="2332" run_id="233" feature_file="a.feature" feature_name="Feature A" severity="high"
+                       name="Scenario b" cucumber_id="a;scenario-b" line="42" content="42:passed:Any"/>
+
+
+    <!-- error -->
+
+
+    <error id="13311" executed_scenario_id="1331" step="Step 1" step_definition="^Step 1$" step_line="42"
+           exception="Exception 1"/>
+    <error id="23311" executed_scenario_id="2331" step="Step 1" step_definition="^Step 1$" step_line="42"
+           exception="Exception 1"/>
+
+
+    <!-- problem -->
+
+
+    <problem id="9" project_id="1" name="Step 1 needs rework" status="OPEN" defect_id="9"
+             creation_date_time="2018-01-01 12:00:00.0"/>
+
+    <problem_pattern id="99" problem_id="9" step="Step 1" scenario_name_starts_with="false" step_starts_with="false"
+                     step_definition_starts_with="false"/>
+
+    <problem_occurrence error_id="23311" problem_pattern_id="99"/>
+
+</dataset>

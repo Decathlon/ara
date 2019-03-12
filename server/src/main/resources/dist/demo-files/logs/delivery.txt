@@ -1,0 +1,14 @@
+seleniumService.getSessionId()
+=> 42
+backendService.importProductsInCart()
+=> OK
+seleniumService.loadCartPage()
+=> OK
+seleniumService.clickValidateOrder()
+=> OK
+seleniumService.clickDeliveryOption("3D Printing")
+=> OK
+seleniumService.getDeliveryOption()
+=> "3D Printing"
+seleniumService.getDeliveryPrice()
+=> "1 cent"

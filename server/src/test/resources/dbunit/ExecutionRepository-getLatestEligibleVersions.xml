@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+
+    <project id="1" code="p" name="Any" default_at_startup="false"/>
+
+    <cycle_definition id="1" project_id="1" branch="develop" name="day" branch_position="1"/>
+    <cycle_definition id="2" project_id="1" branch="develop" name="night" branch_position="1"/>
+    <cycle_definition id="3" project_id="1" branch="stab" name="day" branch_position="2"/>
+    <cycle_definition id="4" project_id="1" branch="stab" name="night" branch_position="2"/>
+    <cycle_definition id="5" project_id="1" branch="master" name="day" branch_position="2"/>
+
+    <!-- DEVELOP -->
+
+    <!-- not matching ELIGIBLE criteria because blocking_validation is FALSE -->
+    <execution id="1" cycle_definition_id="1" branch="develop" name="day" release="1711"
+               version="1711.1709245958" build_date_time="2017-09-24 11:59:58.0"
+               test_date_time="2017-09-26 11:59:58.0" job_url="any1"
+
+               status="DONE" acceptance="NEW" blocking_validation="false" quality_status="PASSED"/>
+
+    <!-- not matching ELIGIBLE criteria because quality_status is FAILED -->
+    <execution id="2" cycle_definition_id="1" branch="develop" name="day" release="1711"
+               version="1711.1709245756" build_date_time="2017-09-24 12:57:56.0"
+               test_date_time="2017-09-25 12:57:56.0" job_url="any2"
+
+               status="DONE" acceptance="NEW" blocking_validation="true" quality_status="FAILED"/>
+
+    <!-- not matching ELIGIBLE criteria because status is not DONE -->
+    <execution id="3" cycle_definition_id="1" branch="develop" name="day" release="1711"
+               version="1711.1709245756" build_date_time="2017-09-24 12:57:56.0"
+               test_date_time="2017-09-24 12:57:56.0" job_url="any3"
+
+               status="RUNNING" acceptance="NEW" blocking_validation="true" quality_status="PASSED"/>
+
+    <!-- Latest matching -->
+    <execution id="25072" cycle_definition_id="1" branch="develop" name="day"
+               release="1808" version="1808.1807201757"
+               build_date_time="2018-08-08 20:57:00.0"
+               test_date_time="2018-08-23 7:07:48.000" job_url="any4" status="DONE"
+               acceptance="NEW" blocking_validation="true" quality_status="PASSED"/>
+
+    <!-- Matching but older -->
+    <execution id="25071" cycle_definition_id="1" branch="develop" name="day"
+               release="1808" version="1808.1807201757"
+               build_date_time="2018-08-07 20:57:00.0"
+               test_date_time="2018-08-07 10:00:38.000" job_url="any5" status="DONE"
+               acceptance="NEW" blocking_validation="true" quality_status="PASSED"/>
+
+    <!-- Matching but older -->
+    <execution id="25070" cycle_definition_id="1" branch="develop" name="day"
+               release="1808" version="1808.1807201757"
+               build_date_time="2018-08-06 20:57:00.0"
+               test_date_time="2018-08-06 10:00:48.000" job_url="any6" status="DONE"
+               acceptance="NEW" blocking_validation="true" quality_status="PASSED"/>
+
+    <!-- STAB -->
+
+    <!-- Not matching -->
+    <execution id="4" cycle_definition_id="4" branch="stab" name="night" release="1710"
+               version="1710.1710245554" build_date_time="2017-09-24 10:55:54.0"
+               test_date_time="2017-09-25 10:55:54.0" job_url="any7" status="DONE"
+               acceptance="DISCARDED" discard_reason="Was not in the mood"/>
+
+    <!-- Latest matching -->
+    <execution id="2502" cycle_definition_id="3" branch="stab" name="day" release="1808"
+               version="1808.1807201757" build_date_time="2018-08-08 20:57:00.0"
+               test_date_time="2018-08-23 24:00:04.000" job_url="any8" status="DONE"
+               acceptance="NEW" blocking_validation="true" quality_status="WARNING"/>
+
+    <!--
+        Same branch and date than previous matching row
+        BUT different cycle name and not blocking: should NOT be returned
+        to test matching clause is enforced even by super-request
+    -->
+    <execution id="9502" cycle_definition_id="4" branch="stab" name="night" release="1808"
+               version="1808.1807201757" build_date_time="2018-08-08 20:57:00.0"
+               test_date_time="2018-08-23 24:00:04.000" job_url="any98" status="DONE"
+               acceptance="DISCARDED" blocking_validation="false" quality_status="WARNING"/>
+
+    <!-- Matching but older -->
+    <execution id="2503" cycle_definition_id="3" branch="stab" name="day" release="1808"
+               version="1808.1807201757" build_date_time="2018-08-07 20:57:00.0"
+               test_date_time="2018-08-07 24:01:47.000" job_url="any9" status="DONE"
+               acceptance="NEW" blocking_validation="true" quality_status="WARNING"/>
+
+    <!-- Matching but older -->
+    <execution id="2504" cycle_definition_id="3" branch="stab" name="day" release="1808"
+               version="1808.1807201757" build_date_time="2018-08-06 20:57:00.0"
+               test_date_time="2018-08-06 24:10:41.000" job_url="any10" status="DONE"
+               acceptance="NEW" blocking_validation="true" quality_status="WARNING"/>
+
+    <!-- MASTER: none are matching: the branch must not be present in results -->
+
+    <execution id="2505" cycle_definition_id="5" branch="master" name="day"
+               release="1808" version="1808.1807201757"
+               build_date_time="2018-08-08 20:57:00.0"
+               test_date_time="2018-08-23 24:11:48.000" job_url="any11" status="DONE"
+               acceptance="NEW" blocking_validation="false" quality_status="WARNING"/>
+
+    <execution id="2506" cycle_definition_id="5" branch="master" name="day"
+               release="1808" version="1808.1807201757"
+               build_date_time="2018-08-07 20:57:00.0"
+               test_date_time="2018-08-07 24:09:40.000" job_url="any12" status="DONE"
+               acceptance="NEW" blocking_validation="false" quality_status="WARNING"/>
+
+</dataset>

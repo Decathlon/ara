@@ -1,0 +1,12 @@
+{
+  "displayName": "b1807.1805041456",
+  "building": true,
+  "duration": 0,
+  "timestamp": 1525442442556,
+  "estimatedDuration": 5914168,
+  "result": "SUCCESS",
+  "release": "the-release",
+  "version": "the-version",
+  "versionTimestamp": 1525442442000,
+  "comment": "Some comment"
+}

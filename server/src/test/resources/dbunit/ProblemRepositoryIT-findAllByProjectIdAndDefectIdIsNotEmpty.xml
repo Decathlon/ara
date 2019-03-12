@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+
+    <project id="1" code="p1" name="Any1" default_at_startup="false"/>
+    <project id="2" code="p2" name="Any2" default_at_startup="false"/>
+
+    <problem id="1" project_id="1" name="any1" status="OPEN" creation_date_time="2018-01-01 12:00:00.0"/>
+    <problem id="2" project_id="1" name="any2" status="OPEN" creation_date_time="2018-01-01 12:00:00.0" defect_id="a"/>
+    <problem id="3" project_id="1" name="any3" status="OPEN" creation_date_time="2018-01-01 12:00:00.0" defect_id="b"/>
+    <problem id="4" project_id="1" name="any4" status="OPEN" creation_date_time="2018-01-01 12:00:00.0" defect_id="  "/>
+    <problem id="5" project_id="2" name="any1" status="OPEN" creation_date_time="2018-01-01 12:00:00.0" defect_id="c"/>
+
+</dataset>

@@ -1,0 +1,54 @@
+{
+	"info": {
+		"_postman_id": "84c3fda0-009b-4482-811a-85bb39962376",
+		"name": "Our Lovely Store - Choose a product",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "all",
+			"item": [
+				{
+					"name": "@severity-sanity-check Functionality {{F-Catalog-List}}: List all our useless products",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "de5bfcd0-2833-4b6b-b83c-7633c9caa14c",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"The server should return 3 useless products\", function () {",
+									"    // Trust us, they are here!",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/get",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"get"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

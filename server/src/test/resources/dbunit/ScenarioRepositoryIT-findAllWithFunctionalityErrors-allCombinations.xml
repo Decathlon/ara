@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+
+    <project id="1" code="p" name="Any" default_at_startup="false"/>
+
+    <source id="1" project_id="1" code="sourceA" name="any" letter="A" technology="CUCUMBER" vcs_url="any"
+            default_branch="anyA" postman_country_root_folders="false"/>
+
+    <functionality id="1" project_id="1" order="1" type="FUNCTIONALITY" name="any1"
+                   creation_date_time="2018-01-01 12:00:00.0" update_date_time="2018-01-01 12:00:00.0"/>
+    <functionality id="2" project_id="1" order="2" type="FUNCTIONALITY" name="any2"
+                   creation_date_time="2018-01-01 12:00:00.0" update_date_time="2018-01-01 12:00:00.0"/>
+
+    <!-- One OK scenario (not in the result) and several KO scenarios to test ordering -->
+
+    <scenario
+            name="functionalities=1 | wrongFunctionalityIds=null | countryCodes=existing | wrongCountryCodes=null | severity=existing | wrongSeverityCode=null -> OK (all set, with null wrong*)"
+            id="1" source_id="1" feature_file="any" feature_name="any" country_codes="existing" severity="existing"
+            ignored="false" line="1" content="any"/>
+    <functionality_coverage functionality_id="1" scenario_id="1"/>
+
+    <scenario
+            name="functionalities=2 | wrongFunctionalityIds=null | countryCodes=existing | wrongCountryCodes=null | severity=existing | wrongSeverityCode=null -> OK (several functionalilties)"
+            id="2" source_id="1" feature_file="any" feature_name="any" country_codes="existing" severity="existing"
+            ignored="false" line="1" content="any"/>
+    <functionality_coverage functionality_id="1" scenario_id="2"/>
+    <functionality_coverage functionality_id="2" scenario_id="2"/>
+
+    <scenario
+            name="functionalities=1 | wrongFunctionalityIds=empty | countryCodes=existing | wrongCountryCodes=null | severity=existing | wrongSeverityCode=null -> OK (empty wrongFunctionalityIds)"
+            id="3" source_id="1" feature_file="any" feature_name="any" wrong_functionality_ids=""
+            country_codes="existing" severity="existing" ignored="false" line="1" content="any"/>
+    <functionality_coverage functionality_id="1" scenario_id="3"/>
+
+    <scenario
+            name="functionalities=1 | wrongFunctionalityIds=null | countryCodes=existing | wrongCountryCodes=empty | severity=existing | wrongSeverityCode=null -> OK (empty wrongCountryCodes)"
+            id="4" source_id="1" feature_file="any" feature_name="any" country_codes="existing" wrong_country_codes=""
+            severity="existing" ignored="false" line="1" content="any"/>
+    <functionality_coverage functionality_id="1" scenario_id="4"/>
+
+    <scenario
+            name="functionalities=1 | wrongFunctionalityIds=null | countryCodes=existing | wrongCountryCodes=null | severity=existing | wrongSeverityCode=empty -> OK (empty wrongSeverityCode)"
+            id="5" source_id="1" feature_file="any" feature_name="any" country_codes="existing" severity="existing"
+            ignored="false" line="1" content="any"/>
+    <functionality_coverage functionality_id="1" scenario_id="5"/>
+
+
+    <scenario
+            name="functionalities=0 | wrongFunctionalityIds=null | countryCodes=existing | wrongCountryCodes=null | severity=existing | wrongSeverityCode=null -> no attached functionality"
+            id="6" source_id="1" feature_file="any" feature_name="any" country_codes="existing" severity="existing"
+            ignored="false" line="1" content="any"/>
+
+    <scenario
+            name="functionalities=2 | wrongFunctionalityIds=some | countryCodes=existing | wrongCountryCodes=null | severity=existing | wrongSeverityCode=null -> nonexistent functionality ID"
+            id="7" source_id="1" feature_file="any" feature_name="any" wrong_functionality_ids="some"
+            country_codes="existing" severity="existing" ignored="false" line="1" content="any"/>
+    <functionality_coverage functionality_id="1" scenario_id="7"/>
+    <functionality_coverage functionality_id="2" scenario_id="7"/>
+
+
+    <scenario
+            name="functionalities=1 | wrongFunctionalityIds=null | countryCodes=null | wrongCountryCodes=null | severity=existing | wrongSeverityCode=null -> no (null) country"
+            id="8" source_id="1" feature_file="any" feature_name="any" severity="existing" ignored="false" line="1"
+            content="any"/>
+    <functionality_coverage functionality_id="1" scenario_id="8"/>
+
+    <scenario
+            name="functionalities=1 | wrongFunctionalityIds=null | countryCodes=empty | wrongCountryCodes=null | severity=existing | wrongSeverityCode=null -> no (empty) country"
+            id="9" source_id="1" feature_file="any" feature_name="any" country_codes="" severity="existing"
+            ignored="false" line="1" content="any"/>
+    <functionality_coverage functionality_id="1" scenario_id="9"/>
+
+    <scenario
+            name="functionalities=1 | wrongFunctionalityIds=null | countryCodes=existing | wrongCountryCodes=some | severity=existing | wrongSeverityCode=null -> nonexistent country code"
+            id="10" source_id="1" feature_file="any" feature_name="any" country_codes="existing"
+            wrong_country_codes="some" severity="existing" ignored="false" line="1" content="any"/>
+    <functionality_coverage functionality_id="1" scenario_id="10"/>
+
+
+    <scenario
+            name="functionalities=1 | wrongFunctionalityIds=null | countryCodes=existing | wrongCountryCodes=null | severity=null | wrongSeverityCode=null -> no (null) severity"
+            id="11" source_id="1" feature_file="any" feature_name="any" country_codes="existing" ignored="false"
+            line="1" content="any"/>
+    <functionality_coverage functionality_id="1" scenario_id="11"/>
+
+    <scenario
+            name="functionalities=1 | wrongFunctionalityIds=null | countryCodes=existing | wrongCountryCodes=null | severity=empty | wrongSeverityCode=null -> no (empty) severity"
+            id="12" source_id="1" feature_file="any" feature_name="any" country_codes="existing" severity=""
+            ignored="false" line="1" content="any"/>
+    <functionality_coverage functionality_id="1" scenario_id="12"/>
+
+    <scenario
+            name="functionalities=1 | wrongFunctionalityIds=null | countryCodes=existing | wrongCountryCodes=null | severity=wrong | wrongSeverityCode=some -> nonexistent severity code"
+            id="13" source_id="1" feature_file="any" feature_name="any" country_codes="existing" severity="wrong"
+            wrong_severity_code="some" ignored="false" line="1" content="any"/>
+    <functionality_coverage functionality_id="1" scenario_id="13"/>
+
+</dataset>

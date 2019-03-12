@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <body>
+        <div th:fragment="nrt-team" th:with="globalQualitiesPerTeamAndSeverity=${(!#maps.isEmpty(qualitiesPerTeamAndSeverity) && qualitiesPerTeamAndSeverity['' + team.id] != null ? qualitiesPerTeamAndSeverity['' + team.id]['*'] : null)}">
+            <div th:if="${globalQualitiesPerTeamAndSeverity != null && globalQualitiesPerTeamAndSeverity.total > 0}" style="margin: 4px 0;">
+                <div class="Row">
+                    <div class="Col span4" style="line-height: 21px; font-size: 0.8em; color: gray; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        [[${team.name}]]
+                    </div>
+                    <div th:class="${'Col span' + ((24 - 4) / #arrays.length(execution.qualitySeverities))}" th:each="qualitySeverity : ${execution.qualitySeverities}">
+                        <th:block th:with="qualitiesPerTeamAndSeverity=${(!#maps.isEmpty(qualitiesPerTeamAndSeverity) && qualitiesPerTeamAndSeverity['' + team.id] != null ? qualitiesPerTeamAndSeverity['' + team.id][qualitySeverity.severity.code] : null)}">
+                            <div th:replace="mail/html/nrt-progress.html :: nrt-progress (
+                                    execution=${execution},
+                                    run=${run},
+                                    counts=${qualitiesPerTeamAndSeverity},
+                                    severityCode=${qualitySeverity.severity.code},
+                                    teamId=${team.id},
+                                    small=true)"></div>
+                        </th:block>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

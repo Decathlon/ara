@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <body>
+        <div th:fragment="nrt-progress" th:if="${counts != null && counts.total > 0}">
+            <a th:href="${executionUrl +
+                    (run != null ? '?type=' + run.type.code + '&country=' + run.country.code : '') +
+                    (teamId != null ? (run != null ? '&' : '?') + 'team=' + teamId : '') +
+                    (severityCode == '*' ? '' : '&severity=' + severityCode) +
+                    (counts.total == counts.passed ? '&withSucceed=true' : '')}"
+               th:with="tooltip=${(counts.passed > 0 ? ' - ' + counts.passed + ' succeed scenario' + (counts.passed == 1 ? '' : 's') : '') +
+                                  (counts.handled > 0 ? ' - ' + counts.handled + ' handled failed scenario' + (counts.handled == 1 ? '' : 's') + ' with associated and not reappearing problem(s)' : '') +
+                                  (counts.unhandled > 0 ? ' - ' +counts.unhandled + ' unhandled failed scenario' + (counts.unhandled == 1 ? '' : 's') + ' without associated problems or with only reappearing problems' : '')}"
+               class="nrt-progress">
+                <div class="Alert"
+                     th:title="${#strings.isEmpty(tooltip) ? '' : #strings.substringAfter(tooltip, ' - ')}"
+                     th:style="${(small ? '' : 'border-color: #E3E8EE;') + (run == null || run.includeInThresholds ? '' : 'opacity: 0.5;')}">
+
+                    <div th:if="${!small}" style="min-height: 16px;">
+                        <span class="textPassed" th:if="${counts.passed > 0}">[[${counts.passed}]]</span>
+                        <span class="textFailed">
+                            <span class="textProblem" th:if="${counts.handled > 0}">
+                                [[${counts.handled}]]
+                                <span th:if="${counts.unhandled > 0}"> + </span>
+                            </span>
+                            <span th:if="${counts.unhandled > 0}">[[${counts.unhandled}]]</span>
+                        </span>
+                    </div>
+
+                    <div th:class="${'progressBar' + (counts.total > 0 ? ' failed' : '') + (small ? ' small' : '')}">
+                        <div th:style="${'width: ' + #numbers.formatDecimal(100.0 * counts.passed / counts.total, 0, 1, 'POINT') + '%;'}"></div>
+                        <div th:style="${'width: ' + #numbers.formatDecimal(100.0 * counts.handled / counts.total, 0, 1, 'POINT') + '%;'}"></div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </body>
+</html>

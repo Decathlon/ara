@@ -1,0 +1,8 @@
+{
+  "displayName": "Deployment Job #1",
+  "building": false,
+  "duration": 0,
+  "timestamp": 1525442442556,
+  "estimatedDuration": 5914168,
+  "result": "UNSTABLE"
+}

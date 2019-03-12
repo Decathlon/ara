@@ -1,0 +1,167 @@
+<!--StructuredEmbeddings_v1.0.0=[
+	{
+		"data":"errors.com",
+		"kind":"fatalError",
+		"name":"Fatal error",
+		"type":"link",
+		"priority":"ERROR_MEDIUM",
+		"priorityOrder":1
+	},
+	{
+		"data":{
+			"severity":null,
+			"name":"named",
+			"video":null,
+			"steps":[
+				{
+					"name":"step1",
+					"error":null
+				}
+			]
+		},
+		"kind":"accessibility",
+		"name":"Accessibility",
+		"type":"object",
+		"priority":"OUTPUT_SMALL",
+		"priorityOrder":3
+	},
+	{
+		"data":"screenshot.com",
+		"kind":"screenshotUrl",
+		"name":"Screenshot",
+		"type":"image",
+		"priority":"FUNCTIONAL_DEBUG_MEDIUM",
+		"priorityOrder":7
+	},
+	{
+		"data":"video.com",
+		"kind":"videoUrl",
+		"name":"Video",
+		"type":"video",
+		"priority":"FUNCTIONAL_DEBUG_LARGE",
+		"priorityOrder":8
+	},
+	{
+		"data":"&amp;amp;&#x2d;&#x2d; <test> &amp; \"checked'",
+		"kind":"escapingTest",
+		"name":"Escaping<test> &amp; \"checked'",
+		"type":"text",
+		"priority":"TECHNICAL_DEBUG_SMALL",
+		"priorityOrder":9
+	},
+	{
+		"data":"2017.12.31&#x2d;23h59m59.999",
+		"kind":"startDateTime",
+		"name":"Scenario start date &amp; time",
+		"type":"text",
+		"priority":"TECHNICAL_DEBUG_SMALL",
+		"priorityOrder":9
+	},
+	{
+		"data":"logs.com",
+		"kind":"logsUrl",
+		"name":"Logs",
+		"type":"link",
+		"priority":"TECHNICAL_DEBUG_MEDIUM",
+		"priorityOrder":10
+	},
+	{
+		"data":"java&#x2d;script&#x2d;errors.com",
+		"kind":"javaScriptErrorsUrl",
+		"name":"JavaScript errors",
+		"type":"link",
+		"priority":"TECHNICAL_DEBUG_MEDIUM",
+		"priorityOrder":10
+	},
+	{
+		"data":"http&#x2d;requests.com",
+		"kind":"httpRequestsUrl",
+		"name":"HTTP requests",
+		"type":"link",
+		"priority":"TECHNICAL_DEBUG_LARGE",
+		"priorityOrder":11
+	},
+	{
+		"data":"hidden!",
+		"kind":"hiddenText",
+		"name":null,
+		"type":"text",
+		"priority":"HIDDEN",
+		"priorityOrder":12
+	}
+]-->
+
+<h3 style="margin: 16px 0 4px 0;">Fatal error</h3>
+<div>
+<!--START:index=0-->
+<a href="errors.com">SHOW</a>
+<!--STOP:index=0-->
+</div>
+
+<h3 style="margin: 16px 0 4px 0;">Accessibility</h3>
+<div>
+<!--START:index=1-->
+{
+	&quot;severity&quot;:null,
+	&quot;name&quot;:&quot;named&quot;,
+	&quot;video&quot;:null,
+	&quot;steps&quot;:[
+		{
+			&quot;name&quot;:&quot;step1&quot;,
+			&quot;error&quot;:null
+		}
+	]
+}
+<!--STOP:index=1-->
+</div>
+
+<h3 style="margin: 16px 0 4px 0;">Screenshot</h3>
+<div>
+<!--START:index=2-->
+<div style="max-width: 100%; max-height: 400px; overflow: auto; box-shadow: 0 0 8px lightgray;">
+<img style="max-width: 100%;" src="screenshot.com">
+</div>
+<!--STOP:index=2-->
+</div>
+
+<h3 style="margin: 16px 0 4px 0;">Video</h3>
+<div>
+<!--START:index=3-->
+<video src="video.com" width="864" autobuffer controls style="max-width: 100%; box-shadow: 0 0 8px lightgray;"><a href="video.com">SHOW</a></video>
+<!--STOP:index=3-->
+</div>
+
+<h3 style="margin: 16px 0 4px 0;">Escaping&lt;test&gt; &amp; &quot;checked&apos;</h3>
+<div>
+<!--START:index=4-->
+&amp;amp;-- &lt;test&gt; &amp; &quot;checked&apos;
+<!--STOP:index=4-->
+</div>
+
+<h3 style="margin: 16px 0 4px 0;">Scenario start date &amp; time</h3>
+<div>
+<!--START:index=5-->
+2017.12.31-23h59m59.999
+<!--STOP:index=5-->
+</div>
+
+<h3 style="margin: 16px 0 4px 0;">Logs</h3>
+<div>
+<!--START:index=6-->
+<a href="logs.com">SHOW</a>
+<!--STOP:index=6-->
+</div>
+
+<h3 style="margin: 16px 0 4px 0;">JavaScript errors</h3>
+<div>
+<!--START:index=7-->
+<a href="java-script-errors.com">SHOW</a>
+<!--STOP:index=7-->
+</div>
+
+<h3 style="margin: 16px 0 4px 0;">HTTP requests</h3>
+<div>
+<!--START:index=8-->
+<a href="http-requests.com">SHOW</a>
+<!--STOP:index=8-->
+</div>

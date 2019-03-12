@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+
+    <!-- Project -->
+    <project id="2" code="prj" name="project" default_at_startup="false" />
+
+    <!-- Setting -->
+    <setting id="1" project_id="2" code="execution.indexer.file.executionBasePath"
+             value="/tmp/ara/executions/custom/{{project}}/{{branch}}/{{cycle}}" />
+
+    <!-- Cycle Definition -->
+    <cycle_definition id="1" project_id="2" branch="develop" name="day" branch_position="1" />
+    <cycle_definition id="2" project_id="2" branch="develop" name="night" branch_position="1" />
+    <cycle_definition id="3" project_id="2" branch="stab" name="day" branch_position="2" />
+    <cycle_definition id="4" project_id="2" branch="stab" name="night" branch_position="2" />
+    <cycle_definition id="5" project_id="2" branch="master" name="day" branch_position="3" />
+    <cycle_definition id="6" project_id="2" branch="master" name="night" branch_position="3" />
+
+    <!-- Country -->
+    <country id="1" project_id="2" code="fr" name="France" />
+    <country id="2" project_id="2" code="nl" name="Netherlands" />
+    <country id="3" project_id="2" code="be" name="Belgium" />
+    <country id="4" project_id="2" code="es" name="Spain" />
+    <country id="5" project_id="2" code="de" name="Germany" />
+    <country id="6" project_id="2" code="cn" name="China"/>
+
+    <!-- Source -->
+    <source id="1" project_id="2" code="code1" name="Source A" letter="A" technology="POSTMAN" vcs_url="vcsUrl1"
+            default_branch="develop" postman_country_root_folders="true"/>
+    <source id="2" project_id="2" code="code2" name="Source B" letter="B" technology="POSTMAN" vcs_url="vcsUrl2"
+            default_branch="develop" postman_country_root_folders="true"/>
+    <source id="3" project_id="2" code="code3" name="Source C" letter="C" technology="POSTMAN" vcs_url="vcsUrl3"
+            default_branch="develop" postman_country_root_folders="true"/>
+
+    <!-- Type -->
+    <type id="1" project_id="2" code="api" name="API" is_browser="false" is_mobile="false" source_id="1"/>
+    <type id="2" project_id="2" code="firefox" name="Desktop" is_browser="true" is_mobile="false" source_id="2"/>
+
+</dataset>

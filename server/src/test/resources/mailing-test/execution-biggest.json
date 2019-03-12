@@ -1,0 +1,833 @@
+{
+  "id": 25875,
+  "branch": "develop",
+  "name": "night",
+  "release": "v3",
+  "version": "45848e1ef5d01e947b9ac3880ace9d48ec35bcb1",
+  "buildDateTime": "2019-02-11T02:55:00.000Z",
+  "testDateTime": "2019-02-11T03:00:00.000Z",
+  "jobUrl": "https://build.company.com/demo/develop/night/72/",
+  "status": "DONE",
+  "result": "SUCCESS",
+  "acceptance": "DISCARDED",
+  "discardReason": "Testing something wrong",
+  "blockingValidation": true,
+  "qualityThresholds": {
+    "sanity-check": {
+      "failure": 100,
+      "warning": 100
+    },
+    "high": {
+      "failure": 95,
+      "warning": 98
+    },
+    "medium": {
+      "failure": 90,
+      "warning": 95
+    }
+  },
+  "qualityStatus": "FAILED",
+  "qualitySeverities": [
+    {
+      "severity": {
+        "code": "sanity-check",
+        "position": 1,
+        "name": "Sanity Check",
+        "shortName": "Sanity Ch.",
+        "initials": "S.C.",
+        "defaultOnMissing": false
+      },
+      "scenarioCounts": {
+        "total": 32,
+        "failed": 18,
+        "passed": 14
+      },
+      "percent": 43,
+      "status": "FAILED"
+    },
+    {
+      "severity": {
+        "code": "high",
+        "position": 2,
+        "name": "High",
+        "shortName": "High",
+        "initials": "High",
+        "defaultOnMissing": true
+      },
+      "scenarioCounts": {
+        "total": 8,
+        "failed": 4,
+        "passed": 4
+      },
+      "percent": 50,
+      "status": "FAILED"
+    },
+    {
+      "severity": {
+        "code": "medium",
+        "position": 3,
+        "name": "Medium",
+        "shortName": "Medium",
+        "initials": "Med.",
+        "defaultOnMissing": false
+      },
+      "scenarioCounts": {
+        "total": 24,
+        "failed": 12,
+        "passed": 12
+      },
+      "percent": 50,
+      "status": "FAILED"
+    },
+    {
+      "severity": {
+        "code": "*",
+        "position": 2147483647,
+        "name": "Global",
+        "shortName": "Global",
+        "initials": "Global",
+        "defaultOnMissing": false
+      },
+      "scenarioCounts": {
+        "total": 64,
+        "failed": 34,
+        "passed": 30
+      },
+      "percent": 46,
+      "status": "FAILED"
+    }
+  ],
+  "duration": 0,
+  "estimatedDuration": 0,
+  "previousId": 25874,
+  "countryDeployments": [
+    {
+      "id": 2733,
+      "country": {
+        "code": "fr",
+        "name": "France"
+      },
+      "platform": "integ",
+      "jobUrl": "https://build.company.com/demo/deploy/fr/73/",
+      "status": "DONE",
+      "result": "SUCCESS",
+      "startDateTime": "2019-02-11T03:00:00.000Z",
+      "estimatedDuration": 0,
+      "duration": 0
+    },
+    {
+      "id": 2734,
+      "country": {
+        "code": "us",
+        "name": "United States"
+      },
+      "platform": "integ",
+      "jobUrl": "https://build.company.com/demo/deploy/us/77/",
+      "status": "DONE",
+      "result": "SUCCESS",
+      "startDateTime": "2019-02-11T03:00:00.000Z",
+      "estimatedDuration": 0,
+      "duration": 0
+    }
+  ],
+  "runs": [
+    {
+      "id": 33891,
+      "country": {
+        "code": "fr",
+        "name": "France"
+      },
+      "type": {
+        "code": "api",
+        "name": "Integ. APIs",
+        "source": {
+          "code": "api",
+          "name": "API",
+          "letter": "A",
+          "technology": "POSTMAN",
+          "vcsUrl": "https://github.com/decathlon/ara/tree/{{branch}}/server/src/main/resources/demo/collections/",
+          "defaultBranch": "master",
+          "postmanCountryRootFolders": true
+        },
+        "browser": false,
+        "mobile": false
+      },
+      "platform": "integ",
+      "jobUrl": "https://build.company.com/demo/test/74/",
+      "status": "DONE",
+      "countryTags": "all",
+      "severityTags": "all",
+      "includeInThresholds": true,
+      "startDateTime": "2019-02-11T03:00:00.000Z",
+      "estimatedDuration": 0,
+      "duration": 0,
+      "qualitiesPerSeverity": {
+        "sanity-check": {
+          "passed": 1,
+          "unhandled": 1,
+          "handled": 0
+        },
+        "*": {
+          "passed": 3,
+          "unhandled": 1,
+          "handled": 0
+        },
+        "medium": {
+          "passed": 2,
+          "unhandled": 0,
+          "handled": 0
+        }
+      },
+      "qualitiesPerTeamAndSeverity": {
+        "397": {
+          "sanity-check": {
+            "passed": 1,
+            "unhandled": 0,
+            "handled": 0
+          },
+          "*": {
+            "passed": 1,
+            "unhandled": 0,
+            "handled": 0
+          }
+        },
+        "398": {
+          "sanity-check": {
+            "passed": 0,
+            "unhandled": 1,
+            "handled": 0
+          },
+          "*": {
+            "passed": 2,
+            "unhandled": 1,
+            "handled": 0
+          },
+          "medium": {
+            "passed": 2,
+            "unhandled": 0,
+            "handled": 0
+          }
+        }
+      }
+    },
+    {
+      "id": 33892,
+      "country": {
+        "code": "fr",
+        "name": "France"
+      },
+      "type": {
+        "code": "firefox-desktop",
+        "name": "HMI Desktop",
+        "source": {
+          "code": "web",
+          "name": "Web",
+          "letter": "W",
+          "technology": "CUCUMBER",
+          "vcsUrl": "https://github.com/decathlon/ara/tree/{{branch}}/generated-cucumber-report/src/main/resources/ara/demo/features/",
+          "defaultBranch": "master",
+          "postmanCountryRootFolders": false
+        },
+        "browser": true,
+        "mobile": false
+      },
+      "platform": "integ",
+      "jobUrl": "https://build.company.com/demo/test/75/",
+      "status": "DONE",
+      "countryTags": "all",
+      "severityTags": "all",
+      "includeInThresholds": true,
+      "startDateTime": "2019-02-11T03:00:00.000Z",
+      "estimatedDuration": 0,
+      "duration": 0,
+      "qualitiesPerSeverity": {
+        "high": {
+          "passed": 1,
+          "unhandled": 0,
+          "handled": 1
+        },
+        "sanity-check": {
+          "passed": 3,
+          "unhandled": 4,
+          "handled": 0
+        },
+        "*": {
+          "passed": 6,
+          "unhandled": 6,
+          "handled": 2
+        },
+        "medium": {
+          "passed": 2,
+          "unhandled": 2,
+          "handled": 1
+        }
+      },
+      "qualitiesPerTeamAndSeverity": {
+        "396": {
+          "high": {
+            "passed": 1,
+            "unhandled": 0,
+            "handled": 0
+          },
+          "*": {
+            "passed": 2,
+            "unhandled": 0,
+            "handled": 0
+          },
+          "medium": {
+            "passed": 1,
+            "unhandled": 0,
+            "handled": 0
+          }
+        },
+        "397": {
+          "sanity-check": {
+            "passed": 1,
+            "unhandled": 0,
+            "handled": 0
+          },
+          "*": {
+            "passed": 2,
+            "unhandled": 0,
+            "handled": 0
+          },
+          "medium": {
+            "passed": 1,
+            "unhandled": 0,
+            "handled": 0
+          }
+        },
+        "398": {
+          "high": {
+            "passed": 0,
+            "unhandled": 0,
+            "handled": 1
+          },
+          "sanity-check": {
+            "passed": 2,
+            "unhandled": 2,
+            "handled": 0
+          },
+          "*": {
+            "passed": 2,
+            "unhandled": 4,
+            "handled": 2
+          },
+          "medium": {
+            "passed": 0,
+            "unhandled": 2,
+            "handled": 1
+          }
+        },
+        "399": {
+          "sanity-check": {
+            "passed": 0,
+            "unhandled": 1,
+            "handled": 0
+          },
+          "*": {
+            "passed": 0,
+            "unhandled": 1,
+            "handled": 0
+          }
+        },
+        "-404": {
+          "sanity-check": {
+            "passed": 0,
+            "unhandled": 1,
+            "handled": 0
+          },
+          "*": {
+            "passed": 0,
+            "unhandled": 1,
+            "handled": 0
+          }
+        }
+      }
+    },
+    {
+      "id": 33893,
+      "country": {
+        "code": "fr",
+        "name": "France"
+      },
+      "type": {
+        "code": "firefox-mobile",
+        "name": "HMI Mobile",
+        "source": {
+          "code": "web",
+          "name": "Web",
+          "letter": "W",
+          "technology": "CUCUMBER",
+          "vcsUrl": "https://github.com/decathlon/ara/tree/{{branch}}/generated-cucumber-report/src/main/resources/ara/demo/features/",
+          "defaultBranch": "master",
+          "postmanCountryRootFolders": false
+        },
+        "browser": true,
+        "mobile": true
+      },
+      "platform": "integ",
+      "jobUrl": "https://build.company.com/demo/test/76/",
+      "status": "DONE",
+      "countryTags": "all",
+      "severityTags": "all",
+      "includeInThresholds": true,
+      "startDateTime": "2019-02-11T03:00:00.000Z",
+      "estimatedDuration": 0,
+      "duration": 0,
+      "qualitiesPerSeverity": {
+        "high": {
+          "passed": 1,
+          "unhandled": 0,
+          "handled": 1
+        },
+        "sanity-check": {
+          "passed": 3,
+          "unhandled": 4,
+          "handled": 0
+        },
+        "*": {
+          "passed": 6,
+          "unhandled": 6,
+          "handled": 2
+        },
+        "medium": {
+          "passed": 2,
+          "unhandled": 2,
+          "handled": 1
+        }
+      },
+      "qualitiesPerTeamAndSeverity": {
+        "396": {
+          "high": {
+            "passed": 1,
+            "unhandled": 0,
+            "handled": 0
+          },
+          "*": {
+            "passed": 2,
+            "unhandled": 0,
+            "handled": 0
+          },
+          "medium": {
+            "passed": 1,
+            "unhandled": 0,
+            "handled": 0
+          }
+        },
+        "397": {
+          "sanity-check": {
+            "passed": 1,
+            "unhandled": 0,
+            "handled": 0
+          },
+          "*": {
+            "passed": 2,
+            "unhandled": 0,
+            "handled": 0
+          },
+          "medium": {
+            "passed": 1,
+            "unhandled": 0,
+            "handled": 0
+          }
+        },
+        "398": {
+          "high": {
+            "passed": 0,
+            "unhandled": 0,
+            "handled": 1
+          },
+          "sanity-check": {
+            "passed": 2,
+            "unhandled": 2,
+            "handled": 0
+          },
+          "*": {
+            "passed": 2,
+            "unhandled": 4,
+            "handled": 2
+          },
+          "medium": {
+            "passed": 0,
+            "unhandled": 2,
+            "handled": 1
+          }
+        },
+        "399": {
+          "sanity-check": {
+            "passed": 0,
+            "unhandled": 1,
+            "handled": 0
+          },
+          "*": {
+            "passed": 0,
+            "unhandled": 1,
+            "handled": 0
+          }
+        },
+        "-404": {
+          "sanity-check": {
+            "passed": 0,
+            "unhandled": 1,
+            "handled": 0
+          },
+          "*": {
+            "passed": 0,
+            "unhandled": 1,
+            "handled": 0
+          }
+        }
+      }
+    },
+    {
+      "id": 33894,
+      "country": {
+        "code": "us",
+        "name": "United States"
+      },
+      "type": {
+        "code": "api",
+        "name": "Integ. APIs",
+        "source": {
+          "code": "api",
+          "name": "API",
+          "letter": "A",
+          "technology": "POSTMAN",
+          "vcsUrl": "https://github.com/decathlon/ara/tree/{{branch}}/server/src/main/resources/demo/collections/",
+          "defaultBranch": "master",
+          "postmanCountryRootFolders": true
+        },
+        "browser": false,
+        "mobile": false
+      },
+      "platform": "integ",
+      "jobUrl": "https://build.company.com/demo/test/78/",
+      "status": "DONE",
+      "countryTags": "all",
+      "severityTags": "all",
+      "includeInThresholds": true,
+      "startDateTime": "2019-02-11T03:00:00.000Z",
+      "estimatedDuration": 0,
+      "duration": 0,
+      "qualitiesPerSeverity": {
+        "sanity-check": {
+          "passed": 1,
+          "unhandled": 1,
+          "handled": 0
+        },
+        "*": {
+          "passed": 3,
+          "unhandled": 1,
+          "handled": 0
+        },
+        "medium": {
+          "passed": 2,
+          "unhandled": 0,
+          "handled": 0
+        }
+      },
+      "qualitiesPerTeamAndSeverity": {
+        "397": {
+          "sanity-check": {
+            "passed": 1,
+            "unhandled": 0,
+            "handled": 0
+          },
+          "*": {
+            "passed": 1,
+            "unhandled": 0,
+            "handled": 0
+          }
+        },
+        "398": {
+          "sanity-check": {
+            "passed": 0,
+            "unhandled": 1,
+            "handled": 0
+          },
+          "*": {
+            "passed": 2,
+            "unhandled": 1,
+            "handled": 0
+          },
+          "medium": {
+            "passed": 2,
+            "unhandled": 0,
+            "handled": 0
+          }
+        }
+      }
+    },
+    {
+      "id": 33895,
+      "country": {
+        "code": "us",
+        "name": "United States"
+      },
+      "type": {
+        "code": "firefox-desktop",
+        "name": "HMI Desktop",
+        "source": {
+          "code": "web",
+          "name": "Web",
+          "letter": "W",
+          "technology": "CUCUMBER",
+          "vcsUrl": "https://github.com/decathlon/ara/tree/{{branch}}/generated-cucumber-report/src/main/resources/ara/demo/features/",
+          "defaultBranch": "master",
+          "postmanCountryRootFolders": false
+        },
+        "browser": true,
+        "mobile": false
+      },
+      "platform": "integ",
+      "jobUrl": "https://build.company.com/demo/test/79/",
+      "status": "DONE",
+      "countryTags": "all",
+      "severityTags": "all",
+      "includeInThresholds": true,
+      "startDateTime": "2019-02-11T03:00:00.000Z",
+      "estimatedDuration": 0,
+      "duration": 0,
+      "qualitiesPerSeverity": {
+        "high": {
+          "passed": 1,
+          "unhandled": 0,
+          "handled": 1
+        },
+        "sanity-check": {
+          "passed": 3,
+          "unhandled": 4,
+          "handled": 0
+        },
+        "*": {
+          "passed": 6,
+          "unhandled": 6,
+          "handled": 2
+        },
+        "medium": {
+          "passed": 2,
+          "unhandled": 2,
+          "handled": 1
+        }
+      },
+      "qualitiesPerTeamAndSeverity": {
+        "396": {
+          "high": {
+            "passed": 1,
+            "unhandled": 0,
+            "handled": 0
+          },
+          "*": {
+            "passed": 2,
+            "unhandled": 0,
+            "handled": 0
+          },
+          "medium": {
+            "passed": 1,
+            "unhandled": 0,
+            "handled": 0
+          }
+        },
+        "397": {
+          "sanity-check": {
+            "passed": 1,
+            "unhandled": 0,
+            "handled": 0
+          },
+          "*": {
+            "passed": 2,
+            "unhandled": 0,
+            "handled": 0
+          },
+          "medium": {
+            "passed": 1,
+            "unhandled": 0,
+            "handled": 0
+          }
+        },
+        "398": {
+          "high": {
+            "passed": 0,
+            "unhandled": 0,
+            "handled": 1
+          },
+          "sanity-check": {
+            "passed": 2,
+            "unhandled": 2,
+            "handled": 0
+          },
+          "*": {
+            "passed": 2,
+            "unhandled": 4,
+            "handled": 2
+          },
+          "medium": {
+            "passed": 0,
+            "unhandled": 2,
+            "handled": 1
+          }
+        },
+        "399": {
+          "sanity-check": {
+            "passed": 0,
+            "unhandled": 1,
+            "handled": 0
+          },
+          "*": {
+            "passed": 0,
+            "unhandled": 1,
+            "handled": 0
+          }
+        },
+        "-404": {
+          "sanity-check": {
+            "passed": 0,
+            "unhandled": 1,
+            "handled": 0
+          },
+          "*": {
+            "passed": 0,
+            "unhandled": 1,
+            "handled": 0
+          }
+        }
+      }
+    },
+    {
+      "id": 33896,
+      "country": {
+        "code": "us",
+        "name": "United States"
+      },
+      "type": {
+        "code": "firefox-mobile",
+        "name": "HMI Mobile",
+        "source": {
+          "code": "web",
+          "name": "Web",
+          "letter": "W",
+          "technology": "CUCUMBER",
+          "vcsUrl": "https://github.com/decathlon/ara/tree/{{branch}}/generated-cucumber-report/src/main/resources/ara/demo/features/",
+          "defaultBranch": "master",
+          "postmanCountryRootFolders": false
+        },
+        "browser": true,
+        "mobile": true
+      },
+      "platform": "integ",
+      "jobUrl": "https://build.company.com/demo/test/80/",
+      "status": "DONE",
+      "countryTags": "all",
+      "severityTags": "all",
+      "includeInThresholds": true,
+      "startDateTime": "2019-02-11T03:00:00.000Z",
+      "estimatedDuration": 0,
+      "duration": 0,
+      "qualitiesPerSeverity": {
+        "high": {
+          "passed": 1,
+          "unhandled": 0,
+          "handled": 1
+        },
+        "sanity-check": {
+          "passed": 3,
+          "unhandled": 4,
+          "handled": 0
+        },
+        "*": {
+          "passed": 6,
+          "unhandled": 6,
+          "handled": 2
+        },
+        "medium": {
+          "passed": 2,
+          "unhandled": 2,
+          "handled": 1
+        }
+      },
+      "qualitiesPerTeamAndSeverity": {
+        "396": {
+          "high": {
+            "passed": 1,
+            "unhandled": 0,
+            "handled": 0
+          },
+          "*": {
+            "passed": 2,
+            "unhandled": 0,
+            "handled": 0
+          },
+          "medium": {
+            "passed": 1,
+            "unhandled": 0,
+            "handled": 0
+          }
+        },
+        "397": {
+          "sanity-check": {
+            "passed": 1,
+            "unhandled": 0,
+            "handled": 0
+          },
+          "*": {
+            "passed": 2,
+            "unhandled": 0,
+            "handled": 0
+          },
+          "medium": {
+            "passed": 1,
+            "unhandled": 0,
+            "handled": 0
+          }
+        },
+        "398": {
+          "high": {
+            "passed": 0,
+            "unhandled": 0,
+            "handled": 1
+          },
+          "sanity-check": {
+            "passed": 2,
+            "unhandled": 2,
+            "handled": 0
+          },
+          "*": {
+            "passed": 2,
+            "unhandled": 4,
+            "handled": 2
+          },
+          "medium": {
+            "passed": 0,
+            "unhandled": 2,
+            "handled": 1
+          }
+        },
+        "399": {
+          "sanity-check": {
+            "passed": 0,
+            "unhandled": 1,
+            "handled": 0
+          },
+          "*": {
+            "passed": 0,
+            "unhandled": 1,
+            "handled": 0
+          }
+        },
+        "-404": {
+          "sanity-check": {
+            "passed": 0,
+            "unhandled": 1,
+            "handled": 0
+          },
+          "*": {
+            "passed": 0,
+            "unhandled": 1,
+            "handled": 0
+          }
+        }
+      }
+    }
+  ]
+}

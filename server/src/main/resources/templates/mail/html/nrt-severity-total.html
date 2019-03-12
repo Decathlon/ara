@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <body>
+        <div th:fragment="nrt-severity-total">
+            <div th:with="isGlobal=${qualitySeverity.severity.code == '*'},
+                          isRunning=${execution.status.name() == 'PENDING' || execution.status.name() == 'RUNNING'},
+                          counts=${qualitySeverity.scenarioCounts},
+                          isFailed=${qualitySeverity.status.name() == 'FAILED'},
+                          highlightWarning=${qualitySeverity.status.name() == 'WARNING' || qualitySeverity.status.name() == 'FAILED'}"
+                 th:class="${'tdStyle ' + (isGlobal || !blockingValidation || isRunning ? 'globalStyle' : isFailed || !allRun ? 'failedStyle' : 'successStyle')}"
+                 th:title="${!isGlobal && !blockingValidation ? 'For information only: not blocking' : ''}">
+                <div th:if="${allRun}" class="percentStyle">[[${counts != null && counts.total > 0 ? qualitySeverity.percent + ' %' : '-'}]]</div>
+                <span th:if="${!allRun}" th:class="${'smallStyle ' + (blockingValidation && !isGlobal && !isRunning ? 'failedSmallStyle' : '')}">INCOMPLETE</span>
+                <span th:if="${allRun}" th:class="${'smallStyle ' + (!isGlobal && isFailed && blockingValidation ? 'failedSmallStyle' : '')}">
+                    <span class="okStyle">[[${counts != null ? counts.passed : 0}]] OK</span>
+                    <span class="koStyle">[[${counts != null ? counts.failed : 0}]] KO</span>
+                    <span th:if="${!isGlobal && blockingValidation}">
+                        <span th:class="${'thresholdStyle ' + (highlightWarning ? 'warningStyle' : '')}"
+                              th:title="${(highlightWarning && !isFailed ? 'WARNING: QUALITY IS NEAR THE MINIMUM QUALITY THRESHOLD! ' : '') + 'Build is not eligible when less than ' + thresholds.failure + ' % of these scenarios pass'}">
+                            &#x26a0;&#xFE0E; [[${thresholds.failure}]] %
+                        </span>
+                    </span>
+                </span>
+            </div>
+        </div>
+    </body>
+</html>

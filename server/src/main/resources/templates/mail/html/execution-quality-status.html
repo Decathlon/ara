@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <style>
+            /* Normalisation */
+            body {
+                font-family: arial, sans-serif;
+                font-size: 14px;
+            }
+
+            /* VueJS emulation */
+            .Row {
+                display: flex;
+                margin: 0 -2px;
+            }
+            .Row:after {
+                clear: both;
+            }
+            .Col {
+                float: left;
+                margin: 0 2px;
+                /* display: inline-block; */
+            }
+            .span2 { /* (24-4)/7 = 2.857... truncated by Thymeleaf to 2 */
+                width: 11.904%; /* = 100*2.857/24 */
+            }
+            .span3 { /* (24-4)/6 = 3.333... truncated by Thymeleaf to 3 */
+                width: 13.887%; /* = 100*3.333/24 */
+            }
+            .span4 { /* (24-4)/5 */
+                width: 16.666%; /* = 100*4/24 */
+            }
+            .span5 { /* (24-4)/4 */
+                width: 20.833%; /* = 100*5/24 */
+            }
+            .span6 { /* (24-4)/3 = 6.666... truncated by Thymeleaf to 6 */
+                width: 27.775%; /* = 100*6.666/24 */
+            }
+            .span10 { /* (24-4)/2 */
+                width: 41.666%; /* = 100*10/24 */
+            }
+            .span20 { /* (24-4)/1 */
+                width: 83.333%; /* = 100*20/24 */
+            }
+            .Alert {
+                border-radius: 6px;
+            }
+            .Button {
+                border-radius: 3px;
+                border: 1px solid #DDDEE1;
+                background-color: #F7F7F7;
+                color: #495060;
+                padding: 2px 7px;
+            }
+            .Button:hover {
+                border-color: #57a3f3;
+                background-color: white;
+                color: #57a3f3;
+            }
+
+            /* common.js */
+            .discardReason {
+                display: inline-block;
+                border: 2px solid #ED3F14;
+                color: #ED3F14;
+                padding: 0 2px;
+                border-radius: 4px;
+                font-weight: bold;
+            }
+
+            /* nrt-severity-total.vue */
+            .tableStyle { border-spacing: 4px; width: 100%; }
+            .tdStyle { border-radius: 5px; line-height: 1em; text-align: center; vertical-align: top; padding: 8px; }
+            .tdStyle:hover { background-color: #ebF7ff !important; }
+            .severityStyle { font-weight: bold; font-size: 14px; padding-top: 0; padding-bottom: 0; }
+            .successStyle { background-color: #F5F7F9; color: #19be6b; }
+            .failedStyle { background-color: #ed3f14; color: white; }
+            .failedStyle:hover { background-color: #FF3100 !important; }
+            .globalStyle { color: black; }
+            .percentStyle { font-size: 22px; line-height: 22px; padding-bottom: 4px; font-weight: bold; }
+            .smallStyle { font-size: 10px; color: gray; }
+            .warningStyle { background-color: #ffcc30; padding: 2px 4px; margin: -2px 0 !important; color: black; border-radius: 4px; }
+            .failedSmallStyle { color: white; }
+            .okStyle        { display: inline-block; margin: 0 2px; }
+            .koStyle        { display: inline-block; margin: 0 2px; }
+            .thresholdStyle { display: inline-block; margin: 0 2px; }
+
+            /* job-status-result.vue */
+            /* JobStatus */
+            .PENDING     { color: #FF9900; }
+            .RUNNING     { color: #0082C3; }
+            .DONE        { display: none; }
+            .UNAVAILABLE { color: #ED3F14; }
+            /* Result */
+            .ABORTED   { color: #ED3F14; }
+            .FAILURE   { color: #ED3F14; }
+            .NOT_BUILT { color: #ED3F14; }
+            .SUCCESS   { display: none; }
+            .UNSTABLE  { display: none; }
+
+            /* nrt-progress.vue */
+            .nrt-progress { display: block; }
+            .nrt-progress .Alert { margin-bottom: 4px; background: none; padding: 8px 16px; border: 1px solid transparent; }
+            .nrt-progress .Alert:hover { background-color: #ebF7ff !important; }
+            .textPassed { color: #19be6b/*light green*/; float: left; }
+            .textFailed { color: #ed3f14/*dark red*/; float: right; font-weight: bold; }
+            .textProblem { color: #ffcc30; font-weight: bold;  }
+            .progressBar { clear: both; border-radius: 3px; }
+            .progressBar, .progressBar div { height: 5px; }
+            .progressBar.small, .progressBar.small div { height: 3px; }
+            .progressBar.failed { background-color: #ed3f14/*dark red*/; }
+            .progressBar div { background-color: #19be6b/*light green*/; float: left; }
+            .progressBar div + div { background-color: #ffcc30; }
+        </style>
+    </head>
+    <body>
+        <p>Hello,</p>
+
+        <p>
+            Non-regression tests ran on <b>[[${testDate}]]</b>
+            for <b>[[${projectName}]] [[${execution.branch}]]/[[${execution.name}]]</b><!--
+         --><span th:if="${execution.release}"> (release <b>[[${execution.release}]]</b>)</span><!--
+         --><span th:if="${buildDate}"> built on <b>[[${buildDate}]]</b></span><!--
+         --><span th:if="${execution.version}"> (version <b>[[${execution.version}]]</b>)</span>.
+        </p>
+
+        <p style="margin-bottom: 4px;">[(${eligibilityMessage})]</p>
+
+        <div th:replace="mail/html/nrt-cycle.html :: nrt-cycle"></div>
+
+        <p>
+            Have a nice analysis,
+        </p>
+        <p style="color: #135B95;">
+            <img style="float: left; margin: 0 4px 0 0;" src="cid:favicon.png" width="32" height="32" alt="" />
+            <strong>ARA - AGILE REGRESSION ANALYZER</strong><br>
+            <em style="color: #1A1A1A;">Fighting Against Regressions All Together.</em>
+        </p>
+    </body>
+</html>

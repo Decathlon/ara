@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+
+    <!-- Designed to be loaded just after full-small-fake-dataset.xml -->
+
+    <!-- Simulating an existing problem and freshly inserted errors: the problem now has to be assigned automatically to errors -->
+    <problem id="1004" project_id="1" name="Scenario d of feature C" status="OPEN" blamed_team_id="2" comment="Comment"
+             defect_id="4" root_cause_id="5" creation_date_time="2018-01-01 12:00:00.0"/>
+    <problem_pattern id="1041" problem_id="1004" scenario_name="Scenario d" feature_file="c.feature"
+                     scenario_name_starts_with="false" step_starts_with="false" step_definition_starts_with="false"/>
+
+</dataset>

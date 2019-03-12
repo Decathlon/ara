@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+    <project id="1" code="p" name="Any" default_at_startup="false"/>
+
+    <severity id="2" project_id="1" code="code1" position="1" name="test" short_name="P0" initials="A" default_on_missing="true"/>
+    <severity id="3" project_id="1" code="code3" position="3" name="test1" short_name="P1" initials="B" default_on_missing="false"/>
+    <severity id="1" project_id="1" code="code2" position="2" name="test2" short_name="P2" initials="C" default_on_missing="false"/>
+</dataset>

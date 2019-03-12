@@ -1,0 +1,99 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+    <project id="1" code="p" name="Any" default_at_startup="false"/>
+
+    <country id="1" project_id="1" code="cn" name="China"/>
+    <country id="2" project_id="1" code="nl" name="Netherlands"/>
+    <country id="3" project_id="1" code="be" name="Belgium"/>
+
+
+    <team id="1" project_id="1" name="Team A" assignable_to_problems="true" assignable_to_functionalities="true"/>
+    <team id="2" project_id="1" name="Team B" assignable_to_problems="true" assignable_to_functionalities="true"/>
+    <team id="3" project_id="1" name="Team C" assignable_to_problems="true" assignable_to_functionalities="true"/>
+
+    <team id="101" project_id="1" name="Team only for problems" assignable_to_problems="true" assignable_to_functionalities="false"/>
+    <team id="102" project_id="1" name="Team only for functionalities" assignable_to_problems="false"
+          assignable_to_functionalities="true"/>
+
+
+    <source id="1" project_id="1" code="sourceA" name="Source A" letter="A" technology="CUCUMBER" vcs_url="urlA"
+            default_branch="branchA" postman_country_root_folders="false"/>
+    <source id="2" project_id="1" code="sourceB" name="Source B" letter="B" technology="CUCUMBER" vcs_url="urlB"
+            default_branch="branchB" postman_country_root_folders="false"/>
+
+
+    <!-- Not ordered, to test service ordering results -->
+    <functionality id="3" project_id="1" order="3000" type="FOLDER" name="F 3"
+                   creation_date_time="2018-01-01 12:00:00.0" update_date_time="2018-01-01 12:00:00.0"/>
+    <functionality id="1" project_id="1" order="1000" type="FOLDER" name="F 1"
+                   creation_date_time="2018-01-01 12:00:00.0" update_date_time="2018-01-01 12:00:00.0"/>
+    <functionality id="2" project_id="1" order="2000" type="FOLDER" name="F 2"
+                   creation_date_time="2018-01-01 12:00:00.0" update_date_time="2018-01-01 12:00:00.0"/>
+
+    <functionality id="12" project_id="1" parent_id="1" order="2000" type="FOLDER" name="F 1.2"
+                   creation_date_time="2018-01-01 12:00:00.0" update_date_time="2018-01-01 12:00:00.0"/>
+    <functionality id="11" project_id="1" parent_id="1" order="1000" type="FOLDER" name="F 1.1"
+                   creation_date_time="2018-01-01 12:00:00.0" update_date_time="2018-01-01 12:00:00.0"/>
+
+    <functionality id="111" project_id="1" parent_id="11" order="1000" type="FUNCTIONALITY" name="F 1.1.1"
+                   country_codes="be,nl" team_id="1" severity="LOW" created="18.02" started="false"
+                   not_automatable="false" covered_scenarios="5" covered_country_scenarios="API:cn=3,nl=1|WEB:be=2"
+                   ignored_scenarios="2" ignored_country_scenarios="WEB:be=2" comment="Comment"
+                   creation_date_time="2018-01-01 12:00:00.0" update_date_time="2018-01-01 12:00:00.0"/>
+    <functionality id="113" project_id="1" parent_id="11" order="3000" type="FUNCTIONALITY" name="F 1.1.3" team_id="3"
+                   creation_date_time="2018-01-01 12:00:00.0" update_date_time="2018-01-01 12:00:00.0"/>
+    <functionality id="112" project_id="1" parent_id="11" order="2000" type="FUNCTIONALITY" name="F 1.1.2"
+                   country_codes="cn,nl" team_id="2" severity="LOW" created="18.02" started="true" covered_scenarios="4"
+                   covered_country_scenarios="API:cn=1|WEB:be=3"
+                   creation_date_time="2018-01-01 12:00:00.0" update_date_time="2018-01-01 12:00:00.0"/>
+
+    <functionality id="31" project_id="1" parent_id="3" order="1000" type="FUNCTIONALITY" name="F 3.1"
+                   creation_date_time="2018-01-01 12:00:00.0" update_date_time="2018-01-01 12:00:00.0"/>
+
+    <functionality id="21" project_id="1" parent_id="2" order="1000" type="FOLDER" name="F 2.1"
+                   creation_date_time="2018-01-01 12:00:00.0" update_date_time="2018-01-01 12:00:00.0"/>
+    <functionality id="22" project_id="1" parent_id="2" order="2000" type="FUNCTIONALITY" name="F 2.2"
+                   creation_date_time="2018-01-01 12:00:00.0" update_date_time="2018-01-01 12:00:00.0"/>
+
+
+    <scenario id="111011201" source_id="1" feature_file="f.feature" feature_name="F"
+              feature_tags="@severity-high" tags="@country-cn" ignored="false" country_codes="cn" severity="high"
+              name="S1" line="10" content="Given we do not care"/>
+    <scenario id="111011202" source_id="2" feature_file="f.feature" feature_name="F"
+              feature_tags="@severity-high" tags="@country-be" ignored="false" country_codes="be" severity="high"
+              name="S2" line="20" content="Given we do not care"/>
+    <scenario id="111011203" source_id="2" feature_file="f.feature" feature_name="F"
+              feature_tags="@severity-high" tags="@country-be" ignored="false" country_codes="be" severity="high"
+              name="S3" line="30" content="Given we do not care"/>
+
+    <scenario id="11101" source_id="1" feature_file="f.feature" feature_name="F" feature_tags="@severity-high"
+              tags="@country-cn" ignored="false" country_codes="cn" severity="high" name="S4" line="40"
+              content="Given we do not care"/>
+    <scenario id="11102" source_id="1" feature_file="f.feature" feature_name="F" feature_tags="@severity-high"
+              tags="@country-cn @country-nl" ignored="false" country_codes="cn,nl" severity="high" name="S5" line="50"
+              content="Given we do not care"/>
+    <scenario id="11103" source_id="2" feature_file="f.feature" feature_name="F" feature_tags="@severity-high"
+              tags="@country-be @ignore" ignored="true" country_codes="be" severity="high" name="S6" line="60"
+              content="Given we do not care"/>
+    <scenario id="11104" source_id="2" feature_file="f.feature" feature_name="F" feature_tags="@severity-high"
+              tags="@country-be @ignore" ignored="true" country_codes="be" severity="high" name="S7" line="70"
+              content="Given we do not care"/>
+
+    <scenario id="11201" source_id="2" feature_file="f.feature" feature_name="F" feature_tags="@severity-high"
+              tags="@country-be" ignored="false" country_codes="be" severity="high" name="S8" line="80"
+              content="Given we do not care"/>
+
+
+    <functionality_coverage functionality_id="111" scenario_id="111011201"/>
+    <functionality_coverage functionality_id="111" scenario_id="11101"/>
+    <functionality_coverage functionality_id="111" scenario_id="11102"/>
+    <functionality_coverage functionality_id="111" scenario_id="111011202"/>
+    <functionality_coverage functionality_id="111" scenario_id="111011203"/>
+    <functionality_coverage functionality_id="111" scenario_id="11103"/>
+    <functionality_coverage functionality_id="111" scenario_id="11104"/>
+
+    <functionality_coverage functionality_id="112" scenario_id="111011201"/>
+    <functionality_coverage functionality_id="112" scenario_id="111011202"/>
+    <functionality_coverage functionality_id="112" scenario_id="111011203"/>
+    <functionality_coverage functionality_id="112" scenario_id="11201"/>
+</dataset>

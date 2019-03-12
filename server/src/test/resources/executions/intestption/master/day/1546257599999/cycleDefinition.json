@@ -1,0 +1,29 @@
+{
+  "blockingValidation": true,
+  "platforms_rules": {
+    "euin2": [
+      {
+        "blockingValidation": true,
+        "country": "NL",
+        "countryTags": "all,nl",
+        "testTypes": "api,api-postman,firefox,performance",
+        "severityTags": "all",
+        "enabled": false
+      }
+    ]
+  },
+  "qualityThresholds": {
+    "high": {
+      "failure": 85,
+      "warning": 90
+    },
+    "sanity-check": {
+      "failure": 90,
+      "warning": 95
+    },
+    "medium": {
+      "failure": 80,
+      "warning": 85
+    }
+  }
+}

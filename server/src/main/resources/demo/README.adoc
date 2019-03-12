@@ -1,0 +1,29 @@
+= Postman Demo Reports Generation
+
+Given:
+
+* Demo Postman collections rarely change
+* Generating reports need to execution the collections with Newman,
+  which needs network access to a website we do not control.
+
+Then, the Newman reports are generated manually when needed, and not included in the build to not make it fail.
+
+== Regenerate Newman Reports
+
+* Create a "lib" folder alongside this README
+* Download JQ at https://stedolan.github.io/jq/download/
+* On Windows, save JQ as "lib/jq-win64.exe"
+* On Linux, save JQ as "lib/jq-linux64"
+* Run ./generate-demo-newman-reports.sh (use Git Bash on Windows for easy Bash execution)
+* Remove the "lib" folder
+* The project is ready to rebuild (using Maven) and will include latest reports
+
+== Folders Purposes
+
+* The folder `collections` is used both to:
+** Generate reports by running Newman
+** Simulate collections upload in the demo project to compute functionality coverages
+* The folder `collections` is used to generate reports by running Newman
+* The folder `lib` is temporary and stores binaries used for reports generation
+* The folder `newmap-reports-0` contains generated Newman reports with no errors
+* The folder `newmap-reports-1` contains generated Newman reports with some errors

@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+
+    <project id="1" code="p" name="Any" default_at_startup="false"/>
+
+    <cycle_definition id="1" project_id="1" branch="develop" name="day" branch_position="1"/>
+    <cycle_definition id="2" project_id="1" branch="stab" name="night" branch_position="2"/>
+
+    <execution id="1" cycle_definition_id="1" branch="develop" name="day" release="R" version="V"
+               build_date_time="2017-09-24 11:59:58.0" test_date_time="2017-09-25 08:51:50.0" job_url="http://jobs/1/"
+               status="DONE" acceptance="NEW"/>
+    <execution id="2" cycle_definition_id="1" branch="develop" name="day" release="R" version="V"
+               build_date_time="2017-09-24 12:57:56.0" test_date_time="2017-09-25 09:53:52.0" job_url="http://jobs/2/"
+               status="DONE" acceptance="NEW"/>
+    <execution id="3" cycle_definition_id="1" branch="develop" name="day" release="R" version="V"
+               build_date_time="2017-09-24 10:55:54.0" test_date_time="2017-09-25 10:55:54.0" job_url="http://jobs/3/"
+               status="RUNNING" acceptance="NEW"/>
+    <execution id="4" cycle_definition_id="1" branch="develop" name="day" release="R" version="V"
+               build_date_time="2017-09-24 10:55:54.0" test_date_time="2017-09-25 11:57:56.0" job_url="http://jobs/4/"
+               status="UNAVAILABLE" acceptance="NEW"/>
+    <execution id="5" cycle_definition_id="2" branch="stab" name="night" release="R" version="V"
+               build_date_time="2017-09-24 10:55:54.0" test_date_time="2017-09-25 12:59:58.0" job_url="http://jobs/5/"
+               status="DONE" acceptance="NEW"/>
+
+</dataset>

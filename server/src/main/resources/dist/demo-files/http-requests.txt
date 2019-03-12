@@ -1,0 +1,7 @@
+POST https://integration.our-lovely-store.com/set-development-mode/1
+=> 200 OK
+=> { "sessionIdForAllUsers": 42 }
+
+POST https://integration.our-lovely-store.com/clean-up
+=> 200 OK
+=> { "sessionRemoved": true, "databaseReset": "SUCCESS", "planets": "REALIGNED" }

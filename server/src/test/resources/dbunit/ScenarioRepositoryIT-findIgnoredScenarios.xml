@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+
+    <project id="1" code="p" name="Any" default_at_startup="false"/>
+
+    <source id="1" project_id="1" code="sourceA" name="Source A" letter="A" technology="CUCUMBER" vcs_url="urlA"
+            default_branch="branchA" postman_country_root_folders="false"/>
+    <source id="2" project_id="1" code="sourceB" name="Source B" letter="B" technology="POSTMAN" vcs_url="urlB"
+            default_branch="branchB" postman_country_root_folders="true"/>
+
+
+    <scenario id="1" source_id="1" ignored="false" feature_file="any" feature_name="Any" name="Name 1" line="1"
+              content="any"/>
+
+    <scenario id="2" source_id="2" ignored="true" feature_file="f1" feature_name="Any" name="Name 2" line="2"
+              content="any"/>
+    <scenario id="3" source_id="2" ignored="true" feature_file="f1" feature_name="Any" name="Name 3" line="3"
+              content="any"/>
+    <scenario id="4" source_id="2" ignored="true" feature_file="f2" feature_name="Any" name="Name 4" line="4"
+              content="any"/>
+
+    <scenario id="5" source_id="1" ignored="true" feature_file="f1" feature_name="Any" name="Name 5" line="5"
+              content="any" severity="high"/>
+
+</dataset>

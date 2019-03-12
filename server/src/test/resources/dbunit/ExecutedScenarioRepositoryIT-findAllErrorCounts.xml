@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+
+    <project id="1" code="p" name="Any" default_at_startup="false"/>
+
+    <country id="1" project_id="1" code="an" name="Any"/>
+
+    <source id="1" project_id="1" code="CUCUMBER" name="Cucumber" letter="C" technology="CUCUMBER"
+            vcs_url="cucumberUrl/{{branch}}" default_branch="develop" postman_country_root_folders="false"/>
+
+    <type id="1" project_id="1" code="any" name="Any" is_browser="false" is_mobile="false" source_id="1"/>
+
+    <cycle_definition id="1" project_id="1" branch="any" name="any" branch_position="1"/>
+
+    <execution id="1" cycle_definition_id="1" branch="any" name="any" release="any" version="any" build_date_time="2017-09-24 11:59:58.0"
+               test_date_time="2017-09-25 11:59:58.0" job_url="any" status="DONE" acceptance="NEW"/>
+
+    <run id="11" execution_id="1" country_id="1" type_id="1" platform="any"/>
+
+    <executed_scenario id="111" run_id="11" feature_file="any" feature_name="any" severity="medium"
+                       name="With unidentified error" line="1" cucumber_id="any" content="any"/>
+    <executed_scenario id="112" run_id="11" feature_file="any" feature_name="any" severity="medium"
+                       name="With identified error" line="2" cucumber_id="any" content="any"/>
+    <executed_scenario id="113" run_id="11" feature_file="any" feature_name="any" severity="sanity-check"
+                       name="Without error" line="3" cucumber_id="any" content="any"/>
+
+    <error id="1111" executed_scenario_id="111" step="any" step_definition="any" exception="any" step_line="1"/>
+    <error id="1121" executed_scenario_id="112" step="any" step_definition="any" exception="any" step_line="1"/>
+    <error id="1122" executed_scenario_id="112" step="any" step_definition="any" exception="any" step_line="2"/>
+
+    <problem id="1" project_id="1" name="any" status="OPEN" creation_date_time="2018-01-01 12:00:00.0"/>
+
+    <problem_pattern id="11" problem_id="1" scenario_name_starts_with="false" step_starts_with="false"
+                     step_definition_starts_with="false"/>
+
+    <problem_occurrence error_id="1121" problem_pattern_id="11"/>
+
+</dataset>

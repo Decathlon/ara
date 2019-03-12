@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+    <project id="1" code="p" name="Any" default_at_startup="false"/>
+
+    <source id="1" project_id="1" code="code1" name="Source A" letter="A" technology="CUCUMBER" vcs_url="vcsUrl1"
+            default_branch="develop" postman_country_root_folders="true"/>
+    <source id="2" project_id="1" code="code2" name="Source B" letter="B" technology="CUCUMBER" vcs_url="vcsUrl2"
+            default_branch="develop" postman_country_root_folders="true"/>
+    <source id="3" project_id="1" code="code3" name="Source C" letter="C" technology="CUCUMBER" vcs_url="vcsUrl3"
+            default_branch="develop" postman_country_root_folders="true"/>
+
+    <!-- Source used by type -->
+    <type id="1" project_id="1" code="TYPE-03" name="any" is_browser="true" is_mobile='true' source_id="3"/>
+
+    <!-- Source used by scenario -->
+    <scenario id="200" source_id="2" feature_file="any" feature_name="any" ignored="true" name="any" line="42"
+              content="any"/>
+</dataset>

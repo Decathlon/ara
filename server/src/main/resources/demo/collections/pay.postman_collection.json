@@ -1,0 +1,221 @@
+{
+	"info": {
+		"_postman_id": "4d96d97d-9f7b-457b-9cff-0577898108b6",
+		"name": "Our Lovely Store - Pay",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "fr+us",
+			"item": [
+				{
+					"name": "@severity-sanity-check Functionalities {{F-Buy-Pay}} & {{F-Buy-Card}}: Pay by Card",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "19ec486e-21e3-4c0e-9620-458a873c953e",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response should validate the payment method is indeed By card\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.form.paymentMethod).to.eql(\"card\");",
+									"});",
+									"",
+									"pm.test(\"Response should indicate a succeed transaction status\", function () {",
+									"    if (pm.environment.get(\"failing\") === 'true') {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.transactionStatus || \"failed\").to.eql(\"succeed\");",
+									"    }",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "paymentMethod",
+									"value": "card",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/post",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"post"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "@severity-medium Functionalities {{F-Buy-Pay}} & {{F-Buy-Gift}}: Pay by Gift Card",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "33040c82-407e-4668-bb64-e44b2cf86f57",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response should validate the payment method is indeed By gift card\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.form.paymentMethod).to.eql(\"gift-card\");",
+									"});",
+									"",
+									"pm.test(\"Response should indicate a succeed transaction status\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.transactionStatus || \"succeed\").to.eql(\"succeed\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "paymentMethod",
+									"value": "gift-card",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/post",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"post"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "30f678d8-fd65-4962-94bd-205893e0ed7b",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "819cce6a-8de1-419f-94de-ed067911b6c0",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "us",
+			"item": [
+				{
+					"name": "@severity-medium Functionalities {{F-Buy-Pay}} & {{F-Buy-NFC}}: Pay by Mobile NFC",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "4cb14ec6-4c35-4042-9af6-4075dae8027d",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response should validate the payment method is indeed By NFC\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.form.paymentMethod).to.eql(\"nfc\");",
+									"});",
+									"",
+									"pm.test(\"Response should indicate a succeed transaction status\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.transactionStatus || \"succeed\").to.eql(\"succeed\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "paymentMethod",
+									"value": "nfc",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/post",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"post"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "33dc864f-2aab-4eed-801c-270ec200ce32",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "ad238776-f6d5-4b44-b017-19af84234a8f",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	]
+}

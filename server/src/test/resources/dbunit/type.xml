@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+    <project id="1" code="p" name="Any" default_at_startup="false"/>
+
+    <source id="1" project_id="1" code="code1" name="source1" letter="A" technology="CUCUMBER" vcs_url="any"
+            default_branch="develop" postman_country_root_folders="true"/>
+    <source id="2" project_id="1" code="code2" name="source2" letter="B" technology="CUCUMBER" vcs_url="any"
+            default_branch="develop" postman_country_root_folders="true"/>
+    <source id="3" project_id="1" code="code3" name="source3" letter="C" technology="CUCUMBER" vcs_url="any"
+            default_branch="develop" postman_country_root_folders="true"/>
+    <source id="4" project_id="1" code="code4" name="source4" letter="D" technology="CUCUMBER" vcs_url="any"
+            default_branch="develop" postman_country_root_folders="true"/>
+
+    <type id="1" project_id="1" code="TYPE-01" name="TEST" is_browser="true" is_mobile='false' source_id="1"/>
+    <type id="2" project_id="1" code="TYPE-02" name="TEST2" is_browser="true" is_mobile='false' source_id="2"/>
+    <type id="4" project_id="1" code="TYPE-04" name="TEST4" is_browser="false" is_mobile='false' source_id="4"/>
+    <type id="3" project_id="1" code="TYPE-03" name="TEST3" is_browser="true" is_mobile='true' source_id="3"/>
+
+    <!-- To test setting assignable_to_* to false when there are assigned entities -->
+    <problem id="99" project_id="1" name="problem1" comment="comment" status="OK" creation_date_time="2018-08-12"/>
+
+    <cycle_definition id="1" project_id="1" branch="develop" name="day" branch_position="1"/>
+
+    <execution id="91" cycle_definition_id="1" branch="develop" name="day" release="1711"
+               version="1711.1709245958" build_date_time="2017-01-24 11:59:58.0"
+               test_date_time="2017-01-26 11:59:58.0" job_url="any1" status="DONE" acceptance="NEW"
+               blocking_validation="false" quality_status="PASSED"/>
+
+
+    <problem_pattern id="1" problem_id="99" type_id="1" scenario_name_starts_with="false" step_starts_with="false"
+                     step_definition_starts_with="false"/>
+
+
+    <country id="1" project_id="1" code="C1" name="Used by country-deployment"/>
+
+
+    <run id="10" execution_id="91" country_id="1" type_id="3" platform="CN" status="OK"/>
+
+</dataset>

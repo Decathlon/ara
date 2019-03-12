@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+
+    <project id="1" code="p" name="Any" default_at_startup="false"/>
+
+    <problem id="1" project_id="1" name="Any" status="OPEN" creation_date_time="2018-01-01 12:01:00.0"/>
+
+    <problem_pattern id="11" problem_id="1" step="Step 1" scenario_name_starts_with="false"
+                     step_starts_with="false" step_definition_starts_with="false"/>
+
+    <problem_pattern id="12" problem_id="1" step="Step 2" scenario_name_starts_with="false"
+                     step_starts_with="false" step_definition_starts_with="false"/>
+
+</dataset>

@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+    <project id="1" code="p" name="Any" default_at_startup="false"/>
+
+    <country id="1" project_id="1" code="an" name="Any"/>
+
+    <source id="1" project_id="1" code="CUCUMBER" name="Cucumber" letter="C" technology="CUCUMBER"
+            vcs_url="cucumberUrl/{{branch}}" default_branch="develop" postman_country_root_folders="false"/>
+
+    <type id="1" project_id="1" code="any" name="Any" is_browser="false" is_mobile="false" source_id="1"/>
+
+    <team id="10" project_id="1" name="Team 10" assignable_to_problems="true" assignable_to_functionalities="true"/>
+
+    <functionality project_id="1" id="1" order="1" type="FUNCTIONALITY" name="F" team_id="10"
+                   creation_date_time="2018-01-01 12:00:00.0" update_date_time="2018-01-01 12:00:00.0"/>
+
+    <cycle_definition id="1" project_id="1" branch="any" name="cycle1" branch_position="1"/>
+    <cycle_definition id="2" project_id="1" branch="any" name="cycle2" branch_position="1"/>
+
+    <execution id="1" cycle_definition_id="1" branch="any" name="cycle1" release="any" version="any"
+               build_date_time="2017-09-24 11:59:58.0" test_date_time="2017-09-25 11:59:58.0" job_url="any1"
+               status="DONE" acceptance="NEW"/>
+    <execution id="2" cycle_definition_id="2" branch="any" name="cycle2" release="any" version="any"
+               build_date_time="2017-09-24 12:59:58.0" test_date_time="2017-09-25 12:59:58.0" job_url="any2"
+               status="DONE" acceptance="NEW"/>
+
+    <run id="11" execution_id="1" country_id="1" type_id="1" platform="any"/>
+    <run id="21" execution_id="2" country_id="1" type_id="1" platform="any"/>
+
+    <executed_scenario id="111" run_id="11" feature_file="any" feature_name="any" severity="medium"
+                       name="Functionality 1: With unidentified error" line="1" cucumber_id="any" content="any"/>
+    <executed_scenario id="211" run_id="21" feature_file="any" feature_name="any" severity="sanity-check"
+                       name="Functionality 1: Without error" line="3" cucumber_id="any" content="any"/>
+
+    <error id="1111" executed_scenario_id="111" step="any" step_definition="any" exception="any" step_line="1"/>
+</dataset>

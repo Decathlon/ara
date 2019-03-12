@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd"
+         updateCheck="false" monitoring="autodetect" dynamicConfig="true">
+
+    <cache name="com.decathlon.ara.domain.Communication" maxEntriesLocalHeap="20" eternal="true"/>
+
+    <cache name="com.decathlon.ara.domain.Country" maxEntriesLocalHeap="200" eternal="true"/>
+
+    <cache name="com.decathlon.ara.domain.Execution" maxEntriesLocalHeap="100" eternal="false"
+           timeToIdleSeconds="300" timeToLiveSeconds="3600"/>
+
+    <cache name="com.decathlon.ara.domain.ExecutionCompletionRequest" timeToLiveSeconds="1"
+           maxEntriesLocalHeap="1"/>
+
+    <cache name="com.decathlon.ara.domain.ExecutedScenario" maxEntriesLocalHeap="1000" eternal="false"
+           timeToIdleSeconds="300" timeToLiveSeconds="3600"/>
+
+    <cache name="com.decathlon.ara.domain.Error" maxEntriesLocalHeap="1000" eternal="false" timeToIdleSeconds="300"
+           timeToLiveSeconds="3600"/>
+
+    <cache name="com.decathlon.ara.domain.Error.problemPatterns" maxEntriesLocalHeap="10000" eternal="false"
+           timeToIdleSeconds="300" timeToLiveSeconds="3600"/>
+
+    <cache name="com.decathlon.ara.domain.Functionality" maxEntriesLocalHeap="2000" eternal="false"
+           timeToIdleSeconds="300" timeToLiveSeconds="3600"/>
+
+    <cache name="com.decathlon.ara.domain.Problem" maxEntriesLocalHeap="1000" eternal="false"
+           timeToIdleSeconds="300" timeToLiveSeconds="3600"/>
+
+    <cache name="com.decathlon.ara.domain.ProblemPattern" maxEntriesLocalHeap="1000" eternal="false"
+           timeToIdleSeconds="300" timeToLiveSeconds="3600"/>
+
+    <cache name="com.decathlon.ara.domain.ProblemPattern.errors" maxEntriesLocalHeap="1000" eternal="false"
+           timeToIdleSeconds="300" timeToLiveSeconds="3600"/>
+
+    <cache name="com.decathlon.ara.domain.Project" maxEntriesLocalHeap="200" eternal="true"/>
+
+    <cache name="com.decathlon.ara.domain.Run" maxEntriesLocalHeap="100" eternal="false" timeToIdleSeconds="300"
+           timeToLiveSeconds="3600"/>
+
+    <cache name="com.decathlon.ara.domain.Scenario" maxEntriesLocalHeap="3000" eternal="false"
+           timeToIdleSeconds="300" timeToLiveSeconds="3600"/>
+
+    <cache name="com.decathlon.ara.domain.Setting" maxEntriesLocalHeap="2000" eternal="true"/>
+
+    <cache name="com.decathlon.ara.domain.Severity" maxEntriesLocalHeap="20" eternal="true"/>
+
+    <cache name="com.decathlon.ara.domain.Source" maxEntriesLocalHeap="200" eternal="true"/>
+
+    <cache name="com.decathlon.ara.domain.Team" maxEntriesLocalHeap="200" eternal="true"/>
+
+    <cache name="com.decathlon.ara.domain.Type" maxEntriesLocalHeap="200" eternal="true"/>
+
+    <cache name="com.decathlon.ara.domain.RootCause" maxEntriesLocalHeap="200" eternal="true"/>
+
+    <cache name="com.decathlon.ara.domain.CycleDefinition" maxEntriesLocalHeap="50" eternal="true"/>
+
+    <cache name="com.decathlon.ara.domain.CountryDeployment" maxEntriesLocalHeap="1000" eternal="false"
+           timeToIdleSeconds="300" timeToLiveSeconds="3600"/>
+
+</ehcache>

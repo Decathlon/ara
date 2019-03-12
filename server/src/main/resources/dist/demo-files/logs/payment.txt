@@ -1,0 +1,14 @@
+seleniumService.getSessionId()
+=> 42
+backendService.importProductsInCart()
+=> OK
+backendService.chooseDeliveryOption()
+=> OK
+seleniumService.loadPaymentPage()
+=> OK
+seleniumService.choosePaymentMethod()
+=> OK
+seleniumService.clickValidatePayment()
+=> OK
+seleniumService.isOrderValidated()
+=> thrown exception

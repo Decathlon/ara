@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+    <project id="1" code="p" name="Any" default_at_startup="false"/>
+
+    <!-- Not ordered, to test service ordering results -->
+    <country id="1" project_id="1" code="cn" name="China"/>
+    <country id="2" project_id="1" code="nl" name="Netherlands"/>
+    <country id="3" project_id="1" code="be" name="Belgium"/>
+
+    <!-- Some more countries for deletion testing -->
+    <country id="4" project_id="1" code="ud" name="Used by country-deployment"/>
+    <country id="5" project_id="1" code="ur" name="Used by run"/>
+    <country id="6" project_id="1" code="up" name="Used by problem-pattern"/>
+    <country id="7" project_id="1" code="f1" name="Used by functionality at begin"/>
+    <country id="8" project_id="1" code="f2" name="Used by functionality in middle"/>
+    <country id="9" project_id="1" code="f3" name="Used by functionality at end"/>
+    <country id="10" project_id="1" code="s1" name="Used by scenario at begin"/>
+    <country id="11" project_id="1" code="s2" name="Used by scenario in middle"/>
+    <country id="12" project_id="1" code="s3" name="Used by scenario at end"/>
+
+    <!-- Mandatory rows for the rows in next section -->
+    <type id="1" project_id="1" code="one" name="any" is_browser="false" is_mobile="false"/>
+    <cycle_definition id="1" project_id="1" branch="any" name="day" branch_position="1"/>
+    <execution id="1" cycle_definition_id="1" branch="any" name="any" release="any" version="any"
+               build_date_time="2000-01-01 12:59:59.0" test_date_time="2000-01-01 12:59:59.0"
+               job_url="any" status="DONE" acceptance="NEW"/>
+    <problem id="1" project_id="1" name="any" status="OPEN" creation_date_time="2000-01-01 12:59:59.0"/>
+    <source id="1" project_id="1" code="one" name="any" letter="a" technology="CUCUMBER" vcs_url="any"
+            default_branch="any" postman_country_root_folders="0"/>
+
+    <!-- Rows using countries to be deleted -->
+    <country_deployment id="1" execution_id="1" country_id="4" platform="any" status="DONE"/>
+    <run id="1" execution_id="1" country_id="5" type_id="1" platform="any" status="DONE"/>
+    <problem_pattern id="1" problem_id="1" country_id="6" scenario_name_starts_with="false" step_starts_with="false"
+                     step_definition_starts_with="false"/>
+    <functionality id="1" project_id="1" order="0" type="FUNCTIONALITY" name="any at begin." country_codes="f1,00"
+                   creation_date_time="2018-01-01 12:00:00.0" update_date_time="2018-01-01 12:00:00.0"/>
+    <functionality id="2" project_id="1" order="0" type="FUNCTIONALITY" name="any in middle" country_codes="00,f2,00"
+                   creation_date_time="2018-01-01 12:00:00.0" update_date_time="2018-01-01 12:00:00.0"/>
+    <functionality id="3" project_id="1" order="0" type="FUNCTIONALITY" name="any at end..." country_codes="00,f3"
+                   creation_date_time="2018-01-01 12:00:00.0" update_date_time="2018-01-01 12:00:00.0"/>
+    <scenario id="1" source_id="1" feature_file="any" feature_name="any" country_codes="s1,00"
+              ignored="0" name="any 1" line="41" content="any"/>
+    <scenario id="2" source_id="1" feature_file="any" feature_name="any" country_codes="00,s2,00"
+              ignored="0" name="any 2" line="42" content="any"/>
+    <scenario id="3" source_id="1" feature_file="any" feature_name="any" country_codes="s3,00"
+              ignored="0" name="any 3" line="43" content="any"/>
+</dataset>

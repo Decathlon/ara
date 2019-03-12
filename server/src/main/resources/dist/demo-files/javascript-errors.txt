@@ -1,0 +1,2 @@
+WARNING: Loading "Our Lovely Store" with automated-tests debugging ON
+ERROR: Failed to load resource: the server responded with a status of 404 (/scripts/analytics.js)

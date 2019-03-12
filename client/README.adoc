@@ -1,0 +1,108 @@
+= ARA - Client
+
+Agile Regression Analyzer front app. +
+A VueJS front-end, packaged with webpack as a JAR to include in the server WAR.
+
+== Technologies
+
+This is a VueJS front-end. +
+Documentation is available here: +
+https://vuejs.org/
+
+The UI library is iView. +
+Documentation of all its components is available here: +
+https://www.iviewui.com/docs/guide/install-en
+
+If you need more libraries for VueJS, you can check this list: +
+https://github.com/vuejs/awesome-vue
+
+== Configuration
+
+When working on the Decathlon network:
+
+[source,bash]
+----
+npm config set proxy http://gateway.zscaler.net:80
+npm config set https-proxy http://gateway.zscaler.net:80
+----
+
+When working on VPN:
+
+[source,bash]
+----
+npm config delete https-proxy
+npm config delete proxy
+----
+
+In case it's not building:
+
+[source,bash]
+----
+npm install --verbose --registry=https://registry.npmjs.com
+npm install --verbose -g webpack@1.13.1
+npm install --verbose -g webpack-dev-server@1.14
+----
+
+== Build Setup
+
+[source,bash]
+----
+# install dependencies
+npm install
+
+# serve with hot reload at localhost:8080
+npm run dev
+
+# build for production with minification
+npm run build
+
+# build for production and view the bundle analyzer report
+npm run build --report
+
+# run unit tests
+npm run unit
+
+# run e2e tests
+npm run e2e
+
+# run all tests
+npm test
+----
+
+For detailed explanation on how things work, checkout the http://vuejs-templates.github.io/webpack/[guide] and http://vuejs.github.io/vue-loader[docs for vue-loader].
+
+=== Configuring environment variables.
+
+Note that you can configure the url used to redirect on docs (Changelog,
+how tos...) if you want to host them on a CDN or an external server. You can set
+the `DOC_URL` environment variable before running the client. By default this
+variable is setted to `localhost`.
+
+== Managing Feature Flipping
+
+If you're dealing with an unstable feature and want to display an UI element only on certain cases, you can add a
+FeatureFlipping server-side (cf the <<../server/README.adoc#FeatFlip, Managing Feature Flipping>> part), then surround your
+UI elements with the component `if-feature-enabled` like so :
+
+```
+<if-feature-enabled code="NAME">
+  <!-- ... -->
+</if-feature-enabled>
+```
+
+With `NAME` the code of the feature used in the server-side.
+
+== Essential Links for This Vue.js App
+
+* https://vuejs.org/[Core Docs]
+* https://forum.vuejs.org/[Forum]
+* https://gitter.im/vuejs/vue[Gitter Chat]
+* https://twitter.com/vuejs[Twitter]
+* http://vuejs-templates.github.io/webpack/[docs for This Template]
+
+== Ecosystem for This Vue.js App
+
+* http://router.vuejs.org/[vue-router]
+* http://vuex.vuejs.org/[vuex]
+* http://vue-loader.vuejs.org/[vue-loader]
+* https://github.com/vuejs/awesome-vue[awesome-vue]

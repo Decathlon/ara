@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <!-- KEEP IN SYNC WITH ara-generated-cucumber-report for it to have the same versions -->
+        <version>2.0.6.RELEASE</version>
+        <!-- lookup parent from repository -->
+        <relativePath/>
+    </parent>
+
+    <groupId>com.decathlon.ara</groupId>
+    <artifactId>ara-parent</artifactId>
+    <packaging>pom</packaging>
+    <version>2.4.3</version>
+
+    <name>Agile Regression Analyzer - Parent</name>
+
+    <modules>
+        <module>client</module>
+        <module>lib</module>
+        <module>generated-cucumber-report</module>
+        <module>server</module>
+    </modules>
+
+</project>

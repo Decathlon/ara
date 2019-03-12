@@ -1,0 +1,39 @@
+{
+  "properties": [
+    {
+      "name": "ara.scheduling.enable",
+      "type": "java.lang.Boolean",
+      "description": "Enable all scheduled tasks (eg. execution & defect indexing). False during integration tests. Prefer disabling individual schedulers in project settings instead of disabling this altogether."
+    },
+    {
+      "name": "ara.adapter.fetcher.name",
+      "type": "java.lang.String",
+      "description": "The service to instantiate to fetch execution reports from the continuous integration server: either 'filesystem' or any other custom adapter."
+    },
+    {
+      "name": "ara.executionSchedulingEnabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable periodic scans of new execution jobs to index."
+    },
+    {
+      "name": "ara.executionSchedulingDelayInMilliseconds",
+      "type": "java.lang.Integer",
+      "description": "The time (in milliseconds) between two periodic scans of new execution jobs to index. Must be positive."
+    },
+    {
+      "name": "ara.executionSchedulingInitialDelayInMilliseconds",
+      "type": "java.lang.Integer",
+      "description": "The time (in milliseconds) before the first periodic scan of new execution jobs to index (to eg. not stress out server after startup)."
+    },
+    {
+      "name": "ara.defectSyncSchedulingDelayInMilliseconds",
+      "type": "java.lang.Integer",
+      "description": "The time (in milliseconds) between two periodic synchronizations of problem statuses from defect states. Must be positive."
+    },
+    {
+      "name": "ara.defectSyncSchedulingInitialDelayInMilliseconds",
+      "type": "java.lang.Integer",
+      "description": "The time (in milliseconds) before the first periodic synchronization of problem statuses from defect states (to eg. not stress out server after startup)."
+    }
+  ]
+}

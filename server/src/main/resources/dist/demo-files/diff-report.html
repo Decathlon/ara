@@ -1,0 +1,42 @@
+<html>
+<body>
+
+<table style="margin: 0 auto">
+	<colgroup>
+		<col width="50%">
+		<col width="50%">
+	</colgroup>
+	<tr>
+		<td style="vertical-align: top; min-width: 50%; max-width: 50%; width: 50%;">
+			<div style="text-align: center; padding-bottom: 4px;"><strong class="groupe">Expected content</strong></div>
+			<div id="sourceA" style="width: 500px; height: 670px; overflow-x: scroll; background-color: white;">
+				<pre style="line-height: 16px; margin: 0;">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;serializedCookies&gt;
+    &lt;cookie name=&quot;sessionId&quot; value=&quot;42&quot;/&gt;
+<span style="background-color: #FAFABF; display: block; width: 100%; height: 16px;"><span style="background-color: #FAFABF; display: block;">    &lt;cookie name=&quot;acceptedGDPR&quot; value=&quot;true&quot;/&gt;</span></span><span style="display: none;">
+</span>    &lt;cookie name=&quot;useAdBlock&quot; value=&quot;true&quot;/&gt;
+<span style="background-color: #FABFBF; display: block; width: 100%; height: 16px;"><span style="background-color: #FABFBF; display: block;">    &lt;cookie name=&quot;adServer&quot; value=&quot;spy1&quot;/&gt;</span></span><span style="display: none;">
+</span>    &lt;cookie name=&quot;acceptedNotifications&quot; value=&quot;true&quot;/&gt;
+<span style="background-color: #BFFABF; display: block; width: 100%; height: 16px;"><span style="background-color: #BFFABF; display: block;"></span></span>&lt;/serializedCookies&gt;
+</pre>
+			</div>
+		</td>
+		<td style="vertical-align: top; min-width: 50%; max-width: 50%; width: 50%;">
+			<div style="text-align: center; padding-bottom: 4px;"><strong class="groupe">Actual content</strong></div>
+			<div id="sourceB" style="width: 500px; height: 670px; overflow-x: scroll; background-color: white;">
+				<pre style="line-height: 16px; margin: 0;">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;serializedCookies&gt;
+    &lt;cookie name=&quot;sessionId&quot; value=&quot;42&quot;/&gt;
+<span style="background-color: #FAFABF; display: block; width: 100%; height: 16px;"><span style="background-color: #FAFABF; display: block;">    &lt;cookie name=&quot;acceptedGDPR&quot; value=&quot;false&quot;/&gt;</span></span><span style="display: none;">
+</span>    &lt;cookie name=&quot;useAdBlock&quot; value=&quot;true&quot;/&gt;
+<span style="background-color: #FABFBF; display: block; width: 100%; height: 16px;"><span style="background-color: #FABFBF; display: block;"></span></span>    &lt;cookie name=&quot;acceptedNotifications&quot; value=&quot;true&quot;/&gt;
+<span style="background-color: #BFFABF; display: block; width: 100%; height: 16px;"><span style="background-color: #BFFABF; display: block;">    &lt;cookie name=&quot;adServer&quot; value=&quot;spy3&quot;/&gt;</span></span><span style="display: none;">
+</span>&lt;/serializedCookies&gt;
+</pre>
+			</div>
+		</td>
+	</tr>
+</table>
+
+</body>
+</html>

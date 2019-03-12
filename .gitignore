@@ -1,0 +1,11 @@
+*.iml
+.idea/
+.settings/
+.classpath
+.project
+target/
+docker/ara/data/
+docker/ara/docker-compose.yml
+docker/ara-server/*.jar
+docker/data/
+docker/ara/data

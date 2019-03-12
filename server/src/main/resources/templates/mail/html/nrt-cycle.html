@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <body>
+        <div th:fragment="nrt-cycle" style="margin-top: 1em;">
+            <!--/* Card */-->
+            <div class="Card" style="height: 100%; margin-bottom: 8px; position: relative;">
+                <!--/* Discard reason */-->
+                <div th:if="${!#strings.isEmpty(execution.discardReason)}" style="text-align: center; margin-bottom: 8px;">
+                    <span class="discardReason">Discarded: [[${execution.discardReason}]]</span>
+                </div>
+
+                <th:block th:switch="${!#lists.isEmpty(execution.qualitySeverities) && !#maps.isEmpty(execution.qualityThresholds)}">
+                    <th:block th:case="true">
+                        <!--/* Grid header 1: severity names */-->
+                        <div class="Row">
+                            <div class="Col span4"></div>
+                            <div th:class="${'Col span' + ((24 - 4) / #arrays.length(execution.qualitySeverities))}" th:each="qualitySeverity : ${execution.qualitySeverities}" style="text-align: center;">
+                                <strong>[[${qualitySeverity.severity.shortName}]]</strong>
+                            </div>
+                        </div>
+
+                        <!--/* Grid header 2: quality percentages */-->
+                        <div class="Row">
+                            <div class="Col span4"></div>
+                            <div th:class="${'Col span' + ((24 - 4) / #arrays.length(execution.qualitySeverities))}" th:each="qualitySeverity : ${execution.qualitySeverities}" style="margin-bottom: 4px;">
+                                <a th:href="${executionUrl +
+                                        (qualitySeverity.severity.code == '*' ? '' : '?severity=' + qualitySeverity.severity.code) +
+                                        (qualitySeverity.scenarioCounts.total == qualitySeverity.scenarioCounts.passed ? (qualitySeverity.severity.code == '*' ? '?' : '&') + 'withSucceed=true' : '')}" style="text-decoration: none;">
+                                    <div th:replace="mail/html/nrt-severity-total.html :: nrt-severity-total (
+                                            qualitySeverity=${qualitySeverity},
+                                            thresholds=${execution.qualityThresholds[qualitySeverity.severity.code]},
+                                            blockingValidation=${execution.blockingValidation},
+                                            allRun=${execution.qualityStatus.name() != 'INCOMPLETE'})"></div>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!--/* Run information for all country & run type couples */-->
+                        <div th:each="run : ${execution.runs}">
+                            <div th:replace="mail/html/nrt-run.html :: nrt-run (execution=${execution},run=${run})"></div>
+                        </div>
+
+                        <!--/* Global details for teams */-->
+                        <div th:if="${!#lists.isEmpty(teamsAssignableToProblems) && !#maps.isEmpty(qualitiesPerTeamAndSeverity)}">
+                            <p><strong>Global Details per Team:</strong></p>
+                            <div th:replace="mail/html/nrt-team.html :: nrt-team (execution=${execution},run=${run},team=${NO_TEAM})"></div>
+                            <th:block th:each="team : ${teamsAssignableToProblems}">
+                                <div th:replace="mail/html/nrt-team.html :: nrt-team (execution=${execution},run=${run},team=${team})"></div>
+                            </th:block>
+                        </div>
+                    </th:block>
+                    <div th:case="false" style="color: #ED3F14;">
+                        NO DATA
+                        <span th:if="${execution.status}" th:class="${execution.status}">([[${#strings.toLowerCase(execution.status)}]])</span>
+                        <span th:if="${execution.result}" th:class="${execution.result}">([[${#strings.toLowerCase(execution.result)}]])</span>
+                        <a th:href="${execution.jobUrl + 'console'}" target="_blank" style="text-decoration: none;">
+                            <span class="Button" style="margin-left: 8px;">SHOW LOGS</span>
+                        </a>
+                    </div>
+                </th:block>
+            </div>
+        </div>
+    </body>
+</html>

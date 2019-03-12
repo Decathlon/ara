@@ -1,0 +1,4 @@
+This is the demo website used to fake screenshots on Cucumber scenario failures.
+
+Screenshots are took manually, as we bypass Selenium in order to have a faster compilation,
+and not depend on network health or not launch a local web-server just to create demo data once in a while.

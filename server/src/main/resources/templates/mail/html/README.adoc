@@ -1,0 +1,7 @@
+= ARA - HTML Email Templates
+
+This folder uses the same file names as in ara/client/src/components/nrt-*.vue to easily compare two files: the VueJS GUI one, and the Thymeleaf mail one.
+
+Yes: the compare must be done by human eyes, but this is the least painful way to make sure evolutions are adopted both in the client view and in HTML mails. The use of Thymeleaf also helps by having roughly the same syntax-philosophy as VueJS (v-if vs. th:if...).
+
+Note: favicon.png is also duplicated from the client project.

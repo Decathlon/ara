@@ -1,0 +1,912 @@
+{
+  "collection": {
+    "_": {
+      "postman_id": "4d96d97d-9f7b-457b-9cff-0577898108b6"
+    },
+    "item": [
+      {
+        "id": "b84eca02-4404-4385-82fa-ee67854d11ed",
+        "name": "fr+us",
+        "item": [
+          {
+            "id": "4d93ec7b-ad97-40b1-bf31-a86680481482",
+            "name": "@severity-sanity-check Functionalities {{F-Buy-Pay}} & {{F-Buy-Card}}: Pay by Card",
+            "request": {
+              "url": {
+                "path": [
+                  "post"
+                ],
+                "host": [
+                  "{{baseUrl}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "method": "POST",
+              "body": {
+                "mode": "formdata",
+                "formdata": [
+                  {
+                    "key": "paymentMethod",
+                    "value": "card",
+                    "type": "text"
+                  }
+                ]
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "19ec486e-21e3-4c0e-9620-458a873c953e",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"Status code is 200\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "});",
+                    "",
+                    "pm.test(\"Response should validate the payment method is indeed By card\", function () {",
+                    "    var jsonData = pm.response.json();",
+                    "    pm.expect(jsonData.form.paymentMethod).to.eql(\"card\");",
+                    "});",
+                    "",
+                    "pm.test(\"Response should indicate a succeed transaction status\", function () {",
+                    "    if (pm.environment.get(\"failing\") === 'true') {",
+                    "        var jsonData = pm.response.json();",
+                    "        pm.expect(jsonData.transactionStatus || \"failed\").to.eql(\"succeed\");",
+                    "    }",
+                    "});",
+                    ""
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "156bb0b3-c9fa-4b5a-8c86-afa21167cf70",
+            "name": "@severity-medium Functionalities {{F-Buy-Pay}} & {{F-Buy-Gift}}: Pay by Gift Card",
+            "request": {
+              "url": {
+                "path": [
+                  "post"
+                ],
+                "host": [
+                  "{{baseUrl}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "method": "POST",
+              "body": {
+                "mode": "formdata",
+                "formdata": [
+                  {
+                    "key": "paymentMethod",
+                    "value": "gift-card",
+                    "type": "text"
+                  }
+                ]
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "33040c82-407e-4668-bb64-e44b2cf86f57",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"Status code is 200\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "});",
+                    "",
+                    "pm.test(\"Response should validate the payment method is indeed By gift card\", function () {",
+                    "    var jsonData = pm.response.json();",
+                    "    pm.expect(jsonData.form.paymentMethod).to.eql(\"gift-card\");",
+                    "});",
+                    "",
+                    "pm.test(\"Response should indicate a succeed transaction status\", function () {",
+                    "    var jsonData = pm.response.json();",
+                    "    pm.expect(jsonData.transactionStatus || \"succeed\").to.eql(\"succeed\");",
+                    "});",
+                    ""
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "event": [
+          {
+            "listen": "prerequest",
+            "script": {
+              "id": "30f678d8-fd65-4962-94bd-205893e0ed7b",
+              "type": "text/javascript",
+              "exec": [
+                ""
+              ]
+            }
+          },
+          {
+            "listen": "test",
+            "script": {
+              "id": "819cce6a-8de1-419f-94de-ed067911b6c0",
+              "type": "text/javascript",
+              "exec": [
+                ""
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "5d2d591d-6840-4e70-b15f-f99fbae15af1",
+        "name": "us",
+        "item": [
+          {
+            "id": "6ee7898a-eb98-4fb3-a090-1fb77b08c39b",
+            "name": "@severity-medium Functionalities {{F-Buy-Pay}} & {{F-Buy-NFC}}: Pay by Mobile NFC",
+            "request": {
+              "url": {
+                "path": [
+                  "post"
+                ],
+                "host": [
+                  "{{baseUrl}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "method": "POST",
+              "body": {
+                "mode": "formdata",
+                "formdata": [
+                  {
+                    "key": "paymentMethod",
+                    "value": "nfc",
+                    "type": "text"
+                  }
+                ]
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "4cb14ec6-4c35-4042-9af6-4075dae8027d",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"Status code is 200\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "});",
+                    "",
+                    "pm.test(\"Response should validate the payment method is indeed By NFC\", function () {",
+                    "    var jsonData = pm.response.json();",
+                    "    pm.expect(jsonData.form.paymentMethod).to.eql(\"nfc\");",
+                    "});",
+                    "",
+                    "pm.test(\"Response should indicate a succeed transaction status\", function () {",
+                    "    var jsonData = pm.response.json();",
+                    "    pm.expect(jsonData.transactionStatus || \"succeed\").to.eql(\"succeed\");",
+                    "});",
+                    ""
+                  ],
+                  "_lastExecutionId": "72829a82-6613-4348-ba26-ae6b103af455"
+                }
+              }
+            ]
+          }
+        ],
+        "event": [
+          {
+            "listen": "prerequest",
+            "script": {
+              "id": "33dc864f-2aab-4eed-801c-270ec200ce32",
+              "type": "text/javascript",
+              "exec": [
+                ""
+              ],
+              "_lastExecutionId": "858908a5-75ff-4013-ad0a-ea29e9c8fc1e"
+            }
+          },
+          {
+            "listen": "test",
+            "script": {
+              "id": "ad238776-f6d5-4b44-b017-19af84234a8f",
+              "type": "text/javascript",
+              "exec": [
+                ""
+              ],
+              "_lastExecutionId": "e2bfe6c2-a009-4c21-a935-5e4f2d2855f2"
+            }
+          }
+        ]
+      }
+    ],
+    "event": [],
+    "variable": [],
+    "info": {
+      "_postman_id": "4d96d97d-9f7b-457b-9cff-0577898108b6",
+      "name": "Our Lovely Store - Pay",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    }
+  },
+  "environment": {
+    "id": "3a067ce3-dad7-44ea-a2f1-d2d6a546eb2d",
+    "name": "integ",
+    "values": [
+      {
+        "type": "any",
+        "value": "https://postman-echo.com",
+        "key": "baseUrl"
+      },
+      {
+        "type": "any",
+        "value": "true",
+        "key": "failing"
+      }
+    ]
+  },
+  "globals": {
+    "id": "11065dbb-f137-4c29-adf8-ec902e752ebf",
+    "values": []
+  },
+  "run": {
+    "stats": {
+      "iterations": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "items": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "scripts": {
+        "total": 3,
+        "pending": 0,
+        "failed": 0
+      },
+      "prerequests": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "requests": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "tests": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "assertions": {
+        "total": 3,
+        "pending": 0,
+        "failed": 0
+      },
+      "testScripts": {
+        "total": 2,
+        "pending": 0,
+        "failed": 0
+      },
+      "prerequestScripts": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      }
+    },
+    "timings": {
+      "responseAverage": 753,
+      "started": 1548064847685,
+      "completed": 1548064848573
+    },
+    "executions": [
+      {
+        "cursor": {
+          "position": 0,
+          "iteration": 0,
+          "length": 1,
+          "cycles": 1,
+          "empty": false,
+          "eof": false,
+          "bof": true,
+          "cr": false,
+          "ref": "66d6f338-7f39-474c-abad-049ce9d9bc2a",
+          "httpRequestId": "f1f06184-ff3a-410b-b321-85bfc0cf2749"
+        },
+        "item": {
+          "id": "6ee7898a-eb98-4fb3-a090-1fb77b08c39b",
+          "name": "@severity-medium Functionalities {{F-Buy-Pay}} & {{F-Buy-NFC}}: Pay by Mobile NFC",
+          "request": {
+            "url": {
+              "path": [
+                "post"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "paymentMethod",
+                  "value": "nfc",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "4cb14ec6-4c35-4042-9af6-4075dae8027d",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response should validate the payment method is indeed By NFC\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.form.paymentMethod).to.eql(\"nfc\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response should indicate a succeed transaction status\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.transactionStatus || \"succeed\").to.eql(\"succeed\");",
+                  "});",
+                  ""
+                ],
+                "_lastExecutionId": "72829a82-6613-4348-ba26-ae6b103af455"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "https",
+            "path": [
+              "post"
+            ],
+            "host": [
+              "postman-echo",
+              "com"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.6.0"
+            },
+            {
+              "key": "Accept",
+              "value": "*/*"
+            },
+            {
+              "key": "Host",
+              "value": "postman-echo.com"
+            },
+            {
+              "key": "accept-encoding",
+              "value": "gzip, deflate"
+            },
+            {
+              "key": "content-type",
+              "value": "multipart/form-data; boundary=--------------------------556589855007386658847384"
+            },
+            {
+              "key": "content-length",
+              "value": 171
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "formdata",
+            "formdata": [
+              {
+                "key": "paymentMethod",
+                "value": "nfc",
+                "type": "text"
+              }
+            ]
+          }
+        },
+        "response": {
+          "id": "dd336e02-17c5-4418-9153-a00a80460a0a",
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Encoding",
+              "value": "gzip"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Date",
+              "value": "Mon, 21 Jan 2019 10:00:49 GMT"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"19a-GC0xHoQe7aqIKNB9KR40ROPPv1g\""
+            },
+            {
+              "key": "Server",
+              "value": "nginx"
+            },
+            {
+              "key": "set-cookie",
+              "value": "sails.sid=s%3At_1YfQ_JnBRlcIUhu-BL-dO9ByOi9iRk.1Cxqua2GE3ACvZLHaPc%2BTGvZ8igzkbuIHT0ZmVWfs3Y; Path=/; HttpOnly"
+            },
+            {
+              "key": "Vary",
+              "value": "Accept-Encoding"
+            },
+            {
+              "key": "Content-Length",
+              "value": "271"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              97,
+              114,
+              103,
+              115,
+              34,
+              58,
+              123,
+              125,
+              44,
+              34,
+              100,
+              97,
+              116,
+              97,
+              34,
+              58,
+              123,
+              125,
+              44,
+              34,
+              102,
+              105,
+              108,
+              101,
+              115,
+              34,
+              58,
+              123,
+              125,
+              44,
+              34,
+              102,
+              111,
+              114,
+              109,
+              34,
+              58,
+              123,
+              34,
+              112,
+              97,
+              121,
+              109,
+              101,
+              110,
+              116,
+              77,
+              101,
+              116,
+              104,
+              111,
+              100,
+              34,
+              58,
+              34,
+              110,
+              102,
+              99,
+              34,
+              125,
+              44,
+              34,
+              104,
+              101,
+              97,
+              100,
+              101,
+              114,
+              115,
+              34,
+              58,
+              123,
+              34,
+              120,
+              45,
+              102,
+              111,
+              114,
+              119,
+              97,
+              114,
+              100,
+              101,
+              100,
+              45,
+              112,
+              114,
+              111,
+              116,
+              111,
+              34,
+              58,
+              34,
+              104,
+              116,
+              116,
+              112,
+              115,
+              34,
+              44,
+              34,
+              104,
+              111,
+              115,
+              116,
+              34,
+              58,
+              34,
+              112,
+              111,
+              115,
+              116,
+              109,
+              97,
+              110,
+              45,
+              101,
+              99,
+              104,
+              111,
+              46,
+              99,
+              111,
+              109,
+              34,
+              44,
+              34,
+              99,
+              111,
+              110,
+              116,
+              101,
+              110,
+              116,
+              45,
+              108,
+              101,
+              110,
+              103,
+              116,
+              104,
+              34,
+              58,
+              34,
+              49,
+              55,
+              49,
+              34,
+              44,
+              34,
+              97,
+              99,
+              99,
+              101,
+              112,
+              116,
+              34,
+              58,
+              34,
+              42,
+              47,
+              42,
+              34,
+              44,
+              34,
+              97,
+              99,
+              99,
+              101,
+              112,
+              116,
+              45,
+              101,
+              110,
+              99,
+              111,
+              100,
+              105,
+              110,
+              103,
+              34,
+              58,
+              34,
+              103,
+              122,
+              105,
+              112,
+              44,
+              32,
+              100,
+              101,
+              102,
+              108,
+              97,
+              116,
+              101,
+              34,
+              44,
+              34,
+              99,
+              111,
+              110,
+              116,
+              101,
+              110,
+              116,
+              45,
+              116,
+              121,
+              112,
+              101,
+              34,
+              58,
+              34,
+              109,
+              117,
+              108,
+              116,
+              105,
+              112,
+              97,
+              114,
+              116,
+              47,
+              102,
+              111,
+              114,
+              109,
+              45,
+              100,
+              97,
+              116,
+              97,
+              59,
+              32,
+              98,
+              111,
+              117,
+              110,
+              100,
+              97,
+              114,
+              121,
+              61,
+              45,
+              45,
+              45,
+              45,
+              45,
+              45,
+              45,
+              45,
+              45,
+              45,
+              45,
+              45,
+              45,
+              45,
+              45,
+              45,
+              45,
+              45,
+              45,
+              45,
+              45,
+              45,
+              45,
+              45,
+              45,
+              45,
+              53,
+              53,
+              54,
+              53,
+              56,
+              57,
+              56,
+              53,
+              53,
+              48,
+              48,
+              55,
+              51,
+              56,
+              54,
+              54,
+              53,
+              56,
+              56,
+              52,
+              55,
+              51,
+              56,
+              52,
+              34,
+              44,
+              34,
+              117,
+              115,
+              101,
+              114,
+              45,
+              97,
+              103,
+              101,
+              110,
+              116,
+              34,
+              58,
+              34,
+              80,
+              111,
+              115,
+              116,
+              109,
+              97,
+              110,
+              82,
+              117,
+              110,
+              116,
+              105,
+              109,
+              101,
+              47,
+              55,
+              46,
+              54,
+              46,
+              48,
+              34,
+              44,
+              34,
+              120,
+              45,
+              102,
+              111,
+              114,
+              119,
+              97,
+              114,
+              100,
+              101,
+              100,
+              45,
+              112,
+              111,
+              114,
+              116,
+              34,
+              58,
+              34,
+              52,
+              52,
+              51,
+              34,
+              125,
+              44,
+              34,
+              106,
+              115,
+              111,
+              110,
+              34,
+              58,
+              110,
+              117,
+              108,
+              108,
+              44,
+              34,
+              117,
+              114,
+              108,
+              34,
+              58,
+              34,
+              104,
+              116,
+              116,
+              112,
+              115,
+              58,
+              47,
+              47,
+              112,
+              111,
+              115,
+              116,
+              109,
+              97,
+              110,
+              45,
+              101,
+              99,
+              104,
+              111,
+              46,
+              99,
+              111,
+              109,
+              47,
+              112,
+              111,
+              115,
+              116,
+              34,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 753,
+          "responseSize": 410
+        },
+        "id": "6ee7898a-eb98-4fb3-a090-1fb77b08c39b",
+        "assertions": [
+          {
+            "assertion": "Status code is 200",
+            "skipped": false
+          },
+          {
+            "assertion": "Response should validate the payment method is indeed By NFC",
+            "skipped": false
+          },
+          {
+            "assertion": "Response should indicate a succeed transaction status",
+            "skipped": false
+          }
+        ]
+      }
+    ],
+    "transfers": {
+      "responseTotal": 271
+    },
+    "failures": [],
+    "error": null
+  }
+}
