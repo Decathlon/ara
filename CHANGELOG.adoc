@@ -22,6 +22,14 @@ For instance, on Windows, you can use http://getgreenshot.org/ for screenshots
 and https://www.screentogif.com/ for animated-GIFs.
 ////
 
+== 3.0.0 (to be released)
+
+First version of ARA with a release of the source code.
+
+=== Technical Changes
+
+=== User-Visible Changes
+
 == 2.4.3
 
 === Technical Changes

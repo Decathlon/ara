@@ -9,3 +9,4 @@ docker/ara/docker-compose.yml
 docker/ara-server/*.jar
 docker/data/
 docker/ara/data
+*dependency-reduced-pom.xml
