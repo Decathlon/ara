@@ -22,11 +22,14 @@ For instance, on Windows, you can use http://getgreenshot.org/ for screenshots
 and https://www.screentogif.com/ for animated-GIFs.
 ////
 
-== 3.0.0 (to be released)
+== 3.0.0
 
 First version of ARA with a release of the source code.
 
 === Technical Changes
+
+* *[BREAKING CHANGE]* Change the way the final Executable is builded.
+* *[FEATURE]* Add the integration to Decathlon's internal CI.
 
 === User-Visible Changes
 
