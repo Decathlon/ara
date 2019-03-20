@@ -10,6 +10,6 @@ fi
 
 JAR=ara.jar
 rm -f ${JAR}
-cp $(ls ../../server/target/ara-server-*.jar | grep -v javadoc | grep -v sources) ${JAR}
+cp $(ls ../../final/target/ara-*.jar | grep -v javadoc | grep -v sources) ${JAR}
 
 docker build -t ${TAG} .

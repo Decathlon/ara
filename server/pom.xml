@@ -331,6 +331,12 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- Cucumber JSON report files generated for the demo project and reports parsing tests -->
+        <dependency>
+            <groupId>com.decathlon.ara</groupId>
+            <artifactId>ara-generated-cucumber-report</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
