@@ -33,6 +33,9 @@ to freeze, when the execution have several errors with detailled exceptions.
 
 First version of ARA with a release of the source code.
 
+* *[BREAKING CHANGE]* Change the way the final jar is builded
+* *[FEATURE]* Connect the project to Decathlon's internal CI.
+
 === Technical Changes
 
 * *[BREAKING CHANGE]* Change the way the final Executable is builded.
