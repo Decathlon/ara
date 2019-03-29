@@ -6,6 +6,7 @@ import com.decathlon.ara.domain.enumeration.QualityStatus;
 import com.decathlon.ara.service.ExecutionHistoryService;
 import com.decathlon.ara.service.ExecutionService;
 import com.decathlon.ara.service.ProjectService;
+import com.decathlon.ara.service.dto.execution.ExecutionCriteriaDTO;
 import com.decathlon.ara.service.dto.execution.ExecutionDTO;
 import com.decathlon.ara.service.dto.execution.ExecutionHistoryPointDTO;
 import com.decathlon.ara.service.dto.execution.ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO;
@@ -83,8 +84,10 @@ public class ExecutionResource {
     @GetMapping("/{id:[0-9]+}")
     @Timed
     public ResponseEntity<ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO> getOne(@PathVariable String projectCode, @PathVariable long id) {
+        ExecutionCriteriaDTO criteria = new ExecutionCriteriaDTO();
+        criteria.setWithSucceed(false);
         try {
-            return ResponseEntity.ok().body(service.findOneWithRuns(projectService.toId(projectCode), id, false));
+            return ResponseEntity.ok().body(service.findOneWithRuns(projectService.toId(projectCode), id, criteria));
         } catch (NotFoundException e) {
             return ResponseUtil.handle(e);
         }
@@ -100,8 +103,10 @@ public class ExecutionResource {
     @GetMapping("/{id:[0-9]+}/with-successes")
     @Timed
     public ResponseEntity<ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO> getOneWithSuccesses(@PathVariable String projectCode, @PathVariable long id) {
+        ExecutionCriteriaDTO criteria = new ExecutionCriteriaDTO();
+        criteria.setWithSucceed(true);
         try {
-            return ResponseEntity.ok().body(service.findOneWithRuns(projectService.toId(projectCode), id, true));
+            return ResponseEntity.ok().body(service.findOneWithRuns(projectService.toId(projectCode), id, criteria));
         } catch (NotFoundException e) {
             return ResponseUtil.handle(e);
         }
@@ -254,6 +259,18 @@ public class ExecutionResource {
             result = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
         return result;
+    }
+
+    @PostMapping("/{id:[0-9]+}/filtered")
+    public ResponseEntity<ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO> getOneFiltered(@PathVariable String projectCode,
+                                                                                                                                      @PathVariable long id,
+                                                                                                                                      @RequestBody ExecutionCriteriaDTO criteria) {
+        try {
+            long projectId = projectService.toId(projectCode);
+            return ResponseEntity.ok(service.findOneWithRuns(projectId, id, criteria));
+        } catch (BadRequestException ex) {
+            return ResponseUtil.handle(ex);
+        }
     }
 
 }

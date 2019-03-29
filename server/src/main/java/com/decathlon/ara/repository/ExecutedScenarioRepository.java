@@ -1,7 +1,7 @@
 package com.decathlon.ara.repository;
 
-import com.decathlon.ara.repository.custom.ExecutedScenarioRepositoryCustom;
 import com.decathlon.ara.domain.ExecutedScenario;
+import com.decathlon.ara.repository.custom.ExecutedScenarioRepositoryCustom;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -33,5 +33,11 @@ public interface ExecutedScenarioRepository extends JpaRepository<ExecutedScenar
             "WHERE executedScenario.run.execution.cycleDefinition.projectId = ?1 " +
             "ORDER BY executedScenario.name")
     List<String> findDistinctNameByProjectId(long projectId);
+
+    @Query("SELECT es " +
+            "FROM ExecutedScenario es " +
+            "WHERE es.run.execution.cycleDefinition.projectId = ?1 " +
+            "AND es.id = ?2 ")
+    ExecutedScenario findOne(long projectId, long executedScenarioId);
 
 }

@@ -1,11 +1,11 @@
 package com.decathlon.ara.web.rest;
 
+import com.decathlon.ara.ci.bean.Build;
+import com.decathlon.ara.ci.bean.BuildToIndex;
+import com.decathlon.ara.ci.service.ExecutionCrawlerService;
 import com.decathlon.ara.domain.CycleDefinition;
 import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
 import com.decathlon.ara.domain.enumeration.JobStatus;
-import com.decathlon.ara.ci.bean.BuildToIndex;
-import com.decathlon.ara.ci.bean.Build;
-import com.decathlon.ara.ci.service.ExecutionCrawlerService;
 import com.decathlon.ara.service.dto.error.ErrorDTO;
 import com.decathlon.ara.service.dto.executedscenario.ExecutedScenarioWithTeamIdsAndErrorsAndProblemsDTO;
 import com.decathlon.ara.service.dto.execution.ExecutionDTO;
@@ -171,10 +171,10 @@ public class ExecutionResourceIT {
         assertThat(executedScenarios.get(1).getTeamIds()).isEmpty();
 
         // Only index 1 has a problem associated to it
-        assertThat(executedScenarios.get(0).getErrors().get(0).getProblems()).isNull();
+        assertThat(executedScenarios.get(0).getErrors().get(0).getProblems()).isEmpty();
         assertThat(executedScenarios.get(0).getErrors().get(1).getProblems()).hasSize(1);
-        assertThat(executedScenarios.get(1).getErrors().get(0).getProblems()).isNull();
-        assertThat(executedScenarios.get(1).getErrors().get(1).getProblems()).isNull();
+        assertThat(executedScenarios.get(1).getErrors().get(0).getProblems()).isEmpty();
+        assertThat(executedScenarios.get(1).getErrors().get(1).getProblems()).isEmpty();
         assertProblem1001(executedScenarios.get(0).getErrors().get(1).getProblems().get(0));
     }
 

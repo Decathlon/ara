@@ -1,5 +1,6 @@
 package com.decathlon.ara.features;
 
+import com.decathlon.ara.features.available.ExecutionShortenerFeature;
 import com.decathlon.ara.features.available.JiraAdapterFeature;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ public class FeatureCollection {
         // this.register(new YourFeatureFlippingClass());
         //
         this.register(new JiraAdapterFeature());
+        this.register(new ExecutionShortenerFeature());
     }
 
     /**

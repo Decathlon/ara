@@ -1,9 +1,16 @@
 <template>
   <div>
     <aside v-if="execution && teamsAssignableToProblems.length > 0">
-      <Button style="display: block; margin: 0 auto;" icon="md-backspace" :disabled="!hasFilter"
-              @click="removeAllFilters()">REMOVE ALL FILTERS
-      </Button>
+      <div style="margin:0 auto; padding:0;">
+        <Button v-bind:style="{display: (this.executionShortener ? 'block': 'none')}" style="margin: 10px 0; width:100%" icon="md-search"
+          @click="applyFilters()">
+          APPLY FILTERS
+        </Button>  
+        
+        <Button style="display: block; margin: 10px 0; width:100%;" icon="md-backspace" :disabled="!hasFilter"
+                @click="removeAllFilters()">REMOVE ALL FILTERS
+        </Button>
+      </div>
 
       <div class="criteria">
         <div class="name">
@@ -45,7 +52,7 @@
       <div class="criteria">
         <div class="name">
           COUNTRY
-          <a v-if="filter.country" @click="filter.country = ''; recomputeQueryString()"
+          <a v-if="filter.country" @click="filter.country = '';recomputeQueryString()"
              title="Remove this filter">
             <Icon type="md-backspace"/>
             REMOVE</a>
@@ -63,7 +70,7 @@
       <div class="criteria">
         <div class="name">
           SEVERITY
-          <a v-if="filter.severity" @click="filter.severity = ''; recomputeQueryString()"
+          <a v-if="filter.severity" @click="filter.severity = '';recomputeQueryString()"
              title="Remove this filter">
             <Icon type="md-backspace"/>
             REMOVE</a>
@@ -87,7 +94,7 @@
       <div class="criteria">
         <div class="name">
           HANDLING
-          <a v-if="filter.handling" @click="filter.handling = ''; recomputeQueryString()"
+          <a v-if="filter.handling" @click="filter.handling = '';recomputeQueryString()"
              title="Remove this filter">
             <Icon type="md-backspace"/>
             REMOVE</a>
@@ -111,7 +118,7 @@
       <div class="criteria">
         <div class="name">
           FEATURE
-          <a v-if="filter.feature" @click="filter.feature = ''; recomputeQueryString()"
+          <a v-if="filter.feature" @click="filter.feature = '';recomputeQueryString()"
              title="Remove this filter">
             <Icon type="md-backspace"/>
             REMOVE</a>
@@ -121,8 +128,8 @@
 
       <div class="criteria">
         <div class="name">
-          SCENARIO
-          <a v-if="filter.scenario" @click="filter.scenario = ''; recomputeQueryString()"
+          SCENARIO'S NAME
+          <a v-if="filter.scenario" @click="filter.scenario = '';recomputeQueryString()"
              title="Remove this filter">
             <Icon type="md-backspace"/>
             REMOVE</a>
@@ -133,7 +140,7 @@
       <div class="criteria">
         <div class="name">
           FAILED STEP
-          <a v-if="filter.step" @click="filter.step = ''; recomputeQueryString()" title="Remove this filter">
+          <a v-if="filter.step" @click="filter.step = '';recomputeQueryString()" title="Remove this filter">
             <Icon type="md-backspace"/>
             REMOVE</a>
         </div>
@@ -143,7 +150,7 @@
       <div class="criteria">
         <div class="name">
           EXCEPTION
-          <a v-if="filter.exception" @click="filter.exception = ''; recomputeQueryString()"
+          <a v-if="filter.exception" @click="filter.exception = '';recomputeQueryString()"
              title="Remove this filter">
             <Icon type="md-backspace"/>
             REMOVE</a>
@@ -155,7 +162,7 @@
         <div class="name">
           OPTIONS
           <a v-if="filter.withSucceed || filter.scenarioDetails"
-             @click="filter.withSucceed = ''; filter.scenarioDetails = ''; recomputeQueryString()" title="Remove this filter">
+             @click="filter.withSucceed = ''; filter.scenarioDetails = '';recomputeQueryString()" title="Remove this filter">
             <Icon type="md-backspace"/>
             REMOVE</a>
         </div>
@@ -170,7 +177,7 @@
       </div>
     </aside>
 
-    <main v-if="execution && runFeatures">
+    <main v-if="execution && features">
       <div style="margin: 0 auto;">
         <nrt-cycle :execution="executionHistoryPoint"
                    :hideButtons="true"
@@ -190,7 +197,7 @@
         <span v-else>Showing <strong>{{counts.matching}}</strong> filtered scenario{{counts.matching === 1 ? '' : 's'}} out of the <strong>{{counts.total}}</strong> {{filter.withSucceed ? '' : 'failed'}} scenario{{counts.total === 1 ? '' : 's'}}</span>
       </h1>
 
-      <run-features :execution="execution" :runFeatures="runFeatures" :scenarioDetails="filter.scenarioDetails" :filteredTeamId="filter.team"/>
+      <run-features :execution="execution" :runFeatures="features" :scenarioDetails="filter.scenarioDetails" :filteredTeamId="filter.team"/>
     </main>
 
     <Spin fix v-if="loadingExecution"/>
@@ -200,6 +207,7 @@
 <script>
   import Vue from 'vue'
   import api from '../libs/api'
+  import util from '../libs/util'
 
   import runFeaturesComponent from '../components/run-features'
   import nrtCycleComponent from '../components/nrt-cycle'
@@ -250,7 +258,9 @@
         counts: {
           matching: 0, // scenarios
           total: 0 // scenarios
-        }
+        },
+        features: [],
+        executionShortener: null
       }
     },
 
@@ -330,76 +340,15 @@
           }
         }
         return countries
-      },
-
-      runFeatures () {
-        let runFeatures = []
-        this.counts.matching = 0
-        this.counts.total = 0
-        this.$set(this, 'totals', {})
-        this.$set(this, 'totalsIfClicked', {})
-
-        if (this.execution && this.execution.runs) {
-          let totalCriterion = this.totalCriterion()
-
-          for (var i in this.execution.runs) {
-            let run = this.execution.runs[i]
-
-            if (run && run.executedScenarios) {
-              let lastRun = null
-              let lastFeature = null
-              let lastScenario = null
-
-              for (let j in run.executedScenarios) {
-                let executedScenario = run.executedScenarios[j]
-
-                // Filter out scenarios & update counts
-                this.counts.total += (executedScenario.handling === 'SUCCESS' ? (this.filter.withSucceed ? 1 : 0) : 1)
-                if (this.matchFilters(this.filter, run, executedScenario)) {
-                  // Append filtered scenarios to view
-                  this.counts.matching++
-                  if (lastRun == null || lastRun.id !== run.id) {
-                    lastRun = {
-                      ...run,
-                      executedScenarios: undefined,
-                      features: []
-                    }
-                    runFeatures.push(lastRun)
-                    lastFeature = null
-                    lastScenario = null
-                  }
-
-                  if (lastFeature == null || lastFeature.file !== executedScenario.featureFile) {
-                    lastFeature = {
-                      file: executedScenario.featureFile,
-                      name: executedScenario.featureName,
-                      scenarios: []
-                    }
-                    lastRun.features.push(lastFeature)
-                    lastScenario = null
-                  }
-
-                  if (lastScenario == null || lastScenario.id !== executedScenario.id) {
-                    lastScenario = {
-                      ...executedScenario
-                    }
-                    lastFeature.scenarios.push(lastScenario)
-                  }
-                }
-
-                // Update totals of the filter pane
-                this.addMatchingTotal(totalCriterion, run, executedScenario)
-                this.addMatchingTotalIfClicked(totalCriterion, run, executedScenario)
-              }
-            }
-          }
-        }
-
-        return runFeatures
       }
     },
 
     methods: {
+      applyFilters () {
+        this.recomputeQueryString()
+        this.filterFeatures()
+      },
+
       dispatchSelectedProblem (problemId) {
         this.filter.problem = problemId
         this.recomputeQueryString()
@@ -411,16 +360,160 @@
         let loadSuccesses = this.filter.withSucceed
         let url = api.paths.executions(this) + '/' + this.executionId + (loadSuccesses ? '/with-successes' : '')
         this.loadingExecution = true
+        util.ifFeatureEnabled('execution-shortener', function () {
+          this.executionShortener = true
+        }.bind(this), function () {
+          this.executionShortener = false
+        }.bind(this))
         Vue.http
           .get(url, api.REQUEST_OPTIONS)
           .then((response) => {
             this.loadingExecution = false
             this.loadedWithSuccesses = loadSuccesses
             this.execution = response.body
+            this.filterFeatures()
           }, (error) => {
             this.loadingExecution = false
             api.handleError(error)
           })
+      },
+
+      filterFeatures () {
+        this.counts.matching = 0
+        this.counts.total = 0
+        this.$set(this, 'totals', {})
+        this.$set(this, 'totalsIfClicked', {})
+
+        if (this.execution && this.execution.runs) {
+          this.loadingExecution = true
+          if (this.executionShortener) {
+            let url = api.paths.executions(this) + '/' + this.execution.id + '/filtered'
+            Vue.http
+              .post(url, this.filter, api.REQUEST_OPTIONS)
+              .then((response) => {
+                this.execution = response.body
+                this.filterExecutionOnServer()
+                this.loadingExecution = false
+              }, (error) => {
+                api.handleError(error)
+                this.loadingExecution = false
+              })
+          } else {
+            this.filterExecutionOnClient()
+            this.loadingExecution = false
+          }
+        }
+      },
+
+      filterExecutionOnServer () {
+        this.features = []
+        let totalCriterion = this.totalCriterion()
+        for (var idx in this.execution.qualitySeverities) {
+          let qualitySeverity = this.execution.qualitySeverities[idx]
+          if (qualitySeverity.severity && qualitySeverity.severity.name !== 'Global') {
+            let sCounts = qualitySeverity.scenarioCounts
+            this.counts.total += (this.filter.withSucceed) ? sCounts.total : sCounts.failed
+          }
+        }
+        for (var i in this.execution.runs) {
+          let run = this.execution.runs[i]
+          if (run && run.executedScenarios) {
+            let lastRun = null
+            let lastFeature = null
+            let lastScenario = null
+            for (let j in run.executedScenarios) {
+              let executedScenario = run.executedScenarios[j]
+              // Filter out scenarios & update counts
+              this.counts.matching++
+              if (lastRun == null || lastRun.id !== run.id) {
+                lastRun = {
+                  ...run,
+                  executedScenarios: undefined,
+                  features: []
+                }
+                this.features.push(lastRun)
+                lastFeature = null
+                lastScenario = null
+              }
+
+              if (lastFeature == null || lastFeature.file !== executedScenario.featureFile) {
+                lastFeature = {
+                  file: executedScenario.featureFile,
+                  name: executedScenario.featureName,
+                  scenarios: []
+                }
+                lastRun.features.push(lastFeature)
+                lastScenario = null
+              }
+
+              if (lastScenario == null || lastScenario.id !== executedScenario.id) {
+                lastScenario = {
+                  ...executedScenario
+                }
+                lastFeature.scenarios.push(lastScenario)
+              }
+              // Update totals of the filter pane
+              this.addMatchingTotal(totalCriterion, run, executedScenario)
+              this.addMatchingTotalIfClicked(totalCriterion, run, executedScenario)
+            }
+          }
+        }
+      },
+
+      // Deprecated.
+      filterExecutionOnClient () {
+        this.features = []
+        let totalCriterion = this.totalCriterion()
+        for (var i in this.execution.runs) {
+          let run = this.execution.runs[i]
+
+          if (run && run.executedScenarios) {
+            let lastRun = null
+            let lastFeature = null
+            let lastScenario = null
+
+            for (let j in run.executedScenarios) {
+              let executedScenario = run.executedScenarios[j]
+              // Filter out scenarios & update counts
+              this.counts.total += (executedScenario.handling === 'SUCCESS' ? (this.filter.withSucceed ? 1 : 0) : 1)
+              if (this.matchFilters(this.filter, run, executedScenario)) {
+                // Append filtered scenarios to view
+                this.counts.matching++
+                if (lastRun == null || lastRun.id !== run.id) {
+                  lastRun = {
+                    ...run,
+                    executedScenarios: undefined,
+                    features: []
+                  }
+                  this.features.push(lastRun)
+                  lastFeature = null
+                  lastScenario = null
+                }
+
+                if (lastFeature == null || lastFeature.file !== executedScenario.featureFile) {
+                  lastFeature = {
+                    file: executedScenario.featureFile,
+                    name: executedScenario.featureName,
+                    scenarios: []
+                  }
+                  lastRun.features.push(lastFeature)
+                  lastScenario = null
+                }
+
+                if (lastScenario == null || lastScenario.id !== executedScenario.id) {
+                  lastScenario = {
+                    ...executedScenario
+                  }
+                  lastFeature.scenarios.push(lastScenario)
+                }
+              }
+
+              // Update totals of the filter pane
+              this.addMatchingTotal(totalCriterion, run, executedScenario)
+              this.addMatchingTotalIfClicked(totalCriterion, run, executedScenario)
+            }
+          }
+        }
       },
 
       loadHistory () {
@@ -672,6 +765,9 @@
           if (this.filter[propertyName]) {
             query[propertyName] = this.filter[propertyName]
           }
+        }
+        if (!this.executionShortener) {
+          this.loadExecution()
         }
         this.$router.replace({ params: { id: this.executionId }, query })
       },

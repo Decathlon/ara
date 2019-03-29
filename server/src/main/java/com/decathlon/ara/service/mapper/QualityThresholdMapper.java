@@ -37,6 +37,14 @@ public abstract class QualityThresholdMapper {
         }
     }
 
+    /**
+     *
+     * @param json
+     * @return
+     * @deprecated
+     * @see com.decathlon.ara.service.transformer.QualityThresholdTransformer#toMap(String)
+     */
+    @Deprecated
     public Map<String, QualityThreshold> map(String json) {
         if (StringUtils.isEmpty(json)) {
             return new HashMap<>();

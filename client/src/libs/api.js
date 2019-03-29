@@ -36,7 +36,7 @@ api.paths = {
   sources: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/sources',
   teams: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/teams',
   types: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/types',
-  features: () => API_PATH + '/features/'
+  features: () => API_PATH + '/features'
 }
 
 api.handleError = function (response, callBack) {

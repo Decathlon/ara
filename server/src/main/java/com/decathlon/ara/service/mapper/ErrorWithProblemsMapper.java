@@ -4,6 +4,7 @@ import com.decathlon.ara.domain.Error;
 import com.decathlon.ara.domain.ProblemPattern;
 import com.decathlon.ara.service.dto.error.ErrorWithProblemsDTO;
 import com.decathlon.ara.service.dto.problem.ProblemDTO;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.mapstruct.AfterMapping;
@@ -20,6 +21,14 @@ public abstract class ErrorWithProblemsMapper implements EntityMapper<ErrorWithP
     @Autowired
     private ProblemMapper problemMapper;
 
+    /**
+     *
+     * @param error
+     * @param errorDto
+     * @deprecated
+     * @see com.decathlon.ara.service.transformer.ProblemTransformer#toDtos(Collection)
+     */
+    @Deprecated
     @AfterMapping
     protected void populateProblems(Error error, @MappingTarget ErrorWithProblemsDTO errorDto) {
         final List<ProblemDTO> problems = problemMapper.toDto(

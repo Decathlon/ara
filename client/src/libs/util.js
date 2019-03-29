@@ -1,5 +1,7 @@
 import moment from 'moment'
 
+import Vue from 'vue'
+import api from './api'
 import store from '../store'
 
 let util = {}
@@ -97,6 +99,20 @@ util.prettyHoursMinutesFromMillisecondsDuration = function (milliseconds) {
 
   return (hours ? hours + (hours === 1 ? ' hour' : ' hours') + (minutes ? ' ' : '') : '') +
          (minutes || !hours ? minutes + (minutes === 1 ? ' minute' : ' minutes') : '')
+}
+
+util.ifFeatureEnabled = function (featureCode, callbackIfEnabled, callbackIfDisabled) {
+  Vue.http
+  .get(api.paths.features() + '/' + featureCode, api.REQUEST_OPTIONS)
+  .then((response) => {
+    if (response.body.enabled) {
+      callbackIfEnabled()
+    } else {
+      callbackIfDisabled()
+    }
+  }, (error) => {
+    api.handleError(error, callbackIfDisabled)
+  })
 }
 
 export default util

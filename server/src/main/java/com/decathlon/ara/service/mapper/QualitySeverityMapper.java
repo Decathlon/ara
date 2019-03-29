@@ -37,6 +37,14 @@ public abstract class QualitySeverityMapper {
         }
     }
 
+    /**
+     *
+     * @param json
+     * @return
+     * @deprecated
+     * @see com.decathlon.ara.service.transformer.QualitySeverityTransformer#toDtos(String)
+     */
+    @Deprecated
     public List<QualitySeverityDTO> stringToQualitySeverityDTO(String json) {
         if (StringUtils.isEmpty(json)) {
             return new ArrayList<>();

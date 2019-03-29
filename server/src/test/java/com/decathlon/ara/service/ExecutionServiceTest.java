@@ -1,22 +1,22 @@
 package com.decathlon.ara.service;
 
+import com.decathlon.ara.ci.bean.Build;
+import com.decathlon.ara.ci.bean.BuildToIndex;
+import com.decathlon.ara.ci.service.ExecutionCrawlerService;
+import com.decathlon.ara.ci.service.ExecutionDiscovererService;
 import com.decathlon.ara.domain.CycleDefinition;
 import com.decathlon.ara.domain.Execution;
 import com.decathlon.ara.domain.ExecutionCompletionRequest;
 import com.decathlon.ara.domain.enumeration.JobStatus;
 import com.decathlon.ara.domain.enumeration.QualityStatus;
-import com.decathlon.ara.ci.bean.BuildToIndex;
-import com.decathlon.ara.ci.bean.Build;
-import com.decathlon.ara.ci.service.ExecutionCrawlerService;
-import com.decathlon.ara.ci.service.ExecutionDiscovererService;
 import com.decathlon.ara.repository.CycleDefinitionRepository;
 import com.decathlon.ara.repository.ExecutionCompletionRequestRepository;
 import com.decathlon.ara.repository.ExecutionRepository;
 import com.decathlon.ara.repository.FunctionalityRepository;
 import com.decathlon.ara.service.mapper.ExecutionMapper;
-import com.decathlon.ara.service.mapper.ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsMapper;
 import com.decathlon.ara.service.mapper.ExecutionWithHandlingCountsMapper;
 import com.decathlon.ara.service.support.Settings;
+import com.decathlon.ara.service.transformer.ExecutionTransformer;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,7 +42,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -68,7 +67,7 @@ public class ExecutionServiceTest {
     private ExecutionWithHandlingCountsMapper executionWithHandlingCountsMapper;
 
     @Mock
-    private ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsMapper executionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsMapper;
+    private ExecutionTransformer executionTransformer;
 
     @Mock
     private ExecutionHistoryService executionHistoryService;
@@ -84,6 +83,9 @@ public class ExecutionServiceTest {
 
     @Mock
     private CycleDefinitionRepository cycleDefinitionRepository;
+
+    @Mock
+    private FeatureService featureService;
 
     @Spy
     @InjectMocks

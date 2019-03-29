@@ -2,6 +2,7 @@ package com.decathlon.ara.service.dto.executedscenario;
 
 import com.decathlon.ara.domain.enumeration.Handling;
 import com.decathlon.ara.service.dto.error.ErrorWithProblemsDTO;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,6 @@ public class ExecutedScenarioWithTeamIdsAndErrorsAndProblemsDTO extends Executed
      */
     private Set<Long> teamIds;
 
-    private List<ErrorWithProblemsDTO> errors;
+    private List<ErrorWithProblemsDTO> errors = new ArrayList<>();
 
 }

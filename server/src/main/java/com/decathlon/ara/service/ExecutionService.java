@@ -12,14 +12,18 @@ import com.decathlon.ara.domain.Execution;
 import com.decathlon.ara.domain.ExecutionCompletionRequest;
 import com.decathlon.ara.domain.Run;
 import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
+import com.decathlon.ara.domain.enumeration.Handling;
 import com.decathlon.ara.domain.enumeration.JobStatus;
 import com.decathlon.ara.domain.enumeration.QualityStatus;
+import com.decathlon.ara.features.available.ExecutionShortenerFeature;
 import com.decathlon.ara.report.util.ScenarioExtractorUtil;
 import com.decathlon.ara.repository.CycleDefinitionRepository;
 import com.decathlon.ara.repository.ExecutionCompletionRequestRepository;
 import com.decathlon.ara.repository.ExecutionRepository;
 import com.decathlon.ara.repository.FunctionalityRepository;
+import com.decathlon.ara.service.dto.error.ErrorWithProblemsDTO;
 import com.decathlon.ara.service.dto.executedscenario.ExecutedScenarioWithTeamIdsAndErrorsAndProblemsDTO;
+import com.decathlon.ara.service.dto.execution.ExecutionCriteriaDTO;
 import com.decathlon.ara.service.dto.execution.ExecutionDTO;
 import com.decathlon.ara.service.dto.execution.ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO;
 import com.decathlon.ara.service.dto.execution.ExecutionWithHandlingCountsDTO;
@@ -27,9 +31,9 @@ import com.decathlon.ara.service.dto.run.RunWithExecutedScenariosAndTeamIdsAndEr
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.mapper.ExecutionMapper;
-import com.decathlon.ara.service.mapper.ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsMapper;
 import com.decathlon.ara.service.mapper.ExecutionWithHandlingCountsMapper;
 import com.decathlon.ara.service.support.Settings;
+import com.decathlon.ara.service.transformer.ExecutionTransformer;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -82,7 +86,7 @@ public class ExecutionService {
     private final ExecutionWithHandlingCountsMapper executionWithHandlingCountsMapper;
 
     @NonNull
-    private final ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsMapper executionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsMapper;
+    private final ExecutionTransformer executionTransformer;
 
     @NonNull
     private final ExecutionHistoryService executionHistoryService;
@@ -98,6 +102,9 @@ public class ExecutionService {
 
     @NonNull
     private final CycleDefinitionRepository cycleDefinitionRepository;
+
+    @NonNull
+    private final FeatureService featureService;
 
 
     /**
@@ -117,28 +124,124 @@ public class ExecutionService {
      *
      * @param projectId     the ID of the project in which to work
      * @param id            the id of the entity
-     * @param withSuccesses if false, only return scenarios with errors; if true, return all scenarios, even succeed ones
+     * @param criteria      the search criteria to use while filtering the executed scenarios.
      * @return the entity
      * @throws NotFoundException when the execution cannot be found
      */
     @Transactional(readOnly = true)
-    public ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO findOneWithRuns(long projectId, long id, boolean withSuccesses) throws NotFoundException {
+    public ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO findOneWithRuns(long projectId, long id, ExecutionCriteriaDTO criteria) throws NotFoundException {
         Execution execution = executionRepository.findByProjectIdAndId(projectId, id);
         if (execution == null) {
             throw new NotFoundException(Messages.NOT_FOUND_EXECUTION, Entities.EXECUTION);
         }
 
-        if (!withSuccesses) {
-            removeScenariosWithoutErrors(execution);
+        boolean executionShortenerEnabled = featureService.isEnabled(new ExecutionShortenerFeature().getCode());
+        if (!executionShortenerEnabled && !criteria.isWithSucceed()) {
+            this.removeScenariosWithoutErrors(execution);
         }
 
-        ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO resultDto =
-                executionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsMapper
-                        .toDto(execution);
+        ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO resultDto
+                = executionTransformer.toFullyDetailledDto(execution);
 
         assignTeamsToExecutedScenario(projectId, resultDto.getRuns());
 
+        if (executionShortenerEnabled) {
+            this.applyFilters(resultDto, criteria);
+            resultDto.getRuns().forEach(run -> run.getExecutedScenarios().forEach(this::reduceExceptionsAndContentsForScenario));
+        }
+
         return resultDto;
+    }
+
+    private void applyFilters(ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO execution, ExecutionCriteriaDTO criteria) {
+        // Apply the "TYPE" filter.
+        if (StringUtils.isNotEmpty(criteria.getType())) {
+            execution.getRuns().removeIf(r -> !criteria.getType().equals(r.getType().getCode()));
+        }
+        // Apply the "COUNTRY" filter.
+        if (StringUtils.isNotEmpty(criteria.getCountry())) {
+            execution.getRuns().removeIf(r -> !criteria.getCountry().equals(r.getCountry().getCode()));
+        }
+        // Apply Scenario specific filters.
+        for (RunWithExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO run : execution.getRuns()) {
+            run.getExecutedScenarios().removeIf(s -> !matchFilters(s, criteria));
+        }
+    }
+
+    private boolean matchFilters(ExecutedScenarioWithTeamIdsAndErrorsAndProblemsDTO scenario, ExecutionCriteriaDTO criteria) {
+        // Apply the "ONLY SCENARIO IN ERROR" filter
+        boolean match = !(!criteria.isWithSucceed() && scenario.getErrors().isEmpty());
+        // Apply the "TEAM" filter
+        if (null != criteria.getTeam()) {
+            match = match && ((-404L == criteria.getTeam() && scenario.getTeamIds().isEmpty())
+                    || scenario.getTeamIds().contains(criteria.getTeam())
+                    || this.containsTeamIdInErrors(scenario, criteria.getTeam()));
+        }
+        // Apply the "SEVERITY" filter
+        if (StringUtils.isNotEmpty(criteria.getSeverity())) {
+            boolean emptySeverity = StringUtils.isEmpty(scenario.getSeverity()) || "&".equals(scenario.getSeverity());
+            match = match && (criteria.getSeverity().equals(scenario.getSeverity())
+                    || ("none".equals(criteria.getSeverity()) && emptySeverity)
+                    || ("medium".equals(criteria.getSeverity()) && emptySeverity));
+        }
+        // Apply the "HANDLING" filter
+        if (StringUtils.isNotEmpty(criteria.getHandling())) {
+            match = match && Handling.valueOf(criteria.getHandling()) == scenario.getHandling();
+        }
+        // Apply the "FEATURE" filter
+        if (StringUtils.isNotEmpty(criteria.getFeature())) {
+            match = match && scenario.getFeatureName().toLowerCase().contains(criteria.getFeature().toLowerCase());
+        }
+        // Apply the "SCENARIO" filter
+        if (StringUtils.isNotEmpty(criteria.getScenario())) {
+            match = match && scenario.getName().toLowerCase().contains(criteria.getScenario().toLowerCase());
+        }
+        // Apply the "STEP" filter
+        if (StringUtils.isNotEmpty(criteria.getStep())) {
+            match = match && !scenario.getErrors().isEmpty() && scenario.getErrors().stream()
+                    .anyMatch(e -> e.getStep().toLowerCase().contains(criteria.getStep().toLowerCase()));
+        }
+        // Apply the "EXCEPTION" filter
+        if (StringUtils.isNotEmpty(criteria.getException()) && !scenario.getErrors().isEmpty()) {
+            match = match && scenario.getErrors().stream()
+                    .anyMatch(e -> e.getException().toLowerCase().contains(criteria.getException().toLowerCase()));
+        }
+        // Apply the "PROBLEM" filter
+        if (null != criteria.getProblem()) {
+            match = match && !scenario.getErrors().isEmpty() && scenario.getErrors().stream()
+                    .anyMatch(e -> e.getProblems().stream()
+                            .anyMatch(p -> p.getId().equals(criteria.getProblem())));
+        }
+        return match;
+    }
+
+    private boolean containsTeamIdInErrors(ExecutedScenarioWithTeamIdsAndErrorsAndProblemsDTO scenario, long teamId) {
+        for (ErrorWithProblemsDTO error : scenario.getErrors()) {
+            if (error.getProblems().stream()
+                    .anyMatch(p -> p.getBlamedTeam().getId() == teamId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void reduceExceptionsAndContentsForScenario(ExecutedScenarioWithTeamIdsAndErrorsAndProblemsDTO scenario) {
+        final int limit = 50;
+        if (scenario.getErrors().isEmpty()) {
+            return;
+        }
+        if (scenario.getContent().length() > limit) {
+            scenario.setContent(scenario.getContent().substring(0, limit) + "...");
+        }
+        for (ErrorWithProblemsDTO error : scenario.getErrors()) {
+            String exception = error.getException();
+            if (!StringUtils.isEmpty(exception)) {
+                int causeIdx = exception.indexOf(':');
+                if (exception.length() > causeIdx + limit) {
+                    error.setException(exception.substring(0, causeIdx + limit - 3) + "...");
+                }
+            }
+        }
     }
 
     private void removeScenariosWithoutErrors(Execution execution) {
