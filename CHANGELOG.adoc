@@ -22,6 +22,18 @@ For instance, on Windows, you can use http://getgreenshot.org/ for screenshots
 and https://www.screentogif.com/ for animated-GIFs.
 ////
 
+== 3.1.0
+
+== User-Visible Changes
+
+* *[FEATURE]* Add support for GitHub issue tracker.
+
+== Technical Changes
+
+* *[FIX]* Fix an issue where a Swagger dependency can't be downloaded on first install.
+* *[FEATURE]* Release ARA source code under Apache 2 license on Github :
+https://github.com/decathlon/ara
+
 == 3.0.1
 
 === Technical Changes
@@ -32,6 +44,9 @@ to freeze, when the execution have several errors with detailled exceptions.
 == 3.0.0
 
 First version of ARA with a release of the source code.
+
+* *[BREAKING CHANGE]* Change the way the final jar is builded
+* *[FEATURE]* Connect the project to Decathlon's internal CI.
 
 === Technical Changes
 

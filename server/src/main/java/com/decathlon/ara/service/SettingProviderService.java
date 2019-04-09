@@ -1,14 +1,21 @@
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.defect.DefectAdapter;
 import com.decathlon.ara.ci.fetcher.Fetcher;
-import com.decathlon.ara.ci.service.FetcherService;
 import com.decathlon.ara.ci.fetcher.FileSystemFetcher;
+import com.decathlon.ara.ci.service.FetcherService;
+import com.decathlon.ara.defect.DefectAdapter;
 import com.decathlon.ara.service.dto.setting.SettingDTO;
 import com.decathlon.ara.service.dto.setting.SettingGroupDTO;
 import com.decathlon.ara.service.dto.setting.SettingOptionDTO;
 import com.decathlon.ara.service.dto.setting.SettingType;
 import com.decathlon.ara.service.support.Settings;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,12 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * Service for providing setting definitions. It is ignored from code coverage, as it's merely a configuration file.
@@ -584,6 +585,40 @@ public class SettingProviderService {
                         "If a state is not configured, it will be considered OPEN, with a warning in logs."));
 
         return settings;
+    }
+
+    public List<SettingDTO> getDefectGithubDefinitions() {
+        List<SettingDTO> result = new ArrayList<>();
+
+        result.add(new SettingDTO()
+                .withCode(Settings.DEFECT_GITHUB_OWNER)
+                .withName("Github Repository's owner")
+                .withType(SettingType.STRING)
+                .withRequired(true)
+                .withHelp("" +
+                        "The owner of this project's Github repository. Usually the user or organization which " +
+                        "holds the repository."));
+
+        result.add(new SettingDTO()
+                .withCode(Settings.DEFECT_GITHUB_REPONAME)
+                .withName("Github Repository's name")
+                .withType(SettingType.STRING)
+                .withRequired(true)
+                .withHelp("The name of this project's Github repository."));
+
+        result.add(new SettingDTO()
+                .withCode(Settings.DEFECT_GITHUB_TOKEN)
+                .withName("Authorization token")
+                .withType(SettingType.STRING)
+                .withRequired(false)
+                .withHelp("" +
+                        "If your project's repository is a private one, you need to put here the personal token of " +
+                        "a user authorized to read the repository." +
+                        "To create a personal access token, on Github, go to the Settings page of your account, then " +
+                        "click on the 'Developer settings' menu and click on the 'Personal Access Token' menu item. " +
+                        "In this page, generate a new token (enable sso if your organization use it), and copy the " +
+                        "Authorization token displayed in this field."));
+        return result;
     }
 
 }

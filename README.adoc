@@ -32,6 +32,24 @@ You only need a report.json from Cucumber and/or one or several JSON reports fro
 ARA integrates best with a working Continuous Integration pipeline which launches your tests automatically (on a time-schedule or after each commit). +
 You will then modify your pipeline slightly to send such report files to ARA.
 
+== How to build it and make it work in 2 minutes
+
+After you've download the source code of ARA, here is all you have to do to make it run on your local environment. You will
+need :
+
+* Java 8 (for now, supports for more recent Java versions will come soon).
+* Maven 3
+* Docker
+* A shell environment (either Bash, Sh, Zsh..., or even a git-bash on Windows)
+
+In the following, the folder which contains this Readme will be called `ARA_ROOT`
+
+. Create a folder where your database's datas are going to live (says `my/db/path`)
+. Open a Terminal, and go to `ARA_ROOT/db`
+. Use `./manage-db.sh create my/db/path`, this command will create a MySQL Dockerized database locally.
+. In the terminal, go back to `ARA_ROOT`` and a `mvn clean install -Pdev -DskipPitest`
+. Go to `ARA_ROOT/final/target` and run `java -Dspring.profiles.active=dev -jar ara-{{YOUR_VERSION}}.jar`
+
 == How to Set Up ARA?
 
 Please read the <<doc/integrator/main/IntegratorDocumentation.adoc#head, Integrator Documentation>>

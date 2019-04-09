@@ -4,7 +4,7 @@ import com.decathlon.ara.domain.Setting;
 import lombok.experimental.UtilityClass;
 
 /**
- * Holds {@link Setting#code}s standard in ARA core application. Other custom adapters are free to provide other ones.
+ * Holds {@link Setting}'s codes standard in ARA core application. Other custom adapters are free to provide other ones.
  */
 @UtilityClass
 public class Settings {
@@ -26,6 +26,10 @@ public class Settings {
     public static final String DEFECT_RTC_WORK_ITEM_TYPES = "defect.rtc.workItemTypes";
     public static final String DEFECT_RTC_CLOSED_STATES = "defect.rtc.closedStates";
     public static final String DEFECT_RTC_OPEN_STATES = "defect.rtc.openStates";
+
+    public static final String DEFECT_GITHUB_OWNER = "defect.github.owner";
+    public static final String DEFECT_GITHUB_REPONAME = "defect.github.repositoryName";
+    public static final String DEFECT_GITHUB_TOKEN = "defect.github.authorizationToken";
 
     public static final String EXECUTION_INDEXER = "execution.indexer";
 

@@ -10,7 +10,6 @@ Here is basically what you will need to set up on your development machine:
   ** Run `mvn install -Pdev_in` in the project's root folder to build the server and its dependencies
      (you can speed up the build by running `mvn install -Pdev_in -DskipTests -DskipITs -DskipPitest` instead).
   ** Run `java -Dspring.profiles.active=dev -jar server/target/ara-server-*.jar` to launch the back-end server. +
-  ** APIs are available here: http://localhost:8080/swagger-ui.html +
   ** When modifying the server, just run `mvn install -Pdev_in` in the `server` folder to not rebuild all dependencies, this time.
 * *Build the client part and start it:*
   ** Run `npm install` (this is part of the above `mvn install`, so you can skip it if you have already done that).

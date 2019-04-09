@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.decathlon.ara</groupId>
         <artifactId>ara-parent</artifactId>
-        <version>3.0.1</version>
+        <version>3.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>ara-server</artifactId>
     <packaging>jar</packaging>
@@ -669,6 +669,9 @@
                             <goal>jar</goal>
                         </goals>
                     </execution>
+                    <!-- FIXME : Replace Springfox Javadoc since it's buggy in the dependency resolution and doesn't
+                                 seems to be maintened anymore. Added a comment, wait for answers on it.
+                                 See: https://github.com/springfox/springfox-javadoc/issues/9
                     <execution>
                         <goals>
                             <goal>javadoc</goal>
@@ -683,10 +686,11 @@
                             </docletArtifact>
                             <additionalOptions>-classdir ${project.build.outputDirectory}</additionalOptions>
                             <subpackages>com.decathlon.ara.web.rest</subpackages>
-                            <sourceFileExcludes combine.self="override"/> <!-- No exclude for this subpackage -->
+                            <sourceFileExcludes combine.self="override"/>
                             <useStandardDocletOptions>false</useStandardDocletOptions>
                         </configuration>
                     </execution>
+                    -->
                 </executions>
                 <configuration>
                     <sourcepath>

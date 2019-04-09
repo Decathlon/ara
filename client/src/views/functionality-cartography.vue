@@ -19,7 +19,7 @@
         </div>
 
         <div class="balance" style="text-align: right;">
-          <a :href="constants.documentationUrl + '/doc/user/functionalities/CreateAndMoveFunctionalities.html'"
+          <a :href="https://github.com/decathlon/ara/blob/master/doc/user/functionalities/CreateAndMoveFunctionalities.adoc"
              target="_blank" id="helpLink">
             How to create &amp; move functionalities
             <Icon type="md-help-circle" size="16" style="padding: 0; vertical-align: -3px;"/>
