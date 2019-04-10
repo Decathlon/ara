@@ -117,6 +117,6 @@ image:coverage.png[]
 == Play With the Demo Project
 
 You can find more information with the
-link:../demo/DemoWalkthrough.adoc[Demo Walk-Through]:
+link:../../demo/DemoWalkthrough.adoc[Demo Walk-Through]:
 follow a typical user journey to understand how to exploit automated tests results with ARA,
 with concrete examples.
