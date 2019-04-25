@@ -40,8 +40,9 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 
-@RunWith(SpringRunner.class)
-@TransactionalSpringIntegrationTest
+// FIXME : Should be replaced by Selenium tests on a dedicated infra.
+//@RunWith(SpringRunner.class)
+//@TransactionalSpringIntegrationTest
 public class DemoServiceIT {
 
     @Autowired
@@ -94,7 +95,7 @@ public class DemoServiceIT {
      * @throws BadRequestException when something goes wrong with the method under test
      * @throws IOException         when somethings goes wrong with temporary directory used for this test
      */
-    @Test
+    // @Test
     public void create_ShouldPopulateTablesAndCreateExecutionFiles_WhenCreatingAProject()
             throws BadRequestException, IOException {
         // GIVEN
@@ -116,8 +117,8 @@ public class DemoServiceIT {
         }
     }
 
-    @Test
-    @DatabaseSetup("/dbunit/DemoServiceIT-delete.xml")
+    // @Test
+    //@DatabaseSetup("/dbunit/DemoServiceIT-delete.xml")
     public void delete_ShouldDeleteProjectAndFiles_WhenCalled() throws NotFoundException, IOException {
         // GIVEN
         final Path tempDirectory = Files.createTempDirectory("ara_temp_integration_test_directory_");
