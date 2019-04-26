@@ -22,6 +22,14 @@ For instance, on Windows, you can use http://getgreenshot.org/ for screenshots
 and https://www.screentogif.com/ for animated-GIFs.
 ////
 
+== 3.1.1
+
+== User-Visible Changes
+
+* *[FIX]* Fix an issue which prevents the Demo project to be created.
+* *[FIX]* Add a global skip tests when trying to build & run in 2minutes (README.adoc)
+* *[FIX}* Fix a 404 link to the DemoWalkthrough in the Demo project.
+
 == 3.1.0
 
 == User-Visible Changes

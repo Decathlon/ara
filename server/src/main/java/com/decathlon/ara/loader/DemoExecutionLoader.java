@@ -283,10 +283,12 @@ public class DemoExecutionLoader {
 
     private void createNewmanReports(File runDirectory, int failingLevel) throws IOException {
         final PathMatchingResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
-        final String newmanReportsLocation = "classpath:demo/newman-reports-" + Math.min(failingLevel, 1) + "/";
+        String parentFolder = "newman-reports-" + Math.min(failingLevel, 1) + "/";
+        final String newmanReportsLocation = "classpath:demo/" + parentFolder;
         final Resource reportsFolderResource = resourceResolver.getResource(newmanReportsLocation);
-        for (Resource resource : resourceResolver.getResources(newmanReportsLocation + "**/*.json")) {
-            final String relativePath = reportsFolderResource.getURI().relativize(resource.getURI()).toString();
+        Resource[] jsonResources = resourceResolver.getResources(newmanReportsLocation + "**/*.json");
+        for (Resource resource : jsonResources) {
+            final String relativePath = resource.getFilename();
             copyStreamToFile(resource.getInputStream(), new File(runDirectory, "reports/" + relativePath));
         }
 

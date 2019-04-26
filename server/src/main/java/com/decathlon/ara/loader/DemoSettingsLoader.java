@@ -98,7 +98,7 @@ public class DemoSettingsLoader {
                         "   style=\"font-size: 32px; float: left; margin-right: 4px\"></i>\n" +
                         "FEELING LOST?<br>" +
                         "Read " +
-                        link(System.getProperty("docUrl") + "/doc/demo/DemoWalkthrough.html",
+                        link("https://github.com/Decathlon/ara/blob/master/doc/demo/DemoWalkthrough.adoc",
                                 "how to play with the demo project") +
                         " while learning how to use ARA and how it can help your team." +
                         "</div>"));

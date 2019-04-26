@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.decathlon.ara</groupId>
         <artifactId>ara-parent</artifactId>
-        <version>3.1.0</version>
+        <version>3.1.1</version>
     </parent>
     <artifactId>ara-server</artifactId>
     <packaging>jar</packaging>
@@ -790,6 +790,8 @@
                 </liquibase.database.url>
                 <liquibase.database.username>root</liquibase.database.username>
                 <liquibase.database.password>V*n6MxBq7mr?4P?M</liquibase.database.password>
+                <skipPitest>true</skipPitest>
+                <skip.integration.tests>true</skip.integration.tests>
             </properties>
         </profile>
         <profile>

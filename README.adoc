@@ -47,7 +47,7 @@ In the following, the folder which contains this Readme will be called `ARA_ROOT
 . Create a folder where your database's datas are going to live (says `my/db/path`)
 . Open a Terminal, and go to `ARA_ROOT/db`
 . Use `./manage-db.sh create my/db/path`, this command will create a MySQL Dockerized database locally.
-. In the terminal, go back to `ARA_ROOT`` and a `mvn clean install -Pdev -DskipPitest`
+. In the terminal, go back to `ARA_ROOT`` and a `mvn clean install -Pdev -DskipPitest -Dmaven.test.skip=true`
 . Go to `ARA_ROOT/final/target` and run `java -Dspring.profiles.active=dev -jar ara-{{YOUR_VERSION}}.jar`
 
 == How to Set Up ARA?
