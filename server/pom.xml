@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.decathlon.ara</groupId>
         <artifactId>ara-parent</artifactId>
-        <version>3.1.1</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>ara-server</artifactId>
     <packaging>jar</packaging>
@@ -342,7 +342,7 @@
     <build>
         <plugins>
             <!-- Run Liquibase scripts on the integration database *BEFORE* generating Querydsl table classes from database schema -->
-            <!-- Liquibase scripts can also be manually run by "mvn liquibase:updateTestingRollback" / "mvn liquibase:rollback" + a profile -->
+            <!-- Liquibase scripts can also be manually run by "mvn liquibase:updateTestingRollback" / "mvn liquibase:rollback" + a profile
             <plugin>
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-maven-plugin</artifactId>
@@ -365,7 +365,7 @@
                     </execution>
                 </executions>
             </plugin>
-
+-->
             <!-- Generate Querydsl table classes from the integration database schema -->
             <plugin>
                 <groupId>com.querydsl</groupId>
