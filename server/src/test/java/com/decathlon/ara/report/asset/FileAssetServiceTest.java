@@ -56,7 +56,7 @@ public class FileAssetServiceTest {
     @Test
     public void saveScreenshot_should_not_fail_but_return_null_on_write_failure() {
         // GIVEN
-        when(araConfiguration.getFileHomeFolder()).thenReturn("/var/proc/?/not-writable"); // ... on Unix nor on Windows
+        when(araConfiguration.getFileHomeFolder()).thenReturn("/bin/mkdir/?/not-writable"); // ... on Unix nor on Windows
 
         // WHEN
         final String url = cut.saveScreenshot(new byte[] { 'a', 'n', 'y' }, "any");
@@ -94,7 +94,7 @@ public class FileAssetServiceTest {
     @Test
     public void saveHttpLogs_should_not_fail_but_return_null_on_write_failure() {
         // GIVEN
-        when(araConfiguration.getFileHomeFolder()).thenReturn("/var/proc/?/not-writable"); // ... on Unix nor on Windows
+        when(araConfiguration.getFileHomeFolder()).thenReturn("/bin/mkdir/?/not-writable"); // ... on Unix nor on Windows
         when(araConfiguration.getFileHttpLogsSubFolder()).thenReturn("/directory");
 
         // WHEN
