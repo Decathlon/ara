@@ -66,10 +66,10 @@ function startContainer {
 }
 
 function createContainer {
-	if [[ "$1" == '/'* ]]; then
-	    dataDir="$1"
-	elif [[ "$1" == '.'* ]]; then
+	if [[ "$1" == '.'* ]]; then
 	    dataDir="`pwd`/$1"
+	else
+	    dataDir="$1"
 	fi
 	echo "[ARA] Create the folder on host if not exists..."
 	run "mkdir -p $dataDir"
