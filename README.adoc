@@ -45,9 +45,11 @@ need :
 In the following, the folder which contains this Readme will be called `ARA_ROOT`
 
 . Create a folder where your database's datas are going to live (says `my/db/path`)
-. Open a Terminal, and go to `ARA_ROOT/db`
+. Open a Terminal, and go to `ARA_ROOT/database/instance`
 . Use `./manage-db.sh create my/db/path`, this command will create a MySQL Dockerized database locally.
-. In the terminal, go back to `ARA_ROOT`` and a `mvn clean install -Pdev -DskipPitest -Dmaven.test.skip=true`
+. In the terminal, go back to `ARA_ROOT``
+. Use the command `mvn liquibase:update -Pdev -pl server` to create the database structure.
+. Use the command `mvn clean install -Pdev -DskipTests=true`
 . Go to `ARA_ROOT/final/target` and run `java -Dspring.profiles.active=dev -jar ara-{{YOUR_VERSION}}.jar`
 
 == How to Set Up ARA?
@@ -61,7 +63,7 @@ Once your technical team did plug the continuous integration of your project ont
 read the <<doc/user/main/UserDocumentation.adoc#head, User Documentation>>
 to train your whole team to use ARA.
 
-== How to Develop ARA?
+== How to Develop on ARA?
 
 Please read the <<doc/developer/DeveloperDocumentation.adoc#head, Developer Documentation>>
 to learn how the project is structured and how to develop new features in ARA.
