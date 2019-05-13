@@ -23,6 +23,7 @@
         <module>client</module>
         <module>lib</module>
         <module>generated-cucumber-report</module>
+        <module>database</module>
         <module>server</module>
         <module>final</module>
     </modules>
