@@ -79,7 +79,7 @@ function createContainer {
 	docker_cmd="docker run"
 	docker_cmd="$docker_cmd --name $CONTAINER_NAME"
 	docker_cmd="$docker_cmd -e MYSQL_ROOT_PASSWORD=$PASSWORD"
-	docker_cmd="$docker_cmd -v $dataDir:/var/lib/mysql" # Starting-slashes are for Windows compatibility
+	docker_cmd="$docker_cmd -v /$dataDir:/var/lib/mysql" # Starting-slashes are for Windows compatibility
 	docker_cmd="$docker_cmd -v /$CONF_DIR:/etc/mysql/conf.d"
 	docker_cmd="$docker_cmd -v /$SQL_DIR:/docker-entrypoint-initdb.d"
 	docker_cmd="$docker_cmd -p $PORT:3306"
