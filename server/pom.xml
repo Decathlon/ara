@@ -342,7 +342,7 @@
     <build>
         <plugins>
             <!-- Run Liquibase scripts on the integration database *BEFORE* generating Querydsl table classes from database schema -->
-            <!-- Liquibase scripts can also be manually run by "mvn liquibase:updateTestingRollback" / "mvn liquibase:rollback" + a profile -->
+            <!-- Liquibase scripts can also be manually run by "mvn liquibase:update" / "mvn liquibase:rollback" + a profile -->
             <plugin>
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-maven-plugin</artifactId>
@@ -355,15 +355,6 @@
                     <password>${liquibase.database.password}</password>
                     <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>generate-sources</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>updateTestingRollback</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <!-- Generate Querydsl table classes from the integration database schema -->
             <plugin>
