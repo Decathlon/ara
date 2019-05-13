@@ -45,7 +45,7 @@ need :
 In the following, the folder which contains this Readme will be called `ARA_ROOT`
 
 . Create a folder where your database's datas are going to live (says `my/db/path`)
-. Open a Terminal, and go to `ARA_ROOT/db`
+. Open a Terminal, and go to `ARA_ROOT/database/instance`
 . Use `./manage-db.sh create my/db/path`, this command will create a MySQL Dockerized database locally.
 . In the terminal, go back to `ARA_ROOT``
 . Use the command `mvn liquibase:update -Pdev -pl server` to create the database structure.
