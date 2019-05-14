@@ -1,7 +1,7 @@
 package com.decathlon.ara.service.dto.countrydeployment;
 
 import com.decathlon.ara.domain.enumeration.JobStatus;
-import com.decathlon.ara.ci.bean.Result;
+import com.decathlon.ara.domain.enumeration.Result;
 import com.decathlon.ara.service.dto.country.CountryDTO;
 import java.util.Date;
 import lombok.AllArgsConstructor;

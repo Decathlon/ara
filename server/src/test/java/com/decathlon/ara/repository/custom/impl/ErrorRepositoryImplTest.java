@@ -5,7 +5,7 @@ import com.decathlon.ara.domain.QError;
 import com.decathlon.ara.repository.ErrorRepository;
 import com.decathlon.ara.repository.ProblemPatternRepository;
 import com.decathlon.ara.repository.custom.util.JpaCacheManager;
-import com.decathlon.ara.service.TransactionService;
+import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.sql.SQLQueryFactory;
@@ -41,7 +41,7 @@ public class ErrorRepositoryImplTest {
     private JpaCacheManager jpaCacheManager;
 
     @Mock
-    private TransactionService transactionService;
+    private TransactionAppenderUtil transactionService;
 
     @InjectMocks
     private ErrorRepositoryImpl cut;

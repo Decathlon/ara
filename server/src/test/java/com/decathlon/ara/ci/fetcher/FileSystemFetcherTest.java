@@ -4,7 +4,7 @@ import com.decathlon.ara.ci.bean.Build;
 import com.decathlon.ara.ci.bean.CountryDeploymentExecution;
 import com.decathlon.ara.ci.bean.CycleDef;
 import com.decathlon.ara.ci.bean.ExecutionTree;
-import com.decathlon.ara.ci.bean.Result;
+import com.decathlon.ara.domain.enumeration.Result;
 import com.decathlon.ara.ci.util.FetchException;
 import com.decathlon.ara.ci.util.JsonParserConsumer;
 import com.decathlon.ara.domain.Run;

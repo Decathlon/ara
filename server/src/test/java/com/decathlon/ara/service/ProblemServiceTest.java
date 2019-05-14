@@ -12,6 +12,7 @@ import com.decathlon.ara.repository.ProblemPatternRepository;
 import com.decathlon.ara.repository.ProblemRepository;
 import com.decathlon.ara.repository.RootCauseRepository;
 import com.decathlon.ara.repository.custom.util.JpaCacheManager;
+import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
 import com.decathlon.ara.service.dto.problem.ProblemDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
@@ -115,7 +116,7 @@ public class ProblemServiceTest {
     private JpaCacheManager jpaCacheManager;
 
     @Mock
-    private TransactionService transactionService;
+    private TransactionAppenderUtil transactionService;
 
     @InjectMocks
     private ProblemService cut;

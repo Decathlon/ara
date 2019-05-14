@@ -1,6 +1,6 @@
 package com.decathlon.ara.service.transformer;
 
-import com.decathlon.ara.ci.bean.Result;
+import com.decathlon.ara.domain.enumeration.Result;
 import com.decathlon.ara.domain.Country;
 import com.decathlon.ara.domain.CountryDeployment;
 import com.decathlon.ara.domain.enumeration.JobStatus;

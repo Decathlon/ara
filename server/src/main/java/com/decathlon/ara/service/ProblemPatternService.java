@@ -7,6 +7,7 @@ import com.decathlon.ara.repository.ProblemPatternRepository;
 import com.decathlon.ara.repository.ProblemRepository;
 import com.decathlon.ara.repository.TypeRepository;
 import com.decathlon.ara.repository.custom.util.JpaCacheManager;
+import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
 import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
 import com.decathlon.ara.service.dto.problempattern.ProblemPatternDTO;
 import com.decathlon.ara.service.dto.response.DeletePatternDTO;
@@ -73,7 +74,7 @@ public class ProblemPatternService {
     private final JpaCacheManager jpaCacheManager;
 
     @NonNull
-    private final TransactionService transactionService;
+    private final TransactionAppenderUtil transactionService;
 
     /**
      * Get one problem pattern by id.
