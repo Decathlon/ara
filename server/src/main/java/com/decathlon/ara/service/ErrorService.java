@@ -6,6 +6,7 @@ import com.decathlon.ara.repository.ExecutedScenarioRepository;
 import com.decathlon.ara.repository.RunRepository;
 import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionAndProblemsDTO;
 import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
+import com.decathlon.ara.service.dto.problem.ProblemDTO;
 import com.decathlon.ara.service.dto.problempattern.ProblemPatternDTO;
 import com.decathlon.ara.service.dto.response.DistinctStatisticsDTO;
 import com.decathlon.ara.service.exception.NotFoundException;
@@ -19,6 +20,7 @@ import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.domain.Error;
 import com.decathlon.ara.domain.Problem;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -60,6 +62,9 @@ public class ErrorService {
     private final ProblemMapper problemMapper;
 
     @NonNull
+    private final ProblemService problemService;
+
+    @NonNull
     private final ProblemPatternMapper problemPatternMapper;
 
     @NonNull
@@ -97,7 +102,18 @@ public class ErrorService {
                     .filter(entry -> entry.getKey().getId().equals(errorDto.getId()))
                     .map(Map.Entry::getValue)
                     .findFirst();
-            errorDto.setProblems(errorProblems.map(problemMapper::toDto).orElse(null));
+
+            if (errorProblems.isPresent()) {
+                List<ProblemDTO> problemDtos = new ArrayList<>();
+                for (Problem problem : errorProblems.get()) {
+                    ProblemDTO dto = problemMapper.toDto(problem);
+                    dto.setDefectUrl(problemService.retrieveDefectUrl(problem));
+                    problemDtos.add(dto);
+                }
+                errorDto.setProblems(problemDtos);
+            } else {
+                errorDto.setProblems(null);
+            }
         });
 
         return errorDtoPage;

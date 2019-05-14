@@ -3,6 +3,9 @@ package com.decathlon.ara.configuration;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
 
 /**
  * <p>ARA's application configuration options to be used by the Java code.</p>
@@ -20,6 +23,11 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @Configuration
 @ConfigurationProperties("ara")
+@Import(DataSourceConfiguration.class)
+@PropertySources({
+        @PropertySource("classpath:db-application.properties"),
+        @PropertySource("classpath:application.properties")
+})
 public class AraConfiguration {
 
     /**

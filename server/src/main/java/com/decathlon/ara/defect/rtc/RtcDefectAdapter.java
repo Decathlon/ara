@@ -4,7 +4,6 @@ import com.decathlon.ara.common.NotGonnaHappenException;
 import com.decathlon.ara.defect.DefectAdapter;
 import com.decathlon.ara.domain.enumeration.ProblemStatus;
 import com.decathlon.ara.ci.util.FetchException;
-import com.decathlon.ara.defect.rtc.RtcDateTimeAdapter;
 import com.decathlon.ara.defect.rtc.bean.WorkItem;
 import com.decathlon.ara.defect.rtc.bean.WorkItemContainer;
 import com.decathlon.ara.service.SettingProviderService;
