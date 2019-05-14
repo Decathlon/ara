@@ -7,8 +7,6 @@ And see README.adoc at the root of the server module for the UML integrated into
 Of course, the uml.txt file needs to be updated, as it is the source of the project documentation.
 ===================================================================================================
 
-Using "Wifi Gratuit Decathlon" for no proxy problem
-
 Download and install GraphViz: +
 http://www.graphviz.org/download/ +
 Choose eg. "Stable 2.38 Windows install packages"

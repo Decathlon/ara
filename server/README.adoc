@@ -278,7 +278,7 @@ First, in a terminal, go to the client module and run "npm run dev" to have a li
 
 Then, on the server part, create a Spring Boot run configuration:
 
-* Main class: com.decathlon.ara.AraApplication
+* Main class: com.decathlon.com.decathlon.ara.AraApplication
 * Active Profiles: dev (if you don't have the Intellij Ultimate version, use the VM arg : `-Dspring.profiles.active=dev` )
 * VM options: `-Dspring.config.location=classpath:/,classpath:/config/{app}/` where you replace `{app}` by the application you want to launch (see below)
 * VM options: `-DdocUrl=<location of your docs if you host them on a different server or http://localhost>`

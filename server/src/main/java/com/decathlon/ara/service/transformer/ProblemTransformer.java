@@ -1,11 +1,16 @@
 package com.decathlon.ara.service.transformer;
 
+import com.decathlon.ara.SpringApplicationContext;
 import com.decathlon.ara.domain.Problem;
+import com.decathlon.ara.service.DefectService;
+import com.decathlon.ara.service.SettingService;
 import com.decathlon.ara.service.dto.problem.ProblemDTO;
+import com.decathlon.ara.service.support.Settings;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +50,6 @@ public class ProblemTransformer {
             result.setDefectId(problem.getDefectId());
             result.setDefectExistence(problem.getDefectExistence());
             result.setClosingDateTime(problem.getClosingDateTime());
-            result.setDefectUrl(problem.getDefectUrl());
             result.setRootCause(rootCauseTransformer.toDto(problem.getRootCause()));
             result.setCreationDateTime(problem.getCreationDateTime());
             result.setFirstSeenDateTime(problem.getFirstSeenDateTime());

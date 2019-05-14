@@ -5,7 +5,7 @@ import com.decathlon.ara.ci.bean.CycleDef;
 import com.decathlon.ara.ci.bean.PlatformRule;
 import com.decathlon.ara.ci.bean.QualityThreshold;
 import com.decathlon.ara.ci.bean.Build;
-import com.decathlon.ara.ci.bean.Result;
+import com.decathlon.ara.domain.enumeration.Result;
 import com.decathlon.ara.ci.fetcher.Fetcher;
 import com.decathlon.ara.service.ExecutionService;
 import com.decathlon.ara.service.SettingService;

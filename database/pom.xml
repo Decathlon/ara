@@ -9,4 +9,210 @@
     </parent>
     <artifactId>ara-database</artifactId>
     <packaging>jar</packaging>
+
+    <properties>
+        <java.version>1.8</java.version>
+
+        <querydsl.version>4.2.1</querydsl.version>
+        <liquibase.database.url></liquibase.database.url>
+        <liquibase.database.username></liquibase.database.username>
+        <liquibase.database.password></liquibase.database.password>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <!-- Database -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+
+        <!-- JPA/Hibernate -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <!-- @javax.interceptor.InterceptorBinding needed by javax.transaction.Transactional -->
+            <groupId>javax.interceptor</groupId>
+            <artifactId>javax.interceptor-api</artifactId>
+            <version>1.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-ehcache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.ehcache</groupId>
+            <artifactId>ehcache-core</artifactId>
+            <version>2.6.11</version>
+        </dependency>
+        <!-- TODO Use JCache + ehcache3 when Spring Boot will upgrade to Hibernate 5.2 (Java 8 only) -->
+        <!-- <dependency> -->
+        <!-- <groupId>org.hibernate</groupId> -->
+        <!-- <artifactId>hibernate-jcache</artifactId> -->
+        <!-- <version>${hibernate.version}</version> -->
+        <!-- </dependency> -->
+        <!-- <dependency> -->
+        <!-- <groupId>org.ehcache</groupId> -->
+        <!-- <artifactId>ehcache</artifactId> -->
+        <!-- </dependency> -->
+
+        <!-- Querydsl -->
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-apt</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-sql</artifactId>
+            <version>${querydsl.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-sql-spring</artifactId>
+            <version>${querydsl.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.8.1</version>
+        </dependency>
+
+        <!-- @Retryable annotations -->
+        <dependency>
+            <groupId>org.springframework.retry</groupId>
+            <artifactId>spring-retry</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Run Liquibase scripts on the integration database *BEFORE* generating Querydsl table classes from database schema -->
+            <!-- Liquibase scripts can also be manually run by "mvn liquibase:update" / "mvn liquibase:rollback" + a profile -->
+            <plugin>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-maven-plugin</artifactId>
+                <version>${liquibase.version}</version>
+                <configuration>
+                    <changeLogFile>src/main/resources/liquibase/master.xml</changeLogFile>
+                    <driver>com.mysql.jdbc.Driver</driver>
+                    <url>${liquibase.database.url}</url>
+                    <username>${liquibase.database.username}</username>
+                    <password>${liquibase.database.password}</password>
+                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                </configuration>
+            </plugin>
+            <!-- Generate Querydsl table classes from the integration database schema -->
+
+            <!--
+            <plugin>
+                <groupId>com.querydsl</groupId>
+                <artifactId>querydsl-maven-plugin</artifactId>
+                <version>${querydsl.version}</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>export</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <jdbcDriver>com.mysql.jdbc.Driver</jdbcDriver>
+                    <jdbcUrl>${liquibase.database.url}</jdbcUrl>
+                    <jdbcUser>${liquibase.database.username}</jdbcUser>
+                    <jdbcPassword>${liquibase.database.password}</jdbcPassword>
+                    <packageName>com.decathlon.ara.domain</packageName>
+                    <targetFolder>${project.build.directory}/generated-sources/annotations</targetFolder>
+                    <namePrefix>S</namePrefix>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>mysql</groupId>
+                        <artifactId>mysql-connector-java</artifactId>
+                        <version>${mysql.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+             Process Lombok annotations to generate entity byte-codes *BEFORE* JPA entities parsing for Querydsl query types generation
+            <plugin>
+                <groupId>com.mysema.maven</groupId>
+                <artifactId>apt-maven-plugin</artifactId>
+                <version>1.1.3</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>process</goal>
+                        </goals>
+                        <configuration>
+                            <includes>com.decathlon.ara.domain</includes>
+                            <outputDirectory>${project.build.directory}/generated-sources/annotations</outputDirectory>
+                            <processor>
+                                com.querydsl.apt.jpa.JPAAnnotationProcessor,
+                               lombok.launch.AnnotationProcessorHider$AnnotationProcessor
+                            </processor>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/annotations</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            -->
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <liquibase.database.url>
+                    jdbc:mysql://localhost:3306/ara-dev?useUnicode=yes&amp;characterEncoding=UTF-8
+                </liquibase.database.url>
+                <liquibase.database.username>root</liquibase.database.username>
+                <liquibase.database.password>V*n6MxBq7mr?4P?M</liquibase.database.password>
+                <skipPitest>true</skipPitest>
+                <skip.integration.tests>true</skip.integration.tests>
+            </properties>
+        </profile>
+        <profile>
+            <id>dev_in</id>
+            <properties>
+                <liquibase.database.url>
+                    jdbc:mysql://localhost:3306/ara-dev-in?useUnicode=yes&amp;characterEncoding=UTF-8
+                </liquibase.database.url>
+                <liquibase.database.username>root</liquibase.database.username>
+                <liquibase.database.password>V*n6MxBq7mr?4P?M</liquibase.database.password>
+            </properties>
+        </profile>
+    </profiles>
 </project>

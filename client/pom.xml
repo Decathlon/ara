@@ -15,7 +15,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <ara.docUrl></ara.docUrl>
+        <ara.docUrl></ara.docUrl>
     </properties>
 
     <build>

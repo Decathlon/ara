@@ -4,7 +4,7 @@ import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
 import com.decathlon.ara.domain.enumeration.JobStatus;
 import com.decathlon.ara.domain.enumeration.QualityStatus;
 import com.decathlon.ara.ci.bean.QualityThreshold;
-import com.decathlon.ara.ci.bean.Result;
+import com.decathlon.ara.domain.enumeration.Result;
 import com.decathlon.ara.service.dto.quality.QualitySeverityDTO;
 import java.util.Date;
 import java.util.List;

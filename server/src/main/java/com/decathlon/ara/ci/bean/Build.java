@@ -1,6 +1,7 @@
 package com.decathlon.ara.ci.bean;
 
 import com.decathlon.ara.domain.Run;
+import com.decathlon.ara.domain.enumeration.Result;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
