@@ -26,6 +26,7 @@ import org.springframework.context.annotation.PropertySources;
 @Import(DataSourceConfiguration.class)
 @PropertySources({
         @PropertySource("classpath:db-application.properties"),
+        @PropertySource("classpath:db-application-${spring.profiles.active}.properties"),
         @PropertySource("classpath:application.properties")
 })
 public class AraConfiguration {
