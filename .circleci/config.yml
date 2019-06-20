@@ -1,0 +1,25 @@
+version: 2 
+jobs: 
+  build: 
+    working_directory: ~/ara
+    docker: 
+      - image: circleci/openjdk:8-jdk-browsers
+    steps: 
+      - checkout
+      - restore_cache: 
+          key: ara-{{ checksum "pom.xml" }}
+      - run: mvn dependency:go-offline 
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: ara-{{ checksum "pom.xml" }}
+      - run:
+          shell: /bin/sh
+          command: |
+            echo Creating Test MySQL Database
+            ./db/manage-db.sh create /tmp/ara-db
+      - run: mvn package 
+      - store_test_results: 
+          path: server/target/surefire-reports
+      - store_artifacts: 
+          path: server/target/ara-server*.jar
