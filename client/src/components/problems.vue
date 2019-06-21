@@ -134,33 +134,33 @@
         }
         this.loadingProblems = true
         Vue.http
-        .post(url, filter, api.REQUEST_OPTIONS)
-        .then((response) => {
-          this.loadingProblems = false
-          this.problems = response.body
+          .post(url, filter, api.REQUEST_OPTIONS)
+          .then((response) => {
+            this.loadingProblems = false
+            this.problems = response.body
 
-          let pageCount = this.problems.totalPages
-          let lastPage = (pageCount === 0 ? 0 : pageCount - 1)
-          if (this.problems.number > lastPage) {
-            // There was a lot of page, we were on one of the last pages, and after reloading, the number of page is now small: go to last one
-            this.problemsPaging.page = lastPage
-            if (this.filtersInQueryString) {
-              this.recomputeQueryString()
-            } else {
-              this.requestedProblems = true
+            let pageCount = this.problems.totalPages
+            let lastPage = (pageCount === 0 ? 0 : pageCount - 1)
+            if (this.problems.number > lastPage) {
+              // There was a lot of page, we were on one of the last pages, and after reloading, the number of page is now small: go to last one
+              this.problemsPaging.page = lastPage
+              if (this.filtersInQueryString) {
+                this.recomputeQueryString()
+              } else {
+                this.requestedProblems = true
+              }
             }
-          }
 
-          if (this.requestedProblems) {
-            this.loadProblems()
-          }
-        }, (error) => {
-          this.loadingProblems = false
-          api.handleError(error)
-          if (this.requestedProblems) {
-            this.loadProblems()
-          }
-        })
+            if (this.requestedProblems) {
+              this.loadProblems()
+            }
+          }, (error) => {
+            this.loadingProblems = false
+            api.handleError(error)
+            if (this.requestedProblems) {
+              this.loadProblems()
+            }
+          })
       },
 
       onProblemsPageChange (pageNumber) {
