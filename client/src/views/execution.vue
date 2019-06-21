@@ -520,12 +520,12 @@
         // TODO NO LOADING INDICATOR FOR NOW
         // TODO IN THE FUTURE, IT WILL BE DONE WITH THE SAME API CALL!
         Vue.http
-        .get(api.paths.executions(this) + '/' + this.executionId + '/history', api.REQUEST_OPTIONS)
-        .then((response) => {
-          this.executionHistoryPoint = response.body
-        }, (error) => {
-          api.handleError(error)
-        })
+          .get(api.paths.executions(this) + '/' + this.executionId + '/history', api.REQUEST_OPTIONS)
+          .then((response) => {
+            this.executionHistoryPoint = response.body
+          }, (error) => {
+            api.handleError(error)
+          })
       },
 
       totalCriterion () {

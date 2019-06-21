@@ -79,7 +79,7 @@ public class ErrorRepositoryIT {
         cut.autoAssignProblemsToNewErrors(projectId, newErrorIds);
 
         // THEN
-        Set<Error> affectedErrors = problemPatternRepository.getOne(Long.valueOf(1041)).getErrors();
+        Set<Error> affectedErrors = problemPatternRepository.getOne(1041L).getErrors();
         assertThat(affectedErrors).hasSize(3);
         assertThat(idsOf(affectedErrors)).contains(longs(124, 313, 314));
     }

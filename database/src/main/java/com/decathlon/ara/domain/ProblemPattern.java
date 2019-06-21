@@ -45,7 +45,7 @@ public class ProblemPattern {
     @Setter(AccessLevel.NONE)
     private Long problemId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "problem_id")
     private Problem problem;
 

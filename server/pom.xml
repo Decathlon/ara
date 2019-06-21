@@ -417,84 +417,80 @@
                 </configuration>
             </plugin>
 
-            <plugin>
-                <groupId>org.pitest</groupId>
-                <artifactId>pitest-maven</artifactId>
-                <version>1.4.3</version>
-                <executions>
-                    <execution>
-                        <id>pitest</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>mutationCoverage</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <skip>${skipPitest}</skip>
-                    <outputFormats>
-                        <outputFormat>XML</outputFormat>
-                        <outputFormat>HTML</outputFormat>
-                    </outputFormats>
-                    <targetClasses>
-                        <!--param>com.decathlon.ara.*</param-->
-                        <!-- For now, while we still have too many integration tests versus unit tests, we focus our efforts on these high-value classes: -->
-                        <param>com.decathlon.ara.ci.fetcher.*</param>
-                        <param>com.decathlon.ara.ci.service.*</param>
-                        <param>com.decathlon.ara.ci.util.*</param>
-                        <param>com.decathlon.ara.coverage.*</param>
-                        <param>com.decathlon.ara.defect.*</param>
-                        <param>com.decathlon.ara.domain.ExecutedScenario</param> <!-- it has getHandling() -->
-                        <param>com.decathlon.ara.domain.Functionality</param> <!-- it has getCoverage() -->
-                        <param>com.decathlon.ara.embedding.bean.*</param>
-                        <param>com.decathlon.ara.embedding.util.*</param>
-                        <param>com.decathlon.ara.postman.service.*</param>
-                        <param>com.decathlon.ara.postman.support.*</param>
-                        <param>com.decathlon.ara.report.bean.Element</param> <!-- isPassed() & extract*() -->
-                        <param>com.decathlon.ara.report.bean.Embedded</param> <!-- extract*() -->
-                        <param>com.decathlon.ara.report.bean.Feature</param> <!-- getReportFileName() -->
-                        <param>com.decathlon.ara.report.bean.Step</param> <!-- extract*() -->
-                        <param>com.decathlon.ara.report.bean.Tag</param> <!-- extract*() -->
-                        <param>com.decathlon.ara.report.service.*</param>
-                        <param>com.decathlon.ara.report.util.*</param>
-                        <param>com.decathlon.ara.service.*</param>
-                        <param>com.decathlon.ara.service.util.*</param>
-                    </targetClasses>
-                    <excludedClasses>
-                        <class>com.decathlon.ara.service.dto.*</class>
-                        <class>com.decathlon.ara.service.exception.*</class>
-                        <class>com.decathlon.ara.service.mapper.*</class>
-                        <class>com.decathlon.ara.service.support.*</class>
-                        <!-- Merely a configuration class (duplicated 3 times in this pom.xml) -->
-                        <class>com.decathlon.ara.service.SettingProviderService</class>
-                    </excludedClasses>
-                    <targetTests>
-                        <param>com.decathlon.ara.**.*Test</param>
-                    </targetTests>
-                    <excludedTestClasses>
-                        <class>com.decathlon.ara.dbunit.DbUnitExporter</class>
-                        <class>com.decathlon.ara.dbunit.DbUnitImporter</class>
-                    </excludedTestClasses>
-                    <environmentVariables>
-                        <spring.profiles.active>${spring.profiles.active}
-                        </spring.profiles.active> <!-- For *IT integration tests -->
-                    </environmentVariables>
-                    <avoidCallsTo>
-                        <!--Avoid call to log service so log method are not being mutated-->
-                        <avoidCallsTo>org.slf4j</avoidCallsTo>
-                        <!--Avoid call to java io outputstream so parsing methods are not being mutated-->
-                        <avoidCallsTo>java.io.OutputStream</avoidCallsTo>
-                        <avoidCallsTo>com.google.common.base.Preconditions</avoidCallsTo>
-                    </avoidCallsTo>
-                    <mutators>
-                        <mutator>ALL</mutator>
-                    </mutators>
-                    <exportLineCoverage>true</exportLineCoverage>
-                    <!--We want each report to override the former one-->
-                    <timestampedReports>false</timestampedReports>
-                </configuration>
-            </plugin>
-
+            <!-- TODO Reactivate pitest when the tests are optimized and don't take more than 10minutes to be executed
+                 due to OpenSource free plan limitation.
+        <plugin>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-maven</artifactId>
+            <version>1.4.3</version>
+            <executions>
+                <execution>
+                    <id>pitest</id>
+                    <phase>test</phase>
+                    <goals>
+                        <goal>mutationCoverage</goal>
+                    </goals>
+                </execution>
+            </executions>
+            <configuration>
+                <skip>${skipPitest}</skip>
+                <outputFormats>
+                    <outputFormat>XML</outputFormat>
+                    <outputFormat>HTML</outputFormat>
+                </outputFormats>
+                <targetClasses>
+                    - For now, while we still have too many integration tests versus unit tests, we focus our efforts on these high-value classes: -
+                    <param>com.decathlon.ara.ci.fetcher.*</param>
+                    <param>com.decathlon.ara.ci.service.*</param>
+                    <param>com.decathlon.ara.ci.util.*</param>
+                    <param>com.decathlon.ara.coverage.*</param>
+                    <param>com.decathlon.ara.defect.*</param>
+                    <param>com.decathlon.ara.domain.ExecutedScenario</param>
+                    <param>com.decathlon.ara.domain.Functionality</param>
+                    <param>com.decathlon.ara.embedding.bean.*</param>
+                    <param>com.decathlon.ara.embedding.util.*</param>
+                    <param>com.decathlon.ara.postman.service.*</param>
+                    <param>com.decathlon.ara.postman.support.*</param>
+                    <param>com.decathlon.ara.report.bean.Element</param> <
+                    <param>com.decathlon.ara.report.bean.Embedded</param>
+                    <param>com.decathlon.ara.report.bean.Feature</param>
+                    <param>com.decathlon.ara.report.bean.Step</param>
+                    <param>com.decathlon.ara.report.bean.Tag</param>
+                    <param>com.decathlon.ara.report.service.*</param>
+                    <param>com.decathlon.ara.report.util.*</param>
+                    <param>com.decathlon.ara.service.*</param>
+                    <param>com.decathlon.ara.service.util.*</param>
+                </targetClasses>
+                <excludedClasses>
+                    <class>com.decathlon.ara.service.dto.*</class>
+                    <class>com.decathlon.ara.service.exception.*</class>
+                    <class>com.decathlon.ara.service.mapper.*</class>
+                    <class>com.decathlon.ara.service.support.*</class>
+                    <class>com.decathlon.ara.service.SettingProviderService</class>
+                </excludedClasses>
+                <targetTests>
+                    <param>com.decathlon.ara.**.*Test</param>
+                </targetTests>
+                <excludedTestClasses>
+                    <class>com.decathlon.ara.dbunit.DbUnitExporter</class>
+                    <class>com.decathlon.ara.dbunit.DbUnitImporter</class>
+                </excludedTestClasses>
+                <environmentVariables>
+                    <spring.profiles.active>${spring.profiles.active}
+                </environmentVariables>
+                <avoidCallsTo>
+                    <avoidCallsTo>org.slf4j</avoidCallsTo>
+                    <avoidCallsTo>java.io.OutputStream</avoidCallsTo>
+                    <avoidCallsTo>com.google.common.base.Preconditions</avoidCallsTo>
+                </avoidCallsTo>
+                <mutators>
+                    <mutator>ALL</mutator>
+                </mutators>
+                <exportLineCoverage>true</exportLineCoverage>
+                <timestampedReports>false</timestampedReports>
+            </configuration>
+        </plugin>
+        -->
             <!-- Make sure the JavaDoc is correct -->
             <plugin>
                 <groupId>org.projectlombok</groupId>
@@ -580,7 +576,6 @@
             <properties>
                 <spring.profiles.active>dev</spring.profiles.active>
                 <skipPitest>true</skipPitest>
-                <skip.integration.tests>true</skip.integration.tests>
             </properties>
         </profile>
         <profile>
@@ -608,13 +603,6 @@
 
         <!-- No need to initialize JaCoCo if no tests are made -->
         <profile>
-            <activation>
-                <property>
-                    <!-- Compared to both -DskipTests=true and -DskipITs=true, -Dmaven.test.skip=true will even skip test class compilations -->
-                    <name>maven.test.skip</name>
-                    <value>true</value>
-                </property>
-            </activation>
             <properties>
                 <jacoco.skip>true</jacoco.skip>
             </properties>

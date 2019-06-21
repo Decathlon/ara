@@ -170,10 +170,20 @@
       },
 
       handlingStyle (executedScenario) {
-        let color = (executedScenario.handling === 'HANDLED' ? '#FFCC30'
-                     : executedScenario.handling === 'UNHANDLED' ? '#ED3F14'
-                     : executedScenario.handling === 'SUCCESS' ? '#19BE6B'
-                     : 'black')
+        let color = ''
+        switch (executedScenario.handling) {
+          case 'HANDLED':
+            color = '#FFCC30'
+            break
+          case 'UNHANDLED':
+            color = '#ED3F14'
+            break
+          case 'SUCCESS':
+            color = '#19BE6B'
+            break
+          default:
+            color = 'black'
+        }
         return 'border-left: 5px solid ' + color + ';'
       }
     },

@@ -87,6 +87,9 @@ public class ExecutionServiceTest {
     @Mock
     private FeatureService featureService;
 
+    @Mock
+    private ProblemService problemService;
+
     @Spy
     @InjectMocks
     private ExecutionService cut;
