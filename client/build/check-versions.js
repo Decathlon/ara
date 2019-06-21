@@ -1,9 +1,12 @@
 var chalk = require('chalk')
 var semver = require('semver')
 var packageConfig = require('../package.json')
-var shell = require('shelljs')
 function exec (cmd) {
-  return require('child_process').execSync(cmd).toString().trim()
+  try {
+    return require('child_process').execSync(cmd).toString().trim()
+  } catch (e) {
+    return ""
+  }
 }
 
 var versionRequirements = [
@@ -14,7 +17,7 @@ var versionRequirements = [
   }
 ]
 
-if (shell.which('npm')) {
+if (exec('which npm').length > 0) {
   versionRequirements.push({
     name: 'npm',
     currentVersion: exec('npm --version'),
