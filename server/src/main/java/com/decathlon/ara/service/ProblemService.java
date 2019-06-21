@@ -279,7 +279,9 @@ public class ProblemService {
         dataBaseEntity.setStatus(dtoToUpdate.getStatus());
         dataBaseEntity.setClosingDateTime(dtoToUpdate.getClosingDateTime());
 
-        return problemMapper.toDto(problemRepository.save(dataBaseEntity));
+        ProblemDTO result = problemMapper.toDto(problemRepository.save(dataBaseEntity));
+        result.setDefectUrl(this.retrieveDefectUrl(projectId, result));
+        return result;
     }
 
     void handleDefectIdChange(long projectId, ProblemDTO problemDto, String oldDefectId) throws BadRequestException {
@@ -783,21 +785,30 @@ public class ProblemService {
     }
 
     public String retrieveDefectUrl(Problem entity) {
+        return this.retrieveDefectUrl(entity.getProjectId(), entity.getDefectId());
+    }
+
+    public String retrieveDefectUrl(long projectId, ProblemDTO problem) {
+        return this.retrieveDefectUrl(projectId, problem.getDefectId());
+    }
+
+    private String retrieveDefectUrl(long projectId, String defectId) {
         // No defect => no URL
-        if (StringUtils.isNotEmpty(entity.getDefectId())) {
+        if (StringUtils.isNotEmpty(defectId)) {
             final DefectService defectService = SpringApplicationContext.getBean(DefectService.class);
             final SettingService settingService = SpringApplicationContext.getBean(SettingService.class);
+
+
             // Defects not managed => no URL
-            if (defectService.getAdapter(entity.getProjectId()).isPresent()) {
-                String defectUrlFormat = settingService.get(entity.getProjectId(), Settings.DEFECT_URL_FORMAT);
+            if (defectService.getAdapter(projectId).isPresent()) {
+                String defectUrlFormat = settingService.get(projectId, Settings.DEFECT_URL_FORMAT);
                 // Defect URL format not configured => warning
                 if (StringUtils.isEmpty(defectUrlFormat)) {
-                    return "please-configure-project-setting-defect-url-format-" + entity.getDefectId();
+                    return "please-configure-project-setting-defect-url-format-" + defectId;
                 }
-                return defectUrlFormat.replace("{{id}}", entity.getDefectId());
+                return defectUrlFormat.replace("{{id}}", defectId);
             }
         }
         return null;
     }
-
 }

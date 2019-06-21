@@ -103,16 +103,16 @@ util.prettyHoursMinutesFromMillisecondsDuration = function (milliseconds) {
 
 util.ifFeatureEnabled = function (featureCode, callbackIfEnabled, callbackIfDisabled) {
   Vue.http
-  .get(api.paths.features() + '/' + featureCode, api.REQUEST_OPTIONS)
-  .then((response) => {
-    if (response.body.enabled) {
-      callbackIfEnabled()
-    } else {
-      callbackIfDisabled()
-    }
-  }, (error) => {
-    api.handleError(error, callbackIfDisabled)
-  })
+    .get(api.paths.features() + '/' + featureCode, api.REQUEST_OPTIONS)
+    .then((response) => {
+      if (response.body.enabled) {
+        callbackIfEnabled()
+      } else {
+        callbackIfDisabled()
+      }
+    }, (error) => {
+      api.handleError(error, callbackIfDisabled)
+    })
 }
 
 export default util

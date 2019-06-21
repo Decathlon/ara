@@ -113,81 +113,6 @@
                     <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
                 </configuration>
             </plugin>
-            <!-- Generate Querydsl table classes from the integration database schema -->
-
-            <!--
-            <plugin>
-                <groupId>com.querydsl</groupId>
-                <artifactId>querydsl-maven-plugin</artifactId>
-                <version>${querydsl.version}</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>export</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <jdbcDriver>com.mysql.jdbc.Driver</jdbcDriver>
-                    <jdbcUrl>${liquibase.database.url}</jdbcUrl>
-                    <jdbcUser>${liquibase.database.username}</jdbcUser>
-                    <jdbcPassword>${liquibase.database.password}</jdbcPassword>
-                    <packageName>com.decathlon.ara.domain</packageName>
-                    <targetFolder>${project.build.directory}/generated-sources/annotations</targetFolder>
-                    <namePrefix>S</namePrefix>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>mysql</groupId>
-                        <artifactId>mysql-connector-java</artifactId>
-                        <version>${mysql.version}</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-
-             Process Lombok annotations to generate entity byte-codes *BEFORE* JPA entities parsing for Querydsl query types generation
-            <plugin>
-                <groupId>com.mysema.maven</groupId>
-                <artifactId>apt-maven-plugin</artifactId>
-                <version>1.1.3</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>process</goal>
-                        </goals>
-                        <configuration>
-                            <includes>com.decathlon.ara.domain</includes>
-                            <outputDirectory>${project.build.directory}/generated-sources/annotations</outputDirectory>
-                            <processor>
-                                com.querydsl.apt.jpa.JPAAnnotationProcessor,
-                               lombok.launch.AnnotationProcessorHider$AnnotationProcessor
-                            </processor>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.build.directory}/generated-sources/annotations</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            -->
         </plugins>
     </build>
 
@@ -202,16 +127,6 @@
                 <liquibase.database.password>V*n6MxBq7mr?4P?M</liquibase.database.password>
                 <skipPitest>true</skipPitest>
                 <skip.integration.tests>true</skip.integration.tests>
-            </properties>
-        </profile>
-        <profile>
-            <id>dev_in</id>
-            <properties>
-                <liquibase.database.url>
-                    jdbc:mysql://localhost:3306/ara-dev-in?useUnicode=yes&amp;characterEncoding=UTF-8
-                </liquibase.database.url>
-                <liquibase.database.username>root</liquibase.database.username>
-                <liquibase.database.password>V*n6MxBq7mr?4P?M</liquibase.database.password>
             </properties>
         </profile>
     </profiles>

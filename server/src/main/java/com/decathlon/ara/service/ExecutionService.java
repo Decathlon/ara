@@ -27,6 +27,7 @@ import com.decathlon.ara.service.dto.execution.ExecutionCriteriaDTO;
 import com.decathlon.ara.service.dto.execution.ExecutionDTO;
 import com.decathlon.ara.service.dto.execution.ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO;
 import com.decathlon.ara.service.dto.execution.ExecutionWithHandlingCountsDTO;
+import com.decathlon.ara.service.dto.problem.ProblemDTO;
 import com.decathlon.ara.service.dto.run.RunWithExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
@@ -106,6 +107,9 @@ public class ExecutionService {
     @NonNull
     private final FeatureService featureService;
 
+    @NonNull
+    private final ProblemService problemService;
+
 
     /**
      * Get all executions.
@@ -143,29 +147,54 @@ public class ExecutionService {
         ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO resultDto
                 = executionTransformer.toFullyDetailledDto(execution);
 
-        assignTeamsToExecutedScenario(projectId, resultDto.getRuns());
-
         if (executionShortenerEnabled) {
-            this.applyFilters(resultDto, criteria);
-            resultDto.getRuns().forEach(run -> run.getExecutedScenarios().forEach(this::reduceExceptionsAndContentsForScenario));
+            // Apply the "TYPE" filter.
+            if (StringUtils.isNotEmpty(criteria.getType())) {
+                execution.getRuns().removeIf(r -> !criteria.getType().equals(r.getType().getCode()));
+            }
+            // Apply the "COUNTRY" filter.
+            if (StringUtils.isNotEmpty(criteria.getCountry())) {
+                execution.getRuns().removeIf(r -> !criteria.getCountry().equals(r.getCountry().getCode()));
+            }
+        }
+
+        final Map<Long, Long> functionalityTeamIds = functionalityRepository.getFunctionalityTeamIds(projectId);
+        for (RunWithExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO run : resultDto.getRuns()) {
+            if (executionShortenerEnabled) {
+                // Apply Scenario specific filters.
+                run.getExecutedScenarios().removeIf(s -> !matchFilters(s, criteria));
+            }
+            for (ExecutedScenarioWithTeamIdsAndErrorsAndProblemsDTO executedScenario : run.getExecutedScenarios()) {
+                executedScenario.setTeamIds(ScenarioExtractorUtil.extractFunctionalityIds(executedScenario.getName()).stream()
+                        .map(functionalityTeamIds::get)
+                        .filter(Objects::nonNull) // Unknown functionality IDs have null team IDs
+                        .collect(Collectors.toSet()));
+
+                final int limit = 50;
+                if (executionShortenerEnabled) {
+                    if (executedScenario.getContent().length() > limit) {
+                        executedScenario.setContent(executedScenario.getContent().substring(0, limit) + "...");
+                    }
+                }
+
+                for (ErrorWithProblemsDTO error : executedScenario.getErrors()) {
+                    for (ProblemDTO problem : error.getProblems()) {
+                        problem.setDefectUrl(problemService.retrieveDefectUrl(projectId, problem));
+                    }
+                    if (executionShortenerEnabled) {
+                        String exception = error.getException();
+                        if (!StringUtils.isEmpty(exception)) {
+                            int causeIdx = exception.indexOf(':');
+                            if (exception.length() > causeIdx + limit) {
+                                error.setException(exception.substring(0, causeIdx + limit - 3) + "...");
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         return resultDto;
-    }
-
-    private void applyFilters(ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO execution, ExecutionCriteriaDTO criteria) {
-        // Apply the "TYPE" filter.
-        if (StringUtils.isNotEmpty(criteria.getType())) {
-            execution.getRuns().removeIf(r -> !criteria.getType().equals(r.getType().getCode()));
-        }
-        // Apply the "COUNTRY" filter.
-        if (StringUtils.isNotEmpty(criteria.getCountry())) {
-            execution.getRuns().removeIf(r -> !criteria.getCountry().equals(r.getCountry().getCode()));
-        }
-        // Apply Scenario specific filters.
-        for (RunWithExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO run : execution.getRuns()) {
-            run.getExecutedScenarios().removeIf(s -> !matchFilters(s, criteria));
-        }
     }
 
     private boolean matchFilters(ExecutedScenarioWithTeamIdsAndErrorsAndProblemsDTO scenario, ExecutionCriteriaDTO criteria) {
@@ -225,40 +254,9 @@ public class ExecutionService {
         return false;
     }
 
-    private void reduceExceptionsAndContentsForScenario(ExecutedScenarioWithTeamIdsAndErrorsAndProblemsDTO scenario) {
-        final int limit = 50;
-        if (scenario.getErrors().isEmpty()) {
-            return;
-        }
-        if (scenario.getContent().length() > limit) {
-            scenario.setContent(scenario.getContent().substring(0, limit) + "...");
-        }
-        for (ErrorWithProblemsDTO error : scenario.getErrors()) {
-            String exception = error.getException();
-            if (!StringUtils.isEmpty(exception)) {
-                int causeIdx = exception.indexOf(':');
-                if (exception.length() > causeIdx + limit) {
-                    error.setException(exception.substring(0, causeIdx + limit - 3) + "...");
-                }
-            }
-        }
-    }
-
     private void removeScenariosWithoutErrors(Execution execution) {
         for (Run run : execution.getRuns()) {
             run.getExecutedScenarios().removeIf(s -> s.getErrors().isEmpty());
-        }
-    }
-
-    private void assignTeamsToExecutedScenario(long projectId, List<RunWithExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO> runsWithErrorsAndProblems) {
-        final Map<Long, Long> functionalityTeamIds = functionalityRepository.getFunctionalityTeamIds(projectId);
-        for (RunWithExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO run : runsWithErrorsAndProblems) {
-            for (ExecutedScenarioWithTeamIdsAndErrorsAndProblemsDTO executedScenario : run.getExecutedScenarios()) {
-                executedScenario.setTeamIds(ScenarioExtractorUtil.extractFunctionalityIds(executedScenario.getName()).stream()
-                        .map(functionalityTeamIds::get)
-                        .filter(Objects::nonNull) // Unknown functionality IDs have null team IDs
-                        .collect(Collectors.toSet()));
-            }
         }
     }
 
