@@ -8,12 +8,11 @@ jobs:
       - checkout
       - restore_cache: 
           key: ara-{{ checksum "pom.xml" }}
-      - run: mvn dependency:go-offline 
+      - run: mvn package dependency:go-offline 
       - save_cache:
           paths:
             - ~/.m2
           key: ara-{{ checksum "pom.xml" }}
-      - run: mvn package 
       - store_test_results: 
           path: server/target/surefire-reports
       - store_artifacts: 
