@@ -13,11 +13,6 @@ jobs:
           paths:
             - ~/.m2
           key: ara-{{ checksum "pom.xml" }}
-      - run:
-          shell: /bin/sh
-          command: |
-            echo Creating Test MySQL Database
-            ./db/manage-db.sh create /tmp/ara-db
       - run: mvn package 
       - store_test_results: 
           path: server/target/surefire-reports
