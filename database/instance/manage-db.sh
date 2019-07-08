@@ -26,7 +26,7 @@ LOGS=1
 # The name of the container which will holds the db to manipulate
 CONTAINER_NAME=ara-db
 # The password of the Database (you should use a secret here instead).
-PASSWORD=V*n6MxBq7mr?4P?M
+PASSWORD=dev_password_to_change
 # The container port exposed to the host.
 PORT=3306
 
