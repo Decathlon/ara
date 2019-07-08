@@ -141,7 +141,6 @@
                     jdbc:mysql://localhost:3306/ara-dev?useUnicode=yes&amp;characterEncoding=UTF-8
                 </liquibase.database.url>
                 <liquibase.database.username>root</liquibase.database.username>
-                <liquibase.database.password>V*n6MxBq7mr?4P?M</liquibase.database.password>
                 <skipPitest>true</skipPitest>
                 <skip.integration.tests>true</skip.integration.tests>
             </properties>
