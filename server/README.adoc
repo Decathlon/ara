@@ -137,75 +137,43 @@ Run the setup once, so Liquibase has a chance to create all tables.
 
 == Setup Development Machine
 
-=== Install MariaDB
-Download MariaDB here, version 5.5.56 (same version than on server): +
-https://downloads.mariadb.org/mariadb/5.5.56/
+=== Install the Database
 
-Follow this tutorial: +
-https://mariadb.com/kb/fr/installing-mariadb-msi-packages-on-windows/ +
-For the root password, use V*n6MxBq7mr?4P?M +
-Check “Use UTF-8 as default server’s character set” +
-Keep other default choice (server port 3306, optimize for transactions, etc.)
+To install the Database for your developments, you'll need Docker and a
+shell environement (available by default on macOS & GNU/Linux, and by
+using Git for Windows or WSL on Windows).
 
-Go to “C:\Program Files\MariaDB 5.5\data” +
-Open my.ini as an Administrator, and paste this content:
+Once thoses prerequisites are satisfied, do the following in a shell
+terminal from the root folder of ARA (called `ARA_ROOT` bellow) :
+```
+> cd database/instance
+> ./manage-db.sh create <PATH_WHERE_TO_PERSIST_DATAS_ON_DISK>
+```
 
-    [mysqld]
-    datadir=C:/Program Files/MariaDB 5.5/data
-    port=3306
-    sql_mode="STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION"
-    default_storage_engine=innodb
-    innodb_buffer_pool_size=2033M
-    innodb_log_file_size=50M
-    character-set-server=utf8
-    innodb_large_prefix
-    innodb_file_format=BARRACUDA
-    innodb_file_per_table
-    innodb_file_format_max=BARRACUDA
-    autocommit=OFF
-    [client]
-    port=3306
+Once this script is done, wait 1 minute and do a `docker ps`. You should
+see the container `ara-db` up and running on port 3306.
 
-Press Win+R, execute “services.msc” and restart the “MySQL” service for it to use the new configuration.
+=== Populate the database
 
-=== Create Data Bases
-You can download MySQL Workbench GPL (the equivalent to SQL Developer):
-https://dev.mysql.com/downloads/workbench/
+Once your database is up and running, you can at any moment run the
+following to populate it with the database's structure and some referentials
+informations. You will need Maven and a database up and running, then you
+can do those commands from the root folder of ARA.
 
-Connect via MySql Workbench, and execute:
+```
+> cd database
+> mvn -Pdev liquibase:updateTestingRollback -Dliquibase.database.password=YOUR_DATABASE_PASSWORD
+```
 
-    CREATE DATABASE `ara-dev-in`;
+This command will call all the liquibase scripts and update the database
+structure and datas if needed.
 
-This will be the schema used by integration tests on your local development environment.
-
-Then, for each application you will maintain, create a schema for running the application on your local development machine:
-
-    CREATE DATABASE `ara-{app}-dev`;
-
-Where `{app}` is the id of your application(s).
-
-If you work on ARA Core, you CAN create this schema to test a core ARA (without application-dependant configuration):
-
-    CREATE DATABASE `ara-dev`;
-
-=== Initialize the Development Data Base
-To create the tables, run this command in ara-server directory:
-
-    mvn -Dspring.config.location=classpath:/,classpath:/config/{app}/ liquibase:updateTestingRollback -P{profile}
-
-Where `{app}` is the id of your application and `{profile}` is the profile linked to your app in the `ara-server/pom.xml` file. +
-Repeat for each application you maintain.
-
-Then, to populate some data, you can initiate the Demo project :
+Finally, to populate some data, you can initiate the Demo project :
 
 * Run Ara server and Ara client
 * Go the Dropdown menu in the top left corner
 * Click on Manage Project List
 * At the center of the screen, click on the button "Create the Demo project"
-
-If you work on ARA Core, you CAN initiate this schema to test a core ARA (without application-dependant configuration):
-
-    mvn liquibase:updateTestingRollback -Pdev
 
 === Install Lombok in Your IDE
 

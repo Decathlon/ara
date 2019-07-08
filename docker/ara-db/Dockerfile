@@ -2,7 +2,8 @@ FROM mariadb:5.5.56
 
 ENV MYSQL_DATABASE=ara
 ENV MYSQL_USER=root
-ENV MYSQL_ROOT_PASSWORD=V*n6MxBq7mr?4P?M
+# Note if you build the Docker image directly from this file and not from the manage-db.sh, then you'll need to set the
+# environement Variable MYSQL_ROOT_PASSWORD
 
 ENTRYPOINT [ "docker-entrypoint.sh", \
              "--autocommit=OFF", \
