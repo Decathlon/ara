@@ -48,11 +48,6 @@ function usage {
 	echo "Use the 'help' cmd to get a full list of all the available commands."
 }
 
-
-MYSQL_VERSION=5.5        # The inno_db conf prevents newer versions.
-CONF_DIR=`pwd`/db-conf   # The path to the folder which contains custom configs
-SQL_DIR=`pwd`/db-sql     # The path to the folder which contains db structure.
-
 function stopContainer {
 	echo "[ARA] Stopping $CONTAINER_NAME container..."
 	run "docker container stop $CONTAINER_NAME"
@@ -73,17 +68,15 @@ function createContainer {
 	fi
 	echo "[ARA] Create the folder on host if not exists..."
 	run "mkdir -p $dataDir"
-	echo "[ARA] Pulling base mysql image..."
-	run "docker pull mysql:$MYSQL_VERSION"
+	echo "[ARA] Creating the image..."
+	run 'docker build -t ara-db-image .'
 	echo "[ARA] Create the $CONTAINER_NAME container (data in $dataDir)"
 	docker_cmd="docker run"
 	docker_cmd="$docker_cmd --name $CONTAINER_NAME"
 	docker_cmd="$docker_cmd -e MYSQL_ROOT_PASSWORD=$PASSWORD"
 	docker_cmd="$docker_cmd -v /$dataDir:/var/lib/mysql" # Starting-slashes are for Windows compatibility
-	docker_cmd="$docker_cmd -v /$CONF_DIR:/etc/mysql/conf.d"
-	docker_cmd="$docker_cmd -v /$SQL_DIR:/docker-entrypoint-initdb.d"
 	docker_cmd="$docker_cmd -p $PORT:3306"
-	docker_cmd="$docker_cmd -d mysql:$MYSQL_VERSION"
+	docker_cmd="$docker_cmd -d ara-db-image"
 	run "$docker_cmd"
 	return $?
 }

@@ -34,7 +34,7 @@ make run-version COMMIT_REF=...
 If the ports 3306 and/or 8080 are not free on your machine, use this modified command, replacing 3306 and/or 8080 by the ports you would like to use:
 
 ```shell
-make run-version COMMIT_REF=... DB_PORT=3306 SERVER_PORT=8080
+make run-version COMMIT_REF=... SERVER_PORT=8080
 ```
 
 ARA will then be accessible here (or to the port you specified instead of 8080): +
