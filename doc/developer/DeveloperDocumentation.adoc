@@ -5,12 +5,16 @@
 Here is basically what you will need to set up on your development machine:
 
 * *Create a database and start it:*
-  ** Run `./manage-db.sh create && ./manage-db.sh start` from the `db` folder.
-* *Build the server part and start it:* +
-  ** Run `mvn install -Pdev_in` in the project's root folder to build the server and its dependencies
-     (you can speed up the build by running `mvn install -Pdev_in -DskipTests -DskipITs -DskipPitest` instead).
-  ** Run `java -Dspring.profiles.active=dev -jar server/target/ara-server-*.jar` to launch the back-end server. +
-  ** When modifying the server, just run `mvn install -Pdev_in` in the `server` folder to not rebuild all dependencies, this time.
+  ** (Optional) You can change your db root account's password in the database/instance/manage-db.sh script.
+  By default it's `dev_password_to_change`.
+  ** Run `./database/instance/manage-db.sh create <FOLDER_PATH_TO_PERSISTS>`
+  ** Run `mvn liquibase:updateTestingRolling -Pdev -Dliquibase.database.password=<YOUR DB ACCOUNT PASS>`
+* *Build the server part and start it:*
+  ** Run `mvn install -Pdev` in the project's root folder to build the server and its dependencies
+     (you can speed up the build by running `mvn install -Pdev -Dmaven.test.skip=true` instead but you'll
+     lose your Unit tests).
+  ** Run `java -Dspring.profiles.active=dev -jar server/target/ara-server-*.jar -Dspring.datasource.password=<YOUR DB ACCOUNT PASS> -Dspring.config.location=classpath:/` to launch the back-end server. +
+  ** When modifying the server, just run `mvn install -Pdev` in the `server` folder to not rebuild all dependencies, this time.
 * *Build the client part and start it:*
   ** Run `npm install` (this is part of the above `mvn install`, so you can skip it if you have already done that).
   ** Run `npm run dev` in the `client` folder to start the front-end server.
