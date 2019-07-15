@@ -595,12 +595,6 @@
                 <skipPitest>true</skipPitest>
             </properties>
         </profile>
-        <profile>
-            <id>dev_in</id>
-            <properties>
-                <spring.profiles.active>dev_in</spring.profiles.active>
-            </properties>
-        </profile>
 
         <profile>
             <id>in</id>

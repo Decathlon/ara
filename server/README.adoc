@@ -198,26 +198,20 @@ By default, all Spring properties are read in application.properties. +
 But for database and other external server configurations, we use profiles to configure such different environments:
 
 * dev: development environment, to develop/run/test/debug on local machine with a local database
-* dev_in: run integration tests on a local machine with a local database, but on a separate empty database schema
 * in: used by continuous integration to run integration tests
 * prod: once deployed on the final production server
 
-To launch compilations and tests, you need to set the dev_in profile:
-
-    mvn install -Dspring.profiles.active=dev_in
-
 To update the development database schema and be able to run ARA on your local machine, run tis command, with the dev profile:
 
-    mvn liquibase:update -Dspring.profiles.active=dev
+    mvn liquibase:update -Dspring.profiles.active=dev -Dliquibase.datasbase.password=<YOUR DB PASSWORD>
 
-This will not skip integration tests: when you run integration tests, you need to be run on *dev_in* environment, and NOT on *in* environment: only the continuous integration server will use it. So you can develop your integration tests, run and debug them on your own modified environment (new database table, etc.).
 
 === First Execution
 
 ==== Set up Spring profile in your IDE
 
-When executing Maven commands in your IDE, make sure to set the Maven profile to dev_in. +
-In IntelliJ, in the view "Maven Projects", unfold the first folder "Profiles" and check "dev_in". +
+When executing Maven commands in your IDE, make sure to set the Maven profile to dev. +
+In IntelliJ, in the view "Maven Projects", unfold the first folder "Profiles" and check "dev". +
 Then, in this "Maven Projects" view, you will be able to execute any lifecycle without having to set the profile.
 
 ==== Make sure IntelliJ Generates MapStruct Classes the Correct Way
@@ -236,9 +230,8 @@ With these options, the IntelliJ compiler will generate MapStruct class implemen
 
 ==== First Compilation
 
-First do a "mvn install -Pdev_in" in the root of the ARA project. +
-This will generate the client and ara-generated-cucumber-report dependencies for the server module to compile. +
-This will also generate the Q* and S* classes (the QueryDsl classes) to make your IDE happy.
+First do a "mvn install -Pdev" in the root of the ARA project. +
+This will generate the client and ara-generated-cucumber-report dependencies for the server module to compile.
 
 ==== Run the Server
 
@@ -294,14 +287,14 @@ This is why we advise you to run this command only when needing to test the inde
 === Useful Commands
 
 * ??? to run the application (without compiling it as a JAR), only the server side (with hot-reload): you must run the client side too with eg. ``npm run dev``
-* When running a JUnit integration test (*IT.java): VM args = ``-Dspring.profiles.active=dev_in``
-* ``mvn liquibase:updateTestingRollback -Pdev`` to update the development database schema
-* ``mvn install -Pdev_in`` to compile, package and install the application, running all tests
-* ``mvn install -Pdev_in -DskipITs=true`` to compile, package and install the application, keeping unit tests, but bypassing slow integration tests
-* ``mvn install -Pdev_in -DskipTests=true -DskipITs=true`` to compile, package and install the application, bypassing all tests, or to regenerate the mapping classes or the entity and table classes if database schema changed
-* ``mvn install -Pdev_in -Dmaven.test.skip=true`` to compile, package and install the application, without even compiling test classes
+* When running a JUnit integration test (*IT.java): VM args = ``-Dspring.profiles.active=dev``
+* ``mvn liquibase:updateTestingRollback -Pdev -Dliquibase.database.password=<YOUR DB PASSWORD>`` to update the development database schema
+* ``mvn install -Pdev`` to compile, package and install the application, running all tests
+* ``mvn install -Pdev -DskipITs=true`` to compile, package and install the application, keeping unit tests, but bypassing slow integration tests
+* ``mvn install -Pdev -DskipTests=true -DskipITs=true`` to compile, package and install the application, bypassing all tests, or to regenerate the mapping classes or the entity and table classes if database schema changed
+* ``mvn install -Pdev -Dmaven.test.skip=true`` to compile, package and install the application, without even compiling test classes
 * ``java -Dspring.profiles.active=dev -jar target/ara-server-*.jar`` to run the produced application, including the client in the server
-* ``mvn install -Pdev_in -DskipPitest`` to skip Pitest tests (mutates the code and check at least one test is failing, to make sure no equivalent to assert(true) is done in tests)
+* ``mvn install -Pdev -DskipPitest`` to skip Pitest tests (mutates the code and check at least one test is failing, to make sure no equivalent to assert(true) is done in tests)
 
 == Liquibase
 
@@ -309,7 +302,7 @@ When designing Liquibase change-sets, you may find out the new change-set is err
 
 You can rollback the last applied change-set with this command:
 
-    mvn -Dliquibase.rollbackCount=1 liquibase:rollback -Pdev_in
+    mvn -Dliquibase.rollbackCount=1 liquibase:rollback -Pdev -Dliquibase.database.password=<YOUR DB PASSWORD>
 
 Change the rollbackCount to tell Liquibase the number of change-sets to rollback. +
 Change the profile to point to the right database.
@@ -430,24 +423,6 @@ So you could:
 * or 'mvn compile' to generate new MapStruct mappers without running any test.
 
 TIP: When running integration tests, you can use the VM arguments `-XX:TieredStopAtLevel=1 -noverify` to speed up Spring context startup
-
-=== PiTest (for Unit Tests)
-
-We are using PiTest: it adds mutations in your code and run unit-tests (not integration-tests) to check at least one unit-test fails with the modified code. +
-This ensures code is robust and completely tested (no "assert true" ;-) but in reality, such "assert true" can be quite well hidden inside real tests). +
-
-Pitest is quite time consuming to run. +
-When working on adding or modifying tests to a class, you can run Pitest only on the given class, using the following command. +
-Note that Pitest needs the tests to have run for it to compute code coverage and know what classes to mutate.
-
-    mvn test -DskipPitest -Pdev_in && \
-    mvn pitest:mutationCoverage \
-        -DtargetClasses=com.decathlon.ara.postman.service.PostmanService \
-        -DtargetTests=com.decathlon.ara.postman.service.PostmanServiceTest \
-        -Pdev_in
-
-It's only an example: you can specify only one class to test (PostmanService) and one test class (PostmanServiceTest). +
-The test-class is optional: by default, all test-classes will be candidates to test mutations.
 
 === Run all Tests in your IDE
 
