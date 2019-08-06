@@ -32,7 +32,6 @@
     <description>Agile Regression Analyzer - Server</description>
 
     <properties>
-        <java.version>1.8</java.version>
 
         <!-- BUG http://mapstruct.org/faq/#can-i-use-mapstruct-together-with-project-lombok -->
         <mapstruct.version>1.2.0.Final</mapstruct.version>
@@ -69,6 +68,7 @@
         <!-- Swagger -->
         <springfox-swagger2.version>2.9.2</springfox-swagger2.version>
     </properties>
+
 
     <dependencies>
         <!-- SpringBoot's @ConfigurationProperties -->
@@ -119,6 +119,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
         </dependency>
 
 
@@ -295,10 +296,22 @@
             <artifactId>ara-database</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
             <!-- Add the generated classes to the classpath -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>

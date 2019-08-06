@@ -20,6 +20,8 @@ package com.decathlon.ara.service.dto.problem;
 import com.decathlon.ara.service.dto.problempattern.ProblemPatternDTO;
 import com.decathlon.ara.service.dto.rootcause.RootCauseDTO;
 import com.decathlon.ara.service.dto.team.TeamDTO;
+
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
