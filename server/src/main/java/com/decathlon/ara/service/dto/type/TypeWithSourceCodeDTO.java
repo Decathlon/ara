@@ -35,6 +35,7 @@ public class TypeWithSourceCodeDTO extends TypeDTO {
     // Optional; no size control as we will just check the foreign key exists
     private String sourceCode;
 
+
     public TypeWithSourceCodeDTO(String code, String name, boolean isBrowser, boolean isMobile, String sourceCode) {
         super(code, name, isBrowser, isMobile);
         this.sourceCode = sourceCode;
