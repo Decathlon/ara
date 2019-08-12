@@ -75,6 +75,8 @@ Your project is now ready to receive its test reports.
 
 If you use want to upload Cucumber reports, just follow the <<../../uploads/UploadCucumber.adoc#head, Upload Cucumber procedure>>
 
+If you use want to upload Postman reports, just follow the <<../../uploads/UploadPostman.adoc#head, Upload Postman procedure>>
+
 == Upload Cucumber Scenarios and Postman Requests to ARA
 
 There is an optional additional step to feed ARA with all data it needs from your project.
