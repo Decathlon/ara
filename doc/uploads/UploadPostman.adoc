@@ -1,14 +1,17 @@
 [#head]
-= Upload a Cucumber execution's report on ARA
+= Upload a Postman execution's report on ARA
 
-Once you've got a running version of ARA, you can upload cucumber execution's
+Once you've got a running version of ARA, you can upload Postman execution's
 report in the system. It's highly recommended to read the
 <<HowItWorks.adoc#head, How It Works>> part.
 
 == Prepare the report
 
-Once you launch your Cucumber runs, you have to export the result in JSON format
-(which is the default export mode of Cucumber).
+We recommand to launch your Postman runs using https://learning.getpostman.com/docs/postman/collection_runs/command_line_integration_with_newman[newman].
+
+Once you launch newman, you have to export the result in JSON format. With `newman` you
+can easily export the result of your run in a json using the command :
+`newman run <collection.json> --reporters cli,json --reporter-json-export report.json`
 
 This report must live in a specific directory architecture which is :
 `{TIMESTAMP}/{COUNTRY}/{TYPE}/report.json`
@@ -20,8 +23,8 @@ launched.
 * `{COUNTRY}` the country code of the country tested by your run (for example `fr` if
 your run has tested the France configuration). This country code must be defined in your
 project's settings in ARA in the Country tab.
-* `{TYPE}` the code of the typology of test this run covers (for example `firefox-web`
-if your run has tested the Web configuration on your app in Firefox). This type code must
+* `{TYPE}` the code of the typology of test this run covers (for example `integ-api`
+if your run has tested the Integration of your APIs). This type code must
 be defined in your project's settings in ARA in the Type tab.
 
 == Add ARA specific information
@@ -86,55 +89,4 @@ curl \
   -F "zip=@/home/user/Documents/1565177727.zip" \
   {ara_baseurl}/api/projects/{project_code}/executions/upload
 ```
-
-
-
-== [OPTIONAL] Upload Cucumber stepDefinition.json file
-
-This file is optional.
-It lets users create aggregation rules matching Cucumber steps definitions (regular expressions) instead
-of just steps (scenario contents).
-For instance, the step `^Step number (\\d+)$` can be used in a scenario as `Step number 1` and `Step number 2`.
-If both steps fail, it could be because the step definition is erroneous, and users would want to create a problem with
-just one rule aggregating both step "instances".
-If the file is not provided, ARA will threat numbers and double-quoted strings in steps as parameters and will thus try
-to guess what were the underlying step definitions.
-But this is very basic, error-prone, and don't account for more complex regular expressions.
-By extracting a `stepDefinitions.json` array file, you will be assured that ARA will let users create relevant rules.
-
-If you decide to provide this file, it must contain a JSON array of all step definitions glue used by a Cucumber run.
-For example:
-
-```json
-[
-  "^A step$",
-  "^A step with number (\\d+) parameter$",
-  "^A step with string \"([^\"]*)\" parameter$",
-]
-```
-
-=== How to extract the stepDefinition.json
-In Java, just include the `ara-lib` library to your test project.
-Here is how to find it with Maven:
-```xml
-<dependency>
-    <groupId>com.decathlon.ara</groupId>
-    <artifactId>ara-lib</artifactId>
-    <version>${ara.version}</version>
-</dependency>
-```
-
-The library declares the cucumber dependency as provided: you will need a working Cucumber dependency in your project
-for the extractor to work: it will need to access your glue code.
-
-Then, use the `com.decathlon.ara.lib.StepDefinitionExtractor` class like this:
-
-```java
-String outputDirectory = System.getProperty("user.dir"); // Create stepDefinitions.json in the current directory
-String gluePackage = "com.company.project.tests.cucumber.glue"; // Base package containing all @Given, @When, @Then...
-StepDefinitionExtractor.extract(outputDirectory, gluePackage);
-```
-
-If you have made an implementation of StepDefinitionExtractor for another language/Cucumber-flavour,
-we would be glad to include it in the open-source repository of ARA :-)
 
