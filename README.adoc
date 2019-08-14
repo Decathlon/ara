@@ -8,68 +8,66 @@ image::https://mirrors.creativecommons.org/presskit/buttons/88x31/png/by-nc-sa.p
 
 == What is ARA?
 
-ARA helps to fight against regressions all together.
+ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
+tracks and follows problems, keep their history, and even break your CI build if quality isn't
+met.
 
-=== Helping your Team to Identify Business Problems Among Many Raw Regression Errors
+== How to locally install it
 
-You have a big corporate project. +
-You have automated tests with Postman or Cucumber (with Selenium, RestAssured, or others...) or even Karate. +
-You cannot afford waiting for your tests to run in order to approve merge requests (too much to run, too long to deploy...). +
-Your automated functional non-regression tests are then executed after a delay, from your main development branches. +
-This produces a lot of errors that could be regressions as well as false-positives. +
-ARA will help you filter out real business problems out of this mess, for your team to fix them quicker.
+If you just want to install it locally to give it a try, you can !
+Also, after this installation, you can follow up the <<doc/demo/DemoWalkthrough.adoc#head, Demo walkthrough>>
+to explore ARA features !
 
-=== How Does it Work?
+Please note the following :
 
-Send your non-regression-tests reports to ARA and it will display them. +
-ARA is an expert system: your team will create rules to aggregate all similar technical errors as problems. +
-Basically, you create rules to correlate all symptoms of the same problem's root cause. +
-You then create defects in your bug-tracking-system and assign these defects to ARA problems for you to follow the resolution advancement.
-In the meantime, when problems are appearing recurrently, ARA will automatically detect the problems that the team has already addressed, thanks to the rules they created. +
-As a result, new errors will stand out, so you can solve them more quickly, and recurring errors will not bother you while they are in the process of being fixed:
+* You'll need https://docs.docker.com/install/[Docker]
+* All the datas that you import in ARA won't be persisted.
+* The port 3306 and 8080 must be available locally.
 
-image:doc/general/handled-errors.png[] +
-Here, the orange error has been recognized: you only need to manage the two new red errors.
+=== I've got a Windows PC !
 
-=== Requirements
+1. Open a Powershell Command Prompt
+2. Run the command `Invoke-WebRequest -OutFile docker-compose.yml https://raw.githubusercontent.com/Decathlon/ara/master/docker-compose.yml`
+3. Run the command `docker-compose pull`
+4. Run the command `docker-compose up`
+5. Open up a browser on `http://localhost:8080`
+6. Enjoy !
+7. To stop it, in the command line, just do a `docker-compose down` in the same directory as the `docker-compose.yml`
+8. To restart it, in the command line do a `docker-compose up` in the same directory as the `docker-compose.yml`
 
-You only need a report.json from Cucumber and/or one or several JSON reports from Newman.
 
-ARA integrates best with a working Continuous Integration pipeline which launches your tests automatically (on a time-schedule or after each commit). +
-You will then modify your pipeline slightly to send such report files to ARA.
+=== I've got a Mac (or a GNU/Linux PC) !
 
-== How to build it and make it work in 2 minutes
+1. Open a Terminal
+2. Run the command `wget https://raw.githubusercontent.com/Decathlon/ara/master/docker-compose.yml`
+3. Run the command `docker-compose pull`
+4. Run the command `docker-compose up`
+5. Open up a browser on `http://localhost:8080`
+6. Enjoy !
+7. To stop it, in the command line, just do a `docker-compose down` in the same directory as the `docker-compose.yml`
+8. To restart it, in the command line do a `docker-compose up` in the same directory as the `docker-compose.yml`
 
-After you've download the source code of ARA, here is all you have to do to make it run on your local environment. You will
-need :
+== How to install it on my Infrastructure
 
-* Java 8 (for now, supports for more recent Java versions will come soon).
-* Maven 3
-* Docker
-* A shell environment (either Bash, Sh, Zsh..., or even a git-bash on Windows)
+This kind of install is recommanded if you want a Production environment for ARA and your projects.
+Unfortunatelly for now, we only support GNU/Linux based machine for this kind of installation
+(but if you want to contribute, be our guest ! :D ).
 
-In the following, the folder which contains this Readme will be called `ARA_ROOT`
+The limitation is due to the fact that volume mounting with Docker on Windows can be quite buggy from a machine to
+another, and the mounting is necessary to persist ARA datas and recover them on server restart.
 
-. Create a folder where your database's datas are going to live (says `my/db/path`)
-. Open a Terminal, and go to `ARA_ROOT/database/instance`
-. Use `./manage-db.sh create my/db/path`, this command will create a MySQL Dockerized database locally.
-. In the terminal, go back to `ARA_ROOT``
-. Use the command `mvn liquibase:update -Pdev -pl server` to create the database structure.
-. Use the command `mvn clean install -Pdev -DskipTests=true`
-. Go to `ARA_ROOT/final/target` and run `java -Dspring.profiles.active=dev -jar ara-{{YOUR_VERSION}}.jar`
-
-== How to Set Up ARA?
-
-Please read the <<doc/integrator/main/IntegratorDocumentation.adoc#head, Integrator Documentation>>
-to learn how to set up ARA, configure it, and plug the continuous integration of your project onto ARA.
+You can find the full installation procedure <<doc/integrator/main/IntegratorDocumentation.adoc#head, here, in the
+Integrator Documentation>>
 
 == How to Use ARA?
 
-Once your technical team did plug the continuous integration of your project onto ARA,
-read the <<doc/user/main/UserDocumentation.adoc#head, User Documentation>>
-to train your whole team to use ARA.
+You can go through the <<doc/demo/DemoWalkthrough.adoc#head, Demo Walkthrough>> to quickly learn how to
+use ARA.
+
+You can also read the <<doc/user/main/UserDocumentation.adoc#head, User Documentation>> to learn everything
+you need to know about the utilization of ARA (don't hesitate to pass those doc to the rest of your teams ;) ).
 
 == How to Develop on ARA?
 
 Please read the <<doc/developer/DeveloperDocumentation.adoc#head, Developer Documentation>>
-to learn how the project is structured and how to develop new features in ARA.
+to learn how the project is structured and how to develop new features in ARA and/or contribute.
