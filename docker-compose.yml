@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  db:
+    image: decathlon/ara-db:4.0.0
+    ports:
+      - "3306:3306"
+    expose:
+      - 3306
+  server:
+    image: decathlon/ara-server:4.0.0
+    ports:
+      - "8080:8080"
+    expose:
+      - 8080
+    depends_on:
+      - db
+    command: "--spring.datasource.url=jdbc:mysql://host.docker.internal:3306/ara?useUnicode=yes&characterEncoding=UTF-8"
