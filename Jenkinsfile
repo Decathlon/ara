@@ -34,7 +34,7 @@ pipeline {
             steps {
                 sh ('rm -rf final/target/*.jar')
                 unstash 'ara-jar'
-                mv final/target/*.jar final/ara.jar
+                sh ('mv final/target/*.jar final/ara.jar')
                 sh "docker build -t ${env.DOCKER_REPO}/ara-server:4.0.0-rc1 final/"
                 sh "docker push ${env.DOCKER_REPO}/ara-server:4.0.0-rc1"
             }
