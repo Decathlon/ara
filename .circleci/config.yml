@@ -3,8 +3,8 @@ jobs:
   build: 
     working_directory: ~/ara
     docker: 
-      - image: circleci/openjdk:8-jdk-browsers
-    steps: 
+      - image: circleci/openjdk:8u222-stretch
+    steps:
       - checkout
       - restore_cache: 
           key: ara-{{ checksum "pom.xml" }}
