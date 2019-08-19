@@ -16,7 +16,7 @@ met.
 
 If you just want to install it locally to give it a try, you can !
 Also, after this installation, you can follow up the <<doc/demo/DemoWalkthrough.adoc#head, Demo walkthrough>>
-to explore ARA features !
+to explore ARA features !!
 
 Please note the following :
 
