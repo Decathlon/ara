@@ -1,13 +1,12 @@
 FROM mariadb:5.5.56
 # The innodb custm config prevents newer version of 5.5
 
-ENV MYSQL_DATABASE=ara
+ENV MYSQL_DATABASE=ara-dev
 ENV MYSQL_USER=root
 # Note if you build the Docker image directly from this file and not from the manage-db.sh, then you'll need to set the
 # environement Variable MYSQL_ROOT_PASSWORD
 
-
-RUN echo 'CREATE DATABASE `ara-dev`;' > /docker-entrypoint-initdb.d/init-db.sql
+COPY init-database.sql /docker-entrypoint-initdb.d/init-database.sql
 
 ENTRYPOINT [ "docker-entrypoint.sh", \
              "--autocommit=OFF", \
