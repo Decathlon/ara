@@ -1,19 +1,62 @@
-version: 2 
-jobs: 
-  build: 
+version: 2
+jobs:
+  build:
     working_directory: ~/ara
-    docker: 
+    docker:
       - image: circleci/openjdk:8u222-stretch
     steps:
       - checkout
-      - restore_cache: 
+      - restore_cache:
           key: ara-{{ checksum "pom.xml" }}
-      - run: mvn package dependency:go-offline 
+      - run: mvn package dependency:go-offline
       - save_cache:
           paths:
             - ~/.m2
           key: ara-{{ checksum "pom.xml" }}
-      - store_test_results: 
+      - store_test_results:
           path: server/target/surefire-reports
-      - store_artifacts: 
-          path: server/target/ara-server*.jar
+  release:
+      working_directory: ~/ara
+      context: ara-context
+      branches:
+        only:
+          - master
+      docker:
+        - image: circleci/openjdk:8u222-stretch
+      steps:
+        - checkout
+        - restore_cache:
+            key: ara-{{ checksum "pom.xml" }}
+        - setup_remote_docker:
+            docker_layer_caching: true
+        - run:
+            name: Upgrade version
+            command: mvn versions:set -DremoveSnapshot -DgenerateBackupPoms=false
+        - run:
+            name: Build final Jar
+            command: mvn package dependency:go-offline
+        - run:
+            name: Stock the new Version
+            command: mvn help:evaluate -Dexpression=project.version -q -DforceStdout > version.txt
+        - run:
+            name: Build database Image
+            command: docker build -t decathlon/ara-db:$(cat version.txt) database/instance
+        - run:
+            name: Build Server Image
+            command: docker build -t decathlon/ara-server:$(cat version.txt) final
+        - run:
+            name: Tag the version
+            command: |
+              git commit -am "Release version $(cat version.txt)"
+              git tag -a v_$(cat version.txt) -m "Release version $(cat version.txt)"
+              git push --tags origin
+              git push origin master
+        - run:
+            name: Push images
+            command: |
+              echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+              docker push decathlon/ara-db:$(cat version.txt) && docker push decathlon/ara-server:$(cat version.txt)
+        - save_cache:
+            paths:
+              - ~/.m2
+            key: ara-{{ checksum "pom.xml" }}

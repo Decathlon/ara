@@ -7,7 +7,7 @@ ENV DATABASE_USER=root
 ENV DATABASE_PASSWORD=password_to_change
 ENV ARA_PROFILE=dev
 
-COPY ara.jar /opt/ara/ara.jar
+COPY target/ara-*.jar /opt/ara/ara.jar
 
 # Your must attach a volume with at least application-prod.properties and db-application-prod.properties to this location
 # If your ARA_PROFILE is prod
