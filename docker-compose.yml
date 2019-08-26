@@ -1,0 +1,27 @@
+# Please Note that this file IS NOT PRODUCTION READY.
+# It's only dedicated to local test & try
+
+version: '3'
+
+services:
+  db:
+    image: "decathlon/ara-db:latest"
+    ports:
+      - "3306:3306"
+    expose:
+      - 3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=local_password_to_change
+  server:
+    image: "decathlon/ara-server:latest"
+    ports:
+      - "8080:8080"
+    expose:
+      - 8080
+    environment:
+      - DATABASE_URL=host.docker.internal:3306/ara-dev
+      - DATABASE_USER=root
+      - DATABASE_PASSWORD=local_password_to_change
+      - ARA_PROFILE=dev
+    depends_on:
+      - db

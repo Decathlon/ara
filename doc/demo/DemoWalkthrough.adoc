@@ -305,3 +305,7 @@ problem, or modify the patterns of another existing problem to match this except
 
 Follow the link:../user/main/UserDocumentation.adoc[user documentation] to learn about other features of ARA,
 like the functionality coverage.
+
+Follow the link:../integrator/main/IntegratorDocumentation.adoc[Integrator documentation] to learn about
+how to configure a Project, upload Postman & Cucumber runs reports in ARA, and upload Postman & Cucumber
+scenarios.

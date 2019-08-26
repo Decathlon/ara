@@ -1,3 +1,20 @@
+/******************************************************************************
+ * Copyright (C) 2019 by the ARA Contributors                                 *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ * 	 http://www.apache.org/licenses/LICENSE-2.0                               *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ *                                                                            *
+ ******************************************************************************/
+
 package com.decathlon.ara.ci.service;
 
 import com.decathlon.ara.ci.bean.Build;
@@ -31,8 +48,8 @@ import com.decathlon.ara.repository.ErrorRepository;
 import com.decathlon.ara.repository.ExecutionCompletionRequestRepository;
 import com.decathlon.ara.repository.ExecutionRepository;
 import com.decathlon.ara.repository.TypeRepository;
+import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
 import com.decathlon.ara.service.ProblemDenormalizationService;
-import com.decathlon.ara.service.TransactionService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -98,7 +115,7 @@ public class ExecutionCrawlerService {
     private final ProblemDenormalizationService problemDenormalizationService;
 
     @NonNull
-    private final TransactionService transactionService;
+    private final TransactionAppenderUtil transactionAppenderUtil;
 
     /**
      * Index the execution of a test cycle.<br>
@@ -152,7 +169,7 @@ public class ExecutionCrawlerService {
                 }
 
                 if (savedExecution.getStatus() == JobStatus.DONE) {
-                    transactionService.doAfterCommit(() -> safelySendQualityEmail(savedExecution));
+                    transactionAppenderUtil.doAfterCommit(() -> safelySendQualityEmail(savedExecution));
                 }
             }
         } catch (Exception e) {
@@ -270,7 +287,7 @@ public class ExecutionCrawlerService {
     }
 
     private void registerAfterCommitExecutionCleanUp(long projectId, Fetcher fetcher, Execution execution) {
-        transactionService.doAfterCommit(() -> {
+        transactionAppenderUtil.doAfterCommit(() -> {
             try {
                 fetcher.onDoneExecutionIndexingFinished(projectId, execution);
             } catch (FetchException e) {

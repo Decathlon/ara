@@ -137,75 +137,43 @@ Run the setup once, so Liquibase has a chance to create all tables.
 
 == Setup Development Machine
 
-=== Install MariaDB
-Download MariaDB here, version 5.5.56 (same version than on server): +
-https://downloads.mariadb.org/mariadb/5.5.56/
+=== Install the Database
 
-Follow this tutorial: +
-https://mariadb.com/kb/fr/installing-mariadb-msi-packages-on-windows/ +
-For the root password, use V*n6MxBq7mr?4P?M +
-Check “Use UTF-8 as default server’s character set” +
-Keep other default choice (server port 3306, optimize for transactions, etc.)
+To install the Database for your developments, you'll need Docker and a
+shell environement (available by default on macOS & GNU/Linux, and by
+using Git for Windows or WSL on Windows).
 
-Go to “C:\Program Files\MariaDB 5.5\data” +
-Open my.ini as an Administrator, and paste this content:
+Once thoses prerequisites are satisfied, do the following in a shell
+terminal from the root folder of ARA (called `ARA_ROOT` bellow) :
+```
+> cd database/instance
+> ./manage-db.sh create <PATH_WHERE_TO_PERSIST_DATAS_ON_DISK>
+```
 
-    [mysqld]
-    datadir=C:/Program Files/MariaDB 5.5/data
-    port=3306
-    sql_mode="STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION"
-    default_storage_engine=innodb
-    innodb_buffer_pool_size=2033M
-    innodb_log_file_size=50M
-    character-set-server=utf8
-    innodb_large_prefix
-    innodb_file_format=BARRACUDA
-    innodb_file_per_table
-    innodb_file_format_max=BARRACUDA
-    autocommit=OFF
-    [client]
-    port=3306
+Once this script is done, wait 1 minute and do a `docker ps`. You should
+see the container `ara-db` up and running on port 3306.
 
-Press Win+R, execute “services.msc” and restart the “MySQL” service for it to use the new configuration.
+=== Populate the database
 
-=== Create Data Bases
-You can download MySQL Workbench GPL (the equivalent to SQL Developer):
-https://dev.mysql.com/downloads/workbench/
+Once your database is up and running, you can at any moment run the
+following to populate it with the database's structure and some referentials
+informations. You will need Maven and a database up and running, then you
+can do those commands from the root folder of ARA.
 
-Connect via MySql Workbench, and execute:
+```
+> cd database
+> mvn -Pdev liquibase:updateTestingRollback -Dliquibase.database.password=YOUR_DATABASE_PASSWORD
+```
 
-    CREATE DATABASE `ara-dev-in`;
+This command will call all the liquibase scripts and update the database
+structure and datas if needed.
 
-This will be the schema used by integration tests on your local development environment.
-
-Then, for each application you will maintain, create a schema for running the application on your local development machine:
-
-    CREATE DATABASE `ara-{app}-dev`;
-
-Where `{app}` is the id of your application(s).
-
-If you work on ARA Core, you CAN create this schema to test a core ARA (without application-dependant configuration):
-
-    CREATE DATABASE `ara-dev`;
-
-=== Initialize the Development Data Base
-To create the tables, run this command in ara-server directory:
-
-    mvn -Dspring.config.location=classpath:/,classpath:/config/{app}/ liquibase:updateTestingRollback -P{profile}
-
-Where `{app}` is the id of your application and `{profile}` is the profile linked to your app in the `ara-server/pom.xml` file. +
-Repeat for each application you maintain.
-
-Then, to populate some data, you can initiate the Demo project :
+Finally, to populate some data, you can initiate the Demo project :
 
 * Run Ara server and Ara client
 * Go the Dropdown menu in the top left corner
 * Click on Manage Project List
 * At the center of the screen, click on the button "Create the Demo project"
-
-If you work on ARA Core, you CAN initiate this schema to test a core ARA (without application-dependant configuration):
-
-    mvn liquibase:updateTestingRollback -Pdev
 
 === Install Lombok in Your IDE
 
@@ -230,26 +198,20 @@ By default, all Spring properties are read in application.properties. +
 But for database and other external server configurations, we use profiles to configure such different environments:
 
 * dev: development environment, to develop/run/test/debug on local machine with a local database
-* dev_in: run integration tests on a local machine with a local database, but on a separate empty database schema
 * in: used by continuous integration to run integration tests
 * prod: once deployed on the final production server
 
-To launch compilations and tests, you need to set the dev_in profile:
-
-    mvn install -Dspring.profiles.active=dev_in
-
 To update the development database schema and be able to run ARA on your local machine, run tis command, with the dev profile:
 
-    mvn liquibase:update -Dspring.profiles.active=dev
+    mvn liquibase:update -Dspring.profiles.active=dev -Dliquibase.datasbase.password=<YOUR DB PASSWORD>
 
-This will not skip integration tests: when you run integration tests, you need to be run on *dev_in* environment, and NOT on *in* environment: only the continuous integration server will use it. So you can develop your integration tests, run and debug them on your own modified environment (new database table, etc.).
 
 === First Execution
 
 ==== Set up Spring profile in your IDE
 
-When executing Maven commands in your IDE, make sure to set the Maven profile to dev_in. +
-In IntelliJ, in the view "Maven Projects", unfold the first folder "Profiles" and check "dev_in". +
+When executing Maven commands in your IDE, make sure to set the Maven profile to dev. +
+In IntelliJ, in the view "Maven Projects", unfold the first folder "Profiles" and check "dev". +
 Then, in this "Maven Projects" view, you will be able to execute any lifecycle without having to set the profile.
 
 ==== Make sure IntelliJ Generates MapStruct Classes the Correct Way
@@ -268,9 +230,8 @@ With these options, the IntelliJ compiler will generate MapStruct class implemen
 
 ==== First Compilation
 
-First do a "mvn install -Pdev_in" in the root of the ARA project. +
-This will generate the client and ara-generated-cucumber-report dependencies for the server module to compile. +
-This will also generate the Q* and S* classes (the QueryDsl classes) to make your IDE happy.
+First do a "mvn install -Pdev" in the root of the ARA project. +
+This will generate the client and ara-generated-cucumber-report dependencies for the server module to compile.
 
 ==== Run the Server
 
@@ -278,7 +239,7 @@ First, in a terminal, go to the client module and run "npm run dev" to have a li
 
 Then, on the server part, create a Spring Boot run configuration:
 
-* Main class: com.decathlon.ara.AraApplication
+* Main class: com.decathlon.com.decathlon.ara.AraApplication
 * Active Profiles: dev (if you don't have the Intellij Ultimate version, use the VM arg : `-Dspring.profiles.active=dev` )
 * VM options: `-Dspring.config.location=classpath:/,classpath:/config/{app}/` where you replace `{app}` by the application you want to launch (see below)
 * VM options: `-DdocUrl=<location of your docs if you host them on a different server or http://localhost>`
@@ -326,14 +287,14 @@ This is why we advise you to run this command only when needing to test the inde
 === Useful Commands
 
 * ??? to run the application (without compiling it as a JAR), only the server side (with hot-reload): you must run the client side too with eg. ``npm run dev``
-* When running a JUnit integration test (*IT.java): VM args = ``-Dspring.profiles.active=dev_in``
-* ``mvn liquibase:updateTestingRollback -Pdev`` to update the development database schema
-* ``mvn install -Pdev_in`` to compile, package and install the application, running all tests
-* ``mvn install -Pdev_in -DskipITs=true`` to compile, package and install the application, keeping unit tests, but bypassing slow integration tests
-* ``mvn install -Pdev_in -DskipTests=true -DskipITs=true`` to compile, package and install the application, bypassing all tests, or to regenerate the mapping classes or the entity and table classes if database schema changed
-* ``mvn install -Pdev_in -Dmaven.test.skip=true`` to compile, package and install the application, without even compiling test classes
+* When running a JUnit integration test (*IT.java): VM args = ``-Dspring.profiles.active=dev``
+* ``mvn liquibase:updateTestingRollback -Pdev -Dliquibase.database.password=<YOUR DB PASSWORD>`` to update the development database schema
+* ``mvn install -Pdev`` to compile, package and install the application, running all tests
+* ``mvn install -Pdev -DskipITs=true`` to compile, package and install the application, keeping unit tests, but bypassing slow integration tests
+* ``mvn install -Pdev -DskipTests=true -DskipITs=true`` to compile, package and install the application, bypassing all tests, or to regenerate the mapping classes or the entity and table classes if database schema changed
+* ``mvn install -Pdev -Dmaven.test.skip=true`` to compile, package and install the application, without even compiling test classes
 * ``java -Dspring.profiles.active=dev -jar target/ara-server-*.jar`` to run the produced application, including the client in the server
-* ``mvn install -Pdev_in -DskipPitest`` to skip Pitest tests (mutates the code and check at least one test is failing, to make sure no equivalent to assert(true) is done in tests)
+* ``mvn install -Pdev -DskipPitest`` to skip Pitest tests (mutates the code and check at least one test is failing, to make sure no equivalent to assert(true) is done in tests)
 
 == Liquibase
 
@@ -341,7 +302,7 @@ When designing Liquibase change-sets, you may find out the new change-set is err
 
 You can rollback the last applied change-set with this command:
 
-    mvn -Dliquibase.rollbackCount=1 liquibase:rollback -Pdev_in
+    mvn -Dliquibase.rollbackCount=1 liquibase:rollback -Pdev -Dliquibase.database.password=<YOUR DB PASSWORD>
 
 Change the rollbackCount to tell Liquibase the number of change-sets to rollback. +
 Change the profile to point to the right database.
@@ -462,24 +423,6 @@ So you could:
 * or 'mvn compile' to generate new MapStruct mappers without running any test.
 
 TIP: When running integration tests, you can use the VM arguments `-XX:TieredStopAtLevel=1 -noverify` to speed up Spring context startup
-
-=== PiTest (for Unit Tests)
-
-We are using PiTest: it adds mutations in your code and run unit-tests (not integration-tests) to check at least one unit-test fails with the modified code. +
-This ensures code is robust and completely tested (no "assert true" ;-) but in reality, such "assert true" can be quite well hidden inside real tests). +
-
-Pitest is quite time consuming to run. +
-When working on adding or modifying tests to a class, you can run Pitest only on the given class, using the following command. +
-Note that Pitest needs the tests to have run for it to compute code coverage and know what classes to mutate.
-
-    mvn test -DskipPitest -Pdev_in && \
-    mvn pitest:mutationCoverage \
-        -DtargetClasses=com.decathlon.ara.postman.service.PostmanService \
-        -DtargetTests=com.decathlon.ara.postman.service.PostmanServiceTest \
-        -Pdev_in
-
-It's only an example: you can specify only one class to test (PostmanService) and one test class (PostmanServiceTest). +
-The test-class is optional: by default, all test-classes will be candidates to test mutations.
 
 === Run all Tests in your IDE
 

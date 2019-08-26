@@ -1,3 +1,20 @@
+/******************************************************************************
+ * Copyright (C) 2019 by the ARA Contributors                                 *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ * 	 http://www.apache.org/licenses/LICENSE-2.0                               *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ *                                                                            *
+ ******************************************************************************/
+
 package com.decathlon.ara.report.service;
 
 import com.decathlon.ara.domain.Error;
@@ -76,10 +93,8 @@ public class ExecutedScenarioExtractorServiceTest {
                     asserts.assertThat(error.getStep()).isEqualTo("A step number 1 that fails with error \"string parameter 1\"");
                     asserts.assertThat(error.getStepDefinition()).isEqualTo(STEP_DEF_ERROR);
                     asserts.assertThat(error.getStepLine()).isEqualTo(9);
-                    asserts.assertThat(error.getException()).isEqualTo("" +
-                            "java.lang.RuntimeException: Error message string parameter 1\n" +
-                            "\tat ara.test.TestGlue.a_step_number_that_fails_with_error(TestGlue.java:59)\n" +
-                            "\tat ✽.Then A step number 1 that fails with error \"string parameter 1\"(ara/test/features/feature1.feature:9)\n");
+                    asserts.assertThat(error.getException()).contains("java.lang.RuntimeException: Error message string parameter 1\n");
+                    asserts.assertThat(error.getException()).contains("at ✽.Then A step number 1 that fails with error \"string parameter 1\"(ara/test/features/feature1.feature:9)\n");
                 }
                 {
                     Error error = get(executedScenario.getErrors(), 1);
@@ -87,10 +102,8 @@ public class ExecutedScenarioExtractorServiceTest {
                     asserts.assertThat(error.getStep()).isEqualTo("A step number 2 that fails with error \"string parameter 2\"");
                     asserts.assertThat(error.getStepDefinition()).isEqualTo(STEP_DEF_ERROR);
                     asserts.assertThat(error.getStepLine()).isEqualTo(10);
-                    asserts.assertThat(error.getException()).isEqualTo("" +
-                            "java.lang.RuntimeException: Error message string parameter 2\n" +
-                            "\tat ara.test.TestGlue.a_step_number_that_fails_with_error(TestGlue.java:59)\n" +
-                            "\tat ✽.And A step number 2 that fails with error \"string parameter 2\"(ara/test/features/feature1.feature:10)\n");
+                    asserts.assertThat(error.getException()).contains("java.lang.RuntimeException: Error message string parameter 2\n");
+                    asserts.assertThat(error.getException()).contains("\tat ✽.And A step number 2 that fails with error \"string parameter 2\"(ara/test/features/feature1.feature:10)\n");
                 }
             }
 
@@ -118,10 +131,8 @@ public class ExecutedScenarioExtractorServiceTest {
                     asserts.assertThat(error.getStep()).isEqualTo("A step number 3 that fails with error \"example 1\"");
                     asserts.assertThat(error.getStepDefinition()).isEqualTo(STEP_DEF_ERROR);
                     asserts.assertThat(error.getStepLine()).isEqualTo(18);
-                    asserts.assertThat(error.getException()).isEqualTo("" +
-                            "java.lang.RuntimeException: Error message example 1\n" +
-                            "\tat ara.test.TestGlue.a_step_number_that_fails_with_error(TestGlue.java:59)\n" +
-                            "\tat ✽.When A step number 3 that fails with error \"example 1\"(ara/test/features/feature1.feature:18)\n");
+                    asserts.assertThat(error.getException()).contains("java.lang.RuntimeException: Error message example 1\n");
+                    asserts.assertThat(error.getException()).contains("\tat ✽.When A step number 3 that fails with error \"example 1\"(ara/test/features/feature1.feature:18)\n");
                 }
             }
 
@@ -144,10 +155,8 @@ public class ExecutedScenarioExtractorServiceTest {
                     asserts.assertThat(error.getStep()).isEqualTo("A step number 3 that fails with error \"example 2\"");
                     asserts.assertThat(error.getStepDefinition()).isEqualTo(STEP_DEF_ERROR);
                     asserts.assertThat(error.getStepLine()).isEqualTo(18);
-                    asserts.assertThat(error.getException()).isEqualTo("" +
-                            "java.lang.RuntimeException: Error message example 2\n" +
-                            "\tat ara.test.TestGlue.a_step_number_that_fails_with_error(TestGlue.java:59)\n" +
-                            "\tat ✽.When A step number 3 that fails with error \"example 2\"(ara/test/features/feature1.feature:18)\n");
+                    asserts.assertThat(error.getException()).contains("java.lang.RuntimeException: Error message example 2\n");
+                    asserts.assertThat(error.getException()).contains("\tat ✽.When A step number 3 that fails with error \"example 2\"(ara/test/features/feature1.feature:18)\n");
                 }
             }
 
@@ -180,7 +189,7 @@ public class ExecutedScenarioExtractorServiceTest {
                     asserts.assertThat(error.getStepLine()).isIn(-100000, -99999);
                     asserts.assertThat(error.getException()).startsWith("" + // startsWith because it contains Cucumber & Maven stack-traces!
                             "java.lang.RuntimeException: This scenario fails on before\n" +
-                            "\tat ara.test.TestGlue.failOnBefore(TestGlue.java:35)\n");
+                            "\tat ara.test.TestGlue.failOnBefore(");
                 }
             }
 
@@ -225,10 +234,8 @@ public class ExecutedScenarioExtractorServiceTest {
                     asserts.assertThat(error.getStep()).isEqualTo("A step number 4 that fails with error \"string parameter 4\"");
                     asserts.assertThat(error.getStepDefinition()).isEqualTo(STEP_DEF_ERROR);
                     asserts.assertThat(error.getStepLine()).isEqualTo(16);
-                    asserts.assertThat(error.getException()).isEqualTo("" +
-                            "java.lang.RuntimeException: Error message string parameter 4\n" +
-                            "\tat ara.test.TestGlue.a_step_number_that_fails_with_error(TestGlue.java:59)\n" +
-                            "\tat ✽.And A step number 4 that fails with error \"string parameter 4\"(ara/test/features/feature2.feature:16)\n");
+                    asserts.assertThat(error.getException()).contains("java.lang.RuntimeException: Error message string parameter 4\n");
+                    asserts.assertThat(error.getException()).contains("\tat ✽.And A step number 4 that fails with error \"string parameter 4\"(ara/test/features/feature2.feature:16)\n");
                 }
             }
 

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright (C) 2019 by the ARA Contributors
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	 http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd"
+                   logicalFilePath="ara/00001800_add_missing_indices.xml">
+
+    <changeSet id="00001800_add_missing_indices_error_exception" author="slaout">
+        <createIndex indexName="index_error_exception"
+                     tableName="error"
+                     unique="false">
+            <column name="exception(512)"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="00001800_add_missing_indices_executed_scenario_feature_file" author="slaout">
+        <createIndex indexName="index_executed_scenario_feature_file"
+                     tableName="executed_scenario"
+                     unique="false">
+            <column name="feature_file"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="00001800_add_missing_indices_executed_scenario_feature_name" author="slaout">
+        <createIndex indexName="index_executed_scenario_feature_name"
+                     tableName="executed_scenario"
+                     unique="false">
+            <column name="feature_name"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="00001800_add_missing_indices_executed_scenario_name" author="slaout">
+        <createIndex indexName="index_executed_scenario_name"
+                     tableName="executed_scenario"
+                     unique="false">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="00001800_add_missing_indices_error_step" author="slaout">
+        <createIndex indexName="index_error_step"
+                     tableName="error"
+                     unique="false">
+            <column name="step(1024)"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="00001800_add_missing_indices_error_step_definition" author="slaout">
+        <createIndex indexName="index_error_step_definition"
+                     tableName="error"
+                     unique="false">
+            <column name="step_definition"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="00001800_add_missing_indices_executed_scenario_cucumber_id" author="slaout">
+        <createIndex indexName="index_executed_scenario_cucumber_id"
+                     tableName="executed_scenario"
+                     unique="false">
+            <column name="cucumber_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

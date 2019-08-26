@@ -1,25 +1,35 @@
+/******************************************************************************
+ * Copyright (C) 2019 by the ARA Contributors                                 *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ * 	 http://www.apache.org/licenses/LICENSE-2.0                               *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ *                                                                            *
+ ******************************************************************************/
+
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.defect.DefectAdapter;
+import com.decathlon.ara.ci.service.DateService;
+import com.decathlon.ara.ci.util.FetchException;
 import com.decathlon.ara.common.NotGonnaHappenException;
+import com.decathlon.ara.defect.DefectAdapter;
+import com.decathlon.ara.defect.bean.Defect;
 import com.decathlon.ara.domain.Problem;
 import com.decathlon.ara.domain.Project;
 import com.decathlon.ara.domain.enumeration.DefectExistence;
 import com.decathlon.ara.domain.enumeration.ProblemStatus;
-import com.decathlon.ara.ci.service.DateService;
-import com.decathlon.ara.ci.util.FetchException;
 import com.decathlon.ara.repository.ProblemRepository;
 import com.decathlon.ara.repository.ProjectRepository;
-import com.decathlon.ara.defect.bean.Defect;
+import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
 import com.decathlon.ara.service.support.Settings;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +38,10 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Handles synchronization of problem statuses with their external defects.<br>
@@ -56,7 +70,7 @@ public class DefectService {
     private DateService dateService;
 
     @Autowired
-    private TransactionService transactionService;
+    private TransactionAppenderUtil transactionAppenderUtil;
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -180,7 +194,7 @@ public class DefectService {
                 .forEach(problem -> problem.setDefectExistence(DefectExistence.UNKNOWN));
 
         // Flag the project to get new full indexing (indexing is done in another thread)
-        transactionService.doAfterCommit(() ->
+        transactionAppenderUtil.doAfterCommit(() ->
                 lastFullIndexDates.remove(projectId));
     }
 

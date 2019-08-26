@@ -1,3 +1,19 @@
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright (C) 2019 by the ARA Contributors
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	 http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
   <div>
     <aside v-if="execution && teamsAssignableToProblems.length > 0">
@@ -520,12 +536,12 @@
         // TODO NO LOADING INDICATOR FOR NOW
         // TODO IN THE FUTURE, IT WILL BE DONE WITH THE SAME API CALL!
         Vue.http
-        .get(api.paths.executions(this) + '/' + this.executionId + '/history', api.REQUEST_OPTIONS)
-        .then((response) => {
-          this.executionHistoryPoint = response.body
-        }, (error) => {
-          api.handleError(error)
-        })
+          .get(api.paths.executions(this) + '/' + this.executionId + '/history', api.REQUEST_OPTIONS)
+          .then((response) => {
+            this.executionHistoryPoint = response.body
+          }, (error) => {
+            api.handleError(error)
+          })
       },
 
       totalCriterion () {

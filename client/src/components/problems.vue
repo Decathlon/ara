@@ -1,3 +1,19 @@
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright (C) 2019 by the ARA Contributors
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	 http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
   <Spin fix v-if="!teamsAssignableToProblems || !teamsAssignableToProblems.length || !rootCauses"/>
   <div v-else>
@@ -134,33 +150,33 @@
         }
         this.loadingProblems = true
         Vue.http
-        .post(url, filter, api.REQUEST_OPTIONS)
-        .then((response) => {
-          this.loadingProblems = false
-          this.problems = response.body
+          .post(url, filter, api.REQUEST_OPTIONS)
+          .then((response) => {
+            this.loadingProblems = false
+            this.problems = response.body
 
-          let pageCount = this.problems.totalPages
-          let lastPage = (pageCount === 0 ? 0 : pageCount - 1)
-          if (this.problems.number > lastPage) {
-            // There was a lot of page, we were on one of the last pages, and after reloading, the number of page is now small: go to last one
-            this.problemsPaging.page = lastPage
-            if (this.filtersInQueryString) {
-              this.recomputeQueryString()
-            } else {
-              this.requestedProblems = true
+            let pageCount = this.problems.totalPages
+            let lastPage = (pageCount === 0 ? 0 : pageCount - 1)
+            if (this.problems.number > lastPage) {
+              // There was a lot of page, we were on one of the last pages, and after reloading, the number of page is now small: go to last one
+              this.problemsPaging.page = lastPage
+              if (this.filtersInQueryString) {
+                this.recomputeQueryString()
+              } else {
+                this.requestedProblems = true
+              }
             }
-          }
 
-          if (this.requestedProblems) {
-            this.loadProblems()
-          }
-        }, (error) => {
-          this.loadingProblems = false
-          api.handleError(error)
-          if (this.requestedProblems) {
-            this.loadProblems()
-          }
-        })
+            if (this.requestedProblems) {
+              this.loadProblems()
+            }
+          }, (error) => {
+            this.loadingProblems = false
+            api.handleError(error)
+            if (this.requestedProblems) {
+              this.loadProblems()
+            }
+          })
       },
 
       onProblemsPageChange (pageNumber) {

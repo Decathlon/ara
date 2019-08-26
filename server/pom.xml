@@ -1,4 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright (C) 2019 by the ARA Contributors
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	 http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -6,7 +23,7 @@
     <parent>
         <groupId>com.decathlon.ara</groupId>
         <artifactId>ara-parent</artifactId>
-        <version>3.1.1</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>ara-server</artifactId>
     <packaging>jar</packaging>
@@ -15,7 +32,6 @@
     <description>Agile Regression Analyzer - Server</description>
 
     <properties>
-        <java.version>1.8</java.version>
 
         <!-- BUG http://mapstruct.org/faq/#can-i-use-mapstruct-together-with-project-lombok -->
         <mapstruct.version>1.2.0.Final</mapstruct.version>
@@ -28,7 +44,6 @@
         <!-- From JHipster -->
         <dropwizard-metrics.version>4.0.3</dropwizard-metrics.version>
 
-        <querydsl.version>4.2.1</querydsl.version>
 
         <!-- Sonar -->
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -49,13 +64,11 @@
 
         <!-- EMPTY: will be set by profiles or through command line -->
         <spring.profiles.active></spring.profiles.active>
-        <liquibase.database.url></liquibase.database.url>
-        <liquibase.database.username></liquibase.database.username>
-        <liquibase.database.password></liquibase.database.password>
 
         <!-- Swagger -->
         <springfox-swagger2.version>2.9.2</springfox-swagger2.version>
     </properties>
+
 
     <dependencies>
         <!-- SpringBoot's @ConfigurationProperties -->
@@ -65,36 +78,6 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- JPA/Hibernate -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <!-- @javax.interceptor.InterceptorBinding needed by javax.transaction.Transactional -->
-            <groupId>javax.interceptor</groupId>
-            <artifactId>javax.interceptor-api</artifactId>
-            <version>1.2.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-ehcache</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.sf.ehcache</groupId>
-            <artifactId>ehcache-core</artifactId>
-            <version>2.6.11</version>
-        </dependency>
-        <!-- TODO Use JCache + ehcache3 when Spring Boot will upgrade to Hibernate 5.2 (Java 8 only) -->
-        <!-- <dependency> -->
-        <!-- <groupId>org.hibernate</groupId> -->
-        <!-- <artifactId>hibernate-jcache</artifactId> -->
-        <!-- <version>${hibernate.version}</version> -->
-        <!-- </dependency> -->
-        <!-- <dependency> -->
-        <!-- <groupId>org.ehcache</groupId> -->
-        <!-- <artifactId>ehcache</artifactId> -->
-        <!-- </dependency> -->
 
         <!-- Web -->
         <dependency>
@@ -125,17 +108,20 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Spring Transactions -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <version>5.1.7.RELEASE</version>
+        </dependency>
+
         <!-- Inject getters/setters for POJO beans -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
         </dependency>
 
-        <!-- Database -->
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -174,7 +160,7 @@
             <version>${dropwizard-metrics.version}</version>
         </dependency>
 
-        <!-- Entity<->DTO Mapper classes generation -->
+        <!-- Entity<->DTO Mappapplicater classes generation -->
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct-jdk8</artifactId>
@@ -231,27 +217,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Querydsl -->
-        <dependency>
-            <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-apt</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-sql</artifactId>
-            <version>${querydsl.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-sql-spring</artifactId>
-            <version>${querydsl.version}</version>
-        </dependency>
-
         <!-- Swagger -->
         <dependency>
             <groupId>io.springfox</groupId>
@@ -285,18 +250,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
             <version>4.2</version>
-        </dependency>
-
-        <!-- Run Liquibase migration scripts at startup in the Docker images (not enabled otherwise) -->
-        <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-        </dependency>
-
-        <!-- @Retryable annotations -->
-        <dependency>
-            <groupId>org.springframework.retry</groupId>
-            <artifactId>spring-retry</artifactId>
         </dependency>
 
         <dependency>
@@ -337,87 +290,26 @@
             <artifactId>ara-generated-cucumber-report</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.decathlon.ara</groupId>
+            <artifactId>ara-database</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Run Liquibase scripts on the integration database *BEFORE* generating Querydsl table classes from database schema -->
-            <!-- Liquibase scripts can also be manually run by "mvn liquibase:updateTestingRollback" / "mvn liquibase:rollback" + a profile -->
             <plugin>
-                <groupId>org.liquibase</groupId>
-                <artifactId>liquibase-maven-plugin</artifactId>
-                <version>${liquibase.version}</version>
-                <configuration>
-                    <changeLogFile>src/main/resources/liquibase/master.xml</changeLogFile>
-                    <driver>com.mysql.jdbc.Driver</driver>
-                    <url>${liquibase.database.url}</url>
-                    <username>${liquibase.database.username}</username>
-                    <password>${liquibase.database.password}</password>
-                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>generate-sources</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>updateTestingRollback</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Generate Querydsl table classes from the integration database schema -->
-            <plugin>
-                <groupId>com.querydsl</groupId>
-                <artifactId>querydsl-maven-plugin</artifactId>
-                <version>${querydsl.version}</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>export</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <jdbcDriver>com.mysql.jdbc.Driver</jdbcDriver>
-                    <jdbcUrl>${liquibase.database.url}</jdbcUrl>
-                    <jdbcUser>${liquibase.database.username}</jdbcUser>
-                    <jdbcPassword>${liquibase.database.password}</jdbcPassword>
-                    <packageName>com.decathlon.ara.domain</packageName>
-                    <targetFolder>${project.build.directory}/generated-sources/annotations</targetFolder>
-                    <namePrefix>S</namePrefix>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>mysql</groupId>
-                        <artifactId>mysql-connector-java</artifactId>
-                        <version>${mysql.version}</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-
-            <!-- Process Lombok annotations to generate entity byte-codes *BEFORE* JPA entities parsing for Querydsl query types generation -->
-            <plugin>
-                <groupId>com.mysema.maven</groupId>
-                <artifactId>apt-maven-plugin</artifactId>
-                <version>1.1.3</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>process</goal>
-                        </goals>
-                        <configuration>
-                            <includes>com.decathlon.ara.domain</includes>
-                            <outputDirectory>${project.build.directory}/generated-sources/annotations</outputDirectory>
-                            <processor>
-                                com.querydsl.apt.jpa.JPAAnnotationProcessor,<!--
-                             -->lombok.launch.AnnotationProcessorHider$AnnotationProcessor
-                            </processor>
-                        </configuration>
-                    </execution>
-                </executions>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
 
             <!-- Add the generated classes to the classpath -->
@@ -555,84 +447,80 @@
                 </configuration>
             </plugin>
 
-            <plugin>
-                <groupId>org.pitest</groupId>
-                <artifactId>pitest-maven</artifactId>
-                <version>1.4.3</version>
-                <executions>
-                    <execution>
-                        <id>pitest</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>mutationCoverage</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <skip>${skipPitest}</skip>
-                    <outputFormats>
-                        <outputFormat>XML</outputFormat>
-                        <outputFormat>HTML</outputFormat>
-                    </outputFormats>
-                    <targetClasses>
-                        <!--param>com.decathlon.ara.*</param-->
-                        <!-- For now, while we still have too many integration tests versus unit tests, we focus our efforts on these high-value classes: -->
-                        <param>com.decathlon.ara.ci.fetcher.*</param>
-                        <param>com.decathlon.ara.ci.service.*</param>
-                        <param>com.decathlon.ara.ci.util.*</param>
-                        <param>com.decathlon.ara.coverage.*</param>
-                        <param>com.decathlon.ara.defect.*</param>
-                        <param>com.decathlon.ara.domain.ExecutedScenario</param> <!-- it has getHandling() -->
-                        <param>com.decathlon.ara.domain.Functionality</param> <!-- it has getCoverage() -->
-                        <param>com.decathlon.ara.embedding.bean.*</param>
-                        <param>com.decathlon.ara.embedding.util.*</param>
-                        <param>com.decathlon.ara.postman.service.*</param>
-                        <param>com.decathlon.ara.postman.support.*</param>
-                        <param>com.decathlon.ara.report.bean.Element</param> <!-- isPassed() & extract*() -->
-                        <param>com.decathlon.ara.report.bean.Embedded</param> <!-- extract*() -->
-                        <param>com.decathlon.ara.report.bean.Feature</param> <!-- getReportFileName() -->
-                        <param>com.decathlon.ara.report.bean.Step</param> <!-- extract*() -->
-                        <param>com.decathlon.ara.report.bean.Tag</param> <!-- extract*() -->
-                        <param>com.decathlon.ara.report.service.*</param>
-                        <param>com.decathlon.ara.report.util.*</param>
-                        <param>com.decathlon.ara.service.*</param>
-                        <param>com.decathlon.ara.service.util.*</param>
-                    </targetClasses>
-                    <excludedClasses>
-                        <class>com.decathlon.ara.service.dto.*</class>
-                        <class>com.decathlon.ara.service.exception.*</class>
-                        <class>com.decathlon.ara.service.mapper.*</class>
-                        <class>com.decathlon.ara.service.support.*</class>
-                        <!-- Merely a configuration class (duplicated 3 times in this pom.xml) -->
-                        <class>com.decathlon.ara.service.SettingProviderService</class>
-                    </excludedClasses>
-                    <targetTests>
-                        <param>com.decathlon.ara.**.*Test</param>
-                    </targetTests>
-                    <excludedTestClasses>
-                        <class>com.decathlon.ara.dbunit.DbUnitExporter</class>
-                        <class>com.decathlon.ara.dbunit.DbUnitImporter</class>
-                    </excludedTestClasses>
-                    <environmentVariables>
-                        <spring.profiles.active>${spring.profiles.active}
-                        </spring.profiles.active> <!-- For *IT integration tests -->
-                    </environmentVariables>
-                    <avoidCallsTo>
-                        <!--Avoid call to log service so log method are not being mutated-->
-                        <avoidCallsTo>org.slf4j</avoidCallsTo>
-                        <!--Avoid call to java io outputstream so parsing methods are not being mutated-->
-                        <avoidCallsTo>java.io.OutputStream</avoidCallsTo>
-                        <avoidCallsTo>com.google.common.base.Preconditions</avoidCallsTo>
-                    </avoidCallsTo>
-                    <mutators>
-                        <mutator>ALL</mutator>
-                    </mutators>
-                    <exportLineCoverage>true</exportLineCoverage>
-                    <!--We want each report to override the former one-->
-                    <timestampedReports>false</timestampedReports>
-                </configuration>
-            </plugin>
-
+            <!-- TODO Reactivate pitest when the tests are optimized and don't take more than 10minutes to be executed
+                 due to OpenSource free plan limitation.
+        <plugin>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-maven</artifactId>
+            <version>1.4.3</version>
+            <executions>
+                <execution>
+                    <id>pitest</id>
+                    <phase>test</phase>
+                    <goals>
+                        <goal>mutationCoverage</goal>
+                    </goals>
+                </execution>
+            </executions>
+            <configuration>
+                <skip>${skipPitest}</skip>
+                <outputFormats>
+                    <outputFormat>XML</outputFormat>
+                    <outputFormat>HTML</outputFormat>
+                </outputFormats>
+                <targetClasses>
+                    - For now, while we still have too many integration tests versus unit tests, we focus our efforts on these high-value classes: -
+                    <param>com.decathlon.ara.ci.fetcher.*</param>
+                    <param>com.decathlon.ara.ci.service.*</param>
+                    <param>com.decathlon.ara.ci.util.*</param>
+                    <param>com.decathlon.ara.coverage.*</param>
+                    <param>com.decathlon.ara.defect.*</param>
+                    <param>com.decathlon.ara.domain.ExecutedScenario</param>
+                    <param>com.decathlon.ara.domain.Functionality</param>
+                    <param>com.decathlon.ara.embedding.bean.*</param>
+                    <param>com.decathlon.ara.embedding.util.*</param>
+                    <param>com.decathlon.ara.postman.service.*</param>
+                    <param>com.decathlon.ara.postman.support.*</param>
+                    <param>com.decathlon.ara.report.bean.Element</param> <
+                    <param>com.decathlon.ara.report.bean.Embedded</param>
+                    <param>com.decathlon.ara.report.bean.Feature</param>
+                    <param>com.decathlon.ara.report.bean.Step</param>
+                    <param>com.decathlon.ara.report.bean.Tag</param>
+                    <param>com.decathlon.ara.report.service.*</param>
+                    <param>com.decathlon.ara.report.util.*</param>
+                    <param>com.decathlon.ara.service.*</param>
+                    <param>com.decathlon.ara.service.util.*</param>
+                </targetClasses>
+                <excludedClasses>
+                    <class>com.decathlon.ara.service.dto.*</class>
+                    <class>com.decathlon.ara.service.exception.*</class>
+                    <class>com.decathlon.ara.service.mapper.*</class>
+                    <class>com.decathlon.ara.service.support.*</class>
+                    <class>com.decathlon.ara.service.SettingProviderService</class>
+                </excludedClasses>
+                <targetTests>
+                    <param>com.decathlon.ara.**.*Test</param>
+                </targetTests>
+                <excludedTestClasses>
+                    <class>com.decathlon.ara.dbunit.DbUnitExporter</class>
+                    <class>com.decathlon.ara.dbunit.DbUnitImporter</class>
+                </excludedTestClasses>
+                <environmentVariables>
+                    <spring.profiles.active>${spring.profiles.active}
+                </environmentVariables>
+                <avoidCallsTo>
+                    <avoidCallsTo>org.slf4j</avoidCallsTo>
+                    <avoidCallsTo>java.io.OutputStream</avoidCallsTo>
+                    <avoidCallsTo>com.google.common.base.Preconditions</avoidCallsTo>
+                </avoidCallsTo>
+                <mutators>
+                    <mutator>ALL</mutator>
+                </mutators>
+                <exportLineCoverage>true</exportLineCoverage>
+                <timestampedReports>false</timestampedReports>
+            </configuration>
+        </plugin>
+        -->
             <!-- Make sure the JavaDoc is correct -->
             <plugin>
                 <groupId>org.projectlombok</groupId>
@@ -710,74 +598,6 @@
                 </configuration>
             </plugin>
         </plugins>
-        <pluginManagement>
-            <plugins>
-                <!-- This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
-                <plugin>
-                    <groupId>org.eclipse.m2e</groupId>
-                    <artifactId>lifecycle-mapping</artifactId>
-                    <version>1.0.0</version>
-                    <configuration>
-                        <lifecycleMappingMetadata>
-                            <pluginExecutions>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>org.liquibase</groupId>
-                                        <artifactId>liquibase-maven-plugin</artifactId>
-                                        <versionRange>[3.5.3,)</versionRange>
-                                        <goals>
-                                            <goal>updateTestingRollback</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore></ignore>
-                                    </action>
-                                </pluginExecution>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>com.mysema.maven</groupId>
-                                        <artifactId>apt-maven-plugin</artifactId>
-                                        <versionRange>[1.0,)</versionRange>
-                                        <goals>
-                                            <goal>process</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore></ignore>
-                                    </action>
-                                </pluginExecution>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>com.querydsl</groupId>
-                                        <artifactId>querydsl-maven-plugin</artifactId>
-                                        <versionRange>[1.0,)</versionRange>
-                                        <goals>
-                                            <goal>export</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore></ignore>
-                                    </action>
-                                </pluginExecution>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>org.apache.maven.plugins</groupId>
-                                        <artifactId>maven-javadoc-plugin</artifactId>
-                                        <versionRange>[1.0,)</versionRange>
-                                        <goals>
-                                            <goal>javadoc</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore></ignore>
-                                    </action>
-                                </pluginExecution>
-                            </pluginExecutions>
-                        </lifecycleMappingMetadata>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
     </build>
 
     <profiles>
@@ -785,24 +605,7 @@
             <id>dev</id>
             <properties>
                 <spring.profiles.active>dev</spring.profiles.active>
-                <liquibase.database.url>
-                    jdbc:mysql://localhost:3306/ara-dev?useUnicode=yes&amp;characterEncoding=UTF-8
-                </liquibase.database.url>
-                <liquibase.database.username>root</liquibase.database.username>
-                <liquibase.database.password>V*n6MxBq7mr?4P?M</liquibase.database.password>
                 <skipPitest>true</skipPitest>
-                <skip.integration.tests>true</skip.integration.tests>
-            </properties>
-        </profile>
-        <profile>
-            <id>dev_in</id>
-            <properties>
-                <spring.profiles.active>dev_in</spring.profiles.active>
-                <liquibase.database.url>
-                    jdbc:mysql://localhost:3306/ara-dev-in?useUnicode=yes&amp;characterEncoding=UTF-8
-                </liquibase.database.url>
-                <liquibase.database.username>root</liquibase.database.username>
-                <liquibase.database.password>V*n6MxBq7mr?4P?M</liquibase.database.password>
             </properties>
         </profile>
 
@@ -824,13 +627,6 @@
 
         <!-- No need to initialize JaCoCo if no tests are made -->
         <profile>
-            <activation>
-                <property>
-                    <!-- Compared to both -DskipTests=true and -DskipITs=true, -Dmaven.test.skip=true will even skip test class compilations -->
-                    <name>maven.test.skip</name>
-                    <value>true</value>
-                </property>
-            </activation>
             <properties>
                 <jacoco.skip>true</jacoco.skip>
             </properties>

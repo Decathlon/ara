@@ -1,0 +1,157 @@
+version: 2.1
+executors:
+  docker-publisher:
+    environment:
+      DATABASE_IMAGE_NAME: decathlon/ara-db
+      SERVER_IMAGE_NAME: decathlon/ara-server
+    docker:
+      - image: circleci/openjdk:8u222-stretch
+jobs:
+  upgrade:
+    executor: docker-publisher
+    steps:
+      - checkout
+      - restore_cache:
+          key: ara-{{ checksum "pom.xml" }}
+      - run:
+          name: Upgrade version
+          command: mvn versions:set -DremoveSnapshot -DgenerateBackupPoms=false
+      - run:
+          name: Stock the new Version
+          command: mvn help:evaluate -Dexpression=project.version -q -DforceStdout > version.txt
+      - run:
+          name: Tag the version
+          command: |
+            git commit -am "Release version $(cat version.txt)"
+            git tag -a v$(cat version.txt) -m "Release version $(cat version.txt)"
+            git push --tags origin
+            git push origin master
+  build:
+    executor: docker-publisher
+    working_directory: ~/ara
+    steps:
+      - checkout
+      - restore_cache:
+          key: ara-{{ checksum "pom.xml" }}
+      - run:
+          name: Build Jar
+          command: mvn package dependency:go-offline
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: ara-{{ checksum "pom.xml" }}
+      - store_test_results:
+          path: server/target/surefire-reports
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Build Docker images
+          command: |
+            docker build -t $DATABASE_IMAGE_NAME:latest database/instance
+            docker build -t $SERVER_IMAGE_NAME:latest final
+      - run:
+          name: Archive Docker images
+          command: |
+            docker save -o database-image.tar $DATABASE_IMAGE_NAME
+            docker save -o server-image.tar $SERVER_IMAGE_NAME
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./database-image.tar
+            - ./server-image.tar
+  nightly:
+    executor: docker-publisher
+    steps:
+      - run:
+          name: Create nightly version tag
+          command: echo "${CIRCLE_BRANCH/version\//''}-nightly" > version.txt
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./version.txt
+  release:
+    executor: docker-publisher
+    steps:
+      - run:
+          name: Create release version tag
+          command: echo "${CIRCLE_TAG/v/''}" > version.txt
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./version.txt
+  publish:
+    executor: docker-publisher
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - setup_remote_docker
+      - run:
+          name: Load archived Docker images
+          command: |
+            docker load -i /tmp/workspace/database-image.tar
+            docker load -i /tmp/workspace/server-image.tar
+      - run:
+          name: Publish Docker Images to Docker Hub
+          command: |
+            echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            IMAGE_TAG=$(cat /tmp/workspace/version.txt)
+            docker push $DATABASE_IMAGE_NAME:latest
+            docker push $SERVER_IMAGE_NAME:latest
+            docker tag $DATABASE_IMAGE_NAME:latest $DATABASE_IMAGE_NAME:$IMAGE_TAG
+            docker tag $SERVER_IMAGE_NAME:latest $SERVER_IMAGE_NAME:$IMAGE_TAG
+            docker push $DATABASE_IMAGE_NAME:$IMAGE_TAG
+            docker push $SERVER_IMAGE_NAME:$IMAGE_TAG
+workflows:
+  version: 2
+  build-master:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: master
+      - upgrade:
+          filters:
+            branches:
+              only: master
+  build-nightly:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: /^version\/.*/
+      - nightly:
+          filters:
+            branches:
+              only: /^version\/.*/
+      - publish:
+          context: ara-context
+          requires:
+            - build
+            - nightly
+          filters:
+            branches:
+              only: /^version\/.*/
+  build-release:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - release:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - publish:
+          context: ara-context
+          requires:
+            - build
+            - release
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/

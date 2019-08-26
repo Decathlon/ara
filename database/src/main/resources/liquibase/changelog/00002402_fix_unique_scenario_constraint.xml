@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright (C) 2019 by the ARA Contributors
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	 http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd"
+                   logicalFilePath="ara/00002402_fix_unique_scenario_constraint.xml">
+
+    <!-- To allow rollback of the next addUniqueIndex: MySql needs an index on the foreign key source column -->
+    <changeSet id="00002402_add_missing_index_scenario_source_id" author="slaout">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="index_scenario_source_id" tableName="scenario"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="index_scenario_source_id"
+                     tableName="scenario"
+                     unique="false">
+            <column name="source_id"/>
+        </createIndex>
+        <rollback/>
+    </changeSet>
+
+    <changeSet id="00002402_drop_unique_scenario_constraint" author="slaout">
+        <dropUniqueConstraint constraintName="unique_scenario" tableName="scenario"/>
+        <rollback>
+            <addUniqueConstraint constraintName="unique_scenario" tableName="scenario"
+                                 columnNames="feature_file, name, line"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="00002402_add_unique_scenario_constraint" author="slaout">
+        <addUniqueConstraint constraintName="unique_scenario" tableName="scenario"
+                             columnNames="source_id, feature_file, name, line"/>
+        <rollback>
+            <dropUniqueConstraint constraintName="unique_scenario" tableName="scenario"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

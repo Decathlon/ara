@@ -1,7 +1,25 @@
+/******************************************************************************
+ * Copyright (C) 2019 by the ARA Contributors                                 *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ * 	 http://www.apache.org/licenses/LICENSE-2.0                               *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ *                                                                            *
+ ******************************************************************************/
+
 package com.decathlon.ara.service;
 
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
+import com.decathlon.ara.SpringApplicationContext;
 import com.decathlon.ara.defect.DefectAdapter;
 import com.decathlon.ara.domain.CycleDefinition;
 import com.decathlon.ara.domain.Error;
@@ -22,6 +40,7 @@ import com.decathlon.ara.repository.ProblemPatternRepository;
 import com.decathlon.ara.repository.ProblemRepository;
 import com.decathlon.ara.repository.RootCauseRepository;
 import com.decathlon.ara.repository.custom.util.JpaCacheManager;
+import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
 import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
 import com.decathlon.ara.service.dto.problem.ProblemAggregateDTO;
 import com.decathlon.ara.service.dto.problem.ProblemDTO;
@@ -50,6 +69,7 @@ import com.decathlon.ara.service.mapper.ProblemWithPatternsMapper;
 import com.decathlon.ara.service.mapper.RootCauseMapper;
 import com.decathlon.ara.service.mapper.TeamMapper;
 import com.decathlon.ara.defect.bean.Defect;
+import com.decathlon.ara.service.support.Settings;
 import com.decathlon.ara.service.util.ObjectUtil;
 import java.util.Arrays;
 import java.util.Collections;
@@ -153,7 +173,7 @@ public class ProblemService {
     private final JpaCacheManager jpaCacheManager;
 
     @NonNull
-    private final TransactionService transactionService;
+    private final TransactionAppenderUtil transactionService;
 
     private static void validateClosedProblemHasRootCause(ProblemDTO problemDto) throws BadRequestException {
         if (problemDto.getStatus() == ProblemStatus.CLOSED && (problemDto.getRootCause() == null ||
@@ -227,7 +247,9 @@ public class ProblemService {
 
         problemDenormalizationService.updateFirstAndLastSeenDateTimes(Collections.singleton(problem));
 
-        return problemWithPatternsMapper.toDto(problem);
+        ProblemWithPatternsDTO result = problemWithPatternsMapper.toDto(problem);
+        result.setDefectUrl(this.retrieveDefectUrl(problem));
+        return result;
     }
 
     /**
@@ -274,7 +296,9 @@ public class ProblemService {
         dataBaseEntity.setStatus(dtoToUpdate.getStatus());
         dataBaseEntity.setClosingDateTime(dtoToUpdate.getClosingDateTime());
 
-        return problemMapper.toDto(problemRepository.save(dataBaseEntity));
+        ProblemDTO result = problemMapper.toDto(problemRepository.save(dataBaseEntity));
+        result.setDefectUrl(this.retrieveDefectUrl(projectId, result));
+        return result;
     }
 
     void handleDefectIdChange(long projectId, ProblemDTO problemDto, String oldDefectId) throws BadRequestException {
@@ -412,6 +436,7 @@ public class ProblemService {
             throw new NotFoundException(Messages.NOT_FOUND_PROBLEM, Entities.PROBLEM);
         }
         ProblemWithPatternsAndAggregateTDO problemDTO = problemWithPatternsAndAggregateMapper.toDto(problem);
+        problemDTO.setDefectUrl(this.retrieveDefectUrl(problem));
 
         // Compute and assign aggregate to the problem
         List<Long> problemIds = Collections.singletonList(problemDTO.getId());
@@ -474,7 +499,7 @@ public class ProblemService {
         // Find problems
         Page<ProblemWithAggregateDTO> page = problemRepository
                 .findMatchingProblems(problemFilterMapper.toEntity(filter).withProjectId(projectId), pageable)
-                .map(problemWithAggregateMapper::toDto);
+                .map(this::toProblemWithAggregate);
 
         // Compute and assign aggregates of each problem
         List<Long> problemIds = page.getContent().stream().map(ProblemDTO::getId).collect(Collectors.toList());
@@ -488,6 +513,12 @@ public class ProblemService {
         assignProblemStabilities(projectId, page.getContent());
 
         return page;
+    }
+
+    private ProblemWithAggregateDTO toProblemWithAggregate(Problem entity) {
+        ProblemWithAggregateDTO result = this.problemWithAggregateMapper.toDto(entity);
+        result.setDefectUrl(this.retrieveDefectUrl(entity));
+        return result;
     }
 
     /**
@@ -770,4 +801,31 @@ public class ProblemService {
                 .withExecutionStabilities(computeExecutionStability(lastExecutionCount, lastExecutions, failedExecutionIds));
     }
 
+    public String retrieveDefectUrl(Problem entity) {
+        return this.retrieveDefectUrl(entity.getProjectId(), entity.getDefectId());
+    }
+
+    public String retrieveDefectUrl(long projectId, ProblemDTO problem) {
+        return this.retrieveDefectUrl(projectId, problem.getDefectId());
+    }
+
+    private String retrieveDefectUrl(long projectId, String defectId) {
+        // No defect => no URL
+        if (StringUtils.isNotEmpty(defectId)) {
+            final DefectService defectService = SpringApplicationContext.getBean(DefectService.class);
+            final SettingService settingService = SpringApplicationContext.getBean(SettingService.class);
+
+
+            // Defects not managed => no URL
+            if (defectService.getAdapter(projectId).isPresent()) {
+                String defectUrlFormat = settingService.get(projectId, Settings.DEFECT_URL_FORMAT);
+                // Defect URL format not configured => warning
+                if (StringUtils.isEmpty(defectUrlFormat)) {
+                    return "please-configure-project-setting-defect-url-format-" + defectId;
+                }
+                return defectUrlFormat.replace("{{id}}", defectId);
+            }
+        }
+        return null;
+    }
 }

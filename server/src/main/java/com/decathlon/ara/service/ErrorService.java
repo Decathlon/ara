@@ -1,3 +1,20 @@
+/******************************************************************************
+ * Copyright (C) 2019 by the ARA Contributors                                 *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ * 	 http://www.apache.org/licenses/LICENSE-2.0                               *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ *                                                                            *
+ ******************************************************************************/
+
 package com.decathlon.ara.service;
 
 import com.decathlon.ara.repository.ExecutionRepository;
@@ -6,6 +23,7 @@ import com.decathlon.ara.repository.ExecutedScenarioRepository;
 import com.decathlon.ara.repository.RunRepository;
 import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionAndProblemsDTO;
 import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
+import com.decathlon.ara.service.dto.problem.ProblemDTO;
 import com.decathlon.ara.service.dto.problempattern.ProblemPatternDTO;
 import com.decathlon.ara.service.dto.response.DistinctStatisticsDTO;
 import com.decathlon.ara.service.exception.NotFoundException;
@@ -19,6 +37,7 @@ import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.domain.Error;
 import com.decathlon.ara.domain.Problem;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -60,6 +79,9 @@ public class ErrorService {
     private final ProblemMapper problemMapper;
 
     @NonNull
+    private final ProblemService problemService;
+
+    @NonNull
     private final ProblemPatternMapper problemPatternMapper;
 
     @NonNull
@@ -97,7 +119,18 @@ public class ErrorService {
                     .filter(entry -> entry.getKey().getId().equals(errorDto.getId()))
                     .map(Map.Entry::getValue)
                     .findFirst();
-            errorDto.setProblems(errorProblems.map(problemMapper::toDto).orElse(null));
+
+            if (errorProblems.isPresent()) {
+                List<ProblemDTO> problemDtos = new ArrayList<>();
+                for (Problem problem : errorProblems.get()) {
+                    ProblemDTO dto = problemMapper.toDto(problem);
+                    dto.setDefectUrl(problemService.retrieveDefectUrl(problem));
+                    problemDtos.add(dto);
+                }
+                errorDto.setProblems(problemDtos);
+            } else {
+                errorDto.setProblems(null);
+            }
         });
 
         return errorDtoPage;
