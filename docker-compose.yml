@@ -5,7 +5,7 @@ version: '3'
 
 services:
   db:
-    image: "decathlon/ara-db:4.0.0"
+    image: "decathlon/ara-db:latest"
     ports:
       - "3306:3306"
     expose:
@@ -13,7 +13,7 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=local_password_to_change
   server:
-    image: "decathlon/ara-server:4.0.0"
+    image: "decathlon/ara-server:latest"
     ports:
       - "8080:8080"
     expose:
