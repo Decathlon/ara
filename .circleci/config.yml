@@ -1,14 +1,14 @@
-version: 2 
-jobs: 
-  build: 
+version: 2
+jobs:
+  build:
     working_directory: ~/ara
-    docker: 
+    docker:
       - image: circleci/openjdk:8u222-stretch
     steps:
       - checkout
       - restore_cache:
           key: ara-{{ checksum "pom.xml" }}
-      - run: mvn package dependency:go-offline 
+      - run: mvn package dependency:go-offline
       - save_cache:
           paths:
             - ~/.m2
@@ -17,6 +17,7 @@ jobs:
           path: server/target/surefire-reports
   release:
       working_directory: ~/ara
+      context: ara-context
       branches:
         only:
           - master
@@ -52,9 +53,10 @@ jobs:
               git push origin master
         - run:
             name: Push images
-            command: docker push decathlon/ara-db:$(cat version.txt) && docker push decathlon/ara-server:$(cat version.txt)
+            command: |
+              echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+              docker push decathlon/ara-db:$(cat version.txt) && docker push decathlon/ara-server:$(cat version.txt)
         - save_cache:
             paths:
               - ~/.m2
             key: ara-{{ checksum "pom.xml" }}
-
