@@ -26,7 +26,7 @@ jobs:
             git tag -a v$(cat version.txt) -m "Release version $(cat version.txt)"
             git push --tags origin
             git push origin master
-  build:
+  build_app:
     executor: docker-publisher
     working_directory: ~/ara
     steps:
@@ -42,6 +42,10 @@ jobs:
           key: ara-{{ checksum "pom.xml" }}
       - store_test_results:
           path: server/target/surefire-reports
+  build_docker_images:
+    executor: docker-publisher
+    working_directory: ~/ara
+    steps:
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
@@ -103,9 +107,19 @@ jobs:
             docker push $SERVER_IMAGE_NAME:$IMAGE_TAG
 workflows:
   version: 2
+  build-pr:
+    jobs:
+      - build_app:
+          filters:
+            branches:
+              ignore: /(^version\/.*)|master/
   build-master:
     jobs:
-      - build:
+      - build_app:
+          filters:
+            branches:
+              only: master
+      - build_docker_images:
           filters:
             branches:
               only: master
@@ -115,7 +129,11 @@ workflows:
               only: master
   build-nightly:
     jobs:
-      - build:
+      - build_app:
+          filters:
+            branches:
+              only: /^version\/.*/
+      - build_docker_images:
           filters:
             branches:
               only: /^version\/.*/
@@ -126,14 +144,21 @@ workflows:
       - publish:
           context: ara-context
           requires:
-            - build
+            - build_app
+            - build_docker_images
             - nightly
           filters:
             branches:
               only: /^version\/.*/
   build-release:
     jobs:
-      - build:
+      - build_app:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - build_docker_images:
           filters:
             tags:
               only: /^v.*/
@@ -149,6 +174,7 @@ workflows:
           context: ara-context
           requires:
             - build
+            - build_docker_images
             - release
           filters:
             tags:
