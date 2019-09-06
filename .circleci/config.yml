@@ -173,7 +173,7 @@ workflows:
       - publish:
           context: ara-context
           requires:
-            - build
+            - build_app
             - build_docker_images
             - release
           filters:
