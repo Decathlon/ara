@@ -188,7 +188,7 @@ public class DemoExecutionLoader {
             Files.createDirectories(executionDirectory.toPath());
 
             // Simple (one country, one Web type) or complete execution
-            boolean complete = CYCLE_NIGHT.equals(cycle) || BRANCH_MASTER.equals(branch);
+            boolean complete = CYCLE_NIGHT.equals(cycle);
             List<String> countries = (complete ? Arrays.asList("fr", "us") : Collections.singletonList("fr"));
             final String testTypes = "api,firefox-desktop" + (complete ? ",firefox-mobile" : "");
             createExecutionJob(executionDirectory, branch, cycle, timestamp, versionTimestamp, countries, testTypes);
