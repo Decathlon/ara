@@ -50,14 +50,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.decathlon.ara.loader.DemoLoaderConstants.BRANCH_DEVELOP;
-import static com.decathlon.ara.loader.DemoLoaderConstants.BRANCH_MASTER;
-import static com.decathlon.ara.loader.DemoLoaderConstants.CYCLE_DAY;
-import static com.decathlon.ara.loader.DemoLoaderConstants.CYCLE_NIGHT;
-import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
-import static com.decathlon.ara.loader.DemoLoaderConstants.SOURCE_CODE_API;
-import static com.decathlon.ara.loader.DemoLoaderConstants.SOURCE_CODE_WEB;
-import static com.decathlon.ara.loader.DemoLoaderConstants.TYPE_CODE_FIREFOX_DESKTOP;
+import static com.decathlon.ara.loader.DemoLoaderConstants.*;
 
 /**
  * Load project with its settings as the Demo project.
@@ -200,21 +193,21 @@ public class DemoSettingsLoader {
     public void createSeverities(long projectId) throws NotUniqueException {
         severityService.create(projectId, new SeverityDTO(
                 "sanity-check",
-                Integer.valueOf(1),
+                1,
                 "Sanity Check",
                 "Sanity Ch.",
                 "S.C.",
                 false));
         severityService.create(projectId, new SeverityDTO(
                 "high",
-                Integer.valueOf(2),
+                2,
                 "High",
                 "High",
                 "High",
                 true));
         severityService.create(projectId, new SeverityDTO(
                 "medium",
-                Integer.valueOf(3),
+                3,
                 "Medium",
                 "Medium",
                 "Med.",
@@ -224,11 +217,17 @@ public class DemoSettingsLoader {
     public List<CycleDefinitionDTO> createCycleDefinitions(long projectId) throws NotUniqueException {
         return Arrays.asList(
                 cycleDefinitionService.create(projectId, new CycleDefinitionDTO(
-                        null, BRANCH_DEVELOP, CYCLE_DAY, Integer.valueOf(1))),
+                        null, BRANCH_DEVELOP, CYCLE_DAY, 1)),
                 cycleDefinitionService.create(projectId, new CycleDefinitionDTO(
-                        null, BRANCH_DEVELOP, CYCLE_NIGHT, Integer.valueOf(1))),
+                        null, BRANCH_DEVELOP, CYCLE_NIGHT, 1)),
                 cycleDefinitionService.create(projectId, new CycleDefinitionDTO(
-                        null, BRANCH_MASTER, CYCLE_DAY, Integer.valueOf(2))));
+                        null, BRANCH_STAB, CYCLE_DAY, 2)),
+                cycleDefinitionService.create(projectId, new CycleDefinitionDTO(
+                        null, BRANCH_STAB, CYCLE_NIGHT, 2)),
+                cycleDefinitionService.create(projectId, new CycleDefinitionDTO(
+                        null, BRANCH_MASTER, CYCLE_DAY, 3)),
+                cycleDefinitionService.create(projectId, new CycleDefinitionDTO(
+                        null, BRANCH_MASTER, CYCLE_NIGHT, 3)));
     }
 
     public void updateSettings(long projectId) throws BadRequestException {

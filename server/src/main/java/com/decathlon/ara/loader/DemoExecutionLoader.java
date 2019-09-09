@@ -66,11 +66,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.decathlon.ara.loader.DemoLoaderConstants.BRANCH_DEVELOP;
-import static com.decathlon.ara.loader.DemoLoaderConstants.BRANCH_MASTER;
-import static com.decathlon.ara.loader.DemoLoaderConstants.CYCLE_DAY;
-import static com.decathlon.ara.loader.DemoLoaderConstants.CYCLE_NIGHT;
-import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
+import static com.decathlon.ara.loader.DemoLoaderConstants.*;
 
 /**
  * Service for loading executions into the Demo project.
@@ -143,12 +139,35 @@ public class DemoExecutionLoader {
         importExecution(projectId, functionalityIds, cycleDefinitions,
                 BRANCH_DEVELOP, CYCLE_NIGHT, 2, todayNight);
 
+
+        importExecution(projectId, functionalityIds, cycleDefinitions,
+                BRANCH_STAB, CYCLE_DAY, 0, pastDay);
+        importExecution(projectId, functionalityIds, cycleDefinitions,
+                BRANCH_STAB, CYCLE_DAY, 1, yesterdayDay);
+        importExecution(projectId, functionalityIds, cycleDefinitions,
+                BRANCH_STAB, CYCLE_DAY, 2, todayDay);
+
+
+        importExecution(projectId, functionalityIds, cycleDefinitions,
+                BRANCH_STAB, CYCLE_NIGHT, 0, pastDay);
+        importExecution(projectId, functionalityIds, cycleDefinitions,
+                BRANCH_STAB, CYCLE_NIGHT, 1, yesterdayDay);
+        importExecution(projectId, functionalityIds, cycleDefinitions,
+                BRANCH_STAB, CYCLE_NIGHT, 2, todayDay);
+
+
         importExecution(projectId, functionalityIds, cycleDefinitions,
                 BRANCH_MASTER, CYCLE_DAY, 0, pastDay);
         importExecution(projectId, functionalityIds, cycleDefinitions,
                 BRANCH_MASTER, CYCLE_DAY, 0, yesterdayDay);
         importExecution(projectId, functionalityIds, cycleDefinitions,
                 BRANCH_MASTER, CYCLE_DAY, 0, todayDay);
+        importExecution(projectId, functionalityIds, cycleDefinitions,
+                BRANCH_MASTER, CYCLE_NIGHT, 0, pastDay);
+        importExecution(projectId, functionalityIds, cycleDefinitions,
+                BRANCH_MASTER, CYCLE_NIGHT, 0, yesterdayDay);
+        importExecution(projectId, functionalityIds, cycleDefinitions,
+                BRANCH_MASTER, CYCLE_NIGHT, 0, todayDay);
     }
 
     private void importExecution(long projectId,
@@ -198,7 +217,7 @@ public class DemoExecutionLoader {
                             .replaceAll(String.format(BUILD_INFORMATION_TIMESTAMP_REPLACEMENT, testTimestamp)));
             replaceInFiles(executionDirectory, JSON_FILE_FILTER,
                     content -> BUILD_INFORMATION_VERSION_TIMESTAMP_PATTERN.matcher(content)
-                            .replaceAll(String.format(BUILD_INFORMATION_VERSION_TIMESTAMP_REPLACEMENT, Long.valueOf(versionTimestamp))));
+                            .replaceAll(String.format(BUILD_INFORMATION_VERSION_TIMESTAMP_REPLACEMENT, versionTimestamp)));
 
             // Replace all functionality IDs
             replaceInFiles(executionDirectory, JSON_FILE_FILTER,
@@ -268,7 +287,7 @@ public class DemoExecutionLoader {
                 .withTimestamp(timestamp)
                 .withRelease(BRANCH_MASTER.equals(branch) ? "v2" : "v3")
                 .withVersion(randomGitCommitId())
-                .withVersionTimestamp(Long.valueOf(versionTimestamp));
+                .withVersionTimestamp(versionTimestamp);
         writeObjectToFile(buildInformation, new File(executionDirectory, "buildInformation.json"));
     }
 

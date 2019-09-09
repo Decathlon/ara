@@ -27,6 +27,7 @@ public class DemoLoaderConstants {
 
     public static final String BRANCH_MASTER = "master";
     static final String BRANCH_DEVELOP = "develop";
+    static final String BRANCH_STAB = "stab";
     static final String CYCLE_DAY = "day";
     static final String CYCLE_NIGHT = "night";
     static final String SOURCE_CODE_API = "api";
