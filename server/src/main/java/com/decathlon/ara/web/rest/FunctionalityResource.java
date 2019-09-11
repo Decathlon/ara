@@ -100,6 +100,12 @@ public class FunctionalityResource {
         dtoToUpdate.setId(id); // HTTP PUT requires the URL to be the URL of the entity
         try {
             FunctionalityDTO updatedDto = service.update(projectService.toId(projectCode), dtoToUpdate);
+            if (null == updatedDto.getCreated()) {
+                updatedDto.setCreated("");
+            }
+            if (null == updatedDto.getComment()) {
+                updatedDto.setComment("");
+            }
             return ResponseEntity.ok()
                     .headers(HeaderUtil.entityUpdated(NAME, updatedDto.getId()))
                     .body(updatedDto);
