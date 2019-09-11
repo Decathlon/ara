@@ -49,8 +49,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class FunctionalityResourceUpdatePropertiesIT {
 
     private static final String PROJECT_CODE = "p";
-    private static final Long A_FOLDER_ID = Long.valueOf(1);
-    private static final Long A_FUNCTIONALITY_ID = Long.valueOf(31);
+    private static final Long A_FOLDER_ID = 1L;
+    private static final Long A_FUNCTIONALITY_ID = 31L;
 
     @Autowired
     private FunctionalityRepository functionalityRepository;
@@ -63,9 +63,10 @@ public class FunctionalityResourceUpdatePropertiesIT {
 
     @Test
     public void testUpdateFolder() {
-        Long id = Long.valueOf(12);
+        Long id = 12L;
         ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, id, folder("F 1.2 renamed"));
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getId()).isEqualTo(id);
         assertThat(response.getBody().getParentId()).isEqualTo(1);
         assertThat(response.getBody().getOrder()).isEqualTo(2000);
@@ -91,24 +92,25 @@ public class FunctionalityResourceUpdatePropertiesIT {
         functionality.setParentId(NONEXISTENT);
         functionality.setOrder(-1);
         functionality.setType("FUNCTIONALITY");
-        functionality.setCoveredScenarios(Integer.valueOf(42));
+        functionality.setCoveredScenarios(42);
         functionality.setCoveredCountryScenarios("to-be-ignored");
-        functionality.setIgnoredScenarios(Integer.valueOf(42));
+        functionality.setIgnoredScenarios(42);
         functionality.setIgnoredCountryScenarios("to-be-ignored");
 
         // These properties will be updated in database
         functionality.setName("F 2.2 renamed");
         functionality.setCountryCodes("be,nl");
-        functionality.setTeamId(Long.valueOf(3));
+        functionality.setTeamId(3L);
         functionality.setSeverity("HIGH");
         functionality.setCreated("Created");
         functionality.setStarted(Boolean.TRUE);
         functionality.setNotAutomatable(Boolean.FALSE); // Was null
         functionality.setComment("New comment");
 
-        Long id = Long.valueOf(22);
+        Long id = 22L;
         ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, id, functionality);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getId()).isEqualTo(id);
         assertThat(response.getBody().getParentId()).isEqualTo(2);
         assertThat(response.getBody().getOrder()).isEqualTo(2000);
@@ -264,7 +266,7 @@ public class FunctionalityResourceUpdatePropertiesIT {
 
     @Test
     public void testUpdateWithExistingNameOfFolder() {
-        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, Long.valueOf(1), folder("F 2"));
+        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, 1L, folder("F 2"));
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_unique");
         assertThat(header(response, HeaderUtil.MESSAGE)).isEqualTo("The name is already used by another folder in the same parent folder.");
@@ -275,7 +277,7 @@ public class FunctionalityResourceUpdatePropertiesIT {
 
     @Test
     public void testUpdateWithExistingNameOfFunctionality() {
-        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, Long.valueOf(113), folder("F 1.1.1"));
+        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, 113L, folder("F 1.1.1"));
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_unique");
         assertThat(header(response, HeaderUtil.MESSAGE)).isEqualTo("The name is already used by another functionality in the same folder.");
@@ -286,22 +288,24 @@ public class FunctionalityResourceUpdatePropertiesIT {
 
     @Test
     public void testUpdateWithExistingNameInAnotherFolder() {
-        final Long id = Long.valueOf(2);
+        final Long id = 2L;
         ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, id, folder("F 1.1.1"));
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getId()).isEqualTo(id);
     }
 
     @Test
     public void testUpdateShouldSetUpdateDateTimeWhileNotUpdatingCreationDate() {
         // GIVEN
-        final Long id = Long.valueOf(2);
+        final Long id = 2L;
         Date startDate = new Date();
 
         // WHEN
         ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, id, folder("F 1.1.1"));
 
         // THEN
+        assertThat(response.getBody()).isNotNull();
         final Functionality createdFunctionality = functionalityRepository.findById(response.getBody().getId())
                 .orElseThrow(() -> new AssertionError("Should have created a functionality"));
         assertThat(createdFunctionality.getCreationDateTime()).isEqualTo(timestamp(2018, Calendar.JANUARY, 1, 12, 0, 0));
@@ -312,16 +316,92 @@ public class FunctionalityResourceUpdatePropertiesIT {
     public void testUpdateFolderWithContent() {
         FunctionalityDTO folder = folder("Renamed").withId(A_FOLDER_ID);
         assertFolderWithContent(folder.withCountryCodes("nl"));
-        assertFolderWithContent(folder.withTeamId(Long.valueOf(1)));
+        assertFolderWithContent(folder.withTeamId(1L));
         assertFolderWithContent(folder.withSeverity("HIGH"));
         assertFolderWithContent(folder.withCreated("18.02"));
         assertFolderWithContent(folder.withStarted(Boolean.TRUE));
         assertFolderWithContent(folder.withNotAutomatable(Boolean.TRUE));
-        assertFolderWithContent(folder.withCoveredScenarios(Integer.valueOf(42)));
-        assertFolderWithContent(folder.withIgnoredScenarios(Integer.valueOf(42)));
+        assertFolderWithContent(folder.withCoveredScenarios(42));
+        assertFolderWithContent(folder.withIgnoredScenarios(42));
         assertFolderWithContent(folder.withCoveredCountryScenarios("some-content"));
         assertFolderWithContent(folder.withIgnoredCountryScenarios("some-content"));
         assertFolderWithContent(folder.withComment("Comment"));
+    }
+
+    @Test
+    public void testUpdateRemoveCommentShouldReturnEmptyString() {
+        FunctionalityDTO functionality = new FunctionalityDTO();
+
+        // These properties must be ignored, and not updated in database
+        functionality.setId(NONEXISTENT);
+        functionality.setParentId(NONEXISTENT);
+        functionality.setOrder(-1);
+        functionality.setType("FUNCTIONALITY");
+        functionality.setCoveredScenarios(42);
+        functionality.setCoveredCountryScenarios("to-be-ignored");
+        functionality.setIgnoredScenarios(42);
+        functionality.setIgnoredCountryScenarios("to-be-ignored");
+
+        // These properties will be updated in database
+        functionality.setName("F 2.2 renamed");
+        functionality.setCountryCodes("be,nl");
+        functionality.setTeamId(3L);
+        functionality.setSeverity("HIGH");
+        functionality.setCreated("Created");
+        functionality.setStarted(Boolean.TRUE);
+        functionality.setNotAutomatable(Boolean.FALSE); // Was null
+        functionality.setComment("");
+
+        Long id = 22L;
+        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, id, functionality);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getId()).isEqualTo(id);
+        assertThat(response.getBody().getComment()).isEqualTo("");
+
+        entityManager.flush();
+
+        Functionality reloadedFunctionality = functionalityRepository.getOne(id);
+        assertThat(reloadedFunctionality.getId()).isEqualTo(id);
+        assertThat(reloadedFunctionality.getComment()).isEqualTo("");
+    }
+
+    @Test
+    public void testUpdateRemoveCreatedShouldReturnEmptyString() {
+        FunctionalityDTO functionality = new FunctionalityDTO();
+
+        // These properties must be ignored, and not updated in database
+        functionality.setId(NONEXISTENT);
+        functionality.setParentId(NONEXISTENT);
+        functionality.setOrder(-1);
+        functionality.setType("FUNCTIONALITY");
+        functionality.setCoveredScenarios(42);
+        functionality.setCoveredCountryScenarios("to-be-ignored");
+        functionality.setIgnoredScenarios(42);
+        functionality.setIgnoredCountryScenarios("to-be-ignored");
+
+        // These properties will be updated in database
+        functionality.setName("F 2.2 renamed");
+        functionality.setCountryCodes("be,nl");
+        functionality.setTeamId(3L);
+        functionality.setSeverity("HIGH");
+        functionality.setCreated("");
+        functionality.setStarted(Boolean.TRUE);
+        functionality.setNotAutomatable(Boolean.FALSE); // Was null
+        functionality.setComment("test");
+
+        Long id = 22L;
+        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, id, functionality);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getId()).isEqualTo(id);
+        assertThat(response.getBody().getCreated()).isEqualTo("");
+
+        entityManager.flush();
+
+        Functionality reloadedFunctionality = functionalityRepository.getOne(id);
+        assertThat(reloadedFunctionality.getId()).isEqualTo(id);
+        assertThat(reloadedFunctionality.getCreated()).isEqualTo("");
     }
 
     private void assertFolderWithContent(FunctionalityDTO folder) {
@@ -331,5 +411,4 @@ public class FunctionalityResourceUpdatePropertiesIT {
         assertThat(header(response, HeaderUtil.MESSAGE)).isEqualTo("A folder can only have a name.");
         assertThat(header(response, HeaderUtil.PARAMS)).isEqualTo("functionality");
     }
-
 }
