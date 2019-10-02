@@ -29,9 +29,12 @@ const STARTS_TO_REMOVE = [
 ]
 
 function reduceException (string, replacement) {
-  var regex = /(.+\.)+.*Exception:/
-  if (string && regex.test(string)) {
-    return string.replace(regex, replacement)
+  var pattern = 'Exception:'
+  if (string) {
+    let idx = string.indexOf(pattern)
+    if (idx > -1) {
+      return string.replace(string.substr(0, idx + pattern.length + 1), replacement)
+    }
   }
   return string
 }
