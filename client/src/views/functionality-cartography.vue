@@ -133,9 +133,37 @@
 
         <div class="headerCell" :style="'width: ' + (columnSizes[7]) + 'px; text-align: center;'">
           Actions
-          <Button size="small" :disabled="!hasFilter" @click="removeAllFilters()" title="Remove all filters">
-            <Icon type="md-backspace"/>
-          </Button>
+           <if-feature-enabled code="xprt-mprt-crtg">
+              <Dropdown title="Other actions" trigger="click" placement="bottom-end" :transfer="true" >
+                <Button size="small">
+                  <Icon type="md-menu"/>
+                </Button>
+                <DropdownMenu slot="list">
+                  <DropdownItem>
+                    <div @click="removeAllFilters()">
+                      <Icon type="md-backspace"/> REMOVE ALL FILTERS
+                    </div>
+                  </DropdownItem>
+                  <DropdownItem>
+                    <div @click="openExportPopup">
+                      <Icon type="md-cloud-download" /> EXPORT CURRENT FUNCTIONALITIES
+                    </div>
+                  </DropdownItem>
+                  <DropdownItem>
+                    <div @click="openImportPopup">
+                      <Icon type="md-cloud-upload" /> IMPORT NEW FUNCTIONALITIES
+                    </div>
+                  </DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
+              <functionality-export-popup ref="exportPopup" />
+              <functionality-import-popup ref="importPopup" />
+          </if-feature-enabled> 
+          <if-feature-disabled code="xprt-mprt-crtg">
+            <Button size="small" :disabled="!hasFilter" @click="removeAllFilters()" title="Remove all filters">
+              <Icon type="md-backspace"/> 
+            </Button>
+          </if-feature-disabled>
         </div>
 
       </div>
@@ -249,6 +277,10 @@
   import functionalityMenuComponent from '../components/functionality-menu'
   import functionalityNodeComponent from '../components/functionality-node'
   import functionalityCoverageDetailsComponent from '../components/functionality-coverage-details'
+  import ifFeatureEnabledComponent from '../components/if-feature-enabled'
+  import ifFeatureDisabledComponent from '../components/if-feature-disabled'
+  import functionalityExportPopup from '../components/functionality-export-popup'
+  import functionalityImportPopup from '../components/functionality-import-popup'
 
   import constants from '../libs/constants.js'
 
@@ -276,7 +308,11 @@
     components: {
       'functionality-menu': functionalityMenuComponent,
       'functionality-node': functionalityNodeComponent,
-      'functionality-coverage-details': functionalityCoverageDetailsComponent
+      'functionality-coverage-details': functionalityCoverageDetailsComponent,
+      'if-feature-enabled': ifFeatureEnabledComponent,
+      'if-feature-disabled': ifFeatureDisabledComponent,
+      'functionality-export-popup': functionalityExportPopup,
+      'functionality-import-popup': functionalityImportPopup
     },
 
     data () {
@@ -570,8 +606,10 @@
       },
 
       removeAllFilters () {
-        this.filter = { ...DEFAULT_FILTER }
-        this.filterFunctionalities()
+        if (this.hasFilter()) {
+          this.filter = { ...DEFAULT_FILTER }
+          this.filterFunctionalities()
+        }
       },
 
       flattenMatchingFunctionalities () {
@@ -961,30 +999,35 @@
         this.fromQueryString()
         this.loadFunctionalities()
 
-        // this.loading = true
         Vue.http
           .get(api.paths.countries(this), api.REQUEST_OPTIONS)
           .then((response) => {
-            // this.loading = false
             this.countries = response.body
             this.$set(this.columnSizes, 4, 24 * this.countries.length + 2 * 4)
           }, (error) => {
             api.handleError(error)
-            // this.loading = false
           })
 
-        // this.loading = true
         Vue.http
           .get(api.paths.sources(this), api.REQUEST_OPTIONS)
           .then((response) => {
-            // this.loading = false
             this.sources = response.body
             // 32 is the size of ', 99 A'; we have 2 * 32 because normal and ignored scenario counts; and 52 is for margins, paddings, icons, and borders
             this.$set(this.columnSizes, 5, Math.max(150, 32 * 2 * this.sources.length + 52))
           }, (error) => {
             api.handleError(error)
-            // this.loading = false
           })
+      },
+
+      // Export / Import
+      openExportPopup () {
+        var projectCode = this.$route.params.projectCode
+        this.$refs.exportPopup.openExportPopup(projectCode, this.flattenedMatchingFunctionalities)
+      },
+
+      openImportPopup () {
+        var projectCode = this.$route.params.projectCode
+        this.$refs.importPopup.openImportPopup(projectCode)
       }
     },
 

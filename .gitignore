@@ -10,3 +10,4 @@ docker/ara-server/*.jar
 docker/data/
 docker/ara/data
 *dependency-reduced-pom.xml
+client/*.vscode
