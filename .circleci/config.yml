@@ -5,7 +5,7 @@ executors:
       DATABASE_IMAGE_NAME: decathlon/ara-db
       SERVER_IMAGE_NAME: decathlon/ara-server
     docker:
-      - image: circleci/openjdk:8u222-stretch
+      - image: circleci/openjdk:11.0.4-stretch
 jobs:
   upgrade:
     executor: docker-publisher
