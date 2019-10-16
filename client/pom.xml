@@ -65,7 +65,6 @@
                         </goals>
                         <configuration>
                           <environmentVariables>
-                            <DOC_URL>${ara.docUrl}</DOC_URL>
                           </environmentVariables>
 
                             <arguments>run build</arguments>
