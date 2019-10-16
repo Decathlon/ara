@@ -54,7 +54,7 @@ jobs:
       - attach_workspace:
             at: /tmp/workspace
       - setup_remote_docker:
-          docker_layer_caching: true
+          docker_layer_caching: false
       - run:
           name: Build Docker images
           command: |
