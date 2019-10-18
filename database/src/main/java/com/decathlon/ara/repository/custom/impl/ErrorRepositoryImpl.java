@@ -56,7 +56,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class ErrorRepositoryImpl implements ErrorRepositoryCustom {
 
-    private static final Sort ERROR_SORTING = new Sort(Sort.Direction.ASC,
+    private static final Sort ERROR_SORTING = new Sort(Sort.Direction.DESC,
             QError.error.executedScenarioId.getMetadata().getName(),
             QError.error.stepLine.getMetadata().getName());
 
