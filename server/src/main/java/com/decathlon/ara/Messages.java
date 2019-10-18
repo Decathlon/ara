@@ -55,7 +55,6 @@ public final class Messages {
     public static final String NOT_UNIQUE_PROBLEM_DEFECT_ID = "The defect ID is already assigned to another problem.";
     public static final String NOT_UNIQUE_PROBLEM_NAME = "The name is already used by another problem.";
     public static final String NOT_UNIQUE_PROJECT_CODE = "The code is already used by another project.";
-    public static final String NOT_UNIQUE_PROJECT_DEFAULT_AT_STARTUP = "There is already another default project.";
     public static final String NOT_UNIQUE_PROJECT_NAME = "The name is already used by another project.";
     public static final String NOT_UNIQUE_ROOT_CAUSE_NAME = "The name is already used by another root cause.";
     public static final String NOT_UNIQUE_SEVERITY_CODE = "A severity with this code already exists.";
