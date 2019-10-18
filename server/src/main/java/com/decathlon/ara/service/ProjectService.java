@@ -164,11 +164,11 @@ public class ProjectService {
         }
     }
 
-    private void validateOnlyOneDefault(ProjectDTO dto) throws NotUniqueException {
+    private void validateOnlyOneDefault(ProjectDTO dto)  {
         if (dto.isDefaultAtStartup()) {
             Project entityDataBaseWithDefaultAtStartup = repository.findByDefaultAtStartup(true);
             if (entityDataBaseWithDefaultAtStartup != null && !entityDataBaseWithDefaultAtStartup.getCode().equals(dto.getCode())) {
-                throw new NotUniqueException(Messages.NOT_UNIQUE_PROJECT_DEFAULT_AT_STARTUP, Entities.PROJECT, QProject.project.defaultAtStartup.getMetadata().getName(), entityDataBaseWithDefaultAtStartup.getCode());
+                entityDataBaseWithDefaultAtStartup.setDefaultAtStartup(false);
             }
         }
     }
