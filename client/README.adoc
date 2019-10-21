@@ -71,13 +71,6 @@ npm test
 
 For detailed explanation on how things work, checkout the http://vuejs-templates.github.io/webpack/[guide] and http://vuejs.github.io/vue-loader[docs for vue-loader].
 
-=== Configuring environment variables.
-
-Note that you can configure the url used to redirect on docs (Changelog,
-how tos...) if you want to host them on a CDN or an external server. You can set
-the `DOC_URL` environment variable before running the client. By default this
-variable is setted to `localhost`.
-
 == Managing Feature Flipping
 
 If you're dealing with an unstable feature and want to display an UI element only on certain cases, you can add a
