@@ -856,7 +856,7 @@
   }
 
   .criteria .name {
-    color: lightgray;
+    color: #657180;
     font-weight: bold;
   }
 
@@ -874,7 +874,7 @@
   }
 
   .criteria .total {
-    color: lightgray;
+    color: gray;
   }
 
   .criteria .total.important {
