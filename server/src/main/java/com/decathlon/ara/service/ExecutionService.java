@@ -32,7 +32,6 @@ import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
 import com.decathlon.ara.domain.enumeration.Handling;
 import com.decathlon.ara.domain.enumeration.JobStatus;
 import com.decathlon.ara.domain.enumeration.QualityStatus;
-import com.decathlon.ara.features.available.ExecutionShortenerFeature;
 import com.decathlon.ara.report.util.ScenarioExtractorUtil;
 import com.decathlon.ara.repository.CycleDefinitionRepository;
 import com.decathlon.ara.repository.ExecutionCompletionRequestRepository;
@@ -156,56 +155,23 @@ public class ExecutionService {
             throw new NotFoundException(Messages.NOT_FOUND_EXECUTION, Entities.EXECUTION);
         }
 
-        boolean executionShortenerEnabled = featureService.isEnabled(new ExecutionShortenerFeature().getCode());
-        if (!executionShortenerEnabled && !criteria.isWithSucceed()) {
+        if (!criteria.isWithSucceed()) {
             this.removeScenariosWithoutErrors(execution);
         }
 
         ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO resultDto
                 = executionTransformer.toFullyDetailledDto(execution);
 
-        if (executionShortenerEnabled) {
-            // Apply the "TYPE" filter.
-            if (StringUtils.isNotEmpty(criteria.getType())) {
-                execution.getRuns().removeIf(r -> !criteria.getType().equals(r.getType().getCode()));
-            }
-            // Apply the "COUNTRY" filter.
-            if (StringUtils.isNotEmpty(criteria.getCountry())) {
-                execution.getRuns().removeIf(r -> !criteria.getCountry().equals(r.getCountry().getCode()));
-            }
-        }
-
         final Map<Long, Long> functionalityTeamIds = functionalityRepository.getFunctionalityTeamIds(projectId);
         for (RunWithExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO run : resultDto.getRuns()) {
-            if (executionShortenerEnabled) {
-                // Apply Scenario specific filters.
-                run.getExecutedScenarios().removeIf(s -> !matchFilters(s, criteria));
-            }
             for (ExecutedScenarioWithTeamIdsAndErrorsAndProblemsDTO executedScenario : run.getExecutedScenarios()) {
                 executedScenario.setTeamIds(ScenarioExtractorUtil.extractFunctionalityIds(executedScenario.getName()).stream()
                         .map(functionalityTeamIds::get)
                         .filter(Objects::nonNull) // Unknown functionality IDs have null team IDs
                         .collect(Collectors.toSet()));
-
-                final int limit = 50;
-                if (executionShortenerEnabled) {
-                    if (executedScenario.getContent().length() > limit) {
-                        executedScenario.setContent(executedScenario.getContent().substring(0, limit) + "...");
-                    }
-                }
-
                 for (ErrorWithProblemsDTO error : executedScenario.getErrors()) {
                     for (ProblemDTO problem : error.getProblems()) {
                         problem.setDefectUrl(problemService.retrieveDefectUrl(projectId, problem));
-                    }
-                    if (executionShortenerEnabled) {
-                        String exception = error.getException();
-                        if (!StringUtils.isEmpty(exception)) {
-                            int causeIdx = exception.indexOf(':');
-                            if (exception.length() > causeIdx + limit) {
-                                error.setException(exception.substring(0, causeIdx + limit - 3) + "...");
-                            }
-                        }
                     }
                 }
             }
