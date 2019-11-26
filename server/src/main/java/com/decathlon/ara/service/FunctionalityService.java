@@ -322,7 +322,8 @@ public class FunctionalityService {
     public List<ExporterInfoDTO> listAvailableExporters() {
         List<ExporterInfoDTO> result = new ArrayList<>();
         for (final Exporter exporter: AVAILABLE_EXPORTERS) {
-            result.add(new ExporterInfoDTO(exporter.getId(), exporter.getName(), exporter.getDescription(), exporter.getFormat()));
+            result.add(new ExporterInfoDTO(exporter.getId(), exporter.getName(),
+                    exporter.getDescription(), exporter.getFormat(), exporter.listRequiredFields()));
         }
         return result;
     }

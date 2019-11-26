@@ -15,28 +15,53 @@
   ~
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
-    <Modal v-model="exportPopup" @on-cancel="cancelExport" @on-ok="exportCartography" title="Export functionalities..." width="300"
+    <Modal ref="content" v-model="exportPopup" @on-cancel="cancelExport" @on-ok="exportCartography" title="Export functionalities..." width="500"
     okText="Export">
-    Choose an export format : 
-    <Select v-model="exporterId">
-        <Option v-for="exporter in availableExporters" :value="exporter.id" :key="exporter.id" :label="exporter.name">
-        </Option>
-    </Select>
+      Choose an export format :
+      <Select v-model="exporterId" @on-change="changeCurrentExporter">
+          <Option v-for="exporter in availableExporters" :value="exporter.id" :key="exporter.id" :label="exporter.name">
+          </Option>
+      </Select>
+      <div :key="this.selectedExporterId">
+        <div v-if="this.requiredFields && this.requiredFields !== {} ">
+          <Form>
+            <Form-item v-for="field in this.requiredFields" :key="field.id" :label="field.name + ' :'">
+              <div>
+                <form-field
+                  :field="field"
+                  ref="formField"
+                  v-model="fieldValue[field.id]" />
+              </div>
+              <div style="color: gray; line-height: 1.2; margin-top: 4px;">
+                {{field.description}}
+              </div>
+            </Form-item>
+          </Form>
+        </div>
+      </div>
     </Modal>
 </template>
 
 <script>
 import Vue from 'vue'
 import api from '../libs/api'
+import formFieldComponent from './form-field'
 
 export default {
+  components: {
+    'form-field': formFieldComponent
+  },
+
   data () {
     return {
       exportPopup: false,
       availableExporters: [],
       displayedFunctionalities: [],
       projectCode: '',
-      exporterId: ''
+      exporterId: '',
+      selectedExporterId: '',
+      requiredFields: undefined,
+      fieldValue: {}
     }
   },
 
@@ -63,8 +88,18 @@ export default {
       }
       let idsToExport = []
       this.displayedFunctionalities.forEach(f => idsToExport.push(f.id))
+      let urlArgs = `exportType=${this.exporterId}&functionalities=${idsToExport.join(',')}`
+      if (this.fieldValue !== {}) {
+        let keys = Object.keys(this.fieldValue)
+        for (var idx in keys) {
+          let key = keys[idx]
+          let element = this.fieldValue[key]
+          urlArgs = `${urlArgs}&${key}=${element}`
+        }
+      }
+      console.log({ urlIs: urlArgs })
       Vue.http
-        .get(api.paths.functionalities(this.projectCode) + `/export?exportType=${this.exporterId}&functionalities=${idsToExport.join(',')}`, api.REQUEST_OPTIONS)
+        .get(api.paths.functionalities(this.projectCode) + `/export?${urlArgs}`, api.REQUEST_OPTIONS)
         .then((response) => {
           this.triggerDownload(response.bodyText)
           this.exporterId = ''
@@ -86,6 +121,15 @@ export default {
 
     cancelExport () {
       this.exporterId = ''
+      this.fieldValue = {}
+    },
+
+    changeCurrentExporter (id) {
+      let currentExporter = this.availableExporters.filter((ex) => ex.id === id)[0]
+      this.requiredFields = (currentExporter) ? currentExporter.requiredFields : undefined
+      this.selectedExporterId = id
+      this.fieldValue = {}
+      return id
     }
   }
 }

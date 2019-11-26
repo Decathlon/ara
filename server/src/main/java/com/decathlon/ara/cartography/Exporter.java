@@ -1,8 +1,8 @@
 package com.decathlon.ara.cartography;
 
 import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
-import org.springframework.core.io.ByteArrayResource;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -58,4 +58,11 @@ public abstract class Exporter {
     public final String getId() {
         return this.getName().toLowerCase().replace(" ", "_");
     }
+
+    /**
+     * List all the required inputs needed from the user to forge a correct export for the current format.
+     *
+     * @return an empty list by default.
+     */
+    public List<ExportField> listRequiredFields() { return new ArrayList<>(); }
 }
