@@ -16,6 +16,8 @@
    + Maven `$ mvn --version` (the displayed Java version should be Java 8)
    + Docker `$ docker --version`<br>
    + Git `$ git --version` <br>
+   
+ ![Check versions](./imagesInstallARA/version_control.PNG)
 
  ### Get the source code
 
@@ -27,12 +29,15 @@
 
  + Run this command line : `$ docker run -e MYSQL_ROOT_PASSWORD=yourDatabasePassword -p 3306:3306 decathlon/ara-db`<br>
  + Check that your docker database image is up: `docker ps`
+ ![Initialize the database](./imagesInstallARA/init_database.PNG)
+ ![Initialize the database](./imagesInstallARA/init_database_2.PNG)
 
  ### Set up the back environment
 
  1. Open IntelliJ 
  2. Choose the `Import a project` option
  3. Select the ARA project location path (`<WORKSPACE_PATH>/ara`), previously imported from Github
+ ![Import the project](./imagesInstallARA/import_ARA_project.PNG)
  4. Import the project as a Maven project
  5. Enable the recursive search of subprojects and auto imports
  6. Confirm
@@ -48,6 +53,7 @@
    + VM Options: `-Dspring.profiles.active=dev -Dspring.config.location=classpath:/ -Dspring.datasource.password=<YOUR_DB_PASSWORD>`
    + Classpath of module: `ara-server`
    + JRE: 1.8
+ ![Run configuration on IntelliJ Idea](./imagesInstallARA/edit_configuration_ara.PNG)
 
  ### Set up the front environment
 
@@ -61,10 +67,12 @@
 4. From the client folder, run the following commands :
 <br>`$ npm install`
 <br>`$ npm run-script dev`
+ ![Run install script on VSCode](./imagesInstallARA/client_run_command.PNG)
 
 
 
   ### Contribute to ARA ;-)
-  
+ ![Show ARA home page](./imagesInstallARA/test_ARA_up.PNG)
+ 
 If you have any questions or remarks feel free to reach us with an issue here : https://github.com/Decathlon/ara/issues/new/choose
 
