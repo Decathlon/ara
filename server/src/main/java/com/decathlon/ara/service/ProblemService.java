@@ -525,19 +525,20 @@ public class ProblemService {
      * Get all errors associated to the given problem id.
      *
      * @param projectId the ID of the project in which to work
-     * @param id        the id of the entity
+     * @param problemId        the id of the entity
      * @param pageable  the meta-data of the requested page
      * @return a page of the errors associated to the problem
      * @throws NotFoundException if the entity id does not exist
      */
     @Transactional(readOnly = true)
-    public Page<ErrorWithExecutedScenarioAndRunAndExecutionDTO> getProblemErrors(long projectId, long id, Pageable pageable) throws NotFoundException {
-        Problem problem = problemRepository.findByProjectIdAndId(projectId, id);
+    public Page<ErrorWithExecutedScenarioAndRunAndExecutionDTO> getProblemErrors(long projectId, long problemId, Pageable pageable) throws NotFoundException {
+        Problem problem = problemRepository.findByProjectIdAndId(projectId, problemId);
         if (problem == null) {
             throw new NotFoundException(Messages.NOT_FOUND_PROBLEM, Entities.PROBLEM);
         }
 
-        Page<Error> errors = errorRepository.findDistinctByProblemPatternsInOrderById(problem.getPatterns(), pageable);
+        List<ProblemPattern> problemPatterns = problem.getPatterns();
+        Page<Error> errors = errorRepository.findDistinctByProblemPatternsInOrderByExecutedScenarioRunExecutionTestDateTimeDesc(problemPatterns, pageable);
         return errors.map(errorWithExecutedScenarioAndRunAndExecutionMapper::toDto);
     }
 

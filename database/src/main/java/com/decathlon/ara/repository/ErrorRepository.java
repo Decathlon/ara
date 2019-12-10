@@ -39,6 +39,8 @@ public interface ErrorRepository extends JpaRepository<Error, Long>, JpaSpecific
     // NO projectId: patterns is already restrained to the correct project
     Page<Error> findDistinctByProblemPatternsInOrderById(List<ProblemPattern> patterns, Pageable pageable);
 
+    Page<Error> findDistinctByProblemPatternsInOrderByExecutedScenarioRunExecutionTestDateTimeDesc(List<ProblemPattern> patterns, Pageable pageable);
+
     @Query("SELECT error " +
             "FROM Error error " +
             "WHERE error.executedScenario.run.execution.cycleDefinition.projectId = ?1 AND error.id = ?2")
