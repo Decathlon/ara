@@ -17,45 +17,45 @@
 
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.defect.DefectAdapter;
-import com.decathlon.ara.domain.enumeration.DefectExistence;
-import com.decathlon.ara.domain.enumeration.ProblemStatus;
+import com.decathlon.ara.Entities;
+import com.decathlon.ara.Messages;
 import com.decathlon.ara.ci.service.DateService;
 import com.decathlon.ara.ci.util.FetchException;
-import com.decathlon.ara.repository.CycleDefinitionRepository;
-import com.decathlon.ara.repository.ErrorRepository;
-import com.decathlon.ara.repository.ExecutionRepository;
-import com.decathlon.ara.repository.ProblemPatternRepository;
-import com.decathlon.ara.repository.ProblemRepository;
-import com.decathlon.ara.repository.RootCauseRepository;
+import com.decathlon.ara.defect.DefectAdapter;
+import com.decathlon.ara.defect.bean.Defect;
+import com.decathlon.ara.domain.Error;
+import com.decathlon.ara.domain.Problem;
+import com.decathlon.ara.domain.ProblemPattern;
+import com.decathlon.ara.domain.enumeration.DefectExistence;
+import com.decathlon.ara.domain.enumeration.ProblemStatus;
+import com.decathlon.ara.repository.*;
 import com.decathlon.ara.repository.custom.util.JpaCacheManager;
 import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
+import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
 import com.decathlon.ara.service.dto.problem.ProblemDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.service.mapper.ErrorWithExecutedScenarioAndRunAndExecutionMapper;
-import com.decathlon.ara.service.mapper.ProblemAggregateMapper;
-import com.decathlon.ara.service.mapper.ProblemFilterMapper;
-import com.decathlon.ara.service.mapper.ProblemMapper;
-import com.decathlon.ara.service.mapper.ProblemPatternMapper;
-import com.decathlon.ara.service.mapper.ProblemWithAggregateMapper;
-import com.decathlon.ara.service.mapper.ProblemWithPatternsAndAggregateMapper;
-import com.decathlon.ara.service.mapper.ProblemWithPatternsMapper;
-import com.decathlon.ara.service.mapper.RootCauseMapper;
-import com.decathlon.ara.service.mapper.TeamMapper;
-import com.decathlon.ara.defect.bean.Defect;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Optional;
+import com.decathlon.ara.service.mapper.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Optional;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProblemServiceTest {
@@ -313,6 +313,66 @@ public class ProblemServiceTest {
         assertThat(problemDto.getDefectExistence()).isEqualTo(DefectExistence.EXISTS);
         assertThat(problemDto.getStatus()).isEqualTo(ProblemStatus.CLOSED);
         assertThat(problemDto.getClosingDateTime()).isEqualTo(newDate);
+    }
+
+    @Test
+    public void getProblemErrors_throwsNotFoundException_whenNoProblemFound() {
+        // GIVEN
+        Pageable pageable = mock(Pageable.class);
+
+        // WHEN
+        when(problemRepository.findByProjectIdAndId(1, 2)).thenReturn(null);
+
+        // THEN
+        assertThatThrownBy(() -> cut.getProblemErrors(1, 2, pageable))
+                .isInstanceOf(NotFoundException.class)
+                .hasFieldOrPropertyWithValue("message", Messages.NOT_FOUND_PROBLEM)
+                .hasFieldOrPropertyWithValue("resourceName", Entities.PROBLEM);
+    }
+
+    @Test
+    public void getProblemErrors_returnNoErrors_whenNoErrorFound() throws NotFoundException {
+        // GIVEN
+        Problem problem = mock(Problem.class);
+        Pageable pageable = mock(Pageable.class);
+
+        ProblemPattern problemPattern1 = mock(ProblemPattern.class);
+        ProblemPattern problemPattern2 = mock(ProblemPattern.class);
+        ProblemPattern problemPattern3 = mock(ProblemPattern.class);
+
+        // WHEN
+        when(problemRepository.findByProjectIdAndId(1, 2)).thenReturn(problem);
+        when(problem.getPatterns()).thenReturn(Arrays.asList(problemPattern1, problemPattern2, problemPattern3));
+        when(errorRepository.findDistinctByProblemPatternsInOrderByExecutedScenarioRunExecutionTestDateTimeDesc(anyList(), any(Pageable.class))).thenReturn(null);
+
+        // THEN
+        Page<ErrorWithExecutedScenarioAndRunAndExecutionDTO> errors = cut.getProblemErrors(1, 2, pageable);
+        verify(errorRepository).findDistinctByProblemPatternsInOrderByExecutedScenarioRunExecutionTestDateTimeDesc(Arrays.asList(problemPattern1, problemPattern2, problemPattern3), pageable);
+        assertThat(errors).isNull();
+    }
+
+    @Test
+    public void getProblemErrors_returnErrors_whenErrorsFound() throws NotFoundException {
+        // GIVEN
+        Problem problem = mock(Problem.class);
+        Pageable pageable = mock(Pageable.class);
+        Page<Error> errorPage = mock(Page.class);
+        Page<ErrorWithExecutedScenarioAndRunAndExecutionDTO> convertedErrorPage = mock(Page.class);
+
+        ProblemPattern problemPattern1 = mock(ProblemPattern.class);
+        ProblemPattern problemPattern2 = mock(ProblemPattern.class);
+        ProblemPattern problemPattern3 = mock(ProblemPattern.class);
+
+        // WHEN
+        when(problemRepository.findByProjectIdAndId(1, 2)).thenReturn(problem);
+        when(problem.getPatterns()).thenReturn(Arrays.asList(problemPattern1, problemPattern2, problemPattern3));
+        when(errorRepository.findDistinctByProblemPatternsInOrderByExecutedScenarioRunExecutionTestDateTimeDesc(anyList(), any(Pageable.class))).thenReturn(errorPage);
+        when(errorPage.map(any(Function.class))).thenReturn(convertedErrorPage);
+
+        // THEN
+        Page<ErrorWithExecutedScenarioAndRunAndExecutionDTO> errors = cut.getProblemErrors(1, 2, pageable);
+        verify(errorRepository).findDistinctByProblemPatternsInOrderByExecutedScenarioRunExecutionTestDateTimeDesc(Arrays.asList(problemPattern1, problemPattern2, problemPattern3), pageable);
+        assertThat(errors).isEqualTo(convertedErrorPage);
     }
 
 }

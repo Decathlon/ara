@@ -20,34 +20,20 @@ package com.decathlon.ara.service;
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.SpringApplicationContext;
-import com.decathlon.ara.defect.DefectAdapter;
-import com.decathlon.ara.domain.CycleDefinition;
-import com.decathlon.ara.domain.Error;
-import com.decathlon.ara.domain.Execution;
-import com.decathlon.ara.domain.Problem;
-import com.decathlon.ara.domain.ProblemPattern;
-import com.decathlon.ara.domain.QProblem;
-import com.decathlon.ara.domain.RootCause;
-import com.decathlon.ara.domain.projection.ProblemAggregate;
-import com.decathlon.ara.domain.enumeration.DefectExistence;
-import com.decathlon.ara.domain.enumeration.ProblemStatus;
 import com.decathlon.ara.ci.service.DateService;
 import com.decathlon.ara.ci.util.FetchException;
-import com.decathlon.ara.repository.CycleDefinitionRepository;
-import com.decathlon.ara.repository.ErrorRepository;
-import com.decathlon.ara.repository.ExecutionRepository;
-import com.decathlon.ara.repository.ProblemPatternRepository;
-import com.decathlon.ara.repository.ProblemRepository;
-import com.decathlon.ara.repository.RootCauseRepository;
+import com.decathlon.ara.defect.DefectAdapter;
+import com.decathlon.ara.defect.bean.Defect;
+import com.decathlon.ara.domain.Error;
+import com.decathlon.ara.domain.*;
+import com.decathlon.ara.domain.enumeration.DefectExistence;
+import com.decathlon.ara.domain.enumeration.ProblemStatus;
+import com.decathlon.ara.domain.projection.ProblemAggregate;
+import com.decathlon.ara.repository.*;
 import com.decathlon.ara.repository.custom.util.JpaCacheManager;
 import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
 import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
-import com.decathlon.ara.service.dto.problem.ProblemAggregateDTO;
-import com.decathlon.ara.service.dto.problem.ProblemDTO;
-import com.decathlon.ara.service.dto.problem.ProblemFilterDTO;
-import com.decathlon.ara.service.dto.problem.ProblemWithAggregateDTO;
-import com.decathlon.ara.service.dto.problem.ProblemWithPatternsAndAggregateTDO;
-import com.decathlon.ara.service.dto.problem.ProblemWithPatternsDTO;
+import com.decathlon.ara.service.dto.problem.*;
 import com.decathlon.ara.service.dto.problempattern.ProblemPatternDTO;
 import com.decathlon.ara.service.dto.response.PickUpPatternDTO;
 import com.decathlon.ara.service.dto.rootcause.RootCauseDTO;
@@ -58,28 +44,9 @@ import com.decathlon.ara.service.exception.BadGatewayException;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
-import com.decathlon.ara.service.mapper.ErrorWithExecutedScenarioAndRunAndExecutionMapper;
-import com.decathlon.ara.service.mapper.ProblemAggregateMapper;
-import com.decathlon.ara.service.mapper.ProblemFilterMapper;
-import com.decathlon.ara.service.mapper.ProblemMapper;
-import com.decathlon.ara.service.mapper.ProblemPatternMapper;
-import com.decathlon.ara.service.mapper.ProblemWithAggregateMapper;
-import com.decathlon.ara.service.mapper.ProblemWithPatternsAndAggregateMapper;
-import com.decathlon.ara.service.mapper.ProblemWithPatternsMapper;
-import com.decathlon.ara.service.mapper.RootCauseMapper;
-import com.decathlon.ara.service.mapper.TeamMapper;
-import com.decathlon.ara.defect.bean.Defect;
+import com.decathlon.ara.service.mapper.*;
 import com.decathlon.ara.service.support.Settings;
 import com.decathlon.ara.service.util.ObjectUtil;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -89,6 +56,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Service for managing Problem.
@@ -539,6 +509,9 @@ public class ProblemService {
 
         List<ProblemPattern> problemPatterns = problem.getPatterns();
         Page<Error> errors = errorRepository.findDistinctByProblemPatternsInOrderByExecutedScenarioRunExecutionTestDateTimeDesc(problemPatterns, pageable);
+        if (errors == null) {
+            return null;
+        }
         return errors.map(errorWithExecutedScenarioAndRunAndExecutionMapper::toDto);
     }
 
