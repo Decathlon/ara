@@ -67,6 +67,16 @@ create a sentence if you don't find the one.
 
 The only thing is to respect the Gherkin syntax (Given/When/Then).
 
+=== Target Frontend components
+
+If you need to target specific front end components in your Gherkin sentences, you can locate them (quicktip : Find a
+specific label in ARA, then search it in the client sources), and add the custom attribute `data-nrt="your-id"` in it.
+
+In your Javascript code, you'll retrieve the element with the code `cy.GetByDataNrt("your-id")` or
+`cy.WaitForElementByDataNrt("your-id", timeoutValueInMs)` if your element may appears dynamically.
+
+You can check the `<ARA_ROOT>/client/src/views/management-projects.vue` file for an example.
+
 === Implement the Gherkin sentences
 
 If you create your own sentences, then you'll need to implement the behavior of it with some javascript code.
