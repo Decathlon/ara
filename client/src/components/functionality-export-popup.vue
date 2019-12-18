@@ -97,7 +97,6 @@ export default {
           urlArgs = `${urlArgs}&${key}=${element}`
         }
       }
-      console.log({ urlIs: urlArgs })
       Vue.http
         .get(api.paths.functionalities(this.projectCode) + `/export?${urlArgs}`, api.REQUEST_OPTIONS)
         .then((response) => {

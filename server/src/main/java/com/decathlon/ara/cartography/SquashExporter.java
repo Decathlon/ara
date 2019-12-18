@@ -4,6 +4,7 @@ import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * SquashExporter is an Exporter which serialize the functionalities in order to make them importable in SquashTM.
@@ -28,7 +29,7 @@ public class SquashExporter extends Exporter {
     }
 
     @Override
-    public byte[] generate(List<FunctionalityDTO> functionalities) {
+    public byte[] generate(List<FunctionalityDTO> functionalities, Map<String, String> requiredInfos) {
         // TODO
         return new byte[0];
     }

@@ -18,6 +18,7 @@
 package com.decathlon.ara.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
+import com.decathlon.ara.Entities;
 import com.decathlon.ara.coverage.CoverageService;
 import com.decathlon.ara.service.FunctionalityService;
 import com.decathlon.ara.service.ProjectService;
@@ -32,12 +33,6 @@ import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.web.rest.util.HeaderUtil;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
-import com.decathlon.ara.Entities;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import javax.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,17 +41,14 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.validation.Valid;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 
 import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 
@@ -237,9 +229,12 @@ public class FunctionalityResource {
      */
     @GetMapping("/export")
     @Timed
-    public ResponseEntity<Resource> export(@PathVariable String projectCode, @RequestParam List<Long> functionalities, @RequestParam String exportType) {
+    public ResponseEntity<Resource> export(@PathVariable String projectCode, @RequestParam List<Long> functionalities, @RequestParam String exportType, @RequestParam Map<String,String> additionalParams) {
         try {
-            ByteArrayResource resource = service.generateExport(functionalities, exportType);
+            // Remove the already known params catched by the global mapping
+            additionalParams.remove("functionalities");
+            additionalParams.remove("exportType");
+            ByteArrayResource resource = service.generateExport(functionalities, exportType, additionalParams);
             return ResponseEntity.ok()
                     .contentLength(resource.contentLength())
                     .contentType(MediaType.parseMediaType("application/octet-stream"))

@@ -4,6 +4,7 @@ import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Describe the API to implement for exporting a ARA Cartography to a file.
@@ -33,7 +34,7 @@ public abstract class Exporter {
      */
     public abstract String getFormat();
 
-    public abstract byte[] generate(List<FunctionalityDTO> functionalities);
+    public abstract byte[] generate(List<FunctionalityDTO> functionalities, Map<String,String> requiredInfos);
 
     /**
      * Check if the implemented exporter is suitable for the given export name.
