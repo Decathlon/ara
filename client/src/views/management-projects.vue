@@ -28,10 +28,10 @@
 
     <div v-if="loaded" style="margin-top: 16px; text-align: center;">
       <div v-if="projects.find(project => project.code === demoProjectCode)">
-        <Button icon="md-trash" type="error" @click="deleteDemoProject">DELETE THE DEMO PROJECT</Button>
+        <Button data-nrt="deleteDemo" icon="md-trash" type="error" @click="deleteDemoProject">DELETE THE DEMO PROJECT</Button>
       </div>
       <div v-else>
-        <Button :loading="loadingDemoProject" icon="md-add" @click="createDemoProject">CREATE THE DEMO PROJECT</Button>
+        <Button data-nrt="createDemo" :loading="loadingDemoProject" icon="md-add" @click="createDemoProject">CREATE THE DEMO PROJECT</Button>
         <div style="margin-top: 8px; color: lightgray;">You will be able to delete (and re-create) the demo project at any time.</div>
       </div>
     </div>

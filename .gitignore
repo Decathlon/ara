@@ -11,3 +11,4 @@ docker/data/
 docker/ara/data
 *dependency-reduced-pom.xml
 client/*.vscode
+client/test/cypress/dist/*
