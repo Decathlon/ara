@@ -111,7 +111,13 @@ export default {
       const blob = new Blob([content], { type: 'text/plain' })
       const event = document.createEvent('MouseEvents')
       let anchor = document.createElement('a')
-      anchor.download = `exportAraCartography-${this.$route.params.projectCode}.json`
+      let exporterFormat = ''
+      for (let idx in this.availableExporters) {
+        if (this.availableExporters[idx].id === this.exporterId) {
+          exporterFormat = this.availableExporters[idx].format
+        }
+      }
+      anchor.download = `exportAraCartography-${this.$route.params.projectCode}.${exporterFormat}`
       anchor.href = window.URL.createObjectURL(blob)
       anchor.dataset.downloadurl = ['text/json', anchor.download, anchor.href].join(':')
       event.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
