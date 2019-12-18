@@ -16,7 +16,7 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
   <div id="app" :class="isFramed ? 'isFramed' : ''">
-    <top-menu v-if='!isFramed' style="position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;"></top-menu>
+    <top-menu data-nrt="topMenu" v-if='!isFramed' style="position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;"></top-menu>
     <div class="layout-content">
       <router-view></router-view>
     </div>

@@ -1,0 +1,109 @@
+= Writing End to End Tests for ARA.
+
+This page presents how end to end tests are implemented for testing ARA.
+
+== Test stack and architecture
+
+=== Test stack used
+
+The end-to-end tests of ARA are based on https://cypress.io[Cypress] with the
+https://www.npmjs.com/package/cypress-cucumber-preprocessor[cypress-cucumber-preprocessor]  which adds the Gherkin syntax
+to the tests.
+
+=== Page Object Model
+
+The tests are based on the Page Object Model pattern. Basically it considers each Page or page's fragment of ARA as an
+object which will contains its properties and its behaviors.
+
+For exemple, we can take the Project list page of ARA. This page will be represented as a Javascript module (see the
+`<ARA_ROOT>/client/test/cypress/support/fragments/management-project.js` file).
+
+This module will expose properties (its url for example) and behaviors (`containsDemoProject` for example that will check
+in the page that the demo project is correctly displayed).
+
+Using this pattern reduces complexity and links between tests. It also facilitates their maintainability by centralizing
+every information about a page at the same place.
+
+=== Folder & Files architecture
+
+The End-to-End tests are located in `<ARA_ROOT>/client/cypress`. It contains the following hierarchy :
+
+* `plugins` : Use for integration of plugins for cypress (like the `cypress-cucumber-preprocessor` one).
+* `scenarii` : Stores all the Gherkin `.feature` files. We can freely create sub-directories in it if you want.
+* `support` : implementations of tests
+** `support/fragments` : Contains all the Page objects and modules. The name  of each file should depict correctly the
+page it represents.
+** `support/stepDefinitions` : link between Gherkin `.feature` and Javascript code. Ideally, one file should represent
+one page.
+** `support/commands.js` : Global commands and overloads of Cypress module
+** `support/index.js` : The entry point of Cypress
+
+== How to launch the tests
+
+You can either launch all the end to end tests with the command : `npm run cy:all`.
+
+Or you can add the `@wip` tag on scenario you choose in the `.feature` files and run them with `npm run cy:wip`.
+
+=== Create a specialized runner
+
+If you want to run only the scenarios with a specific tag (like `@severity-sanity-check`), you can update the
+`<ARA_ROOT>/client/package.json` with a new target (in the `scripts` part) which will have the following syntax :
+
+`"cy:<name>": cypress run -e TAGS='<your_tag>' -e GLOB=test/cypress/**/*.feature`
+
+With :
+* `name` the name of your target (like `wip` or `sanity` for example)
+* `your_tag` the tag your target (like `@wip` or `@severity-sanity-check`)
+
+And then, you can run it with `npm run cy:<name>`.
+
+== How to write a new tests for ARA
+
+=== Create the Gherkin scenario
+
+First you can create your scenario in the `test/cypress/scenarii` folder (either create a new file or add it to an
+existing one). Don't hesitate to see the other `.feature` files to check what are the available sentences, but you can
+create a sentence if you don't find the one you're looking for.
+
+The only required thing is to respect the Gherkin syntax (Given/When/Then).
+
+=== Target Frontend components
+
+If you need to target specific front end components in your Gherkin sentences, you can locate them (quicktip : Find a
+specific label in ARA, then search it in the client sources), and add the custom attribute `data-nrt="<your-id>"` in it.
+
+In your Javascript code, you'll retrieve the element with the code `cy.GetByDataNrt("<your-id>")` or
+`cy.WaitForElementByDataNrt("<your-id>", timeoutValueInMs)` if your element appears dynamically.
+
+You can check the `<ARA_ROOT>/client/src/views/management-projects.vue` file for an example.
+
+=== Implement the Gherkin sentences
+
+If you create your own sentences, then you'll need to implement the behavior of it with some javascript code.
+
+Don't hesitate to get inspirations from already existing code in `test/cypress/support`.
+NOTE: You must know the basics of javascript and NodeJS to create End-To-End tests.
+
+==== Link the Gherkin with the code
+First, find the file in which you'll add the code (for example in `test/cypress/support/stepDefinitions/homeSteps.js` or
+another file which represents the target of your sentence). The mandatory fact is that your file must reside in
+`test/cypress/support/stepDefinitions` and ends with `Steps.js`).
+
+Then you'll create the code attached to your sentence. If you create the sentence `Given an user`, then you'll add the
+code :
+
+```javascript
+Given('an user', () => {
+
+});
+```
+
+(The same apply for `When` and `Then`). If you create a new file, make sure that the first line in it, is :
+`import { Given, When, Then } from 'cypress-cucumber-preprocessor/steps';`
+
+==== Add the behavior of your sentence
+
+Once you do the step above, you can implement the behavior by using the Cypress lib (see
+https://docs.cypress.io/api/api/table-of-contents.html). If you need to interact with page or fragment of pages, make
+sure to respect the POM pattern (see above), and import the corresponding `../fragments/<yourpage>` file in your `steps`
+file.
