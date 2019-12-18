@@ -82,7 +82,7 @@ You can check the `<ARA_ROOT>/client/src/views/management-projects.vue` file for
 If you create your own sentences, then you'll need to implement the behavior of it with some javascript code.
 
 Don't hesitate to get inspirations from already existing code in `test/cypress/support`.
-NOTE: You must know the base of javascript and NodeJS basics to create End-To-End tests.
+NOTE: You must know the basics of javascript and NodeJS to create End-To-End tests.
 
 ==== Link the Gherkin with the code
 First, find the file in which you'll add the code (for example in `test/cypress/support/stepDefinitions/homeSteps.js` or
