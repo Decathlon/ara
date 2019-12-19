@@ -59,7 +59,13 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -337,12 +343,13 @@ public class FunctionalityService {
         if (null != requiredInfos) {
             infos.putAll(requiredInfos);
         }
+
         return new ByteArrayResource(AVAILABLE_EXPORTERS
                 .stream()
                 .filter(e -> e.suitableFor(exportType))
                 .findFirst()
                 .orElseThrow(() -> new BadRequestException(Messages.EXPORT_FUNCTIONALITY_UKNOWN_EXPORTER, Entities.FUNCTIONALITY, "unknown_exporter"))
-                .generate(functionalityDTOS, infos));
+                .generateAndEncodeB64(functionalityDTOS, infos));
     }
 
     /**

@@ -61,7 +61,7 @@
               </span>
               <span v-else>{{setting.value ? setting.value : '-'}}</span>
             </div>
-            <div style="color: gray; line-height: 1.2; margin-top: 4px;">
+            <div class="hints">
               {{setting.help}}
             </div>
           </Form-item>

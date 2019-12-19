@@ -32,7 +32,7 @@
                   ref="formField"
                   v-model="fieldValue[field.id]" />
               </div>
-              <div style="color: gray; line-height: 1.2; margin-top: 4px;">
+              <div class="hints">
                 {{field.description}}
               </div>
             </Form-item>
@@ -89,26 +89,25 @@ export default {
       let idsToExport = []
       this.displayedFunctionalities.forEach(f => idsToExport.push(f.id))
       let urlArgs = `exportType=${this.exporterId}&functionalities=${idsToExport.join(',')}`
-      if (this.fieldValue !== {}) {
-        let keys = Object.keys(this.fieldValue)
-        for (var idx in keys) {
-          let key = keys[idx]
-          let element = this.fieldValue[key]
-          urlArgs = `${urlArgs}&${key}=${element}`
-        }
+      let keys = Object.keys(this.fieldValue)
+      for (var idx in keys) {
+        let key = keys[idx]
+        let element = this.fieldValue[key]
+        urlArgs = `${urlArgs}&${key}=${element}`
       }
       Vue.http
         .get(api.paths.functionalities(this.projectCode) + `/export?${urlArgs}`, api.REQUEST_OPTIONS)
         .then((response) => {
-          this.triggerDownload(response.bodyText)
+          this.triggerDownload(response)
           this.exporterId = ''
         }, (error) => {
           api.handleError(error)
         })
     },
 
-    triggerDownload (content) {
-      const blob = new Blob([content], { type: 'text/plain' })
+    triggerDownload (response) {
+      let content = this.decodeB64Stream(response.bodyText)
+      const blob = new Blob([content], { type: 'application/octet-stream' })
       const event = document.createEvent('MouseEvents')
       let anchor = document.createElement('a')
       let exporterFormat = ''
@@ -119,7 +118,6 @@ export default {
       }
       anchor.download = `exportAraCartography-${this.$route.params.projectCode}.${exporterFormat}`
       anchor.href = window.URL.createObjectURL(blob)
-      anchor.dataset.downloadurl = ['text/json', anchor.download, anchor.href].join(':')
       event.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
       anchor.dispatchEvent(event)
     },
@@ -135,6 +133,16 @@ export default {
       this.selectedExporterId = id
       this.fieldValue = {}
       return id
+    },
+
+    decodeB64Stream (contentBase64) {
+      let binaryString = window.atob(contentBase64)
+      let bStringLen = binaryString.length
+      let contentArray = new Uint8Array(bStringLen)
+      for (let i = 0; i < bStringLen; i++) {
+        contentArray[i] = binaryString.charCodeAt(i)
+      }
+      return contentArray.buffer
     }
   }
 }

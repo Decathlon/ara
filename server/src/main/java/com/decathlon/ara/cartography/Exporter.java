@@ -3,6 +3,7 @@ package com.decathlon.ara.cartography;
 import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +35,25 @@ public abstract class Exporter {
      */
     public abstract String getFormat();
 
-    public abstract byte[] generate(List<FunctionalityDTO> functionalities, Map<String,String> requiredInfos);
+    /**
+     * Generate the byte array of functionalities to export and encode it in Base64.
+     *
+     * @param functionalities the functionalities to import
+     * @param requiredInfos any required additional infos
+     * @return the b64 encoded byte array
+     */
+    public byte[] generateAndEncodeB64(List<FunctionalityDTO> functionalities, Map<String,String> requiredInfos) {
+        return Base64.getEncoder().encode(this.generate(functionalities, requiredInfos));
+    }
+
+    /**
+     * Generate the byte array functionalities export to transmit through HTTP.
+     *
+     * @param functionalities the functionalities to export
+     * @param requiredInfos any required additional infos
+     * @return the byte array representing the functionalities in the implemented class.
+     */
+    protected abstract byte[] generate(List<FunctionalityDTO> functionalities, Map<String,String> requiredInfos);
 
     /**
      * Check if the implemented exporter is suitable for the given export name.
