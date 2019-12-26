@@ -22,6 +22,7 @@ import com.decathlon.ara.domain.QFunctionality;
 import com.decathlon.ara.domain.enumeration.FunctionalityType;
 import com.decathlon.ara.repository.custom.FunctionalityRepositoryCustom;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.NonNull;
@@ -42,7 +43,7 @@ public class FunctionalityRepositoryImpl implements FunctionalityRepositoryCusto
                 .distinct()
                 .from(QFunctionality.functionality)
                 .where(QFunctionality.functionality.type.eq(FunctionalityType.FUNCTIONALITY))
-                .where(QFunctionality.functionality.projectId.eq(Long.valueOf(projectId)))
+                .where(QFunctionality.functionality.projectId.eq(projectId))
                 .fetch()
                 .stream()
                 .collect(Collectors.toMap(
@@ -55,10 +56,9 @@ public class FunctionalityRepositoryImpl implements FunctionalityRepositoryCusto
         final String separator = Functionality.COUNTRY_CODES_SEPARATOR;
         return jpaQueryFactory.select(QFunctionality.functionality.id)
                 .from(QFunctionality.functionality)
-                .where(QFunctionality.functionality.projectId.eq(Long.valueOf(projectId)))
+                .where(QFunctionality.functionality.projectId.eq(projectId))
                 .where(QFunctionality.functionality.countryCodes.prepend(separator).concat(separator)
                         .like("%" + separator + countryCode + separator + "%"))
                 .fetchFirst() != null;
     }
-
 }

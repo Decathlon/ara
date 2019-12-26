@@ -22,6 +22,7 @@ import com.decathlon.ara.coverage.CoverageService;
 import com.decathlon.ara.service.FunctionalityService;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.dto.coverage.CoverageDTO;
+import com.decathlon.ara.service.dto.functionality.ExporterInfoDTO;
 import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
 import com.decathlon.ara.service.dto.functionality.FunctionalityWithChildrenDTO;
 import com.decathlon.ara.service.dto.request.MoveFunctionalityDTO;
@@ -32,11 +33,18 @@ import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.web.rest.util.HeaderUtil;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
 import com.decathlon.ara.Entities;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,7 +53,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 
@@ -204,4 +215,59 @@ public class FunctionalityResource {
         }
     }
 
+    /**
+     * Returns the JSON of all the available Cartography exporters in ARA.
+     *
+     * @param projectCode the current project code
+     * @return the JSON of all the exporters available.
+     */
+    @RequestMapping(method= RequestMethod.OPTIONS, path="/export")
+    @Timed
+    public ResponseEntity<List<ExporterInfoDTO>> getExportOptions(@PathVariable String projectCode) {
+        return ResponseEntity.ok().body(service.listAvailableExporters());
+    }
+
+    /**
+     * Returns a streamable resource which will contains the wanted functionalities exported in the wanted format.
+     *
+     * @param projectCode the code of the project which contains the wanted functionalities.
+     * @param functionalities the wanted functionalities' ids
+     * @param exportType the wanted export format
+     * @return a streamable byte array which represents the exported functionalities for download.
+     */
+    @GetMapping("/export")
+    @Timed
+    public ResponseEntity<Resource> export(@PathVariable String projectCode, @RequestParam List<Long> functionalities, @RequestParam String exportType) {
+        try {
+            ByteArrayResource resource = service.generateExport(functionalities, exportType);
+            return ResponseEntity.ok()
+                    .contentLength(resource.contentLength())
+                    .contentType(MediaType.parseMediaType("application/octet-stream"))
+                    .body(resource);
+        } catch (BadRequestException ex) {
+            return ResponseUtil.handle(ex);
+        }
+    }
+
+    /**
+     * Import the given MultipartFile into the given project as a serialized list of functionalities.
+     *
+     * @param projectCode the project's code which will contains the imported functionalities
+     * @param jsonFunctionalities the json which represents the functionalities (ARA-format).
+     * @return 200 OK if the import finished in success.
+     */
+    @PostMapping("/import")
+    @Timed
+    public ResponseEntity<Resource> importFunctionalities(@PathVariable String projectCode, @RequestParam("functionalities") MultipartFile jsonFunctionalities) {
+        try {
+            service.importJSONFunctionalities(projectCode, new String(jsonFunctionalities.getBytes(), StandardCharsets.UTF_8));
+            return ResponseEntity.ok().build();
+        } catch (BadRequestException ex) {
+            return ResponseUtil.handle(ex);
+        } catch (IOException ex) {
+            return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                    .headers(HeaderUtil.exception(FunctionalityResource.NAME, ex))
+                    .build();
+        }
+    }
 }

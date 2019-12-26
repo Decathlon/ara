@@ -18,11 +18,6 @@
   <div>
     <aside v-if="execution && teamsAssignableToProblems.length > 0">
       <div style="margin:0 auto; padding:0;">
-        <Button v-bind:style="{display: (this.executionShortener ? 'block': 'none')}" style="margin: 10px 0; width:100%" icon="md-search"
-          @click="applyFilters()">
-          APPLY FILTERS
-        </Button>  
-        
         <Button style="display: block; margin: 10px 0; width:100%;" icon="md-backspace" :disabled="!hasFilter"
                 @click="removeAllFilters()">REMOVE ALL FILTERS
         </Button>
@@ -223,7 +218,6 @@
 <script>
   import Vue from 'vue'
   import api from '../libs/api'
-  import util from '../libs/util'
 
   import runFeaturesComponent from '../components/run-features'
   import nrtCycleComponent from '../components/nrt-cycle'
@@ -275,8 +269,7 @@
           matching: 0, // scenarios
           total: 0 // scenarios
         },
-        features: [],
-        executionShortener: null
+        features: []
       }
     },
 
@@ -376,11 +369,6 @@
         let loadSuccesses = this.filter.withSucceed
         let url = api.paths.executions(this) + '/' + this.executionId + (loadSuccesses ? '/with-successes' : '')
         this.loadingExecution = true
-        util.ifFeatureEnabled('execution-shortener', function () {
-          this.executionShortener = true
-        }.bind(this), function () {
-          this.executionShortener = false
-        }.bind(this))
         Vue.http
           .get(url, api.REQUEST_OPTIONS)
           .then((response) => {
@@ -402,22 +390,8 @@
 
         if (this.execution && this.execution.runs) {
           this.loadingExecution = true
-          if (this.executionShortener) {
-            let url = api.paths.executions(this) + '/' + this.execution.id + '/filtered'
-            Vue.http
-              .post(url, this.filter, api.REQUEST_OPTIONS)
-              .then((response) => {
-                this.execution = response.body
-                this.filterExecutionOnServer()
-                this.loadingExecution = false
-              }, (error) => {
-                api.handleError(error)
-                this.loadingExecution = false
-              })
-          } else {
-            this.filterExecutionOnClient()
-            this.loadingExecution = false
-          }
+          this.filterExecutionOnClient()
+          this.loadingExecution = false
         }
       },
 
@@ -782,9 +756,7 @@
             query[propertyName] = this.filter[propertyName]
           }
         }
-        if (!this.executionShortener) {
-          this.loadExecution()
-        }
+        this.loadExecution()
         this.$router.replace({ params: { id: this.executionId }, query })
       },
 
