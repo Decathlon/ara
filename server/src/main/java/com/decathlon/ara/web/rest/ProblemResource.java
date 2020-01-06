@@ -122,7 +122,9 @@ public class ProblemResource {
     @Timed
     public ResponseEntity<Page<ErrorWithExecutedScenarioAndRunAndExecutionDTO>> getProblemErrors(@PathVariable String projectCode, @PathVariable long id, Pageable pageable) {
         try {
-            return ResponseEntity.ok().body(service.getProblemErrors(projectService.toId(projectCode), id, pageable));
+            Long projectId = projectService.toId(projectCode);
+            Page<ErrorWithExecutedScenarioAndRunAndExecutionDTO> page = service.getProblemErrors(projectId, id, pageable);
+            return ResponseEntity.ok().body(page);
         } catch (NotFoundException e) {
             return ResponseUtil.handle(e);
         }

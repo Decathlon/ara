@@ -17,10 +17,9 @@
 
 package com.decathlon.ara.repository;
 
-import com.decathlon.ara.repository.custom.ErrorRepositoryCustom;
 import com.decathlon.ara.domain.Error;
 import com.decathlon.ara.domain.ProblemPattern;
-import java.util.List;
+import com.decathlon.ara.repository.custom.ErrorRepositoryCustom;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,6 +27,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * Spring Data JPA repository for the Error entity.
@@ -38,6 +39,14 @@ public interface ErrorRepository extends JpaRepository<Error, Long>, JpaSpecific
 
     // NO projectId: patterns is already restrained to the correct project
     Page<Error> findDistinctByProblemPatternsInOrderById(List<ProblemPattern> patterns, Pageable pageable);
+
+    /**
+     * Find errors problems paginated and ordered by their date time (descending)
+     * @param patterns the problem patterns, should not be null
+     * @param pageable the pagination details, must not be null
+     * @return the errors. If none found, an empty page is returned
+     */
+    Page<Error> findDistinctByProblemPatternsInOrderByExecutedScenarioRunExecutionTestDateTimeDesc(List<ProblemPattern> patterns, Pageable pageable);
 
     @Query("SELECT error " +
             "FROM Error error " +
