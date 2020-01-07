@@ -17,27 +17,28 @@
 
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.domain.QProject;
-import com.decathlon.ara.domain.RootCause;
-import com.decathlon.ara.repository.RootCauseRepository;
-import com.decathlon.ara.service.exception.BadRequestException;
-import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.service.exception.NotUniqueException;
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.domain.Project;
+import com.decathlon.ara.domain.QProject;
+import com.decathlon.ara.domain.RootCause;
 import com.decathlon.ara.repository.ProjectRepository;
+import com.decathlon.ara.repository.RootCauseRepository;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
+import com.decathlon.ara.service.exception.BadRequestException;
+import com.decathlon.ara.service.exception.NotFoundException;
+import com.decathlon.ara.service.exception.NotUniqueException;
 import com.decathlon.ara.service.mapper.ProjectMapper;
 import com.decathlon.ara.service.util.ObjectUtil;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Service for managing Project.
@@ -147,7 +148,7 @@ public class ProjectService {
     private void validateBusinessRules(ProjectDTO dto) throws NotUniqueException {
         validateUniqueCode(dto);
         validateUniqueName(dto);
-        validateOnlyOneDefault(dto);
+        switchProjectAsDefault(dto);
     }
 
     private void validateUniqueCode(ProjectDTO dto) throws NotUniqueException {
@@ -164,11 +165,11 @@ public class ProjectService {
         }
     }
 
-    private void validateOnlyOneDefault(ProjectDTO dto) throws NotUniqueException {
+    private void switchProjectAsDefault(ProjectDTO dto)  {
         if (dto.isDefaultAtStartup()) {
             Project entityDataBaseWithDefaultAtStartup = repository.findByDefaultAtStartup(true);
             if (entityDataBaseWithDefaultAtStartup != null && !entityDataBaseWithDefaultAtStartup.getCode().equals(dto.getCode())) {
-                throw new NotUniqueException(Messages.NOT_UNIQUE_PROJECT_DEFAULT_AT_STARTUP, Entities.PROJECT, QProject.project.defaultAtStartup.getMetadata().getName(), entityDataBaseWithDefaultAtStartup.getCode());
+                entityDataBaseWithDefaultAtStartup.setDefaultAtStartup(false);
             }
         }
     }
