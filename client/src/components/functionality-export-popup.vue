@@ -15,28 +15,53 @@
   ~
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
-    <Modal v-model="exportPopup" @on-cancel="cancelExport" @on-ok="exportCartography" title="Export functionalities..." width="300"
+    <Modal ref="content" v-model="exportPopup" @on-cancel="cancelExport" @on-ok="exportCartography" title="Export functionalities..." width="500"
     okText="Export">
-    Choose an export format : 
-    <Select v-model="exporterId">
-        <Option v-for="exporter in availableExporters" :value="exporter.id" :key="exporter.id" :label="exporter.name">
-        </Option>
-    </Select>
+      Choose an export format :
+      <Select v-model="exporterId" @on-change="changeCurrentExporter">
+          <Option v-for="exporter in availableExporters" :value="exporter.id" :key="exporter.id" :label="exporter.name">
+          </Option>
+      </Select>
+      <div :key="this.selectedExporterId">
+        <div v-if="this.requiredFields && this.requiredFields !== {} ">
+          <Form>
+            <Form-item v-for="field in this.requiredFields" :key="field.id" :label="field.name + ' :'">
+              <div>
+                <form-field
+                  :field="field"
+                  ref="formField"
+                  v-model="fieldValue[field.id]" />
+              </div>
+              <div class="hints">
+                {{field.description}}
+              </div>
+            </Form-item>
+          </Form>
+        </div>
+      </div>
     </Modal>
 </template>
 
 <script>
 import Vue from 'vue'
 import api from '../libs/api'
+import formFieldComponent from './form-field'
 
 export default {
+  components: {
+    'form-field': formFieldComponent
+  },
+
   data () {
     return {
       exportPopup: false,
       availableExporters: [],
       displayedFunctionalities: [],
       projectCode: '',
-      exporterId: ''
+      exporterId: '',
+      selectedExporterId: '',
+      requiredFields: undefined,
+      fieldValue: {}
     }
   },
 
@@ -63,29 +88,61 @@ export default {
       }
       let idsToExport = []
       this.displayedFunctionalities.forEach(f => idsToExport.push(f.id))
+      let urlArgs = `exportType=${this.exporterId}&functionalities=${idsToExport.join(',')}`
+      let keys = Object.keys(this.fieldValue)
+      for (var idx in keys) {
+        let key = keys[idx]
+        let element = this.fieldValue[key]
+        urlArgs = `${urlArgs}&${key}=${element}`
+      }
       Vue.http
-        .get(api.paths.functionalities(this.projectCode) + `/export?exportType=${this.exporterId}&functionalities=${idsToExport.join(',')}`, api.REQUEST_OPTIONS)
+        .get(api.paths.functionalities(this.projectCode) + `/export?${urlArgs}`, api.REQUEST_OPTIONS)
         .then((response) => {
-          this.triggerDownload(response.bodyText)
+          this.triggerDownload(response)
           this.exporterId = ''
         }, (error) => {
           api.handleError(error)
         })
     },
 
-    triggerDownload (content) {
-      const blob = new Blob([content], { type: 'text/plain' })
+    triggerDownload (response) {
+      let content = this.decodeB64Stream(response.bodyText)
+      const blob = new Blob([content], { type: 'application/octet-stream' })
       const event = document.createEvent('MouseEvents')
       let anchor = document.createElement('a')
-      anchor.download = `exportAraCartography-${this.$route.params.projectCode}.json`
+      let exporterFormat = ''
+      for (let idx in this.availableExporters) {
+        if (this.availableExporters[idx].id === this.exporterId) {
+          exporterFormat = this.availableExporters[idx].format
+        }
+      }
+      anchor.download = `exportAraCartography-${this.$route.params.projectCode}.${exporterFormat}`
       anchor.href = window.URL.createObjectURL(blob)
-      anchor.dataset.downloadurl = ['text/json', anchor.download, anchor.href].join(':')
       event.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
       anchor.dispatchEvent(event)
     },
 
     cancelExport () {
       this.exporterId = ''
+      this.fieldValue = {}
+    },
+
+    changeCurrentExporter (id) {
+      let currentExporter = this.availableExporters.filter((ex) => ex.id === id)[0]
+      this.requiredFields = (currentExporter) ? currentExporter.requiredFields : undefined
+      this.selectedExporterId = id
+      this.fieldValue = {}
+      return id
+    },
+
+    decodeB64Stream (contentBase64) {
+      let binaryString = window.atob(contentBase64)
+      let bStringLen = binaryString.length
+      let contentArray = new Uint8Array(bStringLen)
+      for (let i = 0; i < bStringLen; i++) {
+        contentArray[i] = binaryString.charCodeAt(i)
+      }
+      return contentArray.buffer
     }
   }
 }

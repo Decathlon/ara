@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 /**
  * AraExporter is a Exporter which serialize the functionalities into a ARA-specific format (typically the JSON object
@@ -36,7 +37,7 @@ public class AraExporter extends Exporter {
     }
 
     @Override
-    public byte[] generate(List<FunctionalityDTO> functionalities) {
+    public byte[] generate(List<FunctionalityDTO> functionalities, Map<String, String> requiredInfos) {
         return MAPPER.asString(functionalities).getBytes(StandardCharsets.UTF_8);
     }
 }

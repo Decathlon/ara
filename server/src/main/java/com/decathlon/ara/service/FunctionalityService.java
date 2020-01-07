@@ -19,7 +19,6 @@ package com.decathlon.ara.service;
 
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
-
 import com.decathlon.ara.cartography.AraCartographyMapper;
 import com.decathlon.ara.cartography.AraExporter;
 import com.decathlon.ara.cartography.Exporter;
@@ -322,7 +321,8 @@ public class FunctionalityService {
     public List<ExporterInfoDTO> listAvailableExporters() {
         List<ExporterInfoDTO> result = new ArrayList<>();
         for (final Exporter exporter: AVAILABLE_EXPORTERS) {
-            result.add(new ExporterInfoDTO(exporter.getId(), exporter.getName(), exporter.getDescription(), exporter.getFormat()));
+            result.add(new ExporterInfoDTO(exporter.getId(), exporter.getName(),
+                    exporter.getDescription(), exporter.getFormat(), exporter.listRequiredFields()));
         }
         return result;
     }
@@ -332,19 +332,24 @@ public class FunctionalityService {
      *
      * @param functionalitiesIds the functionalities to export
      * @param exportType the type of export to make
+     * @param requiredInfos the required infos for the wanted exporter (can be empty or null if there is no required infos)
      * @return the functionalities in the export format ready to be streamed over HTTP connections
      * @throws BadRequestException the given export type doesn't exists.
      */
-    public ByteArrayResource generateExport(List<Long> functionalitiesIds, String exportType) throws BadRequestException {
+    public ByteArrayResource generateExport(List<Long> functionalitiesIds, String exportType, Map<String, String> requiredInfos) throws BadRequestException {
         List<Functionality> functionalities = repository.findAllById(functionalitiesIds);
         List<FunctionalityDTO> functionalityDTOS = mapper.toDto(functionalities);
+        Map<String, String> infos = new HashMap<>();
+        if (null != requiredInfos) {
+            infos.putAll(requiredInfos);
+        }
 
         return new ByteArrayResource(AVAILABLE_EXPORTERS
                 .stream()
                 .filter(e -> e.suitableFor(exportType))
                 .findFirst()
                 .orElseThrow(() -> new BadRequestException(Messages.EXPORT_FUNCTIONALITY_UKNOWN_EXPORTER, Entities.FUNCTIONALITY, "unknown_exporter"))
-                .generate(functionalityDTOS));
+                .generateAndEncodeB64(functionalityDTOS, infos));
     }
 
     /**

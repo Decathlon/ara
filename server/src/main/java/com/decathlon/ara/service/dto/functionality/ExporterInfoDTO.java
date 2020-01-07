@@ -1,8 +1,11 @@
 package com.decathlon.ara.service.dto.functionality;
 
+import com.decathlon.ara.cartography.ExportField;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 /**
  * Represents the informations about a functionality exporter that the backend will expose.
@@ -18,4 +21,5 @@ public class ExporterInfoDTO {
     private String name;
     private String description;
     private String format;
+    private List<ExportField> requiredFields;
 }

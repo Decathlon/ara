@@ -65,6 +65,7 @@ function forgeCreationCommand {
 	docker_cmd="$docker_cmd --name $CONTAINER_NAME"
 	docker_cmd="$docker_cmd -e MYSQL_ROOT_PASSWORD=$PASSWORD"
 	docker_cmd="$docker_cmd -p $PORT:3306"
+	docker_cmd="$docker_cmd -v /$1:/var/lib/mysql" # Starting-slashes are for Windows compatibility
 	docker_cmd="$docker_cmd -d ara-db-image"
 	echo $docker_cmd
 }
@@ -80,8 +81,8 @@ function createContainer {
 	echo "[ARA] Creating the image..."
 	run 'docker build -t ara-db-image .'
 	echo "[ARA] Create the $CONTAINER_NAME container (data in $dataDir)"
-	docker_cmd=$(forgeCreationCommand)
-	docker_cmd="$docker_cmd -v /$dataDir:/var/lib/mysql" # Starting-slashes are for Windows compatibility
+	docker_cmd=$(forgeCreationCommand $dataDir)
+	docker_cmd="$docker_cmd"
 	run "$docker_cmd"
 	return $?
 }
@@ -187,7 +188,7 @@ if [ "$1" = "import" ]
     echo "[ARA] Creating the image..."
     run 'docker build -t ara-db-image .'
     echo "[ARA] Create the $CONTAINER_NAME container (data in $dataDir)"
-    docker_cmd=$(forgeCreationCommand)
+    docker_cmd=$(forgeCreationCommand $dataDir)
     run "$docker_cmd"
 	startContainer
 	echo "Waiting to the database to be UP..."
