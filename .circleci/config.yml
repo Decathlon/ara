@@ -132,6 +132,8 @@ workflows:
           filters:
             branches:
               only: master
+          requires:
+            - build_app
 #      - upgrade:
 #          filters:
 #            branches:
@@ -175,6 +177,8 @@ workflows:
               only: /^v.*/
             branches:
               ignore: /.*/
+          requires:
+            - build_app
       - release:
           filters:
             tags:
