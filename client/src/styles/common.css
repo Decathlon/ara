@@ -265,3 +265,9 @@ pre code {
 /** Remove "Monospaced Number" (serif) font */
 
 .ivu-page-item a { font-family: inherit; }
+
+.hints {
+  color: gray;
+  line-height: 1.2;
+  margin-top: 4px;
+}

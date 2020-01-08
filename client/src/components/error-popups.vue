@@ -67,12 +67,10 @@
 </template>
 
 <script>
-  import Vue from 'vue'
   import scenarioHistoryComponent from '../components/scenario-history'
 
   import util from '../libs/util'
   import scenarioUtil from '../libs/scenario-util'
-  import api from '../libs/api'
 
   export default {
     name: 'error-popups',
@@ -129,15 +127,6 @@
       showException (executedScenario, error) {
         this.executedScenario = executedScenario
         this.error = error
-        util.ifFeatureEnabled('execution-shortener', function () {
-          Vue.http
-            .get(api.paths.errors(this) + '/' + error.id, api.REQUEST_OPTIONS)
-            .then((response) => {
-              this.error = response.body
-            }, (err) => {
-              api.handleError(err)
-            })
-        }.bind(this), function () {})
         this.exceptionIsVisible = true
         this.currentPopup = 'exception'
       },
@@ -145,15 +134,6 @@
       showScenario (executedScenario, error) {
         this.executedScenario = executedScenario
         this.error = error
-        util.ifFeatureEnabled('execution-shortener', function () {
-          Vue.http
-            .get(api.paths.executedScenarios(this) + '/' + executedScenario.id, api.REQUEST_OPTIONS)
-            .then((response) => {
-              this.executedScenario = response.body
-            }, (err) => {
-              api.handleError(err)
-            })
-        }.bind(this), function () {})
         this.scenarioIsVisible = true
         this.currentPopup = 'scenario'
       },

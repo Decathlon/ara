@@ -23,7 +23,7 @@
     <parent>
         <groupId>com.decathlon.ara</groupId>
         <artifactId>ara-parent</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0</version>
     </parent>
     <artifactId>ara-server</artifactId>
     <packaging>jar</packaging>
@@ -302,6 +302,12 @@
             <artifactId>assertj-core</artifactId>
             <version>${assertj.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>4.1.1</version>
         </dependency>
     </dependencies>
 

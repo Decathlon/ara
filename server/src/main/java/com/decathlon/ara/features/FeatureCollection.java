@@ -17,13 +17,14 @@
 
 package com.decathlon.ara.features;
 
-import com.decathlon.ara.features.available.ExecutionShortenerFeature;
-import com.decathlon.ara.features.available.JiraAdapterFeature;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import com.decathlon.ara.features.available.ExportImportCartographyFeature;
+import com.decathlon.ara.features.available.JiraAdapterFeature;
 import org.springframework.stereotype.Component;
 
 /**
@@ -48,7 +49,7 @@ public class FeatureCollection {
         // this.register(new YourFeatureFlippingClass());
         //
         this.register(new JiraAdapterFeature());
-        this.register(new ExecutionShortenerFeature());
+        this.register(new ExportImportCartographyFeature());
     }
 
     /**

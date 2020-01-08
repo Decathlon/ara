@@ -34,14 +34,14 @@
     },
     created () {
       Vue.http
-           .get(api.paths.features() + '/' + this.$props.code + '/state', api.REQUEST_OPTIONS)
-                .then((response) => {
-                  this.active = response.body.enabled
-                }, (error) => {
-                  console.err(error)
-                  // Disable the feature if an error occurs : no risks.
-                  this.active = false
-                })
+        .get(api.paths.features() + '/' + this.$props.code + '/state', api.REQUEST_OPTIONS)
+        .then((response) => {
+          this.active = response.body.enabled
+        }, (error) => {
+          console.err(error)
+          // Disable the feature if an error occurs : no risks.
+          this.active = false
+        })
     }
   }
 </script>

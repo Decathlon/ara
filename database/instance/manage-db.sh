@@ -60,6 +60,16 @@ function startContainer {
 	return $?
 }
 
+function forgeCreationCommand {
+  docker_cmd="docker run"
+	docker_cmd="$docker_cmd --name $CONTAINER_NAME"
+	docker_cmd="$docker_cmd -e MYSQL_ROOT_PASSWORD=$PASSWORD"
+	docker_cmd="$docker_cmd -p $PORT:3306"
+	docker_cmd="$docker_cmd -v /$1:/var/lib/mysql" # Starting-slashes are for Windows compatibility
+	docker_cmd="$docker_cmd -d ara-db-image"
+	echo $docker_cmd
+}
+
 function createContainer {
 	if [[ "$1" == '.'* ]]; then
 	    dataDir="`pwd`/$1"
@@ -71,12 +81,8 @@ function createContainer {
 	echo "[ARA] Creating the image..."
 	run 'docker build -t ara-db-image .'
 	echo "[ARA] Create the $CONTAINER_NAME container (data in $dataDir)"
-	docker_cmd="docker run"
-	docker_cmd="$docker_cmd --name $CONTAINER_NAME"
-	docker_cmd="$docker_cmd -e MYSQL_ROOT_PASSWORD=$PASSWORD"
-	docker_cmd="$docker_cmd -v /$dataDir:/var/lib/mysql" # Starting-slashes are for Windows compatibility
-	docker_cmd="$docker_cmd -p $PORT:3306"
-	docker_cmd="$docker_cmd -d ara-db-image"
+	docker_cmd=$(forgeCreationCommand $dataDir)
+	docker_cmd="$docker_cmd"
 	run "$docker_cmd"
 	return $?
 }
@@ -117,7 +123,7 @@ fi
 
 if [ "$1" = "mysqladmin" ]
 	then
-		run "docker exec -it $CONTAINER_NAME mysql -uroot -p$PASSWORD"
+		run "docker exec -it $CONTAINER_NAME mysql -uroot -p$PASSWORD ara-dev"
 		exit $?
 fi
 
@@ -156,6 +162,42 @@ if [ "$1" = "purge" ]
 		exit 1
 fi
 
+if [ "$1" = "import" ]
+  then
+    if [ "$2" = "" ]
+		then
+			echo "[ARA] ERROR : a folder path is expected to persists the data."
+			echo " "
+			usage
+			exit 1
+		fi
+		if [ "$3" = "" ]
+		  then
+		    echo "[ARA] ERROR : a dump path is expected to import it in the container."
+		    echo " "
+		    usage
+		    exit 1
+		fi
+		if [[ "$1" == '.'* ]]; then
+		dataDir="`pwd`/$2"
+	else
+		dataDir="$2"
+	fi
+    echo "[ARA] Create the folder on host if not exists..."
+    run "mkdir -p $dataDir"
+    echo "[ARA] Creating the image..."
+    run 'docker build -t ara-db-image .'
+    echo "[ARA] Create the $CONTAINER_NAME container (data in $dataDir)"
+    docker_cmd=$(forgeCreationCommand $dataDir)
+    run "$docker_cmd"
+	startContainer
+	echo "Waiting to the database to be UP..."
+	sleep 5
+	echo "Import the dump located at $3 into the database."s
+    run "docker exec -i $CONTAINER_NAME sh -c \"exec mysql -uroot -p$PASSWORD ara-dev \" < $3"
+    exit $?
+fi
+
 if [ "$1" = "help" ]
 	then
 		echo "manage-db.sh <cmd> : Manage ARA database's container."
@@ -164,13 +206,13 @@ if [ "$1" = "help" ]
 		echo "                        structure. Use <data_dir> as the folder to persists"
 		echo "                        the data on the host system."
 		echo "  - destroy : Destroy the container builded by the image but leave the data"
-      echo "              untouched."
+      	echo "              untouched."
 		echo "  - start : Start the database's container."
 		echo "  - stop : Stop the database's container."
 		echo "  - mysqladmin : Run the 'mysql' command in the container in interactive mode."
 		echo "  - shell : Run an interactive shell in the container."
 		echo "  - purge : Destroy the container, and remove the data persisted in the host."
-
+   		echo "  - import <data_dir> <dump_dir> : Import the given dump file in a newly created database container."
 		exit 0
 fi
 

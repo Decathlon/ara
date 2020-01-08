@@ -32,7 +32,7 @@
                    :label="(field.type === 'boolean' ? '' : field.name + ':')"
                    :required="field.required && (editingNew || (!field.primaryKey && !field.createOnly))">
           <form-field :field="field" v-model="editingData[field.code]" :editingNew="editingNew" :ref="field.code" v-on:enter="save"/>
-          <div style="color: gray; line-height: 1.2; margin-top: 4px;">
+          <div class="hints">
             {{field.help}}
           </div>
         </Form-item>
