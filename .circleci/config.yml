@@ -132,10 +132,10 @@ workflows:
           filters:
             branches:
               only: master
-      - upgrade:
-          filters:
-            branches:
-              only: master
+#      - upgrade:
+#          filters:
+#            branches:
+#              only: master
   build-nightly:
     jobs:
       - build_app:
