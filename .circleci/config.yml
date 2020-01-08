@@ -22,6 +22,8 @@ jobs:
       - run:
           name: Tag the version
           command: |
+            git config user.name "Decathlon OpenSource Team"
+            git config user.email "oss@decathlon.com"
             git commit -am "Release version $(cat version.txt)"
             git tag -a v$(cat version.txt) -m "Release version $(cat version.txt)"
             git push --tags origin
