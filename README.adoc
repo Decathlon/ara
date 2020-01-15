@@ -36,7 +36,7 @@ Please note the following :
 7. To restart it, in the command line do a `docker-compose up` in the same directory as the `docker-compose.yml`
 
 
-=== I've got a Mac (or a GNU/Linux PC) !
+=== I've got a Mac !
 
 1. Open a Terminal
 2. Run the command `wget https://raw.githubusercontent.com/Decathlon/ara/master/docker-compose.yml`
@@ -45,6 +45,19 @@ Please note the following :
 5. Enjoy !
 6. To stop it, in the command line, just do a `docker-compose down` in the same directory as the `docker-compose.yml`
 7. To restart it, in the command line do a `docker-compose up` in the same directory as the `docker-compose.yml`
+
+
+=== I've got a GNU/Linux PC !
+
+1. Open a Terminal
+2. Run the command `wget https://raw.githubusercontent.com/Decathlon/ara/master/docker-compose.yml`
+3. Edit the `docker-compose.yml` file and replace the `host.docker.internal` at line 22 by `172.17.0.1` (see
+https://github.com/Decathlon/ara/issues/222[this PR]) for more details
+4. Run the command `docker-compose up`
+5. Open up a browser on `http://localhost:8080`
+6. Enjoy !
+7. To stop it, in the command line, just do a `docker-compose down` in the same directory as the `docker-compose.yml`
+8. To restart it, in the command line do a `docker-compose up` in the same directory as the `docker-compose.yml`
 
 == How to install it on my Infrastructure
 
