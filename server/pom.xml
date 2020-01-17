@@ -28,8 +28,11 @@
     <artifactId>ara-server</artifactId>
     <packaging>jar</packaging>
 
-    <name>ara-server</name>
-    <description>Agile Regression Analyzer - Server</description>
+    <name>ARA Server</name>
+    <description>
+        Agile Regression Analyzer - Server:
+        This module is responsible for the server part of the project.
+    </description>
 
     <properties>
 

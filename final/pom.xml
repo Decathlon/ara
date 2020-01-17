@@ -28,6 +28,11 @@
     <artifactId>ara-final</artifactId>
     <packaging>jar</packaging>
 
+    <name>ARA Final</name>
+    <description>
+        Agile Regression Analyzer - Final:
+        This part enable building the application from a script and a Dockerfile
+    </description>
 
     <dependencies>
         <!-- Include the backend of ARA -->

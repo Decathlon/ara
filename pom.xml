@@ -20,7 +20,6 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-
     <parent>
         <groupId>com.decathlon</groupId>
         <artifactId>parent</artifactId>
@@ -36,7 +35,11 @@
         <java.version>1.8</java.version>
     </properties>
 
-    <name>Agile Regression Analyzer - Parent</name>
+    <name>ARA Parent</name>
+    <description>
+        Agile Regression Analyzer (or ARA for short) is a tool that helps you avoid regressions in your projects.
+        It's open-source, so you can contribute ! For more details, go to https://github.com/Decathlon/ara.
+    </description>
 
     <modules>
         <module>client</module>
@@ -46,7 +49,6 @@
         <module>server</module>
         <module>final</module>
     </modules>
-
 
     <dependencyManagement>
         <dependencies>
@@ -82,6 +84,122 @@
                     <target>${java.version}</target>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.8.2</version>
+                <configuration>
+                    <locales>en</locales>
+                </configuration>
+            </plugin>
         </plugins>
+
     </build>
+
+     <scm>
+         <connection>scm:git:https://github.com/Decathlon/ara.git</connection>
+         <developerConnection>scm:git:https://github.com/Decathlon/ara.git</developerConnection>
+         <url>https://github.com/Decathlon/ara</url>
+    </scm>
+
+    <distributionManagement>
+        <site>
+            <id>ara-site</id>
+            <!-- The site is not ready to be deployed yet. When ready, put the final url below (replacing: localhost/tmp) -->
+            <!-- For instance, if your site is www.my-site.com, then you should have the following: <url>scp://my-site.com</url> -->
+            <url>scp://localhost/tmp/</url>
+        </site>
+    </distributionManagement>
+
+    <issueManagement>
+        <system>Github</system>
+        <url>https://github.com/Decathlon/ara/issues</url>
+    </issueManagement>
+
+    <developers>
+
+        <developer>
+            <url>https://github.com/dktsni</url>
+            <id>dktsni</id>
+            <name>Sylvain NIEUWLANDT</name>
+            <email>sylvain.nieuwlandt.partner@decathlon.com</email>
+            <organization>SFEIR</organization>
+            <properties>
+                <picUrl>https://avatars2.githubusercontent.com/u/45944760?s=100</picUrl>
+            </properties>
+        </developer>
+
+        <developer>
+            <url>https://github.com/omar-chahbouni-decathlon</url>
+            <id>omar-chahbouni-decathlon</id>
+            <name>Omar CHAHBOUNI</name>
+            <email>omar.chahbouni.partner@decathlon.com</email>
+            <organization>SFEIR</organization>
+            <properties>
+                <picUrl>https://avatars1.githubusercontent.com/u/47318765?s=100</picUrl>
+            </properties>
+        </developer>
+
+        <developer>
+            <url>https://github.com/thomasgruson</url>
+            <id>thomasgruson</id>
+            <name>Thomas GRUSON</name>
+            <email>thomas.gruson.partner@decathlon.com</email>
+            <organization>SFEIR</organization>
+            <properties>
+                <picUrl>https://avatars2.githubusercontent.com/u/47111054?s=100</picUrl>
+            </properties>
+        </developer>
+
+    </developers>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>3.0.0</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.4</version>
+                <configuration>
+                    <quiet>true</quiet>
+                    <locale>en</locale>
+                </configuration>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>javadoc</report>
+                        </reports>
+                    </reportSet>
+                    <reportSet>
+                        <id>aggregate</id>
+                        <inherited>false</inherited>
+                        <reports>
+                            <report>aggregate</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>5.2.4</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>aggregate</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+
+        </plugins>
+    </reporting>
+
 </project>

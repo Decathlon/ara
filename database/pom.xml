@@ -27,6 +27,12 @@
     <artifactId>ara-database</artifactId>
     <packaging>jar</packaging>
 
+    <name>ARA Database</name>
+    <description>
+        Agile Regression Analyzer - Database:
+        This part of the project manage the interactions with the database.
+    </description>
+
     <properties>
         <java.version>1.8</java.version>
 
