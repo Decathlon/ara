@@ -27,8 +27,11 @@
     <artifactId>ara-client</artifactId>
     <packaging>jar</packaging>
 
-    <name>ara-client</name>
-    <description>Agile Regression Analyzer - Client</description>
+    <name>ARA Client</name>
+    <description>
+      Agile Regression Analyzer - Client:
+      This module is responsible for the client part of the project.
+    </description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

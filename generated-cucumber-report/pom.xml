@@ -26,6 +26,12 @@
     </parent>
     <artifactId>ara-generated-cucumber-report</artifactId>
 
+    <name>ARA Cucumber</name>
+    <description>
+        Agile Regression Analyzer - Cucumber reports:
+        This is where you can generate your Cucumber reports.
+    </description>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <cucumberfork.version>1.2.4</cucumberfork.version>

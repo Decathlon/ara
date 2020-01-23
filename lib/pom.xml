@@ -31,6 +31,12 @@
         <cucumber.version>1.2.5</cucumber.version>
     </properties>
 
+    <name>ARA Libraries</name>
+    <description>
+        Agile Regression Analyzer - Libraries:
+        This is where you find all your common dependencies.
+    </description>
+
     <dependencies>
         <!-- Cucumber -->
         <dependency>

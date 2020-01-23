@@ -28,6 +28,11 @@ Below is what you will need to set up on your development machine.
      *** Wait for the server to be up and running
      *** Run `npm run dev` in the `<ARA_ROOT>/client` folder to start the front-end server.
      *** ARA's GUI is available at http://localhost:8081.
+* *(Optional) Generate the project site:*
+  ** Clean your project by running `mvn clean` command from `<ARA_ROOT>`
+  ** Run `mvn package site site:phase` to generate the maven site containing all the details concerning this project.
+     Please note that this operation may take a while (up to 15 minutes).
+  ** Open the generated `<ARA_ROOT>/target/staging/index.html` file to browse the site
 
 More information are provided below and in linked detailed documentations.
 
