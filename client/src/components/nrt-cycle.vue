@@ -30,12 +30,14 @@
           <i-col span="5">
             <Button-group v-if="!hideButtons" shape="circle" style="float: left; margin-right: 8px;">
               <Button
+                  :data-nrt="'ExecutionsAndErrorsNavigationPreviousButton_' + execution.id " 
                   :disabled="!execution.previousId"
                   @click="emitRequestExecution(execution.previousId)"
                   icon="md-skip-backward"
                   title="Previous execution"
                   type="primary"/>
               <Button
+                  :data-nrt="'ExecutionsAndErrorsNavigationNextButton_' + execution.id " 
                   :disabled="!execution.nextId"
                   @click="emitRequestExecution(execution.nextId)"
                   icon="md-skip-forward"
