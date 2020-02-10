@@ -7,27 +7,6 @@ executors:
     docker:
       - image: circleci/openjdk:8u222-stretch
 jobs:
-  upgrade:
-    executor: docker-publisher
-    steps:
-      - checkout
-      - restore_cache:
-          key: ara-{{ checksum "pom.xml" }}
-      - run:
-          name: Upgrade version
-          command: mvn versions:set -DremoveSnapshot -DgenerateBackupPoms=false
-      - run:
-          name: Stock the new Version
-          command: mvn help:evaluate -Dexpression=project.version -q -DforceStdout > version.txt
-      - run:
-          name: Tag the version
-          command: |
-            git config user.name "Decathlon OpenSource Team"
-            git config user.email "oss@decathlon.com"
-            git commit -am "Release version $(cat version.txt)"
-            git tag -a v$(cat version.txt) -m "Release version $(cat version.txt)"
-            git push --tags origin
-            git push origin master
   build_app:
     executor: docker-publisher
     working_directory: ~/ara
@@ -49,7 +28,30 @@ jobs:
           paths:
             - ./database/instance
             - ./final
-  build_docker_images:
+  build_latest_images:
+    executor: docker-publisher
+    working_directory: ~/ara
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - setup_remote_docker:
+          docker_layer_caching: false
+      - run:
+          name: Build Docker images
+          command: |
+            docker build -t $DATABASE_IMAGE_NAME:latest /tmp/workspace/database/instance
+            docker build -t $SERVER_IMAGE_NAME:latest /tmp/workspace/final
+      - run:
+          name: Archive Docker images
+          command: |
+            docker save -o database-image.tar $DATABASE_IMAGE_NAME
+            docker save -o server-image.tar $SERVER_IMAGE_NAME
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./database-image.tar
+            - ./server-image.tar
+  build_nightly_images:
     executor: docker-publisher
     working_directory: ~/ara
     steps:
@@ -60,8 +62,8 @@ jobs:
       - run:
           name: Build Docker images
           command: |
-            docker build -t $DATABASE_IMAGE_NAME:latest /tmp/workspace/database/instance
-            docker build -t $SERVER_IMAGE_NAME:latest /tmp/workspace/final
+            docker build -t $DATABASE_IMAGE_NAME:nightly /tmp/workspace/database/instance
+            docker build -t $SERVER_IMAGE_NAME:nightly /tmp/workspace/final
       - run:
           name: Archive Docker images
           command: |
@@ -92,7 +94,7 @@ jobs:
           root: .
           paths:
             - ./version.txt
-  publish:
+  publish_latest:
     executor: docker-publisher
     steps:
       - attach_workspace:
@@ -114,6 +116,24 @@ jobs:
             docker tag $SERVER_IMAGE_NAME:latest $SERVER_IMAGE_NAME:$IMAGE_TAG
             docker push $DATABASE_IMAGE_NAME:$IMAGE_TAG
             docker push $SERVER_IMAGE_NAME:$IMAGE_TAG
+
+  publish_nightly:
+    executor: docker-publisher
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - setup_remote_docker
+      - run:
+          name: Load archived Docker images
+          command: |
+            docker load -i /tmp/workspace/database-image.tar
+            docker load -i /tmp/workspace/server-image.tar
+      - run:
+          name: Publish Docker Images to Docker Hub
+          command: |
+            echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            docker push $DATABASE_IMAGE_NAME:nightly
+            docker push $SERVER_IMAGE_NAME:nightly
 workflows:
   version: 2
   build-pr:
@@ -128,23 +148,19 @@ workflows:
           filters:
             branches:
               only: master
-      - build_docker_images:
+      - build_latest_images:
           filters:
             branches:
               only: master
           requires:
             - build_app
-#      - upgrade:
-#          filters:
-#            branches:
-#              only: master
   build-nightly:
     jobs:
       - build_app:
           filters:
             branches:
               only: /^version\/.*/
-      - build_docker_images:
+      - build_nightly_images:
           filters:
             branches:
               only: /^version\/.*/
@@ -154,11 +170,11 @@ workflows:
           filters:
             branches:
               only: /^version\/.*/
-      - publish:
+      - publish_nightly:
           context: ara-context
           requires:
             - build_app
-            - build_docker_images
+            - build_nightly_images
             - nightly
           filters:
             branches:
@@ -171,7 +187,7 @@ workflows:
               only: /^v.*/
             branches:
               ignore: /.*/
-      - build_docker_images:
+      - build_latest_images:
           filters:
             tags:
               only: /^v.*/
@@ -185,11 +201,11 @@ workflows:
               only: /^v.*/
             branches:
               ignore: /.*/
-      - publish:
+      - publish_latest:
           context: ara-context
           requires:
             - build_app
-            - build_docker_images
+            - build_latest_images
             - release
           filters:
             tags:
