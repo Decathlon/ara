@@ -12,7 +12,7 @@ executors:
 jobs:
   build_client:
     executor: client-builder
-    working_directory: ~/ara/client
+    working_directory: ~/ara/ara-client
     steps:
       # Beware! Even though the working_directory is set as ~/ara/client, the client directory cannot be accessed unless adding the checkout below
       # You can get more details from this link: https://stackoverflow.com/questions/50570221/circleci-2-0-working-with-subdirectory
@@ -39,12 +39,12 @@ jobs:
             - ~/.m2
           key: ara-{{ checksum "pom.xml" }}
       - store_test_results:
-          path: server/target/surefire-reports
+          path: ara-server/target/surefire-reports
       - persist_to_workspace:
           root: .
           paths:
-            - ./database/instance
-            - ./final
+            - ./ara-database/instance
+            - ./ara-final
   build_latest_images:
     executor: docker-publisher
     working_directory: ~/ara
@@ -56,8 +56,8 @@ jobs:
       - run:
           name: Build Docker images
           command: |
-            docker build -t $DATABASE_IMAGE_NAME:latest /tmp/workspace/database/instance
-            docker build -t $SERVER_IMAGE_NAME:latest /tmp/workspace/final
+            docker build -t $DATABASE_IMAGE_NAME:latest /tmp/workspace/ara-database/instance
+            docker build -t $SERVER_IMAGE_NAME:latest /tmp/workspace/ara-final
       - run:
           name: Archive Docker images
           command: |
@@ -79,8 +79,8 @@ jobs:
       - run:
           name: Build Docker images
           command: |
-            docker build -t $DATABASE_IMAGE_NAME:nightly /tmp/workspace/database/instance
-            docker build -t $SERVER_IMAGE_NAME:nightly /tmp/workspace/final
+            docker build -t $DATABASE_IMAGE_NAME:nightly /tmp/workspace/ara-database/instance
+            docker build -t $SERVER_IMAGE_NAME:nightly /tmp/workspace/ara-final
       - run:
           name: Archive Docker images
           command: |
