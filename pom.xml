@@ -42,12 +42,12 @@
     </description>
 
     <modules>
-        <module>client</module>
-        <module>lib</module>
-        <module>generated-cucumber-report</module>
-        <module>database</module>
-        <module>server</module>
-        <module>final</module>
+        <module>ara-client</module>
+        <module>ara-lib</module>
+        <module>ara-generated-cucumber-report</module>
+        <module>ara-database</module>
+        <module>ara-server</module>
+        <module>ara-final</module>
     </modules>
 
     <dependencyManagement>
