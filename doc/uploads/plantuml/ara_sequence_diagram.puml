@@ -1,0 +1,17 @@
+@startuml
+group upload zip (ExecutionRessource)
+  CI -> ARA : sending ZIP
+  note left: calling the resource /upload
+  group analyzing report (ExecutionService)
+    ARA -> ARA : get report details (executions) from zip
+    ARA -> ARA : save details in the server ARA is deployed on
+    ARA -> ARA: creating indexed builds for each executions extracted from the zip
+    group searching index (ExecutionCrawlerService)
+      group fetching the executions (FetcherService)
+        ARA -> ARA: getting the executions reports
+      end
+      ARA -> DB: persist executions
+    end
+  end
+end
+@enduml
