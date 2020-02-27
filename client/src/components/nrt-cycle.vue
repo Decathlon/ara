@@ -51,7 +51,7 @@
           <i-col span="19" style="text-align: right;">
             <div style="float: right; margin-left: 8px;">
               <execution-actions-button 
-                  :data-nrt="'ExecutionsAndErrorsActionsButton_' + '_' + execution.id "
+                  :data-nrt="'ExecutionsAndErrorsActionsAndJobReportsButton_' + execution.id "
                   :execution="execution" 
                   v-on:change="emitRequestExecution(execution.id)"/>
             </div>
