@@ -21,21 +21,31 @@
         <Icon type="md-menu"/>
       </Button>
       <DropdownMenu slot="list" style="text-transform: initial;" title="">
-        <DropdownItem :disabled="true" style="font-weight: bold;">
+        <DropdownItem 
+            :disabled="true"
+            :data-nrt="'ExecutionsAndErrorsActionsButton_' + 'Actions_' + execution.id "
+            style="font-weight: bold;">
           <Icon type="md-open" style="visibility: hidden;"/>
           ACTIONS
         </DropdownItem>
 
         <DropdownItem><div @click="discard(execution)"><Icon type="md-flag"/> {{execution.discardReason ? 'CHANGE DISCARD REASON' : 'DISCARD EXECUTION'}}</div></DropdownItem>
-        <DropdownItem v-if="execution.discardReason"><div @click="unDiscard(execution.id)"><Icon type="md-checkmark"/> UN-DISCARD EXECUTION</div></DropdownItem>
+        <DropdownItem 
+            :data-nrt="'ExecutionsAndErrorsActionsButton_' + 'UndiscardExecution_' + execution.id "
+            v-if="execution.discardReason"><div @click="unDiscard(execution.id)"><Icon type="md-checkmark"/> UN-DISCARD EXECUTION</div></DropdownItem>
 
-        <DropdownItem :disabled="true" style="border-top: 1px solid #DDDEE1; font-weight: bold;">
+        <DropdownItem 
+            :disabled="true"
+            :data-nrt="'ExecutionsAndErrorsActionsButton_' + 'JobReports_' + execution.id "
+            style="border-top: 1px solid #DDDEE1; font-weight: bold;">
           <Icon type="md-open" style="visibility: hidden;"/>
           JOB REPORTS
         </DropdownItem>
 
         <a :href="execution.jobUrl ? (execution.jobUrl + 'console') : null" target="_blank">
-          <DropdownItem :disabled="!execution.jobUrl">
+          <DropdownItem 
+              :disabled="!execution.jobUrl"
+              :data-nrt="'ExecutionsAndErrorsActionsButton_' + 'Execution_' + execution.id ">
             <Icon type="md-open"/>
             Execution
             <job-status-result :job="execution" :showDuration="true"/>
@@ -43,7 +53,10 @@
         </a>
         <div v-for="countryDeployment in execution.countryDeployments" :key="countryDeployment.id">
           <a :href="countryDeployment.jobUrl ? (countryDeployment.jobUrl + 'console') : null" target="_blank">
-            <DropdownItem :disabled="!countryDeployment.jobUrl" style="border-top: 1px dashed #DDDEE1;">
+            <DropdownItem 
+                :disabled="!countryDeployment.jobUrl" 
+                :data-nrt="'ExecutionsAndErrorsActionsButton_' + countryDeployment.country.code + '_Deployment_' + + execution.id "
+                style="border-top: 1px dashed #DDDEE1;">
               <Icon type="md-open"/>
               {{countryDeployment.country.code.toUpperCase()}} Deployment
               <job-status-result :job="countryDeployment" :showDuration="true"/>
@@ -52,7 +65,9 @@
           <a v-for="run in execution.runs" :key="run.id" v-if="run.country.code === countryDeployment.country.code"
               :href="run.jobUrl ? (run.jobUrl + 'cucumber-html-reports/overview-features.html') : null"
               target="_blank">
-            <DropdownItem :disabled="!run.jobUrl">
+            <DropdownItem 
+                :disabled="!run.jobUrl"
+                :data-nrt="'ExecutionsAndErrorsActionsButton_' + countryDeployment.country.code + '_' + run.type.name + '_' + execution.id ">
               <Icon type="md-open"/>
               {{run.country.code.toUpperCase()}} {{run.type.name}}
               <job-status-result :job="run" :showDuration="true"/>
