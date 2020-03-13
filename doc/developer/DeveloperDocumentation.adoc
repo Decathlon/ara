@@ -1,5 +1,7 @@
 = ARA's Developer Documentation
 
+Check you are agree with the terms and conditions of contributor license agreements. <</doc/contributing/contributing.adoc#head, Contributing>>
+
 == Getting Started in Two Minutes
 
 Below is what you will need to set up on your development machine.

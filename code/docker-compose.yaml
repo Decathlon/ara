@@ -1,0 +1,46 @@
+# Please Note that this file IS NOT PRODUCTION READY.
+# It's only dedicated to local test & try
+
+version: '3.5'
+
+services:
+  ara-db:
+    image: ara-db #"mariadb:10.3" # "ara-db"
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_DATABASE=ara-dev
+      - MYSQL_USER=dev
+      - MYSQL_PASSWORD=dev
+      - MYSQL_ROOT_PASSWORD=to_change
+    networks:
+      - db_net
+  ara-back:
+    image: "ara-back"
+    restart: always
+    environment:
+      - DATABASE_URL=ara-db:3306/ara-dev
+      - DATABASE_USER=root
+      - DATABASE_PASSWORD=to_change
+      - CLIENT_URL="http://ara-front/"
+      - DATA_DB_MODE=none # validate | update | create | create-drop
+      - ARA_PROFILE=dev
+    networks:
+      - web_net
+      - db_net
+  ara-front:
+    image: "ara-front"
+    restart: always
+    ports:
+      - 8080:80
+    networks:
+      - web_net
+networks:
+  web_net:
+  db_net:
+
+# validate: validate the schema, makes no changes to the database.
+# update: update the schema.
+# create: creates the schema, destroying previous data.
+# create-drop: drop the schema when the SessionFactory is closed explicitly, typically when the application is stopped.

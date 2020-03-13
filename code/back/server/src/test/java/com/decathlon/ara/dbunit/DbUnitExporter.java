@@ -1,0 +1,103 @@
+/******************************************************************************
+ * Copyright (C) 2019 by the ARA Contributors                                 *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ * 	 http://www.apache.org/licenses/LICENSE-2.0                               *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ *                                                                            *
+ ******************************************************************************/
+
+package com.decathlon.ara.dbunit;
+
+import org.dbunit.DatabaseUnitException;
+import org.dbunit.database.DatabaseConnection;
+import org.dbunit.database.IDatabaseConnection;
+import org.dbunit.database.QueryDataSet;
+import org.dbunit.dataset.xml.FlatXmlDataSet;
+import org.hibernate.Session;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import javax.persistence.EntityManager;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.sql.SQLException;
+
+/**
+ * The class name does not start nor end with "Test" because it's not supposed to be run during build. This class is to be run on a development
+ * machine to generate a new DbUnit XML data-source to feed to other integration tests.
+ */
+@RunWith(SpringRunner.class)
+@Ignore//@TransactionalSpringIntegrationTest
+public class DbUnitExporter {
+
+    private static final String XML_PATH = "src/test/resources/dbunit/freshly-created-dataset-to-rename.xml";
+
+    @Autowired
+    private EntityManager entityManager;
+
+    @Test
+    public void export() {
+        try (Session session = entityManager.unwrap(Session.class)) {
+            session.doWork(jdbcConnection -> {
+                // Can be launched in "ara" parent-module or in "ara/server" sub-module
+                boolean inServerModule = System.getProperty("user.dir").endsWith("server");
+                String xmlPath = (inServerModule ? "" : "server/") + XML_PATH;
+                try (OutputStream outputStream = new FileOutputStream(xmlPath)) {
+                    IDatabaseConnection connection = new DatabaseConnection(jdbcConnection);
+
+                    QueryDataSet partialDataSet = new QueryDataSet(connection);
+
+                    // We export all tables: just remove any unneeded table in the generated XML
+                    // Take note of the order to prevent FK constraint violation when re-inserting
+                    // Project Segmentation
+                    partialDataSet.addTable("project");
+                    partialDataSet.addTable("setting");
+                    // Configuration tables
+                    partialDataSet.addTable("country");
+                    partialDataSet.addTable("root_cause");
+                    partialDataSet.addTable("team");
+                    partialDataSet.addTable("source");
+                    partialDataSet.addTable("type");
+                    partialDataSet.addTable("cycle_definition");
+                    partialDataSet.addTable("severity");
+                    partialDataSet.addTable("communication");
+                    // Execution indexation
+                    partialDataSet.addTable("execution_completion_request");
+                    partialDataSet.addTable("execution");
+                    partialDataSet.addTable("country_deployment");
+                    partialDataSet.addTable("run");
+                    partialDataSet.addTable("executed_scenario");
+                    partialDataSet.addTable("error");
+                    // Problem assignation
+                    partialDataSet.addTable("problem");
+                    partialDataSet.addTable("problem_pattern");
+                    partialDataSet.addTable("problem_occurrence");
+                    // Functionality coverage
+                    partialDataSet.addTable("functionality");
+                    partialDataSet.addTable("scenario");
+                    partialDataSet.addTable("functionality_coverage");
+
+                    // XML file into which data needs to be exported
+                    FlatXmlDataSet.write(partialDataSet, outputStream);
+                    System.out.println("Dataset written to " + XML_PATH);
+                } catch (DatabaseUnitException | IOException e) {
+                    throw new SQLException("Cannot export database: " + e.getMessage(), e);
+                }
+            });
+        }
+    }
+
+}

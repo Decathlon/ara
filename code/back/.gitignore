@@ -1,3 +1,5 @@
+.m2
+target/
 *.DS_Store
 # Editor directories and files
 *.suo
@@ -26,4 +28,3 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
-*.log

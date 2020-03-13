@@ -1,0 +1,605 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright (C) 2019 by the ARA Contributors
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	 http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.decathlon.ara</groupId>
+        <artifactId>ara-parent</artifactId>
+        <version>5.0.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>ara-server</artifactId>
+    <packaging>jar</packaging>
+
+    <name>ARA Server</name>
+    <description>
+        Agile Regression Analyzer - Server:
+        This module is responsible for the server part of the project.
+    </description>
+
+    <properties>
+
+        <!-- BUG http://mapstruct.org/faq/#can-i-use-mapstruct-together-with-project-lombok -->
+        <mapstruct.version>1.3.1.Final</mapstruct.version>
+
+        <lombok.version>1.18.2</lombok.version>
+
+        <!-- Overridden to support Java 8 -->
+        <assertj.version>3.11.1</assertj.version>
+
+        <!-- From JHipster -->
+        <dropwizard-metrics.version>4.0.3</dropwizard-metrics.version>
+
+
+        <!-- Sonar -->
+        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+        <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+        <sonar.junit.reportPaths>
+            ${project.build.directory}/surefire-reports,
+            ${project.build.directory}/failsafe-reports
+        </sonar.junit.reportPaths>
+        <sonar.jacoco.reportPaths>
+            ${project.build.directory}/coverage-reports/jacoco-ut.exec,
+            ${project.build.directory}/coverage-reports/jacoco-it.exec
+        </sonar.jacoco.reportPaths>
+        <sonar.language>java</sonar.language>
+        <!-- Merely a configuration class (duplicated 3 times in this pom.xml) -->
+        <sonar.coverage.exclusions>
+            **/com/decathlon/ara/service/SettingProviderService.java
+        </sonar.coverage.exclusions>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <javadoc.skip>false</javadoc.skip>
+        <!-- No need to initialize JaCoCo if no tests are made -->
+        <jacoco.skip>true</jacoco.skip>
+    </properties>
+
+
+    <dependencies>
+        <!-- SpringBoot's @ConfigurationProperties -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- API, java.xml.bind module -->
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+            <version>2.3.2</version>
+        </dependency>
+
+        <!-- Runtime, com.sun.xml.bind module -->
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>2.3.2</version>
+        </dependency>
+
+        <!-- Web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Monitoring -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-actuator-docs</artifactId>
+            <version>1.5.17.RELEASE</version>
+        </dependency>
+
+        <!-- Tests and development -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Inject getters/setters for POJO beans -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.8.1</version>
+        </dependency>
+
+        <!-- From JHipster -->
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-annotation</artifactId>
+            <version>${dropwizard-metrics.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-json</artifactId>
+            <version>${dropwizard-metrics.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-jcache</artifactId>
+            <version>${dropwizard-metrics.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-jvm</artifactId>
+            <version>${dropwizard-metrics.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-servlet</artifactId>
+            <version>${dropwizard-metrics.version}</version>
+        </dependency>
+
+        <!-- Entity<->DTO Mappapplicater classes generation -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${mapstruct.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>${mapstruct.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- For SshClientHelper -->
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.54</version>
+        </dependency>
+
+        <!-- For StructuredEmbeddingsUtil to create and parse JSON arrays and objects -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
+        </dependency>
+
+        <!-- Used to escape HTML -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.6</version>
+        </dependency>
+
+        <!-- DbUnit for loading datasets for integration tests -->
+        <dependency>
+            <groupId>org.dbunit</groupId>
+            <artifactId>dbunit</artifactId>
+            <version>2.5.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.springtestdbunit</groupId>
+            <artifactId>spring-test-dbunit</artifactId>
+            <version>1.3.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Swagger -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>1.2.33</version>
+        </dependency>
+
+        <!-- Mail Sending & Templating -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.thymeleaf</groupId>
+            <artifactId>thymeleaf</artifactId>
+            <version>3.0.10.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.thymeleaf</groupId>
+            <artifactId>thymeleaf-spring5</artifactId>
+            <version>3.0.10.RELEASE</version>
+        </dependency>
+
+        <!-- Mainly for ListUtils#partition() to split a List into consecutive sub-lists -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>4.2</version>
+        </dependency>
+
+        <!-- Parse structured embeddings from Cucumber reports -->
+        <dependency>
+            <groupId>com.decathlon.ara</groupId>
+            <artifactId>ara-lib</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <!-- ara-lib is designed to integrate with the project's provided version of Cucumber: -->
+                <!-- we override it with a Cucumber fork having another groupId -->
+                <exclusion>
+                    <groupId>info.cukes</groupId>
+                    <artifactId>cucumber-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>info.cukes</groupId>
+                    <artifactId>cucumber-java</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>info.cukes</groupId>
+                    <artifactId>cucumber-spring</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>info.cukes</groupId>
+                    <artifactId>cucumber-junit</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- Cucumber JSON report files generated for the demo project and reports parsing tests -->
+        <dependency>
+            <groupId>com.decathlon.ara</groupId>
+            <artifactId>ara-generated-cucumber-report</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.decathlon.ara</groupId>
+            <artifactId>ara-database</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>4.1.1</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                 <configuration>
+                    <mainClass>com.decathlon.ara.AraApplication</mainClass>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Add the generated classes to the classpath -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/annotations</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <compilerArgs>
+                        <compilerArg>
+                            -Amapstruct.defaultComponentModel=spring
+                        </compilerArg>
+                        <compilerArg>
+                            -Amapstruct.unmappedTargetPolicy=IGNORE
+                        </compilerArg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+
+            <!-- Run the self-contained *Test.java Unit Tests (without the integration tests) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- Sets the VM argument line used when unit tests are run. -->
+                    <argLine>${surefireArgLine}</argLine>
+                </configuration>
+            </plugin>
+
+            <!-- Execution of slow *IT.java integration tests during mvn verify phase. -->
+            <!-- See http://javamoods.blogspot.fr/2009/12/unit-and-integration-testing-with-maven.html -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <spring.profiles.active>${spring.profiles.active}</spring.profiles.active>
+                    </systemPropertyVariables>
+                    <!-- Sets the VM argument line used when integration tests are run. -->
+                    <argLine>${failsafeArgLine}</argLine>
+                    <!-- Skips integration tests if the value of skip.integration.tests property is true -->
+                    <skipTests>${skip.integration.tests}</skipTests>
+                </configuration>
+            </plugin>
+
+            <!-- Execute JaCoCo before&after unit-tests&integration-tests to get code-coverage metrics in SonarQube -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.2</version>
+                <executions>
+                    <!-- Prepares the property pointing to the JaCoCo runtime agent which -->
+                    <!-- is passed as VM argument when Maven the Surefire plugin is executed. -->
+                    <execution>
+                        <id>pre-unit-test</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Sets the path to the file which contains the execution data. -->
+                            <destFile>${project.build.directory}/coverage-reports/jacoco-ut.exec</destFile>
+                            <!-- Sets the name of the property containing the settings for JaCoCo runtime agent. -->
+                            <propertyName>surefireArgLine</propertyName>
+                        </configuration>
+                    </execution>
+                    <!-- Ensures that the code coverage report for unit tests is created after unit tests have been run. -->
+                    <execution>
+                        <id>post-unit-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Sets the path to the file which contains the execution data. -->
+                            <dataFile>${project.build.directory}/coverage-reports/jacoco-ut.exec</dataFile>
+                            <!-- Sets the output directory for the code coverage report. -->
+                            <outputDirectory>${project.reporting.outputDirectory}/jacoco-ut</outputDirectory>
+                        </configuration>
+                    </execution>
+
+                    <!-- Prepares the property pointing to the JaCoCo runtime agent which -->
+                    <!-- is passed as VM argument when Maven the Failsafe plugin is executed. -->
+                    <execution>
+                        <id>pre-integration-test</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Sets the path to the file which contains the execution data. -->
+                            <destFile>${project.build.directory}/coverage-reports/jacoco-it.exec</destFile>
+                            <!-- Sets the name of the property containing the settings for JaCoCo runtime agent. -->
+                            <propertyName>failsafeArgLine</propertyName>
+                        </configuration>
+                    </execution>
+                    <!-- Ensures that the code coverage report for integration tests after -->
+                    <!-- integration tests have been run. -->
+                    <execution>
+                        <id>post-integration-test</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Sets the path to the file which contains the execution data. -->
+                            <dataFile>${project.build.directory}/coverage-reports/jacoco-it.exec</dataFile>
+                            <!-- Sets the output directory for the code coverage report. -->
+                            <outputDirectory>${project.reporting.outputDirectory}/jacoco-it</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <excludes>
+                        <!-- Merely a configuration class (duplicated 3 times in this pom.xml) -->
+                        <exclude>**/com/decathlon/ara/service/SettingProviderService.class</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
+            <!-- TODO Reactivate pitest when the tests are optimized and don't take more than 10minutes to be executed
+                 due to OpenSource free plan limitation.
+        <plugin>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-maven</artifactId>
+            <version>1.4.3</version>
+            <executions>
+                <execution>
+                    <id>pitest</id>
+                    <phase>test</phase>
+                    <goals>
+                        <goal>mutationCoverage</goal>
+                    </goals>
+                </execution>
+            </executions>
+            <configuration>
+                <skip>${skipPitest}</skip>
+                <outputFormats>
+                    <outputFormat>XML</outputFormat>
+                    <outputFormat>HTML</outputFormat>
+                </outputFormats>
+                <targetClasses>
+                    - For now, while we still have too many integration tests versus unit tests, we focus our efforts on these high-value classes: -
+                    <param>com.decathlon.ara.ci.fetcher.*</param>
+                    <param>com.decathlon.ara.ci.service.*</param>
+                    <param>com.decathlon.ara.ci.util.*</param>
+                    <param>com.decathlon.ara.coverage.*</param>
+                    <param>com.decathlon.ara.defect.*</param>
+                    <param>com.decathlon.ara.domain.ExecutedScenario</param>
+                    <param>com.decathlon.ara.domain.Functionality</param>
+                    <param>com.decathlon.ara.embedding.bean.*</param>
+                    <param>com.decathlon.ara.embedding.util.*</param>
+                    <param>com.decathlon.ara.postman.service.*</param>
+                    <param>com.decathlon.ara.postman.support.*</param>
+                    <param>com.decathlon.ara.report.bean.Element</param> <
+                    <param>com.decathlon.ara.report.bean.Embedded</param>
+                    <param>com.decathlon.ara.report.bean.Feature</param>
+                    <param>com.decathlon.ara.report.bean.Step</param>
+                    <param>com.decathlon.ara.report.bean.Tag</param>
+                    <param>com.decathlon.ara.report.service.*</param>
+                    <param>com.decathlon.ara.report.util.*</param>
+                    <param>com.decathlon.ara.service.*</param>
+                    <param>com.decathlon.ara.service.util.*</param>
+                </targetClasses>
+                <excludedClasses>
+                    <class>com.decathlon.ara.service.dto.*</class>
+                    <class>com.decathlon.ara.service.exception.*</class>
+                    <class>com.decathlon.ara.service.mapper.*</class>
+                    <class>com.decathlon.ara.service.support.*</class>
+                    <class>com.decathlon.ara.service.SettingProviderService</class>
+                </excludedClasses>
+                <targetTests>
+                    <param>com.decathlon.ara.**.*Test</param>
+                </targetTests>
+                <excludedTestClasses>
+                    <class>com.decathlon.ara.dbunit.DbUnitExporter</class>
+                    <class>com.decathlon.ara.dbunit.DbUnitImporter</class>
+                </excludedTestClasses>
+                <environmentVariables>
+                    <spring.profiles.active>${spring.profiles.active}
+                </environmentVariables>
+                <avoidCallsTo>
+                    <avoidCallsTo>org.slf4j</avoidCallsTo>
+                    <avoidCallsTo>java.io.OutputStream</avoidCallsTo>
+                    <avoidCallsTo>com.google.common.base.Preconditions</avoidCallsTo>
+                </avoidCallsTo>
+                <mutators>
+                    <mutator>ALL</mutator>
+                </mutators>
+                <exportLineCoverage>true</exportLineCoverage>
+                <timestampedReports>false</timestampedReports>
+            </configuration>
+        </plugin>
+        -->
+            <!-- Make sure the JavaDoc is correct -->
+            <plugin>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok-maven-plugin</artifactId>
+                <version>1.18.2.0</version>
+                <executions>
+                    <execution>
+                        <id>delombok</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>delombok</goal>
+                        </goals>
+                        <configuration>
+                            <formatPreferences>
+                                <javaLangAsFQN>skip</javaLangAsFQN>
+                            </formatPreferences>
+                            <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+                            <outputDirectory>
+                                ${project.build.directory}/delombokified-sources-for-javadoc
+                            </outputDirectory>
+                            <addOutputDirectory>false</addOutputDirectory> <!-- Only delombokify for JavaDoc -->
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <skip>${javadoc.skip}</skip>
+                    <source>${java.version}</source>
+                    <sourcepath>
+                        ${project.build.directory}/delombokified-sources-for-javadoc;${project.build.directory}/generated-sources/annotations
+                    </sourcepath>
+                    <sourceFileExcludes>
+                        <!-- Delombok copies Javadoc from fields to getters and setters, but without @return and @param annotations -->
+                        <exclude>com/decathlon/ara/ci/bean/**/*.java</exclude>
+                        <exclude>com/decathlon/ara/configuration/AraConfiguration.java</exclude>
+                        <exclude>com/decathlon/ara/domain/**/*.java</exclude>
+                        <exclude>com/decathlon/ara/postman/bean/**/*.java</exclude>
+                        <exclude>com/decathlon/ara/postman/model/**/*.java</exclude>
+                        <exclude>com/decathlon/ara/service/exception/NotUniqueException.java</exclude>
+                        <exclude>com/decathlon/ara/service/support/**/*.java</exclude>
+                        <exclude>**/*DTO.java</exclude>
+                    </sourceFileExcludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
