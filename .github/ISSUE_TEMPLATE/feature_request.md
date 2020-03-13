@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **What it's the actual situation on ARA ?**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...] / We can't do ... 
+A clear and concise description of what the problem is. Ex. I'm always frustrated when [...] / We can't do ...
 
 **Describe the solution you'd like**
 A clear and concise description of what you want to happen.

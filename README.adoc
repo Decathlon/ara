@@ -1,4 +1,4 @@
-= image:client/src/assets/favicon.png[Logo,64,64] ARA - Agile Regression Analyzer
+= image:code/front/src/assets/favicon.png[Logo,64,64] ARA - Agile Regression Analyzer
 image:https://circleci.com/gh/Decathlon/ara.svg?style=svg["CircleCI", link="https://circleci.com/gh/Decathlon/ara"]
 
 ARA image by https://github.com/slaout[Sébastien Laout], licensed under https://creativecommons.org/licenses/by-nc-sa/4.0/[Creative Commons 4.0 Attributions license]
