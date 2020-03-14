@@ -117,7 +117,7 @@ public class SettingProviderService {
     public List<SettingDTO> getJobIndexingFileSystemDefinitions() {
         List<SettingDTO> settings = new ArrayList<>();
 
-        final String defaultExecutionBasePath = getDefaultExecutionsFolder() + Fetcher.DEFAULT_EXECUTION_VARIABLES;
+        final String defaultExecutionBasePath = getDefaultExecutionsFolder() + Settings.DEFAULT_EXECUTION_VARIABLES;
         settings.add(new SettingDTO()
                 .withCode(Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH)
                 .withName("Execution base path")
@@ -127,12 +127,12 @@ public class SettingProviderService {
                 .withHelp("" +
                         "The root path of all jobs for a given branch and cycle. " +
                         "Optional variables you can use in this configuration: " +
-                        Fetcher.PROJECT_VARIABLE + " is the code of the project for the given execution, " +
-                        Fetcher.BRANCH_VARIABLE + " is the name of the branch for the given execution, " +
-                        Fetcher.CYCLE_VARIABLE + " is the name of the given execution. " +
+                        Settings.PROJECT_VARIABLE + " is the code of the project for the given execution, " +
+                        Settings.BRANCH_VARIABLE + " is the name of the branch for the given execution, " +
+                        Settings.CYCLE_VARIABLE + " is the name of the given execution. " +
                         EG_QUOTE + defaultExecutionBasePath + " (on Linux) " +
-                        "or \"C:/ara/data/executions/" + Fetcher.DEFAULT_EXECUTION_VARIABLES + "\" (on Windows) " +
-                        "or \"classpath:/executions/" + Fetcher.DEFAULT_EXECUTION_VARIABLES + "\" (for tests)"));
+                        "or \"C:/ara/data/executions/" + Settings.DEFAULT_EXECUTION_VARIABLES + "\" (on Windows) " +
+                        "or \"classpath:/executions/" + Settings.DEFAULT_EXECUTION_VARIABLES + "\" (for tests)"));
 
         final String defaultCycleDefinitionPath = "/cycleDefinition.json";
         settings.add(new SettingDTO()
@@ -269,9 +269,9 @@ public class SettingProviderService {
                 .withHelp("" +
                         "The root URL and path of all jobs for a given branch and cycle. " +
                         "Optional variables you can use in this configuration: " +
-                        Fetcher.BRANCH_VARIABLE + " is the name of the branch for the given execution, " +
-                        Fetcher.CYCLE_VARIABLE + " is the name of the given execution. " +
-                        EG_QUOTE + "http://ci.company.com/nrt/" + Fetcher.BRANCH_VARIABLE + "/" + Fetcher.CYCLE_VARIABLE +
+                        Settings.BRANCH_VARIABLE + " is the name of the branch for the given execution, " +
+                        Settings.CYCLE_VARIABLE + " is the name of the given execution. " +
+                        EG_QUOTE + "http://ci.company.com/nrt/" + Settings.BRANCH_VARIABLE + "/" + Settings.CYCLE_VARIABLE +
                         "\" (by HTTP requests to continuous integration server)."));
 
         final String defaultCycleDefinitionPath = "/artifact/cycleDefinition.json";

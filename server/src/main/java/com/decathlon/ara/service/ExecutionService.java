@@ -21,7 +21,6 @@ import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.ci.bean.Build;
 import com.decathlon.ara.ci.bean.BuildToIndex;
-import com.decathlon.ara.ci.fetcher.Fetcher;
 import com.decathlon.ara.ci.service.ExecutionCrawlerService;
 import com.decathlon.ara.ci.service.ExecutionDiscovererService;
 import com.decathlon.ara.domain.CycleDefinition;
@@ -375,13 +374,13 @@ public class ExecutionService {
      * @throws IOException              if the zip file can't be unzipped.
      */
     public void uploadExecutionReport(long projectId, String projectCode, String branch, String cycle, MultipartFile zipFile) throws IOException {
-        if (!settingService.useFileSystemIndexer(projectId)) { 
+        if (!settingService.useFileSystemIndexer(projectId)) {
             throw new IllegalArgumentException(Messages.IMPORT_POSTMAN_NOT_FS_INDEXER);
         }
         String path = settingService.get(projectId, Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH)
-                .replace(Fetcher.PROJECT_VARIABLE, projectCode)
-                .replace(Fetcher.BRANCH_VARIABLE, branch)
-                .replace(Fetcher.CYCLE_VARIABLE, cycle);
+                .replace(Settings.PROJECT_VARIABLE, projectCode)
+                .replace(Settings.BRANCH_VARIABLE, branch)
+                .replace(Settings.CYCLE_VARIABLE, cycle);
         File destinationDirectory = new File(path, "incoming");
         List<File> newExecutions = this.unzipExecutions(destinationDirectory, zipFile);
         for (final File newExecution : newExecutions) {

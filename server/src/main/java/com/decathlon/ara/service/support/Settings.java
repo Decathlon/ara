@@ -77,4 +77,13 @@ public class Settings {
     public static final String EMAIL_TO_EXECUTION_ELIGIBLE_WARNING = "email.to.execution.eligibleWarning";
     public static final String EMAIL_TO_EXECUTION_NOT_ELIGIBLE = "email.to.execution.notEligible";
 
+    // Variables
+    public static final String PROJECT_VARIABLE = "{{project}}";
+    public static final String BRANCH_VARIABLE = "{{branch}}";
+    public static final String CYCLE_VARIABLE = "{{cycle}}";
+
+    /**
+     * The tree structure inside a given .../executions/ folder.
+     */
+    public static final String DEFAULT_EXECUTION_VARIABLES = PROJECT_VARIABLE + "/" + BRANCH_VARIABLE + "/" + CYCLE_VARIABLE;
 }

@@ -31,15 +31,6 @@ import java.util.Optional;
 
 public interface Fetcher {
 
-    String PROJECT_VARIABLE = "{{project}}";
-    String BRANCH_VARIABLE = "{{branch}}";
-    String CYCLE_VARIABLE = "{{cycle}}";
-
-    /**
-     * The tree structure inside a given .../executions/ folder.
-     */
-    String DEFAULT_EXECUTION_VARIABLES = PROJECT_VARIABLE + "/" + BRANCH_VARIABLE + "/" + CYCLE_VARIABLE;
-
     /**
      * @return the code to uniquely identify this fetcher class (stored in the project settings in database)
      */

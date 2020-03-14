@@ -20,12 +20,7 @@ package com.decathlon.ara.service;
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.domain.Project;
-import com.decathlon.ara.ci.fetcher.Fetcher;
-import com.decathlon.ara.loader.DemoExecutionLoader;
-import com.decathlon.ara.loader.DemoFunctionalityLoader;
-import com.decathlon.ara.loader.DemoProblemLoader;
-import com.decathlon.ara.loader.DemoScenarioLoader;
-import com.decathlon.ara.loader.DemoSettingsLoader;
+import com.decathlon.ara.loader.*;
 import com.decathlon.ara.repository.ProjectRepository;
 import com.decathlon.ara.service.dto.cycledefinition.CycleDefinitionDTO;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
@@ -33,10 +28,6 @@ import com.decathlon.ara.service.dto.team.TeamDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.support.Settings;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +35,11 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
 
@@ -134,11 +130,11 @@ public class DemoService {
 
         projectRepository.delete(project);
 
-        if (executionBasePath.contains(Fetcher.PROJECT_VARIABLE)) {
+        if (executionBasePath.contains(Settings.PROJECT_VARIABLE)) {
             final String projectExecutionsFolder = executionBasePath
-                    .replace(Fetcher.PROJECT_VARIABLE, PROJECT_CODE_DEMO)
-                    .replace(Fetcher.BRANCH_VARIABLE, "")
-                    .replace(Fetcher.CYCLE_VARIABLE, "");
+                    .replace(Settings.PROJECT_VARIABLE, PROJECT_CODE_DEMO)
+                    .replace(Settings.BRANCH_VARIABLE, "")
+                    .replace(Settings.CYCLE_VARIABLE, "");
             try {
                 FileUtils.deleteDirectory(new File(projectExecutionsFolder));
             } catch (IOException e) {

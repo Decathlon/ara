@@ -85,7 +85,7 @@ public class ExecutionResourceIntegration {
     }
 
     private void deleteARADataFolder() {
-        File ARADataFolder = new File(ARA_DATA_BASE_FOLDER_PATH); 
+        File ARADataFolder = new File(ARA_DATA_BASE_FOLDER_PATH);
         FileSystemUtils.deleteRecursively(ARADataFolder);
     }
 

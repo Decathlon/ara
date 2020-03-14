@@ -26,12 +26,13 @@ import com.decathlon.ara.service.SettingService;
 import com.decathlon.ara.service.support.Settings;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 // TODO (SNI) : TO be deleted after validation of FileSystemFetcher
 @Service
@@ -66,12 +67,12 @@ public class OldFileSystemFetcher extends FileSystemFetcher implements PullFetch
     public List<Build> getJobHistory(long projectId, String branchName, String cycleName) throws FetchException {
         final String projectCode = projectRepository.findById(projectId)
                 .map(Project::getCode)
-                .orElse(PROJECT_VARIABLE);
+                .orElse(Settings.PROJECT_VARIABLE);
 
         String path = settingService.get(projectId, Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH)
-                .replace(PROJECT_VARIABLE, projectCode)
-                .replace(BRANCH_VARIABLE, branchName)
-                .replace(CYCLE_VARIABLE, cycleName);
+                .replace(Settings.PROJECT_VARIABLE, projectCode)
+                .replace(Settings.BRANCH_VARIABLE, branchName)
+                .replace(Settings.CYCLE_VARIABLE, cycleName);
         File[] directories = new File(path).listFiles(File::isDirectory);
 
         if (directories == null) {
