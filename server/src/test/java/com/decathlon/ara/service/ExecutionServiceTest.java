@@ -34,33 +34,22 @@ import com.decathlon.ara.service.mapper.ExecutionMapper;
 import com.decathlon.ara.service.mapper.ExecutionWithHandlingCountsMapper;
 import com.decathlon.ara.service.support.Settings;
 import com.decathlon.ara.service.transformer.ExecutionTransformer;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 import org.apache.commons.io.FileUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ExecutionServiceTest {
@@ -526,6 +515,19 @@ public class ExecutionServiceTest {
         File subdir2 = new File(directory, "subdir2");
         subdir2.mkdir();
         Mockito.doReturn(false).when(this.cut).isExecutionDirectory(subdir2);
+        // WHEN
+        List<File> paths = cut.retrieveAllExecutionDirectories(directory);
+        FileUtils.deleteQuietly(directory);
+        // THEN
+        Assertions.assertThat(paths).isEmpty();
+    }
+
+    @Test
+    public void retrieveAllExecutionDirectories_should_return_empty_if_is_empty() {
+        // GIVEN
+        File directory = new File(System.getProperty("java.io.tmpdir"), "ara-retrieveAllExeDir-" +
+                new Date().getTime());
+        directory.mkdir();
         // WHEN
         List<File> paths = cut.retrieveAllExecutionDirectories(directory);
         FileUtils.deleteQuietly(directory);

@@ -30,11 +30,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -71,6 +75,8 @@ public class ExecutionResourceIntegration {
     @Autowired
     private ExecutionResource executionResource;
 
+    private static final String ARA_DATA_BASE_FOLDER_PATH = "/opt/ara/data";
+
     private MultipartFile readZip(String zipPath) throws IOException {
         File zip = new File(zipPath);
         FileInputStream fileInputStream = new FileInputStream(zip);
@@ -78,8 +84,23 @@ public class ExecutionResourceIntegration {
         return multipartFile;
     }
 
+    private void deleteARADataFolder() {
+        File ARADataFolder = new File(ARA_DATA_BASE_FOLDER_PATH); 
+        FileSystemUtils.deleteRecursively(ARADataFolder);
+    }
+
+    private List<String> getARADataFilesAndFoldersPaths() throws IOException {
+        List<String> araDataContent = Files.walk(Paths.get(ARA_DATA_BASE_FOLDER_PATH))
+                .map(Path::toString)
+                .collect(Collectors.toList());
+
+        return araDataContent;
+    }
+
     @Test
     public void upload_saveTheExecution_whenNoErrorFound() throws IOException {
+        deleteARADataFolder();
+
         List<Execution> executions = executionRepository.findAll();
         List<CountryDeployment> countryDeployments = countryDeploymentRepository.findAll();
         List<Run> runs = runRepository.findAll();
@@ -162,7 +183,6 @@ public class ExecutionResourceIntegration {
         assertThat(runs)
                 .hasSize(6)
                 .extracting(
-                        "execution.id",
                         "country.code",
                         "type.projectId",
                         "type.code",
@@ -182,7 +202,6 @@ public class ExecutionResourceIntegration {
                 )
                 .containsOnly(
                         tuple(
-                                1L,
                                 "fr",
                                 1L,
                                 "api",
@@ -201,7 +220,6 @@ public class ExecutionResourceIntegration {
                                 true
                         ),
                         tuple(
-                                1L,
                                 "fr",
                                 1L,
                                 "firefox-desktop",
@@ -220,7 +238,6 @@ public class ExecutionResourceIntegration {
                                 true
                         ),
                         tuple(
-                                1L,
                                 "fr",
                                 1L,
                                 "firefox-mobile",
@@ -239,7 +256,6 @@ public class ExecutionResourceIntegration {
                                 true
                         ),
                         tuple(
-                                1L,
                                 "us",
                                 1L,
                                 "api",
@@ -258,7 +274,6 @@ public class ExecutionResourceIntegration {
                                 true
                         ),
                         tuple(
-                                1L,
                                 "us",
                                 1L,
                                 "firefox-desktop",
@@ -277,7 +292,6 @@ public class ExecutionResourceIntegration {
                                 true
                         ),
                         tuple(
-                                1L,
                                 "us",
                                 1L,
                                 "firefox-mobile",
@@ -1847,10 +1861,60 @@ public class ExecutionResourceIntegration {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
         assertThat(errors).isEmpty();
+
+        List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
+        assertThat(generatedFilesPaths)
+                .contains(
+                        "/opt/ara/data",
+                        "/opt/ara/data/executions",
+                        "/opt/ara/data/executions/the-demo-project",
+                        "/opt/ara/data/executions/the-demo-project/develop",
+                        "/opt/ara/data/executions/the-demo-project/develop/day",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/cycleDefinition.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/us",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/us/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/us/firefox-mobile",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/us/firefox-mobile/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/us/firefox-mobile/report.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/us/firefox-mobile/stepDefinitions.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/us/firefox-desktop",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/us/firefox-desktop/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/us/firefox-desktop/report.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/us/firefox-desktop/stepDefinitions.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/us/api",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/us/api/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/us/api/reports",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/us/api/reports/result.txt",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/us/api/reports/pay.postman_collection_fr+us.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/us/api/reports/pay.postman_collection_us.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/us/api/reports/choose-a-product.postman_collection_all.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/fr",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/fr/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/fr/firefox-mobile",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/fr/firefox-mobile/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/fr/firefox-mobile/report.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/fr/firefox-mobile/stepDefinitions.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/fr/firefox-desktop",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/fr/firefox-desktop/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/fr/firefox-desktop/report.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/fr/firefox-desktop/stepDefinitions.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/fr/api",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/fr/api/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/fr/api/reports",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/fr/api/reports/result.txt",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/fr/api/reports/pay.postman_collection_fr+us.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/fr/api/reports/pay.postman_collection_us.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/fr/api/reports/choose-a-product.postman_collection_all.json"
+                );
     }
 
     @Test
     public void upload_saveTheExecutionWithErrors_whenErrorsFound() throws IOException {
+        deleteARADataFolder();
+
         List<Execution> executions = executionRepository.findAll();
         List<CountryDeployment> countryDeployments = countryDeploymentRepository.findAll();
         List<Run> runs = runRepository.findAll();
@@ -1932,7 +1996,6 @@ public class ExecutionResourceIntegration {
         assertThat(runs)
                 .hasSize(2)
                 .extracting(
-                        "execution.id",
                         "country.code",
                         "type.projectId",
                         "type.code",
@@ -1952,7 +2015,6 @@ public class ExecutionResourceIntegration {
                 )
                 .containsOnly(
                         tuple(
-                                3L,
                                 "fr",
                                 1L,
                                 "api",
@@ -1971,7 +2033,6 @@ public class ExecutionResourceIntegration {
                                 true
                         ),
                         tuple(
-                                3L,
                                 "fr",
                                 1L,
                                 "firefox-desktop",
@@ -2548,6 +2609,35 @@ public class ExecutionResourceIntegration {
                                 28,
                                 String.format("org.openqa.selenium.NoSuchElementException: Cannot locate {By.cssSelector: #order-confirmation}%n\tat ara.demo.PaymentGlue.the_order_is_accepted(PaymentGlue.java:76)%n\tat ✽.Then the order is accepted(ara/demo/features/pay.feature:28)%n")
                         )
+                );
+
+        List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
+        assertThat(generatedFilesPaths)
+                .contains(
+                        "/opt/ara/data",
+                        "/opt/ara/data/executions",
+                        "/opt/ara/data/executions/the-demo-project",
+                        "/opt/ara/data/executions/the-demo-project/master",
+                        "/opt/ara/data/executions/the-demo-project/master/day",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1582099200000",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1582099200000/cycleDefinition.json",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1582099200000/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1582099200000/fr",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1582099200000/fr/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1582099200000/fr/firefox-desktop",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1582099200000/fr/firefox-desktop/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1582099200000/fr/firefox-desktop/report.json",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1582099200000/fr/firefox-desktop/stepDefinitions.json",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1582099200000/fr/api",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1582099200000/fr/api/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1582099200000/fr/api/reports",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1582099200000/fr/api/reports/result.txt",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1582099200000/fr/api/reports/pay.postman_collection_fr+us.json",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1582099200000/fr/api/reports/pay.postman_collection_us.json",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1582099200000/fr/api/reports/choose-a-product.postman_collection_all.json",
+                        "/opt/ara/data/assets",
+                        "/opt/ara/data/assets/http-logs"
                 );
     }
 }
