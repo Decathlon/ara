@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2019 by the ARA Contributors                                 *
+ * Copyright (C) 2020 by the ARA Contributors                                 *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -15,33 +15,22 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.ci.fetcher;
+package com.decathlon.ara.service;
 
 import com.decathlon.ara.ci.bean.Build;
 import com.decathlon.ara.ci.bean.CountryDeploymentExecution;
 import com.decathlon.ara.ci.bean.CycleDef;
 import com.decathlon.ara.ci.bean.ExecutionTree;
-import com.decathlon.ara.domain.enumeration.Result;
 import com.decathlon.ara.ci.util.FetchException;
 import com.decathlon.ara.ci.util.JsonParserConsumer;
 import com.decathlon.ara.domain.Run;
+import com.decathlon.ara.domain.enumeration.Result;
 import com.decathlon.ara.report.bean.Feature;
 import com.decathlon.ara.repository.ProjectRepository;
-import com.decathlon.ara.service.SettingProviderService;
-import com.decathlon.ara.service.SettingService;
-import com.decathlon.ara.service.dto.setting.SettingDTO;
 import com.decathlon.ara.service.support.Settings;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -50,6 +39,15 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
@@ -57,9 +55,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class FileSystemFetcherTest {
-
-    private static final String EXECUTIONS_FOLDER = FileSystemFetcherTest.class
+public class ExecutionZipServiceTest {
+    private static final String EXECUTIONS_FOLDER = ExecutionZipServiceTest.class
             .getResource("/executions").getPath();
 
     private static final String AN_EXECUTION_FOLDER = EXECUTIONS_FOLDER + "/intestption/master/day/1546257599999";
@@ -86,30 +83,7 @@ public class FileSystemFetcherTest {
     private JsonParserConsumer jsonParserConsumer;
 
     @InjectMocks
-    private FileSystemFetcher cut;
-
-    @Test
-    public void getCode_ShouldReturnConstantCodeBecauseItIsStoredInDatabase() {
-        assertThat(cut.getCode()).isEqualTo("filesystem");
-    }
-
-    @Test
-    public void getName_ShouldReturnUserFriendlyNameToShowInDropDownListInProjectSettings() {
-        assertThat(cut.getName()).isEqualTo("File-system indexer (from ARA server disk or mount point)");
-    }
-
-    @Test
-    public void getSettingDefinitions_ShouldReturnDefinitionsFromSettingProviderService() {
-        // GIVEN
-        List<SettingDTO> expectedSettingDefinitions = Collections.emptyList();
-        when(settingProviderService.getJobIndexingFileSystemDefinitions()).thenReturn(expectedSettingDefinitions);
-
-        // WHEN
-        final List<SettingDTO> actualSettingDefinitions = cut.getSettingDefinitions();
-
-        // THEN
-        assertThat(actualSettingDefinitions).isSameAs(expectedSettingDefinitions);
-    }
+    private ExecutionZipService cut;
 
     @Test
     public void getTree_ShouldReturnDeploymentJobAndRunJobs() throws FetchException {

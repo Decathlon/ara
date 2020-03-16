@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2019 by the ARA Contributors                                 *
+ * Copyright (C) 2020 by the ARA Contributors                                 *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -15,38 +15,18 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.ci.fetcher;
+package com.decathlon.ara.service;
 
-import com.decathlon.ara.ci.bean.Build;
-import com.decathlon.ara.ci.bean.CountryDeploymentExecution;
-import com.decathlon.ara.ci.bean.CycleDef;
-import com.decathlon.ara.ci.bean.ExecutionTree;
-import com.decathlon.ara.ci.bean.NrtExecution;
+import com.decathlon.ara.ci.bean.*;
 import com.decathlon.ara.ci.util.FetchException;
 import com.decathlon.ara.ci.util.JsonParserConsumer;
 import com.decathlon.ara.domain.Execution;
 import com.decathlon.ara.domain.Run;
 import com.decathlon.ara.report.bean.Feature;
-import com.decathlon.ara.repository.ProjectRepository;
-import com.decathlon.ara.service.SettingProviderService;
-import com.decathlon.ara.service.SettingService;
-import com.decathlon.ara.service.dto.setting.SettingDTO;
 import com.decathlon.ara.service.support.Settings;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
@@ -54,24 +34,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 @Service
 @Transactional
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class FileSystemFetcher implements Fetcher {
-
-    public static final String FILESYSTEM = "filesystem";
+public class ExecutionZipService {
 
     static final String DIRECTORY_HINT =
             " (it may not exist, have wrong permissions, be a file, or triggered I/O error (likely if an NFS folder))";
 
     @NonNull
-    protected final ProjectRepository projectRepository;
-
-    @NonNull
-    protected final SettingService settingService;
-
-    @NonNull
-    private final SettingProviderService settingProviderService;
+    private final SettingService settingService;
 
     @NonNull
     private final JsonFactory jsonFactory;
@@ -87,22 +68,6 @@ public class FileSystemFetcher implements Fetcher {
         throw new FetchException(e, path);
     }
 
-    @Override
-    public String getCode() {
-        return FILESYSTEM;
-    }
-
-    @Override
-    public String getName() {
-        return "File-system indexer (from ARA server disk or mount point)";
-    }
-
-    @Override
-    public List<SettingDTO> getSettingDefinitions() {
-        return settingProviderService.getJobIndexingFileSystemDefinitions();
-    }
-
-    @Override
     public ExecutionTree getTree(long projectId, Build build) throws FetchException {
         String localExecutionFolder = build.getLink();
 
@@ -143,7 +108,6 @@ public class FileSystemFetcher implements Fetcher {
         return new ExecutionTree().withDeployedCountries(deployedCountries).withNonRegressionTests(nonRegressionTests);
     }
 
-    @Override
     public Optional<CycleDef> getCycleDefinition(long projectId, Build build) throws FetchException {
         String path = build.getLink() +
                 settingService.get(projectId, Settings.EXECUTION_INDEXER_FILE_CYCLE_DEFINITION_PATH);
@@ -154,7 +118,6 @@ public class FileSystemFetcher implements Fetcher {
         }
     }
 
-    @Override
     public void completeBuildInformation(long projectId, Build build) throws FetchException {
         String path = build.getLink() + settingService.get(projectId, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH);
         try (InputStream input = new FileInputStream(path)) {
@@ -175,7 +138,6 @@ public class FileSystemFetcher implements Fetcher {
         }
     }
 
-    @Override
     public Optional<List<Feature>> getCucumberReport(long projectId, Run run) throws FetchException {
         String path = run.getJobLink() +
                 settingService.get(projectId, Settings.EXECUTION_INDEXER_FILE_CUCUMBER_REPORT_PATH);
@@ -187,7 +149,6 @@ public class FileSystemFetcher implements Fetcher {
         }
     }
 
-    @Override
     public Optional<List<String>> getCucumberStepDefinitions(long projectId, Run run) throws FetchException {
         String path = run.getJobLink() +
                 settingService.get(projectId, Settings.EXECUTION_INDEXER_FILE_CUCUMBER_STEP_DEFINITIONS_PATH);
@@ -199,7 +160,6 @@ public class FileSystemFetcher implements Fetcher {
         }
     }
 
-    @Override
     public List<String> getNewmanReportPaths(long projectId, Run run) throws FetchException {
         final Path reportsFolderPath = new File(run.getJobLink() +
                 settingService.get(projectId, Settings.EXECUTION_INDEXER_FILE_NEWMAN_REPORTS_PATH)).toPath();
@@ -214,7 +174,6 @@ public class FileSystemFetcher implements Fetcher {
         }
     }
 
-    @Override
     public void streamNewmanResult(long projectId, Run run, String newmanReportPath, JsonParserConsumer consumer)
             throws FetchException {
         final Path reportsFolderPath = new File(run.getJobLink() +
@@ -234,7 +193,6 @@ public class FileSystemFetcher implements Fetcher {
      * @param execution the DONE indexed execution
      * @throws FetchException if the directory cannot be deleted
      */
-    @Override
     public void onDoneExecutionIndexingFinished(long projectId, Execution execution) throws FetchException {
         if (settingService.getBoolean(projectId, Settings.EXECUTION_INDEXER_FILE_DELETE_AFTER_INDEXING_AS_DONE)) {
             try {
@@ -244,5 +202,4 @@ public class FileSystemFetcher implements Fetcher {
             }
         }
     }
-
 }

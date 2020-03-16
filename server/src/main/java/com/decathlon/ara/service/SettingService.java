@@ -21,28 +21,23 @@ import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.common.NotGonnaHappenException;
 import com.decathlon.ara.domain.Setting;
-import com.decathlon.ara.ci.fetcher.FileSystemFetcher;
 import com.decathlon.ara.repository.SettingRepository;
 import com.decathlon.ara.service.dto.setting.SettingDTO;
 import com.decathlon.ara.service.dto.setting.SettingGroupDTO;
 import com.decathlon.ara.service.dto.setting.SettingType;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.service.support.Settings;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Service for managing Settings of a Project.
@@ -184,17 +179,6 @@ public class SettingService {
 
         // Save was successful: update cache
         getValues(projectId).put(code, newValue);
-    }
-
-    /**
-     * Returns True if (and only if) the given projectId use the Filesystem Indexer.
-     *
-     * @param projectId the id of the project check
-     * @return true if the project use the filesystem indexer, false otherwise.
-     */
-    @Transactional(readOnly = true)
-    public boolean useFileSystemIndexer(long projectId) {
-        return FileSystemFetcher.FILESYSTEM.equals(this.get(projectId, Settings.EXECUTION_INDEXER));
     }
 
     /**

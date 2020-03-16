@@ -264,25 +264,8 @@ For a new application, create a `server/src/main/resources/config/{app}` folder,
 ** `spring.datasource.password`: the database password
 ** `ara.clientBaseUrl`: the URL on which your ARA is deployed, as seen by your users
    (used to generate links in sent report emails)
-** `ara.executionSchedulingEnabled=true` to enable execution indexing (1/3)
-** `ara.executionSchedulingDelayInMilliseconds=60000` to enable execution indexing (2/3)
-** `ara.executionSchedulingInitialDelayInMilliseconds=10000` to enable execution indexing (3/3)
 
 You can run it to get a working server part, talking to the client you launched above.
-
-You will have no execution history. +
-In order to index latest non-regression-tests you need to:
-
-* Duplicate the run configuration, and name it "AraApplication with indexing", for instance
-* Add these program arguments:
-** --ara.executionSchedulingEnabled=true
-** --ara.executionSchedulingDelayInMilliseconds=60000
-** --ara.executionSchedulingInitialDelayInMilliseconds=0
-
-Stop the currently running server. +
-Launch this new server run configuration and wait until latest executions get indexed automatically. +
-This can take some time. +
-This is why we advise you to run this command only when needing to test the indexing code: you will use the first run configuration without indexing when developing and testing other codes.
 
 === Useful Commands
 
@@ -476,7 +459,6 @@ To export the production database, create this run configuration in your IDE:
     -ea
     -Dspring.profiles.active=prod
     -Dspring.config.location=classpath:/,classpath:/config/{app},classpath:/config/{app}/prod/
-    -Dara.executionSchedulingEnabled=false
 
 * BE CAREFUL: do not execute any other class with these parameters, as this could corrupt production database (this class is safe, as it's only reading from production)
 

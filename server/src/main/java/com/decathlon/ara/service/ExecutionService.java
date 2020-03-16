@@ -22,7 +22,6 @@ import com.decathlon.ara.Messages;
 import com.decathlon.ara.ci.bean.Build;
 import com.decathlon.ara.ci.bean.BuildToIndex;
 import com.decathlon.ara.ci.service.ExecutionCrawlerService;
-import com.decathlon.ara.ci.service.ExecutionDiscovererService;
 import com.decathlon.ara.domain.CycleDefinition;
 import com.decathlon.ara.domain.Execution;
 import com.decathlon.ara.domain.ExecutionCompletionRequest;
@@ -87,9 +86,6 @@ public class ExecutionService {
 
     @NonNull
     private final FunctionalityRepository functionalityRepository;
-
-    @NonNull
-    private final ExecutionDiscovererService executionDiscovererService;
 
     @NonNull
     private final ExecutionMapper executionMapper;
@@ -374,9 +370,6 @@ public class ExecutionService {
      * @throws IOException              if the zip file can't be unzipped.
      */
     public void uploadExecutionReport(long projectId, String projectCode, String branch, String cycle, MultipartFile zipFile) throws IOException {
-        if (!settingService.useFileSystemIndexer(projectId)) {
-            throw new IllegalArgumentException(Messages.IMPORT_POSTMAN_NOT_FS_INDEXER);
-        }
         String path = settingService.get(projectId, Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH)
                 .replace(Settings.PROJECT_VARIABLE, projectCode)
                 .replace(Settings.BRANCH_VARIABLE, branch)

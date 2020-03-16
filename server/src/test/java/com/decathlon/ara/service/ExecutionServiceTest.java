@@ -20,7 +20,6 @@ package com.decathlon.ara.service;
 import com.decathlon.ara.ci.bean.Build;
 import com.decathlon.ara.ci.bean.BuildToIndex;
 import com.decathlon.ara.ci.service.ExecutionCrawlerService;
-import com.decathlon.ara.ci.service.ExecutionDiscovererService;
 import com.decathlon.ara.domain.CycleDefinition;
 import com.decathlon.ara.domain.Execution;
 import com.decathlon.ara.domain.ExecutionCompletionRequest;
@@ -62,9 +61,6 @@ public class ExecutionServiceTest {
 
     @Mock
     private FunctionalityRepository functionalityRepository;
-
-    @Mock
-    private ExecutionDiscovererService executionDiscovererService;
 
     @Mock
     private ExecutionMapper executionMapper;
@@ -380,7 +376,6 @@ public class ExecutionServiceTest {
         BuildToIndex bti = new BuildToIndex(cycleDefinition, build);
         List<File> unzipMock = Collections.singletonList(executionPath);
         Mockito.doReturn(unzipMock).when(cut).unzipExecutions(Mockito.any(), Mockito.any());
-        Mockito.doReturn(true).when(settingService).useFileSystemIndexer(projectId);
         Mockito.doReturn("/opt/data/{{project}}/{{branch}}/{{cycle}}").when(settingService).get(projectId, Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH);
         Mockito.doReturn(cycleDefinition).when(cycleDefinitionRepository).findByProjectIdAndBranchAndName(projectId, branch, cycle);
         Mockito.doNothing().when(executionCrawlerService).crawl(Mockito.any());
@@ -388,20 +383,6 @@ public class ExecutionServiceTest {
         cut.uploadExecutionReport(projectId, projectCode, branch, cycle, zip);
         // Then
         Mockito.verify(executionCrawlerService).crawl(bti);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void uploadExecutionReport_should_throws_IllegalArgumentException_if_not_using_fs_indexer() throws IOException {
-        // Given
-        long projectId = 23L;
-        String projectCode = "prj";
-        String branch = "master";
-        String cycle = "day";
-        MultipartFile zip = new MockMultipartFile("zip", "test.zip", "application/zip", new byte[0]);
-        Mockito.doReturn(false).when(settingService).useFileSystemIndexer(projectId);
-        // When
-        cut.uploadExecutionReport(projectId, projectCode, branch, cycle, zip);
-        // Then
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -414,7 +395,6 @@ public class ExecutionServiceTest {
         MultipartFile zip = new MockMultipartFile("zip", "test.zip", "application/zip", new byte[0]);
         List<File> unzipMock = Collections.singletonList(new File("dont_matter"));
         Mockito.doReturn(unzipMock).when(cut).unzipExecutions(Mockito.any(), Mockito.any());
-        Mockito.doReturn(true).when(settingService).useFileSystemIndexer(projectId);
         Mockito.doReturn("/opt/data/{{project}}/{{branch}}/{{cycle}}").when(settingService).get(projectId, Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH);
         Mockito.doReturn(null).when(cycleDefinitionRepository).findByProjectIdAndBranchAndName(projectId, branch, cycle);
         // When

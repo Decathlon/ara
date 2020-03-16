@@ -18,7 +18,6 @@
 package com.decathlon.ara.service;
 
 import com.decathlon.ara.domain.Setting;
-import com.decathlon.ara.ci.fetcher.FileSystemFetcher;
 import com.decathlon.ara.repository.SettingRepository;
 import com.decathlon.ara.service.dto.setting.SettingDTO;
 import com.decathlon.ara.service.dto.setting.SettingGroupDTO;
@@ -26,14 +25,6 @@ import com.decathlon.ara.service.dto.setting.SettingOptionDTO;
 import com.decathlon.ara.service.dto.setting.SettingType;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.service.support.Settings;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -42,17 +33,12 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.*;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SettingServiceTest {
@@ -602,30 +588,6 @@ public class SettingServiceTest {
 
         // THEN
         assertThat(groups.get(0).getSettings().get(0).getValue()).isNull(); // Not stars!
-    }
-
-    @Test
-    public void useFileSystemIndexer_shouldReturnTrue_WhenProjectUseFSIndexer() {
-        // GIVEN
-        doReturn(FileSystemFetcher.FILESYSTEM).when(this.cut).get(A_PROJECT_ID, Settings.EXECUTION_INDEXER);
-
-        // WHEN
-        boolean result = this.cut.useFileSystemIndexer(A_PROJECT_ID);
-
-        // THEN
-        Assertions.assertThat(result).isTrue();
-    }
-
-    @Test
-    public void useFileSystemIndexer_shouldReturnFalse_WhenProjectDoNotUseFSIndexer() {
-        // GIVEN
-        doReturn("not-a-filesystem-indexer").when(this.cut).get(A_PROJECT_ID, Settings.EXECUTION_INDEXER);
-
-        // WHEN
-        boolean result = this.cut.useFileSystemIndexer(A_PROJECT_ID);
-
-        // THEN
-        Assertions.assertThat(result).isFalse();
     }
 
 }

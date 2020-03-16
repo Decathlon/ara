@@ -17,25 +17,12 @@
 
 package com.decathlon.ara.ci.service;
 
-import com.decathlon.ara.ci.bean.Build;
-import com.decathlon.ara.ci.bean.BuildToIndex;
-import com.decathlon.ara.ci.bean.CountryDeploymentExecution;
-import com.decathlon.ara.ci.bean.CycleDef;
-import com.decathlon.ara.ci.bean.ExecutionTree;
-import com.decathlon.ara.ci.bean.NrtExecution;
-import com.decathlon.ara.ci.bean.PlatformRule;
-import com.decathlon.ara.ci.fetcher.Fetcher;
+import com.decathlon.ara.ci.bean.*;
 import com.decathlon.ara.ci.util.FetchException;
 import com.decathlon.ara.ci.util.JsonParserConsumer;
 import com.decathlon.ara.common.NotGonnaHappenException;
-import com.decathlon.ara.domain.Country;
-import com.decathlon.ara.domain.CountryDeployment;
 import com.decathlon.ara.domain.Error;
-import com.decathlon.ara.domain.Execution;
-import com.decathlon.ara.domain.ExecutionCompletionRequest;
-import com.decathlon.ara.domain.Problem;
-import com.decathlon.ara.domain.Run;
-import com.decathlon.ara.domain.Type;
+import com.decathlon.ara.domain.*;
 import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
 import com.decathlon.ara.domain.enumeration.JobStatus;
 import com.decathlon.ara.domain.enumeration.QualityStatus;
@@ -43,32 +30,23 @@ import com.decathlon.ara.postman.model.NewmanParsingResult;
 import com.decathlon.ara.postman.service.PostmanService;
 import com.decathlon.ara.report.bean.Feature;
 import com.decathlon.ara.report.service.ExecutedScenarioExtractorService;
-import com.decathlon.ara.repository.CountryRepository;
-import com.decathlon.ara.repository.ErrorRepository;
-import com.decathlon.ara.repository.ExecutionCompletionRequestRepository;
-import com.decathlon.ara.repository.ExecutionRepository;
-import com.decathlon.ara.repository.TypeRepository;
+import com.decathlon.ara.repository.*;
 import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
+import com.decathlon.ara.service.ExecutionZipService;
 import com.decathlon.ara.service.ProblemDenormalizationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -91,7 +69,7 @@ public class ExecutionCrawlerService {
     private final TypeRepository typeRepository;
 
     @NonNull
-    private final FetcherService fetcherService;
+    private final ExecutionZipService executionZipService;
 
     @NonNull
     private final PostmanService postmanService;
@@ -119,24 +97,9 @@ public class ExecutionCrawlerService {
 
     /**
      * Index the execution of a test cycle.<br>
-     * Can come from a continuous integration build (with possibly sub-builds).<br>
-     * Compared to {@link #crawl(BuildToIndex)}, this version create a new database transaction to isolate this indexing
-     * from the rest of the current transaction (if any): a failing execution indexing does not impact the previous or
-     * next tasks.
-     *
-     * @param buildToIndex the description of the build to be indexed as an execution
-     */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void crawlInNewTransaction(BuildToIndex buildToIndex) {
-        crawl(buildToIndex);
-    }
-
-    /**
-     * Index the execution of a test cycle.<br>
      * Can come from a continuous integration build (with possibly sub-builds).
      *
      * @param buildToIndex the description of the build to be indexed as an execution
-     * @see #crawlInNewTransaction(BuildToIndex) crawlInNewTransaction to render the indexing autonomous
      */
     @Transactional
     public void crawl(BuildToIndex buildToIndex) {
@@ -221,10 +184,9 @@ public class ExecutionCrawlerService {
      */
     Execution crawlToExecution(BuildToIndex buildToIndex) throws FetchException {
         final long projectId = buildToIndex.getCycleDefinition().getProjectId();
-        final Fetcher fetcher = fetcherService.get(projectId);
 
         // Get the execution object to update in database, or create a new entity that will be persisted
-        final Execution execution = getOrCreateExecution(projectId, fetcher, buildToIndex);
+        final Execution execution = getOrCreateExecution(projectId, buildToIndex);
 
         // The job is about to be complete and it requested a completion of its indexation?
         // If yes, then delete the flag, so the job can know (as soon as we commit)
@@ -252,14 +214,14 @@ public class ExecutionCrawlerService {
             // If file not found, forget about this execution:
             // it is either too soon (will be crawled again later)
             // or it is completely wrong (the cycleDefinition.json is supposed to be archived first in the build: don't bother to index such deeply broken build)
-            Optional<CycleDef> formerCycleDefinition = fetcher.getCycleDefinition(projectId, buildToIndex.getBuild());
+            Optional<CycleDef> formerCycleDefinition = executionZipService.getCycleDefinition(projectId, buildToIndex.getBuild());
             if (!formerCycleDefinition.isPresent()) {
                 if (execution.getStatus() == JobStatus.DONE || completionRequest.isPresent()) {
                     log.info("Cycle-run's cycle-definition JSON not found in done job (cycle deeply broken): indexing it as failed");
                     // The job started, did not produce cycleDefinition.json (first thing it does, flawlessly, in theory) and then crashed
                     // Store the failed execution job, to not repeatedly crawl it every minutes for nothing
                     execution.setBlockingValidation(Boolean.FALSE); // We really do not know
-                    registerAfterCommitExecutionCleanUp(projectId, fetcher, execution);
+                    registerAfterCommitExecutionCleanUp(projectId, execution);
                     return execution;
                 }
                 log.info("Cycle-run's cycle-definition JSON not found (too soon?): not indexing it yet");
@@ -270,9 +232,9 @@ public class ExecutionCrawlerService {
         }
 
         // Download advancement of the job hierarchy of this execution and update each run and country-deployment with up to date information
-        final ExecutionTree executionTree = fetcher.getTree(projectId, buildToIndex.getBuild());
+        final ExecutionTree executionTree = executionZipService.getTree(projectId, buildToIndex.getBuild());
         updateExecutionHierarchyJobUrls(execution, executionTree);
-        crawlNewAvailableRuns(projectId, fetcher, execution.getRuns());
+        crawlNewAvailableRuns(projectId, execution.getRuns());
         updateExecutionHierarchyStatuses(execution, executionTree);
 
         // Mark still-active children as UNAVAILABLE or DONE if this execution is DONE
@@ -281,15 +243,15 @@ public class ExecutionCrawlerService {
         // Update the quality level and scenario-counts (INCOMPLETE at first, it will come to FAILED, WARNING or PASSED once all runs mandatory for the quality computation are done)
         qualityService.computeQuality(execution);
 
-        registerAfterCommitExecutionCleanUp(projectId, fetcher, execution);
+        registerAfterCommitExecutionCleanUp(projectId, execution);
 
         return execution;
     }
 
-    private void registerAfterCommitExecutionCleanUp(long projectId, Fetcher fetcher, Execution execution) {
+    private void registerAfterCommitExecutionCleanUp(long projectId, Execution execution) {
         transactionAppenderUtil.doAfterCommit(() -> {
             try {
-                fetcher.onDoneExecutionIndexingFinished(projectId, execution);
+                executionZipService.onDoneExecutionIndexingFinished(projectId, execution);
             } catch (FetchException e) {
                 log.error("Error while cleaning up execution URL {} and link {}",
                         execution.getJobUrl(), execution.getJobLink(), e);
@@ -302,11 +264,10 @@ public class ExecutionCrawlerService {
      * report.json Cucumber results file, and index it if present.
      *
      * @param projectId the ID of the project in which to work
-     * @param fetcher   the fetcher to use to download execution progress for the target project of the runs
      * @param runs      the runs for which to index their report.json (executed-scenarios will be added to them, if any), if
      *                  they became or are still eligible
      */
-    void crawlNewAvailableRuns(long projectId, Fetcher fetcher, Collection<Run> runs) {
+    void crawlNewAvailableRuns(long projectId, Collection<Run> runs) {
         for (Run run : runs) {
             if (run.getExecutedScenarios().isEmpty() &&
                     run.getStatus() != JobStatus.DONE &&
@@ -314,10 +275,10 @@ public class ExecutionCrawlerService {
                     run.getType().getSource() != null) {
                 switch (run.getType().getSource().getTechnology()) {
                     case CUCUMBER:
-                        crawlCucumberRun(projectId, fetcher, run);
+                        crawlCucumberRun(projectId, run);
                         break;
                     case POSTMAN:
-                        crawlPostmanRun(projectId, fetcher, run);
+                        crawlPostmanRun(projectId, run);
                         break;
                     default:
                         throw new NotGonnaHappenException(
@@ -327,10 +288,10 @@ public class ExecutionCrawlerService {
         }
     }
 
-    private void crawlPostmanRun(long projectId, Fetcher fetcher, Run run) {
+    private void crawlPostmanRun(long projectId, Run run) {
         List<String> newmanReportPaths;
         try {
-            newmanReportPaths = fetcher.getNewmanReportPaths(projectId, run);
+            newmanReportPaths = executionZipService.getNewmanReportPaths(projectId, run);
         } catch (FetchException e) {
             log.info("Cannot download artifact list of {}", run.getJobUrl(), e);
             return;
@@ -353,7 +314,7 @@ public class ExecutionCrawlerService {
                 }
 
                 try {
-                    indexPostmanReport(projectId, fetcher, run, newmanReportPath, requestPosition);
+                    indexPostmanReport(projectId, run, newmanReportPath, requestPosition);
                 } catch (FetchException e) {
                     log.error("There has been an error while indexing {} for run ", newmanReportPath, run.getJobUrl(), e);
                     // TODO Cannot index all collection runs: make the run quality status as INCOMPLETE
@@ -362,12 +323,12 @@ public class ExecutionCrawlerService {
         }
     }
 
-    private void indexPostmanReport(long projectId, Fetcher fetcher, Run run, String newmanReportPath, AtomicInteger requestPosition)
+    private void indexPostmanReport(long projectId, Run run, String newmanReportPath, AtomicInteger requestPosition)
             throws FetchException {
         final NewmanParsingResult newmanParsingResult = new NewmanParsingResult();
         try {
             JsonParserConsumer consumer = jsonParser -> postmanService.parse(jsonParser, newmanParsingResult);
-            fetcher.streamNewmanResult(projectId, run, newmanReportPath, consumer);
+            executionZipService.streamNewmanResult(projectId, run, newmanReportPath, consumer);
             run.addExecutedScenarios(
                     postmanService.postProcess(run, newmanParsingResult, newmanReportPath, requestPosition));
         } finally {
@@ -383,13 +344,12 @@ public class ExecutionCrawlerService {
      * index (the job crashed deeply).
      *
      * @param projectId the ID of the project in which to work
-     * @param fetcher   the fetcher to use to download execution result for the target project of the run
      * @param run       the run for which to index its report.json (executed-scenarios will be added to it, if any)
      */
-    void crawlCucumberRun(long projectId, Fetcher fetcher, Run run) {
+    void crawlCucumberRun(long projectId, Run run) {
         Optional<List<Feature>> features;
         try {
-            features = fetcher.getCucumberReport(projectId, run);
+            features = executionZipService.getCucumberReport(projectId, run);
             if (!features.isPresent()) {
                 // Do not pollute logs every minute while the currently running NRT job does not produce report.json yet
                 return;
@@ -401,7 +361,7 @@ public class ExecutionCrawlerService {
 
         Optional<List<String>> stepDefinitions;
         try {
-            stepDefinitions = fetcher.getCucumberStepDefinitions(projectId, run);
+            stepDefinitions = executionZipService.getCucumberStepDefinitions(projectId, run);
             if (!stepDefinitions.isPresent()) {
                 log.info("Found no stepDefinitions.json in {} (no problem: faking them instead)", run.getJobUrl());
             }
@@ -630,12 +590,11 @@ public class ExecutionCrawlerService {
 
     /**
      * @param projectId    the ID of the project in which to work
-     * @param fetcher      the fetcher to use to download execution progress for the target project of the execution
      * @param buildToIndex the build to index (branch name, cycle name & job URL)
      * @return the Execution for this job URL, either from existing entity in database (to update it), or created (to insert it)
      */
-    Execution getOrCreateExecution(long projectId, Fetcher fetcher, BuildToIndex buildToIndex) throws FetchException {
-        fetcher.completeBuildInformation(projectId, buildToIndex.getBuild());
+    Execution getOrCreateExecution(long projectId, BuildToIndex buildToIndex) throws FetchException {
+        executionZipService.completeBuildInformation(projectId, buildToIndex.getBuild());
         Execution execution = executionRepository.findByProjectIdAndJobUrlOrJobLink(
                 buildToIndex.getCycleDefinition().getProjectId(),
                 buildToIndex.getBuild().getUrl(),

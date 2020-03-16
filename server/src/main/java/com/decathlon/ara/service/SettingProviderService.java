@@ -17,9 +17,6 @@
 
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.ci.fetcher.Fetcher;
-import com.decathlon.ara.ci.fetcher.FileSystemFetcher;
-import com.decathlon.ara.ci.service.FetcherService;
 import com.decathlon.ara.defect.DefectAdapter;
 import com.decathlon.ara.service.dto.setting.SettingDTO;
 import com.decathlon.ara.service.dto.setting.SettingGroupDTO;
@@ -57,9 +54,6 @@ public class SettingProviderService {
     private static final Object DEFAULT_EXECUTIONS_FOLDER_LOCK = new Object();
 
     @NonNull
-    private final FetcherService fetcherService;
-
-    @NonNull
     private final DefectService defectService;
 
     private String defaultExecutionsFolderCache;
@@ -76,41 +70,15 @@ public class SettingProviderService {
      */
     List<SettingGroupDTO> getDefinitions(long projectId, Map<String, String> projectValues) {
         List<SettingGroupDTO> groups = new ArrayList<>();
-        groups.add(getJobIndexingDefinitions(projectValues));
+        groups.add(getJobIndexingDefinitions());
         groups.add(getEmailReportsDefinitions());
         groups.add(getDefectDefinitions(projectId, projectValues));
         return groups;
     }
 
-    private SettingGroupDTO getJobIndexingDefinitions(Map<String, String> projectValues) {
+    private SettingGroupDTO getJobIndexingDefinitions() {
         SettingGroupDTO group = new SettingGroupDTO("Execution Indexing", new ArrayList<>());
-
-        final List<Fetcher> fetchers = fetcherService.getFetchers();
-
-        final String defaultExecutionIndexer = FileSystemFetcher.FILESYSTEM;
-        group.getSettings().add(new SettingDTO()
-                .withCode(Settings.EXECUTION_INDEXER)
-                .withName("Indexer")
-                .withType(SettingType.SELECT)
-                .withOptions(fetchers.stream()
-                        .map(f -> new SettingOptionDTO(f.getCode(), f.getName()))
-                        .collect(Collectors.toList()))
-                .withRequired(true)
-                .withDefaultValue(defaultExecutionIndexer)
-                .withHelp("" +
-                        "Define the crawler to use to index new test executions as they become available " +
-                        "on the continuous integration server."));
-
-        String configuredExecutionIndexer = projectValues.get(Settings.EXECUTION_INDEXER);
-        String currentExecutionIndexer = (StringUtils.isEmpty(configuredExecutionIndexer) ?
-                defaultExecutionIndexer :
-                configuredExecutionIndexer);
-        group.getSettings().addAll(
-                fetchers.stream()
-                        .filter(f -> currentExecutionIndexer.equals(f.getCode()))
-                        .flatMap(f -> f.getSettingDefinitions().stream())
-                        .collect(Collectors.toList()));
-
+        group.getSettings().addAll(getJobIndexingFileSystemDefinitions());
         return group;
     }
 
@@ -238,124 +206,6 @@ public class SettingProviderService {
                     userDirectory, defaultDirectory, e);
             return userDirectory;
         }
-    }
-
-    public List<SettingDTO> getJobIndexingHttpDefinitions() {
-        List<SettingDTO> settings = new ArrayList<>();
-
-        settings.add(new SettingDTO()
-                .withCode(Settings.EXECUTION_INDEXER_HTTP_USER)
-                .withName("User")
-                .withType(SettingType.STRING)
-                .withHelp("" +
-                        "The user name to log in to the HTTP service used to crawl new execution results " +
-                        "(may be a continuous integration server like Jenkins or a handmade API to adapt your " +
-                        "continuous integration workflow to ARA)."));
-
-        settings.add(new SettingDTO()
-                .withCode(Settings.EXECUTION_INDEXER_HTTP_PASSWORD)
-                .withName("Password")
-                .withType(SettingType.PASSWORD)
-                .withHelp("" +
-                        "The password or API token to log in to the HTTP service used to crawl new execution results " +
-                        "(basic HTTP authentication). If no username nor password are provided, authentication is" +
-                        "disabled and requests are done anonymously."));
-
-        settings.add(new SettingDTO()
-                .withCode(Settings.EXECUTION_INDEXER_HTTP_EXECUTION_BASE_URL)
-                .withName("Execution base URL")
-                .withType(SettingType.STRING)
-                .withRequired(true)
-                .withHelp("" +
-                        "The root URL and path of all jobs for a given branch and cycle. " +
-                        "Optional variables you can use in this configuration: " +
-                        Settings.BRANCH_VARIABLE + " is the name of the branch for the given execution, " +
-                        Settings.CYCLE_VARIABLE + " is the name of the given execution. " +
-                        EG_QUOTE + "http://ci.company.com/nrt/" + Settings.BRANCH_VARIABLE + "/" + Settings.CYCLE_VARIABLE +
-                        "\" (by HTTP requests to continuous integration server)."));
-
-        final String defaultCycleDefinitionPath = "/artifact/cycleDefinition.json";
-        settings.add(new SettingDTO()
-                .withCode(Settings.EXECUTION_INDEXER_HTTP_CYCLE_DEFINITION_PATH)
-                .withName("Cycle definition path")
-                .withType(SettingType.STRING)
-                .withRequired(true)
-                .withDefaultValue(defaultCycleDefinitionPath)
-                .withHelp("" +
-                        "Cycle definition are extracted from this path. " +
-                        EG_QUOTE + defaultCycleDefinitionPath + "\", appended to the run's job URL."));
-
-        final String defaultBuildInformationPath = "/artifact/buildInformation.json";
-        settings.add(new SettingDTO()
-                .withCode(Settings.EXECUTION_INDEXER_HTTP_BUILD_INFORMATION_PATH)
-                .withName("Build information path")
-                .withType(SettingType.STRING)
-                .withRequired(true)
-                .withDefaultValue(defaultBuildInformationPath)
-                .withHelp("" +
-                        "Build information are extracted from this path. " +
-                        EG_QUOTE + defaultBuildInformationPath + "\", appended to the run's jobUrl. " +
-                        "It is used to download the comment of each NRT run job."));
-
-        final String defaultCucumberReportPath = "/artifact/report.json";
-        settings.add(new SettingDTO()
-                .withCode(Settings.EXECUTION_INDEXER_HTTP_CUCUMBER_REPORT_PATH)
-                .withName("Cucumber report path")
-                .withType(SettingType.STRING)
-                .withRequired(true)
-                .withDefaultValue(defaultCucumberReportPath)
-                .withHelp("" +
-                        "Cucumber reports are extracted from this path. " +
-                        EG_QUOTE + defaultCucumberReportPath + "\", appended to the run's job URL."));
-
-        settings.add(new SettingDTO()
-                .withCode(Settings.EXECUTION_INDEXER_HTTP_CUCUMBER_STEP_DEFINITIONS_PATH)
-                .withName("Cucumber step definitions path")
-                .withType(SettingType.STRING)
-                .withHelp("" +
-                        "Cucumber step definitions are extracted from this path. " +
-                        EG_QUOTE + "/artifact/stepDefinitions.json\", appended to the run's job URL. " +
-                        "If not provided, the cycle-definitions will not be downloaded."));
-
-        final String defaultNewmanReportsPath = "/artifact";
-        settings.add(new SettingDTO()
-                .withCode(Settings.EXECUTION_INDEXER_HTTP_NEWMAN_REPORTS_PATH)
-                .withName("Newman reports path")
-                .withType(SettingType.STRING)
-                .withRequired(true)
-                .withDefaultValue(defaultNewmanReportsPath)
-                .withHelp("" +
-                        "Newman reports are extracted from this path. " +
-                        EG_QUOTE + defaultNewmanReportsPath + "\", appended to the run's jobUrl."));
-
-        final String defaultNewmanStartingFolderToRemove = "reports/json/";
-        settings.add(new SettingDTO()
-                .withCode(Settings.EXECUTION_INDEXER_HTTP_NEWMAN_STARTING_FOLDER_TO_REMOVE)
-                .withName("Newman starting folder to remove")
-                .withType(SettingType.STRING)
-                .withRequired(true)
-                .withDefaultValue(defaultNewmanStartingFolderToRemove)
-                .withHelp("" +
-                        "While receiving all paths of files produced by the Newman job, remove the starting " +
-                        "folder path in order to get only report paths that match the original collection paths. " +
-                        EG_QUOTE + defaultNewmanStartingFolderToRemove + "\", if the job exports Newman reports in " +
-                        "\"reports/json/folder/collection.json\" and collections are named like " +
-                        "\"folder/collection.json\": this will allow to generate accurate \"Edit scenario\" links by " +
-                        "reconstructing original collection URLs based on their report URLs."));
-
-        final String defaultNewmanStartingFolderToPrepend = "artifact/reports/json/";
-        settings.add(new SettingDTO()
-                .withCode(Settings.EXECUTION_INDEXER_HTTP_NEWMAN_STARTING_FOLDER_TO_PREPEND)
-                .withName("Newman starting folder to prepend")
-                .withType(SettingType.STRING)
-                .withRequired(true)
-                .withDefaultValue(defaultNewmanStartingFolderToPrepend)
-                .withHelp("" +
-                        "The URL path to prepend to the Newman report file path in order to download that report " +
-                        EG_QUOTE + defaultNewmanStartingFolderToPrepend + "\", " +
-                        "prepended by the job URL and appended by the report file path."));
-
-        return settings;
     }
 
     private SettingGroupDTO getEmailReportsDefinitions() {

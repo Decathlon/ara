@@ -48,8 +48,6 @@ public class Settings {
     public static final String DEFECT_GITHUB_REPONAME = "defect.github.repositoryName";
     public static final String DEFECT_GITHUB_TOKEN = "defect.github.authorizationToken";
 
-    public static final String EXECUTION_INDEXER = "execution.indexer";
-
     public static final String EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH = "execution.indexer.file.executionBasePath";
     public static final String EXECUTION_INDEXER_FILE_CYCLE_DEFINITION_PATH = "execution.indexer.file.cycleDefinitionPath";
     public static final String EXECUTION_INDEXER_FILE_CUCUMBER_REPORT_PATH = "execution.indexer.file.cucumberReportPath";

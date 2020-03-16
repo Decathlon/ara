@@ -17,49 +17,19 @@
 
 package com.decathlon.ara.ci.service;
 
-import com.decathlon.ara.ci.bean.Build;
-import com.decathlon.ara.ci.bean.BuildToIndex;
-import com.decathlon.ara.ci.bean.CountryDeploymentExecution;
-import com.decathlon.ara.ci.bean.CycleDef;
-import com.decathlon.ara.ci.bean.ExecutionTree;
-import com.decathlon.ara.ci.bean.NrtExecution;
-import com.decathlon.ara.ci.bean.PlatformRule;
-import com.decathlon.ara.domain.enumeration.Result;
-import com.decathlon.ara.ci.fetcher.Fetcher;
+import com.decathlon.ara.ci.bean.*;
 import com.decathlon.ara.ci.util.FetchException;
-import com.decathlon.ara.domain.Country;
-import com.decathlon.ara.domain.CountryDeployment;
-import com.decathlon.ara.domain.CycleDefinition;
 import com.decathlon.ara.domain.Error;
-import com.decathlon.ara.domain.ExecutedScenario;
-import com.decathlon.ara.domain.Execution;
-import com.decathlon.ara.domain.ExecutionCompletionRequest;
-import com.decathlon.ara.domain.Run;
-import com.decathlon.ara.domain.Source;
-import com.decathlon.ara.domain.Type;
-import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
-import com.decathlon.ara.domain.enumeration.JobStatus;
-import com.decathlon.ara.domain.enumeration.QualityStatus;
-import com.decathlon.ara.domain.enumeration.Technology;
+import com.decathlon.ara.domain.*;
+import com.decathlon.ara.domain.enumeration.*;
 import com.decathlon.ara.postman.service.PostmanService;
 import com.decathlon.ara.report.bean.Feature;
 import com.decathlon.ara.report.service.ExecutedScenarioExtractorService;
-import com.decathlon.ara.repository.CountryRepository;
-import com.decathlon.ara.repository.ErrorRepository;
-import com.decathlon.ara.repository.ExecutionCompletionRequestRepository;
-import com.decathlon.ara.repository.ExecutionRepository;
-import com.decathlon.ara.repository.TypeRepository;
+import com.decathlon.ara.repository.*;
 import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
+import com.decathlon.ara.service.ExecutionZipService;
 import com.decathlon.ara.service.ProblemDenormalizationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -68,20 +38,13 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.web.client.RestClientException;
 
-import static com.decathlon.ara.util.TestUtil.get;
-import static com.decathlon.ara.util.TestUtil.longs;
-import static com.decathlon.ara.util.TestUtil.timestamp;
+import java.util.*;
+
+import static com.decathlon.ara.util.TestUtil.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.only;
-import static org.mockito.Mockito.same;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ExecutionCrawlerServiceTest {
@@ -97,12 +60,6 @@ public class ExecutionCrawlerServiceTest {
 
     @Mock
     private TypeRepository typeRepository;
-
-    @Mock
-    private FetcherService fetcherService;
-
-    @Mock
-    private Fetcher fetcher;
 
     @Mock
     private PostmanService postmanService;
@@ -127,6 +84,9 @@ public class ExecutionCrawlerServiceTest {
 
     @Mock
     private TransactionAppenderUtil transactionService;
+
+    @Mock
+    private ExecutionZipService executionZipService;
 
     @Spy
     @InjectMocks
@@ -169,7 +129,6 @@ public class ExecutionCrawlerServiceTest {
     public void crawlToExecution_on_DONE_execution_should_return_null() throws FetchException {
         // GIVEN
         long projectId = 10;
-        when(fetcherService.get(projectId)).thenReturn(fetcher);
         BuildToIndex buildToIndex = new BuildToIndex()
                 .withCycleDefinition(new CycleDefinition().withProjectId(projectId))
                 .withBuild(new Build().withUrl("url"));
@@ -187,7 +146,6 @@ public class ExecutionCrawlerServiceTest {
     public void crawlToExecution_on_new_DONE_execution_with_no_cycleDef_should_return_DONE_INCOMPLETE_execution() throws FetchException {
         // GIVEN
         long projectId = 10;
-        when(fetcherService.get(projectId)).thenReturn(fetcher);
         final Build build = new Build()
                 .withUrl("url")
                 .withResult(Result.SUCCESS);
@@ -196,7 +154,7 @@ public class ExecutionCrawlerServiceTest {
                 .withBuild(build);
         when(executionRepository.findByProjectIdAndJobUrlOrJobLink(projectId, "url", null))
                 .thenReturn(null);
-        when(fetcher.getCycleDefinition(projectId, build))
+        when(executionZipService.getCycleDefinition(projectId, build))
                 .thenReturn(Optional.empty());
 
         // WHEN
@@ -213,14 +171,13 @@ public class ExecutionCrawlerServiceTest {
             throws FetchException {
         // GIVEN
         long projectId = 10;
-        when(fetcherService.get(projectId)).thenReturn(fetcher);
         final Build build = new Build().withUrl("url").withResult(Result.SUCCESS);
         BuildToIndex buildToIndex = new BuildToIndex()
                 .withCycleDefinition(new CycleDefinition().withProjectId(projectId))
                 .withBuild(build);
         when(executionRepository.findByProjectIdAndJobUrlOrJobLink(projectId, "url", null))
                 .thenReturn(null);
-        when(fetcher.getCycleDefinition(projectId, build))
+        when(executionZipService.getCycleDefinition(projectId, build))
                 .thenThrow(new FetchException(new RestClientException(""), ""));
 
         // WHEN
@@ -232,7 +189,6 @@ public class ExecutionCrawlerServiceTest {
             throws FetchException {
         // GIVEN
         long projectId = 10;
-        when(fetcherService.get(projectId)).thenReturn(fetcher);
         final Build build = new Build()
                 .withUrl("url")
                 .withResult(Result.SUCCESS)
@@ -243,7 +199,7 @@ public class ExecutionCrawlerServiceTest {
                 .withBuild(build);
         when(executionRepository.findByProjectIdAndJobUrlOrJobLink(projectId, "url", null))
                 .thenReturn(null);
-        when(fetcher.getCycleDefinition(projectId, build))
+        when(executionZipService.getCycleDefinition(projectId, build))
                 .thenReturn(Optional.of(new CycleDef()
                         .withPlatformsRules(new HashMap<>())));
 
@@ -262,7 +218,6 @@ public class ExecutionCrawlerServiceTest {
             throws FetchException {
         // GIVEN
         long projectId = 10;
-        when(fetcherService.get(projectId)).thenReturn(fetcher);
         Map<String, List<PlatformRule>> countryRules = new HashMap<>();
         countryRules.put("any-platform",
                 Arrays.asList(
@@ -278,10 +233,10 @@ public class ExecutionCrawlerServiceTest {
                 .withBuild(build);
         when(executionRepository.findByProjectIdAndJobUrlOrJobLink(projectId, "url", null))
                 .thenReturn(null);
-        when(fetcher.getCycleDefinition(projectId, build))
+        when(executionZipService.getCycleDefinition(projectId, build))
                 .thenReturn(Optional.of(new CycleDef()
                         .withPlatformsRules(countryRules)));
-        when(fetcher.getTree(projectId, build)).thenReturn(
+        when(executionZipService.getTree(projectId, build)).thenReturn(
                 new ExecutionTree()
                         .withDeployedCountries(Collections.singletonList(
                                 new CountryDeploymentExecution()
@@ -313,7 +268,6 @@ public class ExecutionCrawlerServiceTest {
             throws FetchException {
         // GIVEN
         long projectId = 10;
-        when(fetcherService.get(projectId)).thenReturn(fetcher);
         final Build build = new Build()
                 .withUrl("url")
                 .withLink("link")
@@ -333,7 +287,7 @@ public class ExecutionCrawlerServiceTest {
                                 new CountryDeployment().withCountry(new Country().withCode("be"))))
                         .withRuns(Collections.singleton(
                                 run)));
-        when(fetcher.getTree(projectId, build)).thenReturn(
+        when(executionZipService.getTree(projectId, build)).thenReturn(
                 new ExecutionTree()
                         .withDeployedCountries(Collections.singletonList(
                                 new CountryDeploymentExecution()
@@ -344,7 +298,7 @@ public class ExecutionCrawlerServiceTest {
                                         .withCountry("be")
                                         .withType("firefox")
                                         .withBuild(new Build().withUrl("run-url")))));
-        when(fetcher.getCucumberReport(projectId, run)).thenReturn(Optional.empty());
+        when(executionZipService.getCucumberReport(projectId, run)).thenReturn(Optional.empty());
 
         // WHEN
         final Execution execution = cut.crawlToExecution(buildToIndex);
@@ -358,12 +312,11 @@ public class ExecutionCrawlerServiceTest {
     public void crawlToExecution_should_delete_completion_request_if_present() throws FetchException {
         // GIVEN
         long projectId = 42;
-        when(fetcherService.get(projectId)).thenReturn(fetcher);
         BuildToIndex buildToIndex = new BuildToIndex()
                 .withCycleDefinition(new CycleDefinition().withProjectId(projectId))
                 .withBuild(new Build().withUrl("url"));
         Execution execution = new Execution().withStatus(JobStatus.DONE);
-        doReturn(execution).when(cut).getOrCreateExecution(projectId, fetcher, buildToIndex);
+        doReturn(execution).when(cut).getOrCreateExecution(projectId, buildToIndex);
 
         ExecutionCompletionRequest completionRequest = new ExecutionCompletionRequest();
         when(executionCompletionRequestRepository.findById(eq("url"))).thenReturn(Optional.of(completionRequest));
@@ -379,12 +332,11 @@ public class ExecutionCrawlerServiceTest {
     public void crawlToExecution_should_not_delete_any_completion_request_if_absent() throws FetchException {
         // GIVEN
         long projectId = 42;
-        when(fetcherService.get(projectId)).thenReturn(fetcher);
         BuildToIndex buildToIndex = new BuildToIndex()
                 .withCycleDefinition(new CycleDefinition().withProjectId(projectId))
                 .withBuild(new Build().withUrl("url"));
         Execution execution = new Execution().withStatus(JobStatus.DONE);
-        doReturn(execution).when(cut).getOrCreateExecution(projectId, fetcher, buildToIndex);
+        doReturn(execution).when(cut).getOrCreateExecution(projectId, buildToIndex);
 
         when(executionCompletionRequestRepository.findById("url")).thenReturn(Optional.empty());
 
@@ -399,12 +351,11 @@ public class ExecutionCrawlerServiceTest {
     public void crawlToExecution_should_return_incomplete_running_execution_if_completion_request_is_present() throws FetchException {
         // GIVEN
         long projectId = 10;
-        when(fetcherService.get(projectId)).thenReturn(fetcher);
         final Build build = new Build().withUrl("url");
         BuildToIndex buildToIndex = new BuildToIndex()
                 .withCycleDefinition(new CycleDefinition().withProjectId(projectId))
                 .withBuild(build);
-        when(fetcher.getCycleDefinition(projectId, build))
+        when(executionZipService.getCycleDefinition(projectId, build))
                 .thenReturn(Optional.empty());
         ExecutionCompletionRequest completionRequest = new ExecutionCompletionRequest();
         when(executionCompletionRequestRepository.findById(eq("url")))
@@ -427,10 +378,10 @@ public class ExecutionCrawlerServiceTest {
                 new Run().withExecutedScenarios(Collections.singleton(new ExecutedScenario())));
 
         // WHEN
-        cut.crawlNewAvailableRuns(projectId, null, runs);
+        cut.crawlNewAvailableRuns(projectId, runs);
 
         // THEN
-        verify(fetcher, never()).getCucumberReport(eq(projectId), any());
+        verify(executionZipService, never()).getCucumberReport(eq(projectId), any());
     }
 
     @Test
@@ -441,10 +392,10 @@ public class ExecutionCrawlerServiceTest {
                 new Run().withStatus(JobStatus.DONE));
 
         // WHEN
-        cut.crawlNewAvailableRuns(projectId, null, runs);
+        cut.crawlNewAvailableRuns(projectId, runs);
 
         // THEN
-        verify(fetcher, never()).getCucumberReport(eq(projectId), any());
+        verify(executionZipService, never()).getCucumberReport(eq(projectId), any());
     }
 
     @Test
@@ -455,10 +406,10 @@ public class ExecutionCrawlerServiceTest {
                 new Run());
 
         // WHEN
-        cut.crawlNewAvailableRuns(projectId, null, runs);
+        cut.crawlNewAvailableRuns(projectId, runs);
 
         // THEN
-        verify(fetcher, never()).getCucumberReport(eq(projectId), any());
+        verify(executionZipService, never()).getCucumberReport(eq(projectId), any());
     }
 
     @Test
@@ -469,10 +420,10 @@ public class ExecutionCrawlerServiceTest {
                 new Run().withJobUrl(""));
 
         // WHEN
-        cut.crawlNewAvailableRuns(projectId, null, runs);
+        cut.crawlNewAvailableRuns(projectId, runs);
 
         // THEN
-        verify(fetcher, never()).getCucumberReport(eq(projectId), any());
+        verify(executionZipService, never()).getCucumberReport(eq(projectId), any());
     }
 
     @Test
@@ -483,13 +434,13 @@ public class ExecutionCrawlerServiceTest {
                 .withJobUrl("url")
                 .withType(new Type().withSource(new Source().withTechnology(Technology.CUCUMBER)));
         List<Run> runs = Collections.singletonList(run);
-        when(fetcher.getCucumberReport(projectId, run)).thenReturn(Optional.empty());
+        when(executionZipService.getCucumberReport(projectId, run)).thenReturn(Optional.empty());
 
         // WHEN
-        cut.crawlNewAvailableRuns(projectId, fetcher, runs);
+        cut.crawlNewAvailableRuns(projectId, runs);
 
         // THEN
-        verify(fetcher, only()).getCucumberReport(projectId, run);
+        verify(executionZipService, only()).getCucumberReport(projectId, run);
     }
 
     @Test
@@ -497,10 +448,10 @@ public class ExecutionCrawlerServiceTest {
         // GIVEN
         long projectId = 1;
         Run run = new Run().withJobUrl("url");
-        when(fetcher.getCucumberReport(projectId, run)).thenReturn(Optional.empty());
+        when(executionZipService.getCucumberReport(projectId, run)).thenReturn(Optional.empty());
 
         // WHEN
-        cut.crawlCucumberRun(projectId, fetcher, run);
+        cut.crawlCucumberRun(projectId, run);
 
         // THEN
         verify(executedScenarioExtractorService, never()).extractExecutedScenarios(any(), any(), any());
@@ -511,11 +462,11 @@ public class ExecutionCrawlerServiceTest {
         // GIVEN
         long projectId = 1;
         Run run = new Run().withJobUrl("url");
-        when(fetcher.getCucumberReport(projectId, run))
+        when(executionZipService.getCucumberReport(projectId, run))
                 .thenThrow(new FetchException(new RestClientException(""), ""));
 
         // WHEN
-        cut.crawlCucumberRun(projectId, fetcher, run);
+        cut.crawlCucumberRun(projectId, run);
 
         // THEN
         verify(executedScenarioExtractorService, never()).extractExecutedScenarios(any(), any(), any());
@@ -527,13 +478,13 @@ public class ExecutionCrawlerServiceTest {
         long projectId = 1;
         Run run = new Run().withJobUrl("url");
         final List<Feature> features = Collections.emptyList();
-        when(fetcher.getCucumberReport(projectId, run))
+        when(executionZipService.getCucumberReport(projectId, run))
                 .thenReturn(Optional.of(features));
-        when(fetcher.getCucumberStepDefinitions(projectId, run))
+        when(executionZipService.getCucumberStepDefinitions(projectId, run))
                 .thenReturn(Optional.empty());
 
         // WHEN
-        cut.crawlCucumberRun(projectId, fetcher, run);
+        cut.crawlCucumberRun(projectId, run);
 
         // THEN
         verify(executedScenarioExtractorService, only()).extractExecutedScenarios(
@@ -549,13 +500,13 @@ public class ExecutionCrawlerServiceTest {
         long projectId = 1;
         Run run = new Run().withJobUrl("url");
         final List<Feature> features = Collections.emptyList();
-        when(fetcher.getCucumberReport(projectId, run))
+        when(executionZipService.getCucumberReport(projectId, run))
                 .thenReturn(Optional.of(features));
-        when(fetcher.getCucumberStepDefinitions(projectId, run))
+        when(executionZipService.getCucumberStepDefinitions(projectId, run))
                 .thenThrow(new FetchException(new RestClientException(""), ""));
 
         // WHEN
-        cut.crawlCucumberRun(projectId, fetcher, run);
+        cut.crawlCucumberRun(projectId, run);
 
         // THEN
         verify(executedScenarioExtractorService, only()).extractExecutedScenarios(
@@ -571,13 +522,13 @@ public class ExecutionCrawlerServiceTest {
         Run run = new Run().withJobUrl("url");
         final List<Feature> features = Collections.emptyList();
         final List<String> stepDefinitions = Collections.emptyList();
-        when(fetcher.getCucumberReport(projectId, run))
+        when(executionZipService.getCucumberReport(projectId, run))
                 .thenReturn(Optional.of(features));
-        when(fetcher.getCucumberStepDefinitions(projectId, run))
+        when(executionZipService.getCucumberStepDefinitions(projectId, run))
                 .thenReturn(Optional.of(stepDefinitions));
 
         // WHEN
-        cut.crawlCucumberRun(projectId, fetcher, run);
+        cut.crawlCucumberRun(projectId, run);
 
         // THEN
         verify(executedScenarioExtractorService, only()).extractExecutedScenarios(
@@ -981,7 +932,7 @@ public class ExecutionCrawlerServiceTest {
                 .thenReturn(existingExecution);
 
         // WHEN
-        Execution result = cut.getOrCreateExecution(projectId, fetcher, buildToIndex);
+        Execution result = cut.getOrCreateExecution(projectId, buildToIndex);
 
         // THEN
         assertThat(result).isSameAs(existingExecution);
@@ -1009,12 +960,12 @@ public class ExecutionCrawlerServiceTest {
         doAnswer(invocation -> {
             build.setUrl("http://the-one/");
             return null;
-        }).when(fetcher).completeBuildInformation(projectId, build);
+        }).when(executionZipService).completeBuildInformation(projectId, build);
         when(executionRepository.findByProjectIdAndJobUrlOrJobLink(projectId, "http://the-one/", "/opt/the-one/"))
                 .thenReturn(null);
 
         // WHEN
-        Execution result = cut.getOrCreateExecution(projectId, fetcher, buildToIndex);
+        Execution result = cut.getOrCreateExecution(projectId, buildToIndex);
 
         // THEN
         assertThat(result.getName()).isEqualTo("name");
