@@ -83,3 +83,11 @@ you need to know about the utilization of ARA (don't hesitate to pass those doc 
 
 Please read the <<doc/developer/DeveloperDocumentation.adoc#head, Developer Documentation>>
 to learn how the project is structured and how to develop new features in ARA and/or contribute.
+
+== IDEAS
+
+1. Circle CI to docker hub: make promote / think about adding unit tests process
+2. Custom CI
+3. Document dev cs prod process
+4. Dockerize the dev environment
+

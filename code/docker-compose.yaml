@@ -24,7 +24,7 @@ services:
       - DATABASE_USER=root
       - DATABASE_PASSWORD=to_change
       - CLIENT_URL="http://ara-front/"
-      - DATA_DB_MODE=none # validate | update | create | create-drop
+      - DATA_DB_MODE=create-drop # validate | update | create | create-drop
       - ARA_PROFILE=dev
     networks:
       - web_net
