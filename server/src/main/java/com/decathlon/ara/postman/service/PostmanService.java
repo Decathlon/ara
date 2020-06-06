@@ -17,21 +17,12 @@
 
 package com.decathlon.ara.postman.service;
 
-import com.decathlon.ara.postman.bean.Error;
 import com.decathlon.ara.domain.ExecutedScenario;
 import com.decathlon.ara.domain.Run;
 import com.decathlon.ara.domain.Source;
-import com.decathlon.ara.postman.bean.Assertion;
-import com.decathlon.ara.postman.bean.Body;
 import com.decathlon.ara.postman.bean.Collection;
-import com.decathlon.ara.postman.bean.Execution;
-import com.decathlon.ara.postman.bean.Failure;
-import com.decathlon.ara.postman.bean.Item;
-import com.decathlon.ara.postman.bean.KeyValue;
-import com.decathlon.ara.postman.bean.Request;
-import com.decathlon.ara.postman.bean.Response;
-import com.decathlon.ara.postman.bean.Stream;
-import com.decathlon.ara.postman.bean.Url;
+import com.decathlon.ara.postman.bean.Error;
+import com.decathlon.ara.postman.bean.*;
 import com.decathlon.ara.postman.model.NewmanParsingResult;
 import com.decathlon.ara.postman.model.NewmanScenario;
 import com.decathlon.ara.report.asset.AssetService;
@@ -41,25 +32,6 @@ import com.decathlon.ara.report.util.ScenarioExtractorUtil;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.time.Instant;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,6 +43,22 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service

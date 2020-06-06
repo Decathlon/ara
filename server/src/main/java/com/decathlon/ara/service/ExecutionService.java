@@ -19,9 +19,8 @@ package com.decathlon.ara.service;
 
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
-import com.decathlon.ara.ci.bean.Build;
-import com.decathlon.ara.ci.bean.BuildToIndex;
-import com.decathlon.ara.ci.service.ExecutionCrawlerService;
+import com.decathlon.ara.ci.bean.PlannedIndexation;
+import com.decathlon.ara.ci.service.ExecutionIndexerService;
 import com.decathlon.ara.domain.CycleDefinition;
 import com.decathlon.ara.domain.Execution;
 import com.decathlon.ara.domain.ExecutionCompletionRequest;
@@ -106,7 +105,7 @@ public class ExecutionService {
     private final SettingService settingService;
 
     @NonNull
-    private final ExecutionCrawlerService executionCrawlerService;
+    private final ExecutionIndexerService executionIndexerService;
 
     @NonNull
     private final CycleDefinitionRepository cycleDefinitionRepository;
@@ -375,22 +374,23 @@ public class ExecutionService {
                 .replace(Settings.BRANCH_VARIABLE, branch)
                 .replace(Settings.CYCLE_VARIABLE, cycle);
         File destinationDirectory = new File(path, "incoming");
-        List<File> newExecutions = this.unzipExecutions(destinationDirectory, zipFile);
-        for (final File newExecution : newExecutions) {
-            uploadSpecificDirectory(projectId, branch, cycle, newExecution);
+        List<File> executionDirectories = this.unzipExecutions(destinationDirectory, zipFile);
+        for (final File executionDirectory : executionDirectories) {
+            uploadSpecificDirectory(projectId, branch, cycle, executionDirectory);
         }
     }
 
     public void uploadSpecificDirectory(long projectId, String branch, String cycle, File executionDirectory) {
         log.info("Received new execution report in {}", executionDirectory.getAbsolutePath());
-        Build build = new Build().withLink(executionDirectory.getAbsolutePath() + File.separator);
         CycleDefinition cycleDefinition = cycleDefinitionRepository.findByProjectIdAndBranchAndName(projectId, branch, cycle);
         if (null == cycleDefinition) {
             throw new IllegalArgumentException("The branch or cycle for this project doesn't exists.");
         }
 
-        BuildToIndex buildToIndex = new BuildToIndex(cycleDefinition, build);
-        executionCrawlerService.crawl(buildToIndex);
+        PlannedIndexation plannedIndexation = new PlannedIndexation()
+                .withCycleDefinition(cycleDefinition)
+                .withExecutionFolder(executionDirectory);
+        executionIndexerService.indexExecution(plannedIndexation);
     }
 
     List<File> unzipExecutions(File destinationDirectory, MultipartFile zipFile) throws IOException {

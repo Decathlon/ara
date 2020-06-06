@@ -17,9 +17,8 @@
 
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.ci.bean.Build;
-import com.decathlon.ara.ci.bean.BuildToIndex;
-import com.decathlon.ara.ci.service.ExecutionCrawlerService;
+import com.decathlon.ara.ci.bean.PlannedIndexation;
+import com.decathlon.ara.ci.service.ExecutionIndexerService;
 import com.decathlon.ara.domain.CycleDefinition;
 import com.decathlon.ara.domain.Execution;
 import com.decathlon.ara.domain.ExecutionCompletionRequest;
@@ -81,7 +80,7 @@ public class ExecutionServiceTest {
     private SettingService settingService;
 
     @Mock
-    private ExecutionCrawlerService executionCrawlerService;
+    private ExecutionIndexerService executionIndexerService;
 
     @Mock
     private CycleDefinitionRepository cycleDefinitionRepository;
@@ -363,7 +362,7 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void uploadExecutionReport_should_call_the_crawler() throws IOException {
+    public void uploadExecutionReport_should_call_the_indexer() throws IOException {
         // Given
         long projectId = 23L;
         String projectCode = "prj";
@@ -372,17 +371,16 @@ public class ExecutionServiceTest {
         MultipartFile zip = new MockMultipartFile("zip", "test.zip", "application/zip", new byte[0]);
         CycleDefinition cycleDefinition = new CycleDefinition(1L, projectId, branch, cycle, 1);
         File executionPath = new File("/opt/executions/123");
-        Build build = new Build().withLink(executionPath.getAbsolutePath() + File.separator);
-        BuildToIndex bti = new BuildToIndex(cycleDefinition, build);
+        PlannedIndexation plannedIndexation = new PlannedIndexation().withCycleDefinition(cycleDefinition).withExecutionFolder(executionPath);
         List<File> unzipMock = Collections.singletonList(executionPath);
         Mockito.doReturn(unzipMock).when(cut).unzipExecutions(Mockito.any(), Mockito.any());
         Mockito.doReturn("/opt/data/{{project}}/{{branch}}/{{cycle}}").when(settingService).get(projectId, Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH);
         Mockito.doReturn(cycleDefinition).when(cycleDefinitionRepository).findByProjectIdAndBranchAndName(projectId, branch, cycle);
-        Mockito.doNothing().when(executionCrawlerService).crawl(Mockito.any());
+        Mockito.doNothing().when(executionIndexerService).indexExecution(Mockito.any());
         // When
         cut.uploadExecutionReport(projectId, projectCode, branch, cycle, zip);
         // Then
-        Mockito.verify(executionCrawlerService).crawl(bti);
+        Mockito.verify(executionIndexerService).indexExecution(plannedIndexation);
     }
 
     @Test(expected = IllegalArgumentException.class)

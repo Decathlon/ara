@@ -17,20 +17,22 @@
 
 package com.decathlon.ara.ci.bean;
 
-import java.util.List;
+import com.decathlon.ara.domain.CycleDefinition;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Wither;
 
+import java.io.File;
+
 @Data
 @Wither
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExecutionTree {
+public class PlannedIndexation {
 
-    private List<CountryDeploymentExecution> deployedCountries;
+    private CycleDefinition cycleDefinition;
 
-    private List<NrtExecution> nonRegressionTests;
+    private File executionFolder;
 
 }

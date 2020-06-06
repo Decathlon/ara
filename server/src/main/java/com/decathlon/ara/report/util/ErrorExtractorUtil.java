@@ -17,14 +17,15 @@
 
 package com.decathlon.ara.report.util;
 
-import com.decathlon.ara.report.support.ResultsWithMatch;
 import com.decathlon.ara.domain.Error;
 import com.decathlon.ara.report.bean.Status;
 import com.decathlon.ara.report.bean.Step;
-import java.util.ArrayList;
-import java.util.List;
+import com.decathlon.ara.report.support.ResultsWithMatch;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A set of static functions with no dependency nor side-effect (no download, upload, database access...) that take a parsed Cucumber's report.json and extract errors in it.

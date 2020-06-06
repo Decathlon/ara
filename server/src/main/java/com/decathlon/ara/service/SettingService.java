@@ -318,4 +318,11 @@ public class SettingService {
         }
     }
 
+    /**
+     * Clear the settings code/value contained in cache
+     */
+    public void clearProjectsValuesCache() {
+        projectsValuesCache.clear();
+    }
+
 }

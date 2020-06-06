@@ -53,3 +53,7 @@ VALUES
 	('api','Integ. APIs',0,0,1,1,1),
 	('firefox-desktop','HMI Desktop',1,0,2,2,1),
 	('firefox-mobile','HMI Mobile',1,1,2,3,1);
+
+INSERT INTO `setting` (`id`, `project_id`, `code`, `value`)
+VALUES
+	(1,1,'execution.indexer.file.deleteAfterIndexingAsDone','false');

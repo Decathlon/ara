@@ -56,18 +56,6 @@ public class Settings {
     public static final String EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH = "execution.indexer.file.buildInformationPath";
     public static final String EXECUTION_INDEXER_FILE_DELETE_AFTER_INDEXING_AS_DONE = "execution.indexer.file.deleteAfterIndexingAsDone";
 
-    public static final String EXECUTION_INDEXER_HTTP_USER = "execution.indexer.http.user";
-    @SuppressWarnings("squid:S2068") // This is a key, and not a password value (Credentials should not be hard-coded)
-    public static final String EXECUTION_INDEXER_HTTP_PASSWORD = "execution.indexer.http.password";
-    public static final String EXECUTION_INDEXER_HTTP_EXECUTION_BASE_URL = "execution.indexer.http.executionBaseUrl";
-    public static final String EXECUTION_INDEXER_HTTP_CYCLE_DEFINITION_PATH = "execution.indexer.http.cycleDefinitionPath";
-    public static final String EXECUTION_INDEXER_HTTP_BUILD_INFORMATION_PATH = "execution.indexer.http.buildInformationPath";
-    public static final String EXECUTION_INDEXER_HTTP_CUCUMBER_REPORT_PATH = "execution.indexer.http.cucumberReportPath";
-    public static final String EXECUTION_INDEXER_HTTP_CUCUMBER_STEP_DEFINITIONS_PATH = "execution.indexer.http.cucumberStepDefinitionsPath";
-    public static final String EXECUTION_INDEXER_HTTP_NEWMAN_REPORTS_PATH = "execution.indexer.http.newmanReportsPath";
-    public static final String EXECUTION_INDEXER_HTTP_NEWMAN_STARTING_FOLDER_TO_REMOVE = "execution.indexer.http.newmanStartingFolderToRemove";
-    public static final String EXECUTION_INDEXER_HTTP_NEWMAN_STARTING_FOLDER_TO_PREPEND = "execution.indexer.http.newmanStartingFolderToPrepend";
-
     public static final String EMAIL_FROM = "email.from";
     public static final String EMAIL_TO_EXECUTION_CRASHED = "email.to.execution.crashed";
     public static final String EMAIL_TO_EXECUTION_RAN = "email.to.execution.ran";

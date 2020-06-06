@@ -27,18 +27,15 @@ import com.decathlon.ara.report.util.CucumberReportUtil;
 import com.decathlon.ara.report.util.ErrorExtractorUtil;
 import com.decathlon.ara.report.util.ScenarioExtractorUtil;
 import com.google.common.collect.Sets;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import static com.decathlon.ara.lib.embed.producer.StructuredEmbeddingsBuilder.HUMAN_AND_MACHINE_READABLE_TIMESTAMP_PATTERN;
 
