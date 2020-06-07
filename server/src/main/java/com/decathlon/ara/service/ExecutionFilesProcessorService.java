@@ -22,24 +22,19 @@ import com.decathlon.ara.ci.bean.CycleDef;
 import com.decathlon.ara.ci.bean.PlannedIndexation;
 import com.decathlon.ara.ci.bean.PlatformRule;
 import com.decathlon.ara.ci.service.QualityService;
-import com.decathlon.ara.ci.util.JsonParserConsumer;
 import com.decathlon.ara.common.NotGonnaHappenException;
 import com.decathlon.ara.domain.*;
 import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
 import com.decathlon.ara.domain.enumeration.JobStatus;
 import com.decathlon.ara.domain.enumeration.QualityStatus;
 import com.decathlon.ara.domain.enumeration.Technology;
-import com.decathlon.ara.postman.model.NewmanParsingResult;
-import com.decathlon.ara.postman.service.PostmanService;
-import com.decathlon.ara.report.bean.Feature;
-import com.decathlon.ara.report.service.ExecutedScenarioExtractorService;
 import com.decathlon.ara.repository.CountryRepository;
 import com.decathlon.ara.repository.ExecutionCompletionRequestRepository;
 import com.decathlon.ara.repository.ExecutionRepository;
 import com.decathlon.ara.repository.TypeRepository;
 import com.decathlon.ara.service.support.Settings;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
+import com.decathlon.ara.test.ScenariosIndexer;
+import com.decathlon.ara.test.strategy.ScenariosIndexerStrategy;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NonNull;
@@ -53,12 +48,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -69,9 +61,6 @@ public class ExecutionFilesProcessorService {
 
     @NonNull
     private final SettingService settingService;
-
-    @NonNull
-    private final JsonFactory jsonFactory;
 
     @NonNull
     private final ObjectMapper objectMapper;
@@ -89,13 +78,10 @@ public class ExecutionFilesProcessorService {
     private final TypeRepository typeRepository;
 
     @NonNull
-    private final ExecutedScenarioExtractorService executedScenarioExtractorService;
-
-    @NonNull
-    private final PostmanService postmanService;
-
-    @NonNull
     private final QualityService qualityService;
+
+    @NonNull
+    private final ScenariosIndexerStrategy scenariosIndexerStrategy;
 
     /**
      * Create an execution from the planned indexation
@@ -351,8 +337,11 @@ public class ExecutionFilesProcessorService {
                         Run run = getRun(country.get(), type.get(), platformName, rule, typeBuild, executionJobStatus);
 
                         Technology technology = source.getTechnology();
-                        List<ExecutedScenario> executedScenarios = getExecutedScenariosFromTechnologyAndReportsFolder(technology, typeJobFolder.get(), run);
-                        run.setExecutedScenarios(new TreeSet<>(executedScenarios));
+                        Optional<ScenariosIndexer> scenariosIndexer = scenariosIndexerStrategy.getScenariosIndexer(technology);
+                        scenariosIndexer.ifPresent(indexer -> {
+                            final List<ExecutedScenario> executedScenarios = indexer.getExecutedScenarios(typeJobFolder.get(), run);
+                            run.setExecutedScenarios(new TreeSet<>(executedScenarios));
+                        });
 
                         runs.add(run);
                     }
@@ -473,134 +462,6 @@ public class ExecutionFilesProcessorService {
     }
 
     /**
-     * Get executed scenarios depending on the technology used
-     * @param technology the technology
-     * @param typeFolder the type folder
-     * @param run the run
-     * @return the executed scenarios
-     */
-    private List<ExecutedScenario> getExecutedScenariosFromTechnologyAndReportsFolder(
-            Technology technology,
-            File typeFolder,
-            Run run
-    ) {
-        if (technology == null) {
-            log.info(String.format("The technology can not be null. For more details see run [%s] [%s]", run.getJobLink(), run.getJobUrl()));
-            return new ArrayList<>();
-        }
-        switch (technology) {
-            case CUCUMBER:
-                return getCucumberExecutedScenario(typeFolder, run);
-            case POSTMAN:
-                return getPostmanExecutedScenarios(typeFolder, run);
-            default:
-                log.info(String.format("The technology %s is not handled. It may be a great feature request ;)", technology));
-                return new ArrayList<>();
-        }
-    }
-
-    /**
-     * Get the Cucumber executed scenarios
-     * @param reportFolder the Cucumber report folder
-     * @param run the run
-     * @return the Cucumber executed scenarios
-     */
-    private List<ExecutedScenario> getCucumberExecutedScenario(File reportFolder, Run run) {
-        List<Feature> features = new ArrayList<>();
-        List<String> stepDefinitions = new ArrayList<>();
-
-        Optional<File> cucumberReportFile = getCucumberReportFileFromParentFolder(reportFolder);
-        if (cucumberReportFile.isPresent()) {
-            features = getCucumberFeaturesFromReport(cucumberReportFile.get());
-        }
-
-        Optional<File> stepDefinitionsFile = getCucumberStepDefinitionsFileFromParentFolder(reportFolder);
-        if (stepDefinitionsFile.isPresent()) {
-            stepDefinitions = getCucumberStepDefinitions(stepDefinitionsFile.get());
-        }
-
-        List<ExecutedScenario> executedScenarios = executedScenarioExtractorService.extractExecutedScenarios(
-                features,
-                stepDefinitions,
-                run.getJobUrl()
-        );
-
-        return executedScenarios;
-    }
-
-    /**
-     * Extract the Cucumber report file, if found
-     * @param cucumberReportFolder the Cucumber report parent folder
-     * @return the Cucumber report file, if found
-     */
-    private Optional<File> getCucumberReportFileFromParentFolder(File cucumberReportFolder) {
-        final File[] allFolderContent = cucumberReportFolder.listFiles();
-        final File[] filteredFolderContents = Arrays.stream(allFolderContent).filter(file -> file.isFile() && "report.json".equals(file.getName().toLowerCase())).toArray(File[]::new);
-        if (filteredFolderContents.length == 1) {
-            File cucumberReportFile = filteredFolderContents[0];
-            return Optional.of(cucumberReportFile);
-        }
-        log.info("Found no report.json in {}", cucumberReportFolder.getPath());
-        return Optional.empty();
-    }
-
-    /**
-     * Get Cucumber step definitions file
-     * @param cucumberReportFolder the folder to look at
-     * @return the Cucumber step definitions file
-     */
-    private Optional<File> getCucumberStepDefinitionsFileFromParentFolder(File cucumberReportFolder) {
-        final File[] allFolderContent = cucumberReportFolder.listFiles();
-        final File[] filteredFolderContents = Arrays.stream(allFolderContent).filter(file -> file.isFile() && "stepDefinitions.json".equals(file.getName())).toArray(File[]::new);
-        if (filteredFolderContents.length == 1) {
-            File stepDefinitionsFile = filteredFolderContents[0];
-            return Optional.of(stepDefinitionsFile);
-        }
-        log.info("Found no stepDefinitions.json in {}", cucumberReportFolder.getPath());
-        return Optional.empty();
-    }
-
-    /**
-     * Get the Postman executed scenarios
-     * @param postmanFolder the folder containing all the Postman related files
-     * @param run the run
-     * @return the Postman executed scenarios
-     */
-    private List<ExecutedScenario> getPostmanExecutedScenarios(File postmanFolder, Run run) {
-        List<List<ExecutedScenario>> allExecutedScenarios = new ArrayList<>();
-        List<File> postmanReports = getNewmanReportFiles(postmanFolder);
-        Boolean containsResult = postmanReports.stream()
-                .anyMatch(file -> "result.txt".equals(file.getName().toLowerCase()));
-        if (containsResult) {
-            List<File> postmanReportsWithoutResultFile = postmanReports.stream()
-                    .filter(file -> !"result.txt".equals(file.getName().toLowerCase()))
-                    .collect(Collectors.toList());
-
-            AtomicInteger requestPosition = new AtomicInteger(0);
-
-            for (File postmanReportFile : postmanReportsWithoutResultFile) {
-                final NewmanParsingResult newmanParsingResult = new NewmanParsingResult();
-                try {
-                    JsonParserConsumer consumer = jsonParser -> postmanService.parse(jsonParser, newmanParsingResult);
-                    try (InputStream input = new FileInputStream(postmanReportFile); JsonParser parser = jsonFactory.createParser(input)) {
-                        consumer.accept(parser);
-                    } catch (IOException e) {
-                        log.error("Error while handling the postman report file {}", postmanReportFile.getPath(), e);
-                        return new ArrayList<>();
-                    }
-                    List<ExecutedScenario> currentFileExecutedScenarios = postmanService.postProcess(run, newmanParsingResult, postmanReportFile.getName(), requestPosition);
-                    allExecutedScenarios.add(currentFileExecutedScenarios);
-                } finally {
-                    postmanService.deleteTempFiles(newmanParsingResult);
-                }
-            }
-        }
-        return allExecutedScenarios.stream()
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
-    }
-
-    /**
      * Get the CycleDef object
      * @param rawExecutionFile the root execution folder containing the cycleDefinition.json file
      * @return the CycleDef object
@@ -636,51 +497,6 @@ public class ExecutionFilesProcessorService {
      */
     private Boolean isBuildInformation(File file) {
         return file.isFile() && "buildInformation.json".equals(file.getName());
-    }
-
-    /**
-     * Get the features from the Cucumber report file
-     * @param cucumberReport the Cucumber report file
-     * @return the Cucumber features
-     */
-    private List<Feature> getCucumberFeaturesFromReport(File cucumberReport) {
-        try (InputStream input = new FileInputStream(cucumberReport)) {
-            return objectMapper.readValue(input, objectMapper.getTypeFactory().constructCollectionType(List.class, Feature.class));
-        } catch (IOException e) {
-            log.info("Cannot download report.json in {}", cucumberReport.getPath(), e);
-            return new ArrayList<>();
-        }
-    }
-
-    /**
-     * Get Cucumber step definitions from the step definitions file
-     * @param stepDefinitionsFile the file defining the Cucumber step definitions
-     * @return all the extracted Cucumber step definitions
-     */
-    private List<String> getCucumberStepDefinitions(File stepDefinitionsFile) {
-        try (InputStream input = new FileInputStream(stepDefinitionsFile)) {
-            return objectMapper.readValue(input, objectMapper.getTypeFactory().constructCollectionType(List.class, String.class));
-        } catch (IOException e) {
-            log.info("Cannot download stepDefinitions.json in {}", stepDefinitionsFile.getPath(), e);
-            return new ArrayList<>();
-        }
-    }
-
-    /**
-     * Extract the Newman report files, i.e. files in the reports folder
-     * @param newmanFolder the newman folder
-     * @return all the report files
-     */
-    private List<File> getNewmanReportFiles(File newmanFolder) {
-        List<File> newmanReportFiles = new ArrayList<>();
-        final File[] allNewmanFolderContent = newmanFolder.listFiles();
-        final File[] filteredNewmanFolderContents = Arrays.stream(allNewmanFolderContent).filter(file -> file.isDirectory() && "reports".equals(file.getName().toLowerCase())).toArray(File[]::new);
-        if (filteredNewmanFolderContents.length == 1) {
-            final File reportFolder = filteredNewmanFolderContents[0];
-            final File[] allReportFolderContent = reportFolder.listFiles();
-            newmanReportFiles = Arrays.asList(Arrays.stream(allReportFolderContent).filter(File::isFile).toArray(File[]::new));
-        }
-        return newmanReportFiles;
     }
 
     /**

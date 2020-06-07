@@ -22,10 +22,8 @@ import com.decathlon.ara.ci.service.QualityService;
 import com.decathlon.ara.ci.util.JsonParserConsumer;
 import com.decathlon.ara.domain.*;
 import com.decathlon.ara.domain.enumeration.*;
-import com.decathlon.ara.postman.service.PostmanService;
-import com.decathlon.ara.report.service.ExecutedScenarioExtractorService;
 import com.decathlon.ara.repository.*;
-import com.fasterxml.jackson.core.JsonFactory;
+import com.decathlon.ara.test.strategy.ScenariosIndexerStrategy;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
@@ -60,9 +58,6 @@ public class ExecutionFilesProcessorServiceTest {
     private SettingProviderService settingProviderService;
 
     @Mock
-    private JsonFactory jsonFactory;
-
-    @Mock
     private ObjectMapper objectMapper;
 
     @Mock
@@ -84,13 +79,10 @@ public class ExecutionFilesProcessorServiceTest {
     private TypeRepository typeRepository;
 
     @Mock
-    private ExecutedScenarioExtractorService executedScenarioExtractorService;
-
-    @Mock
-    private PostmanService postmanService;
-
-    @Mock
     private QualityService qualityService;
+
+    @Mock
+    private ScenariosIndexerStrategy scenariosIndexerStrategy; 
 
     @InjectMocks
     private ExecutionFilesProcessorService cut;
@@ -106,6 +98,7 @@ public class ExecutionFilesProcessorServiceTest {
         assertThat(execution).isEmpty();
         verify(executionCompletionRequestRepository, never()).delete(any(ExecutionCompletionRequest.class));
         verify(qualityService, never()).computeQuality(any(Execution.class));
+        verify(scenariosIndexerStrategy, never()).getScenariosIndexer(any(Technology.class));
     }
 
     @Test
@@ -121,6 +114,7 @@ public class ExecutionFilesProcessorServiceTest {
         assertThat(execution).isEmpty();
         verify(executionCompletionRequestRepository, never()).delete(any(ExecutionCompletionRequest.class));
         verify(qualityService, never()).computeQuality(any(Execution.class));
+        verify(scenariosIndexerStrategy, never()).getScenariosIndexer(any(Technology.class));
     }
 
     @Test
@@ -138,6 +132,7 @@ public class ExecutionFilesProcessorServiceTest {
         assertThat(execution).isEmpty();
         verify(executionCompletionRequestRepository, never()).delete(any(ExecutionCompletionRequest.class));
         verify(qualityService, never()).computeQuality(any(Execution.class));
+        verify(scenariosIndexerStrategy, never()).getScenariosIndexer(any(Technology.class));
     }
 
     @Test
@@ -158,6 +153,7 @@ public class ExecutionFilesProcessorServiceTest {
         assertThat(execution).isEmpty();
         verify(executionCompletionRequestRepository, never()).delete(any(ExecutionCompletionRequest.class));
         verify(qualityService, never()).computeQuality(any(Execution.class));
+        verify(scenariosIndexerStrategy, never()).getScenariosIndexer(any(Technology.class));
     }
 
     @Test
@@ -184,6 +180,7 @@ public class ExecutionFilesProcessorServiceTest {
         assertThat(execution).isEmpty();
         verify(executionCompletionRequestRepository, never()).delete(any(ExecutionCompletionRequest.class));
         verify(qualityService, never()).computeQuality(any(Execution.class));
+        verify(scenariosIndexerStrategy, never()).getScenariosIndexer(any(Technology.class));
     }
 
     @Test
@@ -218,6 +215,7 @@ public class ExecutionFilesProcessorServiceTest {
         assertThat(execution).isEmpty();
         verify(executionCompletionRequestRepository, never()).delete(any(ExecutionCompletionRequest.class));
         verify(qualityService, never()).computeQuality(any(Execution.class));
+        verify(scenariosIndexerStrategy, never()).getScenariosIndexer(any(Technology.class));
     }
 
     @Test
@@ -258,6 +256,7 @@ public class ExecutionFilesProcessorServiceTest {
         assertThat(execution).isEmpty();
         verify(executionCompletionRequestRepository, never()).delete(any(ExecutionCompletionRequest.class));
         verify(qualityService, never()).computeQuality(any(Execution.class));
+        verify(scenariosIndexerStrategy, never()).getScenariosIndexer(any(Technology.class));
     }
 
     @Test
@@ -330,6 +329,7 @@ public class ExecutionFilesProcessorServiceTest {
         assertThat(execution.get().getCountryDeployments()).isEmpty();
         verify(executionCompletionRequestRepository, never()).delete(any(ExecutionCompletionRequest.class));
         verify(qualityService, never()).computeQuality(any(Execution.class));
+        verify(scenariosIndexerStrategy, never()).getScenariosIndexer(any(Technology.class));
     }
 
     @Test
@@ -403,6 +403,7 @@ public class ExecutionFilesProcessorServiceTest {
         assertThat(execution.get().getCountryDeployments()).isEmpty();
         verify(executionCompletionRequestRepository).delete(executionCompletionRequest);
         verify(qualityService, never()).computeQuality(any(Execution.class));
+        verify(scenariosIndexerStrategy, never()).getScenariosIndexer(any(Technology.class));
     }
 
     @Test
@@ -481,6 +482,7 @@ public class ExecutionFilesProcessorServiceTest {
         assertThat(execution.get().getCountryDeployments()).isEmpty();
         verify(executionCompletionRequestRepository, never()).delete(any(ExecutionCompletionRequest.class));
         verify(qualityService).computeQuality(execution.get());
+        verify(scenariosIndexerStrategy, never()).getScenariosIndexer(any(Technology.class));
     }
 
     @Test
@@ -811,6 +813,8 @@ public class ExecutionFilesProcessorServiceTest {
                 );
         verify(executionCompletionRequestRepository, never()).delete(any(ExecutionCompletionRequest.class));
         verify(qualityService).computeQuality(execution.get());
+        verify(scenariosIndexerStrategy, times(2)).getScenariosIndexer(Technology.CUCUMBER);
+        verify(scenariosIndexerStrategy).getScenariosIndexer(Technology.POSTMAN);
     }
 
     @Test
@@ -1037,6 +1041,8 @@ public class ExecutionFilesProcessorServiceTest {
                 );
         verify(executionCompletionRequestRepository, never()).delete(any(ExecutionCompletionRequest.class));
         verify(qualityService).computeQuality(execution.get());
+        verify(scenariosIndexerStrategy, never()).getScenariosIndexer(Technology.CUCUMBER);
+        verify(scenariosIndexerStrategy).getScenariosIndexer(Technology.POSTMAN);
     }
 
     @Test
@@ -1261,6 +1267,8 @@ public class ExecutionFilesProcessorServiceTest {
                 );
         verify(executionCompletionRequestRepository, never()).delete(any(ExecutionCompletionRequest.class));
         verify(qualityService).computeQuality(execution.get());
+        verify(scenariosIndexerStrategy, never()).getScenariosIndexer(Technology.CUCUMBER);
+        verify(scenariosIndexerStrategy).getScenariosIndexer(Technology.POSTMAN);
     }
 
     @Test
@@ -1558,6 +1566,8 @@ public class ExecutionFilesProcessorServiceTest {
                 );
         verify(executionCompletionRequestRepository, never()).delete(any(ExecutionCompletionRequest.class));
         verify(qualityService).computeQuality(execution.get());
+        verify(scenariosIndexerStrategy).getScenariosIndexer(Technology.CUCUMBER);
+        verify(scenariosIndexerStrategy).getScenariosIndexer(Technology.POSTMAN);
     }
 
     @Test
@@ -1855,6 +1865,8 @@ public class ExecutionFilesProcessorServiceTest {
                 );
         verify(executionCompletionRequestRepository, never()).delete(any(ExecutionCompletionRequest.class));
         verify(qualityService).computeQuality(execution.get());
+        verify(scenariosIndexerStrategy).getScenariosIndexer(Technology.CUCUMBER);
+        verify(scenariosIndexerStrategy).getScenariosIndexer(Technology.POSTMAN);
     }
 
 }
