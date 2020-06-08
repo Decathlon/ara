@@ -138,10 +138,10 @@ public class ExecutionFilesProcessorService {
         Pair<List<CountryDeployment>, List<Run>> countryDeploymentsAndRuns = getCountryDeploymentsAndRunsPair(rawExecutionFile, cycleDef.get(), projectId, execution.get().getStatus());
 
         Set<CountryDeployment> countryDeployments = new TreeSet<>(countryDeploymentsAndRuns.getFirst());
-        execution.get().setCountryDeployments(countryDeployments);
+        execution.get().addCountryDeployments(countryDeployments);
 
         Set<Run> runs = new TreeSet<>(countryDeploymentsAndRuns.getSecond());
-        execution.get().setRuns(runs);
+        execution.get().addRuns(runs);
 
         qualityService.computeQuality(execution.get());
 
@@ -340,7 +340,7 @@ public class ExecutionFilesProcessorService {
                         Optional<ScenariosIndexer> scenariosIndexer = scenariosIndexerStrategy.getScenariosIndexer(technology);
                         scenariosIndexer.ifPresent(indexer -> {
                             final List<ExecutedScenario> executedScenarios = indexer.getExecutedScenarios(typeJobFolder.get(), run);
-                            run.setExecutedScenarios(new TreeSet<>(executedScenarios));
+                            run.addExecutedScenarios(new TreeSet<>(executedScenarios));
                         });
 
                         runs.add(run);
