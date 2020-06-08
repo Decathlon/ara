@@ -479,7 +479,6 @@
                 </outputFormats>
                 <targetClasses>
                     - For now, while we still have too many integration tests versus unit tests, we focus our efforts on these high-value classes: -
-                    <param>com.decathlon.ara.ci.fetcher.*</param>
                     <param>com.decathlon.ara.ci.service.*</param>
                     <param>com.decathlon.ara.ci.util.*</param>
                     <param>com.decathlon.ara.coverage.*</param>
@@ -488,15 +487,15 @@
                     <param>com.decathlon.ara.domain.Functionality</param>
                     <param>com.decathlon.ara.embedding.bean.*</param>
                     <param>com.decathlon.ara.embedding.util.*</param>
-                    <param>com.decathlon.ara.postman.service.*</param>
-                    <param>com.decathlon.ara.postman.support.*</param>
-                    <param>com.decathlon.ara.report.bean.Element</param> <
-                    <param>com.decathlon.ara.report.bean.Embedded</param>
-                    <param>com.decathlon.ara.report.bean.Feature</param>
-                    <param>com.decathlon.ara.report.bean.Step</param>
-                    <param>com.decathlon.ara.report.bean.Tag</param>
-                    <param>com.decathlon.ara.report.service.*</param>
-                    <param>com.decathlon.ara.report.util.*</param>
+                    <param>com.decathlon.ara.scenario.postman.service.*</param>
+                    <param>com.decathlon.ara.scenario.postman.support.*</param>
+                    <param>com.decathlon.ara.scenario.cucumber.bean.Element</param> <
+                    <param>com.decathlon.ara.scenario.cucumber.bean.Embedded</param>
+                    <param>com.decathlon.ara.scenario.cucumber.bean.Feature</param>
+                    <param>com.decathlon.ara.scenario.cucumber.bean.Step</param>
+                    <param>com.decathlon.ara.scenario.cucumber.bean.Tag</param>
+                    <param>com.decathlon.ara.scenario.cucumber.service.*</param>
+                    <param>com.decathlon.ara.scenario.cucumber.util.*</param>
                     <param>com.decathlon.ara.service.*</param>
                     <param>com.decathlon.ara.service.util.*</param>
                 </targetClasses>
@@ -598,8 +597,8 @@
                         <exclude>com/decathlon/ara/ci/bean/**/*.java</exclude>
                         <exclude>com/decathlon/ara/configuration/AraConfiguration.java</exclude>
                         <exclude>com/decathlon/ara/domain/**/*.java</exclude>
-                        <exclude>com/decathlon/ara/postman/bean/**/*.java</exclude>
-                        <exclude>com/decathlon/ara/postman/model/**/*.java</exclude>
+                        <exclude>com/decathlon/ara/scenario/postman/bean/**/*.java</exclude>
+                        <exclude>com/decathlon/ara/scenario/postman/model/**/*.java</exclude>
                         <exclude>com/decathlon/ara/service/exception/NotUniqueException.java</exclude>
                         <exclude>com/decathlon/ara/service/support/**/*.java</exclude>
                         <exclude>**/*DTO.java</exclude>

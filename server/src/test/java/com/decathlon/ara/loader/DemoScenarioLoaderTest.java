@@ -18,7 +18,8 @@
 package com.decathlon.ara.loader;
 
 import com.decathlon.ara.common.NotGonnaHappenException;
-import com.decathlon.ara.service.ScenarioService;
+import com.decathlon.ara.scenario.cucumber.upload.CucumberScenarioUploader;
+import com.decathlon.ara.scenario.postman.upload.PostmanScenarioUploader;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -31,7 +32,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class DemoScenarioLoaderTest {
 
     @Mock
-    private ScenarioService scenarioService;
+    private PostmanScenarioUploader postmanScenarioUploader;
+
+    @Mock
+    private CucumberScenarioUploader cucumberScenarioUploader;
 
     @Mock
     private DemoLoaderService demoLoaderService;

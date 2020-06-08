@@ -29,7 +29,7 @@ import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
 import com.decathlon.ara.domain.enumeration.Handling;
 import com.decathlon.ara.domain.enumeration.JobStatus;
 import com.decathlon.ara.domain.enumeration.QualityStatus;
-import com.decathlon.ara.report.util.ScenarioExtractorUtil;
+import com.decathlon.ara.scenario.cucumber.util.ScenarioExtractorUtil;
 import com.decathlon.ara.repository.CycleDefinitionRepository;
 import com.decathlon.ara.repository.ExecutionCompletionRequestRepository;
 import com.decathlon.ara.repository.ExecutionRepository;

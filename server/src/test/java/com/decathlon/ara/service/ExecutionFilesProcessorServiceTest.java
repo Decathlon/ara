@@ -23,7 +23,7 @@ import com.decathlon.ara.ci.util.JsonParserConsumer;
 import com.decathlon.ara.domain.*;
 import com.decathlon.ara.domain.enumeration.*;
 import com.decathlon.ara.repository.*;
-import com.decathlon.ara.test.strategy.ScenariosIndexerStrategy;
+import com.decathlon.ara.scenario.common.strategy.ScenariosIndexerStrategy;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
@@ -82,7 +82,7 @@ public class ExecutionFilesProcessorServiceTest {
     private QualityService qualityService;
 
     @Mock
-    private ScenariosIndexerStrategy scenariosIndexerStrategy; 
+    private ScenariosIndexerStrategy scenariosIndexerStrategy;
 
     @InjectMocks
     private ExecutionFilesProcessorService cut;
