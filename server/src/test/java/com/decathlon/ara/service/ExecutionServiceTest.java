@@ -33,10 +33,12 @@ import com.decathlon.ara.service.mapper.ExecutionWithHandlingCountsMapper;
 import com.decathlon.ara.service.support.Settings;
 import com.decathlon.ara.service.transformer.ExecutionTransformer;
 import org.apache.commons.io.FileUtils;
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
@@ -373,14 +375,14 @@ public class ExecutionServiceTest {
         File executionPath = new File("/opt/executions/123");
         PlannedIndexation plannedIndexation = new PlannedIndexation().withCycleDefinition(cycleDefinition).withExecutionFolder(executionPath);
         List<File> unzipMock = Collections.singletonList(executionPath);
-        Mockito.doReturn(unzipMock).when(cut).unzipExecutions(Mockito.any(), Mockito.any());
-        Mockito.doReturn("/opt/data/{{project}}/{{branch}}/{{cycle}}").when(settingService).get(projectId, Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH);
-        Mockito.doReturn(cycleDefinition).when(cycleDefinitionRepository).findByProjectIdAndBranchAndName(projectId, branch, cycle);
-        Mockito.doNothing().when(executionIndexerService).indexExecution(Mockito.any());
+        doReturn(unzipMock).when(cut).unzipExecutions(any(), any(), any());
+        doReturn("/opt/data/{{project}}/{{branch}}/{{cycle}}").when(settingService).get(projectId, Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH);
+        doReturn(cycleDefinition).when(cycleDefinitionRepository).findByProjectIdAndBranchAndName(projectId, branch, cycle);
+        doNothing().when(executionIndexerService).indexExecution(any());
         // When
         cut.uploadExecutionReport(projectId, projectCode, branch, cycle, zip);
         // Then
-        Mockito.verify(executionIndexerService).indexExecution(plannedIndexation);
+        verify(executionIndexerService).indexExecution(plannedIndexation);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -392,9 +394,9 @@ public class ExecutionServiceTest {
         String cycle = "day";
         MultipartFile zip = new MockMultipartFile("zip", "test.zip", "application/zip", new byte[0]);
         List<File> unzipMock = Collections.singletonList(new File("dont_matter"));
-        Mockito.doReturn(unzipMock).when(cut).unzipExecutions(Mockito.any(), Mockito.any());
-        Mockito.doReturn("/opt/data/{{project}}/{{branch}}/{{cycle}}").when(settingService).get(projectId, Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH);
-        Mockito.doReturn(null).when(cycleDefinitionRepository).findByProjectIdAndBranchAndName(projectId, branch, cycle);
+        doReturn(unzipMock).when(cut).unzipExecutions(any(), any(), any());
+        doReturn("/opt/data/{{project}}/{{branch}}/{{cycle}}").when(settingService).get(projectId, Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH);
+        doReturn(null).when(cycleDefinitionRepository).findByProjectIdAndBranchAndName(projectId, branch, cycle);
         // When
         cut.uploadExecutionReport(projectId, projectCode, branch, cycle, zip);
     }
@@ -407,17 +409,17 @@ public class ExecutionServiceTest {
         target.mkdir(); // Will log in warning level due to the fact that cut will try to recreate it.
         new File(target, "tmp").createNewFile(); // To make the directory not empty.
         MultipartFile file = new MockMultipartFile("zip", "test.zip", "application/zip", new byte[0]);
-        Mockito.doNothing().when(archiveService).unzip(file, target);
+        doNothing().when(archiveService).unzip(file, target);
         List<File> executions = new ArrayList<>();
         executions.add(new File(target, "execution1"));
-        Mockito.doReturn(executions).when(cut).retrieveAllExecutionDirectories(target);
+        doReturn(executions).when(cut).retrieveAllExecutionDirectories(target, "buildInformation.json");
         try {
             // WHEN
-            List<File> files = this.cut.unzipExecutions(target, file);
+            List<File> files = this.cut.unzipExecutions(target, file, "buildInformation.json");
             // THEN
-            Mockito.verify(archiveService).unzip(file, target);
-            Assertions.assertThat(files).hasSize(1);
-            Assertions.assertThat(files.get(0)).isEqualTo(new File(target, "execution1"));
+            verify(archiveService).unzip(file, target);
+            assertThat(files).hasSize(1);
+            assertThat(files.get(0)).isEqualTo(new File(target, "execution1"));
         } finally {
             FileUtils.deleteQuietly(target);
         }
@@ -429,10 +431,10 @@ public class ExecutionServiceTest {
         File target = new File(System.getProperty("java.io.tmpdir"),"ara-unzipExecutions-" +
                 new Date().getTime());
         MultipartFile file = new MockMultipartFile("zip", "test.zip", "application/zip", new byte[0]);
-        Mockito.doThrow(new IOException("Unable to write")).when(archiveService).unzip(file, target);
+        doThrow(new IOException("Unable to write")).when(archiveService).unzip(file, target);
         try {
             // WHEN
-            List<File> files = this.cut.unzipExecutions(target, file);
+            List<File> files = this.cut.unzipExecutions(target, file, "buildInformation.json");
             // Then is made by the annotation.
         } finally {
             FileUtils.deleteQuietly(target);
@@ -445,15 +447,15 @@ public class ExecutionServiceTest {
         File directory = new File(System.getProperty("java.io.tmpdir"), "ara-retrieveAllExeDir-" +
                 new Date().getTime());
         directory.mkdir();
-        Mockito.doReturn(true).when(this.cut).isExecutionDirectory(directory);
+        doReturn(true).when(this.cut).isExecutionDirectory(directory, "buildInformation.json");
         File subdir = new File(directory, "subdir");
         subdir.mkdir();
         // WHEN
-        List<File> paths = cut.retrieveAllExecutionDirectories(directory);
+        List<File> paths = cut.retrieveAllExecutionDirectories(directory, "buildInformation.json");
         FileUtils.deleteQuietly(directory);
         // THEN
-        Assertions.assertThat(paths).hasSize(1);
-        Assertions.assertThat(paths.get(0)).isEqualTo(directory);
+        assertThat(paths).hasSize(1);
+        assertThat(paths.get(0)).isEqualTo(directory);
     }
 
     @Test
@@ -462,22 +464,22 @@ public class ExecutionServiceTest {
         File directory = new File(System.getProperty("java.io.tmpdir"), "ara-retrieveAllExeDirSubDir-" +
                 new Date().getTime());
         directory.mkdir();
-        Mockito.doReturn(false).when(this.cut).isExecutionDirectory(directory);
+        doReturn(false).when(this.cut).isExecutionDirectory(directory, "buildInformation.json");
         File subdir1 = new File(directory, "subdir1");
         subdir1.mkdir();
-        Mockito.doReturn(true).when(this.cut).isExecutionDirectory(subdir1);
+        doReturn(true).when(this.cut).isExecutionDirectory(subdir1, "buildInformation.json");
         File subdir2 = new File(directory, "subdir2");
         subdir2.mkdir();
-        Mockito.doReturn(false).when(this.cut).isExecutionDirectory(subdir2);
+        doReturn(false).when(this.cut).isExecutionDirectory(subdir2, "buildInformation.json");
         File subdir3 = new File(directory, "subdir3");
         subdir3.mkdir();
-        Mockito.doReturn(true).when(this.cut).isExecutionDirectory(subdir3);
+        doReturn(true).when(this.cut).isExecutionDirectory(subdir3, "buildInformation.json");
         // WHEN
-        List<File> paths = cut.retrieveAllExecutionDirectories(directory);
+        List<File> paths = cut.retrieveAllExecutionDirectories(directory, "buildInformation.json");
         FileUtils.deleteQuietly(directory);
         // THEN
-        Assertions.assertThat(paths).hasSize(2);
-        Assertions.assertThat(paths).containsOnly(subdir1, subdir3);
+        assertThat(paths).hasSize(2);
+        assertThat(paths).containsOnly(subdir1, subdir3);
     }
 
     @Test
@@ -486,18 +488,18 @@ public class ExecutionServiceTest {
         File directory = new File(System.getProperty("java.io.tmpdir"), "ara-retrieveAllExeDir-" +
                 new Date().getTime());
         directory.mkdir();
-        Mockito.doReturn(false).when(this.cut).isExecutionDirectory(directory);
+        doReturn(false).when(this.cut).isExecutionDirectory(directory, "buildInformation.json");
         File subdir1 = new File(directory, "subdir1");
         subdir1.mkdir();
-        Mockito.doReturn(false).when(this.cut).isExecutionDirectory(subdir1);
+        doReturn(false).when(this.cut).isExecutionDirectory(subdir1, "buildInformation.json");
         File subdir2 = new File(directory, "subdir2");
         subdir2.mkdir();
-        Mockito.doReturn(false).when(this.cut).isExecutionDirectory(subdir2);
+        doReturn(false).when(this.cut).isExecutionDirectory(subdir2, "buildInformation.json");
         // WHEN
-        List<File> paths = cut.retrieveAllExecutionDirectories(directory);
+        List<File> paths = cut.retrieveAllExecutionDirectories(directory, "buildInformation.json");
         FileUtils.deleteQuietly(directory);
         // THEN
-        Assertions.assertThat(paths).isEmpty();
+        assertThat(paths).isEmpty();
     }
 
     @Test
@@ -507,10 +509,10 @@ public class ExecutionServiceTest {
                 new Date().getTime());
         directory.mkdir();
         // WHEN
-        List<File> paths = cut.retrieveAllExecutionDirectories(directory);
+        List<File> paths = cut.retrieveAllExecutionDirectories(directory, "buildInformation.json");
         FileUtils.deleteQuietly(directory);
         // THEN
-        Assertions.assertThat(paths).isEmpty();
+        assertThat(paths).isEmpty();
     }
 
     @Test
@@ -522,9 +524,9 @@ public class ExecutionServiceTest {
         try {
             new File(directory, "buildInformation.json").createNewFile();
             // When
-            boolean result = cut.isExecutionDirectory(directory);
+            boolean result = cut.isExecutionDirectory(directory, "buildInformation.json");
             // Then
-            Assertions.assertThat(result).isTrue();
+            assertThat(result).isTrue();
         } finally {
             FileUtils.deleteQuietly(directory);
         }
@@ -536,9 +538,9 @@ public class ExecutionServiceTest {
         try {
             test.createNewFile();
             // When
-            boolean result = cut.isExecutionDirectory(test);
+            boolean result = cut.isExecutionDirectory(test, "buildInformation.json");
             // Then
-            Assertions.assertThat(result).isFalse();
+            assertThat(result).isFalse();
         } finally {
             FileUtils.deleteQuietly(test);
         }
@@ -552,9 +554,9 @@ public class ExecutionServiceTest {
         try {
             new File(directory, "buildInformation.json").createNewFile();
             // When
-            boolean result = cut.isExecutionDirectory(directory);
+            boolean result = cut.isExecutionDirectory(directory, "buildInformation.json");
             // Then
-            Assertions.assertThat(result).isFalse();
+            assertThat(result).isFalse();
         } finally {
             FileUtils.deleteQuietly(directory);
         }
@@ -568,9 +570,9 @@ public class ExecutionServiceTest {
         directory.mkdirs();
         try {
             // When
-            boolean result = cut.isExecutionDirectory(directory);
+            boolean result = cut.isExecutionDirectory(directory, "buildInformation.json");
             // Then
-            Assertions.assertThat(result).isFalse();
+            assertThat(result).isFalse();
         } finally {
             FileUtils.deleteQuietly(directory);
         }

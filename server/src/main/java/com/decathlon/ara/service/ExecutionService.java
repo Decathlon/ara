@@ -374,7 +374,8 @@ public class ExecutionService {
                 .replace(Settings.BRANCH_VARIABLE, branch)
                 .replace(Settings.CYCLE_VARIABLE, cycle);
         File destinationDirectory = new File(path, "incoming");
-        List<File> executionDirectories = this.unzipExecutions(destinationDirectory, zipFile);
+        String buildInformationFilePath = settingService.get(projectId, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH);
+        List<File> executionDirectories = this.unzipExecutions(destinationDirectory, zipFile, buildInformationFilePath);
         for (final File executionDirectory : executionDirectories) {
             uploadSpecificDirectory(projectId, branch, cycle, executionDirectory);
         }
@@ -393,19 +394,19 @@ public class ExecutionService {
         executionIndexerService.indexExecution(plannedIndexation);
     }
 
-    List<File> unzipExecutions(File destinationDirectory, MultipartFile zipFile) throws IOException {
+    List<File> unzipExecutions(File destinationDirectory, MultipartFile zipFile, String buildInformationFilePath) throws IOException {
         Files.createDirectories(destinationDirectory.toPath());
         this.archiveService.unzip(zipFile, destinationDirectory);
-        return retrieveAllExecutionDirectories(destinationDirectory);
+        return retrieveAllExecutionDirectories(destinationDirectory, buildInformationFilePath);
     }
 
-    List<File> retrieveAllExecutionDirectories(File file) {
+    List<File> retrieveAllExecutionDirectories(File file, String buildInformationFilePath) {
         if (ArrayUtils.isEmpty(file.list())) {
             log.warn("No entries found in the zip file {}", file.getAbsolutePath());
             return new ArrayList<>();
         }
 
-        if (isExecutionDirectory(file)) {
+        if (isExecutionDirectory(file, buildInformationFilePath)) {
             return Collections.singletonList(file);
         }
 
@@ -413,14 +414,14 @@ public class ExecutionService {
         File[] entries = file.listFiles();
         if (null != entries) {
             executionDirectories = Arrays.asList(entries).stream()
-                    .filter(this::isExecutionDirectory)
+                    .filter(f -> isExecutionDirectory(f, buildInformationFilePath))
                     .collect(Collectors.toList());
         }
         return executionDirectories;
     }
 
-    Boolean isExecutionDirectory(File path) {
-        return path.isDirectory() && path.getName().matches("[0-9]+")
-                && new File(path, "buildInformation.json").exists();
+    Boolean isExecutionDirectory(File file, String buildInformationFilePath) {
+        return file.isDirectory() && file.getName().matches("[0-9]+")
+                && new File(file, buildInformationFilePath).exists();
     }
 }

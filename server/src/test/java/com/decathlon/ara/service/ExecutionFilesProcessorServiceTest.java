@@ -24,6 +24,7 @@ import com.decathlon.ara.domain.*;
 import com.decathlon.ara.domain.enumeration.*;
 import com.decathlon.ara.repository.*;
 import com.decathlon.ara.scenario.common.strategy.ScenariosIndexerStrategy;
+import com.decathlon.ara.service.support.Settings;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
@@ -84,6 +85,9 @@ public class ExecutionFilesProcessorServiceTest {
     @Mock
     private ScenariosIndexerStrategy scenariosIndexerStrategy;
 
+    @Mock
+    private FileProcessorService fileProcessorService;
+
     @InjectMocks
     private ExecutionFilesProcessorService cut;
 
@@ -136,7 +140,7 @@ public class ExecutionFilesProcessorServiceTest {
     }
 
     @Test
-    public void getExecution_returnEmpty_whenExecutionFolderIsEmpty(){
+    public void getExecution_returnEmpty_whenNoExecutionBuildFound(){
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
         File executionFile = mock(File.class);
@@ -144,8 +148,10 @@ public class ExecutionFilesProcessorServiceTest {
 
         // When
         when(plannedIndexation.getExecutionFolder()).thenReturn(executionFile);
+        when(settingService.get(1L, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH)).thenReturn(BUILD_INFORMATION_FILE_NAME);
+        when(cycleDefinition.getProjectId()).thenReturn(1L);
         when(executionFile.getAbsolutePath()).thenReturn("/execution/absolute/path");
-        when(executionFile.listFiles()).thenReturn(new File[0]);
+        when(fileProcessorService.getMappedObjectFromFile(executionFile, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.empty());
         when(plannedIndexation.getCycleDefinition()).thenReturn(cycleDefinition);
 
         // Then
@@ -157,40 +163,11 @@ public class ExecutionFilesProcessorServiceTest {
     }
 
     @Test
-    public void getExecution_returnEmpty_whenExceptionThrownWhileAccessingTheBuildInformationFile() throws IOException {
+    public void getExecution_returnEmpty_whenDoneExecutionFound() {
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
         File executionFile = mock(File.class);
         CycleDefinition cycleDefinition = mock(CycleDefinition.class);
-
-        File executionBuildInformationFile = mock(File.class);
-
-        // When
-        when(plannedIndexation.getExecutionFolder()).thenReturn(executionFile);
-        when(executionFile.getAbsolutePath()).thenReturn("/execution/absolute/path");
-        when(executionFile.listFiles()).thenReturn(new File[] {executionBuildInformationFile});
-        when(executionBuildInformationFile.isFile()).thenReturn(true);
-        when(executionBuildInformationFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
-        when(executionBuildInformationFile.getAbsolutePath()).thenReturn("/execution/absolute/path/to/build/information/file");
-        when(plannedIndexation.getCycleDefinition()).thenReturn(cycleDefinition);
-        when(objectMapper.readValue(executionBuildInformationFile, Build.class)).thenThrow(new IOException("Error while reading the execution build information file!"));
-
-        // Then
-        Optional<Execution> execution = cut.getExecution(plannedIndexation);
-        assertThat(execution).isEmpty();
-        verify(executionCompletionRequestRepository, never()).delete(any(ExecutionCompletionRequest.class));
-        verify(qualityService, never()).computeQuality(any(Execution.class));
-        verify(scenariosIndexerStrategy, never()).getScenariosIndexer(any(Technology.class));
-    }
-
-    @Test
-    public void getExecution_returnEmpty_whenDoneExecutionFound() throws IOException {
-        // Given
-        PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
-        File executionFile = mock(File.class);
-        CycleDefinition cycleDefinition = mock(CycleDefinition.class);
-
-        File executionBuildInformationFile = mock(File.class);
 
         Build executionBuild = mock(Build.class);
 
@@ -198,12 +175,10 @@ public class ExecutionFilesProcessorServiceTest {
 
         // When
         when(plannedIndexation.getExecutionFolder()).thenReturn(executionFile);
-        when(executionFile.listFiles()).thenReturn(new File[] {executionBuildInformationFile});
-        when(executionBuildInformationFile.isFile()).thenReturn(true);
-        when(executionBuildInformationFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
+        when(settingService.get(1L, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH)).thenReturn(BUILD_INFORMATION_FILE_NAME);
         when(plannedIndexation.getCycleDefinition()).thenReturn(cycleDefinition);
         when(cycleDefinition.getProjectId()).thenReturn(1L);
-        when(objectMapper.readValue(executionBuildInformationFile, Build.class)).thenReturn(executionBuild);
+        when(fileProcessorService.getMappedObjectFromFile(executionFile, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(executionBuild));
         when(executionBuild.getLink()).thenReturn("/execution/path/to/folder");
         when(executionBuild.getUrl()).thenReturn("http://build.fr/execution");
         when(executionRepository.findByProjectIdAndJobUrlOrJobLink(1L, "http://build.fr/execution", "/execution/path/to/folder")).thenReturn(Optional.of(previousExecution));
@@ -219,37 +194,30 @@ public class ExecutionFilesProcessorServiceTest {
     }
 
     @Test
-    public void getExecution_returnEmpty_whenNoCycleDefinitionFoundAndExecutionNotDoneAndNoExecutionCompletionRequest() throws IOException {
+    public void getExecution_returnEmpty_whenNoCycleDefinitionFoundAndExecutionNotDoneAndNoExecutionCompletionRequest() {
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
         File executionFile = mock(File.class);
         CycleDefinition cycleDefinition = mock(CycleDefinition.class);
 
-        File executionBuildInformationFile = mock(File.class);
-
         Build executionBuild = mock(Build.class);
 
         Execution previousExecution = mock(Execution.class);
 
-        File cycleDefinitionFile = mock(File.class);
-
         // When
         when(plannedIndexation.getExecutionFolder()).thenReturn(executionFile);
-        when(executionFile.listFiles()).thenReturn(new File[] {executionBuildInformationFile, cycleDefinitionFile});
-        when(executionBuildInformationFile.isFile()).thenReturn(true);
-        when(executionBuildInformationFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
+        when(settingService.get(1L, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH)).thenReturn(BUILD_INFORMATION_FILE_NAME);
+        when(settingService.get(1L, Settings.EXECUTION_INDEXER_FILE_CYCLE_DEFINITION_PATH)).thenReturn(CYCLE_DEFINITION_FILE_NAME);
         when(plannedIndexation.getCycleDefinition()).thenReturn(cycleDefinition);
         when(cycleDefinition.getProjectId()).thenReturn(1L);
-        when(objectMapper.readValue(executionBuildInformationFile, Build.class)).thenReturn(executionBuild);
+        when(fileProcessorService.getMappedObjectFromFile(executionFile, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(executionBuild));
         when(executionBuild.getLink()).thenReturn("/execution/path/to/folder");
         when(executionBuild.getUrl()).thenReturn("http://build.fr/execution");
         when(executionRepository.findByProjectIdAndJobUrlOrJobLink(1L, "http://build.fr/execution", "/execution/path/to/folder")).thenReturn(Optional.of(previousExecution));
         when(previousExecution.getStatus()).thenReturn(JobStatus.UNAVAILABLE);
         when(previousExecution.getId()).thenReturn(1L);
         when(executionCompletionRequestRepository.findById("http://build.fr/execution")).thenReturn(Optional.empty());
-        when(cycleDefinitionFile.isFile()).thenReturn(true);
-        when(cycleDefinitionFile.getName()).thenReturn(CYCLE_DEFINITION_FILE_NAME);
-        when(objectMapper.readValue(cycleDefinitionFile, CycleDef.class)).thenReturn(null);
+        when(fileProcessorService.getMappedObjectFromFile(executionFile, CYCLE_DEFINITION_FILE_NAME, CycleDef.class)).thenReturn(Optional.empty());
 
         // Then
         Optional<Execution> execution = cut.getExecution(plannedIndexation);
@@ -260,31 +228,25 @@ public class ExecutionFilesProcessorServiceTest {
     }
 
     @Test
-    public void getExecution_returnBlockedExecution_whenNoCycleDefinitionFoundButExecutionDoneAndNoExecutionCompletionRequest() throws IOException {
+    public void getExecution_returnBlockedExecution_whenNoCycleDefinitionFoundButExecutionDoneAndNoExecutionCompletionRequest() {
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
         File executionFile = mock(File.class);
         CycleDefinition cycleDefinition = mock(CycleDefinition.class);
 
-        File executionBuildInformationFile = mock(File.class);
-
         Build executionBuild = mock(Build.class);
 
         Execution previousExecution = mock(Execution.class);
 
-        File cycleDefinitionFile = mock(File.class);
-
         // When
         when(plannedIndexation.getExecutionFolder()).thenReturn(executionFile);
-        when(executionFile.listFiles()).thenReturn(new File[] {executionBuildInformationFile, cycleDefinitionFile});
-        when(executionFile.getAbsolutePath()).thenReturn("/execution/path/to/cycle/definition/file");
-        when(executionBuildInformationFile.isFile()).thenReturn(true);
-        when(executionBuildInformationFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
+        when(settingService.get(1L, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH)).thenReturn(BUILD_INFORMATION_FILE_NAME);
+        when(settingService.get(1L, Settings.EXECUTION_INDEXER_FILE_CYCLE_DEFINITION_PATH)).thenReturn(CYCLE_DEFINITION_FILE_NAME);
         when(plannedIndexation.getCycleDefinition()).thenReturn(cycleDefinition);
         when(cycleDefinition.getProjectId()).thenReturn(1L);
         when(cycleDefinition.getBranch()).thenReturn("develop");
         when(cycleDefinition.getName()).thenReturn("day");
-        when(objectMapper.readValue(executionBuildInformationFile, Build.class)).thenReturn(executionBuild);
+        when(fileProcessorService.getMappedObjectFromFile(executionFile, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(executionBuild));
         when(executionBuild.getLink()).thenReturn("/execution/path/to/folder");
         when(executionBuild.getUrl()).thenReturn("http://build.fr/execution");
         when(executionBuild.getResult()).thenReturn(Result.SUCCESS);
@@ -299,9 +261,7 @@ public class ExecutionFilesProcessorServiceTest {
         when(previousExecution.getStatus()).thenReturn(JobStatus.UNAVAILABLE);
         when(previousExecution.getId()).thenReturn(1L);
         when(executionCompletionRequestRepository.findById("http://build.fr/execution")).thenReturn(Optional.empty());
-        when(cycleDefinitionFile.isFile()).thenReturn(true);
-        when(cycleDefinitionFile.getName()).thenReturn(CYCLE_DEFINITION_FILE_NAME);
-        when(objectMapper.readValue(cycleDefinitionFile, CycleDef.class)).thenThrow(new IOException("Couldn't read the cycle definition file!!!"));
+        when(fileProcessorService.getMappedObjectFromFile(executionFile, CYCLE_DEFINITION_FILE_NAME, CycleDef.class)).thenReturn(Optional.empty());
 
         // Then
         Optional<Execution> execution = cut.getExecution(plannedIndexation);
@@ -333,32 +293,27 @@ public class ExecutionFilesProcessorServiceTest {
     }
 
     @Test
-    public void getExecution_returnBlockedExecution_whenNoCycleDefinitionFoundButExecutionNotDoneButExecutionCompletionRequestFound() throws IOException {
+    public void getExecution_returnBlockedExecution_whenNoCycleDefinitionFoundButExecutionNotDoneButExecutionCompletionRequestFound() {
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
         File executionFile = mock(File.class);
         CycleDefinition cycleDefinition = mock(CycleDefinition.class);
 
-        File executionBuildInformationFile = mock(File.class);
-
         Build executionBuild = mock(Build.class);
 
         Execution previousExecution = mock(Execution.class);
-
-        File cycleDefinitionFile = mock(File.class);
 
         ExecutionCompletionRequest executionCompletionRequest = mock(ExecutionCompletionRequest.class);
 
         // When
         when(plannedIndexation.getExecutionFolder()).thenReturn(executionFile);
-        when(executionFile.listFiles()).thenReturn(new File[] {executionBuildInformationFile, cycleDefinitionFile});
-        when(executionBuildInformationFile.isFile()).thenReturn(true);
-        when(executionBuildInformationFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
+        when(settingService.get(1L, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH)).thenReturn(BUILD_INFORMATION_FILE_NAME);
+        when(settingService.get(1L, Settings.EXECUTION_INDEXER_FILE_CYCLE_DEFINITION_PATH)).thenReturn(CYCLE_DEFINITION_FILE_NAME);
         when(plannedIndexation.getCycleDefinition()).thenReturn(cycleDefinition);
         when(cycleDefinition.getProjectId()).thenReturn(1L);
         when(cycleDefinition.getBranch()).thenReturn("develop");
         when(cycleDefinition.getName()).thenReturn("day");
-        when(objectMapper.readValue(executionBuildInformationFile, Build.class)).thenReturn(executionBuild);
+        when(fileProcessorService.getMappedObjectFromFile(executionFile, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(executionBuild));
         when(executionBuild.getLink()).thenReturn("/execution/path/to/folder");
         when(executionBuild.getUrl()).thenReturn("http://build.fr/execution");
         when(executionBuild.getResult()).thenReturn(Result.NOT_BUILT);
@@ -373,9 +328,7 @@ public class ExecutionFilesProcessorServiceTest {
         when(previousExecution.getStatus()).thenReturn(JobStatus.UNAVAILABLE);
         when(previousExecution.getId()).thenReturn(1L);
         when(executionCompletionRequestRepository.findById("http://build.fr/execution")).thenReturn(Optional.of(executionCompletionRequest));
-        when(cycleDefinitionFile.isFile()).thenReturn(true);
-        when(cycleDefinitionFile.getName()).thenReturn(CYCLE_DEFINITION_FILE_NAME);
-        when(objectMapper.readValue(cycleDefinitionFile, CycleDef.class)).thenReturn(null);
+        when(fileProcessorService.getMappedObjectFromFile(executionFile, CYCLE_DEFINITION_FILE_NAME, CycleDef.class)).thenReturn(Optional.empty());
 
         // Then
         Optional<Execution> execution = cut.getExecution(plannedIndexation);
@@ -427,14 +380,14 @@ public class ExecutionFilesProcessorServiceTest {
 
         // When
         when(plannedIndexation.getExecutionFolder()).thenReturn(executionFile);
+        when(settingService.get(1L, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH)).thenReturn(BUILD_INFORMATION_FILE_NAME);
+        when(settingService.get(1L, Settings.EXECUTION_INDEXER_FILE_CYCLE_DEFINITION_PATH)).thenReturn(CYCLE_DEFINITION_FILE_NAME);
         when(executionFile.listFiles()).thenReturn(new File[] {executionBuildInformationFile, cycleDefinitionFile});
-        when(executionBuildInformationFile.isFile()).thenReturn(true);
-        when(executionBuildInformationFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
         when(plannedIndexation.getCycleDefinition()).thenReturn(cycleDefinition);
         when(cycleDefinition.getProjectId()).thenReturn(1L);
         when(cycleDefinition.getBranch()).thenReturn("develop");
         when(cycleDefinition.getName()).thenReturn("day");
-        when(objectMapper.readValue(executionBuildInformationFile, Build.class)).thenReturn(executionBuild);
+        when(fileProcessorService.getMappedObjectFromFile(executionFile, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(executionBuild));
         when(executionBuild.getLink()).thenReturn("/execution/path/to/folder");
         when(executionBuild.getUrl()).thenReturn("http://build.fr/execution");
         when(executionBuild.getResult()).thenReturn(Result.SUCCESS);
@@ -449,9 +402,7 @@ public class ExecutionFilesProcessorServiceTest {
         when(previousExecution.getStatus()).thenReturn(JobStatus.UNAVAILABLE);
         when(previousExecution.getId()).thenReturn(1L);
         when(executionCompletionRequestRepository.findById("http://build.fr/execution")).thenReturn(Optional.empty());
-        when(cycleDefinitionFile.isFile()).thenReturn(true);
-        when(cycleDefinitionFile.getName()).thenReturn(CYCLE_DEFINITION_FILE_NAME);
-        when(objectMapper.readValue(cycleDefinitionFile, CycleDef.class)).thenReturn(cycleDef);
+        when(fileProcessorService.getMappedObjectFromFile(executionFile, CYCLE_DEFINITION_FILE_NAME, CycleDef.class)).thenReturn(Optional.of(cycleDef));
         when(cycleDef.isBlockingValidation()).thenReturn(true);
         when(cycleDef.getQualityThresholds()).thenReturn(qualityThresholds);
         when(objectMapper.writeValueAsString(qualityThresholds)).thenReturn("final-quality-threshold");
@@ -535,10 +486,6 @@ public class ExecutionFilesProcessorServiceTest {
         File esBuildFile = mock(File.class);
         File frBuildFile = mock(File.class);
 
-        File apiBuildFile = mock(File.class);
-        File desktopBuildFile = mock(File.class);
-        File mobileBuildFile = mock(File.class);
-
         Build esBuild = mock(Build.class);
         Build frBuild = mock(Build.class);
 
@@ -548,6 +495,8 @@ public class ExecutionFilesProcessorServiceTest {
 
         // When
         when(plannedIndexation.getExecutionFolder()).thenReturn(executionFile);
+        when(settingService.get(1L, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH)).thenReturn(BUILD_INFORMATION_FILE_NAME);
+        when(settingService.get(1L, Settings.EXECUTION_INDEXER_FILE_CYCLE_DEFINITION_PATH)).thenReturn(CYCLE_DEFINITION_FILE_NAME);
         when(executionFile.listFiles()).thenReturn(
                 new File[] {
                         executionBuildInformationFile,
@@ -555,14 +504,11 @@ public class ExecutionFilesProcessorServiceTest {
                         esFolder,
                         frFolder
                 });
-        when(executionBuildInformationFile.isFile()).thenReturn(true);
-        when(executionBuildInformationFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
         when(plannedIndexation.getCycleDefinition()).thenReturn(cycleDefinition);
         when(cycleDefinition.getProjectId()).thenReturn(1L);
         when(cycleDefinition.getBranch()).thenReturn("develop");
         when(cycleDefinition.getName()).thenReturn("day");
 
-        when(objectMapper.readValue(executionBuildInformationFile, Build.class)).thenReturn(executionBuild);
         when(executionBuild.getLink()).thenReturn("/execution/path/to/folder");
         when(executionBuild.getUrl()).thenReturn("http://build.fr/execution");
         when(executionBuild.getResult()).thenReturn(Result.SUCCESS);
@@ -573,18 +519,17 @@ public class ExecutionFilesProcessorServiceTest {
         when(executionBuild.getEstimatedDuration()).thenReturn(100L);
         when(executionBuild.getTimestamp()).thenReturn(1589200515000L);
         when(executionBuild.getVersionTimestamp()).thenReturn(1594718326000L);
+        when(fileProcessorService.getMappedObjectFromFile(executionFile, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(executionBuild));
 
         when(executionRepository.findByProjectIdAndJobUrlOrJobLink(1L, "http://build.fr/execution", "/execution/path/to/folder")).thenReturn(Optional.of(previousExecution));
         when(previousExecution.getStatus()).thenReturn(JobStatus.UNAVAILABLE);
         when(previousExecution.getId()).thenReturn(1L);
         when(executionCompletionRequestRepository.findById("http://build.fr/execution")).thenReturn(Optional.empty());
-        when(cycleDefinitionFile.isFile()).thenReturn(true);
-        when(cycleDefinitionFile.getName()).thenReturn(CYCLE_DEFINITION_FILE_NAME);
-        when(objectMapper.readValue(cycleDefinitionFile, CycleDef.class)).thenReturn(cycleDef);
         when(cycleDef.isBlockingValidation()).thenReturn(true);
         when(cycleDef.getPlatformsRules()).thenReturn(platformRules);
         when(cycleDef.getQualityThresholds()).thenReturn(qualityThresholds);
         when(objectMapper.writeValueAsString(qualityThresholds)).thenReturn("final-quality-threshold");
+        when(fileProcessorService.getMappedObjectFromFile(executionFile, CYCLE_DEFINITION_FILE_NAME, CycleDef.class)).thenReturn(Optional.of(cycleDef));
 
         when(platformRule11.isEnabled()).thenReturn(true);
         when(platformRule11.getCountry()).thenReturn("ES");
@@ -616,9 +561,6 @@ public class ExecutionFilesProcessorServiceTest {
         when(countryRepository.findAllByProjectIdOrderByCode(1L)).thenReturn(Arrays.asList(frCountry, esCountry, deCountry));
         when(typeRepository.findAllByProjectIdOrderByCode(1L)).thenReturn(Arrays.asList(apiType, desktopType, mobileType, anotherType));
 
-        when(esBuildFile.isFile()).thenReturn(true);
-        when(esBuildFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
-        when(objectMapper.readValue(esBuildFile, Build.class)).thenReturn(esBuild);
         when(esBuild.getLink()).thenReturn("/execution/path/to/folder/es");
         when(esBuild.getUrl()).thenReturn("http://build.fr/execution/es");
         when(esBuild.getResult()).thenReturn(Result.SUCCESS);
@@ -626,10 +568,8 @@ public class ExecutionFilesProcessorServiceTest {
         when(esBuild.getDuration()).thenReturn(200L);
         when(esBuild.getEstimatedDuration()).thenReturn(300L);
         when(esBuild.getTimestamp()).thenReturn(1590200515000L);
+        when(fileProcessorService.getMappedObjectFromFile(esFolder, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(esBuild));
 
-        when(frBuildFile.isFile()).thenReturn(true);
-        when(frBuildFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
-        when(objectMapper.readValue(frBuildFile, Build.class)).thenReturn(frBuild);
         when(frBuild.getLink()).thenReturn("/execution/path/to/folder/fr");
         when(frBuild.getUrl()).thenReturn("http://build.fr/execution/fr");
         when(frBuild.getResult()).thenReturn(Result.UNSTABLE);
@@ -637,6 +577,7 @@ public class ExecutionFilesProcessorServiceTest {
         when(frBuild.getDuration()).thenReturn(500L);
         when(frBuild.getEstimatedDuration()).thenReturn(99L);
         when(frBuild.getTimestamp()).thenReturn(1589211515000L);
+        when(fileProcessorService.getMappedObjectFromFile(frFolder, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(frBuild));
 
         when(esFolder.isDirectory()).thenReturn(true);
         when(esFolder.getName()).thenReturn("es");
@@ -645,9 +586,6 @@ public class ExecutionFilesProcessorServiceTest {
         when(frFolder.getName()).thenReturn("fr");
         when(frFolder.listFiles()).thenReturn(new File[]{desktopTypeFolder, mobileTypeFolder, frBuildFile});
 
-        when(apiBuildFile.isFile()).thenReturn(true);
-        when(apiBuildFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
-        when(objectMapper.readValue(apiBuildFile, Build.class)).thenReturn(apiBuild);
         when(apiBuild.getLink()).thenReturn("/execution/path/to/folder/api");
         when(apiBuild.getUrl()).thenReturn("http://build.fr/execution/api");
         when(apiBuild.isBuilding()).thenReturn(true);
@@ -655,10 +593,8 @@ public class ExecutionFilesProcessorServiceTest {
         when(apiBuild.getEstimatedDuration()).thenReturn(185L);
         when(apiBuild.getTimestamp()).thenReturn(1666200515000L);
         when(apiBuild.getComment()).thenReturn("comment for api build");
+        when(fileProcessorService.getMappedObjectFromFile(apiTypeFolder, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(apiBuild));
 
-        when(desktopBuildFile.isFile()).thenReturn(true);
-        when(desktopBuildFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
-        when(objectMapper.readValue(desktopBuildFile, Build.class)).thenReturn(desktopBuild);
         when(desktopBuild.getLink()).thenReturn("/execution/path/to/folder/desktop");
         when(desktopBuild.getUrl()).thenReturn("http://build.fr/execution/desktop");
         when(desktopBuild.isBuilding()).thenReturn(false);
@@ -666,10 +602,8 @@ public class ExecutionFilesProcessorServiceTest {
         when(desktopBuild.getEstimatedDuration()).thenReturn(745L);
         when(desktopBuild.getTimestamp()).thenReturn(1589230515100L);
         when(desktopBuild.getComment()).thenReturn("comment for desktop build");
+        when(fileProcessorService.getMappedObjectFromFile(desktopTypeFolder, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(desktopBuild));
 
-        when(mobileBuildFile.isFile()).thenReturn(true);
-        when(mobileBuildFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
-        when(objectMapper.readValue(mobileBuildFile, Build.class)).thenReturn(mobileBuild);
         when(mobileBuild.getLink()).thenReturn("/execution/path/to/folder/mobile");
         when(mobileBuild.getUrl()).thenReturn("http://build.fr/execution/mobile");
         when(mobileBuild.isBuilding()).thenReturn(true);
@@ -677,16 +611,14 @@ public class ExecutionFilesProcessorServiceTest {
         when(mobileBuild.getEstimatedDuration()).thenReturn(3050L);
         when(mobileBuild.getTimestamp()).thenReturn(1512345515000L);
         when(mobileBuild.getComment()).thenReturn("comment for mobile build");
+        when(fileProcessorService.getMappedObjectFromFile(mobileTypeFolder, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(mobileBuild));
 
         when(apiTypeFolder.isDirectory()).thenReturn(true);
         when(apiTypeFolder.getName()).thenReturn("api");
-        when(apiTypeFolder.listFiles()).thenReturn(new File[]{apiBuildFile});
         when(desktopTypeFolder.isDirectory()).thenReturn(true);
         when(desktopTypeFolder.getName()).thenReturn("desktop");
-        when(desktopTypeFolder.listFiles()).thenReturn(new File[]{desktopBuildFile});
         when(mobileTypeFolder.isDirectory()).thenReturn(true);
         when(mobileTypeFolder.getName()).thenReturn("mobile");
-        when(mobileTypeFolder.listFiles()).thenReturn(new File[]{mobileBuildFile});
 
         // Then
         Optional<Execution> execution = cut.getExecution(plannedIndexation);
@@ -861,14 +793,14 @@ public class ExecutionFilesProcessorServiceTest {
 
         File esBuildFile = mock(File.class);
 
-        File apiBuildFile = mock(File.class);
-
         Build esBuild = mock(Build.class);
 
         Build apiBuild = mock(Build.class);
 
         // When
         when(plannedIndexation.getExecutionFolder()).thenReturn(executionFile);
+        when(settingService.get(1L, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH)).thenReturn(BUILD_INFORMATION_FILE_NAME);
+        when(settingService.get(1L, Settings.EXECUTION_INDEXER_FILE_CYCLE_DEFINITION_PATH)).thenReturn(CYCLE_DEFINITION_FILE_NAME);
         when(executionFile.listFiles()).thenReturn(
                 new File[] {
                         executionBuildInformationFile,
@@ -876,14 +808,11 @@ public class ExecutionFilesProcessorServiceTest {
                         esFolder,
                         frFolder
                 });
-        when(executionBuildInformationFile.isFile()).thenReturn(true);
-        when(executionBuildInformationFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
         when(plannedIndexation.getCycleDefinition()).thenReturn(cycleDefinition);
         when(cycleDefinition.getProjectId()).thenReturn(1L);
         when(cycleDefinition.getBranch()).thenReturn("develop");
         when(cycleDefinition.getName()).thenReturn("day");
 
-        when(objectMapper.readValue(executionBuildInformationFile, Build.class)).thenReturn(executionBuild);
         when(executionBuild.getLink()).thenReturn("/execution/path/to/folder");
         when(executionBuild.getUrl()).thenReturn("http://build.fr/execution");
         when(executionBuild.getResult()).thenReturn(Result.SUCCESS);
@@ -894,18 +823,17 @@ public class ExecutionFilesProcessorServiceTest {
         when(executionBuild.getEstimatedDuration()).thenReturn(100L);
         when(executionBuild.getTimestamp()).thenReturn(1589200515000L);
         when(executionBuild.getVersionTimestamp()).thenReturn(1594718326000L);
+        when(fileProcessorService.getMappedObjectFromFile(executionFile, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(executionBuild));
 
         when(executionRepository.findByProjectIdAndJobUrlOrJobLink(1L, "http://build.fr/execution", "/execution/path/to/folder")).thenReturn(Optional.of(previousExecution));
         when(previousExecution.getStatus()).thenReturn(JobStatus.UNAVAILABLE);
         when(previousExecution.getId()).thenReturn(1L);
         when(executionCompletionRequestRepository.findById("http://build.fr/execution")).thenReturn(Optional.empty());
-        when(cycleDefinitionFile.isFile()).thenReturn(true);
-        when(cycleDefinitionFile.getName()).thenReturn(CYCLE_DEFINITION_FILE_NAME);
-        when(objectMapper.readValue(cycleDefinitionFile, CycleDef.class)).thenReturn(cycleDef);
         when(cycleDef.isBlockingValidation()).thenReturn(true);
         when(cycleDef.getPlatformsRules()).thenReturn(platformRules);
         when(cycleDef.getQualityThresholds()).thenReturn(qualityThresholds);
         when(objectMapper.writeValueAsString(qualityThresholds)).thenReturn("final-quality-threshold");
+        when(fileProcessorService.getMappedObjectFromFile(executionFile, CYCLE_DEFINITION_FILE_NAME, CycleDef.class)).thenReturn(Optional.of(cycleDef));
 
         when(platformRule11.isEnabled()).thenReturn(true);
         when(platformRule11.getCountry()).thenReturn("es");
@@ -927,9 +855,6 @@ public class ExecutionFilesProcessorServiceTest {
         when(countryRepository.findAllByProjectIdOrderByCode(1L)).thenReturn(Arrays.asList(deCountry, esCountry));
         when(typeRepository.findAllByProjectIdOrderByCode(1L)).thenReturn(Arrays.asList(apiType, desktopType, mobileType, anotherType));
 
-        when(esBuildFile.isFile()).thenReturn(true);
-        when(esBuildFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
-        when(objectMapper.readValue(esBuildFile, Build.class)).thenReturn(esBuild);
         when(esBuild.getLink()).thenReturn("/execution/path/to/folder/es");
         when(esBuild.getUrl()).thenReturn("http://build.fr/execution/es");
         when(esBuild.getResult()).thenReturn(Result.SUCCESS);
@@ -937,15 +862,13 @@ public class ExecutionFilesProcessorServiceTest {
         when(esBuild.getDuration()).thenReturn(200L);
         when(esBuild.getEstimatedDuration()).thenReturn(300L);
         when(esBuild.getTimestamp()).thenReturn(1590200515000L);
+        when(fileProcessorService.getMappedObjectFromFile(esFolder, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(esBuild));
 
         when(esFolder.isDirectory()).thenReturn(true);
         when(esFolder.getName()).thenReturn("es");
         when(esFolder.listFiles()).thenReturn(new File[]{apiTypeFolder, esBuildFile});
         when(frFolder.isDirectory()).thenReturn(true);
 
-        when(apiBuildFile.isFile()).thenReturn(true);
-        when(apiBuildFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
-        when(objectMapper.readValue(apiBuildFile, Build.class)).thenReturn(apiBuild);
         when(apiBuild.getLink()).thenReturn("/execution/path/to/folder/api");
         when(apiBuild.getUrl()).thenReturn("http://build.fr/execution/api");
         when(apiBuild.isBuilding()).thenReturn(true);
@@ -953,10 +876,10 @@ public class ExecutionFilesProcessorServiceTest {
         when(apiBuild.getEstimatedDuration()).thenReturn(185L);
         when(apiBuild.getTimestamp()).thenReturn(1666200515000L);
         when(apiBuild.getComment()).thenReturn("comment for api build");
+        when(fileProcessorService.getMappedObjectFromFile(apiTypeFolder, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(apiBuild));
 
         when(apiTypeFolder.isDirectory()).thenReturn(true);
         when(apiTypeFolder.getName()).thenReturn("api");
-        when(apiTypeFolder.listFiles()).thenReturn(new File[]{apiBuildFile});
 
         // Then
         Optional<Execution> execution = cut.getExecution(plannedIndexation);
@@ -1089,28 +1012,25 @@ public class ExecutionFilesProcessorServiceTest {
 
         File esBuildFile = mock(File.class);
 
-        File apiBuildFile = mock(File.class);
-
         Build esBuild = mock(Build.class);
 
         Build apiBuild = mock(Build.class);
 
         // When
         when(plannedIndexation.getExecutionFolder()).thenReturn(executionFile);
+        when(settingService.get(1L, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH)).thenReturn(BUILD_INFORMATION_FILE_NAME);
+        when(settingService.get(1L, Settings.EXECUTION_INDEXER_FILE_CYCLE_DEFINITION_PATH)).thenReturn(CYCLE_DEFINITION_FILE_NAME);
         when(executionFile.listFiles()).thenReturn(
                 new File[] {
                         executionBuildInformationFile,
                         cycleDefinitionFile,
                         esFolder
                 });
-        when(executionBuildInformationFile.isFile()).thenReturn(true);
-        when(executionBuildInformationFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
         when(plannedIndexation.getCycleDefinition()).thenReturn(cycleDefinition);
         when(cycleDefinition.getProjectId()).thenReturn(1L);
         when(cycleDefinition.getBranch()).thenReturn("develop");
         when(cycleDefinition.getName()).thenReturn("day");
 
-        when(objectMapper.readValue(executionBuildInformationFile, Build.class)).thenReturn(executionBuild);
         when(executionBuild.getLink()).thenReturn("/execution/path/to/folder");
         when(executionBuild.getUrl()).thenReturn("http://build.fr/execution");
         when(executionBuild.getResult()).thenReturn(Result.SUCCESS);
@@ -1121,18 +1041,17 @@ public class ExecutionFilesProcessorServiceTest {
         when(executionBuild.getEstimatedDuration()).thenReturn(100L);
         when(executionBuild.getTimestamp()).thenReturn(1589200515000L);
         when(executionBuild.getVersionTimestamp()).thenReturn(1594718326000L);
+        when(fileProcessorService.getMappedObjectFromFile(executionFile, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(executionBuild));
 
         when(executionRepository.findByProjectIdAndJobUrlOrJobLink(1L, "http://build.fr/execution", "/execution/path/to/folder")).thenReturn(Optional.of(previousExecution));
         when(previousExecution.getStatus()).thenReturn(JobStatus.UNAVAILABLE);
         when(previousExecution.getId()).thenReturn(1L);
         when(executionCompletionRequestRepository.findById("http://build.fr/execution")).thenReturn(Optional.empty());
-        when(cycleDefinitionFile.isFile()).thenReturn(true);
-        when(cycleDefinitionFile.getName()).thenReturn(CYCLE_DEFINITION_FILE_NAME);
-        when(objectMapper.readValue(cycleDefinitionFile, CycleDef.class)).thenReturn(cycleDef);
         when(cycleDef.isBlockingValidation()).thenReturn(true);
         when(cycleDef.getPlatformsRules()).thenReturn(platformRules);
         when(cycleDef.getQualityThresholds()).thenReturn(qualityThresholds);
         when(objectMapper.writeValueAsString(qualityThresholds)).thenReturn("final-quality-threshold");
+        when(fileProcessorService.getMappedObjectFromFile(executionFile, CYCLE_DEFINITION_FILE_NAME, CycleDef.class)).thenReturn(Optional.of(cycleDef));
 
         when(platformRule11.isEnabled()).thenReturn(true);
         when(platformRule11.getCountry()).thenReturn("es");
@@ -1154,9 +1073,6 @@ public class ExecutionFilesProcessorServiceTest {
         when(countryRepository.findAllByProjectIdOrderByCode(1L)).thenReturn(Arrays.asList(frCountry, esCountry, deCountry));
         when(typeRepository.findAllByProjectIdOrderByCode(1L)).thenReturn(Arrays.asList(apiType, desktopType, mobileType, anotherType));
 
-        when(esBuildFile.isFile()).thenReturn(true);
-        when(esBuildFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
-        when(objectMapper.readValue(esBuildFile, Build.class)).thenReturn(esBuild);
         when(esBuild.getLink()).thenReturn("/execution/path/to/folder/es");
         when(esBuild.getUrl()).thenReturn("http://build.fr/execution/es");
         when(esBuild.getResult()).thenReturn(Result.SUCCESS);
@@ -1164,14 +1080,12 @@ public class ExecutionFilesProcessorServiceTest {
         when(esBuild.getDuration()).thenReturn(200L);
         when(esBuild.getEstimatedDuration()).thenReturn(300L);
         when(esBuild.getTimestamp()).thenReturn(1590200515000L);
+        when(fileProcessorService.getMappedObjectFromFile(esFolder, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(esBuild));
 
         when(esFolder.isDirectory()).thenReturn(true);
         when(esFolder.getName()).thenReturn("es");
         when(esFolder.listFiles()).thenReturn(new File[]{apiTypeFolder, esBuildFile});
 
-        when(apiBuildFile.isFile()).thenReturn(true);
-        when(apiBuildFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
-        when(objectMapper.readValue(apiBuildFile, Build.class)).thenReturn(apiBuild);
         when(apiBuild.getLink()).thenReturn("/execution/path/to/folder/api");
         when(apiBuild.getUrl()).thenReturn("http://build.fr/execution/api");
         when(apiBuild.isBuilding()).thenReturn(true);
@@ -1179,10 +1093,10 @@ public class ExecutionFilesProcessorServiceTest {
         when(apiBuild.getEstimatedDuration()).thenReturn(185L);
         when(apiBuild.getTimestamp()).thenReturn(1666200515000L);
         when(apiBuild.getComment()).thenReturn("comment for api build");
+        when(fileProcessorService.getMappedObjectFromFile(apiTypeFolder, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(apiBuild));
 
         when(apiTypeFolder.isDirectory()).thenReturn(true);
         when(apiTypeFolder.getName()).thenReturn("api");
-        when(apiTypeFolder.listFiles()).thenReturn(new File[]{apiBuildFile});
 
         // Then
         Optional<Execution> execution = cut.getExecution(plannedIndexation);
@@ -1319,9 +1233,6 @@ public class ExecutionFilesProcessorServiceTest {
         File esBuildFile = mock(File.class);
         File frBuildFile = mock(File.class);
 
-        File apiBuildFile = mock(File.class);
-        File mobileBuildFile = mock(File.class);
-
         Build esBuild = mock(Build.class);
         Build frBuild = mock(Build.class);
 
@@ -1330,6 +1241,8 @@ public class ExecutionFilesProcessorServiceTest {
 
         // When
         when(plannedIndexation.getExecutionFolder()).thenReturn(executionFile);
+        when(settingService.get(1L, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH)).thenReturn(BUILD_INFORMATION_FILE_NAME);
+        when(settingService.get(1L, Settings.EXECUTION_INDEXER_FILE_CYCLE_DEFINITION_PATH)).thenReturn(CYCLE_DEFINITION_FILE_NAME);
         when(executionFile.listFiles()).thenReturn(
                 new File[] {
                         executionBuildInformationFile,
@@ -1337,14 +1250,11 @@ public class ExecutionFilesProcessorServiceTest {
                         esFolder,
                         frFolder
                 });
-        when(executionBuildInformationFile.isFile()).thenReturn(true);
-        when(executionBuildInformationFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
         when(plannedIndexation.getCycleDefinition()).thenReturn(cycleDefinition);
         when(cycleDefinition.getProjectId()).thenReturn(1L);
         when(cycleDefinition.getBranch()).thenReturn("develop");
         when(cycleDefinition.getName()).thenReturn("day");
 
-        when(objectMapper.readValue(executionBuildInformationFile, Build.class)).thenReturn(executionBuild);
         when(executionBuild.getLink()).thenReturn("/execution/path/to/folder");
         when(executionBuild.getUrl()).thenReturn("http://build.fr/execution");
         when(executionBuild.getResult()).thenReturn(Result.SUCCESS);
@@ -1355,18 +1265,17 @@ public class ExecutionFilesProcessorServiceTest {
         when(executionBuild.getEstimatedDuration()).thenReturn(100L);
         when(executionBuild.getTimestamp()).thenReturn(1589200515000L);
         when(executionBuild.getVersionTimestamp()).thenReturn(1594718326000L);
+        when(fileProcessorService.getMappedObjectFromFile(executionFile, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(executionBuild));
 
         when(executionRepository.findByProjectIdAndJobUrlOrJobLink(1L, "http://build.fr/execution", "/execution/path/to/folder")).thenReturn(Optional.of(previousExecution));
         when(previousExecution.getStatus()).thenReturn(JobStatus.UNAVAILABLE);
         when(previousExecution.getId()).thenReturn(1L);
         when(executionCompletionRequestRepository.findById("http://build.fr/execution")).thenReturn(Optional.empty());
-        when(cycleDefinitionFile.isFile()).thenReturn(true);
-        when(cycleDefinitionFile.getName()).thenReturn(CYCLE_DEFINITION_FILE_NAME);
-        when(objectMapper.readValue(cycleDefinitionFile, CycleDef.class)).thenReturn(cycleDef);
         when(cycleDef.isBlockingValidation()).thenReturn(true);
         when(cycleDef.getPlatformsRules()).thenReturn(platformRules);
         when(cycleDef.getQualityThresholds()).thenReturn(qualityThresholds);
         when(objectMapper.writeValueAsString(qualityThresholds)).thenReturn("final-quality-threshold");
+        when(fileProcessorService.getMappedObjectFromFile(executionFile, CYCLE_DEFINITION_FILE_NAME, CycleDef.class)).thenReturn(Optional.of(cycleDef));
 
         when(platformRule11.isEnabled()).thenReturn(true);
         when(platformRule11.getCountry()).thenReturn("es");
@@ -1396,9 +1305,6 @@ public class ExecutionFilesProcessorServiceTest {
         when(countryRepository.findAllByProjectIdOrderByCode(1L)).thenReturn(Arrays.asList(frCountry, esCountry, deCountry));
         when(typeRepository.findAllByProjectIdOrderByCode(1L)).thenReturn(Arrays.asList(apiType, mobileType, anotherType));
 
-        when(esBuildFile.isFile()).thenReturn(true);
-        when(esBuildFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
-        when(objectMapper.readValue(esBuildFile, Build.class)).thenReturn(esBuild);
         when(esBuild.getLink()).thenReturn("/execution/path/to/folder/es");
         when(esBuild.getUrl()).thenReturn("http://build.fr/execution/es");
         when(esBuild.getResult()).thenReturn(Result.SUCCESS);
@@ -1406,10 +1312,8 @@ public class ExecutionFilesProcessorServiceTest {
         when(esBuild.getDuration()).thenReturn(200L);
         when(esBuild.getEstimatedDuration()).thenReturn(300L);
         when(esBuild.getTimestamp()).thenReturn(1590200515000L);
+        when(fileProcessorService.getMappedObjectFromFile(esFolder, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(esBuild));
 
-        when(frBuildFile.isFile()).thenReturn(true);
-        when(frBuildFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
-        when(objectMapper.readValue(frBuildFile, Build.class)).thenReturn(frBuild);
         when(frBuild.getLink()).thenReturn("/execution/path/to/folder/fr");
         when(frBuild.getUrl()).thenReturn("http://build.fr/execution/fr");
         when(frBuild.getResult()).thenReturn(Result.UNSTABLE);
@@ -1417,6 +1321,7 @@ public class ExecutionFilesProcessorServiceTest {
         when(frBuild.getDuration()).thenReturn(500L);
         when(frBuild.getEstimatedDuration()).thenReturn(99L);
         when(frBuild.getTimestamp()).thenReturn(1589211515000L);
+        when(fileProcessorService.getMappedObjectFromFile(frFolder, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(frBuild));
 
         when(esFolder.isDirectory()).thenReturn(true);
         when(esFolder.getName()).thenReturn("es");
@@ -1425,9 +1330,6 @@ public class ExecutionFilesProcessorServiceTest {
         when(frFolder.getName()).thenReturn("fr");
         when(frFolder.listFiles()).thenReturn(new File[]{desktopTypeFolder, mobileTypeFolder, frBuildFile});
 
-        when(apiBuildFile.isFile()).thenReturn(true);
-        when(apiBuildFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
-        when(objectMapper.readValue(apiBuildFile, Build.class)).thenReturn(apiBuild);
         when(apiBuild.getLink()).thenReturn("/execution/path/to/folder/api");
         when(apiBuild.getUrl()).thenReturn("http://build.fr/execution/api");
         when(apiBuild.isBuilding()).thenReturn(true);
@@ -1435,10 +1337,8 @@ public class ExecutionFilesProcessorServiceTest {
         when(apiBuild.getEstimatedDuration()).thenReturn(185L);
         when(apiBuild.getTimestamp()).thenReturn(1666200515000L);
         when(apiBuild.getComment()).thenReturn("comment for api build");
+        when(fileProcessorService.getMappedObjectFromFile(apiTypeFolder, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(apiBuild));
 
-        when(mobileBuildFile.isFile()).thenReturn(true);
-        when(mobileBuildFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
-        when(objectMapper.readValue(mobileBuildFile, Build.class)).thenReturn(mobileBuild);
         when(mobileBuild.getLink()).thenReturn("/execution/path/to/folder/mobile");
         when(mobileBuild.getUrl()).thenReturn("http://build.fr/execution/mobile");
         when(mobileBuild.isBuilding()).thenReturn(true);
@@ -1446,15 +1346,14 @@ public class ExecutionFilesProcessorServiceTest {
         when(mobileBuild.getEstimatedDuration()).thenReturn(3050L);
         when(mobileBuild.getTimestamp()).thenReturn(1512345515000L);
         when(mobileBuild.getComment()).thenReturn("comment for mobile build");
+        when(fileProcessorService.getMappedObjectFromFile(mobileTypeFolder, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(mobileBuild));
 
         when(apiTypeFolder.isDirectory()).thenReturn(true);
         when(apiTypeFolder.getName()).thenReturn("api");
-        when(apiTypeFolder.listFiles()).thenReturn(new File[]{apiBuildFile});
         when(desktopTypeFolder.isDirectory()).thenReturn(true);
         when(desktopTypeFolder.getName()).thenReturn("desktop");
         when(mobileTypeFolder.isDirectory()).thenReturn(true);
         when(mobileTypeFolder.getName()).thenReturn("mobile");
-        when(mobileTypeFolder.listFiles()).thenReturn(new File[]{mobileBuildFile});
 
         // Then
         Optional<Execution> execution = cut.getExecution(plannedIndexation);
@@ -1619,9 +1518,6 @@ public class ExecutionFilesProcessorServiceTest {
         File esBuildFile = mock(File.class);
         File frBuildFile = mock(File.class);
 
-        File apiBuildFile = mock(File.class);
-        File mobileBuildFile = mock(File.class);
-
         Build esBuild = mock(Build.class);
         Build frBuild = mock(Build.class);
 
@@ -1630,6 +1526,8 @@ public class ExecutionFilesProcessorServiceTest {
 
         // When
         when(plannedIndexation.getExecutionFolder()).thenReturn(executionFile);
+        when(settingService.get(1L, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH)).thenReturn(BUILD_INFORMATION_FILE_NAME);
+        when(settingService.get(1L, Settings.EXECUTION_INDEXER_FILE_CYCLE_DEFINITION_PATH)).thenReturn(CYCLE_DEFINITION_FILE_NAME);
         when(executionFile.listFiles()).thenReturn(
                 new File[] {
                         executionBuildInformationFile,
@@ -1637,14 +1535,11 @@ public class ExecutionFilesProcessorServiceTest {
                         esFolder,
                         frFolder
                 });
-        when(executionBuildInformationFile.isFile()).thenReturn(true);
-        when(executionBuildInformationFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
         when(plannedIndexation.getCycleDefinition()).thenReturn(cycleDefinition);
         when(cycleDefinition.getProjectId()).thenReturn(1L);
         when(cycleDefinition.getBranch()).thenReturn("develop");
         when(cycleDefinition.getName()).thenReturn("day");
 
-        when(objectMapper.readValue(executionBuildInformationFile, Build.class)).thenReturn(executionBuild);
         when(executionBuild.getLink()).thenReturn("/execution/path/to/folder");
         when(executionBuild.getUrl()).thenReturn("http://build.fr/execution");
         when(executionBuild.getResult()).thenReturn(Result.SUCCESS);
@@ -1655,18 +1550,17 @@ public class ExecutionFilesProcessorServiceTest {
         when(executionBuild.getEstimatedDuration()).thenReturn(100L);
         when(executionBuild.getTimestamp()).thenReturn(1589200515000L);
         when(executionBuild.getVersionTimestamp()).thenReturn(1594718326000L);
+        when(fileProcessorService.getMappedObjectFromFile(executionFile, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(executionBuild));
 
         when(executionRepository.findByProjectIdAndJobUrlOrJobLink(1L, "http://build.fr/execution", "/execution/path/to/folder")).thenReturn(Optional.of(previousExecution));
         when(previousExecution.getStatus()).thenReturn(JobStatus.UNAVAILABLE);
         when(previousExecution.getId()).thenReturn(1L);
         when(executionCompletionRequestRepository.findById("http://build.fr/execution")).thenReturn(Optional.empty());
-        when(cycleDefinitionFile.isFile()).thenReturn(true);
-        when(cycleDefinitionFile.getName()).thenReturn(CYCLE_DEFINITION_FILE_NAME);
-        when(objectMapper.readValue(cycleDefinitionFile, CycleDef.class)).thenReturn(cycleDef);
         when(cycleDef.isBlockingValidation()).thenReturn(true);
         when(cycleDef.getPlatformsRules()).thenReturn(platformRules);
         when(cycleDef.getQualityThresholds()).thenReturn(qualityThresholds);
         when(objectMapper.writeValueAsString(qualityThresholds)).thenReturn("final-quality-threshold");
+        when(fileProcessorService.getMappedObjectFromFile(executionFile, CYCLE_DEFINITION_FILE_NAME, CycleDef.class)).thenReturn(Optional.of(cycleDef));
 
         when(platformRule11.isEnabled()).thenReturn(true);
         when(platformRule11.getCountry()).thenReturn("es");
@@ -1697,9 +1591,6 @@ public class ExecutionFilesProcessorServiceTest {
         when(countryRepository.findAllByProjectIdOrderByCode(1L)).thenReturn(Arrays.asList(frCountry, esCountry, deCountry));
         when(typeRepository.findAllByProjectIdOrderByCode(1L)).thenReturn(Arrays.asList(apiType, desktopType, mobileType, anotherType));
 
-        when(esBuildFile.isFile()).thenReturn(true);
-        when(esBuildFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
-        when(objectMapper.readValue(esBuildFile, Build.class)).thenReturn(esBuild);
         when(esBuild.getLink()).thenReturn("/execution/path/to/folder/es");
         when(esBuild.getUrl()).thenReturn("http://build.fr/execution/es");
         when(esBuild.getResult()).thenReturn(Result.SUCCESS);
@@ -1707,10 +1598,8 @@ public class ExecutionFilesProcessorServiceTest {
         when(esBuild.getDuration()).thenReturn(200L);
         when(esBuild.getEstimatedDuration()).thenReturn(300L);
         when(esBuild.getTimestamp()).thenReturn(1590200515000L);
+        when(fileProcessorService.getMappedObjectFromFile(esFolder, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(esBuild));
 
-        when(frBuildFile.isFile()).thenReturn(true);
-        when(frBuildFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
-        when(objectMapper.readValue(frBuildFile, Build.class)).thenReturn(frBuild);
         when(frBuild.getLink()).thenReturn("/execution/path/to/folder/fr");
         when(frBuild.getUrl()).thenReturn("http://build.fr/execution/fr");
         when(frBuild.getResult()).thenReturn(Result.UNSTABLE);
@@ -1718,6 +1607,7 @@ public class ExecutionFilesProcessorServiceTest {
         when(frBuild.getDuration()).thenReturn(500L);
         when(frBuild.getEstimatedDuration()).thenReturn(99L);
         when(frBuild.getTimestamp()).thenReturn(1589211515000L);
+        when(fileProcessorService.getMappedObjectFromFile(frFolder, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(frBuild));
 
         when(esFolder.isDirectory()).thenReturn(true);
         when(esFolder.getName()).thenReturn("es");
@@ -1726,9 +1616,6 @@ public class ExecutionFilesProcessorServiceTest {
         when(frFolder.getName()).thenReturn("fr");
         when(frFolder.listFiles()).thenReturn(new File[]{mobileTypeFolder, frBuildFile});
 
-        when(apiBuildFile.isFile()).thenReturn(true);
-        when(apiBuildFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
-        when(objectMapper.readValue(apiBuildFile, Build.class)).thenReturn(apiBuild);
         when(apiBuild.getLink()).thenReturn("/execution/path/to/folder/api");
         when(apiBuild.getUrl()).thenReturn("http://build.fr/execution/api");
         when(apiBuild.isBuilding()).thenReturn(true);
@@ -1736,10 +1623,8 @@ public class ExecutionFilesProcessorServiceTest {
         when(apiBuild.getEstimatedDuration()).thenReturn(185L);
         when(apiBuild.getTimestamp()).thenReturn(1666200515000L);
         when(apiBuild.getComment()).thenReturn("comment for api build");
+        when(fileProcessorService.getMappedObjectFromFile(apiTypeFolder, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(apiBuild));
 
-        when(mobileBuildFile.isFile()).thenReturn(true);
-        when(mobileBuildFile.getName()).thenReturn(BUILD_INFORMATION_FILE_NAME);
-        when(objectMapper.readValue(mobileBuildFile, Build.class)).thenReturn(mobileBuild);
         when(mobileBuild.getLink()).thenReturn("/execution/path/to/folder/mobile");
         when(mobileBuild.getUrl()).thenReturn("http://build.fr/execution/mobile");
         when(mobileBuild.isBuilding()).thenReturn(true);
@@ -1747,13 +1632,12 @@ public class ExecutionFilesProcessorServiceTest {
         when(mobileBuild.getEstimatedDuration()).thenReturn(3050L);
         when(mobileBuild.getTimestamp()).thenReturn(1512345515000L);
         when(mobileBuild.getComment()).thenReturn("comment for mobile build");
+        when(fileProcessorService.getMappedObjectFromFile(mobileTypeFolder, BUILD_INFORMATION_FILE_NAME, Build.class)).thenReturn(Optional.of(mobileBuild));
 
         when(apiTypeFolder.isDirectory()).thenReturn(true);
         when(apiTypeFolder.getName()).thenReturn("api");
-        when(apiTypeFolder.listFiles()).thenReturn(new File[]{apiBuildFile});
         when(mobileTypeFolder.isDirectory()).thenReturn(true);
         when(mobileTypeFolder.getName()).thenReturn("mobile");
-        when(mobileTypeFolder.listFiles()).thenReturn(new File[]{mobileBuildFile});
 
         // Then
         Optional<Execution> execution = cut.getExecution(plannedIndexation);

@@ -32,9 +32,9 @@ import com.decathlon.ara.repository.CountryRepository;
 import com.decathlon.ara.repository.ExecutionCompletionRequestRepository;
 import com.decathlon.ara.repository.ExecutionRepository;
 import com.decathlon.ara.repository.TypeRepository;
-import com.decathlon.ara.service.support.Settings;
 import com.decathlon.ara.scenario.common.indexer.ScenariosIndexer;
 import com.decathlon.ara.scenario.common.strategy.ScenariosIndexerStrategy;
+import com.decathlon.ara.service.support.Settings;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NonNull;
@@ -83,6 +83,9 @@ public class ExecutionFilesProcessorService {
     @NonNull
     private final ScenariosIndexerStrategy scenariosIndexerStrategy;
 
+    @NonNull
+    private final FileProcessorService fileProcessorService;
+
     /**
      * Create an execution from the planned indexation
      * @param plannedIndexation contains the folder containing all the execution files and the cycle definition
@@ -103,9 +106,11 @@ public class ExecutionFilesProcessorService {
             return Optional.empty();
         }
 
-        Optional<Build> build = getBuildFromFile(rawExecutionFile);
+        Long projectId = cycleDefinition.getProjectId();
+        String buildInformationFilePath = settingService.get(projectId, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH);
+        Optional<Build> build = getBuildFromFile(rawExecutionFile, buildInformationFilePath);
         if (!build.isPresent()) {
-            log.info("The buildInformation.json file in [{}] couldn't be processed", rawExecutionFile.getAbsolutePath());
+            log.info("The build information file ({}) in [{}] couldn't be processed", buildInformationFilePath, rawExecutionFile.getAbsolutePath());
             return Optional.empty();
         }
 
@@ -119,8 +124,8 @@ public class ExecutionFilesProcessorService {
             return Optional.empty();
         }
 
-        Long projectId = cycleDefinition.getProjectId();
-        Optional<CycleDef> cycleDef = getCycleDef(rawExecutionFile);
+        String cycleDefinitionFilePath = settingService.get(projectId, Settings.EXECUTION_INDEXER_FILE_CYCLE_DEFINITION_PATH);
+        Optional<CycleDef> cycleDef = fileProcessorService.getMappedObjectFromFile(rawExecutionFile, cycleDefinitionFilePath, CycleDef.class);
         if (!cycleDef.isPresent()) {
             if (JobStatus.DONE.equals(execution.get().getStatus()) || completionRequest.isPresent()) {
                 log.info("Cycle-run's cycle-definition JSON not found in done job (cycle deeply broken): indexing it as failed");
@@ -135,7 +140,7 @@ public class ExecutionFilesProcessorService {
         String qualityThresholds = getQualityThresholdsFromCycleDefinition(cycleDef.get());
         execution.get().setQualityThresholds(qualityThresholds);
 
-        Pair<List<CountryDeployment>, List<Run>> countryDeploymentsAndRuns = getCountryDeploymentsAndRunsPair(rawExecutionFile, cycleDef.get(), projectId, execution.get().getStatus());
+        Pair<List<CountryDeployment>, List<Run>> countryDeploymentsAndRuns = getCountryDeploymentsAndRunsPair(rawExecutionFile, cycleDef.get(), projectId, execution.get().getStatus(), buildInformationFilePath);
 
         Set<CountryDeployment> countryDeployments = new TreeSet<>(countryDeploymentsAndRuns.getFirst());
         execution.get().addCountryDeployments(countryDeployments);
@@ -151,24 +156,15 @@ public class ExecutionFilesProcessorService {
     }
 
     /**
-     * Create a build object from the file (folder) containing the buildInformation.json file (if found and processed correctly)
+     * Create a build object from the file (folder) containing the build information file (if found and processed correctly)
      * @param buildInformationParentDirectory the build information file parent folder
+     * @param buildInformationPath the relative path to the build information file
      * @return the build
      */
-    private Optional<Build> getBuildFromFile(File buildInformationParentDirectory) {
-        final File[] allParentFolderContent = buildInformationParentDirectory.listFiles();
-        final File[] files = Arrays.stream(allParentFolderContent).filter(this::isBuildInformation).toArray(File[]::new);
-        Build build = null;
-        if (files.length == 1) {
-            File file = files[0];
-            try {
-                build = objectMapper.readValue(file, Build.class);
-                build.setLink(buildInformationParentDirectory.getPath() + File.separator);
-            } catch (IOException e) {
-                log.info("Unable to process the file {}", file.getAbsolutePath(), e);
-            }
-        }
-        return Optional.ofNullable(build);
+    private Optional<Build> getBuildFromFile(File buildInformationParentDirectory, String buildInformationPath) {
+        Optional<Build> build = fileProcessorService.getMappedObjectFromFile(buildInformationParentDirectory, buildInformationPath, Build.class);
+        build.ifPresent(b -> b.setLink(buildInformationParentDirectory.getPath() + File.separator));
+        return build;
     }
 
     /**
@@ -264,9 +260,10 @@ public class ExecutionFilesProcessorService {
      * @param cycleDef the cycleDef
      * @param projectId the project id
      * @param executionJobStatus the execution job status
+     * @param buildInformationPath the relative path to the build information file
      * @return country deployments and runs
      */
-    private Pair<List<CountryDeployment>, List<Run>> getCountryDeploymentsAndRunsPair(File rawExecutionFile, CycleDef cycleDef, Long projectId, JobStatus executionJobStatus) {
+    private Pair<List<CountryDeployment>, List<Run>> getCountryDeploymentsAndRunsPair(File rawExecutionFile, CycleDef cycleDef, Long projectId, JobStatus executionJobStatus, String buildInformationPath) {
         List<CountryDeployment> countryDeployments = new ArrayList<>();
         List<Run> runs = new ArrayList<>();
         final File[] allExecutionFolderContents = rawExecutionFile.listFiles();
@@ -301,7 +298,7 @@ public class ExecutionFilesProcessorService {
                         .findFirst();
 
                 if (!countryJobFolder.isPresent()) {
-                    log.info("Although the country {} is defined in the cycleDefinition.json file, no matching folder was found. Please check the execution zip again", countryCode);
+                    log.info("Although the country {} is defined in the cycle definition file, no matching folder was found. Please check the execution zip again", countryCode);
                     continue;
                 }
 
@@ -309,7 +306,7 @@ public class ExecutionFilesProcessorService {
                 final File[] allCountryJobFolderContents = countryJobFolder.get().listFiles();
                 final File[] typeJobFolders = Arrays.stream(allCountryJobFolderContents).filter(File::isDirectory).toArray(File[]::new);
 
-                final Optional<Build> countryBuild = getBuildFromFile(countryJobFolder.get());
+                final Optional<Build> countryBuild = getBuildFromFile(countryJobFolder.get(), buildInformationPath);
 
                 CountryDeployment countryDeployment = getCountryDeployment(country.get(), platformName, countryBuild, executionJobStatus);
                 countryDeployments.add(countryDeployment);
@@ -333,7 +330,7 @@ public class ExecutionFilesProcessorService {
                             continue;
                         }
 
-                        final Optional<Build> typeBuild = getBuildFromFile(typeJobFolder.get());
+                        final Optional<Build> typeBuild = getBuildFromFile(typeJobFolder.get(), buildInformationPath);
                         Run run = getRun(country.get(), type.get(), platformName, rule, typeBuild, executionJobStatus);
 
                         Technology technology = source.getTechnology();
@@ -459,44 +456,6 @@ public class ExecutionFilesProcessorService {
         }
 
         return jobStatusToConvert;
-    }
-
-    /**
-     * Get the CycleDef object
-     * @param rawExecutionFile the root execution folder containing the cycleDefinition.json file
-     * @return the CycleDef object
-     */
-    private Optional<CycleDef> getCycleDef(File rawExecutionFile) {
-        final File[] allExecutionFolderContent = rawExecutionFile.listFiles();
-        final File[] files = Arrays.stream(allExecutionFolderContent).filter(this::isCycleDefinition).toArray(File[]::new);
-        CycleDef cycleDef = null;
-        if (files.length == 1) {
-            File cycleDefinitionFile = files[0];
-            try {
-                cycleDef = objectMapper.readValue(cycleDefinitionFile, CycleDef.class);
-            } catch (IOException e) {
-                log.error("Couldn't process the cycleDefinition.json file in [{}]", rawExecutionFile.getAbsolutePath(), e);
-            }
-        }
-        return Optional.ofNullable(cycleDef);
-    }
-
-    /**
-     * Return true iff the file is a cycle definition file
-     * @param file the file
-     * @return true if it is a cycle definition file, false otherwise
-     */
-    private Boolean isCycleDefinition(File file) {
-        return file.isFile() && "cycleDefinition.json".equals(file.getName());
-    }
-
-    /**
-     * Return true iff the file is a build information file
-     * @param file the file
-     * @return true if it is a build information file, false otherwise
-     */
-    private Boolean isBuildInformation(File file) {
-        return file.isFile() && "buildInformation.json".equals(file.getName());
     }
 
     /**

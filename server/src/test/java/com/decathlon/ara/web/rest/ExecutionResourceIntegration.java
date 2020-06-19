@@ -22,6 +22,7 @@ import com.decathlon.ara.domain.*;
 import com.decathlon.ara.domain.enumeration.*;
 import com.decathlon.ara.repository.*;
 import com.decathlon.ara.service.SettingService;
+import com.decathlon.ara.service.support.Settings;
 import com.decathlon.ara.util.TransactionalSpringIntegrationTest;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
@@ -3797,7 +3798,7 @@ public class ExecutionResourceIntegration {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
-        Setting setting = settingRepository.findByProjectIdAndCode(1L, "execution.indexer.file.deleteAfterIndexingAsDone");
+        Setting setting = settingRepository.findByProjectIdAndCode(1L, Settings.EXECUTION_INDEXER_FILE_DELETE_AFTER_INDEXING_AS_DONE);
         assertThat(setting.getValue()).isEqualTo(Boolean.FALSE.toString());
         setting.setValue(Boolean.TRUE.toString());
         settingRepository.save(setting);
@@ -4794,6 +4795,659 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1321009871000/fr/api/reports/pay.postman_collection_fr+us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1321009871000/fr/api/reports/pay.postman_collection_us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1321009871000/fr/api/reports/choose-a-product.postman_collection_all.json"
+                );
+    }
+
+    @Test
+    public void upload_saveTheExecution_whenBuildInformationIsRenamedInSettings() throws IOException {
+        deleteARADataFolder();
+        settingService.clearProjectsValuesCache();
+
+        List<Execution> executions = executionRepository.findAll();
+        List<CountryDeployment> countryDeployments = countryDeploymentRepository.findAll();
+        List<Run> runs = runRepository.findAll();
+
+        assertThat(executions).isEmpty();
+        assertThat(runs).isEmpty();
+        assertThat(countryDeployments).isEmpty();
+
+        Setting setting = settingRepository.findByProjectIdAndCode(1L, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH);
+        assertThat(setting).isNull();
+        setting = new Setting()
+                .withProjectId(1L)
+                .withCode(Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH)
+                .withValue("/artefact/build/info/buildInfo.json");
+        settingRepository.save(setting);
+
+        MultipartFile zip = readZip("src/test/resources/zip/1592156114000.zip");
+        executionResource.upload("the-demo-project", "develop", "day", zip);
+
+        executions = executionRepository.findAll()
+                .stream()
+                .filter(execution -> "34910c9971abebce9f633920d8f8cf90853f38ea".equals(execution.getVersion()))
+                .collect(Collectors.toList());
+        assertThat(executions)
+                .hasSize(1)
+                .extracting(
+                        "branch",
+                        "name",
+                        "release",
+                        "version",
+                        "buildDateTime",
+                        "testDateTime",
+                        "jobUrl",
+                        "jobLink",
+                        "status",
+                        "result",
+                        "acceptance",
+                        "discardReason",
+                        "cycleDefinition.projectId",
+                        "cycleDefinition.branch",
+                        "cycleDefinition.name",
+                        "cycleDefinition.branchPosition",
+                        "blockingValidation",
+                        "qualityThresholds",
+                        "qualityStatus",
+                        "qualitySeverities",
+                        "duration",
+                        "estimatedDuration"
+                )
+                .containsOnly(
+                        tuple(
+                                "develop",
+                                "day",
+                                "v3",
+                                "34910c9971abebce9f633920d8f8cf90853f38ea",
+                                new Date(1581908100000L),
+                                new Date(1581908400000L),
+                                "https://build.company.com/demo/develop/night/54/",
+                                "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/",
+                                JobStatus.DONE,
+                                Result.SUCCESS,
+                                ExecutionAcceptance.NEW,
+                                null,
+                                1L,
+                                "develop",
+                                "day",
+                                1,
+                                true,
+                                "{\"sanity-check\":{\"failure\":100,\"warning\":100},\"high\":{\"failure\":95,\"warning\":98},\"medium\":{\"failure\":90,\"warning\":95}}",
+                                QualityStatus.PASSED,
+                                "[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":32,\"failed\":0,\"passed\":32},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":8,\"failed\":0,\"passed\":8},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":24,\"failed\":0,\"passed\":24},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":64,\"failed\":0,\"passed\":64},\"percent\":100,\"status\":\"PASSED\"}]",
+                                0L,
+                                0L
+                        )
+                );
+
+        runs = new ArrayList<>(
+                executions.stream()
+                        .findFirst()
+                        .get()
+                        .getRuns()
+        );
+
+        assertThat(runs)
+                .hasSize(6)
+                .extracting(
+                        "country.code",
+                        "type.projectId",
+                        "type.code",
+                        "type.source.code",
+                        "type.source.technology",
+                        "comment",
+                        "platform",
+                        "jobUrl",
+                        "jobLink",
+                        "status",
+                        "countryTags",
+                        "startDateTime",
+                        "estimatedDuration",
+                        "duration",
+                        "severityTags",
+                        "includeInThresholds"
+                )
+                .containsOnly(
+                        tuple(
+                                "fr",
+                                1L,
+                                "api",
+                                "api",
+                                Technology.POSTMAN,
+                                null,
+                                "integ",
+                                "https://build.company.com/demo/test/56/",
+                                "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/api/",
+                                JobStatus.DONE,
+                                "all",
+                                new Date(1581908400000L),
+                                0L,
+                                0L,
+                                "all",
+                                true
+                        ),
+                        tuple(
+                                "fr",
+                                1L,
+                                "firefox-desktop",
+                                "web",
+                                Technology.CUCUMBER,
+                                null,
+                                "integ",
+                                "https://build.company.com/demo/test/57/",
+                                "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/firefox-desktop/",
+                                JobStatus.DONE,
+                                "all",
+                                new Date(1581908400000L),
+                                0L,
+                                0L,
+                                "all",
+                                true
+                        ),
+                        tuple(
+                                "fr",
+                                1L,
+                                "firefox-mobile",
+                                "web",
+                                Technology.CUCUMBER,
+                                null,
+                                "integ",
+                                "https://build.company.com/demo/test/58/",
+                                "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/firefox-mobile/",
+                                JobStatus.DONE,
+                                "all",
+                                new Date(1581908400000L),
+                                0L,
+                                0L,
+                                "all",
+                                true
+                        ),
+                        tuple(
+                                "us",
+                                1L,
+                                "api",
+                                "api",
+                                Technology.POSTMAN,
+                                null,
+                                "integ",
+                                "https://build.company.com/demo/test/60/",
+                                "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/api/",
+                                JobStatus.DONE,
+                                "all",
+                                new Date(1581908400000L),
+                                0L,
+                                0L,
+                                "all",
+                                true
+                        ),
+                        tuple(
+                                "us",
+                                1L,
+                                "firefox-desktop",
+                                "web",
+                                Technology.CUCUMBER,
+                                null,
+                                "integ",
+                                "https://build.company.com/demo/test/61/",
+                                "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/firefox-desktop/",
+                                JobStatus.DONE,
+                                "all",
+                                new Date(1581908400000L),
+                                0L,
+                                0L,
+                                "all",
+                                true
+                        ),
+                        tuple(
+                                "us",
+                                1L,
+                                "firefox-mobile",
+                                "web",
+                                Technology.CUCUMBER,
+                                null,
+                                "integ",
+                                "https://build.company.com/demo/test/62/",
+                                "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/firefox-mobile/",
+                                JobStatus.DONE,
+                                "all",
+                                new Date(1581908400000L),
+                                0L,
+                                0L,
+                                "all",
+                                true
+                        )
+                );
+
+        countryDeployments = new ArrayList<>(
+                executions.stream()
+                        .findFirst()
+                        .get()
+                        .getCountryDeployments()
+        );
+
+        assertThat(countryDeployments)
+                .hasSize(2)
+                .extracting(
+                        "country.code",
+                        "platform",
+                        "jobUrl",
+                        "jobLink",
+                        "status",
+                        "result",
+                        "startDateTime",
+                        "estimatedDuration",
+                        "duration"
+                )
+                .containsOnly(
+                        tuple(
+                                "fr",
+                                "integ",
+                                "https://build.company.com/demo/deploy/fr/55/",
+                                "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/",
+                                JobStatus.DONE,
+                                Result.SUCCESS,
+                                new Date(1581908400000L),
+                                0L,
+                                0L
+                        ),
+                        tuple(
+                                "us",
+                                "integ",
+                                "https://build.company.com/demo/deploy/us/59/",
+                                "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/",
+                                JobStatus.DONE,
+                                Result.SUCCESS,
+                                new Date(1581908400000L),
+                                0L,
+                                0L
+                        )
+                );
+
+        List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
+        assertThat(generatedFilesPaths)
+                .contains(
+                        "/opt/ara/data",
+                        "/opt/ara/data/executions",
+                        "/opt/ara/data/executions/the-demo-project",
+                        "/opt/ara/data/executions/the-demo-project/develop",
+                        "/opt/ara/data/executions/the-demo-project/develop/day",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/cycleDefinition.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/firefox-mobile",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/firefox-mobile/report.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/firefox-mobile/artefact",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/firefox-mobile/artefact/build",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/firefox-mobile/artefact/build/info",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/firefox-mobile/artefact/build/info/buildInfo.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/firefox-mobile/stepDefinitions.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/artefact",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/artefact/build",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/artefact/build/info",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/artefact/build/info/buildInfo.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/firefox-desktop",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/firefox-desktop/report.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/firefox-desktop/artefact",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/firefox-desktop/artefact/build",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/firefox-desktop/artefact/build/info",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/firefox-desktop/artefact/build/info/buildInfo.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/firefox-desktop/stepDefinitions.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/api",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/api/artefact",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/api/artefact/build",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/api/artefact/build/info",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/api/artefact/build/info/buildInfo.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/api/reports",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/api/reports/result.txt",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/api/reports/pay.postman_collection_fr+us.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/api/reports/pay.postman_collection_us.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/us/api/reports/choose-a-product.postman_collection_all.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/artefact",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/artefact/build",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/artefact/build/info",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/artefact/build/info/buildInfo.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/firefox-mobile",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/firefox-mobile/report.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/firefox-mobile/artefact",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/firefox-mobile/artefact/build",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/firefox-mobile/artefact/build/info",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/firefox-mobile/artefact/build/info/buildInfo.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/firefox-mobile/stepDefinitions.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/artefact",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/artefact/build",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/artefact/build/info",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/artefact/build/info/buildInfo.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/firefox-desktop",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/firefox-desktop/report.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/firefox-desktop/artefact",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/firefox-desktop/artefact/build",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/firefox-desktop/artefact/build/info",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/firefox-desktop/artefact/build/info/buildInfo.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/firefox-desktop/stepDefinitions.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/api",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/api/artefact",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/api/artefact/build",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/api/artefact/build/info",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/api/artefact/build/info/buildInfo.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/api/reports",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/api/reports/result.txt",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/api/reports/pay.postman_collection_fr+us.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/api/reports/pay.postman_collection_us.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/api/reports/choose-a-product.postman_collection_all.json"
+                );
+    }
+
+    @Test
+    public void upload_saveTheExecution_whenCycleDefinitionIsRenamedInSettings() throws IOException {
+        deleteARADataFolder();
+        settingService.clearProjectsValuesCache();
+
+        List<Execution> executions = executionRepository.findAll();
+        List<CountryDeployment> countryDeployments = countryDeploymentRepository.findAll();
+        List<Run> runs = runRepository.findAll();
+
+        assertThat(executions).isEmpty();
+        assertThat(runs).isEmpty();
+        assertThat(countryDeployments).isEmpty();
+
+        Setting setting = settingRepository.findByProjectIdAndCode(1L, Settings.EXECUTION_INDEXER_FILE_CYCLE_DEFINITION_PATH);
+        assertThat(setting).isNull();
+        setting = new Setting()
+                .withProjectId(1L)
+                .withCode(Settings.EXECUTION_INDEXER_FILE_CYCLE_DEFINITION_PATH)
+                .withValue("cycleDef.json");
+        settingRepository.save(setting);
+
+        MultipartFile zip = readZip("src/test/resources/zip/1585743320000.zip");
+        executionResource.upload("the-demo-project", "develop", "day", zip);
+
+        executions = executionRepository.findAll()
+                .stream()
+                .filter(execution -> "34910c9971abebce9f633920d8f8cf90853f38ea".equals(execution.getVersion()))
+                .collect(Collectors.toList());
+        assertThat(executions)
+                .hasSize(1)
+                .extracting(
+                        "branch",
+                        "name",
+                        "release",
+                        "version",
+                        "buildDateTime",
+                        "testDateTime",
+                        "jobUrl",
+                        "jobLink",
+                        "status",
+                        "result",
+                        "acceptance",
+                        "discardReason",
+                        "cycleDefinition.projectId",
+                        "cycleDefinition.branch",
+                        "cycleDefinition.name",
+                        "cycleDefinition.branchPosition",
+                        "blockingValidation",
+                        "qualityThresholds",
+                        "qualityStatus",
+                        "qualitySeverities",
+                        "duration",
+                        "estimatedDuration"
+                )
+                .containsOnly(
+                        tuple(
+                                "develop",
+                                "day",
+                                "v3",
+                                "34910c9971abebce9f633920d8f8cf90853f38ea",
+                                new Date(1581908100000L),
+                                new Date(1581908400000L),
+                                "https://build.company.com/demo/develop/night/54/",
+                                "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/",
+                                JobStatus.DONE,
+                                Result.SUCCESS,
+                                ExecutionAcceptance.NEW,
+                                null,
+                                1L,
+                                "develop",
+                                "day",
+                                1,
+                                true,
+                                "{\"sanity-check\":{\"failure\":100,\"warning\":100},\"high\":{\"failure\":95,\"warning\":98},\"medium\":{\"failure\":90,\"warning\":95}}",
+                                QualityStatus.PASSED,
+                                "[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":32,\"failed\":0,\"passed\":32},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":8,\"failed\":0,\"passed\":8},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":24,\"failed\":0,\"passed\":24},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":64,\"failed\":0,\"passed\":64},\"percent\":100,\"status\":\"PASSED\"}]",
+                                0L,
+                                0L
+                        )
+                );
+
+        runs = new ArrayList<>(
+                executions.stream()
+                        .findFirst()
+                        .get()
+                        .getRuns()
+        );
+
+        assertThat(runs)
+                .hasSize(6)
+                .extracting(
+                        "country.code",
+                        "type.projectId",
+                        "type.code",
+                        "type.source.code",
+                        "type.source.technology",
+                        "comment",
+                        "platform",
+                        "jobUrl",
+                        "jobLink",
+                        "status",
+                        "countryTags",
+                        "startDateTime",
+                        "estimatedDuration",
+                        "duration",
+                        "severityTags",
+                        "includeInThresholds"
+                )
+                .containsOnly(
+                        tuple(
+                                "fr",
+                                1L,
+                                "api",
+                                "api",
+                                Technology.POSTMAN,
+                                null,
+                                "integ",
+                                "https://build.company.com/demo/test/56/",
+                                "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/api/",
+                                JobStatus.DONE,
+                                "all",
+                                new Date(1581908400000L),
+                                0L,
+                                0L,
+                                "all",
+                                true
+                        ),
+                        tuple(
+                                "fr",
+                                1L,
+                                "firefox-desktop",
+                                "web",
+                                Technology.CUCUMBER,
+                                null,
+                                "integ",
+                                "https://build.company.com/demo/test/57/",
+                                "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/firefox-desktop/",
+                                JobStatus.DONE,
+                                "all",
+                                new Date(1581908400000L),
+                                0L,
+                                0L,
+                                "all",
+                                true
+                        ),
+                        tuple(
+                                "fr",
+                                1L,
+                                "firefox-mobile",
+                                "web",
+                                Technology.CUCUMBER,
+                                null,
+                                "integ",
+                                "https://build.company.com/demo/test/58/",
+                                "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/firefox-mobile/",
+                                JobStatus.DONE,
+                                "all",
+                                new Date(1581908400000L),
+                                0L,
+                                0L,
+                                "all",
+                                true
+                        ),
+                        tuple(
+                                "us",
+                                1L,
+                                "api",
+                                "api",
+                                Technology.POSTMAN,
+                                null,
+                                "integ",
+                                "https://build.company.com/demo/test/60/",
+                                "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/us/api/",
+                                JobStatus.DONE,
+                                "all",
+                                new Date(1581908400000L),
+                                0L,
+                                0L,
+                                "all",
+                                true
+                        ),
+                        tuple(
+                                "us",
+                                1L,
+                                "firefox-desktop",
+                                "web",
+                                Technology.CUCUMBER,
+                                null,
+                                "integ",
+                                "https://build.company.com/demo/test/61/",
+                                "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/us/firefox-desktop/",
+                                JobStatus.DONE,
+                                "all",
+                                new Date(1581908400000L),
+                                0L,
+                                0L,
+                                "all",
+                                true
+                        ),
+                        tuple(
+                                "us",
+                                1L,
+                                "firefox-mobile",
+                                "web",
+                                Technology.CUCUMBER,
+                                null,
+                                "integ",
+                                "https://build.company.com/demo/test/62/",
+                                "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/us/firefox-mobile/",
+                                JobStatus.DONE,
+                                "all",
+                                new Date(1581908400000L),
+                                0L,
+                                0L,
+                                "all",
+                                true
+                        )
+                );
+
+        countryDeployments = new ArrayList<>(
+                executions.stream()
+                        .findFirst()
+                        .get()
+                        .getCountryDeployments()
+        );
+
+        assertThat(countryDeployments)
+                .hasSize(2)
+                .extracting(
+                        "country.code",
+                        "platform",
+                        "jobUrl",
+                        "jobLink",
+                        "status",
+                        "result",
+                        "startDateTime",
+                        "estimatedDuration",
+                        "duration"
+                )
+                .containsOnly(
+                        tuple(
+                                "fr",
+                                "integ",
+                                "https://build.company.com/demo/deploy/fr/55/",
+                                "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/",
+                                JobStatus.DONE,
+                                Result.SUCCESS,
+                                new Date(1581908400000L),
+                                0L,
+                                0L
+                        ),
+                        tuple(
+                                "us",
+                                "integ",
+                                "https://build.company.com/demo/deploy/us/59/",
+                                "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/us/",
+                                JobStatus.DONE,
+                                Result.SUCCESS,
+                                new Date(1581908400000L),
+                                0L,
+                                0L
+                        )
+                );
+
+        List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
+        assertThat(generatedFilesPaths)
+                .contains(
+                        "/opt/ara/data",
+                        "/opt/ara/data/executions",
+                        "/opt/ara/data/executions/the-demo-project",
+                        "/opt/ara/data/executions/the-demo-project/develop",
+                        "/opt/ara/data/executions/the-demo-project/develop/day",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/cycleDef.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/us",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/us/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/us/firefox-mobile",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/us/firefox-mobile/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/us/firefox-mobile/report.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/us/firefox-mobile/stepDefinitions.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/us/firefox-desktop",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/us/firefox-desktop/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/us/firefox-desktop/report.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/us/firefox-desktop/stepDefinitions.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/us/api",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/us/api/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/us/api/reports",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/us/api/reports/result.txt",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/us/api/reports/pay.postman_collection_fr+us.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/us/api/reports/pay.postman_collection_us.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/us/api/reports/choose-a-product.postman_collection_all.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/firefox-mobile",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/firefox-mobile/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/firefox-mobile/report.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/firefox-mobile/stepDefinitions.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/firefox-desktop",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/firefox-desktop/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/firefox-desktop/report.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/firefox-desktop/stepDefinitions.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/api",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/api/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/api/reports",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/api/reports/result.txt",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/api/reports/pay.postman_collection_fr+us.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/api/reports/pay.postman_collection_us.json",
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/api/reports/choose-a-product.postman_collection_all.json"
                 );
     }
 }
