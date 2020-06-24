@@ -114,6 +114,14 @@
             <version>3.8.1</version>
         </dependency>
 
+        <!-- H2 -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+            <version>1.4.200</version>
+        </dependency>
+
         <!-- @Retryable annotations -->
         <dependency>
             <groupId>org.springframework.retry</groupId>

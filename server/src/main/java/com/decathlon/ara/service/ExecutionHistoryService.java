@@ -17,40 +17,32 @@
 
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.domain.ExecutedScenario;
-import com.decathlon.ara.domain.Problem;
-import com.decathlon.ara.domain.Run;
-import com.decathlon.ara.repository.ExecutionRepository;
+import com.decathlon.ara.Entities;
+import com.decathlon.ara.Messages;
+import com.decathlon.ara.domain.*;
+import com.decathlon.ara.domain.projection.ExecutedScenarioWithErrorAndProblemJoin;
 import com.decathlon.ara.repository.ExecutedScenarioRepository;
+import com.decathlon.ara.repository.ExecutionRepository;
 import com.decathlon.ara.repository.FunctionalityRepository;
+import com.decathlon.ara.scenario.cucumber.util.ScenarioExtractorUtil;
 import com.decathlon.ara.service.dto.execution.ExecutionHistoryPointDTO;
 import com.decathlon.ara.service.dto.quality.QualitySeverityDTO;
+import com.decathlon.ara.service.dto.run.ExecutedScenarioHandlingCountsDTO;
 import com.decathlon.ara.service.dto.run.RunDTO;
 import com.decathlon.ara.service.dto.run.RunWithQualitiesDTO;
-import com.decathlon.ara.service.dto.run.ExecutedScenarioHandlingCountsDTO;
 import com.decathlon.ara.service.dto.severity.SeverityDTO;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.mapper.ExecutionHistoryPointMapper;
-import com.decathlon.ara.Entities;
-import com.decathlon.ara.Messages;
-import com.decathlon.ara.domain.Execution;
-import com.decathlon.ara.domain.Severity;
-import com.decathlon.ara.domain.Team;
-import com.decathlon.ara.domain.projection.ExecutedScenarioWithErrorAndProblemJoin;
-import com.decathlon.ara.report.util.ScenarioExtractorUtil;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import java.lang.Error;
 
 @Service
 @Transactional

@@ -17,16 +17,18 @@
 
 package com.decathlon.ara.repository;
 
-import com.decathlon.ara.repository.custom.ExecutionRepositoryCustom;
 import com.decathlon.ara.domain.Execution;
 import com.decathlon.ara.domain.enumeration.JobStatus;
-import java.util.Collection;
-import java.util.List;
+import com.decathlon.ara.repository.custom.ExecutionRepositoryCustom;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Spring Data JPA repository for the Execution entity.
@@ -67,7 +69,7 @@ public interface ExecutionRepository extends JpaRepository<Execution, Long>, Exe
             "WHERE execution.cycleDefinition.projectId = ?1 AND " +
             "      ((execution.jobUrl IS NOT NULL AND execution.jobUrl = ?2) OR " +
             "       (execution.jobLink IS NOT NULL AND execution.jobLink = ?3))")
-    Execution findByProjectIdAndJobUrlOrJobLink(long projectId, String jobUrl, String jobLink);
+    Optional<Execution> findByProjectIdAndJobUrlOrJobLink(Long projectId, String jobUrl, String jobLink);
 
     boolean existsByCycleDefinitionId(Long id);
 
