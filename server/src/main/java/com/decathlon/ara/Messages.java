@@ -44,6 +44,8 @@ public final class Messages {
     public static final String NOT_FOUND_SETTING_OPTION = "The option is not supported by this setting.";
     public static final String NOT_FOUND_SOURCE = "The source does not exist: it has perhaps been removed.";
     public static final String NOT_FOUND_TEAM = "The team does not exist: it has perhaps been removed.";
+    public static final String NOT_FOUND_TECHNOLOGY = "The technology %s was not found.";
+    public static final String NOT_FOUND_TECHNOLOGY_SETTING = "The technology setting code %s was not found.";
     public static final String NOT_FOUND_TYPE = "The type does not exist: it has perhaps been removed.";
 
     public static final String NOT_UNIQUE_COUNTRY_CODE = "The code is already used by another country.";

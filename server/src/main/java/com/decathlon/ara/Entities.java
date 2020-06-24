@@ -42,6 +42,7 @@ public final class Entities {
     public static final String ROOT_CAUSE = "root-cause";
     public static final String SCENARIO = "scenario";
     public static final String SETTING = "setting";
+    public static final String TECHNOLOGY_SETTING = "technology-setting";
     public static final String SOURCE = "source";
     public static final String SEVERITY = "severity";
     public static final String TEAM = "team";

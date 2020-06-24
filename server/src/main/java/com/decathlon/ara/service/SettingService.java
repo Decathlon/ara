@@ -204,7 +204,7 @@ public class SettingService {
      * @throws BadRequestException if the required setting would not be set, the data type format is not respected or
      *                             the setting's business rules are not met
      */
-    void validateNewValue(String newValue, SettingDTO settingDefinition) throws BadRequestException {
+    public void validateNewValue(String newValue, SettingDTO settingDefinition) throws BadRequestException {
         if (StringUtils.isEmpty(newValue)) {
             validateRequiredSettingIsPresent(settingDefinition);
             // Do not validate format on a missing value

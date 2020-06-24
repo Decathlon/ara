@@ -1,3 +1,20 @@
+/******************************************************************************
+ * Copyright (C) 2020 by the ARA Contributors                                 *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ * 	 http://www.apache.org/licenses/LICENSE-2.0                               *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ *                                                                            *
+ ******************************************************************************/
+
 package com.decathlon.ara.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,7 +46,7 @@ public class FileProcessorService {
      * @return the mapped object
      */
     public <T> Optional<T> getMappedObjectFromFile(File parentDirectory, String pathToFile, Class<T> objectClass) {
-        Optional<File> matchingFile = getMatchingFile(parentDirectory, pathToFile);
+        Optional<File> matchingFile = getMatchingSimpleFile(parentDirectory, pathToFile);
         if (!matchingFile.isPresent()) {
             return Optional.empty();
         }
@@ -45,7 +62,35 @@ public class FileProcessorService {
     }
 
     /**
-     * Get a file from a directory and a path starting from the parent directory
+     * Get a file from a parent directory and a path starting from the parent directory
+     * @param parentDirectory the folder in which the file is searched
+     * @param filePath the path from the parentDirectory
+     * @return the file if found
+     */
+    public Optional<File> getMatchingSimpleFile(File parentDirectory, String filePath) {
+        Optional<File> file = getMatchingFile(parentDirectory, filePath);
+        if (file.isPresent() && !file.get().isFile()) {
+            return Optional.empty();
+        }
+        return file;
+    }
+
+    /**
+     * Get a directory from a parent directory and a path starting from the parent directory
+     * @param parentDirectory the folder in which the file is searched
+     * @param directoryPath the path from the parentDirectory
+     * @return the directory if found
+     */
+    public Optional<File> getMatchingDirectory(File parentDirectory, String directoryPath) {
+        Optional<File> file = getMatchingFile(parentDirectory, directoryPath);
+        if (file.isPresent() && !file.get().isDirectory()) {
+            return Optional.empty();
+        }
+        return file;
+    }
+
+    /**
+     * Get a file (either a single file or a directory) from a parent directory and a path starting from the parent directory
      * @param parentDirectory the folder in which the file is searched
      * @param filePath the path from the parentDirectory
      * @return the file if found
@@ -59,7 +104,7 @@ public class FileProcessorService {
 
         File matchingFile = new File(absoluteFilePath);
 
-        if (!(matchingFile.exists() && matchingFile.isFile())) {
+        if (!matchingFile.exists()) {
             log.error("File {} not found", absoluteFilePath);
             return Optional.empty();
         }

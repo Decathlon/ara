@@ -336,7 +336,7 @@ public class ExecutionFilesProcessorService {
                         Technology technology = source.getTechnology();
                         Optional<ScenariosIndexer> scenariosIndexer = scenariosIndexerStrategy.getScenariosIndexer(technology);
                         scenariosIndexer.ifPresent(indexer -> {
-                            final List<ExecutedScenario> executedScenarios = indexer.getExecutedScenarios(typeJobFolder.get(), run);
+                            final List<ExecutedScenario> executedScenarios = indexer.getExecutedScenarios(typeJobFolder.get(), run, projectId);
                             run.addExecutedScenarios(new TreeSet<>(executedScenarios));
                         });
 

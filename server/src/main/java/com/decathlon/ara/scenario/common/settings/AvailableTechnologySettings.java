@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2019 by the ARA Contributors                                 *
+ * Copyright (C) 2020 by the ARA Contributors                                 *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -15,29 +15,25 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.setting;
+package com.decathlon.ara.scenario.common.settings;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import com.decathlon.ara.domain.enumeration.Technology;
+import com.decathlon.ara.service.dto.setting.SettingType;
 
-import java.util.List;
+public interface AvailableTechnologySettings {
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Wither
-public class SettingGroupDTO {
+    Technology getTechnology();
 
-    /**
-     * User-visible name of the group of settings to display in the GUI.
-     */
-    protected String name;
+    String getCode();
 
-    /**
-     * The list of settings for the current project and group.
-     */
-    protected List<SettingDTO> settings;
+    String getDefaultValue();
+
+    String getName();
+
+    String getHelp();
+
+    SettingType getType();
+
+    Boolean isRequired();
 
 }

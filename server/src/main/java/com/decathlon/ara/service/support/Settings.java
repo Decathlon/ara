@@ -50,9 +50,6 @@ public class Settings {
 
     public static final String EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH = "execution.indexer.file.executionBasePath";
     public static final String EXECUTION_INDEXER_FILE_CYCLE_DEFINITION_PATH = "execution.indexer.file.cycleDefinitionPath";
-    public static final String EXECUTION_INDEXER_FILE_CUCUMBER_REPORT_PATH = "execution.indexer.file.cucumberReportPath";
-    public static final String EXECUTION_INDEXER_FILE_CUCUMBER_STEP_DEFINITIONS_PATH = "execution.indexer.file.cucumberStepDefinitionsPath";
-    public static final String EXECUTION_INDEXER_FILE_NEWMAN_REPORTS_PATH = "execution.indexer.file.newmanReportsPath";
     public static final String EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH = "execution.indexer.file.buildInformationPath";
     public static final String EXECUTION_INDEXER_FILE_DELETE_AFTER_INDEXING_AS_DONE = "execution.indexer.file.deleteAfterIndexingAsDone";
 

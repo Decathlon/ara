@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2019 by the ARA Contributors                                 *
+ * Copyright (C) 2020 by the ARA Contributors                                 *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -15,29 +15,20 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.setting;
+package com.decathlon.ara.repository;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import com.decathlon.ara.domain.TechnologySetting;
+import com.decathlon.ara.domain.enumeration.Technology;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Wither
-public class SettingGroupDTO {
+@Repository
+public interface TechnologySettingRepository extends JpaRepository<TechnologySetting, Long> {
 
-    /**
-     * User-visible name of the group of settings to display in the GUI.
-     */
-    protected String name;
+    List<TechnologySetting> findByProjectId(Long projectId);
 
-    /**
-     * The list of settings for the current project and group.
-     */
-    protected List<SettingDTO> settings;
-
+    Optional<TechnologySetting> findByProjectIdAndCodeAndTechnology(Long projectId, String code, Technology technology);
 }

@@ -94,8 +94,6 @@ public class DemoService {
         final ProjectDTO project = demoSettingsLoader.createProjectWithCommunicationsAndRootCauses();
         long projectId = project.getId().longValue();
 
-        demoSettingsLoader.updateSettings(projectId);
-
         demoSettingsLoader.setCommunications(projectId);
 
         demoSettingsLoader.createSources(projectId);

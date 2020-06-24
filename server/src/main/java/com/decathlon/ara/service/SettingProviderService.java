@@ -68,7 +68,7 @@ public class SettingProviderService {
      *                      values on all available settings)
      * @return the settings, tailored to the GUI: definitions, editing helps and values (passwords are hidden)
      */
-    List<SettingGroupDTO> getDefinitions(long projectId, Map<String, String> projectValues) {
+    public List<SettingGroupDTO> getDefinitions(long projectId, Map<String, String> projectValues) {
         List<SettingGroupDTO> groups = new ArrayList<>();
         groups.add(getJobIndexingDefinitions());
         groups.add(getEmailReportsDefinitions());
@@ -112,37 +112,6 @@ public class SettingProviderService {
                 .withHelp("" +
                         "Cycle definition are extracted from this path. " +
                         EG_QUOTE + defaultCycleDefinitionPath + "\", appended to the run's job folder."));
-
-        final String defaultCucumberReportPath = "/report.json";
-        settings.add(new SettingDTO()
-                .withCode(Settings.EXECUTION_INDEXER_FILE_CUCUMBER_REPORT_PATH)
-                .withName("Cucumber report path")
-                .withType(SettingType.STRING)
-                .withRequired(true)
-                .withDefaultValue(defaultCucumberReportPath)
-                .withHelp("" +
-                        "Cucumber reports are extracted from this path. " +
-                        EG_QUOTE + defaultCucumberReportPath + "\", appended to the run's job folder."));
-
-        settings.add(new SettingDTO()
-                .withCode(Settings.EXECUTION_INDEXER_FILE_CUCUMBER_STEP_DEFINITIONS_PATH)
-                .withName("Cucumber step definitions path")
-                .withType(SettingType.STRING)
-                .withHelp("" +
-                        "Cucumber step definitions are extracted from this path. " +
-                        EG_QUOTE + "/stepDefinitions.json\", appended to the run's job folder. " +
-                        "If not provided, the cycle-definitions will not be downloaded"));
-
-        final String defaultNewmanReportsPath = "/reports";
-        settings.add(new SettingDTO()
-                .withCode(Settings.EXECUTION_INDEXER_FILE_NEWMAN_REPORTS_PATH)
-                .withName("Newman reports path")
-                .withType(SettingType.STRING)
-                .withRequired(true)
-                .withDefaultValue(defaultNewmanReportsPath)
-                .withHelp("" +
-                        "Newman reports are extracted from this path. " +
-                        EG_QUOTE + defaultNewmanReportsPath + "\", appended to the run's jobUrl."));
 
         final String defaultBuildInformationPath = "buildInformation.json";
         settings.add(new SettingDTO()
@@ -305,6 +274,9 @@ public class SettingProviderService {
                         "If none is provided, problem's defects will not be linked: " +
                         "users will have to open/close them manually."));
 
+        if (projectValues == null) {
+            return group;
+        }
         String currentDefectAdapter = projectValues.get(Settings.DEFECT_INDEXER);
         if (StringUtils.isNotEmpty(currentDefectAdapter)) {
             group.getSettings().add(new SettingDTO()

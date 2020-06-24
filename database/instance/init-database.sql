@@ -521,6 +521,18 @@ CREATE TABLE `setting` (
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+DROP TABLE IF EXISTS `technology_setting`;
+CREATE TABLE `technology_setting` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `project_id` bigint(20) NOT NULL,
+  `code` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
+  `value` varchar(512) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `technology` varchar(16) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_technology_setting` (`project_id`,`code`,`technology`),
+  CONSTRAINT `fk_technology_setting_projectid` FOREIGN KEY (`project_id`) REFERENCES `project` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC;
+
 --
 -- Table structure for table `severity`
 --
