@@ -2,16 +2,14 @@
 ###############################################################################
 # manage-db.sh
 #
-# This script provide utilities to manipulate the database's container of ARA.
-# You may want to update the CONFIGURATION part of this script (bellow) to 
-# adapt it to your specific installation.
+# This script handles the ARA database container.
+# Feel free to change the CONFIGURATION (below) to meet your installation requirement.
 #
 # You can use this script with the following commands : 
 # - create : Pull the mysql db, run the image and create the db's structure
-# - destroy : Destroy the container builded by the image but leave the data
-#             untouched.
-# - start : Start the database's container.
-# - stop : Stop the database's container.
+# - destroy : Destroy the container built by the image but leave the data pristine.
+# - start : Start the database container.
+# - stop : Stop the database container.
 # - mysqladmin : Run the `mysql` command in the container in interactive mode.
 # - shell : Run an interactive shell in the container.
 # - purge : Destroy the container, and remove the data persisted in the host.
@@ -25,7 +23,7 @@
 LOGS=1
 # The name of the container which will holds the db to manipulate
 CONTAINER_NAME=ara-db
-# The password of the Database (you should use a secret here instead).
+# The database password (it is highly recommended to change it).
 PASSWORD=dev_password_to_change
 # The container port exposed to the host.
 PORT=3306
@@ -45,7 +43,7 @@ function run {
 
 function usage {
 	echo "usage : manage-db.sh <cmd>"
-	echo "Use the 'help' cmd to get a full list of all the available commands."
+	echo "Use the 'help' command to get a full list of all available commands."
 }
 
 function stopContainer {
@@ -200,15 +198,14 @@ fi
 
 if [ "$1" = "help" ]
 	then
-		echo "manage-db.sh <cmd> : Manage ARA database's container."
-		echo "Where <cmd> can be "
-		echo "  - create <data_dir> : Pull the mysql db, run the image and create the db's"
+		echo "manage-db.sh <cmd> : Manage ARA database container."
+		echo "Where <cmd> can be :"
+		echo "  - create <data_dir> : Pull and run the mysql image and create the database"
 		echo "                        structure. Use <data_dir> as the folder to persists"
 		echo "                        the data on the host system."
-		echo "  - destroy : Destroy the container builded by the image but leave the data"
-      	echo "              untouched."
-		echo "  - start : Start the database's container."
-		echo "  - stop : Stop the database's container."
+		echo "  - destroy : Destroy the container built by the image but leave the data pristine."
+		echo "  - start : Start the database container."
+		echo "  - stop : Stop the database container."
 		echo "  - mysqladmin : Run the 'mysql' command in the container in interactive mode."
 		echo "  - shell : Run an interactive shell in the container."
 		echo "  - purge : Destroy the container, and remove the data persisted in the host."
