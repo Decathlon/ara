@@ -91,6 +91,7 @@
       </i-col>
       <i-col :span="(24 - 4) / execution.qualitySeverities.length" v-else v-for="qualitySeverity in execution.qualitySeverities" :key="qualitySeverity.severity.code">
         <nrt-progress
+          :data-nrt="'ExecutionsAndErrorsCartRowHeader_' + qualitySeverity.severity.code + '_' + run.country.code + '_' + run.type.code + '_' + execution.id "
           :execution="execution"
           :run="run"
           :counts="run.qualitiesPerSeverity[qualitySeverity.severity.code]"
