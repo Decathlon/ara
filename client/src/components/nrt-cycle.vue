@@ -30,14 +30,14 @@
           <i-col span="5">
             <Button-group v-if="!hideButtons" shape="circle" style="float: left; margin-right: 8px;">
               <Button
-                  :data-nrt="'ExecutionsAndErrorsNavigationPreviousButton_' + execution.id "
+                  :data-nrt=" $route.name + '_NavigationPreviousButton_' + execution.id "
                   :disabled="!execution.previousId"
                   @click="emitRequestExecution(execution.previousId)"
                   icon="md-skip-backward"
                   title="Previous execution"
                   type="primary"/>
               <Button
-                  :data-nrt="'ExecutionsAndErrorsNavigationNextButton_' + execution.id "
+                  :data-nrt=" $route.name + '_NavigationNextButton_' + execution.id "
                   :disabled="!execution.nextId"
                   @click="emitRequestExecution(execution.nextId)"
                   icon="md-skip-forward"
@@ -51,7 +51,7 @@
           <i-col span="19" style="text-align: right;">
             <div style="float: right; margin-left: 8px;">
               <execution-actions-button 
-                  :data-nrt="'ExecutionsAndErrorsActionsAndJobReportsButton_' + execution.id "
+                  :data-nrt=" $route.name + '_ActionsAndJobReportsButton_' + execution.id "
                   :execution="execution" 
                   v-on:change="emitRequestExecution(execution.id)"/>
             </div>
