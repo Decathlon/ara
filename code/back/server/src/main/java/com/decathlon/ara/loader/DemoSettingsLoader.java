@@ -20,15 +20,7 @@ package com.decathlon.ara.loader;
 import com.decathlon.ara.domain.Communication;
 import com.decathlon.ara.domain.enumeration.CommunicationType;
 import com.decathlon.ara.domain.enumeration.Technology;
-import com.decathlon.ara.service.CommunicationService;
-import com.decathlon.ara.service.CountryService;
-import com.decathlon.ara.service.CycleDefinitionService;
-import com.decathlon.ara.service.ProjectService;
-import com.decathlon.ara.service.SettingService;
-import com.decathlon.ara.service.SeverityService;
-import com.decathlon.ara.service.SourceService;
-import com.decathlon.ara.service.TeamService;
-import com.decathlon.ara.service.TypeService;
+import com.decathlon.ara.service.*;
 import com.decathlon.ara.service.dto.communication.CommunicationDTO;
 import com.decathlon.ara.service.dto.country.CountryDTO;
 import com.decathlon.ara.service.dto.cycledefinition.CycleDefinitionDTO;
@@ -40,9 +32,6 @@ import com.decathlon.ara.service.dto.type.TypeWithSourceCodeDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
-import com.decathlon.ara.service.support.Settings;
-import java.util.Arrays;
-import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,14 +39,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.decathlon.ara.loader.DemoLoaderConstants.BRANCH_DEVELOP;
-import static com.decathlon.ara.loader.DemoLoaderConstants.BRANCH_MASTER;
-import static com.decathlon.ara.loader.DemoLoaderConstants.CYCLE_DAY;
-import static com.decathlon.ara.loader.DemoLoaderConstants.CYCLE_NIGHT;
-import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
-import static com.decathlon.ara.loader.DemoLoaderConstants.SOURCE_CODE_API;
-import static com.decathlon.ara.loader.DemoLoaderConstants.SOURCE_CODE_WEB;
-import static com.decathlon.ara.loader.DemoLoaderConstants.TYPE_CODE_FIREFOX_DESKTOP;
+import java.util.Arrays;
+import java.util.List;
+
+import static com.decathlon.ara.loader.DemoLoaderConstants.*;
 
 /**
  * Load project with its settings as the Demo project.
@@ -229,11 +214,6 @@ public class DemoSettingsLoader {
                         null, BRANCH_DEVELOP, CYCLE_NIGHT, Integer.valueOf(1))),
                 cycleDefinitionService.create(projectId, new CycleDefinitionDTO(
                         null, BRANCH_MASTER, CYCLE_DAY, Integer.valueOf(2))));
-    }
-
-    public void updateSettings(long projectId) throws BadRequestException {
-        settingService.update(projectId, Settings.EXECUTION_INDEXER_FILE_CUCUMBER_STEP_DEFINITIONS_PATH,
-                "/stepDefinitions.json"); // Not active by default: showcase all ARA features in the demo
     }
 
     public List<TeamDTO> createTeams(long projectId) throws NotUniqueException {

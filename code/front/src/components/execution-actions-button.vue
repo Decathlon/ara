@@ -23,7 +23,7 @@
       <DropdownMenu slot="list" style="text-transform: initial;" title="">
         <DropdownItem 
             :disabled="true"
-            :data-nrt="'ExecutionsAndErrorsActionsAndJobReportsButton_' + 'Actions_' + execution.id "
+            :data-nrt=" $route.name + '_ActionsAndJobReportsButton_' + 'Actions_' + execution.id "
             style="font-weight: bold;">
           <Icon type="md-open" style="visibility: hidden;"/>
           ACTIONS
@@ -31,12 +31,12 @@
 
         <DropdownItem><div @click="discard(execution)"><Icon type="md-flag"/> {{execution.discardReason ? 'CHANGE DISCARD REASON' : 'DISCARD EXECUTION'}}</div></DropdownItem>
         <DropdownItem 
-            :data-nrt="'ExecutionsAndErrorsActionsAndJobReportsButton_' + 'UndiscardExecution_' + execution.id "
+            :data-nrt=" $route.name + '_ActionsAndJobReportsButton_' + 'UndiscardExecution_' + execution.id "
             v-if="execution.discardReason"><div @click="unDiscard(execution.id)"><Icon type="md-checkmark"/> UN-DISCARD EXECUTION</div></DropdownItem>
 
         <DropdownItem 
             :disabled="true"
-            :data-nrt="'ExecutionsAndErrorsActionsAndJobReportsButton_' + 'JobReports_' + execution.id "
+            :data-nrt=" $route.name + '_ActionsAndJobReportsButton_' + 'JobReports_' + execution.id "
             style="border-top: 1px solid #DDDEE1; font-weight: bold;">
           <Icon type="md-open" style="visibility: hidden;"/>
           JOB REPORTS
@@ -45,7 +45,7 @@
         <a :href="execution.jobUrl ? (execution.jobUrl + 'console') : null" target="_blank">
           <DropdownItem 
               :disabled="!execution.jobUrl"
-              :data-nrt="'ExecutionsAndErrorsActionsAndJobReportsButton_' + 'Execution_' + execution.id ">
+              :data-nrt=" $route.name + '_ActionsAndJobReportsButton_' + 'Execution_' + execution.id ">
             <Icon type="md-open"/>
             Execution
             <job-status-result :job="execution" :showDuration="true"/>
@@ -55,7 +55,7 @@
           <a :href="countryDeployment.jobUrl ? (countryDeployment.jobUrl + 'console') : null" target="_blank">
             <DropdownItem 
                 :disabled="!countryDeployment.jobUrl" 
-                :data-nrt="'ExecutionsAndErrorsActionsAndJobReportsButton_' + countryDeployment.country.code + '_Deployment_' + + execution.id "
+                :data-nrt=" $route.name + '_ActionsAndJobReportsButton_' + countryDeployment.country.code + '_Deployment_' + + execution.id "
                 style="border-top: 1px dashed #DDDEE1;">
               <Icon type="md-open"/>
               {{countryDeployment.country.code.toUpperCase()}} Deployment
@@ -67,7 +67,7 @@
               target="_blank">
             <DropdownItem 
                 :disabled="!run.jobUrl"
-                :data-nrt="'ExecutionsAndErrorsActionsAndJobReportsButton_' + countryDeployment.country.code + '_' + run.type.name + '_' + execution.id ">
+                :data-nrt=" $route.name + '_ActionsAndJobReportsButton_' + countryDeployment.country.code + '_' + run.type.code + '_' + execution.id ">
               <Icon type="md-open"/>
               {{run.country.code.toUpperCase()}} {{run.type.name}}
               <job-status-result :job="run" :showDuration="true"/>

@@ -233,6 +233,14 @@ export default [
     component: (resolve) => require(['./views/management-projects.vue'], resolve)
   },
   {
+    path: '/projects/:projectCode/management/technologies',
+    name: 'management-technologies',
+    meta: {
+      title: 'Technologies'
+    },
+    component: (resolve) => require(['./views/management-technologies.vue'], resolve)
+  },
+  {
     path: '/projects/:projectCode/management/settings',
     name: 'management-settings',
     meta: {

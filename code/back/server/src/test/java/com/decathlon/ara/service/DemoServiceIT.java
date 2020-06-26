@@ -104,7 +104,7 @@ public class DemoServiceIT {
         // GIVEN
         final Path tempDirectory = Files.createTempDirectory("ara_temp_integration_test_directory_");
         try {
-            doReturn(tempDirectory.toString() + "/" + Fetcher.DEFAULT_EXECUTION_VARIABLES)
+            doReturn(tempDirectory.toString() + "/" + Settings.DEFAULT_EXECUTION_VARIABLES)
                     .when(settingService).get(anyLong(), eq(Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH));
             doReturn(Collections.emptyMap()).when(applicationContext).getBeansOfType(DefectAdapter.class);
 
@@ -126,7 +126,7 @@ public class DemoServiceIT {
         // GIVEN
         final Path tempDirectory = Files.createTempDirectory("ara_temp_integration_test_directory_");
         try {
-            doReturn(tempDirectory.toString() + "/executions/" + Fetcher.DEFAULT_EXECUTION_VARIABLES)
+            doReturn(tempDirectory.toString() + "/executions/" + Settings.DEFAULT_EXECUTION_VARIABLES)
                     .when(settingService).get(anyLong(), eq(Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH));
             Path projectFolder = tempDirectory.resolve("executions/" + PROJECT_CODE_DEMO);
             Path folder = projectFolder.resolve("master/day/1525442442556/fr/firefox-desktop");

@@ -17,12 +17,14 @@
 <template>
   <div v-if="qualitiesPerTeamAndSeverity(team.id, '*').total" style="margin: 8px 0;">
     <Row type="flex" :gutter="4" justify="space-around">
-      <i-col span="4" style="line-height: 21px; font-size: 0.8em; color: gray; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+      <i-col 
+      :data-nrt=" $route.name + '_CartRowSubTitle_' + run.country.code + '_' + run.type.code + '_' + team.id + '_' + execution.id "
+      span="4" style="line-height: 21px; font-size: 0.8em; color: gray; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
         {{team.name}}
       </i-col>
       <i-col :span="(24 - 4) / execution.qualitySeverities.length" v-for="qualitySeverity in execution.qualitySeverities" :key="qualitySeverity.severity.code">
         <nrt-progress
-          :data-nrt="'ExecutionsAndErrorsCartRowTeam_' + qualitySeverity.severity.code + '_' + run.country.code + '_' + run.type.code + '_' + team.name + '_' + execution.id "
+          :data-nrt=" $route.name + '_CartRowTeam_' + qualitySeverity.severity.code + '_' + run.country.code + '_' + run.type.code + '_' + team.id + '_' + execution.id "
           :execution="execution"
           :run="run"
           :counts="qualitiesPerTeamAndSeverity(team.id, qualitySeverity.severity.code)"

@@ -52,6 +52,7 @@
           { routeName: 'management-cycle-definitions', name: 'CYCLES' },
 
           // FOR TESTING, FOR NOW
+          { routeName: 'management-technologies', name: 'TECHNOLOGIES' },
           { routeName: 'management-settings', name: 'SETTINGS' }
         ]
       }

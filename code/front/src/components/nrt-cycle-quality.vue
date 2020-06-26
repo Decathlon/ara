@@ -36,7 +36,7 @@
         <router-link :to="routerLink(qualitySeverity.severity.code, qualitySeverity.scenarioCounts)"
                      :replace="routerReplace" :target="isFramed ? '_blank' : ''">
           <nrt-severity-total
-              :data-nrt="'ExecutionsAndErrorsCartHeader_' + qualitySeverity.severity.code + '_' + execution.id "
+              :data-nrt=" $route.name + '_CartHeader_' + qualitySeverity.severity.code + '_' + execution.id "
               :qualitySeverity="qualitySeverity"
               :thresholds="execution.qualityThresholds ? execution.qualityThresholds[qualitySeverity.severity.code] : {}"
               :blockingValidation="execution.blockingValidation"

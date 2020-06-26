@@ -27,3 +27,7 @@ dist/
 nbdist/
 .nb-gradle/
 *.log
+
+### Build ###
+target/
+node_modules/

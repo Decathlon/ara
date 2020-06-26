@@ -20,41 +20,18 @@ package com.decathlon.ara.domain;
 import com.decathlon.ara.domain.enumeration.CoverageLevel;
 import com.decathlon.ara.domain.enumeration.FunctionalitySeverity;
 import com.decathlon.ara.domain.enumeration.FunctionalityType;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Set;
-import java.util.TreeSet;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.Lob;
-import javax.persistence.ManyToMany;
-import javax.persistence.NamedAttributeNode;
-import javax.persistence.NamedEntityGraph;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.Wither;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.SortNatural;
 
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.nullsFirst;
+import javax.persistence.*;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Set;
+import java.util.TreeSet;
+
+import static java.util.Comparator.*;
 
 @Data
 @NoArgsConstructor
@@ -73,11 +50,12 @@ public class Functionality implements Comparable<Functionality> {
     @GenericGenerator(name = "native", strategy = "native")
     private Long id;
 
-    private long projectId;
+    private Long projectId;
 
     private Long parentId;
 
-    private double order;
+    @Column(name = "\"order\"")
+    private Double order;
 
     @Enumerated(EnumType.STRING)
     private FunctionalityType type;

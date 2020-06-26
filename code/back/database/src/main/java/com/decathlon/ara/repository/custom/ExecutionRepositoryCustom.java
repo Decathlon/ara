@@ -18,9 +18,12 @@
 package com.decathlon.ara.repository.custom;
 
 import com.decathlon.ara.domain.Execution;
+import org.springframework.stereotype.Repository;
+
 import java.util.Collection;
 import java.util.List;
 
+@Repository
 public interface ExecutionRepositoryCustom {
 
     List<Execution> findTop10ByProjectIdAndBranchAndNameOrderByTestDateTimeDesc(long projectId, String branch, String name);
