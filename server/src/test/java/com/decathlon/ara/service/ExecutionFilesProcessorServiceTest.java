@@ -844,6 +844,7 @@ public class ExecutionFilesProcessorServiceTest {
         when(platformRule12.isEnabled()).thenReturn(false);
         when(platformRule21.isEnabled()).thenReturn(true);
         when(platformRule21.getCountry()).thenReturn("fr");
+        when(platformRule21.getTestTypes()).thenReturn("");
 
         when(esCountry.getCode()).thenReturn("es");
         when(deCountry.getCode()).thenReturn("de");
@@ -1062,6 +1063,7 @@ public class ExecutionFilesProcessorServiceTest {
         when(platformRule12.isEnabled()).thenReturn(false);
         when(platformRule21.isEnabled()).thenReturn(true);
         when(platformRule21.getCountry()).thenReturn("fr");
+        when(platformRule21.getTestTypes()).thenReturn("");
 
         when(frCountry.getCode()).thenReturn("fr");
         when(esCountry.getCode()).thenReturn("es");
@@ -1154,7 +1156,7 @@ public class ExecutionFilesProcessorServiceTest {
                         )
                 );
         assertThat(execution.get().getCountryDeployments())
-                .hasSize(1)
+                .hasSize(2)
                 .extracting(
                         "country",
                         "platform",
@@ -1177,6 +1179,17 @@ public class ExecutionFilesProcessorServiceTest {
                                 new Date(1590200515000L),
                                 300L,
                                 200L
+                        ),
+                        tuple(
+                                frCountry,
+                                "integration-2",
+                                null,
+                                null,
+                                JobStatus.UNAVAILABLE,
+                                null,
+                                null,
+                                null,
+                                null
                         )
                 );
         verify(executionCompletionRequestRepository, never()).delete(any(ExecutionCompletionRequest.class));
@@ -1661,7 +1674,7 @@ public class ExecutionFilesProcessorServiceTest {
         assertThat(execution.get().getQualitySeverities()).isNull();
         assertThat(execution.get().getDuration()).isEqualTo(150L);
         assertThat(execution.get().getEstimatedDuration()).isEqualTo(100L);
-        assertThat(execution.get().getRuns()).hasSize(2)
+        assertThat(execution.get().getRuns()).hasSize(3)
                 .extracting(
                         "country",
                         "type",
@@ -1705,6 +1718,21 @@ public class ExecutionFilesProcessorServiceTest {
                                 new Date(1512345515000L),
                                 3050L,
                                 75L,
+                                "sanity",
+                                false
+                        ),
+                        tuple(
+                                frCountry,
+                                desktopType,
+                                null,
+                                "integration-2",
+                                null,
+                                null,
+                                JobStatus.UNAVAILABLE,
+                                "fr",
+                                null,
+                                null,
+                                null,
                                 "sanity",
                                 false
                         )
