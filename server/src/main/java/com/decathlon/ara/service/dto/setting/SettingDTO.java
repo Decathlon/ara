@@ -18,13 +18,14 @@
 package com.decathlon.ara.service.dto.setting;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Wither;
+
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 @Data
 @NoArgsConstructor

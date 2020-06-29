@@ -19,31 +19,21 @@ package com.decathlon.ara.service;
 
 import com.decathlon.ara.defect.DefectAdapter;
 import com.decathlon.ara.domain.Project;
-import com.decathlon.ara.ci.fetcher.Fetcher;
-import com.decathlon.ara.repository.CommunicationRepository;
-import com.decathlon.ara.repository.CountryRepository;
-import com.decathlon.ara.repository.CycleDefinitionRepository;
-import com.decathlon.ara.repository.FunctionalityRepository;
-import com.decathlon.ara.repository.ProblemRepository;
-import com.decathlon.ara.repository.ProjectRepository;
-import com.decathlon.ara.repository.RootCauseRepository;
-import com.decathlon.ara.repository.SettingRepository;
-import com.decathlon.ara.repository.SeverityRepository;
-import com.decathlon.ara.repository.SourceRepository;
-import com.decathlon.ara.repository.TypeRepository;
+import com.decathlon.ara.repository.*;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.support.Settings;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Collections;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.ApplicationContext;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
 
 import static com.decathlon.ara.loader.DemoLoaderConstants.BRANCH_MASTER;
 import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
@@ -113,7 +103,7 @@ public class DemoServiceIT {
         // GIVEN
         final Path tempDirectory = Files.createTempDirectory("ara_temp_integration_test_directory_");
         try {
-            doReturn(tempDirectory.toString() + "/" + Fetcher.DEFAULT_EXECUTION_VARIABLES)
+            doReturn(tempDirectory.toString() + "/" + Settings.DEFAULT_EXECUTION_VARIABLES)
                     .when(settingService).get(anyLong(), eq(Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH));
             doReturn(Collections.emptyMap()).when(applicationContext).getBeansOfType(DefectAdapter.class);
 
@@ -135,7 +125,7 @@ public class DemoServiceIT {
         // GIVEN
         final Path tempDirectory = Files.createTempDirectory("ara_temp_integration_test_directory_");
         try {
-            doReturn(tempDirectory.toString() + "/executions/" + Fetcher.DEFAULT_EXECUTION_VARIABLES)
+            doReturn(tempDirectory.toString() + "/executions/" + Settings.DEFAULT_EXECUTION_VARIABLES)
                     .when(settingService).get(anyLong(), eq(Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH));
             Path projectFolder = tempDirectory.resolve("executions/" + PROJECT_CODE_DEMO);
             Path folder = projectFolder.resolve("master/day/1525442442556/fr/firefox-desktop");

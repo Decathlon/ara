@@ -22,7 +22,7 @@
     <parent>
         <groupId>com.decathlon.ara</groupId>
         <artifactId>ara-parent</artifactId>
-        <version>4.1.1</version>
+        <version>5.0.0</version>
     </parent>
     <artifactId>ara-lib</artifactId>
 
@@ -30,6 +30,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <cucumber.version>1.2.5</cucumber.version>
     </properties>
+
+    <name>ARA Libraries</name>
+    <description>
+        Agile Regression Analyzer - Libraries:
+        This is where you find all your common dependencies.
+    </description>
 
     <dependencies>
         <!-- Cucumber -->

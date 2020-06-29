@@ -19,11 +19,8 @@ package com.decathlon.ara.service;
 
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
-import com.decathlon.ara.ci.bean.Build;
-import com.decathlon.ara.ci.bean.BuildToIndex;
-import com.decathlon.ara.ci.fetcher.Fetcher;
-import com.decathlon.ara.ci.service.ExecutionCrawlerService;
-import com.decathlon.ara.ci.service.ExecutionDiscovererService;
+import com.decathlon.ara.ci.bean.PlannedIndexation;
+import com.decathlon.ara.ci.service.ExecutionIndexerService;
 import com.decathlon.ara.domain.CycleDefinition;
 import com.decathlon.ara.domain.Execution;
 import com.decathlon.ara.domain.ExecutionCompletionRequest;
@@ -32,7 +29,7 @@ import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
 import com.decathlon.ara.domain.enumeration.Handling;
 import com.decathlon.ara.domain.enumeration.JobStatus;
 import com.decathlon.ara.domain.enumeration.QualityStatus;
-import com.decathlon.ara.report.util.ScenarioExtractorUtil;
+import com.decathlon.ara.scenario.cucumber.util.ScenarioExtractorUtil;
 import com.decathlon.ara.repository.CycleDefinitionRepository;
 import com.decathlon.ara.repository.ExecutionCompletionRequestRepository;
 import com.decathlon.ara.repository.ExecutionRepository;
@@ -51,16 +48,6 @@ import com.decathlon.ara.service.mapper.ExecutionMapper;
 import com.decathlon.ara.service.mapper.ExecutionWithHandlingCountsMapper;
 import com.decathlon.ara.service.support.Settings;
 import com.decathlon.ara.service.transformer.ExecutionTransformer;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -72,6 +59,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Service for managing Execution.
@@ -94,9 +87,6 @@ public class ExecutionService {
     private final FunctionalityRepository functionalityRepository;
 
     @NonNull
-    private final ExecutionDiscovererService executionDiscovererService;
-
-    @NonNull
     private final ExecutionMapper executionMapper;
 
     @NonNull
@@ -115,7 +105,7 @@ public class ExecutionService {
     private final SettingService settingService;
 
     @NonNull
-    private final ExecutionCrawlerService executionCrawlerService;
+    private final ExecutionIndexerService executionIndexerService;
 
     @NonNull
     private final CycleDefinitionRepository cycleDefinitionRepository;
@@ -379,63 +369,59 @@ public class ExecutionService {
      * @throws IOException              if the zip file can't be unzipped.
      */
     public void uploadExecutionReport(long projectId, String projectCode, String branch, String cycle, MultipartFile zipFile) throws IOException {
-        if (!settingService.useFileSystemIndexer(projectId)) {
-            throw new IllegalArgumentException(Messages.IMPORT_POSTMAN_NOT_FS_INDEXER);
-        }
         String path = settingService.get(projectId, Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH)
-                .replace(Fetcher.PROJECT_VARIABLE, projectCode)
-                .replace(Fetcher.BRANCH_VARIABLE, branch)
-                .replace(Fetcher.CYCLE_VARIABLE, cycle);
-        File destDir = new File(path, "incoming");
-        List<File> newExecutions = this.unzipExecutions(destDir, zipFile);
-        for (final File newExecution : newExecutions) {
-            this.uploadSpecificDirectory(projectId, branch, cycle, newExecution);
+                .replace(Settings.PROJECT_VARIABLE, projectCode)
+                .replace(Settings.BRANCH_VARIABLE, branch)
+                .replace(Settings.CYCLE_VARIABLE, cycle);
+        File destinationDirectory = new File(path, "incoming");
+        String buildInformationFilePath = settingService.get(projectId, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH);
+        List<File> executionDirectories = this.unzipExecutions(destinationDirectory, zipFile, buildInformationFilePath);
+        for (final File executionDirectory : executionDirectories) {
+            uploadSpecificDirectory(projectId, branch, cycle, executionDirectory);
         }
     }
 
-    public void uploadSpecificDirectory(long projectId, String branch, String cycle, File directory) {
-        log.info("Received new execution report in {}", directory.getAbsolutePath());
-        Build build = new Build().withLink(directory.getAbsolutePath() + File.separator);
+    public void uploadSpecificDirectory(long projectId, String branch, String cycle, File executionDirectory) {
+        log.info("Received new execution report in {}", executionDirectory.getAbsolutePath());
         CycleDefinition cycleDefinition = cycleDefinitionRepository.findByProjectIdAndBranchAndName(projectId, branch, cycle);
         if (null == cycleDefinition) {
             throw new IllegalArgumentException("The branch or cycle for this project doesn't exists.");
         }
 
-        BuildToIndex buildToIndex = new BuildToIndex(cycleDefinition, build);
-        executionCrawlerService.crawl(buildToIndex);
+        PlannedIndexation plannedIndexation = new PlannedIndexation()
+                .withCycleDefinition(cycleDefinition)
+                .withExecutionFolder(executionDirectory);
+        executionIndexerService.indexExecution(plannedIndexation);
     }
 
-    List<File> unzipExecutions(File destinationDirectory, MultipartFile zipFile) throws IOException {
+    List<File> unzipExecutions(File destinationDirectory, MultipartFile zipFile, String buildInformationFilePath) throws IOException {
         Files.createDirectories(destinationDirectory.toPath());
         this.archiveService.unzip(zipFile, destinationDirectory);
-        List<File> resultFiles = new ArrayList<>();
-        if (ArrayUtils.isEmpty(destinationDirectory.list())) {
-            log.warn("No entries found in the zip file {}", destinationDirectory.getAbsolutePath());
-        } else {
-            resultFiles.addAll(retrieveAllExecutionDirectories(destinationDirectory));
-        }
-
-        return resultFiles;
+        return retrieveAllExecutionDirectories(destinationDirectory, buildInformationFilePath);
     }
 
-    List<File> retrieveAllExecutionDirectories(File path) {
-        if (isExecutionDirectory(path)) {
-            return Collections.singletonList(path);
+    List<File> retrieveAllExecutionDirectories(File file, String buildInformationFilePath) {
+        if (ArrayUtils.isEmpty(file.list())) {
+            log.warn("No entries found in the zip file {}", file.getAbsolutePath());
+            return new ArrayList<>();
         }
-        List<File> result = new ArrayList<>();
-        File[] entries = path.listFiles();
+
+        if (isExecutionDirectory(file, buildInformationFilePath)) {
+            return Collections.singletonList(file);
+        }
+
+        List<File> executionDirectories = new ArrayList<>();
+        File[] entries = file.listFiles();
         if (null != entries) {
-            for (File entry : entries) {
-                if (isExecutionDirectory(entry)) {
-                    result.add(entry);
-                }
-            }
+            executionDirectories = Arrays.asList(entries).stream()
+                    .filter(f -> isExecutionDirectory(f, buildInformationFilePath))
+                    .collect(Collectors.toList());
         }
-        return result;
+        return executionDirectories;
     }
 
-    boolean isExecutionDirectory(File path) {
-        return path.isDirectory() && path.getName().matches("[0-9]+")
-                && new File(path, "buildInformation.json").exists();
+    Boolean isExecutionDirectory(File file, String buildInformationFilePath) {
+        return file.isDirectory() && file.getName().matches("[0-9]+")
+                && new File(file, buildInformationFilePath).exists();
     }
 }

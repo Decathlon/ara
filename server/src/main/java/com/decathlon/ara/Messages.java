@@ -44,6 +44,8 @@ public final class Messages {
     public static final String NOT_FOUND_SETTING_OPTION = "The option is not supported by this setting.";
     public static final String NOT_FOUND_SOURCE = "The source does not exist: it has perhaps been removed.";
     public static final String NOT_FOUND_TEAM = "The team does not exist: it has perhaps been removed.";
+    public static final String NOT_FOUND_TECHNOLOGY = "The technology %s was not found.";
+    public static final String NOT_FOUND_TECHNOLOGY_SETTING = "The technology setting code %s was not found.";
     public static final String NOT_FOUND_TYPE = "The type does not exist: it has perhaps been removed.";
 
     public static final String NOT_UNIQUE_COUNTRY_CODE = "The code is already used by another country.";
@@ -55,7 +57,6 @@ public final class Messages {
     public static final String NOT_UNIQUE_PROBLEM_DEFECT_ID = "The defect ID is already assigned to another problem.";
     public static final String NOT_UNIQUE_PROBLEM_NAME = "The name is already used by another problem.";
     public static final String NOT_UNIQUE_PROJECT_CODE = "The code is already used by another project.";
-    public static final String NOT_UNIQUE_PROJECT_DEFAULT_AT_STARTUP = "There is already another default project.";
     public static final String NOT_UNIQUE_PROJECT_NAME = "The name is already used by another project.";
     public static final String NOT_UNIQUE_ROOT_CAUSE_NAME = "The name is already used by another root cause.";
     public static final String NOT_UNIQUE_SEVERITY_CODE = "A severity with this code already exists.";
@@ -114,9 +115,6 @@ public final class Messages {
     public static final String RULE_TEAM_NOT_ASSIGNABLE_TO_PROBLEMS = "The team cannot be assigned to a problem.";
     public static final String RULE_TYPE_USED_BY_PROBLEM_PATTERN = "The type is used by at least one rule of problem: please remove such rules and/or problems.";
     public static final String RULE_TYPE_USED_BY_RUN = "The type is used by at least one run in an execution: please wait for executions with runs of such types to be purged.";
-
-    public static final String IMPORT_POSTMAN_ZIP_ERROR = "The given Postman ZIP reports can't be extracted.";
-    public static final String IMPORT_POSTMAN_NOT_FS_INDEXER = "The given project should use the FileSystem Indexer for this action to work.";
 
     public static final String EXPORT_FUNCTIONALITY_UKNOWN_EXPORTER = "Unknown Export format. Please choose a proposed one.";
     public static final String IMPORT_FUNCTIONALITY_BAD_INPUT = "The given import has a bad format or isn't recognize has ARA functionalities. Did you use the Export feature ?";

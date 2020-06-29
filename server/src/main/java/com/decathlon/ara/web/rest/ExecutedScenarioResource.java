@@ -19,7 +19,7 @@ package com.decathlon.ara.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
 import com.decathlon.ara.Entities;
-import com.decathlon.ara.service.ExecutedScenarioService;
+import com.decathlon.ara.scenario.common.service.ExecutedScenarioService;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.dto.executedscenario.ExecutedScenarioDTO;
 import com.decathlon.ara.service.dto.executedscenario.ExecutedScenarioWithRunAndTeamIdsAndExecutionAndErrorsAndProblemsDTO;

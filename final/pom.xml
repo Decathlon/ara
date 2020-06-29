@@ -23,11 +23,16 @@
     <parent>
         <groupId>com.decathlon.ara</groupId>
         <artifactId>ara-parent</artifactId>
-        <version>4.1.1</version>
+        <version>5.0.0</version>
     </parent>
     <artifactId>ara-final</artifactId>
     <packaging>jar</packaging>
 
+    <name>ARA Final</name>
+    <description>
+        Agile Regression Analyzer - Final:
+        This part enable building the application from a script and a Dockerfile
+    </description>
 
     <dependencies>
         <!-- Include the backend of ARA -->

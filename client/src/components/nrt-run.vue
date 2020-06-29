@@ -22,7 +22,9 @@
 
     <Row type="flex" :gutter="4" justify="space-around">
       <i-col span="4" style="padding-top: 6px;">
-        <a :style="'display: block; color: #657180;' + (haveQualities ? '' : ' cursor: text;')" v-on:click="open = !open">
+        <a 
+          :data-nrt=" $route.name + '_CartRowTitle_' + run.country.code + '_' + run.type.code + '_' + execution.id "
+          :style="'display: block; color: #657180;' + (haveQualities ? '' : ' cursor: text;')" v-on:click="open = !open">
           <Icon type="md-arrow-dropright" size="16" v-if="haveQualities" :class="open ? 'arrow open' : 'arrow'" style="width: 4px; position: relative; left: -5px;" />
           <strong>{{run.country.code.toUpperCase()}}:</strong>
           {{run.type.name}}
@@ -91,6 +93,7 @@
       </i-col>
       <i-col :span="(24 - 4) / execution.qualitySeverities.length" v-else v-for="qualitySeverity in execution.qualitySeverities" :key="qualitySeverity.severity.code">
         <nrt-progress
+          :data-nrt=" $route.name + '_CartRowHeader_' + qualitySeverity.severity.code + '_' + run.country.code + '_' + run.type.code + '_' + execution.id "
           :execution="execution"
           :run="run"
           :counts="run.qualitiesPerSeverity[qualitySeverity.severity.code]"

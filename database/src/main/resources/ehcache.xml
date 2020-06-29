@@ -61,6 +61,8 @@
 
     <cache name="com.decathlon.ara.domain.Setting" maxEntriesLocalHeap="2000" eternal="true"/>
 
+    <cache name="com.decathlon.ara.domain.TechnologySetting" maxEntriesLocalHeap="2000" eternal="true"/>
+
     <cache name="com.decathlon.ara.domain.Severity" maxEntriesLocalHeap="20" eternal="true"/>
 
     <cache name="com.decathlon.ara.domain.Source" maxEntriesLocalHeap="200" eternal="true"/>

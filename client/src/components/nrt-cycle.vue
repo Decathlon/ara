@@ -30,12 +30,14 @@
           <i-col span="5">
             <Button-group v-if="!hideButtons" shape="circle" style="float: left; margin-right: 8px;">
               <Button
+                  :data-nrt=" $route.name + '_NavigationPreviousButton_' + execution.id "
                   :disabled="!execution.previousId"
                   @click="emitRequestExecution(execution.previousId)"
                   icon="md-skip-backward"
                   title="Previous execution"
                   type="primary"/>
               <Button
+                  :data-nrt=" $route.name + '_NavigationNextButton_' + execution.id "
                   :disabled="!execution.nextId"
                   @click="emitRequestExecution(execution.nextId)"
                   icon="md-skip-forward"
@@ -48,7 +50,10 @@
           </i-col>
           <i-col span="19" style="text-align: right;">
             <div style="float: right; margin-left: 8px;">
-              <execution-actions-button :execution="execution" v-on:change="emitRequestExecution(execution.id)"/>
+              <execution-actions-button 
+                  :data-nrt=" $route.name + '_ActionsAndJobReportsButton_' + execution.id "
+                  :execution="execution" 
+                  v-on:change="emitRequestExecution(execution.id)"/>
             </div>
             <span v-if="execution.buildDateTime">version from {{buildDateAgo}}<br></span>
             <span class="small-details"><em style="margin-right: 8px;">{{execution.version}}</em> {{buildDate}}</span>

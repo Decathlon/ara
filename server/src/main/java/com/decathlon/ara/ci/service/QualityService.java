@@ -32,14 +32,6 @@ import com.decathlon.ara.service.mapper.SeverityMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +39,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -71,7 +67,7 @@ public class QualityService {
      *
      * @param execution the execution to study in order to compute its quality(ies) and in which to store the result
      */
-    void computeQuality(Execution execution) {
+    public void computeQuality(Execution execution) {
         // This method will downgrade the quality at any time requiring it: the quality cannot upgrade at any place here
         QualityStatus globalQualityStatus = QualityStatus.PASSED;
 

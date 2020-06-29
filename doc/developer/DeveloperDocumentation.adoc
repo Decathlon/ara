@@ -2,25 +2,37 @@
 
 == Getting Started in Two Minutes
 
-Here is basically what you will need to set up on your development machine:
+Below is what you will need to set up on your development machine.
 
 * *Create a database and start it:*
-  ** (Optional) You can change your db root account's password in the database/instance/manage-db.sh script.
-  By default it's `dev_password_to_change`.
-  ** Go to the folder containing the script `manage-db.sh`:  `cd <ARA_ROOT>/database/instance`, from the project root
-  ** Run it: `./manage-db.sh create <FOLDER_PATH_TO_PERSISTS>`
-  ** (Optional) You can check that your relational database management system is up and running: `<ARA_ROOT>/database/instance/manage-db.sh mysqladmin`
-* *Build the server part and start it:*
-  ** Run `mvn clean install -Pdev` in `<ARA_ROOT>` folder to build the server and its dependencies.
-     Bear in mind that:
-     *** you can speed up the build by skipping the unit tests `mvn clean install -Pdev -Dmaven.test.skip=true`
-     *** for now, your `JAVA_HOME` environment variable should point to Java 8. Make sure `mvn -v` displays this version. We're currently working (https://github.com/Decathlon/ara/pull/167) to accept all java versions above this version.
-  ** Run `java -Dspring.profiles.active=dev -cp final/target/ara-<ARA_CURRENT_VERSION_SNAPSHOT>.jar -Dspring.datasource.password=<YOUR DB ACCOUNT PASS> -Dloader.main=com.decathlon.ara.AraApplication org.springframework.boot.loader.PropertiesLauncher` to launch the back-end server. This step is more suitable for integration tests rather than active development phase. +
-  ** When modifying the server, just run `mvn clean install -Pdev` in the `server` folder to not rebuild all dependencies, this time.
-* *Build the client part and start it:*
-  ** Run `npm install` (this is part of the above `mvn install`, so you can skip it if you have already done that).
-  ** Run `npm run dev` in the `client` folder to start the front-end server.
-  ** ARA's GUI is available at http://localhost:8081 (and it connects to the back-end launched above).
+  ** Go to the folder containing the script `manage-db.sh`:  `cd <ARA_ROOT>/database/instance`, where `<ARA_ROOT>` is your project path location in your computer.
+  ** (Optional) You can change your database root account's password in the `manage-db.sh` script.
+  By default it is `dev_password_to_change`.
+  ** Run it: `./manage-db.sh create <FOLDER_PATH_TO_PERSISTS>`, where `<FOLDER_PATH_TO_PERSISTS>` is the path where you want to save your data.
+  ** (Optional) You can check that your relational database management system is up and running: `./manage-db.sh mysqladmin`
+* *Build your project:*
+  ** +++<u>Build the client</u>+++:
+     *** Go to the client folder: `cd <ARA_ROOT>/client`
+     *** Run `npm install` to install all the required dependencies
+     *** Run `npm run build` to build the client
+  ** +++<u>Build the server</u>+++:
+     *** Run `mvn clean install -Pdev` in the `<ARA_ROOT>` folder to build the server.
+     *** Bear in mind that:
+         **** you can speed up the build by skipping the unit tests `mvn clean install -Pdev -Dmaven.test.skip=true`
+         **** for now, your `JAVA_HOME` environment variable should point to Java 8. Make sure `mvn -v` displays this version. We're currently working (https://github.com/Decathlon/ara/pull/167) to accept all java versions above this version.
+         **** later, when modifying the server, just run `mvn clean install -Pdev` in the `<ARA-ROOT>/server` folder to only compile the server, instead of rebuilding all the project.
+* *Launch your project:*
+  ** +++<u>Start the server</u>+++:
+     *** From the root of your project, run `java -Dspring.profiles.active=dev -cp final/target/ara-<ARA_CURRENT_VERSION_SNAPSHOT>.jar -Dspring.datasource.password=<YOUR DB ACCOUNT PASS> -Dloader.main=com.decathlon.ara.AraApplication org.springframework.boot.loader.PropertiesLauncher` to launch the back-end server. This step is more suitable for integration tests rather than active development phase. +
+  ** +++<u>Start the client</u>+++:
+     *** Wait for the server to be up and running
+     *** Run `npm run dev` in the `<ARA_ROOT>/client` folder to start the front-end server.
+     *** ARA's GUI is available at http://localhost:8081.
+* *(Optional) Generate the project site:*
+  ** Clean your project by running `mvn clean` command from `<ARA_ROOT>`
+  ** Run `mvn package site site:phase` to generate the maven site containing all the details concerning this project.
+     Please note that this operation may take a while (up to 15 minutes).
+  ** Open the generated `<ARA_ROOT>/target/staging/index.html` file to browse the site
 
 More information are provided below and in linked detailed documentations.
 
