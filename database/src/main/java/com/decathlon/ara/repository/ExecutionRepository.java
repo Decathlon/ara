@@ -71,6 +71,8 @@ public interface ExecutionRepository extends JpaRepository<Execution, Long>, Exe
             "       (execution.jobLink IS NOT NULL AND execution.jobLink = ?3))")
     Optional<Execution> findByProjectIdAndJobUrlOrJobLink(Long projectId, String jobUrl, String jobLink);
 
+    Optional<Execution> findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(Long projectId, String jobLink);
+
     boolean existsByCycleDefinitionId(Long id);
 
 }
