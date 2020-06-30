@@ -36,10 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -99,22 +96,20 @@ public class ExecutionIndexerService {
         String link = rawExecutionFolder.getAbsolutePath() + File.separator;
         log.info("Began execution indexing {}/{} for link {}", branch, cycle, link);
 
-        Optional<Execution> execution;
+        Optional<Execution> previousExecution = executionRepository.findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(projectId, link);
+        List<Long> existingErrorIds = getErrorIds(previousExecution);
 
-        execution = executionFilesProcessorService.getExecution(plannedIndexation);
+        Optional<Execution> processedExecution = executionFilesProcessorService.getExecution(plannedIndexation);
 
-        if (!execution.isPresent()) {
+        if (!processedExecution.isPresent()) {
             log.info("Could not extract any execution from the directory {}", link);
             log.info("Some of the files may be incorrect, please check again");
             return;
         }
 
-        final Execution savedExecution = executionRepository.save(execution.get());
+        final Execution savedExecution = executionRepository.save(processedExecution.get());
 
         List<Long> newErrorIds = getErrorIds(Optional.of(savedExecution));
-
-        String url = execution.get().getJobUrl();
-        List<Long> existingErrorIds = getErrorIds(executionRepository.findByProjectIdAndJobUrlOrJobLink(projectId, url, link));
         newErrorIds.removeAll(existingErrorIds);
         if (!newErrorIds.isEmpty()) {
             final Set<Problem> updatedProblems = errorRepository.autoAssignProblemsToNewErrors(projectId, newErrorIds);
@@ -125,6 +120,7 @@ public class ExecutionIndexerService {
             transactionAppenderUtil.doAfterCommit(() -> safelySendQualityEmail(savedExecution));
         }
 
+        String url = processedExecution.get().getJobUrl();
         log.info("Ended indexing execution {}/{} job URL {} and link {}", branch, cycle, url, link);
     }
 
