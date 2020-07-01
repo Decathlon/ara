@@ -79,7 +79,7 @@ public class ExecutionIndexerServiceTest {
 
         verify(executionFilesProcessorService, never()).getExecution(any(PlannedIndexation.class));
         verify(executionRepository, never()).save(any(Execution.class));
-        verify(executionRepository, never()).findByProjectIdAndJobUrlOrJobLink(anyLong(), anyString(), anyString());
+        verify(executionRepository, never()).findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(anyLong(), anyString());
         verify(errorRepository, never()).autoAssignProblemsToNewErrors(anyLong(), anyList());
         verify(problemDenormalizationService, never()).updateFirstAndLastSeenDateTimes(anyCollection());
         verify(transactionService, never()).doAfterCommit(any(Runnable.class));
@@ -98,7 +98,7 @@ public class ExecutionIndexerServiceTest {
 
         verify(executionFilesProcessorService, never()).getExecution(any(PlannedIndexation.class));
         verify(executionRepository, never()).save(any(Execution.class));
-        verify(executionRepository, never()).findByProjectIdAndJobUrlOrJobLink(anyLong(), anyString(), anyString());
+        verify(executionRepository, never()).findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(anyLong(), anyString());
         verify(errorRepository, never()).autoAssignProblemsToNewErrors(anyLong(), anyList());
         verify(problemDenormalizationService, never()).updateFirstAndLastSeenDateTimes(anyCollection());
         verify(transactionService, never()).doAfterCommit(any(Runnable.class));
@@ -119,7 +119,7 @@ public class ExecutionIndexerServiceTest {
 
         verify(executionFilesProcessorService, never()).getExecution(any(PlannedIndexation.class));
         verify(executionRepository, never()).save(any(Execution.class));
-        verify(executionRepository, never()).findByProjectIdAndJobUrlOrJobLink(anyLong(), anyString(), anyString());
+        verify(executionRepository, never()).findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(anyLong(), anyString());
         verify(errorRepository, never()).autoAssignProblemsToNewErrors(anyLong(), anyList());
         verify(problemDenormalizationService, never()).updateFirstAndLastSeenDateTimes(anyCollection());
         verify(transactionService, never()).doAfterCommit(any(Runnable.class));
@@ -139,6 +139,7 @@ public class ExecutionIndexerServiceTest {
         when(cycleDefinition.getProjectId()).thenReturn(1L);
         when(cycleDefinition.getBranch()).thenReturn("branch");
         when(cycleDefinition.getName()).thenReturn("cycle");
+        when(executionRepository.findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(1L,"/execution/folder/location/in/disk" + File.separator)).thenReturn(Optional.empty());
         when(executionFilesProcessorService.getExecution(plannedIndexation)).thenReturn(Optional.empty());
 
         // Then
@@ -146,7 +147,7 @@ public class ExecutionIndexerServiceTest {
 
         verify(executionFilesProcessorService).getExecution(plannedIndexation);
         verify(executionRepository, never()).save(any(Execution.class));
-        verify(executionRepository, never()).findByProjectIdAndJobUrlOrJobLink(anyLong(), anyString(), anyString());
+        verify(executionRepository).findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(1L,"/execution/folder/location/in/disk" + File.separator);
         verify(errorRepository, never()).autoAssignProblemsToNewErrors(anyLong(), anyList());
         verify(problemDenormalizationService, never()).updateFirstAndLastSeenDateTimes(anyCollection());
         verify(transactionService, never()).doAfterCommit(any(Runnable.class));
@@ -173,14 +174,14 @@ public class ExecutionIndexerServiceTest {
         when(executionRepository.save(indexedExecution)).thenReturn(savedExecution);
         when(indexedExecution.getJobUrl()).thenReturn("http://execution-url.build.org");
         when(savedExecution.getStatus()).thenReturn(JobStatus.UNAVAILABLE);
-        when(executionRepository.findByProjectIdAndJobUrlOrJobLink(1L,"http://execution-url.build.org", "/execution/folder/location/in/disk" + File.separator)).thenReturn(Optional.empty());
+        when(executionRepository.findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(1L, "/execution/folder/location/in/disk" + File.separator)).thenReturn(Optional.empty());
 
         // Then
         cut.indexExecution(plannedIndexation);
 
         verify(executionFilesProcessorService).getExecution(plannedIndexation);
         verify(executionRepository).save(indexedExecution);
-        verify(executionRepository).findByProjectIdAndJobUrlOrJobLink(1L,"http://execution-url.build.org", "/execution/folder/location/in/disk" + File.separator);
+        verify(executionRepository).findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(1L, "/execution/folder/location/in/disk" + File.separator);
         verify(errorRepository, never()).autoAssignProblemsToNewErrors(anyLong(), anyList());
         verify(problemDenormalizationService, never()).updateFirstAndLastSeenDateTimes(anyCollection());
         verify(transactionService, never()).doAfterCommit(any(Runnable.class));
@@ -250,7 +251,7 @@ public class ExecutionIndexerServiceTest {
         when(executionRepository.save(indexedExecution)).thenReturn(savedExecution);
         when(indexedExecution.getJobUrl()).thenReturn("http://execution-url.build.org");
         when(savedExecution.getStatus()).thenReturn(JobStatus.UNAVAILABLE);
-        when(executionRepository.findByProjectIdAndJobUrlOrJobLink(1L,"http://execution-url.build.org", "/execution/folder/location/in/disk" + File.separator)).thenReturn(Optional.of(previousExecution));
+        when(executionRepository.findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(1L, "/execution/folder/location/in/disk" + File.separator)).thenReturn(Optional.of(previousExecution));
 
         when(previousExecution.getRuns()).thenReturn(previousRuns);
         when(previousRun.getExecutedScenarios()).thenReturn(previousExecutedScenarios);
@@ -279,7 +280,7 @@ public class ExecutionIndexerServiceTest {
 
         verify(executionFilesProcessorService).getExecution(plannedIndexation);
         verify(executionRepository).save(indexedExecution);
-        verify(executionRepository).findByProjectIdAndJobUrlOrJobLink(1L,"http://execution-url.build.org", "/execution/folder/location/in/disk" + File.separator);
+        verify(executionRepository).findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(1L, "/execution/folder/location/in/disk" + File.separator);
         verify(errorRepository).autoAssignProblemsToNewErrors(1L, Arrays.asList(111L, 113L, 211L, 221L, 222L));
         verify(problemDenormalizationService).updateFirstAndLastSeenDateTimes(problems);
         verify(transactionService, never()).doAfterCommit(any(Runnable.class));
@@ -349,7 +350,7 @@ public class ExecutionIndexerServiceTest {
         when(executionRepository.save(indexedExecution)).thenReturn(savedExecution);
         when(indexedExecution.getJobUrl()).thenReturn("http://execution-url.build.org");
         when(savedExecution.getStatus()).thenReturn(JobStatus.DONE);
-        when(executionRepository.findByProjectIdAndJobUrlOrJobLink(1L,"http://execution-url.build.org", "/execution/folder/location/in/disk" + File.separator)).thenReturn(Optional.of(previousExecution));
+        when(executionRepository.findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(1L, "/execution/folder/location/in/disk" + File.separator)).thenReturn(Optional.of(previousExecution));
 
         when(previousExecution.getRuns()).thenReturn(previousRuns);
         when(previousRun.getExecutedScenarios()).thenReturn(previousExecutedScenarios);
@@ -378,7 +379,7 @@ public class ExecutionIndexerServiceTest {
 
         verify(executionFilesProcessorService).getExecution(plannedIndexation);
         verify(executionRepository).save(indexedExecution);
-        verify(executionRepository).findByProjectIdAndJobUrlOrJobLink(1L,"http://execution-url.build.org", "/execution/folder/location/in/disk" + File.separator);
+        verify(executionRepository).findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(1L, "/execution/folder/location/in/disk" + File.separator);
         verify(errorRepository).autoAssignProblemsToNewErrors(1L, Arrays.asList(111L, 113L, 211L, 221L, 222L));
         verify(problemDenormalizationService).updateFirstAndLastSeenDateTimes(problems);
         verify(transactionService).doAfterCommit(any(Runnable.class));

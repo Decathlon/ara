@@ -150,6 +150,11 @@ public class ExecutionFilesProcessorService {
 
         qualityService.computeQuality(execution.get());
 
+        Boolean executionIsIncomplete = !executionIsComplete(execution.get(), cycleDef.get());
+        if (executionIsIncomplete) {
+            execution.get().setQualityStatus(QualityStatus.INCOMPLETE);
+        }
+
         cleanExecutionFiles(projectId, rawExecutionFile);
 
         return execution;
@@ -271,7 +276,6 @@ public class ExecutionFilesProcessorService {
 
         if (countryJobDirectories == null || countryJobDirectories.length == 0) {
             log.info("The folder {} doesn't contain any country", rawExecutionFile.getAbsolutePath());
-            return Pair.of(countryDeployments, runs);
         }
 
         final List<Country> allCountries = countryRepository.findAllByProjectIdOrderByCode(projectId);
@@ -297,19 +301,22 @@ public class ExecutionFilesProcessorService {
                         .filter(file -> countryCode.equals(file.getName().toLowerCase()))
                         .findFirst();
 
-                if (!countryJobFolder.isPresent()) {
+                CountryDeployment countryDeployment;
+                File[] allCountryJobFolderContents;
+                if (countryJobFolder.isPresent()) {
+                    final Optional<Build> countryBuild = getBuildFromFile(countryJobFolder.get(), buildInformationPath);
+                    countryDeployment = getCompleteCountryDeployment(country.get(), platformName, countryBuild, executionJobStatus);
+                    allCountryJobFolderContents = countryJobFolder.get().listFiles();
+                } else {
+                    countryDeployment = getUnavailableCountryDeployment(country.get(), platformName);
+                    allCountryJobFolderContents = new File[0];
                     log.info("Although the country {} is defined in the cycle definition file, no matching folder was found. Please check the execution zip again", countryCode);
-                    continue;
                 }
 
-                final String[] typeCodes = rule.getTestTypes().split(PlatformRule.TEST_TYPES_SEPARATOR);
-                final File[] allCountryJobFolderContents = countryJobFolder.get().listFiles();
-                final File[] typeJobFolders = Arrays.stream(allCountryJobFolderContents).filter(File::isDirectory).toArray(File[]::new);
-
-                final Optional<Build> countryBuild = getBuildFromFile(countryJobFolder.get(), buildInformationPath);
-
-                CountryDeployment countryDeployment = getCountryDeployment(country.get(), platformName, countryBuild, executionJobStatus);
                 countryDeployments.add(countryDeployment);
+
+                final String[] typeCodes = getTypeCodes(rule.getTestTypes());
+                final File[] typeJobFolders = Arrays.stream(allCountryJobFolderContents).filter(File::isDirectory).toArray(File[]::new);
 
                 for (final String typeCode : typeCodes) {
                     final Optional<Type> type = getTypeFromCodeAndTypes(typeCode, allTypes);
@@ -326,12 +333,14 @@ public class ExecutionFilesProcessorService {
                                 .findFirst();
 
                         if (!typeJobFolder.isPresent()) {
+                            Run run = getUnavailableRun(country.get(), type.get(), platformName, rule);
+                            runs.add(run);
                             log.info("The type {} was not found in the execution zip", typeCode);
                             continue;
                         }
 
                         final Optional<Build> typeBuild = getBuildFromFile(typeJobFolder.get(), buildInformationPath);
-                        Run run = getRun(country.get(), type.get(), platformName, rule, typeBuild, executionJobStatus);
+                        Run run = getCompleteRun(country.get(), type.get(), platformName, rule, typeBuild, executionJobStatus);
 
                         Technology technology = source.getTechnology();
                         Optional<ScenariosIndexer> scenariosIndexer = scenariosIndexerStrategy.getScenariosIndexer(technology);
@@ -350,6 +359,57 @@ public class ExecutionFilesProcessorService {
     }
 
     /**
+     * Split type codes using a separator ({@link PlatformRule#TEST_TYPES_SEPARATOR})
+     * @param rawTypeString the unprocessed string containing all the type codes
+     * @return the type codes
+     */
+    private String[] getTypeCodes(String rawTypeString) {
+        if (StringUtils.isBlank(rawTypeString)) {
+            return new String[0];
+        }
+        return rawTypeString.split(PlatformRule.TEST_TYPES_SEPARATOR);
+    }
+
+    /**
+     * Check whether an execution is complete or not.
+     * An execution is complete if and only if all the rules has been handled.
+     * @param execution the execution to check
+     * @param cycleDef the {@link CycleDef} containing the platform rules
+     * @return
+     */
+    private Boolean executionIsComplete(Execution execution, CycleDef cycleDef) {
+        final Map<String, List<PlatformRule>> platformsRules = cycleDef.getPlatformsRules();
+        return platformsRules.entrySet()
+                .stream()
+                .map(entry -> Pair.of(
+                        entry.getKey(),
+                        entry.getValue().stream()
+                                .filter(PlatformRule::isEnabled)
+                                .map(rule -> Pair.of(
+                                        execution.getCountryDeployments().stream()
+                                                .anyMatch(
+                                                        cd -> cd.getCountry().getCode().toLowerCase().equals(rule.getCountry().toLowerCase()) &
+                                                                cd.getPlatform().toLowerCase().equals(entry.getKey().toLowerCase())
+                                                ),
+                                        Arrays.stream(getTypeCodes(rule.getTestTypes()))
+                                                .map(type -> execution.getRuns().stream()
+                                                        .anyMatch(r ->
+                                                                r.getCountry().getCode().toLowerCase().equals(rule.getCountry().toLowerCase()) &
+                                                                        r.getType().getCode().toLowerCase().equals(type.toLowerCase()) &
+                                                                        r.getPlatform().toLowerCase().equals(entry.getKey().toLowerCase())
+                                                        )
+                                                )
+                                        )
+                                )
+                                .map(pair -> Pair.of(pair.getFirst(), pair.getSecond().allMatch(b -> b)))
+                                .map(pair -> pair.getFirst() & pair.getSecond())
+                                .allMatch(b -> b)
+                ))
+                .map(Pair::getSecond)
+                .allMatch(b -> b);
+    }
+
+    /**
      * Get the country matching the country code, if found
      * @param countryCode the country code
      * @param countries all the countries available
@@ -363,14 +423,43 @@ public class ExecutionFilesProcessorService {
     }
 
     /**
-     * Create a country deployment
+     * Create a country deployment with the status {@link JobStatus#UNAVAILABLE}
+     * @param country the country
+     * @param platformName the platform name
+     * @return the country deployment
+     */
+    private CountryDeployment getUnavailableCountryDeployment(Country country, String platformName) {
+        CountryDeployment countryDeployment = getCountryDeployment(country, platformName, Optional.empty());
+        countryDeployment.setStatus(JobStatus.UNAVAILABLE);
+        return countryDeployment;
+    }
+
+    /**
+     * Create a complete country deployment
      * @param country the country
      * @param platformName the platform name
      * @param countryBuild the country build
      * @param executionJobStatus the execution job status
      * @return the country deployment
      */
-    private CountryDeployment getCountryDeployment(Country country, String platformName, Optional<Build> countryBuild, JobStatus executionJobStatus) {
+    private CountryDeployment getCompleteCountryDeployment(Country country, String platformName, Optional<Build> countryBuild, JobStatus executionJobStatus) {
+        CountryDeployment countryDeployment = getCountryDeployment(country, platformName, countryBuild);
+        JobStatus countryDeploymentJobStatus = JobStatus.UNAVAILABLE;
+        if (countryBuild.isPresent()) {
+            countryDeploymentJobStatus = getRunOrCountryDeploymentJobStatus(executionJobStatus, getJobStatusFromBuild(countryBuild.get()));
+        }
+        countryDeployment.setStatus(countryDeploymentJobStatus);
+        return countryDeployment;
+    }
+
+    /**
+     * Create a country deployment without a status
+     * @param country the country
+     * @param platformName the platform name
+     * @param countryBuild the country build
+     * @return the country deployment
+     */
+    private CountryDeployment getCountryDeployment(Country country, String platformName, Optional<Build> countryBuild) {
         CountryDeployment countryDeployment = new CountryDeployment();
         countryDeployment.setCountry(country);
         countryDeployment.setPlatform(platformName);
@@ -381,8 +470,6 @@ public class ExecutionFilesProcessorService {
             countryDeployment.setEstimatedDuration(countryBuild.get().getEstimatedDuration());
             countryDeployment.setDuration(countryBuild.get().getDuration());
             countryDeployment.setResult(countryBuild.get().getResult());
-            JobStatus countryDeploymentJobStatus = getRunOrCountryDeploymentJobStatus(executionJobStatus, getJobStatusFromBuild(countryBuild.get()));
-            countryDeployment.setStatus(countryDeploymentJobStatus);
         }
         return countryDeployment;
     }
@@ -401,7 +488,21 @@ public class ExecutionFilesProcessorService {
     }
 
     /**
-     * Create a run
+     * Create a run with the status {@link JobStatus#UNAVAILABLE}
+     * @param country the country
+     * @param type the type
+     * @param platformName the platform name
+     * @param rule the rule
+     * @return a run
+     */
+    private Run getUnavailableRun(Country country, Type type, String platformName, PlatformRule rule) {
+        Run run = getRun(country, type, platformName, rule, Optional.empty());
+        run.setStatus(JobStatus.UNAVAILABLE);
+        return run;
+    }
+
+    /**
+     * Create a complete run
      * @param country the country
      * @param type the type
      * @param platformName the platform name
@@ -410,7 +511,26 @@ public class ExecutionFilesProcessorService {
      * @param executionJobStatus the execution job status
      * @return a run
      */
-    private Run getRun(Country country, Type type, String platformName, PlatformRule rule, Optional<Build> typeBuild, JobStatus executionJobStatus) {
+    private Run getCompleteRun(Country country, Type type, String platformName, PlatformRule rule, Optional<Build> typeBuild, JobStatus executionJobStatus) {
+        Run run = getRun(country, type, platformName, rule, typeBuild);
+        JobStatus runJobStatus = JobStatus.UNAVAILABLE;
+        if (typeBuild.isPresent()) {
+            runJobStatus = getRunOrCountryDeploymentJobStatus(executionJobStatus, getJobStatusFromBuild(typeBuild.get()));
+        }
+        run.setStatus(runJobStatus);
+        return run;
+    }
+
+    /**
+     * Create a run without a status
+     * @param country the country
+     * @param type the type
+     * @param platformName the platform name
+     * @param rule the rule
+     * @param typeBuild the type build
+     * @return a run
+     */
+    private Run getRun(Country country, Type type, String platformName, PlatformRule rule, Optional<Build> typeBuild) {
         Run run = new Run();
         run.setCountry(country);
         run.setType(type);
@@ -424,8 +544,6 @@ public class ExecutionFilesProcessorService {
             run.setStartDateTime(new Date(typeBuild.get().getTimestamp()));
             run.setEstimatedDuration(typeBuild.get().getEstimatedDuration());
             run.setDuration(typeBuild.get().getDuration());
-            JobStatus runJobStatus = getRunOrCountryDeploymentJobStatus(executionJobStatus, getJobStatusFromBuild(typeBuild.get()));
-            run.setStatus(runJobStatus);
             if (StringUtils.isNotEmpty(typeBuild.get().getComment())) {
                 run.setComment(typeBuild.get().getComment());
             }
