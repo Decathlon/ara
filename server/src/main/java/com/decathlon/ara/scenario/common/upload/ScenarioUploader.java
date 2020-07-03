@@ -5,9 +5,9 @@ import com.decathlon.ara.Messages;
 import com.decathlon.ara.domain.*;
 import com.decathlon.ara.domain.enumeration.FunctionalityType;
 import com.decathlon.ara.domain.enumeration.Technology;
+import com.decathlon.ara.repository.*;
 import com.decathlon.ara.scenario.cucumber.bean.Tag;
 import com.decathlon.ara.scenario.cucumber.util.ScenarioExtractorUtil;
-import com.decathlon.ara.repository.*;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import lombok.NonNull;
@@ -15,12 +15,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
+@Transactional
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
 public class ScenarioUploader {
