@@ -18,16 +18,9 @@
 package com.decathlon.ara.loader;
 
 import com.decathlon.ara.common.NotGonnaHappenException;
-import com.decathlon.ara.service.ScenarioService;
 import com.decathlon.ara.service.exception.BadRequestException;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import com.decathlon.ara.scenario.cucumber.upload.CucumberScenarioUploader;
+import com.decathlon.ara.scenario.postman.upload.PostmanScenarioUploader;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +31,15 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static com.decathlon.ara.loader.DemoLoaderConstants.SOURCE_CODE_API;
 import static com.decathlon.ara.loader.DemoLoaderConstants.SOURCE_CODE_WEB;
@@ -52,13 +54,16 @@ import static com.decathlon.ara.loader.DemoLoaderConstants.SOURCE_CODE_WEB;
 public class DemoScenarioLoader {
 
     @NonNull
-    private final ScenarioService scenarioService;
+    private final PostmanScenarioUploader postmanScenarioUploader;
+
+    @NonNull
+    private final CucumberScenarioUploader cucumberScenarioUploader;
 
     @NonNull
     private final DemoLoaderService demoLoaderService;
 
     public void createScenarios(long projectId, Map<String, Long> functionalityIds) throws BadRequestException {
-        scenarioService.uploadCucumber(projectId, SOURCE_CODE_WEB,
+        cucumberScenarioUploader.uploadCucumber(projectId, SOURCE_CODE_WEB,
                 demoLoaderService.replaceFunctionalityIdPlaceholders(functionalityIds,
                         getResourceAsUtf8String("reports/demo/dry-report.json")));
 
@@ -71,7 +76,7 @@ public class DemoScenarioLoader {
         }
 
         try {
-            scenarioService.uploadPostman(projectId, SOURCE_CODE_API, postmanScenariosZip);
+            postmanScenarioUploader.uploadPostman(projectId, SOURCE_CODE_API, postmanScenariosZip);
         } finally {
             FileUtils.deleteQuietly(postmanScenariosZip);
         }

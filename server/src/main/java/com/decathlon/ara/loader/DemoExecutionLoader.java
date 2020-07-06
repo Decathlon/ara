@@ -17,43 +17,18 @@
 
 package com.decathlon.ara.loader;
 
-import com.decathlon.ara.common.NotGonnaHappenException;
+import com.decathlon.ara.ci.bean.Build;
 import com.decathlon.ara.ci.bean.CycleDef;
 import com.decathlon.ara.ci.bean.PlatformRule;
 import com.decathlon.ara.ci.bean.QualityThreshold;
-import com.decathlon.ara.ci.bean.Build;
+import com.decathlon.ara.common.NotGonnaHappenException;
 import com.decathlon.ara.domain.enumeration.Result;
-import com.decathlon.ara.ci.fetcher.Fetcher;
 import com.decathlon.ara.service.ExecutionService;
 import com.decathlon.ara.service.SettingService;
 import com.decathlon.ara.service.dto.cycledefinition.CycleDefinitionDTO;
 import com.decathlon.ara.service.support.Settings;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiPredicate;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
-import javax.persistence.EntityManager;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,11 +41,27 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.decathlon.ara.loader.DemoLoaderConstants.BRANCH_DEVELOP;
-import static com.decathlon.ara.loader.DemoLoaderConstants.BRANCH_MASTER;
-import static com.decathlon.ara.loader.DemoLoaderConstants.CYCLE_DAY;
-import static com.decathlon.ara.loader.DemoLoaderConstants.CYCLE_NIGHT;
-import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
+import javax.persistence.EntityManager;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
+
+import static com.decathlon.ara.loader.DemoLoaderConstants.*;
 
 /**
  * Service for loading executions into the Demo project.
@@ -214,9 +205,9 @@ public class DemoExecutionLoader {
             // Create directories for all cycles so there will be no exception in logs if the indexer does not find them
             for (CycleDefinitionDTO cycleDefinition : cycleDefinitions) {
                 final File cycleDirectory = new File(executionBasePath
-                        .replace(Fetcher.PROJECT_VARIABLE, PROJECT_CODE_DEMO)
-                        .replace(Fetcher.BRANCH_VARIABLE, cycleDefinition.getBranch())
-                        .replace(Fetcher.CYCLE_VARIABLE, cycleDefinition.getName()));
+                        .replace(Settings.PROJECT_VARIABLE, PROJECT_CODE_DEMO)
+                        .replace(Settings.BRANCH_VARIABLE, cycleDefinition.getBranch())
+                        .replace(Settings.CYCLE_VARIABLE, cycleDefinition.getName()));
                 Files.createDirectories(cycleDirectory.toPath());
             }
 

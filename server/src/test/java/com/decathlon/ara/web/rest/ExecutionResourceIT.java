@@ -17,9 +17,8 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.ci.bean.Build;
-import com.decathlon.ara.ci.bean.BuildToIndex;
-import com.decathlon.ara.ci.service.ExecutionCrawlerService;
+import com.decathlon.ara.ci.bean.PlannedIndexation;
+import com.decathlon.ara.ci.service.ExecutionIndexerService;
 import com.decathlon.ara.domain.CycleDefinition;
 import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
 import com.decathlon.ara.domain.enumeration.JobStatus;
@@ -33,11 +32,6 @@ import com.decathlon.ara.service.dto.run.RunWithExecutedScenariosAndTeamIdsAndEr
 import com.decathlon.ara.util.TransactionalSpringIntegrationTest;
 import com.decathlon.ara.web.rest.util.HeaderUtil;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Calendar;
-import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -53,10 +47,13 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.multipart.MultipartFile;
 
-import static com.decathlon.ara.util.TestUtil.NONEXISTENT;
-import static com.decathlon.ara.util.TestUtil.header;
-import static com.decathlon.ara.util.TestUtil.longs;
-import static com.decathlon.ara.util.TestUtil.timestamp;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Calendar;
+import java.util.List;
+
+import static com.decathlon.ara.util.TestUtil.*;
 import static com.decathlon.ara.web.rest.ProblemResourceIT.assertProblem1001;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -67,7 +64,7 @@ public class ExecutionResourceIT {
     private static final String PROJECT_CODE = "p";
 
     @MockBean
-    private ExecutionCrawlerService executionCrawlerService;
+    private ExecutionIndexerService executionIndexerService;
 
     @Autowired
     private ExecutionResource cut;
@@ -305,15 +302,14 @@ public class ExecutionResourceIT {
         String cycleName = "day";
         File incomingPath = new File("/tmp/ara/executions/custom/" + projectCode
                 + "/" + branchName + "/" + cycleName + "/incoming/1547216212139");
-        Build build = new Build().withLink(incomingPath.getAbsolutePath() + File.separator);
         CycleDefinition cycle = new CycleDefinition(1L, 2, branchName, cycleName, 1);
-        BuildToIndex buildToIndex = new BuildToIndex(cycle, build);
+        PlannedIndexation plannedIndexation = new PlannedIndexation().withCycleDefinition(cycle).withExecutionFolder(incomingPath);
         try {
             // When
             ResponseEntity<Void> responseEntity = cut.upload(projectCode, branchName, cycleName, file);
             // Then
             Assertions.assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            Mockito.verify(executionCrawlerService, Mockito.timeout(1000)).crawl(buildToIndex);
+            Mockito.verify(executionIndexerService, Mockito.timeout(1000)).indexExecution(plannedIndexation);
         } finally {
             if (':' == incomingPath.getAbsolutePath().charAt(1)) { // Windows like path
                 FileUtils.deleteQuietly(new File("/tmp"));
