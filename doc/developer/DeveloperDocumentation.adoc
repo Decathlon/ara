@@ -7,7 +7,7 @@ Below is what you will need to set up on your development machine.
 * *Create a database and start it:*
   ** Go to the folder containing the script `manage-db.sh`:  `cd <ARA_ROOT>/database/instance`, where `<ARA_ROOT>` is your project path location in your computer.
   ** (Optional) You can change your database root account's password in the `manage-db.sh` script.
-  By default it is `dev_password_to_change`.
+  By default, it is `dev_password_to_change`.
   ** Run it: `./manage-db.sh create <FOLDER_PATH_TO_PERSISTS>`, where `<FOLDER_PATH_TO_PERSISTS>` is the path where you want to save your data.
   ** (Optional) You can check that your relational database management system is up and running: `./manage-db.sh mysqladmin`
 * *Build your project:*
