@@ -4,10 +4,18 @@ Here is how to set up ARA, configure it, and plug the continuous integration of 
 
 == Install ARA
 
-The simplest way to install and run ARA is to use the Docker-compose script.
+To install ARA:
 
-Open the <<../../../docker/README.adoc#head, Run ARA Using Docker>> document
-and follow the first two sections: "Pre-Requisite" and "Getting Started as an Ops".
+. Create a database:
+.. directly with the following <<../../../database/instance/init-database.sql, script>>
+.. or create a container containing your database (script for <<../../../database/instance/manage-db.sh, Linux>> or <<../../../database/instance/manage-db.bat, Windows>>)
+. Build the front with the `npm run build` command, in the *client* folder
+. Add `spring.datasource.url`, `spring.datasource.username` and `spring.datasource.password` with the matching values in your <<../../../database/src/main/resources/db-application.properties, properties file>> to let your application connect to your database
+. Create a jar, containing the front you just built: run `mvn clean install` in the project root folder
+. Launch your jar (for instance with the command): +
+`java -Xmx2048m -Dspring.profiles.active=_profile_ -jar ara-_x.y.z_.jar --spring.config.location=classpath:/`, where +
+* `ara-_x.y.z_.jar` is the generated jar and `_x.y.z_` your current version
+* `_profile_` is the profile you built your jar with (e.g. `dev` or `prod`)
 
 == Enable or Disable an experimental feature
 

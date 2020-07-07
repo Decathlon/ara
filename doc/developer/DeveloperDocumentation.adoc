@@ -53,8 +53,6 @@ Follow links for module-specific documentations:
 * *doc*: <<../integrator/main/IntegratorDocumentation.adoc#head, integrator>>,
   <<../user/main/UserDocumentation.adoc#head, user>> and
   <<../developer/DeveloperDocumentation.adoc#head, developer>> documentations
-* *<<../docker/README.adoc#head, docker>>*: Dockerfiles for database and server,
-  as well as a docker-compose script to run ARA with no prerequisite (except docker and make)
 * *generated-cucumber-report*: contains Cucumber feature files used to generate report files
   used on the server integration tests to run into all possible cases while indexing such reports
 * *ide-resources*: IDE <<../ide-resources/eclipse/README.adoc#head, configuration for Eclipse>> and
