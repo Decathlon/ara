@@ -140,11 +140,11 @@ Run the setup once, so Liquibase has a chance to create all tables.
 === Install the Database
 
 To install the Database for your developments, you'll need Docker and a
-shell environement (available by default on macOS & GNU/Linux, and by
+shell environment (available by default on macOS & GNU/Linux, and by
 using Git for Windows or WSL on Windows).
 
-Once thoses prerequisites are satisfied, do the following in a shell
-terminal from the root folder of ARA (called `ARA_ROOT` bellow) :
+Once those prerequisites are satisfied, do the following in a shell
+terminal from the root folder of ARA (called `ARA_ROOT` below) :
 ```
 > cd database/instance
 > ./manage-db.sh create <PATH_WHERE_TO_PERSIST_DATAS_ON_DISK>
@@ -367,8 +367,8 @@ your feature `getCode()` method and `<state>` set to `true` if enabled or `false
 Note that the resolution of a feature default state (state at the application init) is calculated following
 those rules :
 
-* the value is setted in system property `-Dara.features.<code>=<state>`
-* if not, the value is setted in the spring application.properties file `ara.features.<code>=<state>`
+* the value is set in system property `-Dara.features.<code>=<state>`
+* if not, the value is set in the spring application.properties file `ara.features.<code>=<state>`
 * if not, the value is `false`.
 
 Once your ARA instance is live, you can update the current state of a feature flipping using the
