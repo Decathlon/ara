@@ -17,7 +17,7 @@ It also synchronizes team efforts to increase your project quality.
   - *develop/day:* quickly execute basic tests at each commit on the develop branch
   - *develop/night:* execute complete test-suite at night for the develop branch (can take a long time)
   - *master/night:* execute complete test-suite at night for the master branch
-* *EXECUTIONS:* A given cycle is executed regularly: each execution can run several test types, and aggregate all results to gives you a quality status.
+* *EXECUTIONS:* A given cycle is executed regularly: each execution can run several test types, and aggregate all results to give you a quality status.
 * *TEST-TYPES:* you can run API tests with Cucumber, Postman or Karate; and Web desktop or Web mobile tests with Cucumber:
     - RestAssured API with Cucumber
     - API with Postman
@@ -25,11 +25,11 @@ It also synchronizes team efforts to increase your project quality.
     - Firefox desktop with Selenium & Cucumber
 * *QUALITY-STATUSES:* all Cucumber/Karate-scenarios and Postman requests are assigned a severity: a threshold is configured for each severity of each cycle. If a severity quality is below thresholds, the cycle is considered FAILED.
 * *SCENARIOS/REQUESTS:* scenarios are the base unit of test: they can all be executed independently, in any order (with dependencies).
-* *SEVERITY:* each scenario and request is assigned a severity (if not, the default one is used): higher severities have a stricter threshold and less failures are allowed for these severities:
-            depending on your project, severities can have the same thresholds: in this case, severities helps priorize regression fix actions.
-    - *Sanity-check:* (eg. on the develop/day cycle, 90% of scenarios must pass for the cycle execution to be successfull)
-    - *High (the default severity):* (eg. on the develop/day cycle, 85% of scenarios must pass for the cycle execution to be successfull)
-    - *Medium:* (eg. on the develop/day cycle, 80% of scenarios must pass for the cycle execution to be successfull)
+* *SEVERITY:* each scenario and request are assigned to a severity (if not, then the default one is used): higher severities have a stricter threshold and less failures are allowed:
+            depending on your project, severities can have the same thresholds: in this case, severities helps prioritize regression fix actions.
+    - *Sanity-check:* (eg. on the develop/day cycle, 90% of scenarios must pass for the cycle execution to be successful)
+    - *High (the default severity):* (eg. on the develop/day cycle, 85% of scenarios must pass for the cycle execution to be successful)
+    - *Medium:* (eg. on the develop/day cycle, 80% of scenarios must pass for the cycle execution to be successful)
 * *STEP:* one line of a Cucumber scenario (a `Given`, `When`, `Then`, `And`...) or an assertion in a Postman Test Script
 
 == Overview of ARA Screens & Features
@@ -99,8 +99,7 @@ image:history-button.png[]
 image:history.png[]
 
 You can uncheck the filter checkboxes on top of the history popup to broaden your view of the history of the scenario:
-by un-checking the cycle name, you will know if the same scenario fails or pass on other cycles,
-same for branch and country...
+by un-checking the cycle name, you will know if the same scenario fails or pass on other cycles, the same applies for branches and countries...
 
 image:history-filters.png[]
 

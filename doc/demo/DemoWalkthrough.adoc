@@ -15,7 +15,7 @@ image:create-demo-project.png[]
 
 == The Structure of the Demo Project
 
-The demo project is configured as follow in ARA:
+The demo project is configured as follows in ARA:
 
 * It has two Git branches:
   ** *master*: the version in production (or about to be)
@@ -123,7 +123,7 @@ image:problem-1-05.png[]
 
 ==== Attach Other Patterns to Problem 1
 
-Since problem we just created seems to denote a server-side regression,
+Since the problem we just created seems to denote a server-side regression,
 you look at the API tests to see if the problem happened here too. +
 Bingo:
 
@@ -174,7 +174,7 @@ You notice another unhandled error (in red) in the latest execution of `DEVELOP:
 
 image:problem-2-01.png[]
 
-This scenario have two errors, because of two failed steps (this is common on Postman requests, too). +
+This scenario has two errors, because of two failed steps (this is common on Postman requests, too). +
 You only need to identity one error per scenario with a problem. +
 If a scenario is assigned one known problem to it, then the scenario is considered "handled"
 and all remaining red errors (without any attached problem) are considered side-effects. +
