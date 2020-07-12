@@ -7,8 +7,13 @@ const normalizeText = (s) => s.replace(/\s/g, '');
 
 Given('executions and errors', () => {
   cy.server();
+
+  cy.fixture('teams.json').as('teams');
+  cy.route('GET', '/api/projects/the-demo-project/teams', '@teams');
+
   cy.fixture('executions_latest.json').as('executionsLatest');
   cy.route('GET', '/api/projects/the-demo-project/executions/latest', '@executionsLatest');
+
   cy.visit(executions.url);
 });
 

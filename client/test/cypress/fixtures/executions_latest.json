@@ -167,7 +167,7 @@
           }
         },
         "qualitiesPerTeamAndSeverity": {
-          "27": {
+          "1": {
             "sanity-check": {
               "passed": 1,
               "unhandled": 0,
@@ -181,7 +181,7 @@
               "total": 1
             }
           },
-          "28": {
+          "2": {
             "sanity-check": {
               "passed": 1,
               "unhandled": 0,
@@ -260,7 +260,7 @@
           }
         },
         "qualitiesPerTeamAndSeverity": {
-          "26": {
+          "1": {
             "high": {
               "passed": 1,
               "unhandled": 0,
@@ -280,7 +280,7 @@
               "total": 1
             }
           },
-          "27": {
+          "2": {
             "sanity-check": {
               "passed": 1,
               "unhandled": 0,
@@ -300,7 +300,7 @@
               "total": 1
             }
           },
-          "28": {
+          "3": {
             "high": {
               "passed": 1,
               "unhandled": 0,
@@ -326,7 +326,7 @@
               "total": 3
             }
           },
-          "29": {
+          "4": {
             "sanity-check": {
               "passed": 1,
               "unhandled": 0,

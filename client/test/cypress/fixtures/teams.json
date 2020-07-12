@@ -1,0 +1,25 @@
+[ {
+    "id":1,
+    "name":"Team 1",
+    "assignableToProblems":true,
+    "assignableToFunctionalities":true
+  },
+  {
+    "id":2,
+    "name":"Team 2",
+    "assignableToProblems":true,
+    "assignableToFunctionalities":true
+  },
+  {
+    "id":3,
+    "name":"Team 3",
+    "assignableToProblems":true,
+    "assignableToFunctionalities":true
+  },
+  {
+    "id":4,
+    "name":"Team 4",
+    "assignableToProblems":true,
+    "assignableToFunctionalities":true
+  }
+]

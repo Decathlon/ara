@@ -1,4 +1,4 @@
-Feature: Journey
+Feature: Journey Executions and Errors
 
 Background:
   Given executions and errors
@@ -23,22 +23,22 @@ Background:
   Scenario: Check Runs
   # OPEN FIRST RUN
     When on the executions and errors page, in the cart "5", the user clicks on the run "fr_api"
-    Then on the executions and errors page, in the cart "5", on the run "fr_api", the team "28" is visible
-    And on the executions and errors page, in the cart "5", on the run "fr_api", the team "27" is visible
-    And on the executions and errors page, in the cart "5", on the run "fr_desktop", the team "26" is hidden
-    And on the executions and errors page, in the cart "5", on the run "fr_desktop", the team "27" is hidden
-    And on the executions and errors page, in the cart "5", on the run "fr_desktop", the team "28" is hidden
-    And on the executions and errors page, in the cart "5", on the run "fr_desktop", the team "29" is hidden
+    Then on the executions and errors page, in the cart "5", on the run "fr_api", the team "1" is visible
+    And on the executions and errors page, in the cart "5", on the run "fr_api", the team "2" is visible
+    And on the executions and errors page, in the cart "5", on the run "fr_desktop", the team "1" is hidden
+    And on the executions and errors page, in the cart "5", on the run "fr_desktop", the team "2" is hidden
+    And on the executions and errors page, in the cart "5", on the run "fr_desktop", the team "3" is hidden
+    And on the executions and errors page, in the cart "5", on the run "fr_desktop", the team "4" is hidden
     And on the executions and errors page, in the cart "5", on the run "fr_desktop", the team "-404" is hidden
 
   # OPEN SECOND RUN
     When on the executions and errors page, in the cart "5", the user clicks on the run "fr_desktop"
-    Then on the executions and errors page, in the cart "5", on the run "fr_api", the team "28" is visible
-    And on the executions and errors page, in the cart "5", on the run "fr_api", the team "27" is visible
-    And on the executions and errors page, in the cart "5", on the run "fr_desktop", the team "26" is visible
-    And on the executions and errors page, in the cart "5", on the run "fr_desktop", the team "27" is visible
-    And on the executions and errors page, in the cart "5", on the run "fr_desktop", the team "28" is visible
-    And on the executions and errors page, in the cart "5", on the run "fr_desktop", the team "29" is visible
+    Then on the executions and errors page, in the cart "5", on the run "fr_api", the team "1" is visible
+    And on the executions and errors page, in the cart "5", on the run "fr_api", the team "2" is visible
+    And on the executions and errors page, in the cart "5", on the run "fr_desktop", the team "1" is visible
+    And on the executions and errors page, in the cart "5", on the run "fr_desktop", the team "2" is visible
+    And on the executions and errors page, in the cart "5", on the run "fr_desktop", the team "3" is visible
+    And on the executions and errors page, in the cart "5", on the run "fr_desktop", the team "4" is visible
     And on the executions and errors page, in the cart "5", on the run "fr_desktop", the team "-404" is visible
 
   # CONTROL DATAS
