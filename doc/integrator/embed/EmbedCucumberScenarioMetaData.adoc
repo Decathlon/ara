@@ -46,7 +46,7 @@ This is up to you to provide the correct parameters to Cucumber for it to execut
 You can do so with this command-line option: `--tags @country-all,@country-us` (or its equivalent JUnit annotation)
 for the US country in this example.
 
-Note: to combine country-selection and ignore-exclusion, use this command-line option:
+TIP: To combine country-selection and ignore-exclusion, use this command-line option:
 `--tags ~@ignore --tags @country-all,@country-us` (means "without @ignore AND either with @country-all or @country-us).
 
 Countries are used to compute country-functionality-coverage: +

@@ -72,7 +72,7 @@ you need to download and install AsciidocFX + GraphViz: they contain all "plugin
   http://www.graphviz.org/download/ +
   Choose eg. "Stable 2.38 Windows install packages"
 
-Note: on the AsciidocFX page, you can see how to create UML, ASCII-art, directory-listing, math expressions, graphics...
+TIP: On the AsciidocFX page, you can see how to create UML, ASCII-art, directory-listing, math expressions, graphics...
 
 You can open and edit the .adoc files with AsciidocFX.
 

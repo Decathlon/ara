@@ -2,7 +2,8 @@
 
 Before reading this section, it is advised to read first <<../uploads/HowItWorks.adoc#head, how ARA executions works>>. +
 This documentation aims to show how to contribute to ARA by adding a testing technology that isn't yet supported. +
-Note: Your ARA version must be at least 5.0.0
+
+IMPORTANT: Your ARA version must be at least 5.0.0
 
 == What and where should I add my contribution ?
 

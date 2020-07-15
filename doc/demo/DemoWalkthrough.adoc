@@ -177,8 +177,9 @@ image:problem-2-01.png[]
 This scenario has two errors, because of two failed steps (this is common on Postman requests, too). +
 You only need to identity one error per scenario with a problem. +
 If a scenario is assigned one known problem to it, then the scenario is considered "handled"
-and all remaining red errors (without any attached problem) are considered side-effects. +
-Note: if you really see two different errors on a scenario, you *can* assign two problems.
+and all remaining red errors (without any attached problem) are considered side-effects.
+
+NOTE: If you really see two different errors on a scenario, you *can* assign two problems.
 
 Here, the delivery selection does not work anymore. +
 And the delivery price being wrong is a side-effect of that problem. +
