@@ -175,12 +175,13 @@ workflows:
           filters:
             branches:
               only: master
+          requires:
+            - build_client
       - build_latest_images:
           filters:
             branches:
               only: master
           requires:
-            - build_client
             - build_app
   build-nightly:
     jobs:
@@ -192,12 +193,13 @@ workflows:
           filters:
             branches:
               only: /^version\/.*/
+          requires:
+            - build_client
       - build_nightly_images:
           filters:
             branches:
               only: /^version\/.*/
           requires:
-            - build_client
             - build_app
       - nightly:
           filters:
@@ -206,8 +208,6 @@ workflows:
       - publish_nightly:
           context: ara-context
           requires:
-            - build_client
-            - build_app
             - build_nightly_images
             - nightly
           filters:
@@ -227,6 +227,8 @@ workflows:
               only: /^v.*/
             branches:
               ignore: /.*/
+          requires:
+            - build_client
       - build_latest_images:
           filters:
             tags:
@@ -234,7 +236,6 @@ workflows:
             branches:
               ignore: /.*/
           requires:
-            - build_client
             - build_app
       - release:
           filters:
@@ -245,8 +246,6 @@ workflows:
       - publish_latest:
           context: ara-context
           requires:
-            - build_client
-            - build_app
             - build_latest_images
             - release
           filters:
