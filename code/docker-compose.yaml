@@ -5,7 +5,7 @@ version: '3.5'
 
 services:
   ara-db:
-    image: ara-db #"mariadb:10.3" # "ara-db"
+    image: ara-db #"mysql:5.7" # "ara-db"
     restart: always
     ports:
       - 3306:3306

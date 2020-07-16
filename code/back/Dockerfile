@@ -45,7 +45,7 @@ VOLUME $APP_HOME/config
 COPY --from=builder /build/server/target/ara-server.jar app.jar
 ENTRYPOINT [ "sh", "-c", "java $JAVAOPS \
         -Djava.security.egd=file:/dev/./urandom \
-        -Dspring.datasource.url=\"jdbc:mariadb://$DATABASE_URL?useUnicode=yes&characterEncoding=UTF-8\" \
+        -Dspring.datasource.url=\"jdbc:mysql://$DATABASE_URL?useUnicode=yes&characterEncoding=UTF-8\" \
         -Dspring.datasource.username=\"$DATABASE_USER\" \
         -Dspring.datasource.password=\"$DATABASE_PASSWORD\" \
         -Dspring.profiles.active=\"$ARA_PROFILE\" \

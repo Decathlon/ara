@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.ci.fetcher.Fetcher;
 import com.decathlon.ara.defect.DefectAdapter;
 import com.decathlon.ara.domain.Project;
 import com.decathlon.ara.repository.*;

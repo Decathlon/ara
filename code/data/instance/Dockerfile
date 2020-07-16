@@ -1,4 +1,4 @@
-FROM mariadb:10.3
+FROM mysql:5.7
 
 ENV MYSQL_DATABASE=ara-dev
 ENV MYSQL_USER=dev
