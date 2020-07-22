@@ -9185,4 +9185,654 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400011/fr/api"
                 );
     }
+
+    @Test
+    public void upload_saveTheCypressExecution_whenCucumberReport() throws IOException {
+        deleteARADataFolder();
+        settingService.clearProjectsValuesCache();
+
+        List<Execution> executions = executionRepository.findAll();
+        List<CountryDeployment> countryDeployments = countryDeploymentRepository.findAll();
+        List<Run> runs = runRepository.findAll();
+        List<ExecutedScenario> executedScenarios = executedScenarioRepository.findAll();
+        List<Error> errors = errorRepository.findAll();
+
+        assertThat(executions).isEmpty();
+        assertThat(runs).isEmpty();
+        assertThat(countryDeployments).isEmpty();
+        assertThat(executedScenarios).isEmpty();
+        assertThat(errors).isEmpty();
+
+        MultipartFile zip = readZip("src/test/resources/zip/1581926400000.zip");
+        executionResource.upload("the-demo-project", "master", "day", zip);
+
+        Execution execution = executionRepository.findByProjectIdAndJobUrl(1L, "https://build.company.com/demo/master/day/81/");
+
+        assertThat(execution.getBranch()).isEqualTo("master");
+        assertThat(execution.getName()).isEqualTo("day");
+        assertThat(execution.getRelease()).isEqualTo("v2");
+        assertThat(execution.getVersion()).isEqualTo("version-2");
+        assertThat(execution.getBuildDateTime()).isEqualTo(new Date(1581926100000L));
+        assertThat(execution.getTestDateTime()).isEqualTo(new Date(1581926400000L));
+        assertThat(execution.getJobUrl()).isEqualTo("https://build.company.com/demo/master/day/81/");
+        assertThat(execution.getJobLink()).isEqualTo("/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926400000/");
+        assertThat(execution.getStatus()).isEqualTo(JobStatus.DONE);
+        assertThat(execution.getResult()).isEqualTo(Result.SUCCESS);
+        assertThat(execution.getAcceptance()).isEqualTo(ExecutionAcceptance.NEW);
+        assertThat(execution.getDiscardReason()).isNull();
+        assertThat(execution.getCycleDefinition().getProjectId()).isEqualTo(1L);
+        assertThat(execution.getCycleDefinition().getBranch()).isEqualTo("master");
+        assertThat(execution.getCycleDefinition().getName()).isEqualTo("day");
+        assertThat(execution.getCycleDefinition().getBranchPosition()).isEqualTo(2);
+        assertThat(execution.getBlockingValidation()).isEqualTo(true);
+        assertThat(execution.getQualityThresholds()).isEqualTo("{\"sanity-check\":{\"failure\":100,\"warning\":100},\"high\":{\"failure\":95,\"warning\":98},\"medium\":{\"failure\":90,\"warning\":95}}");
+        assertThat(execution.getQualityStatus()).isEqualTo(QualityStatus.FAILED);
+        assertThat(execution.getQualitySeverities()).isEqualTo("[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":2,\"failed\":2,\"passed\":0},\"percent\":0,\"status\":\"FAILED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":0,\"failed\":0,\"passed\":0},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":1,\"failed\":0,\"passed\":1},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":3,\"failed\":2,\"passed\":1},\"percent\":33,\"status\":\"FAILED\"}]");
+        assertThat(execution.getDuration()).isEqualTo(100L);
+        assertThat(execution.getEstimatedDuration()).isEqualTo(230L);
+
+        runs = new ArrayList<>(execution.getRuns());
+
+        assertThat(runs)
+                .hasSize(1)
+                .extracting(
+                        "country.code",
+                        "type.projectId",
+                        "type.code",
+                        "type.source.code",
+                        "type.source.technology",
+                        "comment",
+                        "platform",
+                        "jobUrl",
+                        "jobLink",
+                        "status",
+                        "countryTags",
+                        "startDateTime",
+                        "estimatedDuration",
+                        "duration",
+                        "severityTags",
+                        "includeInThresholds"
+                )
+                .containsOnly(
+                        tuple(
+                                "fr",
+                                1L,
+                                "cypress-front",
+                                "front",
+                                Technology.CYPRESS,
+                                null,
+                                "integ",
+                                "https://build.company.com/demo/test/83/",
+                                "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926400000/fr/cypress-front/",
+                                JobStatus.DONE,
+                                "all",
+                                new Date(1581926400000L),
+                                50L,
+                                30L,
+                                "all",
+                                true
+                        )
+                );
+
+        executedScenarios = new ArrayList<>(runs.get(0).getExecutedScenarios());
+
+        assertThat(executedScenarios)
+                .hasSize(3)
+                .extracting(
+                        "featureFile",
+                        "featureName",
+                        "featureTags",
+                        "tags",
+                        "severity",
+                        "name",
+                        "cucumberId",
+                        "line",
+                        "content",
+                        "startDateTime",
+                        "screenshotUrl",
+                        "videoUrl",
+                        "logsUrl",
+                        "httpRequestsUrl",
+                        "javaScriptErrorsUrl",
+                        "diffReportUrl",
+                        "cucumberReportUrl",
+                        "apiServer",
+                        "seleniumNode"
+                )
+                .containsOnly(
+                        tuple(
+                                "user-journey-executions-and-errors.feature",
+                                "Journey",
+                                "",
+                                "@severity-sanity-check",
+                                "sanity-check",
+                                "Check Runs",
+                                "journey;check-runs",
+                                23,
+                                String.format(
+                                        "4:passed:2553000000:Given executions and errors%n"+
+                                                "25:passed:587000000:When on the executions and errors page, in the cart \"5\", the user clicks on the run \"fr_api\"%n"+
+                                                "26:failed:4545000000:Then on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"28\" is visible%n"+
+                                                "27:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"27\" is visible%n"+
+                                                "28:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"26\" is hidden%n"+
+                                                "29:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"27\" is hidden%n"+
+                                                "30:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"28\" is hidden%n"+
+                                                "31:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"29\" is hidden%n"+
+                                                "32:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"-404\" is hidden%n"+
+                                                "35:skipped:0:When on the executions and errors page, in the cart \"5\", the user clicks on the run \"fr_desktop\"%n"+
+                                                "36:skipped:0:Then on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"28\" is visible%n"+
+                                                "37:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"27\" is visible%n"+
+                                                "38:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"26\" is visible%n"+
+                                                "39:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"27\" is visible%n"+
+                                                "40:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"28\" is visible%n"+
+                                                "41:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"29\" is visible%n"+
+                                                "42:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"-404\" is visible%n"+
+                                                "45:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_api\", in the column \"sanity-check\", the number of ok is \"2\", the number of problem is \"0\", the number of ko is \"0\", the progress bar is 100%% of success, 0%% of unhandled and 0%% of failed%n"+
+                                                "50:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"sanity-check\", the quality is \"100\", the number of OK is \"9\", the number of KO is \"0\", the color is \"green\"%n"+
+                                                "51:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"high\", the quality is \"100\", the number of OK is \"2\", the number of KO is \"0\", the color is \"green\"%n"+
+                                                "52:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"medium\", the quality is \"100\", the number of OK is \"7\", the number of KO is \"0\", the color is \"green\"%n"+
+                                                "53:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"*\", the quality is \"100\", the number of OK is \"18\", the number of KO is \"0\", the color is \"none\"%n"+
+                                                "56:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"sanity-check\", the threshold is \"100\", the color is \"none\"%n"+
+                                                "57:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"high\", the threshold is \"95\", the color is \"none\"%n"+
+                                                "58:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"medium\", the threshold is \"90\", the color is \"none\""
+                                ),
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                "https://build.company.com/demo/test/83/cucumber-html-reports/report-feature_user-journey-executions-and-errors-feature.html",
+                                null,
+                                null
+                        ),
+                        tuple(
+                                "user-journey-executions-and-errors.feature",
+                                "Journey",
+                                "",
+                                "@severity-medium",
+                                "medium",
+                                "Check the Actions Buttons",
+                                "journey;check-the-actions-buttons",
+                                7,
+                                String.format(
+                                        "4:passed:4216000000:Given executions and errors%n"+
+                                                "8:passed:790000000:When on the executions and errors page, the user clicks on the actions and job reports button \"5\"%n"+
+                                                "9:passed:128000000:Then on the executions and errors page, in the actions and job reports list, the \"Actions\" button \"5\" is visible%n"+
+                                                "10:passed:133000000:And on the executions and errors page, in the actions and job reports list, the \"Actions\" button \"5\" is disabled%n"+
+                                                "11:passed:425000000:And on the executions and errors page, in the actions and job reports list, the \"JobReports\" button \"5\" is visible%n"+
+                                                "12:passed:143000000:And on the executions and errors page, in the actions and job reports list, the \"JobReports\" button \"5\" is disabled%n"+
+                                                "13:passed:268000000:And on the executions and errors page, in the actions and job reports list, the \"Execution\" button \"5\" is visible%n"+
+                                                "14:passed:228000000:And on the executions and errors page, in the actions and job reports list, the \"Execution\" button \"5\" is enabled%n"+
+                                                "15:passed:250000000:And on the executions and errors page, in the actions and job reports list, the \"fr_Deployment\" button \"5\" is visible%n"+
+                                                "16:passed:156000000:And on the executions and errors page, in the actions and job reports list, the \"fr_Deployment\" button \"5\" is enabled%n"+
+                                                "17:passed:249000000:And on the executions and errors page, in the actions and job reports list, the \"fr_api\" button \"5\" is visible%n"+
+                                                "18:passed:103000000:And on the executions and errors page, in the actions and job reports list, the \"fr_api\" button \"5\" is enabled%n"+
+                                                "19:passed:153000000:And on the executions and errors page, in the actions and job reports list, the \"fr_desktop\" button \"5\" is visible%n"+
+                                                "20:passed:324000000:And on the executions and errors page, in the actions and job reports list, the \"fr_desktop\" button \"5\" is enabled"
+                                ),
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                "https://build.company.com/demo/test/83/cucumber-html-reports/report-feature_user-journey-executions-and-errors-feature.html",
+                                null,
+                                null
+                        ),
+                        tuple(
+                                "user-journey.feature",
+                                "Journey",
+                                "",
+                                "@severity-sanity-check",
+                                "sanity-check",
+                                "Check the status of a build",
+                                "journey;check-the-status-of-a-build",
+                                4,
+                                String.format(
+                                        "5:failed:9931000000:Given an user with a demo project%n"+
+                                                "6:skipped:0:When the user goes to the home page%n"+
+                                                "7:skipped:0:Then the top menu is present"
+                                ),
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                "https://build.company.com/demo/test/83/cucumber-html-reports/report-feature_user-journey-feature.html",
+                                null,
+                                null
+                        )
+                );
+
+        countryDeployments = new ArrayList<>(execution.getCountryDeployments());
+
+        assertThat(countryDeployments)
+                .hasSize(1)
+                .extracting(
+                        "country.code",
+                        "platform",
+                        "jobUrl",
+                        "jobLink",
+                        "status",
+                        "result",
+                        "startDateTime",
+                        "estimatedDuration",
+                        "duration"
+                )
+                .containsOnly(
+                        tuple(
+                                "fr",
+                                "integ",
+                                "https://build.company.com/demo/deploy/fr/82/",
+                                "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926400000/fr/",
+                                JobStatus.DONE,
+                                Result.SUCCESS,
+                                new Date(1581926400000L),
+                                90L,
+                                170L
+                        )
+                );
+
+        errors = runs.stream()
+                .map(Run::getExecutedScenarios)
+                .flatMap(Collection::stream)
+                .map(ExecutedScenario::getErrors)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+        assertThat(errors)
+                .hasSize(2)
+                .extracting(
+                        "executedScenario.name",
+                        "step",
+                        "stepDefinition",
+                        "stepLine",
+                        "exception"
+                )
+                .containsOnly(
+                        tuple(
+                                "Check Runs",
+                                "on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"28\" is visible",
+                                "^on the executions and errors page, in the cart \"([^\"]*)\", on the run \"([^\"]*)\", the team \"([^\"]*)\" is visible$",
+                                26,
+                                String.format(
+                                        "AssertionError: Timed out retrying: Expected to find element: `[data-nrt='executions_CartRowSubTitle_fr_api_28_5']`, but never found it.%n"+
+                                                "    + expected - actual%n%n%n"+
+                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey-executions-and-errors.feature:65845:61)%n"+
+                                                "    at Context.resolveAndRunStepDefinition (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey-executions-and-errors.feature:24567:9)%n"+
+                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey-executions-and-errors.feature:23936:35)"
+                                )
+                        ),
+                        tuple(
+                                "Check the status of a build",
+                                "an user with a demo project",
+                                "^an user with a demo project$",
+                                5,
+                                String.format(
+                                        "AssertionError: Timed out retrying: Expected to find element: `[data-nrt=deleteDemo]`, but never found it.%n"+
+                                                "    + expected - actual%n%n%n"+
+                                                "    at Object.reset (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:65729:50)%n"+
+                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:65946:8)%n"+
+                                                "    at Context.resolveAndRunStepDefinition (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:24567:9)%n"+
+                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:23936:35)"
+                                )
+                        )
+                );
+
+        List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
+        assertThat(generatedFilesPaths)
+                .contains(
+                        "/opt/ara/data",
+                        "/opt/ara/data/executions",
+                        "/opt/ara/data/executions/the-demo-project",
+                        "/opt/ara/data/executions/the-demo-project/master",
+                        "/opt/ara/data/executions/the-demo-project/master/day",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926400000",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926400000/cycleDefinition.json",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926400000/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926400000/fr",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926400000/fr/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926400000/fr/cypress-front",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926400000/fr/cypress-front/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926400000/fr/cypress-front/stepDefinitions",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926400000/fr/cypress-front/stepDefinitions/user-journey-executions-and-errors.stepDefinitions.json",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926400000/fr/cypress-front/stepDefinitions/user-journey.stepDefinitions.json",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926400000/fr/cypress-front/reports",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926400000/fr/cypress-front/reports/cucumber",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926400000/fr/cypress-front/reports/cucumber/user-journey.cucumber.json",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926400000/fr/cypress-front/reports/cucumber/user-journey-executions-and-errors.cucumber.json"
+                );
+    }
+
+    @Test
+    public void upload_saveTheCypressExecution_whenCucumberReportMissAStepDefinitions() throws IOException {
+        deleteARADataFolder();
+        settingService.clearProjectsValuesCache();
+
+        List<Execution> executions = executionRepository.findAll();
+        List<CountryDeployment> countryDeployments = countryDeploymentRepository.findAll();
+        List<Run> runs = runRepository.findAll();
+        List<ExecutedScenario> executedScenarios = executedScenarioRepository.findAll();
+        List<Error> errors = errorRepository.findAll();
+
+        assertThat(executions).isEmpty();
+        assertThat(runs).isEmpty();
+        assertThat(countryDeployments).isEmpty();
+        assertThat(executedScenarios).isEmpty();
+        assertThat(errors).isEmpty();
+
+        MultipartFile zip = readZip("src/test/resources/zip/1581926500000.zip");
+        executionResource.upload("the-demo-project", "master", "day", zip);
+
+        Execution execution = executionRepository.findByProjectIdAndJobUrl(1L, "https://build.company.com/demo/master/day/81/");
+
+        assertThat(execution.getBranch()).isEqualTo("master");
+        assertThat(execution.getName()).isEqualTo("day");
+        assertThat(execution.getRelease()).isEqualTo("v2");
+        assertThat(execution.getVersion()).isEqualTo("version-2");
+        assertThat(execution.getBuildDateTime()).isEqualTo(new Date(1581926100000L));
+        assertThat(execution.getTestDateTime()).isEqualTo(new Date(1581926400000L));
+        assertThat(execution.getJobUrl()).isEqualTo("https://build.company.com/demo/master/day/81/");
+        assertThat(execution.getJobLink()).isEqualTo("/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000/");
+        assertThat(execution.getStatus()).isEqualTo(JobStatus.DONE);
+        assertThat(execution.getResult()).isEqualTo(Result.SUCCESS);
+        assertThat(execution.getAcceptance()).isEqualTo(ExecutionAcceptance.NEW);
+        assertThat(execution.getDiscardReason()).isNull();
+        assertThat(execution.getCycleDefinition().getProjectId()).isEqualTo(1L);
+        assertThat(execution.getCycleDefinition().getBranch()).isEqualTo("master");
+        assertThat(execution.getCycleDefinition().getName()).isEqualTo("day");
+        assertThat(execution.getCycleDefinition().getBranchPosition()).isEqualTo(2);
+        assertThat(execution.getBlockingValidation()).isEqualTo(true);
+        assertThat(execution.getQualityThresholds()).isEqualTo("{\"sanity-check\":{\"failure\":100,\"warning\":100},\"high\":{\"failure\":95,\"warning\":98},\"medium\":{\"failure\":90,\"warning\":95}}");
+        assertThat(execution.getQualityStatus()).isEqualTo(QualityStatus.FAILED);
+        assertThat(execution.getQualitySeverities()).isEqualTo("[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":2,\"failed\":2,\"passed\":0},\"percent\":0,\"status\":\"FAILED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":0,\"failed\":0,\"passed\":0},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":1,\"failed\":0,\"passed\":1},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":3,\"failed\":2,\"passed\":1},\"percent\":33,\"status\":\"FAILED\"}]");
+        assertThat(execution.getDuration()).isEqualTo(100L);
+        assertThat(execution.getEstimatedDuration()).isEqualTo(230L);
+
+        runs = new ArrayList<>(execution.getRuns());
+
+        assertThat(runs)
+                .hasSize(1)
+                .extracting(
+                        "country.code",
+                        "type.projectId",
+                        "type.code",
+                        "type.source.code",
+                        "type.source.technology",
+                        "comment",
+                        "platform",
+                        "jobUrl",
+                        "jobLink",
+                        "status",
+                        "countryTags",
+                        "startDateTime",
+                        "estimatedDuration",
+                        "duration",
+                        "severityTags",
+                        "includeInThresholds"
+                )
+                .containsOnly(
+                        tuple(
+                                "fr",
+                                1L,
+                                "cypress-front",
+                                "front",
+                                Technology.CYPRESS,
+                                null,
+                                "integ",
+                                "https://build.company.com/demo/test/83/",
+                                "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000/fr/cypress-front/",
+                                JobStatus.DONE,
+                                "all",
+                                new Date(1581926400000L),
+                                50L,
+                                30L,
+                                "all",
+                                true
+                        )
+                );
+
+        executedScenarios = new ArrayList<>(runs.get(0).getExecutedScenarios());
+
+        assertThat(executedScenarios)
+                .hasSize(3)
+                .extracting(
+                        "featureFile",
+                        "featureName",
+                        "featureTags",
+                        "tags",
+                        "severity",
+                        "name",
+                        "cucumberId",
+                        "line",
+                        "content",
+                        "startDateTime",
+                        "screenshotUrl",
+                        "videoUrl",
+                        "logsUrl",
+                        "httpRequestsUrl",
+                        "javaScriptErrorsUrl",
+                        "diffReportUrl",
+                        "cucumberReportUrl",
+                        "apiServer",
+                        "seleniumNode"
+                )
+                .containsOnly(
+                        tuple(
+                                "user-journey-executions-and-errors.feature",
+                                "Journey",
+                                "",
+                                "@severity-sanity-check",
+                                "sanity-check",
+                                "Check Runs",
+                                "journey;check-runs",
+                                23,
+                                String.format(
+                                        "4:passed:2553000000:Given executions and errors%n"+
+                                                "25:passed:587000000:When on the executions and errors page, in the cart \"5\", the user clicks on the run \"fr_api\"%n"+
+                                                "26:failed:4545000000:Then on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"28\" is visible%n"+
+                                                "27:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"27\" is visible%n"+
+                                                "28:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"26\" is hidden%n"+
+                                                "29:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"27\" is hidden%n"+
+                                                "30:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"28\" is hidden%n"+
+                                                "31:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"29\" is hidden%n"+
+                                                "32:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"-404\" is hidden%n"+
+                                                "35:skipped:0:When on the executions and errors page, in the cart \"5\", the user clicks on the run \"fr_desktop\"%n"+
+                                                "36:skipped:0:Then on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"28\" is visible%n"+
+                                                "37:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"27\" is visible%n"+
+                                                "38:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"26\" is visible%n"+
+                                                "39:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"27\" is visible%n"+
+                                                "40:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"28\" is visible%n"+
+                                                "41:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"29\" is visible%n"+
+                                                "42:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"-404\" is visible%n"+
+                                                "45:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_api\", in the column \"sanity-check\", the number of ok is \"2\", the number of problem is \"0\", the number of ko is \"0\", the progress bar is 100%% of success, 0%% of unhandled and 0%% of failed%n"+
+                                                "50:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"sanity-check\", the quality is \"100\", the number of OK is \"9\", the number of KO is \"0\", the color is \"green\"%n"+
+                                                "51:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"high\", the quality is \"100\", the number of OK is \"2\", the number of KO is \"0\", the color is \"green\"%n"+
+                                                "52:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"medium\", the quality is \"100\", the number of OK is \"7\", the number of KO is \"0\", the color is \"green\"%n"+
+                                                "53:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"*\", the quality is \"100\", the number of OK is \"18\", the number of KO is \"0\", the color is \"none\"%n"+
+                                                "56:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"sanity-check\", the threshold is \"100\", the color is \"none\"%n"+
+                                                "57:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"high\", the threshold is \"95\", the color is \"none\"%n"+
+                                                "58:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"medium\", the threshold is \"90\", the color is \"none\""
+                                ),
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                "https://build.company.com/demo/test/83/cucumber-html-reports/report-feature_user-journey-executions-and-errors-feature.html",
+                                null,
+                                null
+                        ),
+                        tuple(
+                                "user-journey-executions-and-errors.feature",
+                                "Journey",
+                                "",
+                                "@severity-medium",
+                                "medium",
+                                "Check the Actions Buttons",
+                                "journey;check-the-actions-buttons",
+                                7,
+                                String.format(
+                                        "4:passed:4216000000:Given executions and errors%n"+
+                                                "8:passed:790000000:When on the executions and errors page, the user clicks on the actions and job reports button \"5\"%n"+
+                                                "9:passed:128000000:Then on the executions and errors page, in the actions and job reports list, the \"Actions\" button \"5\" is visible%n"+
+                                                "10:passed:133000000:And on the executions and errors page, in the actions and job reports list, the \"Actions\" button \"5\" is disabled%n"+
+                                                "11:passed:425000000:And on the executions and errors page, in the actions and job reports list, the \"JobReports\" button \"5\" is visible%n"+
+                                                "12:passed:143000000:And on the executions and errors page, in the actions and job reports list, the \"JobReports\" button \"5\" is disabled%n"+
+                                                "13:passed:268000000:And on the executions and errors page, in the actions and job reports list, the \"Execution\" button \"5\" is visible%n"+
+                                                "14:passed:228000000:And on the executions and errors page, in the actions and job reports list, the \"Execution\" button \"5\" is enabled%n"+
+                                                "15:passed:250000000:And on the executions and errors page, in the actions and job reports list, the \"fr_Deployment\" button \"5\" is visible%n"+
+                                                "16:passed:156000000:And on the executions and errors page, in the actions and job reports list, the \"fr_Deployment\" button \"5\" is enabled%n"+
+                                                "17:passed:249000000:And on the executions and errors page, in the actions and job reports list, the \"fr_api\" button \"5\" is visible%n"+
+                                                "18:passed:103000000:And on the executions and errors page, in the actions and job reports list, the \"fr_api\" button \"5\" is enabled%n"+
+                                                "19:passed:153000000:And on the executions and errors page, in the actions and job reports list, the \"fr_desktop\" button \"5\" is visible%n"+
+                                                "20:passed:324000000:And on the executions and errors page, in the actions and job reports list, the \"fr_desktop\" button \"5\" is enabled"
+                                ),
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                "https://build.company.com/demo/test/83/cucumber-html-reports/report-feature_user-journey-executions-and-errors-feature.html",
+                                null,
+                                null
+                        ),
+                        tuple(
+                                "user-journey.feature",
+                                "Journey",
+                                "",
+                                "@severity-sanity-check",
+                                "sanity-check",
+                                "Check the status of a build",
+                                "journey;check-the-status-of-a-build",
+                                4,
+                                String.format(
+                                        "5:failed:9931000000:Given an user with a demo project%n"+
+                                                "6:skipped:0:When the user goes to the home page%n"+
+                                                "7:skipped:0:Then the top menu is present"
+                                ),
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                "https://build.company.com/demo/test/83/cucumber-html-reports/report-feature_user-journey-feature.html",
+                                null,
+                                null
+                        )
+                );
+
+        countryDeployments = new ArrayList<>(execution.getCountryDeployments());
+
+        assertThat(countryDeployments)
+                .hasSize(1)
+                .extracting(
+                        "country.code",
+                        "platform",
+                        "jobUrl",
+                        "jobLink",
+                        "status",
+                        "result",
+                        "startDateTime",
+                        "estimatedDuration",
+                        "duration"
+                )
+                .containsOnly(
+                        tuple(
+                                "fr",
+                                "integ",
+                                "https://build.company.com/demo/deploy/fr/82/",
+                                "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000/fr/",
+                                JobStatus.DONE,
+                                Result.SUCCESS,
+                                new Date(1581926400000L),
+                                90L,
+                                170L
+                        )
+                );
+
+        errors = runs.stream()
+                .map(Run::getExecutedScenarios)
+                .flatMap(Collection::stream)
+                .map(ExecutedScenario::getErrors)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+        assertThat(errors)
+                .hasSize(2)
+                .extracting(
+                        "executedScenario.name",
+                        "step",
+                        "stepDefinition",
+                        "stepLine",
+                        "exception"
+                )
+                .containsOnly(
+                        tuple(
+                                "Check Runs",
+                                "on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"28\" is visible",
+                                "^on the executions and errors page, in the cart \"([^\"]*)\", on the run \"([^\"]*)\", the team \"([^\"]*)\" is visible$",
+                                26,
+                                String.format(
+                                        "AssertionError: Timed out retrying: Expected to find element: `[data-nrt='executions_CartRowSubTitle_fr_api_28_5']`, but never found it.%n"+
+                                                "    + expected - actual%n%n%n"+
+                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey-executions-and-errors.feature:65845:61)%n"+
+                                                "    at Context.resolveAndRunStepDefinition (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey-executions-and-errors.feature:24567:9)%n"+
+                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey-executions-and-errors.feature:23936:35)"
+                                )
+                        ),
+                        tuple(
+                                "Check the status of a build",
+                                "an user with a demo project",
+                                "^an user with a demo project$",
+                                5,
+                                String.format(
+                                        "AssertionError: Timed out retrying: Expected to find element: `[data-nrt=deleteDemo]`, but never found it.%n"+
+                                                "    + expected - actual%n%n%n"+
+                                                "    at Object.reset (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:65729:50)%n"+
+                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:65946:8)%n"+
+                                                "    at Context.resolveAndRunStepDefinition (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:24567:9)%n"+
+                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:23936:35)"
+                                )
+                        )
+                );
+
+        List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
+        assertThat(generatedFilesPaths)
+                .contains(
+                        "/opt/ara/data",
+                        "/opt/ara/data/executions",
+                        "/opt/ara/data/executions/the-demo-project",
+                        "/opt/ara/data/executions/the-demo-project/master",
+                        "/opt/ara/data/executions/the-demo-project/master/day",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000/cycleDefinition.json",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000/fr",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000/fr/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000/fr/cypress-front",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000/fr/cypress-front/buildInformation.json",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000/fr/cypress-front/stepDefinitions",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000/fr/cypress-front/stepDefinitions/user-journey-executions-and-errors.stepDefinitions.json",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000/fr/cypress-front/reports",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000/fr/cypress-front/reports/cucumber",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000/fr/cypress-front/reports/cucumber/user-journey.cucumber.json",
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000/fr/cypress-front/reports/cucumber/user-journey-executions-and-errors.cucumber.json"
+                )
+                .doesNotContain(
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000/fr/cypress-front/stepDefinitions/user-journey.stepDefinitions.json"
+                );
+    }
 }
