@@ -87,7 +87,7 @@ public class TechnologySettingServiceTest {
                 .filter(s -> Technology.CUCUMBER.equals(s.getTechnology()))
                 .findFirst()
                 .get();
-        assertThat(cucumberGroup.getName()).isEqualTo("Cucumber Settings");
+        assertThat(cucumberGroup.getName()).isEqualTo("Cucumber");
         assertThat(cucumberGroup.getSettings())
                 .hasSize(2)
                 .extracting(
@@ -124,7 +124,7 @@ public class TechnologySettingServiceTest {
                 .filter(s -> Technology.POSTMAN.equals(s.getTechnology()))
                 .findFirst()
                 .get();
-        assertThat(postmanGroup.getName()).isEqualTo("Postman Settings");
+        assertThat(postmanGroup.getName()).isEqualTo("Postman");
         assertThat(postmanGroup.getSettings())
                 .hasSize(2)
                 .extracting(

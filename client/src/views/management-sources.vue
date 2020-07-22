@@ -25,6 +25,8 @@
   import api from '../libs/api'
   import managementMenuComponent from '../components/management-menu'
   import crudComponent from '../components/crud'
+  import Vue from 'vue'
+  import _ from 'lodash'
 
   export default {
     name: 'management-sources',
@@ -43,8 +45,24 @@
                       'or by the "Firefox" and "Chrome" test types). ' +
                       'Sources are also used to upload known Cucumber scenarios and Postman requests to associate them with functionalities ' +
                       'and compute functionality coverage by automated tests. ' +
-                      'The code of the source is used in the HTTP call made to upload scenarios and requests.',
-        fields: [
+                      'The code of the source is used in the HTTP call made to upload scenarios and requests.'
+      }
+    },
+
+    computed: {
+      fields () {
+        let technologyOption = {
+          code: 'technology',
+          name: 'Technology',
+          columnTitle: 'Technology',
+          type: 'select',
+          options: [],
+          required: true,
+          newValue: undefined,
+          width: 128,
+          help: 'The technology used for tests stored in this VCS source: Cucumber .feature files, Postman .json collections...'
+        }
+        const fields = [
           {
             code: 'code',
             name: 'Code',
@@ -78,20 +96,7 @@
             width: 96,
             help: 'The unique user-visible letter of the source to display in the column "Coverage by scenarios" of the Functionality Cartography screen. Eg. "A" for "API", "I" for iPhone", "P" for "Postman", "W" for "Web"...'
           },
-          {
-            code: 'technology',
-            name: 'Technology',
-            columnTitle: 'Technology',
-            type: 'select',
-            options: [
-              { value: 'CUCUMBER', label: 'Cucumber' },
-              { value: 'POSTMAN', label: 'Postman' }
-            ],
-            required: true,
-            newValue: undefined,
-            width: 128,
-            help: 'The technology used for tests stored in this VCS source: Cucumber .feature files, Postman .json collections...'
-          },
+          technologyOption,
           {
             code: 'vcsUrl',
             name: 'VCS URL',
@@ -138,10 +143,24 @@
               'Has no effect on Cucumber sources.'
           }
         ]
-      }
-    },
-
-    computed: {
+        Vue.http
+          .get(api.paths.settings(this) + '/technology', api.REQUEST_OPTIONS)
+          .then((response) => {
+            const options = _.map(response.body, function (element) {
+              return {
+                value: element.technology,
+                label: element.name
+              }
+            })
+            const index = _.findIndex(fields, { code: 'technology' })
+            technologyOption.options = options
+            fields.splice(index, 1, technologyOption)
+            return fields
+          }, (error) => {
+            api.handleError(error)
+          })
+        return fields
+      },
       url () {
         return api.paths.sources(this)
       }
