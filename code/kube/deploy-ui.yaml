@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ara-front
+  labels:
+    app: ara-front
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ara-front
+  template:
+    metadata:
+      labels:
+        app: ara-front
+    spec:
+      containers:
+      - name: ara-front
+        image: ara-front
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+          name: http-port
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "800m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ara-front-lb
+  labels:
+    run: ara-front-svc
+spec:
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: http-port
+  selector:
+    app: ara-front
