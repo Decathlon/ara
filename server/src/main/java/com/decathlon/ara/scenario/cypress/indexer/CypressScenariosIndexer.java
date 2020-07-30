@@ -22,6 +22,8 @@ import com.decathlon.ara.domain.Run;
 import com.decathlon.ara.scenario.common.indexer.ScenariosIndexer;
 import com.decathlon.ara.scenario.cucumber.indexer.CucumberScenariosIndexer;
 import com.decathlon.ara.scenario.cucumber.service.ExecutedScenarioExtractorService;
+import com.decathlon.ara.scenario.cypress.bean.media.CypressMedia;
+import com.decathlon.ara.scenario.cypress.bean.media.CypressVideo;
 import com.decathlon.ara.scenario.cypress.settings.CypressSettings;
 import com.decathlon.ara.service.FileProcessorService;
 import com.decathlon.ara.service.TechnologySettingService;
@@ -106,6 +108,20 @@ public class CypressScenariosIndexer implements ScenariosIndexer {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
+        String mediaPath = technologySettingService.getSettingValue(projectId, CypressSettings.MEDIA_FILE_PATH).orElse("");
+        List<CypressMedia> medias = fileProcessorService.getMappedObjectListFromFile(parentFolder, mediaPath, CypressMedia.class);
+
+        executedScenarios = executedScenarios.stream()
+                .map(scenario -> {
+                    Optional<Pair<Optional<String>, String>> mediaUrls = getSnapshotAndVideoUrls(scenario, medias);
+                    mediaUrls.ifPresent(pair -> {
+                        pair.getFirst().ifPresent(scenario::setScreenshotUrl);
+                        scenario.setVideoUrl(pair.getSecond());
+                    });
+                    return scenario;
+                })
+                .collect(Collectors.toList());
+
         return executedScenarios;
     }
 
@@ -149,5 +165,26 @@ public class CypressScenariosIndexer implements ScenariosIndexer {
         String[] splitName = name.split("\\.");
         String prefix = splitName[0];
         return prefix;
+    }
+
+    /**
+     * Get the snapshots and videos urls matching an executed scenario, if found
+     * @param executedScenario the executed scenario
+     * @param availableMedias all the available videos and snapshots details
+     * @return a pair of snapshot and video urls, if any
+     */
+    private Optional<Pair<Optional<String>, String>> getSnapshotAndVideoUrls(ExecutedScenario executedScenario, List<CypressMedia> availableMedias) {
+        return availableMedias.stream()
+                .filter(media -> executedScenario.getFeatureFile().equals(media.getFeature()))
+                .findFirst()
+                .map(media -> {
+                    Optional<String> snapshotUrl = media.getSnapshots().stream()
+                            .filter(image -> executedScenario.getCucumberId().equals(image.getId()))
+                            .map(image -> image.getUrl())
+                            .findFirst();
+                    CypressVideo video = media.getVideo();
+                    String videoUrl = video.getUrl();
+                    return Pair.of(snapshotUrl, videoUrl);
+                });
     }
 }

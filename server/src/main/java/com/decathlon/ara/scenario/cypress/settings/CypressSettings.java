@@ -56,6 +56,15 @@ public enum CypressSettings implements AvailableTechnologySettings {
             SettingType.STRING,
             "stepDefinitions",
             true
+    ),
+
+    MEDIA_FILE_PATH(
+            "media.file.path",
+            "Media file path",
+            "Where to find the media file, i.e. the file that matches every (Cucumber) features with its matching tests executions medias (videos and snapshots) url/path.",
+            SettingType.STRING,
+            "media.json",
+            true
     );
 
     private final String code;

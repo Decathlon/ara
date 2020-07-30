@@ -9337,8 +9337,8 @@ public class ExecutionResourceIntegration {
                                                 "58:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"medium\", the threshold is \"90\", the color is \"none\""
                                 ),
                                 null,
-                                null,
-                                null,
+                                "https://media.your-company.com/content/images/snapshot3.png",
+                                "https://media.your-company.com/content/videos/videos2.mp4",
                                 null,
                                 null,
                                 null,
@@ -9373,8 +9373,8 @@ public class ExecutionResourceIntegration {
                                                 "20:passed:324000000:And on the executions and errors page, in the actions and job reports list, the \"fr_desktop\" button \"5\" is enabled"
                                 ),
                                 null,
-                                null,
-                                null,
+                                "https://media.your-company.com/content/images/snapshot2.png",
+                                "https://media.your-company.com/content/videos/videos2.mp4",
                                 null,
                                 null,
                                 null,
@@ -9398,8 +9398,8 @@ public class ExecutionResourceIntegration {
                                                 "7:skipped:0:Then the top menu is present"
                                 ),
                                 null,
-                                null,
-                                null,
+                                "https://media.your-company.com/content/images/snapshot1.png",
+                                "https://media.your-company.com/content/videos/videos1.mp4",
                                 null,
                                 null,
                                 null,

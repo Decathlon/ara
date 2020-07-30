@@ -22,6 +22,9 @@ import com.decathlon.ara.domain.Run;
 import com.decathlon.ara.scenario.cucumber.bean.Feature;
 import com.decathlon.ara.scenario.cucumber.indexer.CucumberScenariosIndexer;
 import com.decathlon.ara.scenario.cucumber.service.ExecutedScenarioExtractorService;
+import com.decathlon.ara.scenario.cypress.bean.media.CypressMedia;
+import com.decathlon.ara.scenario.cypress.bean.media.CypressSnapshot;
+import com.decathlon.ara.scenario.cypress.bean.media.CypressVideo;
 import com.decathlon.ara.scenario.cypress.settings.CypressSettings;
 import com.decathlon.ara.service.FileProcessorService;
 import com.decathlon.ara.service.TechnologySettingService;
@@ -605,6 +608,26 @@ public class CypressScenariosIndexerTest {
         ExecutedScenario executedScenario22 = mock(ExecutedScenario.class);
         ExecutedScenario executedScenario23 = mock(ExecutedScenario.class);
 
+        String mediaFilePath = "media.json";
+
+        CypressMedia media1 = mock(CypressMedia.class);
+        String mediaFeature1 = "unknownFeature";
+
+        CypressMedia media2 = mock(CypressMedia.class);
+        CypressVideo video2 = mock(CypressVideo.class);
+        String videoUrl2 = "http://url.com/video-2.mp4";
+        CypressSnapshot image21 = mock(CypressSnapshot.class);
+        String imageId21 = "unknownId";
+        CypressSnapshot image22 = mock(CypressSnapshot.class);
+        String imageUrl22 = "http://url.com/image-22.mp4";
+
+        String feature1 = "feature1";
+        String cucumberId1 = "scenario1";
+        String cucumberId2 = "scenario2";
+        String feature2 = "feature2";
+        String feature3 = "feature3";
+        String feature5 = "feature5";
+
         // When
         when(technologySettingService.getSettingValue(projectId, CypressSettings.CUCUMBER_REPORTS_FOLDER_PATHS)).thenReturn(Optional.of(cucumberFolderPath));
         when(fileProcessorService.getMatchingDirectory(parentFolder, cucumberFolderPath)).thenReturn(Optional.of(cucumberFolder));
@@ -634,6 +657,25 @@ public class CypressScenariosIndexerTest {
         when(executedScenarioExtractorService.extractExecutedScenarios(features1, steps1, runJobUrl)).thenReturn(Arrays.asList(executedScenario11, executedScenario12));
         when(executedScenarioExtractorService.extractExecutedScenarios(features2, steps2, runJobUrl)).thenReturn(Arrays.asList(executedScenario21, executedScenario22, executedScenario23));
 
+        when(technologySettingService.getSettingValue(projectId, CypressSettings.MEDIA_FILE_PATH)).thenReturn(Optional.of(mediaFilePath));
+        when(fileProcessorService.getMappedObjectListFromFile(parentFolder, mediaFilePath, CypressMedia.class)).thenReturn(Arrays.asList(media1, media2));
+        when(media1.getFeature()).thenReturn(mediaFeature1);
+        when(media2.getFeature()).thenReturn(feature1);
+        when(media2.getVideo()).thenReturn(video2);
+        when(video2.getUrl()).thenReturn(videoUrl2);
+        when(media2.getSnapshots()).thenReturn(Arrays.asList(image21, image22));
+        when(image21.getId()).thenReturn(imageId21);
+        when(image22.getId()).thenReturn(cucumberId2);
+        when(image22.getUrl()).thenReturn(imageUrl22);
+
+        when(executedScenario11.getFeatureFile()).thenReturn(feature1);
+        when(executedScenario11.getCucumberId()).thenReturn(cucumberId1);
+        when(executedScenario12.getFeatureFile()).thenReturn(feature2);
+        when(executedScenario21.getFeatureFile()).thenReturn(feature3);
+        when(executedScenario22.getFeatureFile()).thenReturn(feature1);
+        when(executedScenario22.getCucumberId()).thenReturn(cucumberId2);
+        when(executedScenario23.getFeatureFile()).thenReturn(feature5);
+
         // Then
         List<ExecutedScenario> executedScenarios = cypressScenariosIndexer.getExecutedScenarios(parentFolder, run, projectId);
         assertThat(executedScenarios)
@@ -657,5 +699,15 @@ public class CypressScenariosIndexerTest {
         verify(cucumberScenariosIndexer).getCucumberStepDefinitions(stepDefinitionsFile2);
         verify(executedScenarioExtractorService).extractExecutedScenarios(features1, steps1, runJobUrl);
         verify(executedScenarioExtractorService).extractExecutedScenarios(features2, steps2, runJobUrl);
+        verify(executedScenario11).setVideoUrl(videoUrl2);
+        verify(executedScenario11, never()).setScreenshotUrl(anyString());
+        verify(executedScenario12, never()).setVideoUrl(anyString());
+        verify(executedScenario12, never()).setScreenshotUrl(anyString());
+        verify(executedScenario21, never()).setVideoUrl(anyString());
+        verify(executedScenario21, never()).setScreenshotUrl(anyString());
+        verify(executedScenario22).setVideoUrl(videoUrl2);
+        verify(executedScenario22).setScreenshotUrl(imageUrl22);
+        verify(executedScenario23, never()).setVideoUrl(anyString());
+        verify(executedScenario23, never()).setScreenshotUrl(anyString());
     }
 }
