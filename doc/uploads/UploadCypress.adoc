@@ -1,0 +1,118 @@
+[#head]
+= Upload a Cypress execution report
+
+This section explains how to upload a Cypress execution. The report handling relies on a Cucumber preprocessor.
+For more details, you can read: <<../developer/WritingEndToEndTests.adoc, How to write Cypress tests>>
+
+== Report generation
+
+To generate your reports, you first need to install some packages.
+
+=== Installation
+
+|===
+|Package |Command |More details
+
+|Cypress
+|`npm install --save-dev cypress`
+|https://www.cypress.io/
+
+|Cucumber preprocessor
+|`npm install --save-dev cypress-cucumber-preprocessor`
+|https://github.com/TheBrainFamily/cypress-cucumber-preprocessor
+
+|===
+
+
+=== Configuration
+
+You can specify where to save the generated reports. In `package.json`. +
+For example, add:
+
+```json
+"cypress-cucumber-preprocessor": {
+    "cucumberJson": {
+      "generate": true,
+      "outputFolder": "test/cypress/outputs/cucumber/reports",
+      "fileSuffix": ".cucumber"
+    }
+```
+
+If you also want to add snapshots (only the failed scenarios) and videos (executions), you can specify it in `cypress.json`. +
+For instance:
+```json
+"screenshotsFolder": "test/cypress/outputs/media/screenshots",
+"videosFolder": "test/cypress/outputs/media/videos"
+```
+
+=== Script
+
+To generate the reports, simply run the `cypress run` command.
+You will find all the generated resources in the folder you specified in your configuration.
+
+== Settings
+
+=== Cucumber reports
+
+* Folder path: The path where to find the folder containing your generated Cucumber reports
+* File name suffix value: The suffix in the Cucumber file name. It matches the value you put in `fileSuffix` (in the `cypress-cucumber-preprocessor` configuration). It is used to recognize these reports.
+
+=== Step definitions
+
+* Folder path: The path where to find the folder containing your step definitions files
++
+NOTE: To match a step definitions file with a report file, they must share the same base name. +
+For instance: `my-feature.cucumber.json` (report) matches `my-feature.stepDefinitions.json` (step definitions)
+* File name suffix value: The suffix in the step definitions files. It used to recognize step definitions files.
++
+CAUTION: The suffix value here must be different from the report suffix value above.
+
+=== Media
+
+* Media file path: This is used to find the file that matches the Cucumber features with its snapshots and video urls.
+** Structure: It is an array of media:You can find the matching beans in the package: `com.decathlon.ara.scenario.cypress.bean.media`.
+*** media: It consists of the following fields:
+**** feature: the feature file name
+**** video: the video details
+***** url: the url of the execution video
+**** snapshots: it is an array of all snapshots of the failed scenarios
+***** id: the `id` field in `elements` (in the Cucumber json report)
+***** name: the `name` field in `elements` (in the Cucumber json report)
+***** url: the url of the snapshot
+** Example:
++
+```json
+[
+    {
+        "feature": "first-example.feature",
+        "video": {
+            "url": "https://media.your-company.com/content/videos/videos1.mp4"
+        },
+        "snapshots": [
+            {
+                "id": "first-example;check-the-status",
+                "name": "Check the status",
+                "url": "https://media.your-company.com/content/images/snapshot1.png"
+            }
+        ]
+    },
+    {
+        "feature": "another-example.feature",
+        "video": {
+            "url": "https://media.your-company.com/content/videos/videos2.mp4"
+        },
+        "snapshots": [
+            {
+                "id": "another-example;see-profil",
+                "name": "See the user profil",
+                "url": "https://media.your-company.com/content/images/snapshot2.png"
+            },
+            {
+                "id": "another-example;logout",
+                "name": "Logout",
+                "url": "https://media.your-company.com/content/images/snapshot3.png"
+            }
+        ]
+    }
+]
+```
