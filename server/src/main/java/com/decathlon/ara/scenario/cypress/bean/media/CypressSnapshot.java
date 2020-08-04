@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2019 by the ARA Contributors                                 *
+ * Copyright (C) 2020 by the ARA Contributors                                 *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -15,27 +15,16 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.domain.enumeration;
+package com.decathlon.ara.scenario.cypress.bean.media;
 
-/**
- * Reporting technologies supported by ARA, for it to know how to index reports of a run.
- */
-public enum Technology {
+import lombok.Data;
 
-    /**
-     * Cucumber job (no matter if it runs Selenium or other technologies like RestAssured or Karate): index its
-     * report.json result.
-     */
-    CUCUMBER,
+@Data
+public class CypressSnapshot {
 
-    /**
-     * Job running one or more Postman collection(s) using Newman: parse all its reports/*.json reports.
-     */
-    POSTMAN,
+    private String id;
 
-    /**
-     * Let ARA handle all the Cypress related report files
-     */
-    CYPRESS
+    private String name;
 
+    private String url;
 }

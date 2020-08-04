@@ -46,13 +46,15 @@ VALUES
 INSERT INTO `source` (`code`, `name`, `letter`, `technology`, `vcs_url`, `default_branch`, `postman_country_root_folders`, `id`, `project_id`)
 VALUES
 	('api','API','A','POSTMAN','https://vcs_url.com/company/ara/tree/{{branch}}/generated-postman-report/src/main/resources/demo/collections/','master',1,1,1),
-	('web','Web','W','CUCUMBER','https://vcs_url.com/company/ara/tree/{{branch}}/generated-cucumber-report/src/main/resources/demo/features/','master',0,2,1);
+	('web','Web','W','CUCUMBER','https://vcs_url.com/company/ara/tree/{{branch}}/generated-cucumber-report/src/main/resources/demo/features/','master',0,2,1),
+	('front','Front','C','CYPRESS','https://vcs_url.com/company/ara/tree/{{branch}}/generated-cypress-report/src/main/resources/demo/features/','master',0,3,1);
 
 INSERT INTO `type` (`code`, `name`, `is_browser`, `is_mobile`, `source_id`, `id`, `project_id`)
 VALUES
 	('api','Integ. APIs',0,0,1,1,1),
 	('firefox-desktop','HMI Desktop',1,0,2,2,1),
-	('firefox-mobile','HMI Mobile',1,1,2,3,1);
+	('firefox-mobile','HMI Mobile',1,1,2,3,1),
+	('cypress-front','Cypress front',1,1,3,4,1);
 
 INSERT INTO `setting` (`id`, `project_id`, `code`, `value`)
 VALUES

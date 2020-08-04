@@ -328,7 +328,7 @@ Wherever possible, copy another class and adapt it, to get all useful Lombok ann
 * If it is a new configuration table, in the client project, add a new management-*.vue,
   using the crud.vue component to generate the table and create/edit window with little efforts
 
-Note: if a column in the table is multi-words, use underscore_case naming for the column and camelCase for the entity field: Spring & Hibernate will translate camelCase to underscore_case automatically: no need to add @Column annotation in this simple case
+NOTE: If a column in the table is multi-words, use underscore_case naming for the column and camelCase for the entity field: Spring & Hibernate will translate camelCase to underscore_case automatically: no need to add @Column annotation in this simple case
 
 Some tips:
 

@@ -2,6 +2,7 @@ package com.decathlon.ara.scenario.common.strategy;
 
 import com.decathlon.ara.domain.enumeration.Technology;
 import com.decathlon.ara.scenario.cucumber.indexer.CucumberScenariosIndexer;
+import com.decathlon.ara.scenario.cypress.indexer.CypressScenariosIndexer;
 import com.decathlon.ara.scenario.postman.indexer.PostmanScenariosIndexer;
 import com.decathlon.ara.scenario.common.indexer.ScenariosIndexer;
 import lombok.NonNull;
@@ -23,6 +24,9 @@ public class ScenariosIndexerStrategy {
     @NonNull
     private final CucumberScenariosIndexer cucumberScenariosIndexerService;
 
+    @NonNull
+    private final CypressScenariosIndexer cypressScenariosIndexer;
+
     /**
      * Get the scenarios indexer from the technology
      * @param technology the technology
@@ -38,6 +42,8 @@ public class ScenariosIndexerStrategy {
                 return Optional.of(cucumberScenariosIndexerService);
             case POSTMAN:
                 return Optional.of(postmanScenariosIndexerService);
+            case CYPRESS:
+                return Optional.of(cypressScenariosIndexer);
             default:
                 log.info("The technology {} is not handled yet. It may be a great feature request ;)", technology);
                 return Optional.empty();

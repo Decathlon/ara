@@ -559,7 +559,7 @@ public class ExecutionFilesProcessorService {
      * otherwise, stays the same
      *
      * @param executionJobStatus the execution job status
-     * @param jobStatusToConvert the (run or country deployement) job status to convert
+     * @param jobStatusToConvert the (run or country deployment) job status to convert
      * @return a new job status
      */
     private JobStatus getRunOrCountryDeploymentJobStatus(JobStatus executionJobStatus, JobStatus jobStatusToConvert) {
@@ -569,7 +569,7 @@ public class ExecutionFilesProcessorService {
             }
 
             if (JobStatus.RUNNING.equals(jobStatusToConvert)) {
-                return jobStatusToConvert.DONE;
+                return JobStatus.DONE;
             }
         }
 

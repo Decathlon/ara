@@ -160,7 +160,7 @@ public class TechnologySettingService {
      */
     private TechnologySettingGroupDTO getTechnologySettingGroup(Pair<Technology, List<SettingDTO>> pair) {
         Technology technology = pair.getFirst();
-        String groupName = WordUtils.capitalizeFully(String.format("%s settings", technology.toString()));
+        String groupName = WordUtils.capitalizeFully(technology.toString());
         List<SettingDTO> settings = pair.getSecond();
         TechnologySettingGroupDTO group = new TechnologySettingGroupDTO(technology);
         group.setName(groupName);

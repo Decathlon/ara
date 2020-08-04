@@ -17,18 +17,20 @@
 
 package com.decathlon.ara.scenario.cucumber.util;
 
-import com.decathlon.ara.scenario.cucumber.support.ResultsWithMatch;
 import com.decathlon.ara.scenario.cucumber.bean.Argument;
+import com.decathlon.ara.scenario.cucumber.bean.Match;
 import com.decathlon.ara.scenario.cucumber.bean.Step;
+import com.decathlon.ara.scenario.cucumber.support.ResultsWithMatch;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A set of static functions with no dependency nor side-effect (no download, upload, database access...) that parse a stepDefinitions.json or manipulate the parsed result.
@@ -60,10 +62,12 @@ public class StepDefinitionUtil {
      */
     public static String extractStepDefinition(ResultsWithMatch stepOrHook, String hookName, List<String> stepDefinitions) {
         String stepDefinition;
+        Match match = stepOrHook.getMatch();
         if (StringUtils.isEmpty(hookName)) {
-            stepDefinition = getMatchingStepDefinition(stepDefinitions, ((Step) stepOrHook).getName(), stepOrHook.getMatch().getArguments());
+            Argument[] arguments = match != null ? match.getArguments() : new Argument[0];
+            stepDefinition = getMatchingStepDefinition(stepDefinitions, ((Step) stepOrHook).getName(), arguments);
         } else {
-            stepDefinition = stepOrHook.getMatch().getLocation(); // eg. "Hooks.beforeScenario(Scenario)"
+            stepDefinition = match.getLocation(); // eg. "Hooks.beforeScenario(Scenario)"
         }
         return stepDefinition;
     }

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2019 by the ARA Contributors                                 *
+ * Copyright (C) 2020 by the ARA Contributors                                 *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -15,27 +15,35 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.domain.enumeration;
+package com.decathlon.ara.scenario.cypress.upload;
 
-/**
- * Reporting technologies supported by ARA, for it to know how to index reports of a run.
- */
-public enum Technology {
+import com.decathlon.ara.domain.enumeration.Technology;
+import com.decathlon.ara.scenario.common.upload.ScenarioUploader;
+import com.decathlon.ara.scenario.cucumber.bean.Feature;
+import com.decathlon.ara.scenario.cucumber.util.ScenarioExtractorUtil;
+import com.decathlon.ara.service.exception.BadRequestException;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-    /**
-     * Cucumber job (no matter if it runs Selenium or other technologies like RestAssured or Karate): index its
-     * report.json result.
-     */
-    CUCUMBER,
+import java.util.List;
 
-    /**
-     * Job running one or more Postman collection(s) using Newman: parse all its reports/*.json reports.
-     */
-    POSTMAN,
+@Component
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@Slf4j
+public class CypressScenarioUploader {
 
-    /**
-     * Let ARA handle all the Cypress related report files
-     */
-    CYPRESS
+    @NonNull
+    private final ScenarioUploader uploader;
 
+    public void uploadScenarios(long projectId, String sourceCode, List<Feature> features) throws BadRequestException {
+        uploader.processUploadedContent(
+                projectId,
+                sourceCode,
+                Technology.CYPRESS,
+                source -> ScenarioExtractorUtil.extractScenarios(source, features)
+        );
+    }
 }
