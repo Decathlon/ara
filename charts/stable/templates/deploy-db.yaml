@@ -1,0 +1,73 @@
+{{- if not .Values.database.external }}
+{{- $name := printf "%s-%s" .Chart.Name "db" -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  labels:
+    app.kubernetes.io/name: {{ include "ara.name" . }}
+    helm.sh/chart: {{ include "ara.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/component: {{ $name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "ara.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: {{ $name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "ara.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: {{ $name }}
+    spec:
+      containers:
+      - name: {{ $name }}
+        image: "{{ .Values.image.registry }}/ara-db:{{ .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: MYSQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "ara.configmap.name" . }}
+              key: database_name
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "ara.database.secret.name" . }}-root
+              key: root-password
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "ara.database.secret.name" . }}
+              key: {{ include "ara.database.secret.usernamekey" . }}
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "ara.database.secret.name" . }}
+              key: {{ include "ara.database.secret.passwordkey" . }}
+        ports:
+        - containerPort: {{ .Values.db.port }}
+        {{- if .Values.db.resources }}
+        resources:
+{{ toYaml .Values.db.resources | indent 10 }}
+        {{- end }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
+spec:
+  ports:
+  - port: {{ .Values.db.port }}
+  selector:
+    app.kubernetes.io/name: {{ include "ara.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: {{ $name }}
+  clusterIP: None
+{{- end }}

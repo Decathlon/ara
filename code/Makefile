@@ -7,7 +7,6 @@ DB_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-db:${VERSION}
 BACK_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-back:${VERSION}
 FRONT_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-front:${VERSION}
 
-
 cache-build-back:
 	@echo '-- Build java ara-back with local cache --'
 	@docker container run -v "$$PWD/back":/root/ara -w /root/ara maven:3-jdk-11 mvn -Pprod -s settings.xml clean package dependency:go-offline
@@ -26,20 +25,20 @@ build-front: ## Build ara-front
 
 run-front: ## Run front
 	@echo '-- Run ara-front --'
-	@docker-compose up ara-front
+	@export VERSION=$(VERSION); docker-compose up ara-front
 
 run-back: ## Run back
 	@echo '-- Run ara-back --'
-	@docker-compose up ara-back
+	@export VERSION=$(VERSION); docker-compose up ara-back
 
 run-db: ## Run database
 	@echo '-- Run database --'
-	@docker-compose up ara-db
+	@export VERSION=$(VERSION); docker-compose up ara-db
 
-build: build-back build-front build-db ## Build ARA
+build-full: build-back build-front build-db ## Build ARA
 
-build-parallel: ## Build ARA in parallel
-	@$(MAKE) build -j3 -k
+build: ## Build ARA in parallel
+	@$(MAKE) build-full -j3 -k
 
 promote-back: ## promote ara back to specified registry
 	@echo '-- Push ${BACK_IMAGE} --'
@@ -57,11 +56,23 @@ promote: promote-back promote-front ## Build ARA
 
 start: ## Start ARA
 	@echo '-- Start ARA --'
-	@docker-compose up -d
+	@export VERSION=$(VERSION); docker-compose up -d
 
 stop: ## Stop ARA
 	@echo '-- Stop ARA --'
-	@docker-compose down
+	@export VERSION=$(VERSION); docker-compose down
+
+helm-tempate:
+	@helm template ../charts/stable --debug
+
+helm-uninstall:
+	@helm uninstall --namespace ara ara-local
+
+helm-install:
+	@helm install --create-namespace --namespace ara ara-local ../charts/stable
+
+helm-upgrade:
+	@helm upgrade --namespace ara ara-local ../charts/stable
 
 .PHONY: help
 help:

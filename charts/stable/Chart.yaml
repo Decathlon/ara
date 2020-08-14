@@ -1,0 +1,17 @@
+apiVersion: v2
+name: ara
+version: 1.0.0
+appVersion: 5.0.0
+description: |
+    ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
+    tracks and follows problems, keep their history, and even break your CI build if quality isn't
+    met.
+keywords:
+- ara
+- analyser
+icon: https://raw.githubusercontent.com/Thomgrus/ara/feat/ara-migration-merged/code/front/src/assets/favicon.png
+sources:
+- https://github.com/Decathlon/ara
+maintainers:
+- name: Thomgrus
+  email: thomas.gruson@protonmail.com
