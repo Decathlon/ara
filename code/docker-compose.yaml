@@ -17,7 +17,7 @@ services:
     networks:
       - db_net
   ara-back:
-    image: "ara-api:${VERSION:-latest}"
+    image: "ara-back:${VERSION:-latest}"
     restart: always
     environment:
       - DATABASE_URL=ara-db:3306/ara-dev
