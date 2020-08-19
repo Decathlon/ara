@@ -8,7 +8,7 @@ metadata:
     helm.sh/chart: {{ include "ara.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/version: {{ .Chart.Version }}
     app.kubernetes.io/component: {{ $name }}
 spec:
   replicas: {{ .Values.ui.replicas }}
@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
       - name: {{ $name }}
-        image: "{{ .Values.image.registry }}/ara-front:{{ .Chart.AppVersion }}"
+        image: "{{ .Values.image.registry }}/ara-front:{{ .Chart.Name }}-{{ .Chart.Version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         {{- if .Values.loadBalancer.enabled }}
         env:
