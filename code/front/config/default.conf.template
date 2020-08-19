@@ -6,11 +6,11 @@ server {
     #access_log  /var/log/nginx/host.access.log  main;
 
     location /api {
-      proxy_pass http://ara-back:8080/api;
+      proxy_pass http://${API_URL}/api;
     }
 
     location /actuator/info {
-      proxy_pass http://ara-back:8080/actuator/info;
+      proxy_pass http://${API_URL}/actuator/info;
     }
 
     location / {

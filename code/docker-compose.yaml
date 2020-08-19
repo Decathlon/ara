@@ -5,7 +5,7 @@ version: '3.5'
 
 services:
   ara-db:
-    image: ara-db #"mysql:5.7" # "ara-db"
+    image: "ara-db:${VERSION}" #"mysql:5.7" # "ara-db"
     restart: always
     ports:
       - 3306:3306
@@ -17,7 +17,7 @@ services:
     networks:
       - db_net
   ara-back:
-    image: "ara-back"
+    image: "ara-api:${VERSION:-latest}"
     restart: always
     environment:
       - DATABASE_URL=ara-db:3306/ara-dev
@@ -30,8 +30,10 @@ services:
       - web_net
       - db_net
   ara-front:
-    image: "ara-front"
+    image: "ara-front:${VERSION:-latest}"
     restart: always
+    environment:
+      - API_URL=ara-back:8080
     ports:
       - 8080:80
     networks:
