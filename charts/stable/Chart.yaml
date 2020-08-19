@@ -1,7 +1,8 @@
 apiVersion: v2
 name: ara
-version: 1.0.0
+version: 1.0.1
 appVersion: 5.0.0
+home: https://github.com/Decathlon/ara
 description: |
     ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
     tracks and follows problems, keep their history, and even break your CI build if quality isn't
