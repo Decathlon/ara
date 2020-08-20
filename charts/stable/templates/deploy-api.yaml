@@ -29,6 +29,8 @@ spec:
         image: "{{ .Values.image.registry }}/ara-back:{{ .Chart.Name }}-{{ .Chart.Version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
+        - name: SERVER_PORT
+          value: "{{ .Values.api.port }}"
         - name: DATABASE_URL
           valueFrom:
             configMapKeyRef:
@@ -57,6 +59,22 @@ spec:
         ports:
         - containerPort: {{ .Values.api.port }}
           name: http-port
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: {{ .Values.api.port }}
+          initialDelaySeconds: 40
+          timeoutSeconds: 2
+          periodSeconds: 3
+          failureThreshold: 2
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: {{ .Values.api.port }}
+          initialDelaySeconds: 100
+          timeoutSeconds: 2
+          periodSeconds: 8
+          failureThreshold: 1
         {{- if .Values.api.resources }}
         resources:
 {{ toYaml .Values.api.resources | indent 10 }}

@@ -39,6 +39,14 @@ spec:
         ports:
         - containerPort: {{ .Values.ui.port }}
           name: http-port
+        readinessProbe:
+          httpGet:
+            path: /api/projects
+            port: {{ .Values.ui.port }}
+          initialDelaySeconds: 40
+          timeoutSeconds: 2
+          periodSeconds: 3
+          failureThreshold: 2
         {{- if .Values.ui.resources }}
         resources:
 {{ toYaml .Values.ui.resources | indent 10 }}
