@@ -12,8 +12,13 @@
     "e2e": "node test/e2e/runner.js",
     "test": "npm run unit && npm run e2e",
     "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs",
-    "cy:all": "cypress run --spec test/cypress/**/*.feature",
-    "cy:wip": "cypress run -e TAGS='@wip' -e GLOB=test/cypress/**/*.feature"
+    "cy:all": "cypress run --spec 'test/cypress/**/*.feature'",
+    "cy:wip": "cypress run -e TAGS='@wip' -e GLOB=test/cypress/**/*.feature",
+    "cy:output:cleanup": "rm -fr test/cypress/outputs",
+    "cy:report:cleanup": "rm -fr test/cypress/outputs/reports",
+    "cy:report:generate": "npm run cy:report:cleanup; cypress run",
+    "cy:report:merge": "npm run cy:report:generate; mkdir -p test/cypress/outputs/reports/json/merged && npx mochawesome-merge 'test/cypress/outputs/reports/json/all/*.json' > test/cypress/outputs/reports/json/merged/final-report.json",
+    "cy:report:html": "npm run cy:report:merge; npx marge test/cypress/outputs/reports/json/merged/final-report.json --overwrite=true --charts=true --reportDir=test/cypress/outputs/reports/html"
   },
   "dependencies": {
     "eslint-plugin-html": "^3.1.1",
@@ -50,7 +55,7 @@
     "cross-spawn": "^5.0.1",
     "css-loader": "^2.1.1",
     "cssnano": "^4.0.0",
-    "cypress": "^3.8.0",
+    "cypress": "^4.10.0",
     "cypress-cucumber-preprocessor": "^1.16.2",
     "eslint": "^5.16.0",
     "eslint-config-standard": "^12.0.0",
@@ -80,9 +85,13 @@
     "karma-webpack": "^4.0.2",
     "less": "^3.8.1",
     "less-loader": "^4.0.5",
+    "lodash": "^4.17.19",
     "lolex": "^1.5.2",
     "mini-css-extract-plugin": "^0.8.0",
-    "mocha": "^5.0.0",
+    "mocha": "^8.0.1",
+    "mochawesome": "^6.1.1",
+    "mochawesome-merge": "^4.1.0",
+    "mochawesome-report-generator": "^5.1.0",
     "nightwatch": "^1.0.2",
     "opn": "^5.4.0",
     "optimize-css-assets-webpack-plugin": "^2.0.0",
@@ -111,7 +120,7 @@
     "step_definitions": "test/cypress/support/stepDefinitions",
     "cucumberJson": {
       "generate": true,
-      "outputFolder": "test/cypress/dist",
+      "outputFolder": "test/cypress/outputs/cucumber",
       "filePrefix": "",
       "fileSuffix": ".cucumber"
     }

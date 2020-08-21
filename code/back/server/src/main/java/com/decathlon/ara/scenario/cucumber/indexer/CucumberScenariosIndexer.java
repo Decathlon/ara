@@ -96,7 +96,7 @@ public class CucumberScenariosIndexer implements ScenariosIndexer {
      * @param cucumberReport the Cucumber report file
      * @return the Cucumber features
      */
-    private List<Feature> getCucumberFeaturesFromReport(File cucumberReport) {
+    public List<Feature> getCucumberFeaturesFromReport(File cucumberReport) {
         try (InputStream input = new FileInputStream(cucumberReport)) {
             return objectMapper.readValue(input, objectMapper.getTypeFactory().constructCollectionType(List.class, Feature.class));
         } catch (IOException e) {
@@ -110,7 +110,7 @@ public class CucumberScenariosIndexer implements ScenariosIndexer {
      * @param stepDefinitionsFile the file defining the Cucumber step definitions
      * @return all the extracted Cucumber step definitions
      */
-    private List<String> getCucumberStepDefinitions(File stepDefinitionsFile) {
+    public List<String> getCucumberStepDefinitions(File stepDefinitionsFile) {
         try (InputStream input = new FileInputStream(stepDefinitionsFile)) {
             return objectMapper.readValue(input, objectMapper.getTypeFactory().constructCollectionType(List.class, String.class));
         } catch (IOException e) {

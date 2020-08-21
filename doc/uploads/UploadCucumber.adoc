@@ -2,12 +2,12 @@
 = Upload a Cucumber execution's report on ARA
 
 Once you've got a running version of ARA, you can upload cucumber execution's
-report in the system. It's highly recommended to read the
+report in the system. It's highly recommended reading the
 <<HowItWorks.adoc#head, How It Works>> part.
 
 == Prepare the report
 
-Once you launch your Cucumber runs, you have to export the result in JSON format
+Once you launch your Cucumber runs, you have to export the result in the JSON format
 (which is the default export mode of Cucumber).
 
 This report must live in a specific directory architecture which is :
@@ -15,7 +15,7 @@ This report must live in a specific directory architecture which is :
 
 With :
 
-* `{TIMESTAMP}` the timestamp, from the Jan 01 1970, of the moment when the test was
+* `{TIMESTAMP}` the timestamp, the seconds passed from Jan 01 1970 to the moment the test was
 launched.
 * `{COUNTRY}` the country code of the country tested by your run (for example `fr` if
 your run has tested the France configuration). This country code must be defined in your
@@ -26,12 +26,12 @@ be defined in your project's settings in ARA in the Type tab.
 
 == Add ARA specific information
 
-You need to create a file name `cycleDefinition.json` and add it to the folder architecture
-described above like so : `{TIMESTAMP}/cycleDefinition.json`
+You need to create a file named `cycleDefinition.json` and add it to the folder architecture
+described above : `{TIMESTAMP}/cycleDefinition.json`
 
 For its content, please see the explanation <<HowItWorks.adoc#cycleDefJson, here>>
 
-You also need to add some files which will tells ARA where to find your build information
+You also need to add some files which will tell ARA where to find your build information
 (build timestamp, build url, version...). The content of this file is described
 <<HowItWorks.adoc#buildInfosJson, here>>. Please note that you'll need a `buildInformation.json`
 file in each directory in the folder architecture. So you'll have at least :
@@ -41,8 +41,8 @@ file in each directory in the folder architecture. So you'll have at least :
 * `{TIMESTAMP}/{COUNTRY}/{TYPE}/buildInformation.json`
 
 
-We highly recommand that those files (cycleDefinition and all the buildInformation files) should
-be generated in a script inside your CI tool (like GitlabCI, or Jenkins) to avoid any errors, and
+We highly recommend that those files (`cycleDefinition.json` and all the `buildInformation.json` files) to
+be generated using a script launched from your CI tool (like GitlabCI, or Jenkins) to avoid any errors, and
 to retrieve the good information (buildLink, buildTimestamp...) directly in it.
 
 == Send the report
@@ -97,7 +97,7 @@ of just steps (scenario contents).
 For instance, the step `^Step number (\\d+)$` can be used in a scenario as `Step number 1` and `Step number 2`.
 If both steps fail, it could be because the step definition is erroneous, and users would want to create a problem with
 just one rule aggregating both step "instances".
-If the file is not provided, ARA will threat numbers and double-quoted strings in steps as parameters and will thus try
+If the file is not provided, ARA will treat numbers and double-quoted strings in steps as parameters and will thus try
 to guess what were the underlying step definitions.
 But this is very basic, error-prone, and don't account for more complex regular expressions.
 By extracting a `stepDefinitions.json` array file, you will be assured that ARA will let users create relevant rules.
@@ -124,7 +124,7 @@ Here is how to find it with Maven:
 </dependency>
 ```
 
-The library declares the cucumber dependency as provided: you will need a working Cucumber dependency in your project
+The library declares the Cucumber dependency as provided: you will need a working Cucumber dependency in your project
 for the extractor to work: it will need to access your glue code.
 
 Then, use the `com.decathlon.ara.lib.StepDefinitionExtractor` class like this:

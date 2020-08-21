@@ -31,6 +31,11 @@ public enum Technology {
     /**
      * Job running one or more Postman collection(s) using Newman: parse all its reports/*.json reports.
      */
-    POSTMAN
+    POSTMAN,
+
+    /**
+     * Let ARA handle all the Cypress related report files
+     */
+    CYPRESS
 
 }

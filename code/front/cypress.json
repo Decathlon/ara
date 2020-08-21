@@ -1,10 +1,19 @@
 {
-  "baseUrl": "http://localhost:8081/#",
+  "baseUrl": "http://localhost:8081/",
   "fixturesFolder": "test/cypress/fixtures",
   "integrationFolder": "test/cypress/scenarii",
   "pluginsFile": "test/cypress/plugins/index.js",
-  "screenshotsFolder": "test/cypress/dist/screenshots",
+  "screenshotsFolder": "test/cypress/outputs/media/screenshots",
   "supportFile": "test/cypress/support/index.js",
-  "videosFolder": "test/cypress/dist/videos",
-  "testFiles": "**/*.feature"
+  "videosFolder": "test/cypress/outputs/media/videos",
+  "testFiles": "**/*.feature",
+  "reporter": "mochawesome",
+  "reporterOptions": {
+    "chart": true,
+    "reportDir": "test/cypress/outputs/reports/json/all",
+    "reportFilename": "report",
+    "overwrite": false,
+    "html": false,
+    "json": true
+  }
 }

@@ -36,3 +36,8 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+
+# Cypress
+/test/cypress/outputs/
+/mochawesome-report/
+/mochawesome.json

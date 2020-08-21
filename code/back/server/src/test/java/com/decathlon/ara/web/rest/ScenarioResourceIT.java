@@ -61,6 +61,7 @@ public class ScenarioResourceIT {
         return names;
     }
 
+    @Deprecated
     @Test
     public void testUploadCucumber() throws IOException {
         String reportJson = TestUtil.loadUtf8ResourceAsString("reports/tests/dry-report.json");

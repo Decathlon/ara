@@ -31,3 +31,5 @@ nbdist/
 ### Build ###
 target/
 node_modules/
+*dependency-reduced-pom.xml
+client/*.vscode

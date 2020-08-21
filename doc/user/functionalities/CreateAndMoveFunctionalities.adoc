@@ -40,7 +40,7 @@ Creation follows the same principle:
 image:create.png[]
 
 WARNING: Be careful when creating a folder (or even a functionality) while some filters are active.
-         The newly created folder will likely not be visible because it will not match filters.
+         The newly created folder will likely not be visible because it will not match the filters.
          Most filters only apply to functionalities: teams, countries, etc.
          Folders cannot have such values, so they do not match filters and are thus hidden.
          However, folders containing functionalities matching the filters are visible.
