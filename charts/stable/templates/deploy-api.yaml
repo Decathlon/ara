@@ -50,7 +50,7 @@ spec:
           valueFrom:
             configMapKeyRef:
               name: {{ include "ara.configmap.name" . }}
-              key: ui_url
+              key: app_url
         - name: DATA_DB_MODE
           valueFrom:
             configMapKeyRef:

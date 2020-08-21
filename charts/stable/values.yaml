@@ -26,6 +26,8 @@ api:
         #  memory: 128Mi
     port: 8080
     dbMode: create-drop
+    # Used to redirect on the app by email service among others
+    appUrl: ara.test
 
 ##
 ## UI Configuration
