@@ -28,14 +28,12 @@ spec:
       - name: {{ $name }}
         image: "{{ .Values.image.registry }}/ara-front:{{ .Chart.Name }}-{{ .Chart.Version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        {{- if .Values.loadBalancer.enabled }}
         env:
         - name: API_URL
           valueFrom:
             configMapKeyRef:
               name: {{ include "ara.configmap.name" . }}
               key: api_url
-        {{- end }}
         ports:
         - containerPort: {{ .Values.ui.port }}
           name: http-port
