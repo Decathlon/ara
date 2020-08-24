@@ -44,13 +44,14 @@
       </div>
 
       <div id="helps">
+        <span>V{{ appVersion }}</span>
         <!-- Keep the same width as logo+select: this is to center the menu when space is available -->
         <Tooltip content="How to use ARA?" placement="bottom-end" :transfer="true">
           <a :href="'https://github.com/decathlon/ara/blob/master/doc/user/main/UserDocumentation.adoc'"
              target="_blank"><Icon type="md-help-circle" size="24" style="padding: 0;"/></a>
         </Tooltip><!-- No space between items
      --><Tooltip content="What's new in ARA?" placement="bottom-end" :transfer="false">
-          <a :href="'https://github.com/decathlon/ara/blob/master/CHANGELOG.adoc'"
+          <a :href="'https://github.com/Decathlon/ara/releases/tag/ara-' + appVersion"
              @click="setLatestChangelogVersion"
              target="_blank"><Badge dot :count="changelogCount"><Icon type="md-notifications" size="24"/></Badge></a>
         </Tooltip>
@@ -212,6 +213,11 @@
     padding-right: 8px;
     white-space: nowrap;
   }
+
+  #helps span {
+    color: white;
+  }
+
   #helps a {
     display: block;
     color: white;

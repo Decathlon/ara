@@ -25,7 +25,8 @@ services:
       - DATABASE_PASSWORD=to_change
       - CLIENT_URL="http://ara-front/"
       - DATA_DB_MODE=create-drop # validate | update | create | create-drop
-      - ARA_PROFILE=dev
+    ports:
+      - 8080:8080
     networks:
       - web_net
       - db_net
@@ -35,7 +36,7 @@ services:
     environment:
       - API_URL=ara-back:8080
     ports:
-      - 8080:80
+      - 80:80
     networks:
       - web_net
 networks:
