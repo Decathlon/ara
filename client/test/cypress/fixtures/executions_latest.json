@@ -6,7 +6,7 @@
     "version": "e023ff218f5ef838cf635ed8842572f99b726fb8",
     "buildDateTime": "2020-02-28T07:55:00.000Z",
     "testDateTime": "2020-02-28T08:00:00.000Z",
-    "jobUrl": "https://build.company.com/demo/develop/day/50/",
+    "jobUrl": "https://build.company.com/demo/develop/day/5/",
     "status": "DONE",
     "result": "SUCCESS",
     "acceptance": "NEW",
@@ -98,7 +98,7 @@
     ],
     "duration": 0,
     "estimatedDuration": 0,
-    "previousId": 47,
+    "previousId": 4,
     "countryDeployments": [
       {
         "id": 78,
