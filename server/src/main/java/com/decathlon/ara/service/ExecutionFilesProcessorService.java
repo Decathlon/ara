@@ -40,7 +40,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -48,7 +47,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -130,7 +128,6 @@ public class ExecutionFilesProcessorService {
             if (JobStatus.DONE.equals(execution.get().getStatus()) || completionRequest.isPresent()) {
                 log.info("Cycle-run's cycle-definition JSON not found in done job (cycle deeply broken): indexing it as failed");
                 execution.get().setBlockingValidation(false);
-                cleanExecutionFiles(projectId, rawExecutionFile);
                 return execution;
             }
             log.info("Cycle-run's cycle-definition JSON not found (too soon?): not indexing it yet");
@@ -154,8 +151,6 @@ public class ExecutionFilesProcessorService {
         if (executionIsIncomplete) {
             execution.get().setQualityStatus(QualityStatus.INCOMPLETE);
         }
-
-        cleanExecutionFiles(projectId, rawExecutionFile);
 
         return execution;
     }
@@ -574,21 +569,5 @@ public class ExecutionFilesProcessorService {
         }
 
         return jobStatusToConvert;
-    }
-
-    /**
-     * If enabled in settings, delete the directory containing the files related to the indexed execution
-     *
-     * @param projectId the project id
-     * @param executionDirectory the directory containing the files related to the indexed execution
-     */
-    private void cleanExecutionFiles(Long projectId, File executionDirectory) {
-        if (settingService.getBoolean(projectId, Settings.EXECUTION_INDEXER_FILE_DELETE_AFTER_INDEXING_AS_DONE)) {
-            try {
-                FileUtils.deleteDirectory(executionDirectory);
-            } catch (IOException e) {
-                log.error("The directory [{}] wasn't deleted due to an error", executionDirectory.getAbsolutePath(), e);
-            }
-        }
     }
 }

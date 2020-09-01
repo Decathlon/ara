@@ -51,6 +51,7 @@ import com.decathlon.ara.service.transformer.ExecutionTransformer;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -369,6 +370,9 @@ public class ExecutionService {
      * @throws IOException              if the zip file can't be unzipped.
      */
     public void uploadExecutionReport(long projectId, String projectCode, String branch, String cycle, MultipartFile zipFile) throws IOException {
+        CycleDefinition cycleDefinition = cycleDefinitionRepository.findByProjectIdAndBranchAndName(projectId, branch, cycle)
+                .orElseThrow(() -> new IllegalArgumentException("The branch or cycle for this project doesn't exists."));
+
         String path = settingService.get(projectId, Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH)
                 .replace(Settings.PROJECT_VARIABLE, projectCode)
                 .replace(Settings.BRANCH_VARIABLE, branch)
@@ -377,16 +381,19 @@ public class ExecutionService {
         String buildInformationFilePath = settingService.get(projectId, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH);
         List<File> executionDirectories = this.unzipExecutions(destinationDirectory, zipFile, buildInformationFilePath);
         for (final File executionDirectory : executionDirectories) {
-            uploadSpecificDirectory(projectId, branch, cycle, executionDirectory);
+            try {
+                processSpecificDirectory(cycleDefinition, executionDirectory);
+            } catch (Exception e) {
+                log.error("A problem occurred while indexing this execution [{}]", executionDirectory.getPath(), e);
+            } finally {
+                log.info("Cleaning the incoming folder: {}", executionDirectory.getAbsolutePath());
+                cleanExecutionFiles(projectId, executionDirectory);
+            }
         }
     }
 
-    public void uploadSpecificDirectory(long projectId, String branch, String cycle, File executionDirectory) {
+    public void processSpecificDirectory(CycleDefinition cycleDefinition, File executionDirectory) {
         log.info("Received new execution report in {}", executionDirectory.getAbsolutePath());
-        CycleDefinition cycleDefinition = cycleDefinitionRepository.findByProjectIdAndBranchAndName(projectId, branch, cycle);
-        if (null == cycleDefinition) {
-            throw new IllegalArgumentException("The branch or cycle for this project doesn't exists.");
-        }
 
         PlannedIndexation plannedIndexation = new PlannedIndexation()
                 .withCycleDefinition(cycleDefinition)
@@ -423,5 +430,21 @@ public class ExecutionService {
     Boolean isExecutionDirectory(File file, String buildInformationFilePath) {
         return file.isDirectory() && file.getName().matches("[0-9]+")
                 && new File(file, buildInformationFilePath).exists();
+    }
+
+    /**
+     * If enabled in settings, delete the directory containing the files related to the indexed execution
+     *
+     * @param projectId the project id
+     * @param executionDirectory the directory containing the files related to the indexed execution
+     */
+    private void cleanExecutionFiles(Long projectId, File executionDirectory) {
+        if (settingService.getBoolean(projectId, Settings.EXECUTION_INDEXER_FILE_DELETE_AFTER_INDEXING_AS_DONE)) {
+            try {
+                FileUtils.deleteDirectory(executionDirectory);
+            } catch (IOException e) {
+                log.error("The directory [{}] wasn't deleted due to an error", executionDirectory.getAbsolutePath(), e);
+            }
+        }
     }
 }
