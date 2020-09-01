@@ -29,12 +29,14 @@ import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
 import com.decathlon.ara.service.mapper.CycleDefinitionMapper;
 import com.decathlon.ara.service.util.ObjectUtil;
-import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Service for managing CycleDefinition.
@@ -131,9 +133,9 @@ public class CycleDefinitionService {
     }
 
     private void validateBusinessRules(long projectId, CycleDefinitionDTO dto) throws NotUniqueException {
-        CycleDefinition existingEntityWithSameBranchAndName = repository.findByProjectIdAndBranchAndName(projectId, dto.getBranch(), dto.getName());
-        if (existingEntityWithSameBranchAndName != null && !existingEntityWithSameBranchAndName.getId().equals(dto.getId())) {
-            throw new NotUniqueException(Messages.NOT_UNIQUE_CYCLE_DEFINITION_NAME_BRANCH, Entities.CYCLE_DEFINITION, QCycleDefinition.cycleDefinition.branch.getMetadata().getName(), existingEntityWithSameBranchAndName.getId());
+        Optional<CycleDefinition> existingEntityWithSameBranchAndName = repository.findByProjectIdAndBranchAndName(projectId, dto.getBranch(), dto.getName());
+        if (existingEntityWithSameBranchAndName.isPresent() && !existingEntityWithSameBranchAndName.get().getId().equals(dto.getId())) {
+            throw new NotUniqueException(Messages.NOT_UNIQUE_CYCLE_DEFINITION_NAME_BRANCH, Entities.CYCLE_DEFINITION, QCycleDefinition.cycleDefinition.branch.getMetadata().getName(), existingEntityWithSameBranchAndName.get().getId());
         }
     }
 
