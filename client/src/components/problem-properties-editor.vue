@@ -18,26 +18,26 @@
   <Form :label-width="120">
     <Form-item label="For team:">
       <Select v-model="teamId" clearable filterable placeholder="None">
-        <Option v-for="team in teamsAssignableToProblems" :value="team.id" :key="team.id" :label="team.name" />
+        <Option data-nrt= 'problem_team_select_edit_option' v-for="team in teamsAssignableToProblems" :value="team.id" :key="team.id" :label="team.name" />
       </Select>
     </Form-item>
     <Form-item label="Name:" :required="true">
-      <Input ref="name" v-model="name" @on-enter="submit" />
+      <Input data-nrt= 'problem_name_edit' ref="name" v-model="name" @on-enter="submit" />
     </Form-item>
     <Form-item label="Comment:">
-      <Input v-model="comment" type="textarea" :autosize="{ minRows: 2, maxRows: 15 }" />
+      <Input data-nrt= 'problem_edit_comment' v-model="comment" type="textarea" :autosize="{ minRows: 2, maxRows: 15 }" />
     </Form-item>
     <Form-item label="Work item id:">
-      <Input v-model="defectId" @on-enter="submit" />
+      <Input data-nrt= 'problem_edit_workItem' v-model="defectId" @on-enter="submit" />
     </Form-item>
     <Form-item label="Root cause:" :required="isClosed" style="position: relative;">
       <Select v-model="rootCauseId" clearable placeholder="None">
-        <Option v-for="rootCause in rootCauses" :value="rootCause.id" :key="rootCause.id" :label="rootCause.name" />
+        <Option data-nrt= 'problem_edit_root_cause_option' v-for="rootCause in rootCauses" :value="rootCause.id" :key="rootCause.id" :label="rootCause.name" />
       </Select>
       <Spin fix v-if="!rootCauses"/>
     </Form-item>
     <Form-item v-if="okText" label="">
-      <Button type="primary" @click="submit" :loading="loadingSubmit">{{okText}}</Button>
+      <Button data-nrt= 'problem_edit_ok_button' type="primary" @click="submit" :loading="loadingSubmit">{{okText}}</Button>
     </Form-item>
   </Form>
 </template>

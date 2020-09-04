@@ -20,7 +20,7 @@
       PROBLEM
       <problem-tag :problem="problem"/>
       <a v-if="problem.defectUrl && problem.defectExistence !== 'NONEXISTENT'" :href="problem.defectUrl" target="_blank">
-        <Button icon="md-open" type="info">GO TO WORK ITEM #{{problem.defectId}}</Button>
+        <Button data-nrt= 'goToWorkItemButton' icon="md-open" type="info">GO TO WORK ITEM #{{problem.defectId}}</Button>
       </a>
       <span v-if="problem.effectiveStatus === 'OPEN'">({{problem.effectiveStatus}})</span>
     </h2>
@@ -39,7 +39,7 @@
 
     <div style="margin: 8px 0 8px 21px;">
       <strong>Creation:</strong>
-      <div>{{util.formatDate(problem.creationDateTime)}}</div>
+      <div data-nrt= 'problemCreationDateTime'> {{util.formatDate(problem.creationDateTime)}}</div>
     </div>
 
     <div v-if="problem.effectiveStatus !== 'OPEN' && problem.closingDateTime" style="margin: 8px 0 8px 21px;">
@@ -74,14 +74,14 @@
     </Alert>
 
     <div style="text-align: center; margin-top: 8px;">
-      <Button type="error" @click="deleteProblem" icon="md-trash" style="float: right;" :loading="loadingDelete">DELETE PROBLEM</Button>
-      <Button type="primary" @click="editProperties" icon="md-create" style="float: left;">EDIT PROBLEM PROPERTIES</Button>
+      <Button data-nrt= 'deleteProblemButton' type="error" @click="deleteProblem" icon="md-trash" style="float: right;" :loading="loadingDelete">DELETE PROBLEM</Button>
+      <Button data-nrt= 'editProblemButton' type="primary" @click="editProperties" icon="md-create" style="float: left;">EDIT PROBLEM PROPERTIES</Button>
 
       <Button type="default" @click="refreshDefect" icon="md-refresh" v-if="problem.defectUrl" title="Status is automatically refreshed from the work-item.
 But this can take a minute.
 If you updated the work-item a few seconds ago, you may want to speed up the ARA update by clicking this button.">REFRESH STATUS FROM WORK-ITEM NOW</Button>
-      <Button type="default" @click="showCloseProblemDialog" icon="md-close-circle" v-else-if="problem.effectiveStatus === 'OPEN'">CLOSE PROBLEM</Button>
-      <Button type="default" @click="reopenProblem" icon="md-medical" v-else>REOPEN PROBLEM</Button>
+      <Button data-nrt= 'closeProblemButton' type="default" @click="showCloseProblemDialog" icon="md-close-circle" v-else-if="problem.effectiveStatus === 'OPEN'">CLOSE PROBLEM</Button>
+      <Button data-nrt= 'reopenProblemButton' type="default" @click="reopenProblem" icon="md-medical" v-else>REOPEN PROBLEM</Button>
     </div>
 
     <h2>STATISTICS</h2>
@@ -121,14 +121,14 @@ If you updated the work-item a few seconds ago, you may want to speed up the ARA
           <td><strong v-if="pattern.stepDefinitionStartsWith">Starts with: </strong>{{pattern.stepDefinition}}</td>
           <td style="white-space: pre-line;"><strong v-if="pattern.exception">Starts with: </strong>{{pattern.exception}}</td>
           <td style="width: 1px; padding: 8px;">
-            <Dropdown title="Actions" trigger="click" placement="bottom-end">
+            <Dropdown title="Actions" data-nrt= 'actionsDropdownProblem' trigger="click" placement="bottom-end">
               <Button type="primary">
                 <Icon type="md-menu"/>
               </Button>
               <DropdownMenu slot="list">
-                <DropdownItem><div @click="editPattern(pattern.id)"><Icon type="md-create"/> EDIT PATTERN</div></DropdownItem>
-                <DropdownItem><div @click="movePattern(pattern.id)"><Icon type="ios-undo"/> MOVE PATTERN TO ANOTHER EXISTING PROBLEM</div></DropdownItem>
-                <DropdownItem><div @click="deletePattern(pattern.id)"><Icon type="md-trash"/> DELETE PATTERN</div></DropdownItem>
+                <DropdownItem><div data-nrt= 'actionEditPatternProblem' @click="editPattern(pattern.id)"><Icon type="md-create"/> EDIT PATTERN</div></DropdownItem>
+                <DropdownItem><div data-nrt= 'actionMovePatternProblem' @click="movePattern(pattern.id)"><Icon type="ios-undo"/> MOVE PATTERN TO ANOTHER EXISTING PROBLEM</div></DropdownItem>
+                <DropdownItem><div data-nrt= 'actionDeleteProblem' @click="deletePattern(pattern.id)"><Icon type="md-trash"/> DELETE PATTERN</div></DropdownItem>
               </DropdownMenu>
             </Dropdown>
           </td>
@@ -150,7 +150,7 @@ If you updated the work-item a few seconds ago, you may want to speed up the ARA
       <Form :label-width="120">
         <Form-item label="Root cause:" style="position: relative;">
           <Select v-model="rootCauseIdForClose" clearable placeholder="None">
-            <Option v-for="rootCause in rootCauses" :value="rootCause.id" :key="rootCause.id" :label="rootCause.name" />
+            <Option  data-nrt= 'deleteRootCauseModalOption' v-for="rootCause in rootCauses" :value="rootCause.id" :key="rootCause.id" :label="rootCause.name" />
           </Select>
           <Spin fix v-if="!rootCauses"/>
         </Form-item>

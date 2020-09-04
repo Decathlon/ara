@@ -48,7 +48,7 @@
       &nbsp;
 
       Root cause:
-      <Select v-model="filter.rootCauseId" placeholder="All" style="width: 200px; text-align: left;"
+      <Select  v-model="filter.rootCauseId" placeholder="All" style="width: 200px; text-align: left;"
               @on-change="requestProblems">
         <Option value="" :label="'\u00A0'"/>
         <Option v-for="rootCause in rootCauses" :value="rootCause.id" :key="rootCause.id" :label="rootCause.name"/>

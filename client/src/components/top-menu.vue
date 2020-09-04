@@ -36,7 +36,7 @@
       <div style="flex: 1 0 auto;">
         <!-- After deleting the demo project, if no other project exists, `projectCode` still exists but we should hide the menu anyway  -->
         <ul v-if="projectCode && projects && projects.length" class="ivu-menu ivu-menu-primary ivu-menu-horizontal">
-          <router-link v-for="link in links" :key="link.name" :to="to(link)"
+          <router-link :data-nrt=" link.name + '_Menu' " v-for="link in links" :key="link.name" :to="to(link)"
                       class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected">
             {{link.name}}
           </router-link>
