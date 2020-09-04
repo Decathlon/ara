@@ -17,14 +17,15 @@
 
 package com.decathlon.ara.repository;
 
-import com.decathlon.ara.repository.custom.FunctionalityRepositoryCustom;
 import com.decathlon.ara.domain.Functionality;
 import com.decathlon.ara.domain.enumeration.FunctionalityType;
-import java.util.List;
-import java.util.SortedSet;
+import com.decathlon.ara.repository.custom.FunctionalityRepositoryCustom;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.SortedSet;
 
 /**
  * Spring Data JPA repository for the Functionality entity.
@@ -32,7 +33,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface FunctionalityRepository extends JpaRepository<Functionality, Long>, FunctionalityRepositoryCustom {
 
-    Functionality findByProjectIdAndId(long projectId, long id);
+    Functionality findByProjectIdAndId(Long projectId, Long id);
+
+    List<Functionality> findByProjectIdAndIdIn(Long projectId, List<Long> ids);
 
     List<Functionality> findAllByProjectIdOrderByOrder(long projectId);
 
