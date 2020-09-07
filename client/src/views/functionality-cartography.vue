@@ -154,6 +154,16 @@
                       <Icon type="md-cloud-upload" /> IMPORT NEW FUNCTIONALITIES
                     </div>
                   </DropdownItem>
+                  <DropdownItem divided>
+                    <div @click="selectAll()">
+                      <Icon type="md-checkbox-outline"/> SELECT ALL
+                    </div>
+                  </DropdownItem>
+                  <DropdownItem>
+                    <div @click="clearSelection()">
+                      <Icon type="md-square-outline" /> CLEAR SELECTION
+                    </div>
+                  </DropdownItem>
                   <DropdownItem :disabled="noSelection" divided>
                     <div @click="startMovingSelection()">
                       <Icon type="md-move"/> MOVE SELECTION TO...
@@ -1050,6 +1060,36 @@
           }, (error) => {
             api.handleError(error)
           })
+      },
+
+      applySelectToNode (node, selected) {
+        node.isSelected = selected
+        if (node.children) {
+          for (let i in node.children) {
+            const child = node.children[i]
+            this.applySelectToNode(child, selected)
+          }
+        }
+      },
+
+      applySelectToAllNodes (selected) {
+        let selection = []
+        for (let i in this.functionalities) {
+          const child = this.functionalities[i]
+          this.applySelectToNode(child, selected)
+          if (selected) {
+            selection = selection.concat(child)
+          }
+        }
+        this.nodesSelection = selection
+      },
+
+      selectAll () {
+        this.applySelectToAllNodes(true)
+      },
+
+      clearSelection () {
+        this.applySelectToAllNodes(false)
       },
 
       propagateSelectionToChildren (node) {
