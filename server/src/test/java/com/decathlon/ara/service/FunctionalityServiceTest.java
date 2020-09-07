@@ -41,6 +41,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
@@ -109,7 +110,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getFunctionality()).thenReturn(functionality);
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(null);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.empty());
 
         // Then
         functionalityService.create(projectId, newFunctionalityDTO);
@@ -135,7 +136,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getType()).thenReturn(FunctionalityType.FUNCTIONALITY);
 
         // Then
@@ -172,7 +173,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -221,7 +222,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -277,7 +278,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -339,7 +340,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -399,7 +400,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -461,7 +462,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -525,7 +526,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -591,7 +592,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -663,7 +664,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -738,7 +739,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -816,7 +817,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -896,7 +897,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -1007,7 +1008,7 @@ public class FunctionalityServiceTest {
         // When
         when(moveDetails.getReferenceId()).thenReturn(referenceId);
         when(moveDetails.getSourceIds()).thenReturn(Arrays.asList(sourceId1, sourceId2, sourceId3));
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(null);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.empty());
 
         // Then
         functionalityService.moveList(projectId, moveDetails);
@@ -1032,7 +1033,7 @@ public class FunctionalityServiceTest {
         // When
         when(moveDetails.getReferenceId()).thenReturn(referenceId);
         when(moveDetails.getSourceIds()).thenReturn(Arrays.asList(sourceId1, sourceId2, sourceId3));
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(repository.findByProjectIdAndIdIn(projectId, Arrays.asList(sourceId1, sourceId2, sourceId3))).thenReturn(
                 Arrays.asList(sourceFunctionality1, sourceFunctionality2)
         );
