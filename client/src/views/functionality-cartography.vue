@@ -683,7 +683,7 @@
             }
           }
         }
-        this.$router.replace({ query })
+        this.$router.replace({ query }).catch(() => {})
       },
 
       fromQueryString () {
