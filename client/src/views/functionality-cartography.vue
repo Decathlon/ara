@@ -431,7 +431,7 @@
         if (jsonNodes) {
           for (let i in jsonNodes) {
             let jsonNode = jsonNodes[i]
-            jsonNode.countryCodes = util.toSplitted(jsonNode.countryCodes)
+            jsonNode.countryCodes = util.toSplit(jsonNode.countryCodes)
             nodes.push({
               id: jsonNode.id, // For virtual-scroller
               row: jsonNode,
@@ -676,7 +676,7 @@
           if (this.filter[propertyName]) {
             let value = this.filter[propertyName]
             if (propertyName === 'countries') {
-              value = util.fromSplitted(value)
+              value = util.fromSplit(value)
             }
             if (value !== '') {
               query[propertyName] = value
@@ -693,7 +693,7 @@
             if (query[propertyName]) {
               let value = query[propertyName]
               if (propertyName === 'countries') {
-                value = util.toSplitted(value)
+                value = util.toSplit(value)
               }
               this.filter[propertyName] = value
             }
@@ -716,7 +716,7 @@
         for (let property in serverRow) {
           let value = serverRow[property]
           if (property === 'countryCodes') {
-            value = util.toSplitted(value)
+            value = util.toSplit(value)
           }
           clientRow[property] = value
         }
