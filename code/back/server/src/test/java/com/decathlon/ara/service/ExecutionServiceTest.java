@@ -390,7 +390,7 @@ public class ExecutionServiceTest {
         List<File> unzipMock = Collections.singletonList(executionPath);
         doReturn(unzipMock).when(cut).unzipExecutions(any(), any(), any());
         doReturn("/opt/data/{{project}}/{{branch}}/{{cycle}}").when(settingService).get(projectId, Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH);
-        doReturn(cycleDefinition).when(cycleDefinitionRepository).findByProjectIdAndBranchAndName(projectId, branch, cycle);
+        doReturn(Optional.of(cycleDefinition)).when(cycleDefinitionRepository).findByProjectIdAndBranchAndName(projectId, branch, cycle);
         doNothing().when(executionIndexerService).indexExecution(any());
         // When
         cut.uploadExecutionReport(projectId, projectCode, branch, cycle, zip);
@@ -399,17 +399,14 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void uploadExecutionReport_should_throws_IllegalArgumentException_if_cycle_doesnt_exists() throws IOException {
+    public void uploadExecutionReport_should_throw_IllegalArgumentException_if_cycle_doesnt_exists() throws IOException {
         // Given
         long projectId = 23L;
         String projectCode = "prj";
         String branch = "master";
         String cycle = "day";
         MultipartFile zip = new MockMultipartFile("zip", "test.zip", "application/zip", new byte[0]);
-        List<File> unzipMock = Collections.singletonList(new File("dont_matter"));
-        doReturn(unzipMock).when(cut).unzipExecutions(any(), any(), any());
-        doReturn("/opt/data/{{project}}/{{branch}}/{{cycle}}").when(settingService).get(projectId, Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH);
-        doReturn(null).when(cycleDefinitionRepository).findByProjectIdAndBranchAndName(projectId, branch, cycle);
+        doReturn(Optional.empty()).when(cycleDefinitionRepository).findByProjectIdAndBranchAndName(projectId, branch, cycle);
         // When
         assertThrows(IllegalArgumentException.class, () -> cut.uploadExecutionReport(projectId, projectCode, branch, cycle, zip));
     }

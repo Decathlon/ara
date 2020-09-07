@@ -22,7 +22,9 @@ import com.decathlon.ara.ci.bean.CycleDef;
 import com.decathlon.ara.ci.bean.PlatformRule;
 import com.decathlon.ara.ci.bean.QualityThreshold;
 import com.decathlon.ara.common.NotGonnaHappenException;
+import com.decathlon.ara.domain.CycleDefinition;
 import com.decathlon.ara.domain.enumeration.Result;
+import com.decathlon.ara.repository.CycleDefinitionRepository;
 import com.decathlon.ara.service.ExecutionService;
 import com.decathlon.ara.service.SettingService;
 import com.decathlon.ara.service.dto.cycledefinition.CycleDefinitionDTO;
@@ -97,6 +99,9 @@ public class DemoExecutionLoader {
 
     @NonNull
     private final ObjectMapper objectMapper;
+
+    @NonNull
+    private final CycleDefinitionRepository cycleDefinitionRepository;
 
     private final AtomicInteger nextJobId = new AtomicInteger(42);
 
@@ -213,7 +218,9 @@ public class DemoExecutionLoader {
 
             // The execution is ready to be indexed by ExecutionDiscovererService
             this.entityManager.flush();
-            this.executionService.uploadSpecificDirectory(projectId, branch, cycle, executionDirectory);
+            CycleDefinition cycleDefinition = cycleDefinitionRepository.findByProjectIdAndBranchAndName(projectId, branch, cycle)
+                    .orElseThrow(() -> new IllegalArgumentException("The branch or cycle for this project doesn't exists."));
+            this.executionService.processSpecificDirectory(cycleDefinition, executionDirectory);
             // ^ Deletion of executionDirectory is made by this call
         } catch (IOException e) {
             log.error("Cannot import executions: " + e.getMessage(), e);

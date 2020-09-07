@@ -14,6 +14,9 @@ Given('executions and errors', () => {
   cy.fixture('executions_latest.json').as('executionsLatest');
   cy.route('GET', '/api/projects/the-demo-project/executions/latest', '@executionsLatest');
 
+  cy.fixture('executions_history.json').as('executionsHistory');
+  cy.route('GET', '/api/projects/the-demo-project/executions/4/history', '@executionsHistory');
+
   cy.visit(executions.url);
 });
 
@@ -24,6 +27,10 @@ When('on the executions and errors page, in the cart {string}, the user clicks o
   executions.getRun(runId, executionId).click();
 });
 
+When('on the executions and errors page, in the cart {string}, the user clicks on the {string} execution button', (executionId, navigation) => {
+  
+  executions.getNavigationButton(executionId, navigation).click();
+});
 
 Then('on the executions and errors page, in the actions and job reports list, the {string} button {string} is visible', (label, executionId) => {
   executions.getButton(label, executionId).should('be.visible');
@@ -69,27 +76,9 @@ Then('on the executions and errors page, in the cart {string}, on the header, in
   });
 });
 
-Then('on the executions and errors page, in the cart {string}, on the run {string} and the team {string}, in the column {string}, the number of ok is {string}, the number of problem is {string}, the number of ko is {string}, the progress bar is {int}% of success, {int}% of unhandled and {int}% of failed', (executionId, runId, teamId, qualityId, okValue, pbValue, koValue, greenValue, orangeValue, redValue) => {
-  executions.getCartRowSubTitle(runId, teamId, executionId).find('.textPassed').then(($textPassed) => {
-    if (okValue != 0){
-      expect($textPassed.text()).to.equal(okValue);
-    } else {
-      expect($textPassed).to.be.not.visible;
-    }
-  });
-  executions.getCartRowSubTitle(runId, teamId, executionId).find('.textFailed').then(($textFailed) => {
-    if (koValue != 0){
-      expect($textFailed.text()).to.equal(koValue);
-    } else {
-      expect($textFailed).to.be.not.visible;
-    }
-  });
-  executions.getCartRowSubTitle(runId, teamId, executionId).find('.textProblem').then(($textProblem) => {
-    if (pbValue != 0){
-      expect($textProblem.text()).to.equal(pbValue);
-    } else {
-      expect($textProblem).to.be.not.visible;
-    }
+Then('on the executions and errors page, in the cart {string}, on the run {string}, in the column {string}, for the team {string}, the progress bar is {int}% of success, {int}% of unhandled and {int}% of failed', (executionId, runId, qualityId, teamId, greenValue, orangeValue, redValue) => {
+  executions.getCartRowTeam(qualityId, runId, teamId, executionId).find('.progressBar').then(($progressBar) => {
+    commun.testProgressBar($progressBar, greenValue);
   });
 });
 
@@ -117,12 +106,32 @@ Then('on the executions and errors page, in the cart {string}, on the run {strin
     cartRowHeaderFailed.find('.textProblem').should('have.length', 0)
   } 
 
-/*
   executions.getCartRowHeader(qualityId, runId, executionId).find('.progressBar').then(($progressBar) => {
-    cy.log($progressBar.find('>div'));
-    const size = $progressBar.find('>div').eq(0);
-    expect($progressBar.find('>div').eq(0).length()).to.have.css('width', size);
-  });*/
- // executions.getCartRowHeader(qualityId, runId, executionId).find('.progressBar').children().to.have.css('background-color', 100);
-  
+    commun.testProgressBar($progressBar, greenValue);
+  });
+ 
 });
+
+Then('on the executions and errors page, in the cart {string}, the version is {string} and the build date is {string}', (executionId, version, buildDate) => {
+  executions.getVersion(executionId).then(($version) => {
+    expect($version.text()).to.equal(version + ' ' + buildDate);
+  });
+});
+
+Then('on the executions and errors page, in the cart {string}, the test date is {string}', (executionId, testDate) => {
+  executions.getTestDate(executionId).then(($testDate) => {
+    expect($testDate.text()).to.equal(testDate);
+  });
+
+ 
+});
+
+
+Then('on the executions and errors page, in the cart {string}, the {string} execution button is clickable', (executionId, navigation) => {
+  executions.getNavigationButton(executionId, navigation).should('be.not.disabled');
+});
+
+Then('on the executions and errors page, in the cart {string}, the {string} execution button is not clickable', (executionId, navigation) => {
+  executions.getNavigationButton(executionId, navigation).should('be.disabled');
+});
+

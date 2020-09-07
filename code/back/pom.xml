@@ -29,7 +29,7 @@
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-parent</artifactId>
     <packaging>pom</packaging>
-    <version>6.0.0</version>
+    <version>6.1.0</version>
 
     <name>ARA Parent</name>
     <description>
