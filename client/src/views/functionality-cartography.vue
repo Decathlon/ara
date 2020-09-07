@@ -640,17 +640,17 @@
 
       flattenMatchingFunctionalities () {
         this.flattenedMatchingFunctionalities = []
-        this.flattenMatchingnodes(this.functionalities, this.flattenedMatchingFunctionalities)
+        this.flattenMatchingNodes(this.functionalities, this.flattenedMatchingFunctionalities)
       },
 
-      flattenMatchingnodes (nodes, flattenedNodes) {
+      flattenMatchingNodes (nodes, flattenedNodes) {
         for (let i in nodes) {
           let node = nodes[i]
           if (node.matches || node.hasMatchingChildren) {
             this.flattenedMatchingFunctionalities.push(node)
           }
           if (node.expanded && node.children && node.hasMatchingChildren) {
-            this.flattenMatchingnodes(node.children)
+            this.flattenMatchingNodes(node.children)
           }
         }
       },
