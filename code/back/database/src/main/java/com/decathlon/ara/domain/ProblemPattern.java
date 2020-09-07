@@ -37,14 +37,14 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.experimental.Wither;
+import lombok.With;
 import org.hibernate.annotations.GenericGenerator;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Wither
+@With
 // Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
 @EqualsAndHashCode(of = { "problemId", "featureFile", "featureName", "scenarioName", "scenarioNameStartsWith", "step",
         "stepStartsWith", "stepDefinition", "stepDefinitionStartsWith", "exception", "release", "country", "type",

@@ -1,20 +1,26 @@
 package com.decathlon.ara.scenario.common.upload;
 
-import com.decathlon.ara.domain.Scenario;
-import com.decathlon.ara.repository.*;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import javax.persistence.EntityManager;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import javax.persistence.EntityManager;
 
-@RunWith(MockitoJUnitRunner.class)
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.decathlon.ara.domain.Scenario;
+import com.decathlon.ara.repository.CountryRepository;
+import com.decathlon.ara.repository.FunctionalityRepository;
+import com.decathlon.ara.repository.ScenarioRepository;
+import com.decathlon.ara.repository.SeverityRepository;
+import com.decathlon.ara.repository.SourceRepository;
+
+@ExtendWith(MockitoExtension.class)
 public class ScenarioUploaderTest {
 
     @Mock

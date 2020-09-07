@@ -17,6 +17,33 @@
 
 package com.decathlon.ara.ci.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+
 import com.decathlon.ara.ci.bean.QualityThreshold;
 import com.decathlon.ara.domain.Country;
 import com.decathlon.ara.domain.CycleDefinition;
@@ -35,29 +62,8 @@ import com.decathlon.ara.service.mapper.SeverityMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class QualityServiceTest {
 
     private static final long PROJECT_ID = 1;
@@ -139,6 +145,7 @@ public class QualityServiceTest {
     }
 
     @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
     public void computeQuality_should_set_the_quality_fields() throws IOException {
         // GIVEN
         Execution execution = new Execution()
@@ -166,7 +173,7 @@ public class QualityServiceTest {
         when(objectMapper.writeValueAsString(qualitySeverityListArgument.capture())).thenReturn("result");
 
         SeverityDTO severityAllDto = new SeverityDTO();
-        when(severityMapper.toDto(Severity.ALL)).thenReturn(severityAllDto);
+        doReturn(severityAllDto).when(severityMapper).toDto(Severity.ALL);
 
         // WHEN
         cut.computeQuality(execution);
@@ -319,7 +326,7 @@ public class QualityServiceTest {
         assertThat(activeSeverities.stream().map(Severity::getCode)).containsExactly("2", "3");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void getActiveSeverities_should_throw_IllegalArgumentException_on_unknown_severity() {
         // GIVEN
         Execution execution = new Execution()
@@ -331,7 +338,7 @@ public class QualityServiceTest {
         when(severityRepository.findAllByProjectIdOrderByPosition(PROJECT_ID)).thenReturn(Collections.emptyList());
 
         // WHEN
-        cut.getActiveSeverities(execution);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> cut.getActiveSeverities(execution));
     }
 
     @Test
@@ -340,7 +347,7 @@ public class QualityServiceTest {
         Execution execution = new Execution();
         Severity someSeverity = Severity.ALL;
         SeverityDTO someSeverityDto = new SeverityDTO();
-        when(severityMapper.toDto(someSeverity)).thenReturn(someSeverityDto);
+        doReturn(someSeverityDto).when(severityMapper).toDto(someSeverity);
 
         // WHEN
         QualitySeverityDTO quality = cut.computeQualityOfSeverity(execution, someSeverity, null);

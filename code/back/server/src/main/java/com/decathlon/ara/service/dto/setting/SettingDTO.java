@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -30,7 +30,7 @@ import java.util.function.Function;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Wither
+@With
 public class SettingDTO {
 
     /**

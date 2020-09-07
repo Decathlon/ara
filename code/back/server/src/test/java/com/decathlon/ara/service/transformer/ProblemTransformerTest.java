@@ -17,6 +17,20 @@
 
 package com.decathlon.ara.service.transformer;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.assertj.core.api.Assertions;
+import org.assertj.core.util.Lists;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.decathlon.ara.domain.Problem;
 import com.decathlon.ara.domain.RootCause;
 import com.decathlon.ara.domain.Team;
@@ -26,20 +40,8 @@ import com.decathlon.ara.domain.enumeration.ProblemStatus;
 import com.decathlon.ara.service.dto.problem.ProblemDTO;
 import com.decathlon.ara.service.dto.rootcause.RootCauseDTO;
 import com.decathlon.ara.service.dto.team.TeamDTO;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.util.Lists;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ProblemTransformerTest {
 
     @Mock

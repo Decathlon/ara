@@ -17,24 +17,31 @@
 
 package com.decathlon.ara.service;
 
+import static org.junit.Assert.assertThrows;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+
 import com.decathlon.ara.features.FeatureActivator;
 import com.decathlon.ara.features.FeatureCollection;
 import com.decathlon.ara.features.IFeature;
 import com.decathlon.ara.service.dto.feature.DetailledFeatureDTO;
 import com.decathlon.ara.service.dto.feature.FeatureDTO;
 import com.decathlon.ara.service.exception.NotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class FeatureServiceTest {
 
     @Mock
@@ -89,13 +96,13 @@ public class FeatureServiceTest {
                 wantedFeatureName, wantedFeatureDesc));
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void find_should_throw_not_found_if_code_doesnt_exists() throws NotFoundException {
         // Given
         String wantedFeatureCode = "not-existing";
         Mockito.doReturn(Optional.empty()).when(featureCollectionMock).get(wantedFeatureCode);
         // When
-        cut.find(wantedFeatureCode);
+        assertThrows(NotFoundException.class, () -> cut.find(wantedFeatureCode));
         // Then
         // Test in annotation.
     }
@@ -174,7 +181,7 @@ public class FeatureServiceTest {
         Mockito.verify(featureActivatorMock).changeStateOf(feature2Code, true);
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void update_should_send_NotFound_if_one_not_exists() throws NotFoundException {
         // Given
         List<FeatureDTO> wantedUpdates = new ArrayList<>();
@@ -189,7 +196,7 @@ public class FeatureServiceTest {
         Mockito.doReturn(Optional.empty()).when(featureCollectionMock).get(feature3Code);
 
         // When
-        cut.update(wantedUpdates);
+        assertThrows(NotFoundException.class, () -> cut.update(wantedUpdates));
     }
 
     @Test
@@ -246,7 +253,7 @@ public class FeatureServiceTest {
         Mockito.verify(featureActivatorMock).changeStateOf(feature2Code, true);
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void reset_should_send_NotFound_if_one_not_exists() throws NotFoundException {
         // Given
         List<String> wantedReset = new ArrayList<>();
@@ -261,7 +268,7 @@ public class FeatureServiceTest {
         Mockito.doReturn(Optional.empty()).when(featureCollectionMock).get(feature3Code);
 
         // When
-        cut.reset(wantedReset);
+        assertThrows(NotFoundException.class, () -> cut.reset(wantedReset));
     }
 
     @Test

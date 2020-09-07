@@ -23,7 +23,7 @@ import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import static com.decathlon.ara.service.support.DtoConstants.CODE_MESSAGE;
 import static com.decathlon.ara.service.support.DtoConstants.CODE_PATTERN;
@@ -31,7 +31,7 @@ import static com.decathlon.ara.service.support.DtoConstants.CODE_PATTERN;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Wither
+@With
 public class SeverityDTO {
 
     @NotNull(message = "The code is required.")

@@ -17,17 +17,20 @@
 
 package com.decathlon.ara.features;
 
+import static org.junit.Assert.assertThrows;
+
 import java.util.Map;
+
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.env.Environment;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FeatureActivatorTest {
 
     @Mock
@@ -41,7 +44,7 @@ public class FeatureActivatorTest {
 
     private FeatureActivator cut;
 
-    @Before
+    @BeforeEach
     public void setup() {
         this.cut = new FeatureActivator(environment, currentStateMock, defaultStatesMock);
     }
@@ -65,13 +68,13 @@ public class FeatureActivatorTest {
         Assertions.assertThat(stateFeature2).isTrue();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void getState_should_throw_exception_if_not_found() {
         // Given
         String feature1 = "feature-1";
         Mockito.doReturn(false).when(currentStateMock).containsKey(feature1);
         // When
-        cut.getState("feature-1");
+        assertThrows(IllegalArgumentException.class,() -> cut.getState("feature-1"));
         // Then
         // Assertions made in the annotation.
     }
@@ -128,13 +131,13 @@ public class FeatureActivatorTest {
         Assertions.assertThat(stateFeature2).isTrue();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void isEnabledByDefault_should_throw_exception_if_not_found() {
         // Given
         String feature1 = "feature-7";
         Mockito.doReturn(false).when(defaultStatesMock).containsKey(feature1);
         // When
-        cut.isEnabledByDefault("feature-7");
+        assertThrows(IllegalArgumentException.class, () -> cut.isEnabledByDefault("feature-7"));
         // Then
         // Assertions made in the annotation.
     }

@@ -17,30 +17,43 @@
 
 package com.decathlon.ara.dbunit;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.sql.SQLException;
+
+import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
+
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.database.DatabaseConnection;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.database.QueryDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSet;
 import org.hibernate.Session;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
-import javax.persistence.EntityManager;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.sql.SQLException;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
 
 /**
  * The class name does not start nor end with "Test" because it's not supposed to be run during build. This class is to be run on a development
  * machine to generate a new DbUnit XML data-source to feed to other integration tests.
  */
-@RunWith(SpringRunner.class)
-@Ignore//@TransactionalSpringIntegrationTest
+@SpringBootTest
+@TestExecutionListeners({
+    TransactionalTestExecutionListener.class,
+    DependencyInjectionTestExecutionListener.class,
+    DbUnitTestExecutionListener.class
+})
+@TestPropertySource(
+		locations = "classpath:application-db-h2.properties")
+@Transactional
 public class DbUnitExporter {
 
     private static final String XML_PATH = "src/test/resources/dbunit/freshly-created-dataset-to-rename.xml";

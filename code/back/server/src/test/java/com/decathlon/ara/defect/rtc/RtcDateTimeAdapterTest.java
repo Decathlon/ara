@@ -17,11 +17,12 @@
 
 package com.decathlon.ara.defect.rtc;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.text.ParseException;
 import java.util.Date;
-import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 public class RtcDateTimeAdapterTest {
 

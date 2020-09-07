@@ -19,7 +19,7 @@ package com.decathlon.ara.domain;
 
 import com.querydsl.core.annotations.QueryInit;
 import lombok.*;
-import lombok.experimental.Wither;
+import lombok.With;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
@@ -34,7 +34,7 @@ import static java.util.Comparator.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Wither
+@With
 @Entity
 // Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
 @EqualsAndHashCode(of = { "executedScenarioId", "stepLine" })

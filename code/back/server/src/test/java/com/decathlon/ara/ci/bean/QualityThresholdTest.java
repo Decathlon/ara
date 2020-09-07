@@ -17,10 +17,11 @@
 
 package com.decathlon.ara.ci.bean;
 
-import com.decathlon.ara.domain.enumeration.QualityStatus;
-import org.junit.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
+
+import com.decathlon.ara.domain.enumeration.QualityStatus;
 
 public class QualityThresholdTest {
 

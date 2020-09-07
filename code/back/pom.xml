@@ -29,11 +29,7 @@
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-parent</artifactId>
     <packaging>pom</packaging>
-    <version>6.0.0-SNAPSHOT</version>
-
-    <properties>
-        <java.version>11</java.version>
-    </properties>
+    <version>6.0.0</version>
 
     <name>ARA Parent</name>
     <description>
@@ -48,40 +44,8 @@
         <module>server</module>
     </modules>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>2.3.3.RELEASE</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
-    <repositories>
-        <repository>
-            <id>oss-sonatype</id>
-            <name>oss-sonatype</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <release>${java.version}</release>
-                </configuration>
-            </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
@@ -91,7 +55,6 @@
                 </configuration>
             </plugin>
         </plugins>
-
     </build>
 
      <scm>
@@ -115,7 +78,6 @@
     </issueManagement>
 
     <developers>
-
         <developer>
             <url>https://github.com/dktsni</url>
             <id>dktsni</id>
@@ -126,7 +88,6 @@
                 <picUrl>https://avatars2.githubusercontent.com/u/45944760?s=100</picUrl>
             </properties>
         </developer>
-
         <developer>
             <url>https://github.com/omar-chahbouni-decathlon</url>
             <id>omar-chahbouni-decathlon</id>
@@ -137,7 +98,6 @@
                 <picUrl>https://avatars1.githubusercontent.com/u/47318765?s=100</picUrl>
             </properties>
         </developer>
-
         <developer>
             <url>https://github.com/thomasgruson</url>
             <id>thomasgruson</id>
@@ -148,7 +108,6 @@
                 <picUrl>https://avatars2.githubusercontent.com/u/47111054?s=100</picUrl>
             </properties>
         </developer>
-
     </developers>
 
     <reporting>
@@ -198,38 +157,4 @@
 
         </plugins>
     </reporting>
-
-    <profiles>
-        <profile>
-            <id>dev</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <liquibase.database.url>
-                    jdbc:mysql://localhost:3306/ara-dev?useUnicode=yes&amp;characterEncoding=UTF-8
-                </liquibase.database.url>
-                <liquibase.database.username>root</liquibase.database.username>
-                <skipPitest>true</skipPitest>
-                <skip.integration.tests>true</skip.integration.tests>
-                <spring.profiles.active>dev</spring.profiles.active>
-            </properties>
-        </profile>
-
-        <profile>
-            <id>in</id>
-            <properties>
-                <spring.profiles.active>in</spring.profiles.active>
-            </properties>
-        </profile>
-        <profile>
-            <id>prod</id>
-            <properties>
-                <spring.profiles.active>prod</spring.profiles.active>
-            </properties>
-            <!-- This production profile is too sensitive for it to be configured here. -->
-            <!-- We would risk someone inadvertently running tests on it and/or corrupting data. -->
-            <!-- The production profile properties are set as system properties provided by the continuous integration job. -->
-        </profile>
-    </profiles>
 </project>

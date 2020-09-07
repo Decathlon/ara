@@ -17,10 +17,11 @@
 
 package com.decathlon.ara.ci.service;
 
-import java.util.Date;
-import org.junit.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Date;
+
+import org.junit.jupiter.api.Test;
 
 public class DateServiceTest {
 

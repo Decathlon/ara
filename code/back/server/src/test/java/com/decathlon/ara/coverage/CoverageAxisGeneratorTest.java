@@ -17,21 +17,23 @@
 
 package com.decathlon.ara.coverage;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.decathlon.ara.domain.Functionality;
 import com.decathlon.ara.domain.Scenario;
 import com.decathlon.ara.domain.enumeration.CoverageLevel;
 import com.decathlon.ara.service.dto.coverage.AxisPointDTO;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CoverageAxisGeneratorTest {
 
     private static final int ANY_PROJECT_ID = -42;

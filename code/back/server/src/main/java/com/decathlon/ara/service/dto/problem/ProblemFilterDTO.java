@@ -23,7 +23,7 @@ import com.decathlon.ara.domain.filter.ProblemFilter;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.With;
 
 /**
  * Input of the problem filtering API.<br>
@@ -32,7 +32,7 @@ import lombok.experimental.Wither;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Wither
+@With
 public class ProblemFilterDTO {
 
     private String name;

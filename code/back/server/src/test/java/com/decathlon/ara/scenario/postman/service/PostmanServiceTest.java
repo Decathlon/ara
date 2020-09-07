@@ -17,10 +17,51 @@
 
 package com.decathlon.ara.scenario.postman.service;
 
+import static com.decathlon.ara.util.TestUtil.get;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.AdditionalMatchers;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+
 import com.decathlon.ara.domain.Error;
 import com.decathlon.ara.domain.ExecutedScenario;
 import com.decathlon.ara.domain.Run;
 import com.decathlon.ara.domain.Type;
+import com.decathlon.ara.scenario.cucumber.asset.AssetService;
 import com.decathlon.ara.scenario.postman.bean.Assertion;
 import com.decathlon.ara.scenario.postman.bean.Body;
 import com.decathlon.ara.scenario.postman.bean.Collection;
@@ -37,48 +78,12 @@ import com.decathlon.ara.scenario.postman.bean.Stream;
 import com.decathlon.ara.scenario.postman.bean.Url;
 import com.decathlon.ara.scenario.postman.model.NewmanParsingResult;
 import com.decathlon.ara.scenario.postman.model.NewmanScenario;
-import com.decathlon.ara.scenario.cucumber.asset.AssetService;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.TimeZone;
-import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.commons.io.FileUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.AdditionalMatchers;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
 
-import static com.decathlon.ara.util.TestUtil.get;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PostmanServiceTest {
 
     private static final String NEW_LINE = System.getProperty("line.separator");
@@ -99,23 +104,23 @@ public class PostmanServiceTest {
     @InjectMocks
     private PostmanService cut;
 
-    @Test(expected = IOException.class)
+    @Test
     public void parse_should_throw_exception_when_malformed_json() throws IOException {
         // GIVEN
         when(Boolean.valueOf(jsonParser.isClosed())).thenReturn(Boolean.FALSE);
         when(jsonParser.nextToken()).thenReturn(JsonToken.START_ARRAY);
 
         // WHEN
-        cut.parse(jsonParser, null);
+        assertThrows(IOException.class, () -> cut.parse(jsonParser, null));
     }
 
-    @Test(expected = IOException.class)
+    @Test
     public void parse_should_throw_exception_when_closed_stream() throws IOException {
         // GIVEN
         when(Boolean.valueOf(jsonParser.isClosed())).thenReturn(Boolean.TRUE);
 
         // WHEN
-        cut.parse(jsonParser, null);
+        assertThrows(IOException.class, () -> cut.parse(jsonParser, null));
     }
 
     @Test
@@ -532,6 +537,7 @@ public class PostmanServiceTest {
     }
 
     @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
     public void buildScenarioContents_should_build_the_scenario_content() {
         // GIVEN
         final NewmanScenario newmanScenario = new NewmanScenario()

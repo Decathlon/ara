@@ -17,13 +17,15 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.domain.enumeration.FunctionalityType;
-import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
+import org.junit.jupiter.api.Disabled;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-@RunWith(Suite.class)
+import com.decathlon.ara.domain.enumeration.FunctionalityType;
+import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
 
+@Disabled
+@RunWith(Suite.class)
 @Suite.SuiteClasses({
         FunctionalityResourceCreateIT.class,
         FunctionalityResourceDeleteIT.class,

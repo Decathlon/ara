@@ -17,16 +17,17 @@
 
 package com.decathlon.ara.service.transformer;
 
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.decathlon.ara.domain.Source;
 import com.decathlon.ara.domain.enumeration.Technology;
 import com.decathlon.ara.service.dto.source.SourceDTO;
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SourceTransformerTest {
 
     @InjectMocks

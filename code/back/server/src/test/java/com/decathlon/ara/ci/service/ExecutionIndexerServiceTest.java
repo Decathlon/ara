@@ -17,21 +17,15 @@
 
 package com.decathlon.ara.ci.service;
 
-import com.decathlon.ara.ci.bean.PlannedIndexation;
-import com.decathlon.ara.domain.Error;
-import com.decathlon.ara.domain.*;
-import com.decathlon.ara.domain.enumeration.JobStatus;
-import com.decathlon.ara.repository.ErrorRepository;
-import com.decathlon.ara.repository.ExecutionRepository;
-import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
-import com.decathlon.ara.service.ExecutionFilesProcessorService;
-import com.decathlon.ara.service.ProblemDenormalizationService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.util.Arrays;
@@ -39,10 +33,28 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+import com.decathlon.ara.ci.bean.PlannedIndexation;
+import com.decathlon.ara.domain.CycleDefinition;
+import com.decathlon.ara.domain.Error;
+import com.decathlon.ara.domain.ExecutedScenario;
+import com.decathlon.ara.domain.Execution;
+import com.decathlon.ara.domain.Problem;
+import com.decathlon.ara.domain.Run;
+import com.decathlon.ara.domain.enumeration.JobStatus;
+import com.decathlon.ara.repository.ErrorRepository;
+import com.decathlon.ara.repository.ExecutionRepository;
+import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
+import com.decathlon.ara.service.ExecutionFilesProcessorService;
+import com.decathlon.ara.service.ProblemDenormalizationService;
+
+@ExtendWith(MockitoExtension.class)
 public class ExecutionIndexerServiceTest {
 
     @Mock

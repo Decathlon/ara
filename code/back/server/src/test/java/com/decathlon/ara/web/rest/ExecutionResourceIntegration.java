@@ -17,25 +17,8 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.domain.Error;
-import com.decathlon.ara.domain.*;
-import com.decathlon.ara.domain.enumeration.*;
-import com.decathlon.ara.repository.*;
-import com.decathlon.ara.scenario.cucumber.settings.CucumberSettings;
-import com.decathlon.ara.scenario.postman.settings.PostmanSettings;
-import com.decathlon.ara.service.SettingService;
-import com.decathlon.ara.service.support.Settings;
-import com.decathlon.ara.util.TransactionalSpringIntegrationTest;
-import org.apache.commons.io.IOUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.FileSystemUtils;
-import org.springframework.web.multipart.MultipartFile;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,17 +28,70 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
+import javax.transaction.Transactional;
 
+import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+import org.springframework.util.FileSystemUtils;
+import org.springframework.web.multipart.MultipartFile;
 
-@RunWith(SpringRunner.class)
+import com.decathlon.ara.domain.Country;
+import com.decathlon.ara.domain.CountryDeployment;
+import com.decathlon.ara.domain.CycleDefinition;
+import com.decathlon.ara.domain.Error;
+import com.decathlon.ara.domain.ExecutedScenario;
+import com.decathlon.ara.domain.Execution;
+import com.decathlon.ara.domain.ExecutionCompletionRequest;
+import com.decathlon.ara.domain.Run;
+import com.decathlon.ara.domain.Setting;
+import com.decathlon.ara.domain.TechnologySetting;
+import com.decathlon.ara.domain.Type;
+import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
+import com.decathlon.ara.domain.enumeration.JobStatus;
+import com.decathlon.ara.domain.enumeration.QualityStatus;
+import com.decathlon.ara.domain.enumeration.Result;
+import com.decathlon.ara.domain.enumeration.Technology;
+import com.decathlon.ara.repository.CountryDeploymentRepository;
+import com.decathlon.ara.repository.ErrorRepository;
+import com.decathlon.ara.repository.ExecutedScenarioRepository;
+import com.decathlon.ara.repository.ExecutionCompletionRequestRepository;
+import com.decathlon.ara.repository.ExecutionRepository;
+import com.decathlon.ara.repository.RunRepository;
+import com.decathlon.ara.repository.SettingRepository;
+import com.decathlon.ara.repository.TechnologySettingRepository;
+import com.decathlon.ara.scenario.cucumber.settings.CucumberSettings;
+import com.decathlon.ara.scenario.postman.settings.PostmanSettings;
+import com.decathlon.ara.service.SettingService;
+import com.decathlon.ara.service.support.Settings;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+
+@Disabled
 @SpringBootTest
-@TransactionalSpringIntegrationTest
-@ActiveProfiles("test")
+@TestExecutionListeners({
+    TransactionalTestExecutionListener.class,
+    DependencyInjectionTestExecutionListener.class,
+    DbUnitTestExecutionListener.class
+})
+@TestPropertySource(
+		locations = "classpath:application-db-h2.properties")
+@Transactional
 public class ExecutionResourceIntegration {
 
     @Autowired

@@ -17,6 +17,23 @@
 
 package com.decathlon.ara.scenario.cucumber.service;
 
+import static com.decathlon.ara.util.TestUtil.get;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import org.assertj.core.api.AutoCloseableSoftAssertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.decathlon.ara.domain.Error;
 import com.decathlon.ara.domain.ExecutedScenario;
 import com.decathlon.ara.scenario.cucumber.asset.AssetService;
@@ -24,24 +41,8 @@ import com.decathlon.ara.scenario.cucumber.bean.Feature;
 import com.decathlon.ara.scenario.cucumber.util.CucumberReportUtil;
 import com.decathlon.ara.scenario.cucumber.util.StepDefinitionUtil;
 import com.decathlon.ara.util.TestUtil;
-import org.assertj.core.api.AutoCloseableSoftAssertions;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
-import static com.decathlon.ara.util.TestUtil.get;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ExecutedScenarioExtractorServiceTest {
 
     private static final String STEP_DEF_ERROR = "^A step number (\\d+) that fails with error \"([^\"]*)\"$";

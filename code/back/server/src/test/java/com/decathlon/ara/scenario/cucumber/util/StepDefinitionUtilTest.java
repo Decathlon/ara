@@ -17,10 +17,11 @@
 
 package com.decathlon.ara.scenario.cucumber.util;
 
-import com.decathlon.ara.scenario.cucumber.bean.Argument;
-import org.junit.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
+
+import com.decathlon.ara.scenario.cucumber.bean.Argument;
 
 @SuppressWarnings("static-method")
 public class StepDefinitionUtilTest {

@@ -23,6 +23,7 @@ import com.decathlon.ara.domain.ProblemPattern;
 import com.decathlon.ara.service.dto.error.ErrorWithProblemsDTO;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +61,7 @@ public class ErrorTransformer {
 
             List<Problem> problems = error.getProblemPatterns().stream()
                     .map(ProblemPattern::getProblem)
-                    .sorted()
+                    .sorted(Comparator.nullsLast(Problem::compareTo))
                     .distinct()
                     .collect(Collectors.toList());
             result.setProblems(problemTransformer.toDtos(problems));

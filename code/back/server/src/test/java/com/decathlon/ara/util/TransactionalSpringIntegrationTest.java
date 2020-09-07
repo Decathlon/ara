@@ -17,13 +17,14 @@
 
 package com.decathlon.ara.util;
 
-import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
 import javax.transaction.Transactional;
+
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener;
 import org.springframework.test.annotation.DirtiesContext;
@@ -32,6 +33,8 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
 
 /**
  * <p>Annotation to use alongside {@code @RunWith(SpringRunner.class)} (this one cannot be inherited and has to be

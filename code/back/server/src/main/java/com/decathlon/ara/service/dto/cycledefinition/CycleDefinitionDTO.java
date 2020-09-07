@@ -23,13 +23,13 @@ import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import static com.decathlon.ara.service.support.DtoConstants.CODE_NAME_MESSAGE;
 import static com.decathlon.ara.service.support.DtoConstants.CODE_PATTERN;
 
 @Data
-@Wither
+@With
 @NoArgsConstructor
 @AllArgsConstructor
 public class CycleDefinitionDTO {

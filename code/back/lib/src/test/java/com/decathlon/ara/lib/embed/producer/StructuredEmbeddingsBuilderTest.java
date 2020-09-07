@@ -18,7 +18,8 @@
 package com.decathlon.ara.lib.embed.producer;
 
 import com.decathlon.ara.lib.embed.producer.type.TextEmbedding;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

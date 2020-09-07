@@ -21,10 +21,10 @@ import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.With;
 
 @Data
-@Wither
+@With
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExecutionStabilityDTO {

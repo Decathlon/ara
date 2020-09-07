@@ -17,18 +17,20 @@
 
 package com.decathlon.ara.scenario.cucumber.util;
 
+import static com.decathlon.ara.util.TestUtil.longs;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+
 import com.decathlon.ara.domain.Functionality;
 import com.decathlon.ara.domain.Scenario;
 import com.decathlon.ara.domain.Source;
 import com.decathlon.ara.scenario.cucumber.bean.Feature;
 import com.decathlon.ara.util.TestUtil;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import org.junit.Test;
-
-import static com.decathlon.ara.util.TestUtil.longs;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("static-method")
 public class ScenarioExtractorUtilTest {

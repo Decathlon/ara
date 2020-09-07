@@ -20,14 +20,14 @@ package com.decathlon.ara.service.dto.setting;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Wither
+@With
 public class SettingGroupDTO {
 
     /**

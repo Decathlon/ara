@@ -17,36 +17,18 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.ci.util.FetchException;
-import com.decathlon.ara.defect.TestDefectAdapter;
-import com.decathlon.ara.defect.bean.Defect;
-import com.decathlon.ara.domain.enumeration.*;
-import com.decathlon.ara.service.dto.error.ErrorDTO;
-import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
-import com.decathlon.ara.service.dto.executedscenario.ExecutedScenarioWithRunAndExecutionDTO;
-import com.decathlon.ara.service.dto.execution.ExecutionDTO;
-import com.decathlon.ara.service.dto.problem.*;
-import com.decathlon.ara.service.dto.problempattern.ProblemPatternDTO;
-import com.decathlon.ara.service.dto.response.PickUpPatternDTO;
-import com.decathlon.ara.service.dto.rootcause.RootCauseDTO;
-import com.decathlon.ara.service.dto.run.RunWithExecutionDTO;
-import com.decathlon.ara.service.dto.stability.ExecutionStabilityDTO;
-import com.decathlon.ara.service.dto.team.TeamDTO;
-import com.decathlon.ara.util.TransactionalSpringIntegrationTest;
-import com.decathlon.ara.web.rest.util.HeaderUtil;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
+import static com.decathlon.ara.util.TestUtil.NONEXISTENT;
+import static com.decathlon.ara.util.TestUtil.firstPageOf10;
+import static com.decathlon.ara.util.TestUtil.header;
+import static com.decathlon.ara.util.TestUtil.longs;
+import static com.decathlon.ara.util.TestUtil.timestamp;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 
-import javax.persistence.EntityManager;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -54,15 +36,61 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.decathlon.ara.util.TestUtil.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
 
-@RunWith(SpringRunner.class)
-@Ignore
-@TransactionalSpringIntegrationTest
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+
+import com.decathlon.ara.ci.util.FetchException;
+import com.decathlon.ara.defect.TestDefectAdapter;
+import com.decathlon.ara.defect.bean.Defect;
+import com.decathlon.ara.domain.enumeration.DefectExistence;
+import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
+import com.decathlon.ara.domain.enumeration.JobStatus;
+import com.decathlon.ara.domain.enumeration.ProblemStatus;
+import com.decathlon.ara.domain.enumeration.ProblemStatusFilter;
+import com.decathlon.ara.service.dto.error.ErrorDTO;
+import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
+import com.decathlon.ara.service.dto.executedscenario.ExecutedScenarioWithRunAndExecutionDTO;
+import com.decathlon.ara.service.dto.execution.ExecutionDTO;
+import com.decathlon.ara.service.dto.problem.ProblemAggregateDTO;
+import com.decathlon.ara.service.dto.problem.ProblemDTO;
+import com.decathlon.ara.service.dto.problem.ProblemFilterDTO;
+import com.decathlon.ara.service.dto.problem.ProblemWithAggregateDTO;
+import com.decathlon.ara.service.dto.problem.ProblemWithPatternsAndAggregateTDO;
+import com.decathlon.ara.service.dto.problem.ProblemWithPatternsDTO;
+import com.decathlon.ara.service.dto.problempattern.ProblemPatternDTO;
+import com.decathlon.ara.service.dto.response.PickUpPatternDTO;
+import com.decathlon.ara.service.dto.rootcause.RootCauseDTO;
+import com.decathlon.ara.service.dto.run.RunWithExecutionDTO;
+import com.decathlon.ara.service.dto.stability.ExecutionStabilityDTO;
+import com.decathlon.ara.service.dto.team.TeamDTO;
+import com.decathlon.ara.web.rest.util.HeaderUtil;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseSetup;
+
+@Disabled
+@SpringBootTest
+@TestExecutionListeners({
+    TransactionalTestExecutionListener.class,
+    DependencyInjectionTestExecutionListener.class,
+    DbUnitTestExecutionListener.class
+})
+@TestPropertySource(
+		locations = "classpath:application-db-h2.properties")
+@Transactional
 @DatabaseSetup("/dbunit/full-small-fake-dataset.xml")
 @DatabaseSetup("/dbunit/full-small-fake-dataset-defect-settings.xml")
 public class ProblemResourceIT {
@@ -77,10 +105,6 @@ public class ProblemResourceIT {
 
     @Autowired
     private ProblemResource cut;
-
-    private static ProblemDTO openProblem() {
-        return new ProblemDTO().withStatus(ProblemStatus.OPEN);
-    }
 
     private static void assertProblem1003(ProblemDTO problem) {
         assertThat(problem.getId()).isEqualTo(1003);

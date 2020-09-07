@@ -19,10 +19,10 @@ package com.decathlon.ara.service.dto.support;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.experimental.Wither;
+import lombok.With;
 
 @Data
-@Wither
+@With
 @AllArgsConstructor
 public class UpsertResultDTO<T> {
 

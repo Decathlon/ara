@@ -163,14 +163,14 @@ The `result` field should reflect the state of your CI job for this build, if it
 (note that ARA can analyze results of NRT reports even on failed CI job, you can configure it in this way if
 you want).
 
-The `timestamp` is a UNIX timestamp since Epoch which represents the date & time when this current build job
+The `timestamp` is a UNIX timestamp since Epoch which represents the date and time when this current build job
 has started.
 
 The `release` field contains the current tested release version of your application.
 
 The  `version` field contains the current tested build version of your application.
 
-The `versionTimestamp` is a UNIX timestamp since Epoch which represents the date & time when this current
+The `versionTimestamp` is a UNIX timestamp since Epoch which represents the date and time when this current
 version was tagged.
 
 Note that the `release`, `version` and `versionTimestamp` fields are optional in the `buildInformation.json`

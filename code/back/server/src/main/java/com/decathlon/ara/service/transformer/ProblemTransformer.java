@@ -17,19 +17,16 @@
 
 package com.decathlon.ara.service.transformer;
 
-import com.decathlon.ara.SpringApplicationContext;
-import com.decathlon.ara.domain.Problem;
-import com.decathlon.ara.service.DefectService;
-import com.decathlon.ara.service.SettingService;
-import com.decathlon.ara.service.dto.problem.ProblemDTO;
-import com.decathlon.ara.service.support.Settings;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.decathlon.ara.domain.Problem;
+import com.decathlon.ara.service.dto.problem.ProblemDTO;
 
 /**
  * This service provide transformation utilities (DTO - DO and DO - DTO) for the Problem.

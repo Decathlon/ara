@@ -17,27 +17,40 @@
 
 package com.decathlon.ara.web.rest;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.util.List;
+
+import javax.transaction.Transactional;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+
 import com.decathlon.ara.domain.Functionality;
 import com.decathlon.ara.domain.Scenario;
 import com.decathlon.ara.repository.FunctionalityRepository;
 import com.decathlon.ara.repository.ScenarioRepository;
 import com.decathlon.ara.util.TestUtil;
-import com.decathlon.ara.util.TransactionalSpringIntegrationTest;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.IOException;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-@RunWith(SpringRunner.class)
-@Ignore
-@TransactionalSpringIntegrationTest
+@Disabled
+@SpringBootTest
+@TestExecutionListeners({
+    TransactionalTestExecutionListener.class,
+    DependencyInjectionTestExecutionListener.class,
+    DbUnitTestExecutionListener.class
+})
+@TestPropertySource(
+		locations = "classpath:application-db-h2.properties")
+@Transactional
 @DatabaseSetup("/dbunit/functionality.xml")
 public class ScenarioResourceIT {
 

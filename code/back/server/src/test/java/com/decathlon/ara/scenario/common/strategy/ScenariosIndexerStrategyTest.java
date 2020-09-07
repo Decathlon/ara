@@ -17,22 +17,23 @@
 
 package com.decathlon.ara.scenario.common.strategy;
 
-import com.decathlon.ara.domain.enumeration.Technology;
-import com.decathlon.ara.scenario.cucumber.indexer.CucumberScenariosIndexer;
-import com.decathlon.ara.scenario.cypress.indexer.CypressScenariosIndexer;
-import com.decathlon.ara.scenario.postman.indexer.PostmanScenariosIndexer;
-import com.decathlon.ara.scenario.common.indexer.ScenariosIndexer;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+import com.decathlon.ara.domain.enumeration.Technology;
+import com.decathlon.ara.scenario.common.indexer.ScenariosIndexer;
+import com.decathlon.ara.scenario.cucumber.indexer.CucumberScenariosIndexer;
+import com.decathlon.ara.scenario.cypress.indexer.CypressScenariosIndexer;
+import com.decathlon.ara.scenario.postman.indexer.PostmanScenariosIndexer;
+
+@ExtendWith(MockitoExtension.class)
 public class ScenariosIndexerStrategyTest {
 
     @Mock

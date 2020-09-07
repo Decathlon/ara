@@ -17,24 +17,35 @@
 
 package com.decathlon.ara.repository.custom.impl;
 
-import com.decathlon.ara.domain.Problem;
-import com.decathlon.ara.repository.ProblemRepository;
-import com.decathlon.ara.util.TransactionalSpringIntegrationTest;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.List;
-
 import static com.decathlon.ara.util.TestUtil.longs;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
-@Ignore
-@TransactionalSpringIntegrationTest
+import java.util.List;
+
+import javax.transaction.Transactional;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+
+import com.decathlon.ara.domain.Problem;
+import com.decathlon.ara.repository.ProblemRepository;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseSetup;
+
+@SpringBootTest
+@TestExecutionListeners({
+    TransactionalTestExecutionListener.class,
+    DependencyInjectionTestExecutionListener.class,
+    DbUnitTestExecutionListener.class
+})
+@TestPropertySource(
+		locations = "classpath:application-db-h2.properties")
+@Transactional
 public class ProblemRepositoryIT {
 
     @Autowired

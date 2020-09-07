@@ -17,6 +17,31 @@
 
 package com.decathlon.ara.web.rest;
 
+import static com.decathlon.ara.util.TestUtil.NONEXISTENT;
+import static com.decathlon.ara.util.TestUtil.firstPageOf10;
+import static com.decathlon.ara.util.TestUtil.header;
+import static com.decathlon.ara.util.TestUtil.timestamp;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+
+import java.util.Calendar;
+import java.util.List;
+
+import javax.transaction.Transactional;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+
 import com.decathlon.ara.domain.ProblemPattern;
 import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
 import com.decathlon.ara.domain.enumeration.JobStatus;
@@ -31,29 +56,20 @@ import com.decathlon.ara.service.dto.response.DeletePatternDTO;
 import com.decathlon.ara.service.dto.run.RunWithExecutionDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.util.TransactionalSpringIntegrationTest;
 import com.decathlon.ara.web.rest.util.HeaderUtil;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Calendar;
-import java.util.List;
-
-import static com.decathlon.ara.util.TestUtil.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
-
-@RunWith(SpringRunner.class)
-@Ignore
-@TransactionalSpringIntegrationTest
+@Disabled
+@SpringBootTest
+@TestExecutionListeners({
+    TransactionalTestExecutionListener.class,
+    DependencyInjectionTestExecutionListener.class,
+    DbUnitTestExecutionListener.class
+})
+@TestPropertySource(
+		locations = "classpath:application-db-h2.properties")
+@Transactional
 public class ProblemPatternResourceIT {
 
     private static final String PROJECT_CODE = "p";

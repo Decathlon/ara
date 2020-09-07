@@ -22,10 +22,10 @@ import com.decathlon.ara.domain.enumeration.Result;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.With;
 
 @Data
-@Wither
+@With
 @NoArgsConstructor
 @AllArgsConstructor
 public class Build {
@@ -64,7 +64,7 @@ public class Build {
     private long duration;
 
     /**
-     * Number of UNIX milliseconds representing the date & time at which the job started (since Jan 01 1970 UTC/GMT+0).
+     * Number of UNIX milliseconds representing the date and time at which the job started (since Jan 01 1970 UTC/GMT+0).
      */
     private long timestamp;
 
@@ -89,7 +89,7 @@ public class Build {
 
     /**
      * Only for a build of an execution (not for a run or a countryDeployment): number of UNIX milliseconds representing
-     * the date & time at which the version having been tested by this execution build was created (compiled...).
+     * the date and time at which the version having been tested by this execution build was created (compiled...).
      */
     private Long versionTimestamp;
 

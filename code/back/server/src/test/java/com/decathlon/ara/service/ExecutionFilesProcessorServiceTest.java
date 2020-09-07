@@ -17,32 +17,59 @@
 
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.ci.bean.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.decathlon.ara.ci.bean.Build;
+import com.decathlon.ara.ci.bean.CycleDef;
+import com.decathlon.ara.ci.bean.PlannedIndexation;
+import com.decathlon.ara.ci.bean.PlatformRule;
+import com.decathlon.ara.ci.bean.QualityThreshold;
 import com.decathlon.ara.ci.service.QualityService;
 import com.decathlon.ara.ci.util.JsonParserConsumer;
-import com.decathlon.ara.domain.*;
-import com.decathlon.ara.domain.enumeration.*;
-import com.decathlon.ara.repository.*;
+import com.decathlon.ara.domain.Country;
+import com.decathlon.ara.domain.CycleDefinition;
+import com.decathlon.ara.domain.Execution;
+import com.decathlon.ara.domain.ExecutionCompletionRequest;
+import com.decathlon.ara.domain.Source;
+import com.decathlon.ara.domain.Type;
+import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
+import com.decathlon.ara.domain.enumeration.JobStatus;
+import com.decathlon.ara.domain.enumeration.QualityStatus;
+import com.decathlon.ara.domain.enumeration.Result;
+import com.decathlon.ara.domain.enumeration.Technology;
+import com.decathlon.ara.repository.CountryRepository;
+import com.decathlon.ara.repository.ExecutionCompletionRequestRepository;
+import com.decathlon.ara.repository.ExecutionRepository;
+import com.decathlon.ara.repository.ProjectRepository;
+import com.decathlon.ara.repository.TypeRepository;
 import com.decathlon.ara.scenario.common.strategy.ScenariosIndexerStrategy;
 import com.decathlon.ara.service.support.Settings;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ExecutionFilesProcessorServiceTest {
 
     private final static String BUILD_INFORMATION_FILE_NAME = "buildInformation.json";

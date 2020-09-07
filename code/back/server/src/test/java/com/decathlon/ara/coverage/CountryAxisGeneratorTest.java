@@ -17,21 +17,23 @@
 
 package com.decathlon.ara.coverage;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.decathlon.ara.domain.Country;
 import com.decathlon.ara.domain.Functionality;
 import com.decathlon.ara.repository.CountryRepository;
 import com.decathlon.ara.service.dto.coverage.AxisPointDTO;
-import java.util.Arrays;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CountryAxisGeneratorTest {
 
     private static final int A_PROJECT_ID = 42;

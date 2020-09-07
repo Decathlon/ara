@@ -17,6 +17,28 @@
 
 package com.decathlon.ara.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.decathlon.ara.domain.TechnologySetting;
 import com.decathlon.ara.domain.enumeration.Technology;
 import com.decathlon.ara.repository.TechnologySettingRepository;
@@ -27,22 +49,8 @@ import com.decathlon.ara.service.dto.setting.SettingType;
 import com.decathlon.ara.service.dto.setting.TechnologySettingGroupDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.mockito.Mockito.*;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class TechnologySettingServiceTest {
 
     @Mock
@@ -191,7 +199,7 @@ public class TechnologySettingServiceTest {
         assertThat(value).hasValue(CucumberSettings.REPORT_PATH.getDefaultValue());
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void update_throwNotFoundException_whenCodeIsUnknown() throws BadRequestException {
         // Given
         Long projectId = 1L;
@@ -205,10 +213,10 @@ public class TechnologySettingServiceTest {
         // Then
         verify(technologySettingRepository, never()).save(any(TechnologySetting.class));
         verify(settingService, never()).validateNewValue(anyString(), any(SettingDTO.class));
-        technologySettingService.update(projectId, unknownCode, technology, newValue);
+        assertThrows(NotFoundException.class, () -> technologySettingService.update(projectId, unknownCode, technology, newValue));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void update_throwBadRequestException_whenValueIsInvalidated() throws BadRequestException {
         // Given
         Long projectId = 1L;
@@ -222,7 +230,7 @@ public class TechnologySettingServiceTest {
 
         // Then
         verify(technologySettingRepository, never()).save(any(TechnologySetting.class));
-        technologySettingService.update(projectId, code, technology, incorrectValue);
+        assertThrows(BadRequestException.class, () -> technologySettingService.update(projectId, code, technology, incorrectValue));
     }
 
     @Test

@@ -1,5 +1,5 @@
 ### BUILD image
-ARG JAVA_VERSION=11
+ARG JAVA_VERSION=14
 FROM maven:3-jdk-$JAVA_VERSION as builder
 WORKDIR /build
 #COPY settings.xml settings.xml
@@ -18,9 +18,9 @@ WORKDIR /build
 #COPY server server
 # Build application
 COPY . .
-RUN mvn -Pprod -s settings.xml clean package dependency:go-offline
+RUN mvn -s settings.xml clean install
 
-FROM openjdk:$JAVA_VERSION-jre-slim as runtime
+FROM openjdk:$JAVA_VERSION-slim as runtime
 EXPOSE 8080
 #Set app home folder
 ENV APP_HOME /app

@@ -22,14 +22,14 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import lombok.experimental.Wither;
+import lombok.With;
 
 @Data
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Wither
+@With
 public class TypeWithSourceCodeDTO extends TypeDTO {
 
     // Optional; no size control as we will just check the foreign key exists

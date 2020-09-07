@@ -17,27 +17,29 @@
 
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.domain.Severity;
-import com.decathlon.ara.repository.SeverityRepository;
-import com.decathlon.ara.service.dto.severity.SeverityDTO;
-import com.decathlon.ara.service.mapper.SeverityMapper;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.decathlon.ara.domain.Severity;
+import com.decathlon.ara.repository.SeverityRepository;
+import com.decathlon.ara.service.dto.severity.SeverityDTO;
+import com.decathlon.ara.service.mapper.SeverityMapper;
+
+@ExtendWith(MockitoExtension.class)
 public class SeverityServiceTest {
 
     @Mock

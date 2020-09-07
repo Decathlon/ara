@@ -17,23 +17,22 @@
 
 package com.decathlon.ara.defect.rtc;
 
-import com.decathlon.ara.defect.rtc.bean.State;
-import com.decathlon.ara.defect.rtc.bean.WorkItem;
-import com.decathlon.ara.domain.enumeration.ProblemStatus;
-import com.decathlon.ara.service.SettingProviderService;
-import com.decathlon.ara.service.SettingService;
-import com.decathlon.ara.service.support.Settings;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
+import static org.mockito.Mockito.when;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -42,11 +41,14 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
-import static org.mockito.Mockito.when;
+import com.decathlon.ara.defect.rtc.bean.State;
+import com.decathlon.ara.defect.rtc.bean.WorkItem;
+import com.decathlon.ara.domain.enumeration.ProblemStatus;
+import com.decathlon.ara.service.SettingProviderService;
+import com.decathlon.ara.service.SettingService;
+import com.decathlon.ara.service.support.Settings;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class RtcDefectAdapterTest {
 
     @Mock
@@ -66,7 +68,7 @@ public class RtcDefectAdapterTest {
 
     private RtcDefectAdapter cut;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(restTemplateBuilder.requestFactory(ArgumentMatchers.<Class<ClientHttpRequestFactory>>any()))
                 .thenReturn(restTemplateBuilder);

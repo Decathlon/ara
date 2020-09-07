@@ -17,27 +17,40 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.service.dto.team.TeamDTO;
-import com.decathlon.ara.util.TransactionalSpringIntegrationTest;
-import com.decathlon.ara.web.rest.util.HeaderUtil;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.List;
-
 import static com.decathlon.ara.util.TestUtil.NONEXISTENT;
 import static com.decathlon.ara.util.TestUtil.header;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
-@Ignore
-@TransactionalSpringIntegrationTest
+import java.util.List;
+
+import javax.transaction.Transactional;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+
+import com.decathlon.ara.service.dto.team.TeamDTO;
+import com.decathlon.ara.web.rest.util.HeaderUtil;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseSetup;
+
+@Disabled
+@SpringBootTest
+@TestExecutionListeners({
+    TransactionalTestExecutionListener.class,
+    DependencyInjectionTestExecutionListener.class,
+    DbUnitTestExecutionListener.class
+})
+@TestPropertySource(
+		locations = "classpath:application-db-h2.properties")
+@Transactional
 @DatabaseSetup("/dbunit/team.xml")
 public class TeamResourceIT {
 

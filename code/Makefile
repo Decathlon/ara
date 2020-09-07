@@ -1,3 +1,4 @@
+JAVA_VERSION=14
 DOCKER_REGISTRY?=docker.io
 # Forks may use name/ara for their tests
 IMAGE_NAME?=ara
@@ -9,7 +10,7 @@ FRONT_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-front:${VERSION}
 
 cache-build-back:
 	@echo '-- Build java ara-back with local cache --'
-	@docker container run -v "$$PWD/back":/root/ara -w /root/ara maven:3-jdk-11 mvn -Pprod -s settings.xml clean package dependency:go-offline
+	@docker container run -v "$$PWD/back":/root/ara -w /root/ara maven:3-jdk-$(JAVA_VERSION) mvn -s settings.xml clean package dependency:go-offline
 
 build-db: ## Build ara-db
 	@echo '-- Build ${DB_IMAGE} --'
@@ -34,6 +35,10 @@ run-back: ## Run back
 run-db: ## Run database
 	@echo '-- Run database --'
 	@export VERSION=$(VERSION); docker-compose up ara-db
+
+start-db: ## Start database
+	@echo '-- Run database --'
+	@export VERSION=$(VERSION); docker-compose up -d ara-db
 
 build-full: build-back build-front build-db ## Build ARA
 

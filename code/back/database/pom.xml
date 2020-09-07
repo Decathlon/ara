@@ -20,12 +20,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.decathlon.ara</groupId>
-        <artifactId>ara-parent</artifactId>
-        <version>6.0.0-SNAPSHOT</version>
-    </parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.3.3.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+
+    <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-database</artifactId>
-    <packaging>jar</packaging>
+    <version>6.0.0</version>
 
     <name>ARA Database</name>
     <description>
@@ -34,6 +37,7 @@
     </description>
 
     <properties>
+        <java.version>14</java.version>
         <querydsl.version>4.3.1</querydsl.version>
         <liquibase.version>3.6.3</liquibase.version>
         <liquibase.database.url></liquibase.database.url>
@@ -43,21 +47,28 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Database -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+            <scope>runtime</scope>
         </dependency>
-
-        <!-- JPA/Hibernate -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
+		    <groupId>com.h2database</groupId>
+		    <artifactId>h2</artifactId>
+		    <scope>runtime</scope>
+		</dependency>
+		
         <dependency>
             <!-- @javax.interceptor.InterceptorBinding needed by javax.transaction.Transactional -->
             <groupId>javax.interceptor</groupId>
@@ -73,31 +84,19 @@
             <artifactId>ehcache-core</artifactId>
             <version>2.6.11</version>
         </dependency>
-        <!-- TODO Use JCache + ehcache3 when Spring Boot will upgrade to Hibernate 5.2 (Java 8 only) -->
-        <!-- <dependency> -->
-        <!-- <groupId>org.hibernate</groupId> -->
-        <!-- <artifactId>hibernate-jcache</artifactId> -->
-        <!-- <version>${hibernate.version}</version> -->
-        <!-- </dependency> -->
-        <!-- <dependency> -->
-        <!-- <groupId>org.ehcache</groupId> -->
-        <!-- <artifactId>ehcache</artifactId> -->
-        <!-- </dependency> -->
 
         <!-- Querydsl -->
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-apt</artifactId>
-            <version>${querydsl.version}</version>
         </dependency>
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-jpa</artifactId>
-            <version>${querydsl.version}</version>
         </dependency>
         <dependency>
             <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-sql</artifactId>
+            <artifactId>querydsl-sql-spring</artifactId>
             <version>${querydsl.version}</version>
             <exclusions>
                 <exclusion>
@@ -111,24 +110,10 @@
             <artifactId>joda-time</artifactId>
             <version>2.10.6</version>
         </dependency>
-        <dependency>
-            <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-sql-spring</artifactId>
-            <version>${querydsl.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.8.1</version>
-        </dependency>
-
-        <!-- H2 -->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
-            <version>1.4.200</version>
         </dependency>
 
         <!-- @Retryable annotations -->
@@ -140,6 +125,38 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok-maven-plugin</artifactId>
+                <version>1.18.12.0</version>
+                <executions>
+                    <execution>
+                        <id>delombok</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>delombok</goal>
+                        </goals>
+                        <configuration>
+                            <formatPreferences>
+                                <javaLangAsFQN>skip</javaLangAsFQN>
+                            </formatPreferences>
+                            <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+                            <outputDirectory>${project.build.directory}/delombokified-sources-for-javadoc</outputDirectory>
+                            <addOutputDirectory>false</addOutputDirectory> <!-- Only delombokify for JavaDoc -->
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <sourcepath>${project.build.directory}/delombokified-sources-for-javadoc;${project.build.directory}/generated-sources/annotations</sourcepath>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+
             <!-- Run Liquibase scripts on the integration database *BEFORE* generating Querydsl table classes from database schema -->
             <!-- Liquibase scripts can also be manually run by "mvn liquibase:update" / "mvn liquibase:rollback" + a profile -->
             <plugin>

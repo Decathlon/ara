@@ -1,21 +1,24 @@
 package com.decathlon.ara.cartography;
 
-import com.decathlon.ara.domain.enumeration.FunctionalityType;
-import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
-
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-@RunWith(MockitoJUnitRunner.class)
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
+
+import com.decathlon.ara.domain.enumeration.FunctionalityType;
+import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
+
+@SpringBootTest
+@TestPropertySource(
+		locations = "classpath:application-db-h2.properties")
 public class AraExporterTest {
 
-    @InjectMocks
+    @Autowired
     private AraExporter sut;
 
     @Test

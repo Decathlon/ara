@@ -21,7 +21,7 @@ import com.decathlon.ara.domain.enumeration.CoverageLevel;
 import com.decathlon.ara.domain.enumeration.FunctionalitySeverity;
 import com.decathlon.ara.domain.enumeration.FunctionalityType;
 import lombok.*;
-import lombok.experimental.Wither;
+import lombok.With;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.SortNatural;
 
@@ -36,7 +36,7 @@ import static java.util.Comparator.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Wither
+@With
 @Entity
 @NamedEntityGraph(name = "Functionality.scenarios", attributeNodes = @NamedAttributeNode("scenarios"))
 // Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode

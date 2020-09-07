@@ -17,6 +17,18 @@
 
 package com.decathlon.ara.repository.custom.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.ArrayList;
+
+import javax.persistence.EntityManager;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.decathlon.ara.domain.ProblemPattern;
 import com.decathlon.ara.domain.QError;
 import com.decathlon.ara.repository.ErrorRepository;
@@ -26,17 +38,8 @@ import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.sql.SQLQueryFactory;
-import java.util.ArrayList;
-import javax.persistence.EntityManager;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ErrorRepositoryImplTest {
 
     @Mock

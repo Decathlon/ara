@@ -17,11 +17,12 @@
 
 package com.decathlon.ara.domain;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
+
 import com.decathlon.ara.domain.enumeration.Handling;
 import com.decathlon.ara.domain.enumeration.ProblemStatus;
-import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class ExecutedScenarioTest {
 

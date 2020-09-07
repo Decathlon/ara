@@ -21,12 +21,12 @@ import com.decathlon.ara.domain.CycleDefinition;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import java.io.File;
 
 @Data
-@Wither
+@With
 @NoArgsConstructor
 @AllArgsConstructor
 public class PlannedIndexation {

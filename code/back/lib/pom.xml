@@ -20,13 +20,18 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.decathlon.ara</groupId>
-        <artifactId>ara-parent</artifactId>
-        <version>6.0.0-SNAPSHOT</version>
-    </parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.3.3.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+
+    <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-lib</artifactId>
+    <version>6.0.0</version>
 
     <properties>
+        <java.version>14</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <cucumber.version>1.2.5</cucumber.version>
     </properties>
@@ -38,30 +43,50 @@
     </description>
 
     <dependencies>
+        <dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter</artifactId>
+		</dependency>
+
+        <!-- Inject getters/setters for POJO beans -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.junit.vintage</groupId>
+					<artifactId>junit-vintage-engine</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
         <!-- Cucumber -->
         <dependency>
             <groupId>info.cukes</groupId>
             <artifactId>cucumber-core</artifactId>
             <version>${cucumber.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>info.cukes</groupId>
             <artifactId>cucumber-java</artifactId>
             <version>${cucumber.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>info.cukes</groupId>
             <artifactId>cucumber-spring</artifactId>
             <version>${cucumber.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>info.cukes</groupId>
             <artifactId>cucumber-junit</artifactId>
             <version>${cucumber.version}</version>
-            <scope>provided</scope>
             <exclusions>
                 <!-- JUnit: we need 4.12 and not the 4.11 included with cucumber-junit because of -->
                 <!-- https://github.com/junit-team/junit4/blob/master/doc/ReleaseNotes4.12.md#pull-request-583-pull-request-720-fix-handling-of-assertionerror-and-assumptionviolatedexception-in-expectedexception-rule -->
@@ -71,71 +96,50 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>5.0.10.RELEASE</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>5.0.10.RELEASE</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- Inject getters/setters for POJO beans -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.4</version>
-            <scope>provided</scope>
-        </dependency>
 
         <!-- For JSON creation -->
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
-            <version>2.4.0</version>
         </dependency>
 
         <!-- For HTML characters escaping -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>
-            <version>1.6</version>
-        </dependency>
-
-        <!-- Unit tests -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>3.11.1</version>
-            <scope>test</scope>
+            <version>1.9</version>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.1.1</version>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok-maven-plugin</artifactId>
+                <version>1.18.12.0</version>
                 <executions>
                     <execution>
-                        <id>attach-javadocs</id>
+                        <id>delombok</id>
+                        <phase>generate-sources</phase>
                         <goals>
-                            <goal>jar</goal>
+                            <goal>delombok</goal>
                         </goals>
+                        <configuration>
+                            <formatPreferences>
+                                <javaLangAsFQN>skip</javaLangAsFQN>
+                            </formatPreferences>
+                            <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+                            <outputDirectory>${project.build.directory}/delombokified-sources-for-javadoc</outputDirectory>
+                            <addOutputDirectory>false</addOutputDirectory> <!-- Only delombokify for JavaDoc -->
+                        </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
+                    <sourcepath>${project.build.directory}/delombokified-sources-for-javadoc;${project.build.directory}/generated-sources/annotations</sourcepath>
                     <source>${java.version}</source>
                 </configuration>
             </plugin>

@@ -25,7 +25,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.With;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -39,7 +39,7 @@ import java.util.TreeSet;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Wither
+@With
 @Entity
 // Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
 @EqualsAndHashCode(of = { "cycleDefinition", "testDateTime" })
@@ -69,7 +69,7 @@ public class Execution {
     private String version;
 
     /**
-     * The date & time at which the version having been tested by this execution was created (compiled...).<br>
+     * the date and time at which the version having been tested by this execution was created (compiled...).<br>
      * Optional: for display only.
      */
     @Column(name = "build_date_time")
@@ -77,7 +77,7 @@ public class Execution {
     private Date buildDateTime;
 
     /**
-     * The date & time at which the execution was run on continuous Continuous Integration.<br>
+     * the date and time at which the execution was run on continuous Continuous Integration.<br>
      * Mandatory.
      */
     @Column(name = "test_date_time")

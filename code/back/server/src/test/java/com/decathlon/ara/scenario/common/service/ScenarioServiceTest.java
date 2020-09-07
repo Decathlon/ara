@@ -17,11 +17,31 @@
 
 package com.decathlon.ara.scenario.common.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.decathlon.ara.domain.Source;
 import com.decathlon.ara.domain.projection.IgnoredScenario;
 import com.decathlon.ara.domain.projection.ScenarioIgnoreCount;
 import com.decathlon.ara.domain.projection.ScenarioSummary;
-import com.decathlon.ara.repository.*;
+import com.decathlon.ara.repository.CountryRepository;
+import com.decathlon.ara.repository.FunctionalityRepository;
+import com.decathlon.ara.repository.ScenarioRepository;
+import com.decathlon.ara.repository.SeverityRepository;
+import com.decathlon.ara.repository.SourceRepository;
 import com.decathlon.ara.scenario.postman.service.PostmanScenarioIndexerService;
 import com.decathlon.ara.service.SeverityService;
 import com.decathlon.ara.service.dto.ignore.ScenarioIgnoreSourceDTO;
@@ -30,22 +50,8 @@ import com.decathlon.ara.service.dto.severity.SeverityDTO;
 import com.decathlon.ara.service.dto.source.SourceDTO;
 import com.decathlon.ara.service.mapper.ScenarioSummaryMapper;
 import com.decathlon.ara.service.mapper.SourceMapper;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.persistence.EntityManager;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.when;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ScenarioServiceTest {
 
     private static final long PROJECT_ID = 1;

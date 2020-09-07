@@ -26,7 +26,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import static com.decathlon.ara.service.support.DtoConstants.CODE_MESSAGE;
 import static com.decathlon.ara.service.support.DtoConstants.CODE_PATTERN;
@@ -37,7 +37,7 @@ import static java.util.Comparator.nullsFirst;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Wither
+@With
 // Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
 @EqualsAndHashCode(of = { "code" })
 public class SourceDTO implements Comparable<SourceDTO> {

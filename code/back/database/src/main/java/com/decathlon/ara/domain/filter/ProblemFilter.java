@@ -22,13 +22,13 @@ import com.decathlon.ara.domain.enumeration.ProblemStatusFilter;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.With;
 
 /**
  * Input of the problem filtering repository query.<br>
  */
 @Data
-@Wither
+@With
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProblemFilter {

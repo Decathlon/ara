@@ -17,6 +17,34 @@
 
 package com.decathlon.ara.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.decathlon.ara.domain.Setting;
 import com.decathlon.ara.repository.SettingRepository;
 import com.decathlon.ara.service.dto.setting.SettingDTO;
@@ -25,22 +53,8 @@ import com.decathlon.ara.service.dto.setting.SettingOptionDTO;
 import com.decathlon.ara.service.dto.setting.SettingType;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SettingServiceTest {
 
     private static final long A_PROJECT_ID = 42;
@@ -143,7 +157,7 @@ public class SettingServiceTest {
         }
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void update_ShouldFail_WhenCalledWithAKnownSettingButWithAValueNotPassingValidation() throws BadRequestException {
         // GIVEN
         SettingDTO settingDefinition = new SettingDTO();
@@ -152,7 +166,7 @@ public class SettingServiceTest {
                 .when(cut).validateNewValue(eq("value"), same(settingDefinition));
 
         // WHEN
-        cut.update(A_PROJECT_ID, "code", "value");
+        assertThrows(BadRequestException.class, () -> cut.update(A_PROJECT_ID, "code", "value"));
     }
 
     @Test

@@ -18,9 +18,12 @@
 package com.decathlon.ara.lib.embed.consumer;
 
 import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

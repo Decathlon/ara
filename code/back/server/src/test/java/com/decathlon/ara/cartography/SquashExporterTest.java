@@ -1,20 +1,21 @@
 package com.decathlon.ara.cartography;
 
-import com.decathlon.ara.domain.enumeration.FunctionalityType;
-import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RunWith(MockitoJUnitRunner.class)
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.decathlon.ara.domain.enumeration.FunctionalityType;
+import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
+
+@ExtendWith(MockitoExtension.class)
 public class SquashExporterTest {
 
     @Spy

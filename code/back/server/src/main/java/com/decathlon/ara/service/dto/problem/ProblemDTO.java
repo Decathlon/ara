@@ -33,13 +33,13 @@ import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.With;
 import org.apache.commons.lang3.StringUtils;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Wither
+@With
 public class ProblemDTO {
 
     private Long id;

@@ -22,7 +22,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.With;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -33,7 +33,7 @@ import static java.util.Comparator.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Wither
+@With
 @Entity
 @EqualsAndHashCode(of = { "projectId", "code", "technology" })
 public class TechnologySetting implements Comparable<TechnologySetting> {

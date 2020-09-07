@@ -17,6 +17,40 @@
 
 package com.decathlon.ara.web.rest;
 
+import static com.decathlon.ara.util.TestUtil.NONEXISTENT;
+import static com.decathlon.ara.util.TestUtil.header;
+import static com.decathlon.ara.util.TestUtil.longs;
+import static com.decathlon.ara.util.TestUtil.timestamp;
+import static com.decathlon.ara.web.rest.ProblemResourceIT.assertProblem1001;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Calendar;
+import java.util.List;
+
+import javax.transaction.Transactional;
+
+import org.apache.commons.io.FileUtils;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.decathlon.ara.ci.bean.PlannedIndexation;
 import com.decathlon.ara.ci.service.ExecutionIndexerService;
 import com.decathlon.ara.domain.CycleDefinition;
@@ -29,38 +63,20 @@ import com.decathlon.ara.service.dto.execution.ExecutionWithCountryDeploymentsAn
 import com.decathlon.ara.service.dto.execution.ExecutionWithHandlingCountsDTO;
 import com.decathlon.ara.service.dto.run.RunDTO;
 import com.decathlon.ara.service.dto.run.RunWithExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO;
-import com.decathlon.ara.util.TransactionalSpringIntegrationTest;
 import com.decathlon.ara.web.rest.util.HeaderUtil;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
-import org.apache.commons.io.FileUtils;
-import org.assertj.core.api.Assertions;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Calendar;
-import java.util.List;
-
-import static com.decathlon.ara.util.TestUtil.*;
-import static com.decathlon.ara.web.rest.ProblemResourceIT.assertProblem1001;
-import static org.assertj.core.api.Assertions.assertThat;
-
-@RunWith(SpringRunner.class)
-@Ignore
-@TransactionalSpringIntegrationTest
+@Disabled
+@SpringBootTest
+@TestExecutionListeners({
+    TransactionalTestExecutionListener.class,
+    DependencyInjectionTestExecutionListener.class,
+    DbUnitTestExecutionListener.class
+})
+@TestPropertySource(
+		locations = "classpath:application-db-h2.properties")
+@Transactional
 public class ExecutionResourceIT {
 
     private static final String PROJECT_CODE = "p";

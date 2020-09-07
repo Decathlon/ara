@@ -22,7 +22,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.With;
 
 /**
  * This object holds key+value data: it holds the count (the value) of scenarios for a given triple [ sourceCode, severityCode, ignoredOrNot ] "key".
@@ -31,7 +31,7 @@ import lombok.experimental.Wither;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-@Wither
+@With
 public class ScenarioIgnoreCount {
 
     /**

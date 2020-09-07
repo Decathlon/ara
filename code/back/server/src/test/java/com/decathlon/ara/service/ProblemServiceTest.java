@@ -17,6 +17,29 @@
 
 package com.decathlon.ara.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Optional;
+import java.util.function.Function;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.ci.service.DateService;
@@ -28,36 +51,30 @@ import com.decathlon.ara.domain.Problem;
 import com.decathlon.ara.domain.ProblemPattern;
 import com.decathlon.ara.domain.enumeration.DefectExistence;
 import com.decathlon.ara.domain.enumeration.ProblemStatus;
-import com.decathlon.ara.repository.*;
+import com.decathlon.ara.repository.CycleDefinitionRepository;
+import com.decathlon.ara.repository.ErrorRepository;
+import com.decathlon.ara.repository.ExecutionRepository;
+import com.decathlon.ara.repository.ProblemPatternRepository;
+import com.decathlon.ara.repository.ProblemRepository;
+import com.decathlon.ara.repository.RootCauseRepository;
 import com.decathlon.ara.repository.custom.util.JpaCacheManager;
 import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
 import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
 import com.decathlon.ara.service.dto.problem.ProblemDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.service.mapper.*;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import com.decathlon.ara.service.mapper.ErrorWithExecutedScenarioAndRunAndExecutionMapper;
+import com.decathlon.ara.service.mapper.ProblemAggregateMapper;
+import com.decathlon.ara.service.mapper.ProblemFilterMapper;
+import com.decathlon.ara.service.mapper.ProblemMapper;
+import com.decathlon.ara.service.mapper.ProblemPatternMapper;
+import com.decathlon.ara.service.mapper.ProblemWithAggregateMapper;
+import com.decathlon.ara.service.mapper.ProblemWithPatternsAndAggregateMapper;
+import com.decathlon.ara.service.mapper.ProblemWithPatternsMapper;
+import com.decathlon.ara.service.mapper.RootCauseMapper;
+import com.decathlon.ara.service.mapper.TeamMapper;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Optional;
-import java.util.function.Function;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.*;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ProblemServiceTest {
 
     @Mock

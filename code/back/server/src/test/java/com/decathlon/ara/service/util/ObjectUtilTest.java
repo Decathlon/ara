@@ -17,11 +17,12 @@
 
 package com.decathlon.ara.service.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
+
 import lombok.Getter;
 import lombok.Setter;
-import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class ObjectUtilTest {
 

@@ -21,12 +21,12 @@ import com.decathlon.ara.service.dto.source.SourceDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.With;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Wither
+@With
 public class ScenarioDTO {
 
     private Long id;

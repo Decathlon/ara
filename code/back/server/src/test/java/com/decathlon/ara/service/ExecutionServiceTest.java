@@ -17,6 +17,37 @@
 
 package com.decathlon.ara.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
+import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.decathlon.ara.ci.bean.PlannedIndexation;
 import com.decathlon.ara.ci.service.ExecutionIndexerService;
 import com.decathlon.ara.domain.CycleDefinition;
@@ -32,26 +63,8 @@ import com.decathlon.ara.service.mapper.ExecutionMapper;
 import com.decathlon.ara.service.mapper.ExecutionWithHandlingCountsMapper;
 import com.decathlon.ara.service.support.Settings;
 import com.decathlon.ara.service.transformer.ExecutionTransformer;
-import org.apache.commons.io.FileUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ExecutionServiceTest {
 
     @Mock
@@ -385,7 +398,7 @@ public class ExecutionServiceTest {
         verify(executionIndexerService).indexExecution(plannedIndexation);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void uploadExecutionReport_should_throws_IllegalArgumentException_if_cycle_doesnt_exists() throws IOException {
         // Given
         long projectId = 23L;
@@ -398,7 +411,7 @@ public class ExecutionServiceTest {
         doReturn("/opt/data/{{project}}/{{branch}}/{{cycle}}").when(settingService).get(projectId, Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH);
         doReturn(null).when(cycleDefinitionRepository).findByProjectIdAndBranchAndName(projectId, branch, cycle);
         // When
-        cut.uploadExecutionReport(projectId, projectCode, branch, cycle, zip);
+        assertThrows(IllegalArgumentException.class, () -> cut.uploadExecutionReport(projectId, projectCode, branch, cycle, zip));
     }
 
     @Test
@@ -425,7 +438,7 @@ public class ExecutionServiceTest {
         }
     }
 
-    @Test(expected = IOException.class)
+    @Test
     public void unzipExecutions_should_propagate_ioexception_from_archiveservice() throws IOException {
         // GIVEN
         File target = new File(System.getProperty("java.io.tmpdir"),"ara-unzipExecutions-" +
@@ -434,7 +447,7 @@ public class ExecutionServiceTest {
         doThrow(new IOException("Unable to write")).when(archiveService).unzip(file, target);
         try {
             // WHEN
-            List<File> files = this.cut.unzipExecutions(target, file, "buildInformation.json");
+            assertThrows(IOException.class, () -> this.cut.unzipExecutions(target, file, "buildInformation.json"));
             // Then is made by the annotation.
         } finally {
             FileUtils.deleteQuietly(target);

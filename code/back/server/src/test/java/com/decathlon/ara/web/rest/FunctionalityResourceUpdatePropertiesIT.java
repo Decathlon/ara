@@ -17,33 +17,50 @@
 
 package com.decathlon.ara.web.rest;
 
+import static com.decathlon.ara.util.TestUtil.NONEXISTENT;
+import static com.decathlon.ara.util.TestUtil.header;
+import static com.decathlon.ara.util.TestUtil.timestamp;
+import static com.decathlon.ara.web.rest.FunctionalityResourceITSuite.TEAM_ID_NOT_ASSIGNABLE_TO_FUNCTIONALITIES;
+import static com.decathlon.ara.web.rest.FunctionalityResourceITSuite.folder;
+import static com.decathlon.ara.web.rest.FunctionalityResourceITSuite.functionality;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Calendar;
+import java.util.Date;
+
+import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+
 import com.decathlon.ara.domain.Functionality;
 import com.decathlon.ara.domain.enumeration.FunctionalitySeverity;
 import com.decathlon.ara.domain.enumeration.FunctionalityType;
 import com.decathlon.ara.repository.FunctionalityRepository;
 import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
-import com.decathlon.ara.util.TransactionalSpringIntegrationTest;
 import com.decathlon.ara.web.rest.util.HeaderUtil;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.persistence.EntityManager;
-import java.util.Calendar;
-import java.util.Date;
-
-import static com.decathlon.ara.util.TestUtil.*;
-import static com.decathlon.ara.web.rest.FunctionalityResourceITSuite.*;
-import static org.assertj.core.api.Assertions.assertThat;
-
-@RunWith(SpringRunner.class)
-@Ignore
-@TransactionalSpringIntegrationTest
+@Disabled
+@SpringBootTest
+@TestExecutionListeners({
+    TransactionalTestExecutionListener.class,
+    DependencyInjectionTestExecutionListener.class,
+    DbUnitTestExecutionListener.class
+})
+@TestPropertySource(
+		locations = "classpath:application-db-h2.properties")
+@Transactional
 @DatabaseSetup("/dbunit/functionality.xml")
 public class FunctionalityResourceUpdatePropertiesIT {
 

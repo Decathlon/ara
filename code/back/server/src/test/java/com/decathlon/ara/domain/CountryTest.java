@@ -17,10 +17,10 @@
 
 package com.decathlon.ara.domain;
 
-import org.apache.commons.lang3.RandomUtils;
-import org.junit.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.apache.commons.lang3.RandomUtils;
+import org.junit.jupiter.api.Test;
 
 public class CountryTest {
 

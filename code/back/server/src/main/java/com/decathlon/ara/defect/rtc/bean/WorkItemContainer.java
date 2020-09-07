@@ -25,10 +25,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.With;
 
 @Data
-@Wither
+@With
 @NoArgsConstructor
 @AllArgsConstructor
 @XmlRootElement(name = "workitem")

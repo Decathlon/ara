@@ -22,10 +22,10 @@ import com.decathlon.ara.domain.Type;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.With;
 
 @Data
-@Wither
+@With
 @NoArgsConstructor
 @AllArgsConstructor
 public class PlatformRule {

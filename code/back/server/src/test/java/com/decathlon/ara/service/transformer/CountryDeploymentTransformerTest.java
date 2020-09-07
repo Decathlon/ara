@@ -17,26 +17,28 @@
 
 package com.decathlon.ara.service.transformer;
 
-import com.decathlon.ara.domain.enumeration.Result;
-import com.decathlon.ara.domain.Country;
-import com.decathlon.ara.domain.CountryDeployment;
-import com.decathlon.ara.domain.enumeration.JobStatus;
-import com.decathlon.ara.service.dto.country.CountryDTO;
-import com.decathlon.ara.service.dto.countrydeployment.CountryDeploymentDTO;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+import com.decathlon.ara.domain.Country;
+import com.decathlon.ara.domain.CountryDeployment;
+import com.decathlon.ara.domain.enumeration.JobStatus;
+import com.decathlon.ara.domain.enumeration.Result;
+import com.decathlon.ara.service.dto.country.CountryDTO;
+import com.decathlon.ara.service.dto.countrydeployment.CountryDeploymentDTO;
+
+@ExtendWith(MockitoExtension.class)
 public class CountryDeploymentTransformerTest {
 
     @Mock

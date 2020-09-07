@@ -17,6 +17,18 @@
 
 package com.decathlon.ara.service;
 
+import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.when;
+
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.decathlon.ara.loader.DemoExecutionLoader;
 import com.decathlon.ara.loader.DemoFunctionalityLoader;
 import com.decathlon.ara.loader.DemoProblemLoader;
@@ -26,18 +38,8 @@ import com.decathlon.ara.repository.ProjectRepository;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
-import java.util.Optional;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 
-import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
-import static org.mockito.Mockito.when;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DemoServiceTest {
 
     @Mock
@@ -67,22 +69,22 @@ public class DemoServiceTest {
     @InjectMocks
     private DemoService cut;
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void create_ShouldFail_WhenDemoProjectAlreadyExists() throws BadRequestException {
         // GIVEN
         when(projectService.findOne(PROJECT_CODE_DEMO)).thenReturn(Optional.of(new ProjectDTO()));
 
         // WHEN
-        cut.create();
+        assertThrows(BadRequestException.class, () -> cut.create());
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void delete_ShouldFail_WhenDemoProjectDoesNotExist() throws NotFoundException {
         // GIVEN
         when(projectRepository.findOneByCode(PROJECT_CODE_DEMO)).thenReturn(null);
 
         // WHEN
-        cut.delete();
+        assertThrows(NotFoundException.class, () -> cut.delete());
     }
 
 }

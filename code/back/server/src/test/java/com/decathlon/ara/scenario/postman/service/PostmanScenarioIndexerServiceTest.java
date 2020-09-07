@@ -17,17 +17,17 @@
 
 package com.decathlon.ara.scenario.postman.service;
 
-import com.decathlon.ara.domain.Scenario;
-import com.decathlon.ara.domain.Source;
-import com.decathlon.ara.scenario.postman.bean.Assertion;
-import com.decathlon.ara.scenario.postman.bean.CollectionWithScripts;
-import com.decathlon.ara.scenario.postman.bean.Event;
-import com.decathlon.ara.scenario.postman.bean.Info;
-import com.decathlon.ara.scenario.postman.bean.ItemWithScripts;
-import com.decathlon.ara.scenario.postman.bean.Listen;
-import com.decathlon.ara.scenario.postman.bean.Request;
-import com.decathlon.ara.scenario.postman.bean.Script;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -40,26 +40,28 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import com.decathlon.ara.domain.Scenario;
+import com.decathlon.ara.domain.Source;
+import com.decathlon.ara.scenario.postman.bean.Assertion;
+import com.decathlon.ara.scenario.postman.bean.CollectionWithScripts;
+import com.decathlon.ara.scenario.postman.bean.Event;
+import com.decathlon.ara.scenario.postman.bean.Info;
+import com.decathlon.ara.scenario.postman.bean.ItemWithScripts;
+import com.decathlon.ara.scenario.postman.bean.Listen;
+import com.decathlon.ara.scenario.postman.bean.Request;
+import com.decathlon.ara.scenario.postman.bean.Script;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PostmanScenarioIndexerServiceTest {
 
     @Mock

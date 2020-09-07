@@ -17,25 +17,39 @@
 
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.service.dto.execution.ExecutionHistoryPointDTO;
-import com.decathlon.ara.service.dto.run.RunWithQualitiesDTO;
-import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.util.TransactionalSpringIntegrationTest;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringRunner;
+import static com.decathlon.ara.util.TestUtil.NONEXISTENT;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
 
 import java.util.List;
 
-import static com.decathlon.ara.util.TestUtil.NONEXISTENT;
-import static org.assertj.core.api.Assertions.assertThat;
+import javax.transaction.Transactional;
 
-@RunWith(SpringRunner.class)
-@Ignore
-@TransactionalSpringIntegrationTest
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+
+import com.decathlon.ara.service.dto.execution.ExecutionHistoryPointDTO;
+import com.decathlon.ara.service.dto.run.RunWithQualitiesDTO;
+import com.decathlon.ara.service.exception.NotFoundException;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseSetup;
+
+@Disabled
+@SpringBootTest
+@TestExecutionListeners({
+    TransactionalTestExecutionListener.class,
+    DependencyInjectionTestExecutionListener.class,
+    DbUnitTestExecutionListener.class
+})
+@TestPropertySource(
+		locations = "classpath:application-db-h2.properties")
+@Transactional
 public class ExecutionHistoryServiceIT {
 
     @Autowired
@@ -78,7 +92,7 @@ public class ExecutionHistoryServiceIT {
         assertThat(execution.getRuns().get(0).getQualitiesPerTeamAndSeverity().get("10").get("medium").getTotal()).isEqualTo(1);
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     @DatabaseSetup({ "/dbunit/ExecutionHistoryServiceIT-getLatestExecutionHistories.xml" })
     public void getExecution_should_throw_NotFoundException_when_not_found() throws NotFoundException {
         // GIVEN
@@ -86,7 +100,7 @@ public class ExecutionHistoryServiceIT {
         long nonexistentExecutionId = NONEXISTENT.longValue();
 
         // WHEN
-        cut.getExecution(projectId, nonexistentExecutionId);
+        assertThrows(NotFoundException.class, () -> cut.getExecution(projectId, nonexistentExecutionId));
     }
 
 }

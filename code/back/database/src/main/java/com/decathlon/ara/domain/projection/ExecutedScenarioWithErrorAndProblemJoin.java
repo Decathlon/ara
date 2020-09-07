@@ -25,7 +25,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.With;
 
 /**
  * A join of {@link ExecutedScenario}, {@link Error} and {@link Problem}: provide a few information about the scenario,
@@ -36,7 +36,7 @@ import lombok.experimental.Wither;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-@Wither
+@With
 public class ExecutedScenarioWithErrorAndProblemJoin {
 
     /**
@@ -60,15 +60,15 @@ public class ExecutedScenarioWithErrorAndProblemJoin {
     private String name;
 
     /**
-     * Is > 0 if there are any unhandled errors for this scenario.<br>
-     * If both {@code unhandledCount} and {@link #handledCount} are > 1, the scenario is considered handled.<br>
+     * Is greater than 0 if there are any unhandled errors for this scenario.<br>
+     * If both {@code unhandledCount} and {@link #handledCount} are greater than 1, the scenario is considered handled.<br>
      * If both {@code unhandledCount} and {@link #handledCount} are 0, the scenario is successful (it has no error).
      */
     private long unhandledCount;
 
     /**
-     * Is > 0 if there are any handled errors for this scenario.<br>
-     * If both {@link #unhandledCount} and {@code handledCount} are > 1, the scenario is considered handled.<br>
+     * Is greater than 0 if there are any handled errors for this scenario.<br>
+     * If both {@link #unhandledCount} and {@code handledCount} are greater than 1, the scenario is considered handled.<br>
      * If both {@link #unhandledCount} and {@code handledCount} are 0, the scenario is successful (it has no error).
      */
     private long handledCount;

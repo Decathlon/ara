@@ -17,18 +17,20 @@
 
 package com.decathlon.ara.loader;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.decathlon.ara.common.NotGonnaHappenException;
 import com.decathlon.ara.scenario.cucumber.upload.CucumberScenarioUploader;
 import com.decathlon.ara.scenario.postman.upload.PostmanScenarioUploader;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DemoScenarioLoaderTest {
 
     @Mock
@@ -55,9 +57,9 @@ public class DemoScenarioLoaderTest {
         assertThat(content.replaceAll("[\r\n]", "")).isEqualTo("content-withÜTF8");
     }
 
-    @Test(expected = NotGonnaHappenException.class)
+    @Test
     public void getResourceAsUtf8String_ShouldThrowNotGonnaHappenException_WhenDeveloperFucksUpCodeOrPackaging() {
-        cut.getResourceAsUtf8String("nonexistent");
+        assertThrows(NotGonnaHappenException.class, () -> cut.getResourceAsUtf8String("nonexistent"));
     }
 
 }

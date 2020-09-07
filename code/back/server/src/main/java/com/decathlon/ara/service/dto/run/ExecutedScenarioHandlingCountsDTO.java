@@ -22,7 +22,7 @@ import com.decathlon.ara.domain.enumeration.Handling;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.With;
 
 /**
  * Holds a number of {@link ExecutedScenario} + the count of these scenarios in each {@link Handling} state.
@@ -30,7 +30,7 @@ import lombok.experimental.Wither;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Wither
+@With
 public class ExecutedScenarioHandlingCountsDTO {
 
     /**

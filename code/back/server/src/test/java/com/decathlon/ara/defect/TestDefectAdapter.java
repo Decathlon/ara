@@ -17,13 +17,15 @@
 
 package com.decathlon.ara.defect;
 
-import com.decathlon.ara.ci.util.FetchException;
-import com.decathlon.ara.defect.bean.Defect;
-import com.decathlon.ara.service.dto.setting.SettingDTO;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
 import org.springframework.stereotype.Service;
+
+import com.decathlon.ara.ci.util.FetchException;
+import com.decathlon.ara.defect.bean.Defect;
+import com.decathlon.ara.service.dto.setting.SettingDTO;
 
 /**
  * A test-scope-only defect adapter for integration tests.
