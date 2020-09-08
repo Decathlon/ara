@@ -70,7 +70,7 @@ stop: ## Stop ARA
 update-maven-version:
 	@echo '-- Update Maven version --'
 	@mvn -f back/pom.xml -s back/settings.xml release:update-versions -DautoVersionSubmodules=true
-	@mvn -f back/pom.xml -s back/settings.xml versions:set -DremoveSnapshot
+	@mvn -f back/pom.xml -s back/settings.xml versions:set -DremoveSnapshot -DprocessAllModules
 
 helm-tempate:
 	@helm template ../charts/stable --debug
