@@ -67,6 +67,11 @@ stop: ## Stop ARA
 	@echo '-- Stop ARA --'
 	@export VERSION=$(VERSION); docker-compose down
 
+update-maven-version:
+	@echo '-- Update Maven version --'
+	@mvn -f back/pom.xml -s back/settings.xml release:update-versions -DautoVersionSubmodules=true
+	@mvn -f back/pom.xml -s back/settings.xml versions:set -DremoveSnapshot
+
 helm-tempate:
 	@helm template ../charts/stable --debug
 
