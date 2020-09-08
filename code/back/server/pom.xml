@@ -29,7 +29,7 @@
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-server</artifactId>
-    <version>6.0.0</version>
+    <version>6.1.0</version>
 
     <name>ARA Server</name>
     <description>
@@ -39,7 +39,7 @@
 
     <properties>
         <java.version>14</java.version>
-        
+
         <spring.profiles.active></spring.profiles.active>
         <spring.db.type>mysql</spring.db.type>
 
