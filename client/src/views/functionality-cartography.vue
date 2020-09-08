@@ -169,6 +169,11 @@
                       <Icon type="md-move"/> MOVE SELECTION TO...
                     </div>
                   </DropdownItem>
+                  <DropdownItem :disabled="noSelection">
+                    <div @click="deleteSelection()">
+                      <Icon type="md-trash" /> DELETE SELECTION
+                    </div>
+                  </DropdownItem>
                 </DropdownMenu>
               </Dropdown>
               <functionality-export-popup ref="exportPopup" />
@@ -997,7 +1002,7 @@
         return counts
       },
 
-      deleteNode (node) {
+      getDeleteMessage (node) {
         let childrenCounts = this.countChildren(node)
         let childrenMessage = ''
         if (childrenCounts.FOLDER > 0 || childrenCounts.FUNCTIONALITY > 0) {
@@ -1011,6 +1016,11 @@
             childrenMessage = ` (+ ${functionalitiesMessage})`
           }
         }
+        return childrenMessage
+      },
+
+      deleteNode (node) {
+        const childrenMessage = this.getDeleteMessage(node)
         let self = this
         this.$Modal.confirm({
           title: `Delete ${node.row.type === 'FOLDER' ? 'Folder' : 'Functionality'}`,
@@ -1226,6 +1236,66 @@
           this.resetNodeTargetDetails(child)
         }
       },
+
+      deleteSelection () {
+        if (this.noSelection) {
+          return
+        }
+
+        this.isMovingSelection = false
+
+        const selectionNumber = this.nodesSelection.length
+
+        const hasOnlyFunctionalities = _(this.nodesSelection).every((node) => node.row.type === 'FUNCTIONALITY')
+        const hasOnlyFolders = _(this.nodesSelection).every((node) => node.row.type === 'FOLDER')
+
+        let title = 'Delete '
+        if (hasOnlyFunctionalities) {
+          title += (selectionNumber === 1 ? 'a' : selectionNumber) + ' functionalit' + (selectionNumber > 1 ? 'ies' : 'y')
+        } else if (hasOnlyFolders) {
+          title += (selectionNumber === 1 ? 'a' : selectionNumber) + ' folder' + (selectionNumber > 1 ? 's' : '')
+        } else {
+          title += 'selection (' + selectionNumber + ')'
+        }
+
+        let content = '<p>Delete '
+        const nodeDescriptions = _(this.nodesSelection)
+          .map((node) => `<b>${util.escapeHtml(node.row.name)}</b> ` + this.getDeleteMessage(node))
+          .values()
+          .join(', ')
+        content += nodeDescriptions + '?</p>'
+
+        let okText = 'Delete selection'
+
+        const ids = _(this.nodesSelection)
+          .map((node) => `id=${node.id}`)
+          .values()
+          .join('&')
+
+        let self = this
+        this.$Modal.confirm({
+          title: title,
+          content: content,
+          okText: okText,
+          loading: true,
+          onOk () {
+            self.loadingFunctionalities = true
+            Vue.http
+              .delete(api.paths.functionalities(self) + '?' + ids, api.REQUEST_OPTIONS)
+              .then((response) => {
+                self.$Modal.remove()
+                self.loadingFunctionalities = false
+                self.nodesSelection = []
+                self.parseFunctionalities(response.body)
+              }, (error) => {
+                self.$Modal.remove()
+                self.loadingFunctionalities = false
+                api.handleError(error)
+              })
+          }
+        })
+      },
+
       // Export / Import
       openExportPopup () {
         var projectCode = this.$route.params.projectCode

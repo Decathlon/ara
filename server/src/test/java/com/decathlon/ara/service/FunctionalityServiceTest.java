@@ -41,6 +41,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
@@ -1040,5 +1041,120 @@ public class FunctionalityServiceTest {
 
         // Then
         functionalityService.moveList(projectId, moveDetails);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void delete_throwBadRequestException_whenIdIsNull() throws BadRequestException {
+        // Given
+        Long projectId = 1L;
+
+        // When
+
+        // Then
+        functionalityService.delete(projectId, null);
+        verify(repository, never()).delete(any());
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void delete_throwNotFoundException_whenIdIsUnknown() throws BadRequestException {
+        // Given
+        Long projectId = 1L;
+        Long id = 10L;
+
+        // When
+        when(repository.findByProjectIdAndId(projectId, id)).thenReturn(Optional.empty());
+
+        // Then
+        functionalityService.delete(projectId, id);
+        verify(repository, never()).delete(any());
+    }
+
+    @Test
+    public void delete_deleteFunctionality_whenIdExists() throws BadRequestException {
+        // Given
+        Long projectId = 1L;
+        Long id = 10L;
+
+        Functionality functionality = mock(Functionality.class);
+
+        // When
+        when(repository.findByProjectIdAndId(projectId, id)).thenReturn(Optional.of(functionality));
+
+        // Then
+        functionalityService.delete(projectId, id);
+        verify(repository).delete(functionality);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void deleteList_throwBadRequestException_whenIdsNull() throws BadRequestException {
+        // Given
+        Long projectId = 1L;
+
+        // When
+
+        // Then
+        functionalityService.deleteList(projectId, null);
+        verify(repository, never()).deleteAll(anyIterable());
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void deleteList_throwBadRequestException_whenIdsEmpty() throws BadRequestException {
+        // Given
+        Long projectId = 1L;
+
+        // When
+
+        // Then
+        functionalityService.deleteList(projectId, new ArrayList<>());
+        verify(repository, never()).deleteAll(anyIterable());
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void deleteList_throwNotFoundException_whenSomeIdsNotFound() throws BadRequestException {
+        // Given
+        Long projectId = 1L;
+
+        Long functionalityId1 = 11L;
+        Long functionalityId2 = 12L;
+        Long functionalityId3 = 13L;
+
+        Functionality functionality1 = mock(Functionality.class);
+        Functionality functionality2 = mock(Functionality.class);
+
+        List<Long> functionalityIds = Arrays.asList(functionalityId1, functionalityId2, functionalityId3);
+
+        // When
+        when(repository.findByProjectIdAndIdIn(projectId, functionalityIds)).thenReturn(
+                Arrays.asList(functionality1, functionality2)
+        );
+
+        // Then
+        functionalityService.deleteList(projectId, functionalityIds);
+        verify(repository, never()).deleteAll(anyIterable());
+    }
+
+    @Test
+    public void deleteList_deleteFunctionalities_whenAllIdsFound() throws BadRequestException {
+        // Given
+        Long projectId = 1L;
+
+        Long functionalityId1 = 11L;
+        Long functionalityId2 = 12L;
+        Long functionalityId3 = 13L;
+
+        Functionality functionality1 = mock(Functionality.class);
+        Functionality functionality2 = mock(Functionality.class);
+        Functionality functionality3 = mock(Functionality.class);
+
+        List<Long> functionalityIds = Arrays.asList(functionalityId1, functionalityId2, functionalityId3);
+
+        List<Functionality> functionalitiesToDelete = Arrays.asList(functionality1, functionality2, functionality3);
+
+        // When
+        when(repository.findByProjectIdAndIdIn(projectId, functionalityIds)).thenReturn(functionalitiesToDelete);
+
+        // Then
+        functionalityService.deleteList(projectId, functionalityIds);
+        verify(repository).deleteAll(functionalitiesToDelete);
     }
 }

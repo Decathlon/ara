@@ -257,11 +257,36 @@ public class FunctionalityService {
      * @param id        entity id
      * @throws NotFoundException if the entity id does not exist
      */
-    public void delete(Long projectId, Long id) throws NotFoundException {
+    public void delete(Long projectId, Long id) throws BadRequestException {
+        if (id == null) {
+            throw new BadRequestException(Messages.PARAMETER_IS_MISSING, Entities.FUNCTIONALITY, "delete_functionality_missing_id_parameter");
+        }
         Functionality entity = repository.findByProjectIdAndId(projectId, id)
                 .orElseThrow(() -> new NotFoundException(Messages.NOT_FOUND_FUNCTIONALITY_OR_FOLDER, Entities.FUNCTIONALITY));
         // Will cascade delete children
         repository.delete(entity);
+    }
+
+    /**
+     * Delete a list of functionalities (as well as its children, if any)
+     * @param projectId the project id
+     * @param ids       entity ids
+     * @return the updated tree
+     * @throws BadRequestException if any error
+     */
+    public List<FunctionalityWithChildrenDTO> deleteList(Long projectId, List<Long> ids) throws BadRequestException {
+        if (CollectionUtils.isEmpty(ids)) {
+            throw new BadRequestException(Messages.PARAMETER_IS_MISSING, Entities.FUNCTIONALITY, "delete_functionality_list_missing_ids_parameter");
+        }
+
+        List<Functionality> functionalitiesToDelete = repository.findByProjectIdAndIdIn(projectId, ids);
+        Boolean thereAreSomeUnknownIds = ids.size() > functionalitiesToDelete.size();
+        if (thereAreSomeUnknownIds) {
+            throw new NotFoundException(Messages.NOT_FOUND_FUNCTIONALITY_OR_FOLDER, Entities.FUNCTIONALITY);
+        }
+
+        repository.deleteAll(functionalitiesToDelete);
+        return findAllAsTree(projectId);
     }
 
     /**
