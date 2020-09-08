@@ -30,7 +30,6 @@ ENV JAVA_OPTS=-Xmx2048m
 ENV DATABASE_URL=ara-db:3306/ara-dev
 ENV DATABASE_USER=changeIt
 ENV DATABASE_PASSWORD=password_to_change
-ENV ARA_PROFILE=dev
 ENV CLIENT_URL=http://ara-front
 ENV DATA_DB_MODE=validate
 
@@ -48,7 +47,6 @@ ENTRYPOINT [ "sh", "-c", "java $JAVAOPS \
         -Dspring.datasource.url=\"jdbc:mysql://$DATABASE_URL?useUnicode=yes&characterEncoding=UTF-8\" \
         -Dspring.datasource.username=\"$DATABASE_USER\" \
         -Dspring.datasource.password=\"$DATABASE_PASSWORD\" \
-        -Dspring.profiles.active=\"$ARA_PROFILE\" \
         -Dara.clientBaseUrl=\"$CLIENT_URL\" \
         -Dspring.jpa.properties.hibernate.hbm2ddl.auto=\"$DATA_DB_MODE\" \
         -jar app.jar"]
