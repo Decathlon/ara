@@ -52,7 +52,7 @@ Then('on the executions and errors page, in the cart {string}, on the run {strin
   executions.getCartRowSubTitle(runId, teamId, executionId).should('be.not.visible');
 });
 
-Then('on the executions and errors page, in the cart {string}, on the header, in the column {string}, the quality is {string}, the number of OK is {string}, the number of KO is {string}, the color is {string}', (executionId, qualityId, qualityValue, okValue, koValue, color) => {
+Then('on the executions and errors page, in the cart {string}, on the header, in the column {string}, the quality is {int}, the number of OK is {int}, the number of KO is {int}, the color is {string}', (executionId, qualityId, qualityValue, okValue, koValue, color) => {
   executions.getCartHeader(qualityId, executionId).find('.percentStyle').then(($percent) => {
     expect(normalizeText($percent.text())).to.equal(normalizeText(qualityValue + ' %'))
   });
@@ -67,7 +67,7 @@ Then('on the executions and errors page, in the cart {string}, on the header, in
   });
 }); 
 
-Then('on the executions and errors page, in the cart {string}, on the header, in the column {string}, the threshold is {string}, the color is {string}', (executionId, qualityId, thresholdValue, color) => {
+Then('on the executions and errors page, in the cart {string}, on the header, in the column {string}, the threshold is {int}, the color is {string}', (executionId, qualityId, thresholdValue, color) => {
   executions.getCartHeader(qualityId, executionId).find('.thresholdStyle').then(($threshold) => {
     expect(normalizeText($threshold.text())).to.equal(normalizeText(thresholdValue + " %"))
   });
@@ -76,40 +76,76 @@ Then('on the executions and errors page, in the cart {string}, on the header, in
   });
 });
 
-Then('on the executions and errors page, in the cart {string}, on the run {string}, in the column {string}, for the team {string}, the progress bar is {int}% of success, {int}% of unhandled and {int}% of failed', (executionId, runId, qualityId, teamId, greenValue, orangeValue, redValue) => {
-  executions.getCartRowTeam(qualityId, runId, teamId, executionId).find('.progressBar').then(($progressBar) => {
-    commun.testProgressBar($progressBar, greenValue);
-  });
-});
-
-Then('on the executions and errors page, in the cart {string}, on the run {string}, in the column {string}, the number of ok is {string}, the number of problem is {string}, the number of ko is {string}, the progress bar is {int}% of success, {int}% of unhandled and {int}% of failed', (executionId, runId, qualityId, okValue, pbValue, koValue, greenValue, orangeValue, redValue) => {
-  executions.getCartRowHeader(qualityId, runId, executionId).find('.textPassed').then(($textPassed) => {
-    if (okValue != 0){
-      expect(normalizeText($textPassed.text())).to.equal(normalizeText(okValue));
-    } else {
-      expect(normalizeText($textPassed.text())).to.equal('');
-    }
-  });
-  const cartRowHeaderFailed = executions.getCartRowHeader(qualityId, runId, executionId).find('.textFailed');
-  cartRowHeaderFailed.then(($textFailed) => {
-    if (koValue != 0){
-      expect(normalizeText($textFailed.text())).to.equal(normalizeText(koValue));
-    } else {
-      expect(normalizeText($textFailed.text())).to.equal('');
-    }
-  });
-  if (pbValue != 0){
-    cartRowHeaderFailed.find('.textProblem').then(($textProblem) => {
-      expect(normalizeText($textProblem.text())).to.equal(normalizeText(pbValue));
+Then('on the executions and errors page, in the cart {string}, on the run {string}, in the column {string}, for the team {string}, the progress bar is {float}% of success and {float}% of unhandled', (executionId, runId, qualityId, teamId, greenValue, orangeValue) => {
+  // GREEN
+  if(greenValue === 100 || greenValue === 50) {
+    executions.getCartRowTeam(qualityId, runId, teamId, executionId).find('.progressBar').then(($progressBar) => {
+      commun.testFirstProgressBar($progressBar, greenValue, 1542812.5);
+    });
+  } else if (greenValue === 75) {
+    executions.getCartRowTeam(qualityId, runId, teamId, executionId).find('.progressBar').then(($progressBar) => {
+      commun.testFirstProgressBar($progressBar, greenValue, 1542708.33334);
     });
   } else {
-    cartRowHeaderFailed.find('.textProblem').should('have.length', 0)
-  } 
+    executions.getCartRowTeam(qualityId, runId, teamId, executionId).find('.progressBar').then(($progressBar) => {
+      commun.testFirstProgressBar($progressBar, greenValue, 1542678.57143);
+    });
+  }
 
-  executions.getCartRowHeader(qualityId, runId, executionId).find('.progressBar').then(($progressBar) => {
-    commun.testProgressBar($progressBar, greenValue);
-  });
- 
+  // ORANGE
+  if(orangeValue === 100 || orangeValue === 50) {
+    executions.getCartRowTeam(qualityId, runId, teamId, executionId).find('.progressBar').then(($progressBar) => {
+      commun.testLastProgressBar($progressBar, orangeValue, 1542812.5);
+    });
+  } else {
+    executions.getCartRowTeam(qualityId, runId, teamId, executionId).find('.progressBar').then(($progressBar) => {
+      commun.testLastProgressBar($progressBar, orangeValue, 1542678.57143);
+    });
+  }  
+});
+
+Then('on the executions and errors page, in the cart {string}, on the run {string}, in the column {string}, the number of ok is {int}, the number of problem is {int}, the number of ko is {int}', (executionId, runId, qualityId, okValue, pbValue, koValue) => {
+  if (okValue+koValue+pbValue===0){
+    // no cart
+    executions.getCartRowHeader(qualityId, runId, executionId).should('not.exist');
+  } else {
+    
+    // init value for koValue and pbValue
+    var koAndPbValue = '';
+    if (koValue != 0 || pbValue != 0){
+      if (pbValue != 0){
+        koAndPbValue = pbValue.toString();
+      }
+      if (koValue != 0) {
+        if (koAndPbValue != ''){
+          koAndPbValue += '+'
+        }
+        koAndPbValue += koValue.toString();
+      }
+    }
+
+    
+    executions.getCartRowHeader(qualityId, runId, executionId).find('.textPassed').then(($textPassed) => {
+      if (okValue != 0){
+        expect(parseInt(normalizeText($textPassed.text()))).to.equal(okValue);
+      } else {
+        expect(normalizeText($textPassed.text())).to.equal('');
+      }
+    });
+    
+    const cartRowHeaderFailed = executions.getCartRowHeader(qualityId, runId, executionId).find('.textFailed');
+    cartRowHeaderFailed.then(($textFailed) => {
+      expect(normalizeText($textFailed.text())).to.equal(koAndPbValue);
+    });
+    
+    if (pbValue != 0){
+      cartRowHeaderFailed.find('.textProblem').then(($textProblem) => {
+        expect(parseInt(normalizeText($textProblem.text()))).to.equal(pbValue);
+      });
+    } else {
+      cartRowHeaderFailed.find('.textProblem').should('have.length', 0)
+    } 
+  }
 });
 
 Then('on the executions and errors page, in the cart {string}, the version is {string} and the build date is {string}', (executionId, version, buildDate) => {
