@@ -154,9 +154,24 @@
                       <Icon type="md-cloud-upload" /> IMPORT NEW FUNCTIONALITIES
                     </div>
                   </DropdownItem>
+                  <DropdownItem divided>
+                    <div @click="selectAll()">
+                      <Icon type="md-checkbox-outline"/> SELECT ALL
+                    </div>
+                  </DropdownItem>
+                  <DropdownItem>
+                    <div @click="clearSelection()">
+                      <Icon type="md-square-outline" /> CLEAR SELECTION
+                    </div>
+                  </DropdownItem>
                   <DropdownItem :disabled="noSelection" divided>
                     <div @click="startMovingSelection()">
                       <Icon type="md-move"/> MOVE SELECTION TO...
+                    </div>
+                  </DropdownItem>
+                  <DropdownItem :disabled="noSelection">
+                    <div @click="deleteSelection()">
+                      <Icon type="md-trash" /> DELETE SELECTION
                     </div>
                   </DropdownItem>
                 </DropdownMenu>
@@ -431,7 +446,7 @@
         if (jsonNodes) {
           for (let i in jsonNodes) {
             let jsonNode = jsonNodes[i]
-            jsonNode.countryCodes = util.toSplitted(jsonNode.countryCodes)
+            jsonNode.countryCodes = util.toSplit(jsonNode.countryCodes)
             nodes.push({
               id: jsonNode.id, // For virtual-scroller
               row: jsonNode,
@@ -630,17 +645,17 @@
 
       flattenMatchingFunctionalities () {
         this.flattenedMatchingFunctionalities = []
-        this.flattenMatchingnodes(this.functionalities, this.flattenedMatchingFunctionalities)
+        this.flattenMatchingNodes(this.functionalities, this.flattenedMatchingFunctionalities)
       },
 
-      flattenMatchingnodes (nodes, flattenedNodes) {
+      flattenMatchingNodes (nodes, flattenedNodes) {
         for (let i in nodes) {
           let node = nodes[i]
           if (node.matches || node.hasMatchingChildren) {
             this.flattenedMatchingFunctionalities.push(node)
           }
           if (node.expanded && node.children && node.hasMatchingChildren) {
-            this.flattenMatchingnodes(node.children)
+            this.flattenMatchingNodes(node.children)
           }
         }
       },
@@ -676,14 +691,14 @@
           if (this.filter[propertyName]) {
             let value = this.filter[propertyName]
             if (propertyName === 'countries') {
-              value = util.fromSplitted(value)
+              value = util.fromSplit(value)
             }
             if (value !== '') {
               query[propertyName] = value
             }
           }
         }
-        this.$router.replace({ query })
+        this.$router.replace({ query }).catch(() => {})
       },
 
       fromQueryString () {
@@ -693,7 +708,7 @@
             if (query[propertyName]) {
               let value = query[propertyName]
               if (propertyName === 'countries') {
-                value = util.toSplitted(value)
+                value = util.toSplit(value)
               }
               this.filter[propertyName] = value
             }
@@ -716,7 +731,7 @@
         for (let property in serverRow) {
           let value = serverRow[property]
           if (property === 'countryCodes') {
-            value = util.toSplitted(value)
+            value = util.toSplit(value)
           }
           clientRow[property] = value
         }
@@ -987,7 +1002,7 @@
         return counts
       },
 
-      deleteNode (node) {
+      getDeleteMessage (node) {
         let childrenCounts = this.countChildren(node)
         let childrenMessage = ''
         if (childrenCounts.FOLDER > 0 || childrenCounts.FUNCTIONALITY > 0) {
@@ -1001,6 +1016,11 @@
             childrenMessage = ` (+ ${functionalitiesMessage})`
           }
         }
+        return childrenMessage
+      },
+
+      deleteNode (node) {
+        const childrenMessage = this.getDeleteMessage(node)
         let self = this
         this.$Modal.confirm({
           title: `Delete ${node.row.type === 'FOLDER' ? 'Folder' : 'Functionality'}`,
@@ -1050,6 +1070,36 @@
           }, (error) => {
             api.handleError(error)
           })
+      },
+
+      applySelectToNode (node, selected) {
+        node.isSelected = selected
+        if (node.children) {
+          for (let i in node.children) {
+            const child = node.children[i]
+            this.applySelectToNode(child, selected)
+          }
+        }
+      },
+
+      applySelectToAllNodes (selected) {
+        let selection = []
+        for (let i in this.functionalities) {
+          const child = this.functionalities[i]
+          this.applySelectToNode(child, selected)
+          if (selected) {
+            selection = selection.concat(child)
+          }
+        }
+        this.nodesSelection = selection
+      },
+
+      selectAll () {
+        this.applySelectToAllNodes(true)
+      },
+
+      clearSelection () {
+        this.applySelectToAllNodes(false)
       },
 
       propagateSelectionToChildren (node) {
@@ -1186,6 +1236,66 @@
           this.resetNodeTargetDetails(child)
         }
       },
+
+      deleteSelection () {
+        if (this.noSelection) {
+          return
+        }
+
+        this.isMovingSelection = false
+
+        const selectionNumber = this.nodesSelection.length
+
+        const hasOnlyFunctionalities = _(this.nodesSelection).every((node) => node.row.type === 'FUNCTIONALITY')
+        const hasOnlyFolders = _(this.nodesSelection).every((node) => node.row.type === 'FOLDER')
+
+        let title = 'Delete '
+        if (hasOnlyFunctionalities) {
+          title += (selectionNumber === 1 ? 'a' : selectionNumber) + ' functionalit' + (selectionNumber > 1 ? 'ies' : 'y')
+        } else if (hasOnlyFolders) {
+          title += (selectionNumber === 1 ? 'a' : selectionNumber) + ' folder' + (selectionNumber > 1 ? 's' : '')
+        } else {
+          title += 'selection (' + selectionNumber + ')'
+        }
+
+        let content = '<p>Delete '
+        const nodeDescriptions = _(this.nodesSelection)
+          .map((node) => `<b>${util.escapeHtml(node.row.name)}</b> ` + this.getDeleteMessage(node))
+          .values()
+          .join(', ')
+        content += nodeDescriptions + '?</p>'
+
+        let okText = 'Delete selection'
+
+        const ids = _(this.nodesSelection)
+          .map((node) => `id=${node.id}`)
+          .values()
+          .join('&')
+
+        let self = this
+        this.$Modal.confirm({
+          title: title,
+          content: content,
+          okText: okText,
+          loading: true,
+          onOk () {
+            self.loadingFunctionalities = true
+            Vue.http
+              .delete(api.paths.functionalities(self) + '?' + ids, api.REQUEST_OPTIONS)
+              .then((response) => {
+                self.$Modal.remove()
+                self.loadingFunctionalities = false
+                self.nodesSelection = []
+                self.parseFunctionalities(response.body)
+              }, (error) => {
+                self.$Modal.remove()
+                self.loadingFunctionalities = false
+                api.handleError(error)
+              })
+          }
+        })
+      },
+
       // Export / Import
       openExportPopup () {
         var projectCode = this.$route.params.projectCode
