@@ -18,7 +18,19 @@
   <div>
     <functionality-menu />
 
-    <div>
+    <div v-if="countries.length === 0 || sources.length === 0 || teamsAssignableToFunctionalities.length === 0">
+      <h2 style="text-align: center; width: 75%; margin: auto; font-weight: normal;">
+        <span>
+          Before adding functionalities, please make sure to add at least
+          a <router-link :to="{ name: 'management-countries' }">country</router-link>,
+          a <router-link :to="{ name: 'management-sources' }">source</router-link> and
+          a <router-link :to="{ name: 'management-teams' }">team</router-link> (that is assignable to functionalities).
+        </span>
+      </h2>
+
+    </div>
+
+    <div v-else>
       <Spin fix v-if="loadingFunctionalities"/>
       <!-- Screen title with help -->
       <div style="display: flex;">
