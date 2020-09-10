@@ -146,50 +146,57 @@
         <div class="headerCell" :style="'width: ' + (columnSizes[7]) + 'px; text-align: center;'">
           Actions
            <if-feature-enabled code="xprt-mprt-crtg">
-              <Dropdown title="Other actions" trigger="click" placement="bottom-end" :transfer="true" >
-                <Button size="small">
-                  <Icon type="md-menu"/>
+              <template v-if="!isMovingSelection">
+                <Dropdown title="Other actions" trigger="click" placement="bottom-end" :transfer="true" >
+                  <Button size="small">
+                    <Icon type="md-menu"/>
+                  </Button>
+                  <DropdownMenu slot="list">
+                    <DropdownItem>
+                      <div @click="removeAllFilters()">
+                        <Icon type="md-backspace"/> REMOVE ALL FILTERS
+                      </div>
+                    </DropdownItem>
+                    <DropdownItem divided>
+                      <div @click="openExportPopup">
+                        <Icon type="md-cloud-download" /> EXPORT CURRENT FUNCTIONALITIES
+                      </div>
+                    </DropdownItem>
+                    <DropdownItem>
+                      <div @click="openImportPopup">
+                        <Icon type="md-cloud-upload" /> IMPORT NEW FUNCTIONALITIES
+                      </div>
+                    </DropdownItem>
+                    <DropdownItem divided>
+                      <div @click="selectAll()">
+                        <Icon type="md-checkbox-outline"/> SELECT ALL
+                      </div>
+                    </DropdownItem>
+                    <DropdownItem>
+                      <div @click="clearSelection()">
+                        <Icon type="md-square-outline" /> CLEAR SELECTION
+                      </div>
+                    </DropdownItem>
+                    <DropdownItem :disabled="noSelection" divided>
+                      <div @click="startMovingSelection()">
+                        <Icon type="md-move"/> MOVE SELECTION TO...
+                      </div>
+                    </DropdownItem>
+                    <DropdownItem :disabled="noSelection">
+                      <div @click="deleteSelection()">
+                        <Icon type="md-trash" /> DELETE SELECTION
+                      </div>
+                    </DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
+                <functionality-export-popup ref="exportPopup" />
+                <functionality-import-popup ref="importPopup" />
+              </template>
+              <template v-else>
+                <Button size="small" type="warning" title="Cancel move" @click="cancelMove()" style="float: none;">
+                  <Icon type="md-close-circle"/>
                 </Button>
-                <DropdownMenu slot="list">
-                  <DropdownItem>
-                    <div @click="removeAllFilters()">
-                      <Icon type="md-backspace"/> REMOVE ALL FILTERS
-                    </div>
-                  </DropdownItem>
-                  <DropdownItem divided>
-                    <div @click="openExportPopup">
-                      <Icon type="md-cloud-download" /> EXPORT CURRENT FUNCTIONALITIES
-                    </div>
-                  </DropdownItem>
-                  <DropdownItem>
-                    <div @click="openImportPopup">
-                      <Icon type="md-cloud-upload" /> IMPORT NEW FUNCTIONALITIES
-                    </div>
-                  </DropdownItem>
-                  <DropdownItem divided>
-                    <div @click="selectAll()">
-                      <Icon type="md-checkbox-outline"/> SELECT ALL
-                    </div>
-                  </DropdownItem>
-                  <DropdownItem>
-                    <div @click="clearSelection()">
-                      <Icon type="md-square-outline" /> CLEAR SELECTION
-                    </div>
-                  </DropdownItem>
-                  <DropdownItem :disabled="noSelection" divided>
-                    <div @click="startMovingSelection()">
-                      <Icon type="md-move"/> MOVE SELECTION TO...
-                    </div>
-                  </DropdownItem>
-                  <DropdownItem :disabled="noSelection">
-                    <div @click="deleteSelection()">
-                      <Icon type="md-trash" /> DELETE SELECTION
-                    </div>
-                  </DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
-              <functionality-export-popup ref="exportPopup" />
-              <functionality-import-popup ref="importPopup" />
+              </template>
           </if-feature-enabled>
           <if-feature-disabled code="xprt-mprt-crtg">
             <Button size="small" :disabled="!hasFilter" @click="removeAllFilters()" title="Remove all filters">
@@ -197,6 +204,7 @@
             </Button>
           </if-feature-disabled>
         </div>
+        <div class="headerCell" :style="'width: ' + (columnSizes[8]) + 'px; text-align: center;'"></div>
 
       </div>
       <virtual-scroller :items="flattenedMatchingFunctionalities" item-height="31" pool-size="1000" buffer="200" page-mode>
@@ -217,7 +225,6 @@
             v-on:duplicate="startDuplicating"
             v-on:move="startMoving"
             v-on:completeMove="completeMove"
-            v-on:cancelMove="cancelMove"
             v-on:create="create"
             v-on:delete="deleteNode"
             v-on:showCoverage="showCoverage"/>
@@ -364,7 +371,8 @@
           86, // Countries (default value: will be computed when countries are available, to know what width to allocate for all countries)
           180, // Coverage (default value: will be computed when sources are available, to know what width to allocate for all sources)
           110, // Comment
-          87 // Actions
+          60, // Actions
+          25 // Selection
         ],
         counts: {
           matching: 0,
