@@ -26,6 +26,7 @@ import com.decathlon.ara.service.dto.coverage.CoverageDTO;
 import com.decathlon.ara.service.dto.functionality.ExporterInfoDTO;
 import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
 import com.decathlon.ara.service.dto.functionality.FunctionalityWithChildrenDTO;
+import com.decathlon.ara.service.dto.request.MoveFunctionalitiesDTO;
 import com.decathlon.ara.service.dto.request.MoveFunctionalityDTO;
 import com.decathlon.ara.service.dto.request.NewFunctionalityDTO;
 import com.decathlon.ara.service.dto.scenario.ScenarioDTO;
@@ -154,17 +155,31 @@ public class FunctionalityResource {
     /**
      * DELETE one entity, and its children, if any.
      *
-     * @param projectCode the code of the project in which to work
-     * @param id the id of the entity to delete
+     * @param projectCode the project code
+     * @param id the functionality id to delete
      * @return the ResponseEntity with status 200 (OK)
      */
     @DeleteMapping("/{id:[0-9]+}")
     @Timed
-    public ResponseEntity<Void> delete(@PathVariable String projectCode, @PathVariable long id) {
+    public ResponseEntity<Void> delete(@PathVariable String projectCode, @PathVariable Long id) {
         try {
             service.delete(projectService.toId(projectCode), id);
             return ResponseUtil.deleted(NAME, id);
-        } catch (NotFoundException e) {
+        } catch (BadRequestException e) {
+            return ResponseUtil.handle(e);
+        }
+    }
+
+    @DeleteMapping
+    @Timed
+    public ResponseEntity<List<FunctionalityWithChildrenDTO>> deleteList(
+            @PathVariable String projectCode,
+            @RequestParam("id") List<Long> ids
+    ) {
+        try {
+            List<FunctionalityWithChildrenDTO> updatedTree = service.deleteList(projectService.toId(projectCode), ids);
+            return ResponseEntity.ok().body(updatedTree);
+        } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
         }
     }
@@ -184,6 +199,24 @@ public class FunctionalityResource {
             return ResponseEntity.ok()
                     .headers(HeaderUtil.entityMoved(NAME, updatedDto.getId()))
                     .body(updatedDto);
+        } catch (BadRequestException e) {
+            return ResponseUtil.handle(e);
+        }
+    }
+
+    /**
+     * POST move several functionalities or folders to another place in the tree.
+     *
+     * @param projectCode the project code
+     * @param moveRequest contains the entities to move, as well as the destination entity
+     * @return the ResponseEntity with status 200 (OK)
+     */
+    @PostMapping("/move/list")
+    @Timed
+    public ResponseEntity<List<FunctionalityWithChildrenDTO>> moveList(@PathVariable String projectCode, @Valid @RequestBody MoveFunctionalitiesDTO moveRequest) {
+        try {
+            List<FunctionalityWithChildrenDTO> updatedTree = service.moveList(projectService.toId(projectCode), moveRequest);
+            return ResponseEntity.ok().body(updatedTree);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
         }

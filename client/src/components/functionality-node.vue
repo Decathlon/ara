@@ -15,8 +15,7 @@
   ~
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
-  <span style="width: 100%;" :class="'functionality-node ' + (node.row.type) + (hasFilter && node.matches ? ' matches' : '') + (dropDownVisible ? ' dropDownVisible' : '') + (nodeToMove && nodeToMove.id === node.id ? ' moving' : '')" :id="node.row.id">
-
+  <span style="width: 100%;" :class="'functionality-node ' + (node.row.type) + (hasFilter && node.matches ? ' matches' : '') + (dropDownVisible ? ' dropDownVisible' : '') + (isMovingSelection && node.moveDetails.isBeingMoved ? ' moving' : '')" :id="node.row.id">
     <span class="name toHover cell" :style="'width: calc(100% - ' + sumColumnSizes + 'px); padding-left: ' + (node.level * 32 + 3) + 'px;'">
       <span class="expandedOnHover" v-if="hover" :style="'margin-left: ' + (node.level * 32) + 'px;'">
         <span v-if="node.hasMatchingChildren" @click="emitToggleExpand" class="expandButton"><!--
@@ -93,30 +92,22 @@
 
     <span class="cell" :style="'width: ' + (columnSizes[7]) + 'px; text-align: center; line-height: 25px;'">
 
-      <div v-if="destinationReferenceNodeId === node.id">
-        <!-- Saving indicator... -->
-        <Spin style="width: 20px; margin: 3px auto 0 auto;"/>
-      </div>
-
-      <div v-else-if="!!destinationReferenceNodeId">
-        <!-- Currently saving: show nothing on other nodes -->
-      </div>
-
-      <ButtonGroup v-else-if="!nodeToMove">
-        <Button size="small" title="Edit" @click="emitEdit">
-          <Icon type="md-create"/>
-        </Button>
+      <ButtonGroup v-if="!isMovingSelection">
         <Dropdown title="Other actions" trigger="click" placement="bottom-end" :transfer="true" @on-visible-change="dropDownVisibilityChanged">
           <Button size="small">
             <Icon type="md-menu"/>
           </Button>
           <DropdownMenu slot="list">
             <DropdownItem>
+              <div @click="emitEdit">
+                <Icon type="md-create"/> EDIT
+              </div>
+            </DropdownItem>
+            <DropdownItem divided>
               <div @click="emitMove">
                 <Icon type="md-move"/> MOVE TO...
               </div>
             </DropdownItem>
-
             <DropdownItem v-if="node.row.type === 'FUNCTIONALITY'" divided>
               <div @click="emitDuplicate">
                 <Icon type="md-copy"/> DUPLICATE
@@ -164,7 +155,7 @@
         </Dropdown>
       </ButtonGroup>
 
-      <ButtonGroup v-else-if="node.isPossibleMovingTarget">
+      <ButtonGroup v-else-if="isAvailableMoveTarget">
         <Dropdown title="Move to..." trigger="click" placement="bottom-end" :transfer="true" @on-visible-change="dropDownVisibilityChanged">
           <Button size="small" type="success">
             <Icon type="md-funnel"/>
@@ -187,20 +178,23 @@
             </DropdownItem>
           </DropdownMenu>
         </Dropdown>
-        <Button size="small" type="warning" title="Cancel move" @click="emitCancelMove()" style="float: none;">
-          <Icon type="md-close-circle"/>
-        </Button>
       </ButtonGroup>
 
-      <div v-else-if="nodeToMove.id === node.id" :title="'Currently moving this ' + node.row.type.toLowerCase()">
+      <div v-else-if="(isMovingSelection && node.moveDetails.isBeingMoved)" :title="'Currently moving this ' + node.row.type.toLowerCase()">
         <span style="display: inline-block; text-align: center; width: 22px;">
           <Icon type="md-move" style="display: inline-block;"/>
         </span>
-        <Button size="small" type="warning" title="Cancel move" @click="emitCancelMove()" style="float: none;">
-          <Icon type="md-close-circle"/>
-        </Button>
       </div>
 
+    </span>
+
+    <span class="cell" :style="'width: ' + (columnSizes[8]) + 'px;'">
+      <Checkbox
+        @on-change="emitSelection()"
+        v-model="node.isSelected"
+        :disabled="isMovingSelection"
+        style="margin:0 0 0 10%;">
+      </Checkbox>
     </span>
 
   </span>
@@ -212,7 +206,7 @@
   export default {
     name: 'functionality-node',
 
-    props: [ 'node', 'columnSizes', 'sumColumnSizes', 'hasFilter', 'countries', 'teams', 'nodeToMove', 'destinationReferenceNodeId', 'sources' ],
+    props: [ 'node', 'columnSizes', 'sumColumnSizes', 'hasFilter', 'countries', 'teams', 'isMovingSelection', 'sources' ],
 
     data () {
       return {
@@ -223,6 +217,11 @@
     },
 
     computed: {
+
+      isAvailableMoveTarget () {
+        return this.isMovingSelection && !(this.node.moveDetails.isBeingMoved || this.node.moveDetails.isMovingNodesParent || this.node.moveDetails.isInLowerHierarchy)
+      },
+
       teamName () {
         let id = this.node.row.teamId
         if (id && this.teams) {
@@ -380,10 +379,6 @@
         this.dropDownVisible = false
       },
 
-      emitCancelMove () {
-        this.$emit('cancelMove')
-      },
-
       emitCreate (type, position) {
         this.$emit('create', type, this.node, position)
       },
@@ -397,6 +392,10 @@
         if (this.hasCoverage) {
           this.$emit('showCoverage', this.node)
         }
+      },
+
+      emitSelection () {
+        this.$emit('updateSelection', this.node)
       },
 
       dropDownVisibilityChanged (visible) {
