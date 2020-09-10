@@ -15,11 +15,17 @@ export const getRGB = (color) => {
     };
 }
 
-var PROGRESS_BAR = 154.281250/100;
-export const getProgressBar = (value) => {
-    return value * PROGRESS_BAR + 'px';
+
+export const getProgressBar = (value, widthMax) => {
+    var numPower = Math.pow(10, 6); 
+    return ~~(value * widthMax/(100*10000) * numPower)/numPower + 'px';
 }
 
-export const testProgressBar = (progressBar, value) => {
-    return expect(progressBar.find('>div').first()).to.have.css('width', getProgressBar(value));
+export const testFirstProgressBar = (progressBar, value, widthMax) => {
+    return expect(progressBar.find('>div').first()).to.have.css('width', getProgressBar(value, widthMax));
 }
+
+export const testLastProgressBar = (progressBar, value, widthMax) => {
+    return expect(progressBar.find('>div').last()).to.have.css('width', getProgressBar(value, widthMax));
+}
+
