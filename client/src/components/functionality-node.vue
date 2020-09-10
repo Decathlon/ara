@@ -93,15 +93,17 @@
     <span class="cell" :style="'width: ' + (columnSizes[7]) + 'px; text-align: center; line-height: 25px;'">
 
       <ButtonGroup v-if="!isMovingSelection">
-        <Button size="small" title="Edit" @click="emitEdit">
-          <Icon type="md-create"/>
-        </Button>
         <Dropdown title="Other actions" trigger="click" placement="bottom-end" :transfer="true" @on-visible-change="dropDownVisibilityChanged">
           <Button size="small">
             <Icon type="md-menu"/>
           </Button>
           <DropdownMenu slot="list">
             <DropdownItem>
+              <div @click="emitEdit">
+                <Icon type="md-create"/> EDIT
+              </div>
+            </DropdownItem>
+            <DropdownItem divided>
               <div @click="emitMove">
                 <Icon type="md-move"/> MOVE TO...
               </div>
