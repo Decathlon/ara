@@ -153,7 +153,6 @@
             </DropdownItem>
           </DropdownMenu>
         </Dropdown>
-        <Checkbox @on-change="emitSelection()" v-model="node.isSelected"></Checkbox>
       </ButtonGroup>
 
       <ButtonGroup v-else-if="isAvailableMoveTarget">
@@ -179,22 +178,23 @@
             </DropdownItem>
           </DropdownMenu>
         </Dropdown>
-        <Button size="small" type="warning" title="Cancel move" @click="emitCancelMove()" style="float: none;">
-          <Icon type="md-close-circle"/>
-        </Button>
-        <Checkbox @on-change="emitSelection()" v-model="node.isSelected" disabled></Checkbox>
       </ButtonGroup>
 
       <div v-else-if="(isMovingSelection && node.moveDetails.isBeingMoved)" :title="'Currently moving this ' + node.row.type.toLowerCase()">
         <span style="display: inline-block; text-align: center; width: 22px;">
           <Icon type="md-move" style="display: inline-block;"/>
         </span>
-        <Button size="small" type="warning" title="Cancel move" @click="emitCancelMove()" style="float: none;">
-          <Icon type="md-close-circle"/>
-        </Button>
-        <Checkbox @on-change="emitSelection()" v-model="node.isSelected" disabled></Checkbox>
       </div>
 
+    </span>
+
+    <span class="cell" :style="'width: ' + (columnSizes[8]) + 'px;'">
+      <Checkbox
+        @on-change="emitSelection()"
+        v-model="node.isSelected"
+        :disabled="isMovingSelection"
+        style="margin:0 0 0 10%;">
+      </Checkbox>
     </span>
 
   </span>
@@ -377,10 +377,6 @@
         this.$emit('completeMove', this.node, position)
         // Buggy here, so we do it manually :-(
         this.dropDownVisible = false
-      },
-
-      emitCancelMove () {
-        this.$emit('cancelMove')
       },
 
       emitCreate (type, position) {
