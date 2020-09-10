@@ -1069,6 +1069,9 @@
       },
 
       loadAll () {
+        this.isMovingSelection = false
+        this.nodesSelection = []
+
         this.fromQueryString()
         this.loadFunctionalities()
 
