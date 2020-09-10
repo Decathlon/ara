@@ -15,7 +15,7 @@
   ~
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
-  <span style="width: 100%;" :class="'functionality-node ' + (node.row.type) + (hasFilter && node.matches ? ' matches' : '') + (dropDownVisible ? ' dropDownVisible' : '') + (isMovingSelection && node.moveDetails.isBeingMoved ? ' moving' : '')" :id="node.row.id">
+  <span style="width: 100%;" :class="'functionality-node ' + (node.row.type) + (hasFilter && node.matches ? ' matches' : '') + (dropDownVisible ? ' dropDownVisible' : '') + (isMovingSelection && node.moveDetails.isBeingMoved ? ' moving' : '') + (node.isSelected ? ' selected-node' : '')" :id="node.row.id">
     <span class="name toHover cell" :style="'width: calc(100% - ' + sumColumnSizes + 'px); padding-left: ' + (node.level * 32 + 3) + 'px;'">
       <span class="expandedOnHover" v-if="hover" :style="'margin-left: ' + (node.level * 32) + 'px;'">
         <span v-if="node.hasMatchingChildren" @click="emitToggleExpand" class="expandButton"><!--
@@ -436,6 +436,10 @@
   .moving .country.active {
     background-color: #0082C3 !important;
     color: white !important;
+  }
+
+  .selected-node {
+    background-color: #BFE6FF !important;
   }
 
   .expandButton,
