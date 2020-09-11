@@ -247,5 +247,15 @@ export default [
       title: 'Project Settings'
     },
     component: (resolve) => require(['./views/management-settings.vue'], resolve)
-  }
+  },
+
+  // Not found page
+  { path: '/not-found',
+    name: 'not-found',
+    meta: {
+      title: 'Page not found...'
+    },
+    component: (resolve) => require(['./views/not-found.vue'], resolve)
+  },
+  { path: '*', redirect: '/not-found' }
 ]
