@@ -37,6 +37,7 @@ import com.decathlon.ara.service.dto.functionality.ExporterInfoDTO;
 import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
 import com.decathlon.ara.service.dto.functionality.FunctionalityWithChildrenDTO;
 import com.decathlon.ara.service.dto.request.FunctionalityPosition;
+import com.decathlon.ara.service.dto.request.MoveFunctionalitiesDTO;
 import com.decathlon.ara.service.dto.request.MoveFunctionalityDTO;
 import com.decathlon.ara.service.dto.request.NewFunctionalityDTO;
 import com.decathlon.ara.service.dto.scenario.ScenarioDTO;
@@ -58,14 +59,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -156,11 +152,11 @@ public class FunctionalityService {
         ObjectUtil.trimStringValues(dtoToUpdate);
 
         // Must update an existing entity
-        Functionality dataBaseEntity = repository.findByProjectIdAndId(projectId, dtoToUpdate.getId());
-        if (dataBaseEntity == null) {
-            String message = (isFolder(dtoToUpdate) ? Messages.NOT_FOUND_FUNCTIONALITY_FOLDER : Messages.NOT_FOUND_FUNCTIONALITY);
-            throw new NotFoundException(message, Entities.FUNCTIONALITY);
-        }
+        Functionality dataBaseEntity = repository.findByProjectIdAndId(projectId, dtoToUpdate.getId())
+                .orElseThrow(() -> {
+                    String message = (isFolder(dtoToUpdate) ? Messages.NOT_FOUND_FUNCTIONALITY_FOLDER : Messages.NOT_FOUND_FUNCTIONALITY);
+                    return new NotFoundException(message, Entities.FUNCTIONALITY);
+                });
 
         // The updated entity must remain valid
         dtoToUpdate.setParentId(dataBaseEntity.getParentId());
@@ -221,10 +217,10 @@ public class FunctionalityService {
      *
      * @param projectId the ID of the project in which to work
      * @param newDto    the entity to create, relative to another entity
-     * @return the crated entity
+     * @return the created entity
      * @throws BadRequestException if something is wrong in the request
      */
-    public FunctionalityDTO create(long projectId, NewFunctionalityDTO newDto) throws BadRequestException {
+    public FunctionalityDTO create(Long projectId, NewFunctionalityDTO newDto) throws BadRequestException {
         ObjectUtil.trimStringValues(newDto.getFunctionality());
 
         // Compute new position and verify all technical rules related to the position of the node in the tree
@@ -257,17 +253,40 @@ public class FunctionalityService {
     /**
      * Delete an entity by id, and its children, if any.
      *
-     * @param projectId the ID of the project in which to work
-     * @param id        the id of the entity
+     * @param projectId the project id
+     * @param id        entity id
      * @throws NotFoundException if the entity id does not exist
      */
-    public void delete(long projectId, long id) throws NotFoundException {
-        Functionality entity = repository.findByProjectIdAndId(projectId, id);
-        if (entity == null) {
-            throw new NotFoundException(Messages.NOT_FOUND_FUNCTIONALITY_OR_FOLDER, Entities.FUNCTIONALITY);
+    public void delete(Long projectId, Long id) throws BadRequestException {
+        if (id == null) {
+            throw new BadRequestException(Messages.PARAMETER_IS_MISSING, Entities.FUNCTIONALITY, "delete_functionality_missing_id_parameter");
         }
+        Functionality entity = repository.findByProjectIdAndId(projectId, id)
+                .orElseThrow(() -> new NotFoundException(Messages.NOT_FOUND_FUNCTIONALITY_OR_FOLDER, Entities.FUNCTIONALITY));
         // Will cascade delete children
         repository.delete(entity);
+    }
+
+    /**
+     * Delete a list of functionalities (as well as its children, if any)
+     * @param projectId the project id
+     * @param ids       entity ids
+     * @return the updated tree
+     * @throws BadRequestException if any error
+     */
+    public List<FunctionalityWithChildrenDTO> deleteList(Long projectId, List<Long> ids) throws BadRequestException {
+        if (CollectionUtils.isEmpty(ids)) {
+            throw new BadRequestException(Messages.PARAMETER_IS_MISSING, Entities.FUNCTIONALITY, "delete_functionality_list_missing_ids_parameter");
+        }
+
+        List<Functionality> functionalitiesToDelete = repository.findByProjectIdAndIdIn(projectId, ids);
+        Boolean thereAreSomeUnknownIds = ids.size() > functionalitiesToDelete.size();
+        if (thereAreSomeUnknownIds) {
+            throw new NotFoundException(Messages.NOT_FOUND_FUNCTIONALITY_OR_FOLDER, Entities.FUNCTIONALITY);
+        }
+
+        repository.deleteAll(functionalitiesToDelete);
+        return findAllAsTree(projectId);
     }
 
     /**
@@ -279,10 +298,8 @@ public class FunctionalityService {
      * @throws BadRequestException if something is wrong in the request
      */
     public FunctionalityDTO move(long projectId, MoveFunctionalityDTO moveRequest) throws BadRequestException {
-        Functionality source = repository.findByProjectIdAndId(projectId, moveRequest.getSourceId());
-        if (source == null) {
-            throw new NotFoundException(Messages.NOT_FOUND_FUNCTIONALITY_OR_FOLDER_TO_MOVE, Entities.FUNCTIONALITY);
-        }
+        Functionality source = repository.findByProjectIdAndId(projectId, moveRequest.getSourceId())
+                .orElseThrow(() -> new NotFoundException(Messages.NOT_FOUND_FUNCTIONALITY_OR_FOLDER_TO_MOVE, Entities.FUNCTIONALITY));
 
         // Compute new position and verify all technical rules related to the position of the node in the tree
         TreePosition treePosition = computeDestinationTreePosition(projectId, moveRequest.getReferenceId(), moveRequest.getRelativePosition(), source);
@@ -290,6 +307,44 @@ public class FunctionalityService {
         source.setOrder(treePosition.getOrder());
 
         return mapper.toDto(repository.save(source));
+    }
+
+    /**
+     * Move a list of functionalities or folders to another place in the functionality tree.
+     * @param projectId the project id
+     * @param moveRequest the request containing the move details
+     * @return the updated functionality tree
+     * @throws BadRequestException thrown if there are any problem linked to the move request
+     */
+    public List<FunctionalityWithChildrenDTO> moveList(long projectId, MoveFunctionalitiesDTO moveRequest) throws BadRequestException {
+        if (moveRequest == null) {
+            throw new BadRequestException(Messages.PARAMETER_IS_MISSING, Entities.FUNCTIONALITY, "move_functionality_list_missing_move_request_parameter");
+        }
+        Long destinationId = moveRequest.getReferenceId();
+        if (destinationId == null) {
+            throw new BadRequestException(Messages.PARAMETER_HAS_ONE_OR_MORE_MISSING_FIELDS, Entities.FUNCTIONALITY, "move_functionality_list_missing_reference_id");
+        }
+        List<Long> sourceIds = moveRequest.getSourceIds();
+        if (CollectionUtils.isEmpty(sourceIds)) {
+            throw new BadRequestException(Messages.PARAMETER_HAS_ONE_OR_MORE_MISSING_FIELDS, Entities.FUNCTIONALITY, "move_functionality_list_missing_sources_id");
+        }
+        Functionality referenceFunctionality = repository.findByProjectIdAndId(projectId, destinationId)
+                .orElseThrow(() -> new NotFoundException(Messages.NOT_FOUND_FUNCTIONALITY_OR_FOLDER_REFERENCE, Entities.FUNCTIONALITY));
+
+        List<Functionality> sourceFunctionalities = repository.findByProjectIdAndIdIn(projectId, sourceIds);
+        Boolean notAllTheFunctionalitiesAreFound = sourceIds.size() != sourceFunctionalities.size();
+        if (notAllTheFunctionalitiesAreFound) {
+            throw new NotFoundException(Messages.NOT_FOUND_FUNCTIONALITY_OR_FOLDER_REFERENCE, Entities.FUNCTIONALITY);
+        }
+
+        for (Functionality sourceFunctionality : sourceFunctionalities) {
+            TreePosition treePosition = computeDestinationTreePosition(projectId, destinationId, moveRequest.getRelativePosition(), sourceFunctionality);
+            sourceFunctionality.setParentId(treePosition.getParentId());
+            sourceFunctionality.setOrder(treePosition.getOrder());
+        }
+
+        repository.saveAll(sourceFunctionalities);
+        return findAllAsTree(projectId);
     }
 
     /**
@@ -302,10 +357,8 @@ public class FunctionalityService {
      */
     public List<ScenarioDTO> findScenarios(long projectId, long functionalityId) throws BadRequestException {
         // Must update an existing entity
-        Functionality functionality = repository.findByProjectIdAndId(projectId, functionalityId);
-        if (functionality == null) {
-            throw new NotFoundException(Messages.NOT_FOUND_FUNCTIONALITY, Entities.FUNCTIONALITY);
-        }
+        Functionality functionality = repository.findByProjectIdAndId(projectId, functionalityId)
+                .orElseThrow(() -> new NotFoundException(Messages.NOT_FOUND_FUNCTIONALITY, Entities.FUNCTIONALITY));
         if (functionality.getType() != FunctionalityType.FUNCTIONALITY) {
             throw new BadRequestException(Messages.RULE_FUNCTIONALITY_FOLDER_HAVE_NO_COVERAGE, Entities.FUNCTIONALITY, "folders_have_no_coverage");
         }
@@ -450,9 +503,9 @@ public class FunctionalityService {
             throw new BadRequestException(Messages.RULE_FUNCTIONALITY_MOVE_TO_ITSELF_OR_SUB_FOLDER, Entities.FUNCTIONALITY, "cannot_move_to_itself_or_sub_folder");
         }
 
-        // Threat "insert LAST_CHILD" as "BELOW the last child of the parent in which to insert"
+        // Treat "insert LAST_CHILD" as "BELOW the last child of the parent in which to insert"
         List<Functionality> siblings = repository.findAllByProjectIdAndParentIdOrderByOrder(projectId, parentId);
-        boolean insertBelow = (effectivePosition == FunctionalityPosition.BELOW);
+        Boolean insertBelow = (effectivePosition == FunctionalityPosition.BELOW);
         if (effectivePosition == FunctionalityPosition.LAST_CHILD) {
             reference = (siblings.isEmpty() ? null : siblings.get(siblings.size() - 1));
             insertBelow = true;
@@ -463,8 +516,8 @@ public class FunctionalityService {
 
     private void ensureNotInsertingIntoFunctionality(long projectId, FunctionalityPosition effectivePosition, Long parentId) throws BadRequestException {
         if (effectivePosition == FunctionalityPosition.LAST_CHILD && parentId != null) {
-            Functionality parent = repository.findByProjectIdAndId(projectId, parentId);
-            if (parent.getType() == FunctionalityType.FUNCTIONALITY) {
+            Optional<Functionality> parent = repository.findByProjectIdAndId(projectId, parentId);
+            if (parent.isPresent() && parent.get().getType() == FunctionalityType.FUNCTIONALITY) {
                 throw new BadRequestException(Messages.RULE_FUNCTIONALITY_HAVE_NO_CHILDREN, Entities.FUNCTIONALITY, "functionalities_cannot_have_children");
             }
         }
@@ -510,10 +563,8 @@ public class FunctionalityService {
             }
             reference = null;
         } else {
-            reference = repository.findByProjectIdAndId(projectId, referenceId);
-            if (reference == null) {
-                throw new NotFoundException(Messages.NOT_FOUND_FUNCTIONALITY_OR_FOLDER_REFERENCE, Entities.FUNCTIONALITY);
-            }
+            reference = repository.findByProjectIdAndId(projectId, referenceId)
+                    .orElseThrow(() -> new NotFoundException(Messages.NOT_FOUND_FUNCTIONALITY_OR_FOLDER_REFERENCE, Entities.FUNCTIONALITY));
         }
         return reference;
     }
@@ -539,7 +590,7 @@ public class FunctionalityService {
         // from Number.MAX_VALUE, when dividing by 2 repeatedly in JavaScript ...
         // give the exact same result when dividing by two 954 times.
         // Then, they have different formatting but have the same value, rarely having a differently rounded last digit.
-        // But the rounding errors do not impact the the meaning of the algorithm of dividing by 2
+        // But the rounding errors do not impact the meaning of the algorithm of dividing by 2
         // We get to 0 at the 2099th division by two.
         // You'd have to swap each second during 35 minutes non-stop before harming the algorithm.
         // In the improbable case that such case would appear (eg. by a batch doing heavy work each night),

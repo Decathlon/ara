@@ -18,8 +18,20 @@
   <div>
     <functionality-menu />
 
-    <Spin fix v-if="loadingFunctionalities || countries.length === 0 || sources.length === 0 || teamsAssignableToFunctionalities.length === 0"/>
+    <div v-if="countries.length === 0 || sources.length === 0 || teamsAssignableToFunctionalities.length === 0">
+      <h2 style="text-align: center; width: 75%; margin: auto; font-weight: normal;">
+        <span>
+          Before adding functionalities, please make sure to add at least
+          a <router-link :to="{ name: 'management-countries' }">country</router-link>,
+          a <router-link :to="{ name: 'management-sources' }">source</router-link> and
+          a <router-link :to="{ name: 'management-teams' }">team</router-link> (that is assignable to functionalities).
+        </span>
+      </h2>
+
+    </div>
+
     <div v-else>
+      <Spin fix v-if="loadingFunctionalities"/>
       <!-- Screen title with help -->
       <div style="display: flex;">
         <div class="balance">
@@ -58,7 +70,7 @@
         --></ButtonGroup><!--
       --><Input placeholder="Identifier" title="Functionality identifier" size="small" icon="md-document" v-model="filter.id" @on-change="filterFunctionalities" style="margin-right: 3px; width: 95px;"/><!--
       --><Input placeholder="Name" size="small" icon="ios-funnel" v-model="filter.functionality" @on-change="filterFunctionalities" style="width: calc(100% - 2 * 26px - 95px - 3 * 3px);"/>
-        </div>
+      </div>
 
         <div class="headerCell" :style="'width: ' + (columnSizes[1]) + 'px;'">
           Team<br>
@@ -134,37 +146,65 @@
         <div class="headerCell" :style="'width: ' + (columnSizes[7]) + 'px; text-align: center;'">
           Actions
            <if-feature-enabled code="xprt-mprt-crtg">
-              <Dropdown title="Other actions" trigger="click" placement="bottom-end" :transfer="true" >
-                <Button size="small">
-                  <Icon type="md-menu"/>
+              <template v-if="!isMovingSelection">
+                <Dropdown title="Other actions" trigger="click" placement="bottom-end" :transfer="true" >
+                  <Button size="small">
+                    <Icon type="md-menu"/>
+                  </Button>
+                  <DropdownMenu slot="list">
+                    <DropdownItem>
+                      <div @click="removeAllFilters()">
+                        <Icon type="md-backspace"/> REMOVE ALL FILTERS
+                      </div>
+                    </DropdownItem>
+                    <DropdownItem divided>
+                      <div @click="openExportPopup">
+                        <Icon type="md-cloud-download" /> EXPORT CURRENT FUNCTIONALITIES
+                      </div>
+                    </DropdownItem>
+                    <DropdownItem>
+                      <div @click="openImportPopup">
+                        <Icon type="md-cloud-upload" /> IMPORT NEW FUNCTIONALITIES
+                      </div>
+                    </DropdownItem>
+                    <DropdownItem divided>
+                      <div @click="selectAll()">
+                        <Icon type="md-checkbox-outline"/> SELECT ALL
+                      </div>
+                    </DropdownItem>
+                    <DropdownItem>
+                      <div @click="clearSelection()">
+                        <Icon type="md-square-outline" /> CLEAR SELECTION
+                      </div>
+                    </DropdownItem>
+                    <DropdownItem :disabled="noSelection" divided>
+                      <div @click="startMovingSelection()">
+                        <Icon type="md-move"/> MOVE SELECTION TO...
+                      </div>
+                    </DropdownItem>
+                    <DropdownItem :disabled="noSelection">
+                      <div @click="deleteSelection()">
+                        <Icon type="md-trash" /> DELETE SELECTION
+                      </div>
+                    </DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
+                <functionality-export-popup ref="exportPopup" />
+                <functionality-import-popup ref="importPopup" />
+              </template>
+              <template v-else>
+                <Button size="small" type="warning" title="Cancel move" @click="cancelMove()" style="float: none;">
+                  <Icon type="md-close-circle"/>
                 </Button>
-                <DropdownMenu slot="list">
-                  <DropdownItem>
-                    <div @click="removeAllFilters()">
-                      <Icon type="md-backspace"/> REMOVE ALL FILTERS
-                    </div>
-                  </DropdownItem>
-                  <DropdownItem>
-                    <div @click="openExportPopup">
-                      <Icon type="md-cloud-download" /> EXPORT CURRENT FUNCTIONALITIES
-                    </div>
-                  </DropdownItem>
-                  <DropdownItem>
-                    <div @click="openImportPopup">
-                      <Icon type="md-cloud-upload" /> IMPORT NEW FUNCTIONALITIES
-                    </div>
-                  </DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
-              <functionality-export-popup ref="exportPopup" />
-              <functionality-import-popup ref="importPopup" />
-          </if-feature-enabled> 
+              </template>
+          </if-feature-enabled>
           <if-feature-disabled code="xprt-mprt-crtg">
             <Button size="small" :disabled="!hasFilter" @click="removeAllFilters()" title="Remove all filters">
-              <Icon type="md-backspace"/> 
+              <Icon type="md-backspace"/>
             </Button>
           </if-feature-disabled>
         </div>
+        <div class="headerCell" :style="'width: ' + (columnSizes[8]) + 'px; text-align: center;'"></div>
 
       </div>
       <virtual-scroller :items="flattenedMatchingFunctionalities" item-height="31" pool-size="1000" buffer="200" page-mode>
@@ -177,15 +217,14 @@
             :hasFilter="hasFilter"
             :countries="countries"
             :teams="teamsAssignableToFunctionalities"
-            :nodeToMove="nodeToMove"
-            :destinationReferenceNodeId="destinationReferenceNodeId"
+            :isMovingSelection="isMovingSelection"
             :sources="sources"
+            v-on:updateSelection="updateSelection"
             v-on:toggleExpand="toggleExpand"
             v-on:edit="startEditing"
             v-on:duplicate="startDuplicating"
             v-on:move="startMoving"
             v-on:completeMove="completeMove"
-            v-on:cancelMove="cancelMove"
             v-on:create="create"
             v-on:delete="deleteNode"
             v-on:showCoverage="showCoverage"/>
@@ -284,6 +323,8 @@
 
   import constants from '../libs/constants.js'
 
+  import _ from 'lodash'
+
   const DEFAULT_FILTER = {
     id: '',
     functionality: '',
@@ -330,7 +371,8 @@
           86, // Countries (default value: will be computed when countries are available, to know what width to allocate for all countries)
           180, // Coverage (default value: will be computed when sources are available, to know what width to allocate for all sources)
           110, // Comment
-          66 // Actions
+          60, // Actions
+          25 // Selection
         ],
         counts: {
           matching: 0,
@@ -352,13 +394,13 @@
         showingEditDialog: false,
         loadingSaving: true,
 
-        // Move
-        nodeToMove: null,
-        destinationReferenceNodeId: null,
-
         // Coverage details popup
         coverageDetailsNode: null,
-        showCoverageDetails: false
+        showCoverageDetails: false,
+
+        // Selection
+        isMovingSelection: false,
+        nodesSelection: []
       }
     },
 
@@ -393,6 +435,10 @@
           default:
             return `!!UNSUPPORTED:${this.creatingRelativePosition}!!`
         }
+      },
+
+      noSelection () {
+        return !this.nodesSelection || this.nodesSelection.length === 0
       }
     },
 
@@ -420,7 +466,7 @@
         if (jsonNodes) {
           for (let i in jsonNodes) {
             let jsonNode = jsonNodes[i]
-            jsonNode.countryCodes = util.toSplitted(jsonNode.countryCodes)
+            jsonNode.countryCodes = util.toSplit(jsonNode.countryCodes)
             nodes.push({
               id: jsonNode.id, // For virtual-scroller
               row: jsonNode,
@@ -428,8 +474,13 @@
               expanded: true,
               matches: true,
               hasMatchingChildren: false,
+              isSelected: false,
               children: this.parseFunctionalityNodes(jsonNode.children, level + 1),
-              isPossibleMovingTarget: true
+              moveDetails: {
+                isBeingMoved: false,
+                isMovingNodesParent: false,
+                isInLowerHierarchy: false
+              }
             })
           }
         }
@@ -614,17 +665,17 @@
 
       flattenMatchingFunctionalities () {
         this.flattenedMatchingFunctionalities = []
-        this.flattenMatchingnodes(this.functionalities, this.flattenedMatchingFunctionalities)
+        this.flattenMatchingNodes(this.functionalities, this.flattenedMatchingFunctionalities)
       },
 
-      flattenMatchingnodes (nodes, flattenedNodes) {
+      flattenMatchingNodes (nodes, flattenedNodes) {
         for (let i in nodes) {
           let node = nodes[i]
           if (node.matches || node.hasMatchingChildren) {
             this.flattenedMatchingFunctionalities.push(node)
           }
           if (node.expanded && node.children && node.hasMatchingChildren) {
-            this.flattenMatchingnodes(node.children)
+            this.flattenMatchingNodes(node.children)
           }
         }
       },
@@ -660,14 +711,14 @@
           if (this.filter[propertyName]) {
             let value = this.filter[propertyName]
             if (propertyName === 'countries') {
-              value = util.fromSplitted(value)
+              value = util.fromSplit(value)
             }
             if (value !== '') {
               query[propertyName] = value
             }
           }
         }
-        this.$router.replace({ query })
+        this.$router.replace({ query }).catch(() => {})
       },
 
       fromQueryString () {
@@ -677,7 +728,7 @@
             if (query[propertyName]) {
               let value = query[propertyName]
               if (propertyName === 'countries') {
-                value = util.toSplitted(value)
+                value = util.toSplit(value)
               }
               this.filter[propertyName] = value
             }
@@ -700,7 +751,7 @@
         for (let property in serverRow) {
           let value = serverRow[property]
           if (property === 'countryCodes') {
-            value = util.toSplitted(value)
+            value = util.toSplit(value)
           }
           clientRow[property] = value
         }
@@ -818,7 +869,11 @@
               matches: true,
               hasMatchingChildren: false,
               children: [],
-              isPossibleMovingTarget: true
+              moveDetails: {
+                isBeingMoved: false,
+                isMovingNodesParent: false,
+                isInLowerHierarchy: false
+              }
             }
             this.copyRowPropertiesFromServer(response.body, newNode.row)
 
@@ -878,47 +933,60 @@
         }
       },
 
-      startMoving (nodeToMove) {
-        this.nodeToMove = nodeToMove
-        this.updateMovingTargets(this.functionalities, nodeToMove, true)
-      },
+      selectOnlyThisNode (node, nodeId) {
+        node.isSelected = (node.id === nodeId)
 
-      updateMovingTargets (nodes, nodeToMove, movable) {
-        if (nodes) {
-          for (let i = 0; i < nodes.length; i++) {
-            let node = nodes[i]
-            node.isPossibleMovingTarget = (movable && node.id !== nodeToMove.id)
-            this.updateMovingTargets(node.children, nodeToMove, node.isPossibleMovingTarget)
+        const children = node.children
+
+        if (children) {
+          for (let i in children) {
+            const child = children[i]
+            this.selectOnlyThisNode(child, nodeId)
           }
         }
       },
 
-      completeMove (referenceNode, relativePosition) {
-        // Show loading indicator while not null
-        this.destinationReferenceNodeId = referenceNode.id
+      startMoving (node) {
+        this.nodesSelection = [node]
 
-        let moveInstructions = {
-          sourceId: this.nodeToMove.id,
-          referenceId: referenceNode.id,
-          relativePosition: relativePosition
+        for (let i in this.functionalities) {
+          const child = this.functionalities[i]
+          this.selectOnlyThisNode(child, node.id)
         }
-        Vue.http
-          .post(api.paths.functionalities(this) + '/move', moveInstructions, api.REQUEST_OPTIONS)
-          .then((response) => {
-            this.destinationReferenceNodeId = null
-            this.removeNode(this.nodeToMove, this.functionalities)
-            this.nodeToMove.row = response.body
-            this.appendNode(this.nodeToMove, this.functionalities)
-            this.filterFunctionalities()
-            this.nodeToMove = null
-          }, (error) => {
-            this.destinationReferenceNodeId = null
-            api.handleError(error)
-          })
+
+        this.propagateSelectionToChildren(node)
+
+        this.startMovingSelection()
+      },
+
+      completeMove (referenceNode, relativePosition) {
+        if (this.nodesSelection && this.nodesSelection.length > 0) {
+          const selectionIds = _(this.nodesSelection).map('id').value()
+          let moveInstructions = {
+            sourceIds: selectionIds,
+            referenceId: referenceNode.id,
+            relativePosition: relativePosition
+          }
+
+          this.loadingFunctionalities = true
+
+          Vue.http
+            .post(api.paths.functionalities(this) + '/move/list', moveInstructions, api.REQUEST_OPTIONS)
+            .then((response) => {
+              this.loadingFunctionalities = false
+              this.isMovingSelection = false
+              this.nodesSelection = []
+              this.parseFunctionalities(response.body)
+            }, (error) => {
+              this.loadingFunctionalities = false
+              api.handleError(error)
+            })
+        }
       },
 
       cancelMove () {
-        this.nodeToMove = null
+        this.isMovingSelection = false
+        this.resetAllNodesTargetDetails()
       },
 
       removeNode (nodeToRemove, nodes) {
@@ -954,7 +1022,7 @@
         return counts
       },
 
-      deleteNode (node) {
+      getDeleteMessage (node) {
         let childrenCounts = this.countChildren(node)
         let childrenMessage = ''
         if (childrenCounts.FOLDER > 0 || childrenCounts.FUNCTIONALITY > 0) {
@@ -968,6 +1036,11 @@
             childrenMessage = ` (+ ${functionalitiesMessage})`
           }
         }
+        return childrenMessage
+      },
+
+      deleteNode (node) {
+        const childrenMessage = this.getDeleteMessage(node)
         let self = this
         this.$Modal.confirm({
           title: `Delete ${node.row.type === 'FOLDER' ? 'Folder' : 'Functionality'}`,
@@ -996,6 +1069,9 @@
       },
 
       loadAll () {
+        this.isMovingSelection = false
+        this.nodesSelection = []
+
         this.fromQueryString()
         this.loadFunctionalities()
 
@@ -1017,6 +1093,230 @@
           }, (error) => {
             api.handleError(error)
           })
+      },
+
+      applySelectToNode (node, selected) {
+        node.isSelected = selected
+        if (node.children) {
+          for (let i in node.children) {
+            const child = node.children[i]
+            this.applySelectToNode(child, selected)
+          }
+        }
+      },
+
+      applySelectToAllNodes (selected) {
+        let selection = []
+        for (let i in this.functionalities) {
+          const child = this.functionalities[i]
+          this.applySelectToNode(child, selected)
+          if (selected) {
+            selection = selection.concat(child)
+          }
+        }
+        this.nodesSelection = selection
+      },
+
+      selectAll () {
+        this.applySelectToAllNodes(true)
+      },
+
+      clearSelection () {
+        this.applySelectToAllNodes(false)
+      },
+
+      propagateSelectionToChildren (node) {
+        if (node.children) {
+          for (let i in node.children) {
+            const child = node.children[i]
+            child.isSelected = node.isSelected
+            this.propagateSelectionToChildren(child)
+          }
+        }
+      },
+
+      propagateSelectionToParent (node) {
+        let currentParentId = node.row.parentId
+
+        while (currentParentId) {
+          const parentNode = this.getNodeFromId(this.functionalities, currentParentId)
+          const children = parentNode.children
+          const allChecked = _(children).every('isSelected')
+          currentParentId = parentNode.row.parentId
+
+          parentNode.isSelected = allChecked
+        }
+      },
+
+      findNodeInElement (node, nodeId) {
+        if (node.id === nodeId) {
+          return node
+        } else if (node.children) {
+          let i
+          let result = null
+          for (i = 0; result == null && i < node.children.length; i++) {
+            let child = node.children[i]
+            result = this.findNodeInElement(child, nodeId)
+          }
+          return result
+        }
+        return null
+      },
+
+      getNodeFromId (nodes, nodeId) {
+        for (let i in nodes) {
+          let node = nodes[i]
+          let nodeFound = this.findNodeInElement(node, nodeId)
+          if (nodeFound) {
+            return nodeFound
+          }
+        }
+      },
+
+      getNodeSelection (node) {
+        const isFolder = node.row.type === 'FOLDER'
+        if (node.isSelected) {
+          return [node]
+        } else if (node.children && isFolder) {
+          let selection = []
+          for (let i in node.children) {
+            const child = node.children[i]
+            selection = selection.concat(this.getNodeSelection(child))
+          }
+          return selection
+        }
+        return []
+      },
+
+      updateNodesSelection () {
+        let selection = []
+        for (let i in this.functionalities) {
+          const child = this.functionalities[i]
+          selection = selection.concat(this.getNodeSelection(child))
+        }
+        this.nodesSelection = selection
+      },
+
+      updateSelection (node) {
+        this.propagateSelectionToChildren(node)
+        this.propagateSelectionToParent(node)
+        this.updateNodesSelection()
+      },
+
+      updateTargetDetails (node) {
+        const children = node.children
+
+        const isBeingMoved = _(this.nodesSelection).some(['id', node.id])
+        const isInLowerHierarchy = node.isSelected && !isBeingMoved
+        const isParentOfMovingNode = _(this.nodesSelection).map(function (n) { return n.row.parentId }).value().includes(node.id)
+        if (isBeingMoved) {
+          node.moveDetails.isBeingMoved = true
+        }
+        if (isInLowerHierarchy) {
+          node.moveDetails.isInLowerHierarchy = true
+        }
+        if (isParentOfMovingNode) {
+          node.moveDetails.isMovingNodesParent = true
+        }
+
+        if (children) {
+          for (let i in children) {
+            const child = children[i]
+            this.updateTargetDetails(child)
+          }
+        }
+      },
+
+      startMovingSelection () {
+        if (this.noSelection) {
+          return
+        }
+        this.isMovingSelection = true
+        for (let i in this.functionalities) {
+          const child = this.functionalities[i]
+          this.updateTargetDetails(child)
+        }
+      },
+
+      resetNodeTargetDetails (node) {
+        node.moveDetails.isBeingMoved = false
+        node.moveDetails.isInLowerHierarchy = false
+        node.moveDetails.isMovingNodesParent = false
+
+        const children = node.children
+
+        if (children) {
+          for (let i in children) {
+            const child = children[i]
+            this.resetNodeTargetDetails(child)
+          }
+        }
+      },
+
+      resetAllNodesTargetDetails () {
+        for (let i in this.functionalities) {
+          const child = this.functionalities[i]
+          this.resetNodeTargetDetails(child)
+        }
+      },
+
+      deleteSelection () {
+        if (this.noSelection) {
+          return
+        }
+
+        this.isMovingSelection = false
+
+        const selectionNumber = this.nodesSelection.length
+
+        const hasOnlyFunctionalities = _(this.nodesSelection).every((node) => node.row.type === 'FUNCTIONALITY')
+        const hasOnlyFolders = _(this.nodesSelection).every((node) => node.row.type === 'FOLDER')
+
+        let title = 'Delete '
+        if (hasOnlyFunctionalities) {
+          title += (selectionNumber === 1 ? 'a' : selectionNumber) + ' functionalit' + (selectionNumber > 1 ? 'ies' : 'y')
+        } else if (hasOnlyFolders) {
+          title += (selectionNumber === 1 ? 'a' : selectionNumber) + ' folder' + (selectionNumber > 1 ? 's' : '')
+        } else {
+          title += 'selection (' + selectionNumber + ')'
+        }
+
+        let content = '<p>Delete '
+        const nodeDescriptions = _(this.nodesSelection)
+          .map((node) => `<b>${util.escapeHtml(node.row.name)}</b> ` + this.getDeleteMessage(node))
+          .values()
+          .join(', ')
+        content += nodeDescriptions + '?</p>'
+
+        let okText = 'Delete selection'
+
+        const ids = _(this.nodesSelection)
+          .map((node) => `id=${node.id}`)
+          .values()
+          .join('&')
+
+        let self = this
+        this.$Modal.confirm({
+          title: title,
+          content: content,
+          okText: okText,
+          loading: true,
+          onOk () {
+            self.loadingFunctionalities = true
+            Vue.http
+              .delete(api.paths.functionalities(self) + '?' + ids, api.REQUEST_OPTIONS)
+              .then((response) => {
+                self.$Modal.remove()
+                self.loadingFunctionalities = false
+                self.nodesSelection = []
+                self.parseFunctionalities(response.body)
+              }, (error) => {
+                self.$Modal.remove()
+                self.loadingFunctionalities = false
+                api.handleError(error)
+              })
+          }
+        })
       },
 
       // Export / Import
