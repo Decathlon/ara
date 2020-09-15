@@ -25,7 +25,7 @@ api:
         #  cpu: 100m
         #  memory: 128Mi
     port: 8080
-    dbMode: create-drop
+    dbMode: update
     # Used to redirect on the app by email service among others
     appUrl: ara.test
 
@@ -51,11 +51,16 @@ ui:
 ## Postgresql Database Configuration
 ##
 database:
+    embedded: true
+    # type mysql is suported when embedded is false
+    type: h2
+    # When embedded if false you can provide default cluster database or external database:
     external: false
     # When external is true you can set the host of database
     # host:
     # Name of the database
     name: ara
+    # Set if no existing secret
     username: ara
     password: changeme
     # Use an existing secret

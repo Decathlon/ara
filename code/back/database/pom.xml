@@ -27,7 +27,7 @@
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-database</artifactId>
-    <version>6.1.4</version>
+    <version>6.1.5</version>
 
     <name>ARA Database</name>
     <description>
@@ -67,7 +67,7 @@
 		    <artifactId>h2</artifactId>
 		    <scope>runtime</scope>
 		</dependency>
-		
+
         <dependency>
             <!-- @javax.interceptor.InterceptorBinding needed by javax.transaction.Transactional -->
             <groupId>javax.interceptor</groupId>

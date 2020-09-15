@@ -63,9 +63,13 @@ db-password
 Define access url
 */}}
 {{- define "ara.db.accessUrl" -}}
-{{- if not .Values.database.host -}}
+{{- if .Values.database.embedded -}}
+mem:{{ .Values.database.name }}
+{{- else if not .Values.database.host -}}
+{{/* provided database missioned by the chart */}}
 {{ printf "%s-db.%s.svc.cluster.local:3306" .Chart.Name .Release.Namespace }}/{{ .Values.database.name }}
 {{- else -}}
+{{/* provided database missioned by the user */}}
 {{ .Values.database.host }}/{{ .Values.database.name }}
 {{- end -}}
 {{- end -}}

@@ -12,10 +12,6 @@ cache-build-back:
 	@echo '-- Build java ara-back with local cache --'
 	@docker container run -v "$$PWD/back":/root/ara -w /root/ara maven:3-jdk-$(JAVA_VERSION) mvn -s settings.xml clean package dependency:go-offline
 
-build-db: ## Build ara-db
-	@echo '-- Build ${DB_IMAGE} --'
-	@docker build -t ${DB_IMAGE} data/instance
-
 build-back: ## Build ara-back
 	@echo '-- Build ${BACK_IMAGE} --'
 	@docker build -t ${BACK_IMAGE} back
@@ -40,10 +36,10 @@ start-db: ## Start database
 	@echo '-- Run database --'
 	@export VERSION=$(VERSION); docker-compose up -d ara-db
 
-build-full: build-back build-front build-db ## Build ARA
+build-full: build-back build-front ## Build ARA
 
 build: ## Build ARA in parallel
-	@$(MAKE) build-full -j3 -k
+	@$(MAKE) build-full -j2 -k
 
 promote-back: ## promote ara back to specified registry
 	@echo '-- Push ${BACK_IMAGE} --'
@@ -51,7 +47,7 @@ promote-back: ## promote ara back to specified registry
 	@docker push ${BACK_IMAGE}
 	@docker logout
 
-promote-front: ## promote ara back to specified registry
+promote-front: ## promote ara front to specified registry
 	@echo '-- Push ${FRONT_IMAGE} --'
 	@echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin ${DOCKER_REGISTRY}
 	@docker push ${FRONT_IMAGE}

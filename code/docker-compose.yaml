@@ -5,26 +5,27 @@ version: '3.5'
 
 services:
   ara-db:
-    image: "ara-db:${VERSION:-latest}" #"mysql:5.7" # "ara-db"
+    image: "mysql:5.7"
     restart: always
     ports:
       - 3306:3306
     environment:
       - MYSQL_DATABASE=ara-dev
-      - MYSQL_USER=dev
-      - MYSQL_PASSWORD=dev
+      - MYSQL_USER=changeme
+      - MYSQL_PASSWORD=changeme
       - MYSQL_ROOT_PASSWORD=to_change
     networks:
       - db_net
   ara-back:
     image: "ara-back:${VERSION:-latest}"
     restart: always
-    environment:
-      - DATABASE_URL=ara-db:3306/ara-dev
-      - DATABASE_USER=root
-      - DATABASE_PASSWORD=to_change
-      - CLIENT_URL="http://ara-front/"
-      - DATA_DB_MODE=create-drop # validate | update | create | create-drop
+    #environment:
+      #- DATABASE_TYPE=mysql
+      #- DATABASE_URL=ara-db:3306/ara-dev
+      #- DATABASE_USER=root
+      #- DATABASE_PASSWORD=to_change
+      #- CLIENT_URL="http://localhost:80/"
+      #- DATA_DB_MODE=create-drop # validate | update | create | create-drop
     ports:
       - 8080:8080
     networks:

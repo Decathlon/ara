@@ -17,7 +17,13 @@ WORKDIR /build
 #COPY generated-cucumber-report generated-cucumber-report
 #COPY server server
 # Build application
-COPY . .
+COPY pom.xml settings.xml ./
+COPY src src
+COPY lib lib
+COPY generated-cucumber-report generated-cucumber-report
+COPY database database
+COPY server server
+COPY settings.xml .m2/* .m2/
 RUN mvn -s settings.xml clean install
 
 FROM openjdk:$JAVA_VERSION-slim as runtime
@@ -27,11 +33,9 @@ ENV APP_HOME /app
 
 ENV JAVA_OPTS=-Xmx2048m
 
-ENV DATABASE_URL=ara-db:3306/ara-dev
-ENV DATABASE_USER=changeIt
-ENV DATABASE_PASSWORD=password_to_change
+ENV DATABASE_TYPE=h2
+ENV DATABASE_URL="mem:ara-db"
 ENV CLIENT_URL=http://ara-front
-ENV DATA_DB_MODE=validate
 
 #Create base app folder
 WORKDIR $APP_HOME
@@ -42,13 +46,7 @@ VOLUME $APP_HOME/config
 
 #Copy executable jar file from the builder image
 COPY --from=builder /build/server/target/ara-server.jar app.jar
-ENTRYPOINT [ "sh", "-c", "java $JAVAOPS \
-        -Djava.security.egd=file:/dev/./urandom \
-        -Dspring.datasource.url=\"jdbc:mysql://$DATABASE_URL?useUnicode=yes&characterEncoding=UTF-8\" \
-        -Dspring.datasource.username=\"$DATABASE_USER\" \
-        -Dspring.datasource.password=\"$DATABASE_PASSWORD\" \
-        -Dara.clientBaseUrl=\"$CLIENT_URL\" \
-        -Dspring.jpa.properties.hibernate.hbm2ddl.auto=\"$DATA_DB_MODE\" \
-        -jar app.jar"]
+COPY entrypoint.sh .
+ENTRYPOINT [ "./entrypoint.sh"]
 #Second option using shell form:
 #ENTRYPOINT exec java $JAVA_OPTS -jar app.jar $0 $@

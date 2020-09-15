@@ -1,4 +1,4 @@
-{{- if not .Values.database.external }}
+{{- if and (not .Values.database.external) (not .Values.database.embedded) }}
 {{- $name := printf "%s-%s" .Chart.Name "db" -}}
 apiVersion: apps/v1
 kind: Deployment

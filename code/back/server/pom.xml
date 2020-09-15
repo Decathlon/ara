@@ -28,7 +28,7 @@
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-server</artifactId>
-    <version>6.1.4</version>
+    <version>6.1.5</version>
 
     <name>ARA Server</name>
     <description>
@@ -39,8 +39,7 @@
     <properties>
         <java.version>14</java.version>
 
-        <spring.profiles.active />
-        <spring.db.type>mysql</spring.db.type>
+        <spring.profiles.active>db-h2</spring.profiles.active>
 
         <mapstruct.version>1.3.1.Final</mapstruct.version>
 
@@ -297,8 +296,13 @@
         <profile>
             <id>dev</id>
             <properties>
-                <spring.profiles.active>dev</spring.profiles.active>
-                <spring.db.type>h2</spring.db.type>
+                <spring.profiles.active>db-h2,dev,dev-db-h2</spring.profiles.active>
+            </properties>
+        </profile>
+        <profile>
+            <id>int</id>
+            <properties>
+                <spring.profiles.active>db-mysql,dev,dev-db-mysql</spring.profiles.active>
             </properties>
         </profile>
     </profiles>
