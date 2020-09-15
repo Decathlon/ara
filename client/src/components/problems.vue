@@ -39,16 +39,16 @@
       &nbsp;
 
       Problem name:
-      <Input ref="name" v-model="filter.name" style="width: 100px; text-align: left;" @on-change="requestProblems"/>
+      <Input data-nrt="problem_name" ref="name" v-model="filter.name" style="width: 100px; text-align: left;" @on-change="requestProblems"/>
       &nbsp;
 
       Work item:
-      #<Input v-model="filter.defectId" style="width: 50px; text-align: left;" @on-change="requestProblems" title="TIP: type 'none' to show problems without work item"/>
-      <Checkbox v-model="filter.defectExistence" true-value="NONEXISTENT" @on-change="requestProblems">Nonexistent</Checkbox>
+      #<Input data-nrt="problem_work_item" v-model="filter.defectId" style="width: 50px; text-align: left;" @on-change="requestProblems" title="TIP: type 'none' to show problems without work item"/>
+      <Checkbox data-nrt="Non_Existent_Checkbox" v-model="filter.defectExistence" true-value="NONEXISTENT" @on-change="requestProblems">Nonexistent</Checkbox>
       &nbsp;
 
       Root cause:
-      <Select  v-model="filter.rootCauseId" placeholder="All" style="width: 200px; text-align: left;"
+      <Select data-nrt="Root_Cause_Select" v-model="filter.rootCauseId" placeholder="All" style="width: 200px; text-align: left;"
               @on-change="requestProblems">
         <Option value="" :label="'\u00A0'"/>
         <Option v-for="rootCause in rootCauses" :value="rootCause.id" :key="rootCause.id" :label="rootCause.name"/>

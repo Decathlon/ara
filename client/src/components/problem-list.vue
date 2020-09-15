@@ -39,6 +39,7 @@
           <td v-if="selectButtonText && showProblemNames">
             <Button type="primary" @click="select(problem.id, problem.name)" style="margin: 4px;"
                     :loading="loadingSelect && problem.id == selectedProblemId"
+                    :data-nrt=" 'problem_id_' + problem.id"
                     :disabled="loadingSelect && problem.id != selectedProblemId">{{selectButtonText}}
             </Button>
           </td>
@@ -47,47 +48,48 @@
               <problem-tag :problem="problem" :link="true"/><!-- No space between problem-tag and comment-icon
            --><span v-if="problem.comment"
                     :title="'Comment: ' + problem.comment"
+                    :data-nrt=" 'problem_comment_' + problem.id"
                     style="display: inline-block; vertical-align: top;"
                     ><Icon type="md-text" size="20"/></span>
             </div>
-            <span style="color: rgb(158, 167, 180);">Creation: <strong>{{formatDate(problem.creationDateTime)}}</strong></span>
-            <span v-if="problem.rootCause" style="margin-left: 8px;">Root cause: <strong>{{problem.rootCause.name}}</strong></span>
+            <span :data-nrt=" 'problem_createDate_' + problem.id" style="color: rgb(158, 167, 180);">Creation: <strong>{{formatDate(problem.creationDateTime)}}</strong></span>
+            <span v-if="problem.rootCause" :data-nrt=" 'problem_rootCause_' + problem.id" style="margin-left: 8px;">Root cause: <strong>{{problem.rootCause.name}}</strong></span>
           </td>
 
-          <td>{{formatDate(problem.firstSeenDateTime)}}</td>
-          <td>{{formatDate(problem.lastSeenDateTime)}}</td>
+          <td :data-nrt=" 'problem_firstSeenDate_' + problem.id">{{formatDate(problem.firstSeenDateTime)}} </td>
+          <td :data-nrt=" 'problem_lastSeenDate_' + problem.id">{{formatDate(problem.lastSeenDateTime)}}</td>
 
           <td style="white-space: nowrap;">
-            <problem-stability :cycleStabilities="problem.aggregate.cycleStabilities" :problem="problem"/>
+            <problem-stability :cycleStabilities="problem.aggregate.cycleStabilities" :problem="problem" />
           </td>
-          <td>{{problem.aggregate.errorCount}}</td>
+          <td :data-nrt=" 'problem_ErrorCount_' + problem.id">{{problem.aggregate.errorCount}}</td>
           <td>
             <em v-if="problem.aggregate.scenarioCount > 1">{{problem.aggregate.scenarioCount}}</em>
-            <span v-else :title="problem.aggregate.firstScenarioName">{{withEllipsis(problem.aggregate.firstScenarioName)}}</span>
+            <span :data-nrt=" 'problem_ScenarioCount_' + problem.id" v-else :title="problem.aggregate.firstScenarioName">{{withEllipsis(problem.aggregate.firstScenarioName)}}</span>
           </td>
           <td>
             <em v-if="problem.aggregate.branchCount > 1">{{problem.aggregate.branchCount}}</em>
-            <span v-else>{{problem.aggregate.firstBranch}}</span>
+            <span :data-nrt=" 'problem_Branch_' + problem.id" v-else>{{problem.aggregate.firstBranch}}</span>
           </td>
           <td>
             <em v-if="problem.aggregate.releaseCount > 1">{{problem.aggregate.releaseCount}}</em>
-            <span v-else>{{problem.aggregate.firstRelease}}</span>
+            <span :data-nrt=" 'problem_Release_' + problem.id" v-else>{{problem.aggregate.firstRelease}}</span>
           </td>
           <td>
             <em v-if="problem.aggregate.versionCount > 1">{{problem.aggregate.versionCount}}</em>
-            <span v-else>{{problem.aggregate.firstVersion}}</span>
+            <span :data-nrt=" 'problem_Version_' + problem.id" v-else>{{problem.aggregate.firstVersion}}</span>
           </td>
           <td>
             <em v-if="problem.aggregate.countryCount > 1">{{problem.aggregate.countryCount}}</em>
-            <span v-else-if="problem.aggregate.firstCountry">{{problem.aggregate.firstCountry.name}}</span>
+            <span :data-nrt=" 'problem_Country_' + problem.id" v-else-if="problem.aggregate.firstCountry">{{problem.aggregate.firstCountry.name}}</span>
           </td>
           <td>
             <em v-if="problem.aggregate.typeCount > 1">{{problem.aggregate.typeCount}}</em>
-            <span v-else-if="problem.aggregate.firstType">{{problem.aggregate.firstType.name}}</span>
+            <span :data-nrt=" 'problem_Type_' + problem.id" v-else-if="problem.aggregate.firstType">{{problem.aggregate.firstType.name}}</span>
           </td>
           <td>
             <em v-if="problem.aggregate.platformCount > 1">{{problem.aggregate.platformCount}}</em>
-            <span v-else>{{problem.aggregate.firstPlatform}}</span>
+            <span :data-nrt=" 'problem_Platform_' + problem.id" v-else>{{problem.aggregate.firstPlatform}}</span>
           </td>
         </tr>
       </tbody>

@@ -150,7 +150,7 @@ If you updated the work-item a few seconds ago, you may want to speed up the ARA
       <Form :label-width="120">
         <Form-item label="Root cause:" style="position: relative;">
           <Select v-model="rootCauseIdForClose" clearable placeholder="None">
-            <Option  data-nrt= 'deleteRootCauseModalOption' v-for="rootCause in rootCauses" :value="rootCause.id" :key="rootCause.id" :label="rootCause.name" />
+            <Option data-nrt= 'deleteRootCauseModalOption' v-for="rootCause in rootCauses" :value="rootCause.id" :key="rootCause.id" :label="rootCause.name" />
           </Select>
           <Spin fix v-if="!rootCauses"/>
         </Form-item>

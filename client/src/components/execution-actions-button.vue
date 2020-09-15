@@ -100,18 +100,13 @@
 <script>
   import Vue from 'vue'
   import api from '../libs/api'
-
   import jobStatusResultComponent from '../components/job-status-result'
-
   export default {
     name: 'execution-actions-button',
-
     props: [ 'execution' ],
-
     components: {
       'job-status-result': jobStatusResultComponent
     },
-
     data () {
       return {
         loadingDiscard: false,
@@ -120,7 +115,6 @@
         discardReason: ''
       }
     },
-
     methods: {
       discard (execution) {
         this.discardReason = execution.discardReason
@@ -129,7 +123,6 @@
         this.showDiscardDialog = true
         this.$nextTick(() => this.$refs.name.focus())
       },
-
       confirmDiscard () {
         if (this.discardReason) {
           let url = api.paths.executions(this) + '/' + this.executionToDiscard.id + '/discard'
@@ -156,7 +149,6 @@
           }, 0)
         }
       },
-
       unDiscard (executionId) {
         let self = this
         this.$Modal.confirm({
@@ -188,4 +180,3 @@
     color: gray;
   }
 </style>
-
