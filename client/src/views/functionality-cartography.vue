@@ -1148,10 +1148,12 @@
         while (currentParentId) {
           const parentNode = this.getNodeFromId(this.functionalities, currentParentId)
           const children = parentNode.children
-          const allChecked = _(children).every('isSelected')
+          const notAllChecked = !_(children).every('isSelected')
           currentParentId = parentNode.row.parentId
 
-          parentNode.isSelected = allChecked
+          if (notAllChecked) {
+            parentNode.isSelected = false
+          }
         }
       },
 
