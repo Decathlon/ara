@@ -18,7 +18,9 @@
   <div>
     <functionality-menu />
 
-    <div v-if="countries.length === 0 || sources.length === 0 || teamsAssignableToFunctionalities.length === 0">
+    <Spin fix v-if="loadingSettings"></Spin>
+
+    <div v-else-if="countries.length === 0 || sources.length === 0 || teamsAssignableToFunctionalities.length === 0">
       <h2 style="text-align: center; width: 75%; margin: auto; font-weight: normal;">
         <span>
           Before adding functionalities, please make sure to add at least
@@ -359,6 +361,7 @@
     data () {
       return {
         // Functionalities and filtering
+        loadingSettings: true,
         loadingFunctionalities: true,
         functionalities: [],
         flattenedMatchingFunctionalities: [],
@@ -1075,22 +1078,26 @@
         this.fromQueryString()
         this.loadFunctionalities()
 
+        this.loadingSettings = true
+
         Vue.http
           .get(api.paths.countries(this), api.REQUEST_OPTIONS)
           .then((response) => {
             this.countries = response.body
             this.$set(this.columnSizes, 4, 24 * this.countries.length + 2 * 4)
+            Vue.http
+              .get(api.paths.sources(this), api.REQUEST_OPTIONS)
+              .then((response) => {
+                this.sources = response.body
+                // 32 is the size of ', 99 A'; we have 2 * 32 because normal and ignored scenario counts; and 52 is for margins, paddings, icons, and borders
+                this.$set(this.columnSizes, 5, Math.max(150, 32 * 2 * this.sources.length + 52))
+                this.loadingSettings = false
+              }, (error) => {
+                this.loadingSettings = false
+                api.handleError(error)
+              })
           }, (error) => {
-            api.handleError(error)
-          })
-
-        Vue.http
-          .get(api.paths.sources(this), api.REQUEST_OPTIONS)
-          .then((response) => {
-            this.sources = response.body
-            // 32 is the size of ', 99 A'; we have 2 * 32 because normal and ignored scenario counts; and 52 is for margins, paddings, icons, and borders
-            this.$set(this.columnSizes, 5, Math.max(150, 32 * 2 * this.sources.length + 52))
-          }, (error) => {
+            this.loadingSettings = false
             api.handleError(error)
           })
       },
