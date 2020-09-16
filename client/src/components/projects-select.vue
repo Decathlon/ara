@@ -85,7 +85,7 @@
             this.changeCurrentProject(option)
             if (this.$route.params.id) {
               // The screen was referring to an id of execution, error, problem...
-              // wich will not be valid on the other project.
+              // which will not be valid on the other project.
               // So we redirect to the home screen of that new project
               this.$router.push({ name: 'executions', params: { projectCode: this.currentProjectCode } })
             } else {

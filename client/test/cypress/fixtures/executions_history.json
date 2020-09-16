@@ -37,9 +37,9 @@
         "defaultOnMissing": false
       },
       "scenarioCounts": {
-        "total": 10,
+        "total": 11,
         "failed": 5,
-        "passed": 5
+        "passed": 6
       },
       "percent": 100,
       "status": "SUCCESS"
@@ -55,8 +55,8 @@
       },
       "scenarioCounts": {
         "total": 15,
-        "failed": 2,
-        "passed": 13
+        "failed": 3,
+        "passed": 12
       },
       "percent": 100,
       "status": "SUCCESS"
@@ -71,9 +71,9 @@
         "defaultOnMissing": false
       },
       "scenarioCounts": {
-        "total": 8,
+        "total": 2,
         "failed": 0,
-        "passed": 8
+        "passed": 2
       },
       "percent": 100,
       "status": "SUCCESS"
@@ -88,9 +88,9 @@
         "defaultOnMissing": false
       },
       "scenarioCounts": {
-        "total": 33,
+        "total": 27,
         "failed": 7,
-        "passed": 26
+        "passed": 20
       },
       "percent": 100,
       "status": "SUCCESS"
@@ -167,9 +167,9 @@
           "total": 2
         },
         "high": {
-          "passed": 8,
+          "passed": 7,
           "unhandled": 0,
-          "handled": 2,
+          "handled": 3,
           "total": 10
         }
       },
@@ -182,10 +182,10 @@
             "total": 2
           }, 
           "high": {
-            "passed": 5,
+            "passed": 4,
             "unhandled": 0,
             "handled": 0,
-            "total": 5
+            "total": 4
           },
           "medium": {
             "passed": 2,
@@ -194,10 +194,10 @@
             "total": 2
           },
           "*": {
-            "passed": 8,
+            "passed": 7,
             "unhandled": 1,
             "handled": 0,
-            "total": 9
+            "total": 8
           }
         },
         "2": {
@@ -210,14 +210,14 @@
           "high": {
             "passed": 3,
             "unhandled": 0,
-            "handled": 2,
-            "total": 5
+            "handled": 3,
+            "total": 6
           },
           "*": {
             "passed": 4,
             "unhandled": 0,
-            "handled": 3,
-            "total": 7
+            "handled": 4,
+            "total": 8
           }
         }
       }
@@ -260,31 +260,31 @@
           "total": 5
         },
         "sanity-check": {
-          "passed": 3,
+          "passed": 4,
           "unhandled": 3,
           "handled": 0,
-          "total": 6
+          "total": 7
         },
         "*": {
-          "passed": 8,
+          "passed": 9,
           "unhandled": 3,
           "handled": 0,
-          "total": 11
+          "total": 12
         }
       },
       "qualitiesPerTeamAndSeverity": {
         "1": {
           "sanity-check": {
-            "passed": 2,
+            "passed": 3,
             "unhandled": 1,
             "handled": 0,
-            "total": 3
+            "total": 4
           },
           "*": {
-            "passed": 2,
+            "passed": 3,
             "unhandled": 1,
             "handled": 0,
-            "total": 3
+            "total": 4
           }
         },
         "2": {

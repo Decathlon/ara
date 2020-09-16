@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2019 by the ARA Contributors                                 *
+ * Copyright (C) 2020 by the ARA Contributors                                 *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -21,15 +21,18 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MoveFunctionalityDTO {
+public class MoveFunctionalitiesDTO {
 
     /**
-     * The functionality ID to move.
+     * The functionality IDs to move.
      */
-    private Long sourceId;
+    private List<Long> sourceIds = new ArrayList<>();
 
     /**
      * The destination reference ID: null if reference is the (virtual) root folder.
@@ -40,5 +43,4 @@ public class MoveFunctionalityDTO {
      * The position where to move sourceId relative to referenceId.
      */
     private FunctionalityPosition relativePosition;
-
 }
