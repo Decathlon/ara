@@ -28,6 +28,10 @@ export const getCartRowTeam = (qualityId, runId, teamId, executionId) => {
     return cy.GetByDataNrt('executions_CartRowTeam_' + qualityId + '_' + runId + '_' + teamId + '_' + executionId);
 }
 
+export const getProgressBar = (qualityId, runId, teamId, executionId, progressBarType) => {
+    return cy.GetByDataNrt('executions_CartRowTeamProgressBar' + progressBarType + '_' + qualityId + '_' + runId + '_' + teamId + '_' + executionId);
+}
+
 export const getVersion = (executionId) => {
     return cy.GetByDataNrt('executions_Version_' + executionId);
 }

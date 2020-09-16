@@ -33,8 +33,10 @@
       </div>
 
       <div :class="'progressBar' + (counts.total > 0 ? ' failed' : '') + (small ? ' small' : '')">
-        <div :style="'width: ' + (100 * counts.passed / counts.total) + '%'"></div>
-        <div :style="'width: ' + (100 * counts.handled / counts.total) + '%;'"></div>
+        <div :data-nrt=" $route.name + '_CartRowTeamProgressBarPassed_' + severityCode + '_' + run.country.code + '_' + run.type.code + '_' + teamId + '_' + execution.id "
+             :style="'width: ' + (100 * counts.passed / counts.total) + '%'"></div>
+        <div :data-nrt=" $route.name + '_CartRowTeamProgressBarHandled_' + severityCode + '_' + run.country.code + '_' + run.type.code + '_' + teamId + '_' + execution.id "
+             :style="'width: ' + (100 * counts.handled / counts.total) + '%;'"></div>
       </div>
     </Alert>
   </router-link>
