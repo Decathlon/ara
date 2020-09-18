@@ -11,6 +11,9 @@ FRONT_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-front:${VERSION}
 MIGRATION_LABEL = "to-be-changed"
 DATE_WITH_TIME := $(shell /bin/date "+%Y%m%d%H%M%S")
 
+install: ## Install project for dev
+	@mvn -Dmaven.test.skip=true -f back/pom.xml clean install
+
 makeMigration: ## Create a migration file
 	mvn -f back/pom.xml -pl database liquibase:diff -DdiffChangeLogFile=back/database/src/main/resources/db/changelog/changes/${DATE_WITH_TIME}-${MIGRATION_LABEL}.yaml
 	@echo "  - include:" >> back/database/src/main/resources/db/changelog/db.changelog-master.yaml

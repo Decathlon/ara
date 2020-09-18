@@ -57,8 +57,8 @@ database:
     external: false
     # When external is true you can set the host of database
     # host:
-    # Active liquibase update. Only for non embedded database.
-    liquibaseActive: false
+    # Active liquibase update
+    liquibaseActive: true
     # Name of the database
     name: ara
     # Set if no existing secret
