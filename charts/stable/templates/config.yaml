@@ -13,6 +13,6 @@ data:
   database_name: {{ .Values.database.name }}
   database_url: {{ include "ara.db.accessUrl" . }}
   database_type: {{ .Values.database.type }}
-  liquibase_active: {{ .Values.api.liquibaseActive }}
+  liquibase_active: {{ .Values.database.liquibaseActive | quote }}
   app_url: {{ .Values.api.appUrl }}
   api_url: {{ printf "%s-api.%s.svc.cluster.local:%.0f" .Chart.Name .Release.Namespace .Values.api.port }}
