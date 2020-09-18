@@ -1,0 +1,1205 @@
+databaseChangeLog:
+- changeSet:
+    id: 1600426180003-1
+    author: THOMAS (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: communicationPK
+            name: id
+            type: BIGINT
+        - column:
+            name: code
+            type: VARCHAR(255)
+        - column:
+            name: message
+            type: LONGTEXT
+        - column:
+            name: name
+            type: VARCHAR(255)
+        - column:
+            name: project_id
+            type: BIGINT
+        - column:
+            name: type
+            type: VARCHAR(255)
+        tableName: communication
+- changeSet:
+    id: 1600426180003-2
+    author: THOMAS (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: countryPK
+            name: id
+            type: BIGINT
+        - column:
+            name: code
+            type: VARCHAR(255)
+        - column:
+            name: name
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: project_id
+            type: BIGINT
+        tableName: country
+- changeSet:
+    id: 1600426180003-3
+    author: THOMAS (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: country_deploymentPK
+            name: id
+            type: BIGINT
+        - column:
+            name: duration
+            type: BIGINT
+        - column:
+            name: estimated_duration
+            type: BIGINT
+        - column:
+            name: execution_id
+            type: BIGINT
+        - column:
+            name: job_link
+            type: VARCHAR(255)
+        - column:
+            name: job_url
+            type: VARCHAR(255)
+        - column:
+            name: platform
+            type: VARCHAR(255)
+        - column:
+            name: result
+            type: VARCHAR(255)
+        - column:
+            name: start_date_time
+            type: datetime
+        - column:
+            name: status
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: country_id
+            type: BIGINT
+        tableName: country_deployment
+- changeSet:
+    id: 1600426180003-4
+    author: THOMAS (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: cycle_definitionPK
+            name: id
+            type: BIGINT
+        - column:
+            name: branch
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: branch_position
+            type: INT
+        - column:
+            name: name
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: project_id
+            type: BIGINT
+        tableName: cycle_definition
+- changeSet:
+    id: 1600426180003-5
+    author: THOMAS (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: errorPK
+            name: id
+            type: BIGINT
+        - column:
+            name: exception
+            type: LONGTEXT
+        - column:
+            name: executed_scenario_id
+            type: BIGINT
+        - column:
+            name: step
+            type: VARCHAR(255)
+        - column:
+            name: step_definition
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: step_line
+            type: INT
+        tableName: error
+- changeSet:
+    id: 1600426180003-6
+    author: THOMAS (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: executed_scenarioPK
+            name: id
+            type: BIGINT
+        - column:
+            name: api_server
+            type: VARCHAR(255)
+        - column:
+            name: content
+            type: LONGTEXT
+        - column:
+            name: cucumber_id
+            type: VARCHAR(255)
+        - column:
+            name: cucumber_report_url
+            type: VARCHAR(255)
+        - column:
+            name: diff_report_url
+            type: VARCHAR(255)
+        - column:
+            name: feature_file
+            type: VARCHAR(255)
+        - column:
+            name: feature_name
+            type: VARCHAR(255)
+        - column:
+            name: feature_tags
+            type: VARCHAR(255)
+        - column:
+            name: http_requests_url
+            type: VARCHAR(255)
+        - column:
+            name: java_script_errors_url
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: line
+            type: INT
+        - column:
+            name: logs_url
+            type: VARCHAR(255)
+        - column:
+            name: name
+            type: VARCHAR(255)
+        - column:
+            name: run_id
+            type: BIGINT
+        - column:
+            name: screenshot_url
+            type: VARCHAR(255)
+        - column:
+            name: selenium_node
+            type: VARCHAR(255)
+        - column:
+            name: severity
+            type: VARCHAR(255)
+        - column:
+            name: start_date_time
+            type: datetime
+        - column:
+            name: tags
+            type: VARCHAR(255)
+        - column:
+            name: video_url
+            type: VARCHAR(255)
+        tableName: executed_scenario
+- changeSet:
+    id: 1600426180003-7
+    author: THOMAS (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: executionPK
+            name: id
+            type: BIGINT
+        - column:
+            name: acceptance
+            type: VARCHAR(255)
+        - column:
+            name: blocking_validation
+            type: BIT
+        - column:
+            name: branch
+            type: VARCHAR(255)
+        - column:
+            name: build_date_time
+            type: datetime
+        - column:
+            name: discard_reason
+            type: VARCHAR(255)
+        - column:
+            name: duration
+            type: BIGINT
+        - column:
+            name: estimated_duration
+            type: BIGINT
+        - column:
+            name: job_link
+            type: VARCHAR(255)
+        - column:
+            name: job_url
+            type: VARCHAR(255)
+        - column:
+            name: name
+            type: VARCHAR(255)
+        - column:
+            name: quality_severities
+            type: LONGTEXT
+        - column:
+            name: quality_status
+            type: VARCHAR(255)
+        - column:
+            name: quality_thresholds
+            type: VARCHAR(255)
+        - column:
+            name: release
+            type: VARCHAR(255)
+        - column:
+            name: result
+            type: VARCHAR(255)
+        - column:
+            name: status
+            type: VARCHAR(255)
+        - column:
+            name: test_date_time
+            type: datetime
+        - column:
+            name: version
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: cycle_definition_id
+            type: BIGINT
+        tableName: execution
+- changeSet:
+    id: 1600426180003-8
+    author: THOMAS (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: execution_completion_requestPK
+            name: job_url
+            type: VARCHAR(255)
+        tableName: execution_completion_request
+- changeSet:
+    id: 1600426180003-9
+    author: THOMAS (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: functionalityPK
+            name: id
+            type: BIGINT
+        - column:
+            name: comment
+            type: LONGTEXT
+        - column:
+            name: country_codes
+            type: VARCHAR(255)
+        - column:
+            name: covered_country_scenarios
+            type: VARCHAR(255)
+        - column:
+            name: covered_scenarios
+            type: INT
+        - column:
+            name: created
+            type: VARCHAR(255)
+        - column:
+            name: creation_date_time
+            type: datetime
+        - column:
+            name: ignored_country_scenarios
+            type: VARCHAR(255)
+        - column:
+            name: ignored_scenarios
+            type: INT
+        - column:
+            name: name
+            type: VARCHAR(255)
+        - column:
+            name: not_automatable
+            type: BIT
+        - column:
+            name: order
+            type: DOUBLE
+        - column:
+            name: parent_id
+            type: BIGINT
+        - column:
+            name: project_id
+            type: BIGINT
+        - column:
+            name: severity
+            type: VARCHAR(255)
+        - column:
+            name: started
+            type: BIT
+        - column:
+            name: team_id
+            type: BIGINT
+        - column:
+            name: type
+            type: VARCHAR(255)
+        - column:
+            name: update_date_time
+            type: datetime
+        tableName: functionality
+- changeSet:
+    id: 1600426180003-10
+    author: THOMAS (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+            name: functionality_id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+            name: scenario_id
+            type: BIGINT
+        tableName: functionality_coverage
+- changeSet:
+    id: 1600426180003-11
+    author: THOMAS (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: problemPK
+            name: id
+            type: BIGINT
+        - column:
+            name: closing_date_time
+            type: datetime
+        - column:
+            name: comment
+            type: LONGTEXT
+        - column:
+            name: creation_date_time
+            type: datetime
+        - column:
+            name: defect_existence
+            type: VARCHAR(255)
+        - column:
+            name: defect_id
+            type: VARCHAR(255)
+        - column:
+            name: first_seen_date_time
+            type: datetime
+        - column:
+            name: last_seen_date_time
+            type: datetime
+        - column:
+            name: name
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: project_id
+            type: BIGINT
+        - column:
+            name: status
+            type: VARCHAR(255)
+        - column:
+            name: blamed_team_id
+            type: BIGINT
+        - column:
+            name: root_cause_id
+            type: BIGINT
+        tableName: problem
+- changeSet:
+    id: 1600426180003-12
+    author: THOMAS (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+            name: problem_pattern_id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+            name: error_id
+            type: BIGINT
+        tableName: problem_occurrence
+- changeSet:
+    id: 1600426180003-13
+    author: THOMAS (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: problem_patternPK
+            name: id
+            type: BIGINT
+        - column:
+            name: exception
+            type: LONGTEXT
+        - column:
+            name: feature_file
+            type: VARCHAR(255)
+        - column:
+            name: feature_name
+            type: VARCHAR(255)
+        - column:
+            name: platform
+            type: VARCHAR(255)
+        - column:
+            name: problem_id
+            type: BIGINT
+        - column:
+            name: release
+            type: VARCHAR(255)
+        - column:
+            name: scenario_name
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: scenario_name_starts_with
+            type: BIT
+        - column:
+            name: step
+            type: VARCHAR(255)
+        - column:
+            name: step_definition
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: step_definition_starts_with
+            type: BIT
+        - column:
+            constraints:
+              nullable: false
+            name: step_starts_with
+            type: BIT
+        - column:
+            name: type_is_browser
+            type: BIT
+        - column:
+            name: type_is_mobile
+            type: BIT
+        - column:
+            name: country_id
+            type: BIGINT
+        - column:
+            name: type_id
+            type: BIGINT
+        tableName: problem_pattern
+- changeSet:
+    id: 1600426180003-14
+    author: THOMAS (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: projectPK
+            name: id
+            type: BIGINT
+        - column:
+            name: code
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: default_at_startup
+            type: BIT
+        - column:
+            name: name
+            type: VARCHAR(255)
+        tableName: project
+- changeSet:
+    id: 1600426180003-15
+    author: THOMAS (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: root_causePK
+            name: id
+            type: BIGINT
+        - column:
+            name: name
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: project_id
+            type: BIGINT
+        tableName: root_cause
+- changeSet:
+    id: 1600426180003-16
+    author: THOMAS (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: runPK
+            name: id
+            type: BIGINT
+        - column:
+            name: comment
+            type: VARCHAR(255)
+        - column:
+            name: country_tags
+            type: VARCHAR(255)
+        - column:
+            name: duration
+            type: BIGINT
+        - column:
+            name: estimated_duration
+            type: BIGINT
+        - column:
+            name: execution_id
+            type: BIGINT
+        - column:
+            name: include_in_thresholds
+            type: BIT
+        - column:
+            name: job_link
+            type: VARCHAR(255)
+        - column:
+            name: job_url
+            type: VARCHAR(255)
+        - column:
+            name: platform
+            type: VARCHAR(255)
+        - column:
+            name: severity_tags
+            type: VARCHAR(255)
+        - column:
+            name: start_date_time
+            type: datetime
+        - column:
+            name: status
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: country_id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: false
+            name: type_id
+            type: BIGINT
+        tableName: run
+- changeSet:
+    id: 1600426180003-17
+    author: THOMAS (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: scenarioPK
+            name: id
+            type: BIGINT
+        - column:
+            name: content
+            type: LONGTEXT
+        - column:
+            name: country_codes
+            type: VARCHAR(255)
+        - column:
+            name: feature_file
+            type: VARCHAR(255)
+        - column:
+            name: feature_name
+            type: VARCHAR(255)
+        - column:
+            name: feature_tags
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: ignored
+            type: BIT
+        - column:
+            constraints:
+              nullable: false
+            name: line
+            type: INT
+        - column:
+            name: name
+            type: VARCHAR(255)
+        - column:
+            name: severity
+            type: VARCHAR(255)
+        - column:
+            name: tags
+            type: VARCHAR(255)
+        - column:
+            name: wrong_country_codes
+            type: VARCHAR(255)
+        - column:
+            name: wrong_functionality_ids
+            type: VARCHAR(255)
+        - column:
+            name: wrong_severity_code
+            type: VARCHAR(255)
+        - column:
+            name: source_id
+            type: BIGINT
+        tableName: scenario
+- changeSet:
+    id: 1600426180003-18
+    author: THOMAS (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: settingPK
+            name: id
+            type: BIGINT
+        - column:
+            name: code
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: project_id
+            type: BIGINT
+        - column:
+            name: value
+            type: VARCHAR(255)
+        tableName: setting
+- changeSet:
+    id: 1600426180003-19
+    author: THOMAS (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: severityPK
+            name: id
+            type: BIGINT
+        - column:
+            name: code
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: default_on_missing
+            type: BIT
+        - column:
+            name: initials
+            type: VARCHAR(255)
+        - column:
+            name: name
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: position
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: project_id
+            type: BIGINT
+        - column:
+            name: short_name
+            type: VARCHAR(255)
+        tableName: severity
+- changeSet:
+    id: 1600426180003-20
+    author: THOMAS (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: sourcePK
+            name: id
+            type: BIGINT
+        - column:
+            name: code
+            type: VARCHAR(255)
+        - column:
+            name: default_branch
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: letter
+            type: CHAR(1)
+        - column:
+            name: name
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: postman_country_root_folders
+            type: BIT
+        - column:
+            constraints:
+              nullable: false
+            name: project_id
+            type: BIGINT
+        - column:
+            name: technology
+            type: VARCHAR(255)
+        - column:
+            name: vcs_url
+            type: VARCHAR(255)
+        tableName: source
+- changeSet:
+    id: 1600426180003-21
+    author: THOMAS (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: teamPK
+            name: id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: false
+            name: assignable_to_functionalities
+            type: BIT
+        - column:
+            constraints:
+              nullable: false
+            name: assignable_to_problems
+            type: BIT
+        - column:
+            name: name
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: project_id
+            type: BIGINT
+        tableName: team
+- changeSet:
+    id: 1600426180003-22
+    author: THOMAS (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: technology_settingPK
+            name: id
+            type: BIGINT
+        - column:
+            name: code
+            type: VARCHAR(255)
+        - column:
+            name: project_id
+            type: BIGINT
+        - column:
+            name: technology
+            type: VARCHAR(255)
+        - column:
+            name: value
+            type: VARCHAR(255)
+        tableName: technology_setting
+- changeSet:
+    id: 1600426180003-23
+    author: THOMAS (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: typePK
+            name: id
+            type: BIGINT
+        - column:
+            name: code
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: is_browser
+            type: BIT
+        - column:
+            constraints:
+              nullable: false
+            name: is_mobile
+            type: BIT
+        - column:
+            name: name
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: project_id
+            type: BIGINT
+        - column:
+            name: source_id
+            type: BIGINT
+        tableName: type
+- changeSet:
+    id: 1600426180003-24
+    author: THOMAS (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: project_id
+        baseTableName: communication
+        constraintName: FK2wk6td65bobvjsaq9c81v9wen
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: project
+        validate: true
+- changeSet:
+    id: 1600426180003-25
+    author: THOMAS (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: problem_id
+        baseTableName: problem_pattern
+        constraintName: FK7jpqo5y6cyahys39sm0orwq8g
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: problem
+        validate: true
+- changeSet:
+    id: 1600426180003-26
+    author: THOMAS (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: error_id
+        baseTableName: problem_occurrence
+        constraintName: FK7ufw7w6ty9af8d2knfj8wf61s
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: error
+        validate: true
+- changeSet:
+    id: 1600426180003-27
+    author: THOMAS (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: source_id
+        baseTableName: scenario
+        constraintName: FK7xjao8if8v7ngrr3d5fysl2xh
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: source
+        validate: true
+- changeSet:
+    id: 1600426180003-28
+    author: THOMAS (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: source_id
+        baseTableName: type
+        constraintName: FK8bb2af2liwalk4v03f86ahqja
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: source
+        validate: true
+- changeSet:
+    id: 1600426180003-29
+    author: THOMAS (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: functionality_id
+        baseTableName: functionality_coverage
+        constraintName: FK977tbrih0pi27hco0siana744
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: functionality
+        validate: true
+- changeSet:
+    id: 1600426180003-30
+    author: THOMAS (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: execution_id
+        baseTableName: run
+        constraintName: FK9lhk4jv9q31qayvj52ta7rfce
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: execution
+        validate: true
+- changeSet:
+    id: 1600426180003-31
+    author: THOMAS (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: cycle_definition_id
+        baseTableName: execution
+        constraintName: FKbkthi8mbwaru241u7dqrbaxuh
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: cycle_definition
+        validate: true
+- changeSet:
+    id: 1600426180003-32
+    author: THOMAS (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: country_id
+        baseTableName: run
+        constraintName: FKcpc4mlahsqy8l57jhe3ks1jc8
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: country
+        validate: true
+- changeSet:
+    id: 1600426180003-33
+    author: THOMAS (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: type_id
+        baseTableName: run
+        constraintName: FKfx9m2uogm587s519qvdaxikuu
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: type
+        validate: true
+- changeSet:
+    id: 1600426180003-34
+    author: THOMAS (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: country_id
+        baseTableName: country_deployment
+        constraintName: FKi09oks9a5retlq886imdmk7v3
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: country
+        validate: true
+- changeSet:
+    id: 1600426180003-35
+    author: THOMAS (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: executed_scenario_id
+        baseTableName: error
+        constraintName: FKi9qjriqbyemy75cc7qytapl6j
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: executed_scenario
+        validate: true
+- changeSet:
+    id: 1600426180003-36
+    author: THOMAS (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: root_cause_id
+        baseTableName: problem
+        constraintName: FKin8hwekccdrb0jy6dq136aowg
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: root_cause
+        validate: true
+- changeSet:
+    id: 1600426180003-37
+    author: THOMAS (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: run_id
+        baseTableName: executed_scenario
+        constraintName: FKjf6qljggvhle2upr7gj4j15aq
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: run
+        validate: true
+- changeSet:
+    id: 1600426180003-38
+    author: THOMAS (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: blamed_team_id
+        baseTableName: problem
+        constraintName: FKn4axsqmo5lfarir5wsi6ly6qp
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: team
+        validate: true
+- changeSet:
+    id: 1600426180003-39
+    author: THOMAS (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: type_id
+        baseTableName: problem_pattern
+        constraintName: FKn8vphj76n1ehosn36gecx7ril
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: type
+        validate: true
+- changeSet:
+    id: 1600426180003-40
+    author: THOMAS (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: problem_pattern_id
+        baseTableName: problem_occurrence
+        constraintName: FKorsa8kvts94kximvdh0lmlfjg
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: problem_pattern
+        validate: true
+- changeSet:
+    id: 1600426180003-41
+    author: THOMAS (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: execution_id
+        baseTableName: country_deployment
+        constraintName: FKqaxgaqvt8qusu5v39nh20w5nj
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: execution
+        validate: true
+- changeSet:
+    id: 1600426180003-42
+    author: THOMAS (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: scenario_id
+        baseTableName: functionality_coverage
+        constraintName: FKqfv2fc357ofm8yxmnih36pw5q
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: scenario
+        validate: true
+- changeSet:
+    id: 1600426180003-43
+    author: THOMAS (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: country_id
+        baseTableName: problem_pattern
+        constraintName: FKqt7rl8ot2vql5bhw477ig1r47
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: country
+        validate: true
+

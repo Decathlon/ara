@@ -302,7 +302,7 @@
         <profile>
             <id>int</id>
             <properties>
-                <spring.profiles.active>db-mysql,dev,dev-db-mysql</spring.profiles.active>
+                <spring.profiles.active>db-mysql</spring.profiles.active>
             </properties>
         </profile>
     </profiles>

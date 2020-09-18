@@ -15,15 +15,17 @@
   ~
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.3.3.RELEASE</version>
-		<relativePath /> <!-- lookup parent from repository -->
-	</parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.3.3.RELEASE</version>
+        <relativePath />
+        <!-- lookup parent from repository -->
+    </parent>
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-database</artifactId>
@@ -38,10 +40,7 @@
     <properties>
         <java.version>14</java.version>
         <querydsl.version>4.3.1</querydsl.version>
-        <liquibase.version>3.6.3</liquibase.version>
-        <liquibase.database.url />
-        <liquibase.database.username />
-        <liquibase.database.password />
+        <diffChangeLogFile>src/main/resources/db/changelog/to-be-changed.yaml</diffChangeLogFile>
     </properties>
 
     <dependencies>
@@ -63,10 +62,14 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-		    <groupId>com.h2database</groupId>
-		    <artifactId>h2</artifactId>
-		    <scope>runtime</scope>
-		</dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+        </dependency>
 
         <dependency>
             <!-- @javax.interceptor.InterceptorBinding needed by javax.transaction.Transactional -->
@@ -141,7 +144,7 @@
                             </formatPreferences>
                             <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
                             <outputDirectory>${project.build.directory}/delombokified-sources-for-javadoc</outputDirectory>
-                            <addOutputDirectory>false</addOutputDirectory> <!-- Only delombokify for JavaDoc -->
+                            <addOutputDirectory>false</addOutputDirectory>                            <!-- Only delombokify for JavaDoc -->
                         </configuration>
                     </execution>
                 </executions>
@@ -152,24 +155,34 @@
                 <configuration>
                     <sourcepath>${project.build.directory}/delombokified-sources-for-javadoc;${project.build.directory}/generated-sources/annotations</sourcepath>
                     <source>${java.version}</source>
-                    <target>${java.version}</target>
                 </configuration>
             </plugin>
 
-            <!-- Run Liquibase scripts on the integration database *BEFORE* generating Querydsl table classes from database schema -->
-            <!-- Liquibase scripts can also be manually run by "mvn liquibase:update" / "mvn liquibase:rollback" + a profile -->
             <plugin>
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-maven-plugin</artifactId>
                 <version>${liquibase.version}</version>
                 <configuration>
-                    <changeLogFile>src/main/resources/liquibase/master.xml</changeLogFile>
-                    <driver>com.mysql.jdbc.Driver</driver>
-                    <url>${liquibase.database.url}</url>
-                    <username>${liquibase.database.username}</username>
-                    <password>${liquibase.database.password}</password>
-                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                    <diffChangeLogFile>${diffChangeLogFile}</diffChangeLogFile>
+                    <propertyFile>src/main/resources/liquibase.properties</propertyFile>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.liquibase.ext</groupId>
+                        <artifactId>liquibase-hibernate5</artifactId>
+                        <version>3.9.0</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-starter-data-jpa</artifactId>
+                        <version>${project.parent.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>javax.validation</groupId>
+                        <artifactId>validation-api</artifactId>
+                        <version>2.0.1.Final</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>

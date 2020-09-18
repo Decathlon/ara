@@ -8,6 +8,14 @@ DB_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-db:${VERSION}
 BACK_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-back:${VERSION}
 FRONT_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-front:${VERSION}
 
+MIGRATION_LABEL = "to-be-changed"
+DATE_WITH_TIME := $(shell /bin/date "+%Y%m%d%H%M%S")
+
+makeMigration: ## Create a migration file
+	mvn -f back/pom.xml -pl database liquibase:diff -DdiffChangeLogFile=back/database/src/main/resources/db/changelog/changes/${DATE_WITH_TIME}-${MIGRATION_LABEL}.yaml
+	@echo "  - include:" >> back/database/src/main/resources/db/changelog/db.changelog-master.yaml
+	@echo "      file: classpath*:db/changelog/changes/$(DATE_WITH_TIME)-$(MIGRATION_LABEL).yaml" >> back/database/src/main/resources/db/changelog/db.changelog-master.yaml
+
 cache-build-back:
 	@echo '-- Build java ara-back with local cache --'
 	@docker container run -v "$$PWD/back":/root/ara -w /root/ara maven:3-jdk-$(JAVA_VERSION) mvn -s settings.xml clean package dependency:go-offline
