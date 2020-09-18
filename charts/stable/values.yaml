@@ -25,7 +25,6 @@ api:
         #  cpu: 100m
         #  memory: 128Mi
     port: 8080
-    dbMode: update
     # Used to redirect on the app by email service among others
     appUrl: ara.test
 
@@ -54,10 +53,12 @@ database:
     embedded: true
     # type mysql is suported when embedded is false
     type: h2
-    # When embedded if false you can provide default cluster database or external database:
+    # When embedded is false you can provide default cluster database or external database:
     external: false
     # When external is true you can set the host of database
     # host:
+    # Active liquibase update. Only for non embedded database.
+    liquibaseActive: false
     # Name of the database
     name: ara
     # Set if no existing secret

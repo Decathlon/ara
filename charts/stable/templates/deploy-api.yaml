@@ -56,11 +56,11 @@ spec:
             configMapKeyRef:
               name: {{ include "ara.configmap.name" . }}
               key: app_url
-        - name: DATA_DB_MODE
+        - name: LIQUIBASE_ACTIVE
           valueFrom:
             configMapKeyRef:
                 name: {{ include "ara.configmap.name" . }}
-                key: db_mode
+                key: liquibase_active
         ports:
         - containerPort: {{ .Values.api.port }}
           name: http-port

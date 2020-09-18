@@ -10,6 +10,8 @@ case $DATABASE_TYPE in
     h2)
         echo "ARA configured with his h2 embedded database"
         DATABASE_PARAMS="${DATABASE_PARAMS}-Dspring.datasource.url=jdbc:h2:$DATABASE_URL;DB_CLOSE_DELAY=-1 "
+        echo "so liquibase is force set to false"
+        LIQUIBASE_ACTIVE=false
         ;;
     *)
         echo "ERROR: please specify a DATABASE_TYPE env var with the target database type"
@@ -27,9 +29,9 @@ then
     DATABASE_PARAMS="${DATABASE_PARAMS}-Dspring.datasource.password=$DATABASE_PASSWORD "
 fi
 
-if [[ ! -z $DATA_DB_MODE ]]
+if [[ ! -z $LIQUIBASE_ACTIVE ]]
 then
-    DATABASE_PARAMS="${DATABASE_PARAMS}-Dspring.jpa.properties.hibernate.hbm2ddl.auto=$DATA_DB_MODE "
+    DATABASE_PARAMS="${DATABASE_PARAMS}-Dspring.liquibase.enabled=$LIQUIBASE_ACTIVE "
 fi
 
 java $JAVAOPS \
