@@ -5,6 +5,43 @@ Background:
 
 
 @severity-medium
+  Scenario: Check Ignored Scenarios
+    Then on the executions and errors page, on ignored scenarios part, on the header, in the column "sanity-check", there is no ignored scenario
+    And on the executions and errors page, on ignored scenarios part, on the header, in the column "high", there is 34% - i.e. "1/3" - of ignored scenarios
+    And on the executions and errors page, on ignored scenarios part, on the header, in the column "medium", there is 13% - i.e. "1/8" - of ignored scenarios
+    And on the executions and errors page, on ignored scenarios part, on the header, in the column "*", there is 10% - i.e. "2/20" - of ignored scenarios
+    And on the executions and errors page, on ignored scenarios part, on the run "api", in the column "sanity-check", there is no ignored scenario
+    And on the executions and errors page, on ignored scenarios part, on the run "api", in the column "high", there is no ignored scenario
+    And on the executions and errors page, on ignored scenarios part, on the run "api", in the column "medium", there is no ignored scenario
+    And on the executions and errors page, on ignored scenarios part, on the run "api", in the column "*", there is no ignored scenario
+    And on the executions and errors page, on ignored scenarios part, on the run "web", in the column "sanity-check", there is no ignored scenario
+    And on the executions and errors page, on ignored scenarios part, on the run "web", in the column "high", there is 34% - i.e. "1/3" - of ignored scenarios
+    And on the executions and errors page, on ignored scenarios part, on the run "web", in the column "medium", there is 17% - i.e. "1/6" - of ignored scenarios
+    And on the executions and errors page, on ignored scenarios part, on the run "web", in the column "*", there is 13% - i.e. "2/16" - of ignored scenarios
+    When on the executions and errors page, on ignored scenarios part, on the run "web", in the column "high", the user clicks on the ignored scenarios
+    Then on the executions and errors page, on ignored scenarios part, the ignored scenarios for the run "web" and the severity "high" are displayed
+    And on the executions and errors page, on ignored scenarios part, the ignored scenarios for "Feature A" contain 1 scenario including "Functionalities 1 & 2: Feature A" and its severity is "high"
+    When on the executions and errors page, on ignored scenarios part, on the run "web", in the column "medium", the user clicks on the ignored scenarios
+    Then on the executions and errors page, on ignored scenarios part, the ignored scenarios for the run "web" and the severity "medium" are displayed
+    And on the executions and errors page, on ignored scenarios part, the ignored scenarios for "Feature B" contain 1 scenario including "Functionality 3: Feature B" and its severity is "medium"
+    When on the executions and errors page, on ignored scenarios part, on the run "web", in the column "*", the user clicks on the ignored scenarios
+    Then on the executions and errors page, on ignored scenarios part, the ignored scenarios for the run "web" and the severity "*" are displayed
+    And on the executions and errors page, on ignored scenarios part, the ignored scenarios for "Feature A" contain 1 scenario including "Functionalities 1 & 2: Feature A" and its severity is "high"
+    And on the executions and errors page, on ignored scenarios part, the ignored scenarios for "Feature B" contain 1 scenario including "Functionality 3: Feature B" and its severity is "medium"
+
+@severity-medium
+  Scenario: Navigate between latest executions and all executions
+    Then on the executions and errors page, the button "Show Raw Executions" is visible
+    And on the executions and errors page, the button "Go back to Executions Dashboard" is not visible
+    When on the executions and errors page, the user clicks on the button "Show Raw Executions"
+    Then on the executions and errors page, the button "Show Raw Executions" is not visible
+    And on the executions and errors page, the button "Go back to Executions Dashboard" is visible
+    And on the executions and errors page, the list of all executions is visible
+    When on the executions and errors page, the user clicks on the button "Go back to Executions Dashboard"
+    Then on the executions and errors page, the latest executions are visible
+
+
+@severity-medium
   Scenario: Check the Actions Buttons
     When on the executions and errors page, the user clicks on the actions and job reports button "5"
     Then on the executions and errors page, in the actions and job reports list, the "Actions" button "5" is visible
@@ -21,7 +58,7 @@ Background:
     And on the executions and errors page, in the actions and job reports list, the "fr_desktop" button "5" is enabled
 
 @severity-sanity-check
-  Scenario: Check Header
+  Scenario: Check Header & Navigate between previous and next execution
 
   # VERSION AND DATE
     Then on the executions and errors page, in the cart "5", the version is "e023ff218f5ef838cf635ed8842572f99b726fb8" and the build date is "Feb 28, 2020 - 08:55"
