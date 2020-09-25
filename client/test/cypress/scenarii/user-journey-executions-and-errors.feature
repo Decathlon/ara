@@ -67,11 +67,18 @@ Background:
   # EXECUTIONS NAVIGATION
     And on the executions and errors page, in the cart "5", the "Previous" execution button is clickable
     And on the executions and errors page, in the cart "5", the "Next" execution button is not clickable
+  # Go to the previous execution  
     When on the executions and errors page, in the cart "5", the user clicks on the "Previous" execution button
     And on the executions and errors page, in the cart "4", the version is "1a4b22b8c9a55f666f66666d7e856d210c05e64" and the build date is "Feb 27, 2020 - 08:55"
     And on the executions and errors page, in the cart "4", the test date is "Feb 27, 2020 - 09:00"
     And on the executions and errors page, in the cart "4", the "Previous" execution button is clickable
     And on the executions and errors page, in the cart "4", the "Next" execution button is clickable
+  # Go to the next execution  
+    When on the executions and errors page, in the cart "4", the user clicks on the "Next" execution button
+    And on the executions and errors page, in the cart "5", the version is "e023ff218f5ef838cf635ed8842572f99b726fb8" and the build date is "Feb 28, 2020 - 08:55"
+    And on the executions and errors page, in the cart "5", the test date is "Feb 28, 2020 - 09:00"
+    And on the executions and errors page, in the cart "5", the "Previous" execution button is clickable
+    And on the executions and errors page, in the cart "5", the "Next" execution button is not clickable
 
 
 @severity-sanity-check
