@@ -32,9 +32,9 @@ spec:
         env:
         - name: MYSQL_DATABASE
           valueFrom:
-            configMapKeyRef:
-              name: {{ include "ara.configmap.name" . }}
-              key: database_name
+            secretKeyRef:
+              name: {{ include "ara.database.secret.name" . }}
+              key: {{ include "ara.database.secret.databasenamekey" . }}
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:

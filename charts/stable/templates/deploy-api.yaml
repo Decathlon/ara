@@ -36,11 +36,16 @@ spec:
             configMapKeyRef:
               name: {{ include "ara.configmap.name" . }}
               key: database_type
-        - name: DATABASE_URL
+        - name: DATABASE_HOST
           valueFrom:
             configMapKeyRef:
               name: {{ include "ara.configmap.name" . }}
-              key: database_url
+              key: database_host
+        - name: DATABASE_NAME
+          valueFrom:
+            secretKeyRef:
+              name:  {{ include "ara.database.secret.name" . }}
+              key: {{ include "ara.database.secret.databasenamekey" . }}
         - name: DATABASE_USER
           valueFrom:
             secretKeyRef:

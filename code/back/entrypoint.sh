@@ -5,11 +5,11 @@ DATABASE_PARAMS=''
 case $DATABASE_TYPE in
     mysql)
         echo "ARA configured with mysql database"
-        DATABASE_PARAMS="${DATABASE_PARAMS}-Dspring.datasource.url=jdbc:mysql://$DATABASE_URL "
+        DATABASE_PARAMS="${DATABASE_PARAMS}-Dspring.datasource.url=jdbc:mysql://$DATABASE_HOST/$DATABASE_NAME "
         ;;
     h2)
         echo "ARA configured with his h2 embedded database"
-        DATABASE_PARAMS="${DATABASE_PARAMS}-Dspring.datasource.url=jdbc:h2:$DATABASE_URL;DB_CLOSE_ON_EXIT=FALSE "
+        DATABASE_PARAMS="${DATABASE_PARAMS}-Dspring.datasource.url=jdbc:h2:$DATABASE_HOST:$DATABASE_NAME;DB_CLOSE_ON_EXIT=FALSE "
         ;;
     *)
         echo "ERROR: please specify a DATABASE_TYPE env var with the target database type"

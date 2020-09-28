@@ -22,7 +22,8 @@ services:
     restart: always
     environment:
       - DATABASE_TYPE=mysql
-      - DATABASE_URL=ara-db:3306/ara-dev
+      - DATABASE_HOST=ara-db:3306
+      - DATABASE_NAME=ara-dev
       - DATABASE_USER=root
       - DATABASE_PASSWORD=to_change
       - CLIENT_URL="http://localhost:80/"
