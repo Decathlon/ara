@@ -84,7 +84,9 @@ spec:
         resources:
 {{ toYaml .Values.api.resources | indent 10 }}
         {{- end }}
-
+      {{- if .Values.api.sideCarContainer }}
+{{ toYaml .Values.api.sideCarContainer | indent 6 }}
+      {{- end}}
 ---
 apiVersion: v1
 kind: Service

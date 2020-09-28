@@ -27,6 +27,7 @@ api:
     port: 8080
     # Used to redirect on the app by email service among others
     appUrl: ara.test
+    # sideCarContainer:
 
 ##
 ## UI Configuration
