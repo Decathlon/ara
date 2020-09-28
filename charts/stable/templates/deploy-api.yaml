@@ -87,6 +87,10 @@ spec:
       {{- if .Values.api.sideCarContainer }}
 {{ toYaml .Values.api.sideCarContainer | indent 6 }}
       {{- end}}
+      {{- if .Values.api.volumes }}
+      volumes:
+{{ toYaml .Values.api.volumes | indent 6 }}
+      {{- end}}
 ---
 apiVersion: v1
 kind: Service
