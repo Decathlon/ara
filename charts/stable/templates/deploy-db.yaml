@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
       - name: {{ $name }}
-        image: "{{ .Values.image.registry }}/ara-db:{{ .Chart.Name }}-{{ .Chart.Version }}"
+        image: "mysql:5.7"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: MYSQL_DATABASE
