@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/version: {{ .Chart.Version }}
     app.kubernetes.io/component: configuration
 data:
-  database_host: {{ include "ara.db.host" . }}
+  database_host: {{ include "ara.db.host" . | quote }}
   database_type: {{ .Values.database.type }}
   liquibase_active: {{ .Values.database.liquibaseActive | quote }}
   app_url: {{ .Values.api.appUrl }}

@@ -77,10 +77,8 @@ Define host url
 {{- if .Values.database.embedded -}}
 mem
 {{- else if not .Values.database.host -}}
-{{/* provided database missioned by the chart */}}
 {{ printf "%s-db.%s.svc.cluster.local:3306" .Chart.Name .Release.Namespace }}
 {{- else -}}
-{{/* provided database missioned by the user */}}
 {{ .Values.database.host }}
 {{- end -}}
 {{- end -}}
