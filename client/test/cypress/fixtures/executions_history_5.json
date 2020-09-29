@@ -130,7 +130,7 @@
             "name": "API",
             "letter": "A",
             "technology": "POSTMAN",
-            "vcsUrl": "https://github.com/decathlon/ara/tree/{{branch}}/server/src/main/resources/demo/collections/",
+            "vcsUrl": "https://github.com/{{branch}}/server/src/main/resources/demo/collections/",
             "defaultBranch": "master",
             "postmanCountryRootFolders": true
           },
@@ -217,7 +217,7 @@
             "name": "Web",
             "letter": "W",
             "technology": "CUCUMBER",
-            "vcsUrl": "https://github.com/decathlon/ara/tree/{{branch}}/generated-cucumber-report/src/main/resources/ara/demo/features/",
+            "vcsUrl": "https://github.com/{{branch}}/generated-cucumber-report/src/main/resources/ara/demo/features/",
             "defaultBranch": "master",
             "postmanCountryRootFolders": false
           },

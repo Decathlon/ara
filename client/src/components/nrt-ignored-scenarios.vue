@@ -25,7 +25,9 @@
         <i-col span="4" />
         <i-col :span="(24 - 4) / severityTotals.severities.length" v-for="globalSeverityStat of severityTotals.severities" :key="globalSeverityStat.severity.code" style="text-align: center;">
           <strong>{{globalSeverityStat.severity.shortName}}</strong>
-          <div class="tdStyle globalStyle percentStyle" v-if="globalSeverityStat.counts.ignored > 0">
+          <div :data-nrt=" 'executions_IgnoredScenariosHeader_' + globalSeverityStat.severity.code " 
+                class="tdStyle globalStyle percentStyle" 
+                v-if="globalSeverityStat.counts.ignored > 0">
             {{globalSeverityStat.counts.percent}}%<br>
             <span style="font-size: 75%;">{{globalSeverityStat.counts.ignored}}/{{globalSeverityStat.counts.total}}</span>
           </div>
@@ -45,7 +47,8 @@
                 <span v-if="severityStat.counts.ignored < 0" style="color: rgb(237, 63, 20)">
                   ?
                 </span>
-                <span v-else-if="severityStat.counts.ignored > 0">
+                <span :data-nrt=" 'executions_IgnoredScenariosRaw_' + sourceStat.source.code + '_' + globalSeverityStat.severity.code " 
+                      v-else-if="severityStat.counts.ignored > 0">
                   {{severityStat.counts.percent}}%<br>
                   <span style="font-size: 75%;">{{severityStat.counts.ignored}}/{{severityStat.counts.total}}</span>
                 </span>
@@ -62,16 +65,16 @@
     <!-- The scenarios matching the clicked filter box -->
     <div style="border-left: 1px solid #e9eaec; margin-left: 508px; padding-left: 8px;">
       <div v-if="featuresWithIgnoredScenarios">
-        <h2 style="margin-top: 0;">{{detailsTitle}}</h2>
+        <h2 :data-nrt=" 'executions_IgnoredScenariosDetailsTitle' " style="margin-top: 0;">{{detailsTitle}}</h2>
         <div v-for="feature in featuresWithIgnoredScenarios" :key="feature.reportFileName">
-          <strong style="display: block; margin-top: 6px;">
+          <strong :data-nrt=" 'executions_IgnoredScenariosDetailsFeature_' + feature.name " style="display: block; margin-top: 6px;">
             {{feature.name}}
             <span style="color: lightgray">({{feature.scenarios.length}})</span>
-            <a :href="editUrl(feature)" target="_blank" style="margin-left: 8px; font-weight: normal;">
+            <a :data-nrt=" 'executions_IgnoredScenariosDetailsEditScenarios_' + feature.name " :href="editUrl(feature)" target="_blank" style="margin-left: 8px; font-weight: normal;">
               <Icon type="md-open"/> EDIT SCENARIOS
             </a>
           </strong>
-          <div v-for="(scenario, index) in feature.scenarios" :key="index" class="scenarioName">
+          <div :data-nrt=" 'executions_IgnoredScenariosDetailsFeature_' + feature.name + '_' + scenario.name " v-for="(scenario, index) in feature.scenarios" :key="index" class="scenarioName">
             {{scenario.name}}
             <span class="severityStyle">{{scenario.severity}}</span>
           </div>
