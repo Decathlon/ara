@@ -5,7 +5,7 @@ on:
     - cron: '0 10 * * *' # everyday at 10am
   push:
     branches:
-      - '**'
+      - 'main'
     tags:
       - 'ara-*.*.*'
   pull_request:

@@ -28,7 +28,7 @@ Please note the following :
 === I've got a Windows PC !
 
 1. Open a Powershell Command Prompt
-2. Run the command `Invoke-WebRequest -OutFile docker-compose.yml https://raw.githubusercontent.com/Decathlon/ara/master/docker-compose.yml`
+2. Run the command `Invoke-WebRequest -OutFile docker-compose.yml https://raw.githubusercontent.com/Decathlon/ara/main/code/docker-compose.yml`
 3. Run the command `docker-compose up`
 4. Open up a browser on `http://localhost:8080`
 5. Enjoy !
@@ -39,7 +39,7 @@ Please note the following :
 === I've got a Mac !
 
 1. Open a Terminal
-2. Run the command `wget https://raw.githubusercontent.com/Decathlon/ara/master/docker-compose.yml`
+2. Run the command `wget https://raw.githubusercontent.com/Decathlon/ara/main/code/docker-compose.yml`
 3. Run the command `docker-compose up`
 4. Open up a browser on `http://localhost:8080`
 5. Enjoy !
@@ -50,7 +50,7 @@ Please note the following :
 === I've got a GNU/Linux PC !
 
 1. Open a Terminal
-2. Run the command `wget https://raw.githubusercontent.com/Decathlon/ara/master/docker-compose.yml`
+2. Run the command `wget https://raw.githubusercontent.com/Decathlon/ara/main/code/docker-compose.yml`
 3. Edit the `docker-compose.yml` file and replace the `host.docker.internal` at line 22 by `172.17.0.1` (see
 https://github.com/Decathlon/ara/issues/222[this PR]) for more details
 4. Run the command `docker-compose up`

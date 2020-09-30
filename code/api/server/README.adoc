@@ -290,7 +290,7 @@ You can rollback the last applied change-set with this command:
 Change the rollbackCount to tell Liquibase the number of change-sets to rollback. +
 Change the profile to point to the right database.
 
-IMPORTANT: Only do this on your local development environment, while designing a NEW change-set, and before committing the final version to the master branch of the project. +
+IMPORTANT: Only do this on your local development environment, while designing a NEW change-set, and before committing the final version to the main branch of the project. +
 Once a change-set has gone to production, you must not modify it.
 
 All change-sets of ARA need to be rollbackable: when applying the change-sets, a rollback test is performed in order to check for problems (and then the change-set is applied again, of course). +
