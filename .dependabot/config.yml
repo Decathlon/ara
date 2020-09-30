@@ -1,7 +1,7 @@
 version: 1
 update_configs:
   - package_manager: "java:maven"
-    directory: "/code/back"
+    directory: "/code/api"
     update_schedule: "daily"
     default_reviewers:
       - "decathlon/ara"
@@ -10,7 +10,7 @@ update_configs:
       - "dktsni"
 
   - package_manager: "javascript"
-    directory: "/code/front"
+    directory: "/code/web-ui"
     update_schedule: "live"
     default_reviewers:
       - "decathlon/ara"

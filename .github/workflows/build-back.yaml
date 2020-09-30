@@ -21,7 +21,7 @@ jobs:
         name: Prepare
         id: prep
         run: |
-          DOCKER_IMAGE=aligor/ara-back
+          DOCKER_IMAGE=aligor/ara-api
           VERSION=noop
           if [ "${{ github.event_name }}" = "schedule" ]; then
             VERSION=nightly
@@ -65,8 +65,8 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v2
         with:
-          context: ./code/back
-          file: ./code/back/Dockerfile
+          context: ./code/api
+          file: ./code/api/Dockerfile
           platforms: linux/amd64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.prep.outputs.tags }}

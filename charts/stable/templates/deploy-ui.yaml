@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
       - name: {{ $name }}
-        image: "{{ .Values.image.registry }}/ara-front:{{ .Chart.Version }}"
+        image: "{{ .Values.image.registry }}/ara-web-ui:{{ .Chart.Version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: API_URL

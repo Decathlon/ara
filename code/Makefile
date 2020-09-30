@@ -4,40 +4,39 @@ DOCKER_REGISTRY?=docker.io
 IMAGE_NAME?=ara
 VERSION?=latest
 
-DB_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-db:${VERSION}
-BACK_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-back:${VERSION}
-FRONT_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-front:${VERSION}
+API_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-api:${VERSION}
+WEB_UI_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-web-ui:${VERSION}
 
 MIGRATION_LABEL = "to-be-changed"
 DATE_WITH_TIME := $(shell /bin/date "+%Y%m%d%H%M%S")
 
 install: ## Install project for dev
-	@mvn -Dmaven.test.skip=true -f back/pom.xml clean install
+	@mvn -Dmaven.test.skip=true -f api/pom.xml clean install
 
 makeMigration: ## Create a migration file
-	mvn -f back/pom.xml -pl database liquibase:diff -DdiffChangeLogFile=back/database/src/main/resources/db/changelog/changes/${DATE_WITH_TIME}-${MIGRATION_LABEL}.yaml
-	@echo "  - include:" >> back/database/src/main/resources/db/changelog/db.changelog-master.yaml
-	@echo "      file: classpath*:db/changelog/changes/$(DATE_WITH_TIME)-$(MIGRATION_LABEL).yaml" >> back/database/src/main/resources/db/changelog/db.changelog-master.yaml
+	mvn -f api/pom.xml -pl database liquibase:diff -DdiffChangeLogFile=api/database/src/main/resources/db/changelog/changes/${DATE_WITH_TIME}-${MIGRATION_LABEL}.yaml
+	@echo "  - include:" >> api/database/src/main/resources/db/changelog/db.changelog-master.yaml
+	@echo "      file: classpath*:db/changelog/changes/$(DATE_WITH_TIME)-$(MIGRATION_LABEL).yaml" >> api/database/src/main/resources/db/changelog/db.changelog-master.yaml
 
-cache-build-back:
-	@echo '-- Build java ara-back with local cache --'
-	@docker container run -v "$$PWD/back":/root/ara -w /root/ara maven:3-jdk-$(JAVA_VERSION) mvn -s settings.xml clean package dependency:go-offline
+cache-build-api:
+	@echo '-- Build java ara-api with local cache --'
+	@docker container run -v "$$PWD/api":/root/ara -w /root/ara maven:3-jdk-$(JAVA_VERSION) mvn -s settings.xml clean package dependency:go-offline
 
-build-back: ## Build ara-back
-	@echo '-- Build ${BACK_IMAGE} --'
-	@docker build -t ${BACK_IMAGE} back
+build-api: ## Build ara-api
+	@echo '-- Build ${API_IMAGE} --'
+	@docker build -t ${API_IMAGE} api
 
-build-front: ## Build ara-front
-	@echo '-- Build ${FRONT_IMAGE} --'
-	@docker build -t ${FRONT_IMAGE} front
+build-web-ui: ## Build ara-web-ui
+	@echo '-- Build ${WEB_UI_IMAGE} --'
+	@docker build -t ${WEB_UI_IMAGE} web-ui
 
-run-front: ## Run front
-	@echo '-- Run ara-front --'
-	@export VERSION=$(VERSION); docker-compose up ara-front
+run-web-ui: ## Run web-ui
+	@echo '-- Run ara-web-ui --'
+	@export VERSION=$(VERSION); docker-compose up ara-web-ui
 
-run-back: ## Run back
-	@echo '-- Run ara-back --'
-	@export VERSION=$(VERSION); docker-compose up ara-back
+run-api: ## Run api
+	@echo '-- Run ara-api --'
+	@export VERSION=$(VERSION); docker-compose up ara-api
 
 run-db: ## Run database
 	@echo '-- Run database --'
@@ -47,24 +46,10 @@ start-db: ## Start database
 	@echo '-- Run database --'
 	@export VERSION=$(VERSION); docker-compose up -d ara-db
 
-build-full: build-back build-front ## Build ARA
+build-full: build-api build-web-ui ## Build ARA
 
 build: ## Build ARA in parallel
 	@$(MAKE) build-full -j2 -k
-
-promote-back: ## promote ara back to specified registry
-	@echo '-- Push ${BACK_IMAGE} --'
-	@echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin ${DOCKER_REGISTRY}
-	@docker push ${BACK_IMAGE}
-	@docker logout
-
-promote-front: ## promote ara front to specified registry
-	@echo '-- Push ${FRONT_IMAGE} --'
-	@echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin ${DOCKER_REGISTRY}
-	@docker push ${FRONT_IMAGE}
-	@docker logout
-
-promote: promote-back promote-front ## Build ARA
 
 start: ## Start ARA
 	@echo '-- Start ARA --'
@@ -76,8 +61,8 @@ stop: ## Stop ARA
 
 update-maven-version:
 	@echo '-- Update Maven version --'
-	@mvn -f back/pom.xml -s back/settings.xml release:update-versions -DautoVersionSubmodules=true
-	@mvn -f back/pom.xml -s back/settings.xml versions:set -DremoveSnapshot -DprocessAllModules
+	@mvn -f api/pom.xml -s api/settings.xml release:update-versions -DautoVersionSubmodules=true
+	@mvn -f api/pom.xml -s api/settings.xml versions:set -DremoveSnapshot -DprocessAllModules
 
 helm-tempate:
 	@helm template ../charts/stable --debug

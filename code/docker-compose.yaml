@@ -16,9 +16,9 @@ services:
       - MYSQL_ROOT_PASSWORD=to_change
     networks:
       - db_net
-  ara-back:
-    build: ./back
-    image: "ara-back:${VERSION:-latest}"
+  ara-api:
+    build: ./api
+    image: "ara-api:${VERSION:-latest}"
     restart: always
     environment:
       - DATABASE_TYPE=mysql
@@ -32,12 +32,12 @@ services:
     networks:
       - web_net
       - db_net
-  ara-front:
-    build: ./front
-    image: "ara-front:${VERSION:-latest}"
+  ara-web-ui:
+    build: ./web-ui
+    image: "ara-web-ui:${VERSION:-latest}"
     restart: always
     environment:
-      - API_URL=ara-back:8080
+      - API_URL=ara-api:8080
     ports:
       - 8081:80
     networks:

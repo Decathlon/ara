@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
       - name: {{ $name }}
-        image: "{{ .Values.image.registry }}/ara-back:{{ .Chart.Version }}"
+        image: "{{ .Values.image.registry }}/ara-api:{{ .Chart.Version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: SERVER_PORT

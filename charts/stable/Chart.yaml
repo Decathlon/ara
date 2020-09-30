@@ -10,7 +10,7 @@ keywords:
 - ara
 - analyser
 - tests aggregator
-icon: https://raw.githubusercontent.com/Thomgrus/ara/feat/ara-migration-merged/code/front/src/assets/favicon.png
+icon: https://raw.githubusercontent.com/Thomgrus/ara/master/code/web-ui/src/assets/favicon.png
 sources:
 - https://github.com/Decathlon/ara
 maintainers:

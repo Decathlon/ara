@@ -35,7 +35,7 @@ ENV JAVA_OPTS=-Xmx2048m
 ENV DATABASE_TYPE=h2
 ENV DATABASE_HOST="mem"
 ENV DATABASE_NAME="ara-db"
-ENV CLIENT_URL=http://ara-front
+ENV CLIENT_URL=http://ara-web-ui
 
 #Create base app folder
 WORKDIR $APP_HOME
