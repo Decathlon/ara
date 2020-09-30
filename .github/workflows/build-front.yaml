@@ -21,7 +21,7 @@ jobs:
         name: Prepare
         id: prep
         run: |
-          DOCKER_IMAGE=aligor/ara-web-ui
+          DOCKER_IMAGE=Decathlon/ara-web-ui
           VERSION=noop
           if [ "${{ github.event_name }}" = "schedule" ]; then
             VERSION=nightly

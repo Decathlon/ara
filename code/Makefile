@@ -1,7 +1,7 @@
 JAVA_VERSION=14
 DOCKER_REGISTRY?=docker.io
 # Forks may use name/ara for their tests
-IMAGE_NAME?=ara
+IMAGE_NAME?=Decathlon/ara
 VERSION?=latest
 
 API_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-api:${VERSION}

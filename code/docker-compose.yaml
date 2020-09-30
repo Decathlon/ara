@@ -18,7 +18,7 @@ services:
       - db_net
   ara-api:
     build: ./api
-    image: "ara-api:${VERSION:-latest}"
+    image: "Decathlon/ara-api:${VERSION:-latest}"
     restart: always
     environment:
       - DATABASE_TYPE=mysql
@@ -34,7 +34,7 @@ services:
       - db_net
   ara-web-ui:
     build: ./web-ui
-    image: "ara-web-ui:${VERSION:-latest}"
+    image: "Decathlon/ara-web-ui:${VERSION:-latest}"
     restart: always
     environment:
       - API_URL=ara-api:8080
