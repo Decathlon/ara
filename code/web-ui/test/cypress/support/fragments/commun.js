@@ -14,12 +14,3 @@ export const getRGB = (color) => {
             break;
     };
 }
-
-var PROGRESS_BAR = 154.281250/100;
-export const getProgressBar = (value) => {
-    return value * PROGRESS_BAR + 'px';
-}
-
-export const testProgressBar = (progressBar, value) => {
-    return expect(progressBar.find('>div').first()).to.have.css('width', getProgressBar(value));
-}

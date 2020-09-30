@@ -65,11 +65,11 @@ util.formatDate = function (date, withSeconds) {
   return date ? moment(date).format('MMM D, YYYY - HH:mm' + (withSeconds ? ':ss' : '')) : ''
 }
 
-util.toSplitted = function (string) {
+util.toSplit = function (string) {
   return (string ? string.split(',') : [])
 }
 
-util.fromSplitted = function (array) {
+util.fromSplit = function (array) {
   return (array && array.length > 0 ? array.join(',') : '')
 }
 

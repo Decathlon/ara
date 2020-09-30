@@ -35,7 +35,7 @@
           <span v-else>{{executionCommunication.message}}</span>
         </Alert>
       </div>
-      <div v-if="latestExecutions" style="flex: 0 0 auto; margin-bottom: 16px;">
+      <div :data-nrt=" 'executions_LatestExecutions' " v-if="latestExecutions" style="flex: 0 0 auto; margin-bottom: 16px;">
         <Button icon="md-refresh" @click="loadLatestExecutions" style="margin-left: 8px;">REFRESH</Button>
       </div>
     </div>
@@ -54,7 +54,8 @@
 
       <div style="text-align: center; margin-top: 16px;">
         <router-link :to="{ name: 'raw-executions' }" :target="isFramed ? '_blank' : ''">
-          <Button icon="md-nuclear">SHOW RAW EXECUTIONS</Button>
+          <Button :data-nrt=" 'executions_ShowRawExecutions' "
+                  icon="md-nuclear">SHOW RAW EXECUTIONS</Button>
         </router-link>
       </div>
 

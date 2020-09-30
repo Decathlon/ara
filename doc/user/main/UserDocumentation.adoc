@@ -18,12 +18,10 @@ It also synchronizes team efforts to increase your project quality.
   - *develop/night:* execute complete test-suite at night for the develop branch (can take a long time)
   - *master/night:* execute complete test-suite at night for the master branch
 * *EXECUTIONS:* A given cycle is executed regularly: each execution can run several test types, and aggregate all results to give you a quality status.
-* *TEST-TYPES:* you can run API tests with Cucumber, Postman or Karate; and Web desktop or Web mobile tests with Cucumber:
-    - RestAssured API with Cucumber
+* *TEST-TYPES:* you can run API tests (e.g with Postman); and Web desktop or Web mobile tests (e.g. with Cucumber or Cypress):
     - API with Postman
-    - Karate API with Cucumber
     - Firefox desktop with Selenium & Cucumber
-* *QUALITY-STATUSES:* all Cucumber/Karate-scenarios and Postman requests are assigned a severity: a threshold is configured for each severity of each cycle. If a severity quality is below thresholds, the cycle is considered FAILED.
+* *QUALITY-STATUSES:* all (Cucumber, Postman or any other supported technology) scenarios are assigned a severity: a threshold is configured for each severity of each cycle. If a severity quality is below thresholds, the cycle is considered FAILED.
 * *SCENARIOS/REQUESTS:* scenarios are the base unit of test: they can all be executed independently, in any order (with dependencies).
 * *SEVERITY:* each scenario and request are assigned to a severity (if not, then the default one is used): higher severities have a stricter threshold and less failures are allowed:
             depending on your project, severities can have the same thresholds: in this case, severities helps prioritize regression fix actions.

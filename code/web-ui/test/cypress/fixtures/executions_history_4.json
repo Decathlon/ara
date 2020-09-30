@@ -1,0 +1,327 @@
+{
+  "id": 4,
+  "branch": "develop",
+  "name": "day",
+  "release": "v3",
+  "version": "1a4b22b8c9a55f666f66666d7e856d210c05e64",
+  "buildDateTime": "2020-02-27T07:55:00.000Z",
+  "testDateTime": "2020-02-27T08:00:00.000Z",
+  "jobUrl": "https://build.company.com/demo/develop/day/4/",
+  "status": "DONE",
+  "result": "SUCCESS",
+  "acceptance": "NEW",
+  "blockingValidation": true,
+  "qualityThresholds": {
+    "sanity-check": {
+      "failure": 100,
+      "warning": 100
+    },
+    "high": {
+      "failure": 95,
+      "warning": 98
+    },
+    "medium": {
+      "failure": 90,
+      "warning": 95
+    }
+  },
+  "qualityStatus": "SUCCESS",
+  "qualitySeverities": [
+    {
+      "severity": {
+        "code": "sanity-check",
+        "position": 1,
+        "name": "Sanity Check",
+        "shortName": "Sanity Ch.",
+        "initials": "S.C.",
+        "defaultOnMissing": false
+      },
+      "scenarioCounts": {
+        "total": 11,
+        "failed": 5,
+        "passed": 6
+      },
+      "percent": 100,
+      "status": "SUCCESS"
+    },
+    {
+      "severity": {
+        "code": "high",
+        "position": 2,
+        "name": "High",
+        "shortName": "High",
+        "initials": "High",
+        "defaultOnMissing": true
+      },
+      "scenarioCounts": {
+        "total": 15,
+        "failed": 3,
+        "passed": 12
+      },
+      "percent": 100,
+      "status": "SUCCESS"
+    },
+    {
+      "severity": {
+        "code": "medium",
+        "position": 3,
+        "name": "Medium",
+        "shortName": "Medium",
+        "initials": "Med.",
+        "defaultOnMissing": false
+      },
+      "scenarioCounts": {
+        "total": 2,
+        "failed": 0,
+        "passed": 2
+      },
+      "percent": 100,
+      "status": "SUCCESS"
+    },
+    {
+      "severity": {
+        "code": "*",
+        "position": 2147483647,
+        "name": "Global",
+        "shortName": "Global",
+        "initials": "Global",
+        "defaultOnMissing": false
+      },
+      "scenarioCounts": {
+        "total": 27,
+        "failed": 7,
+        "passed": 20
+      },
+      "percent": 100,
+      "status": "SUCCESS"
+    }
+  ],
+  "duration": 0,
+  "estimatedDuration": 0,
+  "previousId": 3,
+  "nextId": 5,
+  "countryDeployments": [
+    {
+      "id": 78,
+      "country": {
+        "code": "fr",
+        "name": "France"
+      },
+      "platform": "integ",
+      "jobUrl": "https://build.company.com/demo/deploy/fr/51/",
+      "status": "DONE",
+      "result": "SUCCESS",
+      "startDateTime": "2020-02-27T08:00:00.000Z",
+      "estimatedDuration": 0,
+      "duration": 0
+    }
+  ],
+  "runs": [
+    {
+      "id": 215,
+      "country": {
+        "code": "fr",
+        "name": "France"
+      },
+      "type": {
+        "code": "api",
+        "name": "Integ. APIs",
+        "source": {
+          "code": "api",
+          "name": "API",
+          "letter": "A",
+          "technology": "POSTMAN",
+          "vcsUrl": "https://vcs-url.com/company/tree/{{branch}}/collections/",
+          "defaultBranch": "master",
+          "postmanCountryRootFolders": true
+        },
+        "browser": false,
+        "mobile": false
+      },
+      "platform": "integ",
+      "jobUrl": "https://build.company.com/demo/test/52/",
+      "status": "DONE",
+      "countryTags": "all",
+      "severityTags": "all",
+      "includeInThresholds": true,
+      "startDateTime": "2020-02-27T08:00:00.000Z",
+      "estimatedDuration": 0,
+      "duration": 0,
+      "qualitiesPerSeverity": {
+        "sanity-check": {
+          "passed": 2,
+          "unhandled": 1,
+          "handled": 1,
+          "total": 4
+        },
+        "*": {
+          "passed": 12,
+          "unhandled": 1,
+          "handled": 3,
+          "total": 16
+        },
+        "medium": {
+          "passed": 2,
+          "unhandled": 0,
+          "handled": 0,
+          "total": 2
+        },
+        "high": {
+          "passed": 7,
+          "unhandled": 0,
+          "handled": 3,
+          "total": 10
+        }
+      },
+      "qualitiesPerTeamAndSeverity": {
+        "1": {
+          "sanity-check": {
+            "passed": 1,
+            "unhandled": 1,
+            "handled": 0,
+            "total": 2
+          }, 
+          "high": {
+            "passed": 4,
+            "unhandled": 0,
+            "handled": 0,
+            "total": 4
+          },
+          "medium": {
+            "passed": 2,
+            "unhandled": 0,
+            "handled": 0,
+            "total": 2
+          },
+          "*": {
+            "passed": 7,
+            "unhandled": 1,
+            "handled": 0,
+            "total": 8
+          }
+        },
+        "2": {
+          "sanity-check": {
+            "passed": 1,
+            "unhandled": 0,
+            "handled": 1,
+            "total": 2
+          }, 
+          "high": {
+            "passed": 3,
+            "unhandled": 0,
+            "handled": 3,
+            "total": 6
+          },
+          "*": {
+            "passed": 4,
+            "unhandled": 0,
+            "handled": 4,
+            "total": 8
+          }
+        }
+      }
+    },
+    {
+      "id": 216,
+      "country": {
+        "code": "fr",
+        "name": "France"
+      },
+      "type": {
+        "code": "desktop",
+        "name": "HMI Desktop",
+        "source": {
+          "code": "web",
+          "name": "Web",
+          "letter": "W",
+          "technology": "CUCUMBER",
+          "vcsUrl": "https://vcs-url.com/company/tree/{{branch}}/web/features/",
+          "defaultBranch": "master",
+          "postmanCountryRootFolders": false
+        },
+        "browser": true,
+        "mobile": false
+      },
+      "platform": "integ",
+      "jobUrl": "https://build.company.com/demo/test/53/",
+      "status": "DONE",
+      "countryTags": "all",
+      "severityTags": "all",
+      "includeInThresholds": true,
+      "startDateTime": "2020-02-27T08:00:00.000Z",
+      "estimatedDuration": 0,
+      "duration": 0,
+      "qualitiesPerSeverity": {
+        "high": {
+          "passed": 5,
+          "unhandled": 0,
+          "handled": 0,
+          "total": 5
+        },
+        "sanity-check": {
+          "passed": 4,
+          "unhandled": 3,
+          "handled": 0,
+          "total": 7
+        },
+        "*": {
+          "passed": 9,
+          "unhandled": 3,
+          "handled": 0,
+          "total": 12
+        }
+      },
+      "qualitiesPerTeamAndSeverity": {
+        "1": {
+          "sanity-check": {
+            "passed": 3,
+            "unhandled": 1,
+            "handled": 0,
+            "total": 4
+          },
+          "*": {
+            "passed": 3,
+            "unhandled": 1,
+            "handled": 0,
+            "total": 4
+          }
+        },
+        "2": {
+          "sanity-check": {
+            "passed": 0,
+            "unhandled": 2,
+            "handled": 0,
+            "total": 2
+          },
+          "*": {
+            "passed": 0,
+            "unhandled": 2,
+            "handled": 0,
+            "total": 2
+          }
+        },
+        "-404": {
+          "sanity-check": {
+            "passed": 1,
+            "unhandled": 0,
+            "handled": 0,
+            "total": 1
+          },
+          "high": {
+            "passed": 5,
+            "unhandled": 0,
+            "handled": 0,
+            "total": 5
+          },
+          "*": {
+            "passed": 6,
+            "unhandled": 0,
+            "handled": 0,
+            "total": 6
+          }
+        }
+      }
+    }
+  ]
+}

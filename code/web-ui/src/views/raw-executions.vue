@@ -17,7 +17,7 @@
 <template>
   <div>
     <div class="spinnable">
-      <table border class="table">
+      <table :data-nrt=" 'executions_TableOfExecutions' " border class="table">
         <thead>
           <tr>
             <th></th>
@@ -92,7 +92,8 @@
 
       <div style="text-align: center; clear: both; padding-top: 16px;">
         <router-link :to="{ name: 'executions' }">
-          <Button icon="md-arrow-round-back">GO BACK TO EXECUTIONS DASHBOARD</Button>
+          <Button :data-nrt=" 'executions_GoBackToExecutionsDashboard' "
+                  icon="md-arrow-round-back">GO BACK TO EXECUTIONS DASHBOARD</Button>
         </router-link>
       </div>
   </div>

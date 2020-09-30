@@ -25,6 +25,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.SortedSet;
 
 /**
@@ -33,7 +34,7 @@ import java.util.SortedSet;
 @Repository
 public interface FunctionalityRepository extends JpaRepository<Functionality, Long>, FunctionalityRepositoryCustom {
 
-    Functionality findByProjectIdAndId(Long projectId, Long id);
+    Optional<Functionality> findByProjectIdAndId(Long projectId, Long id);
 
     List<Functionality> findByProjectIdAndIdIn(Long projectId, List<Long> ids);
 

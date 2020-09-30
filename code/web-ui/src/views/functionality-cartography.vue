@@ -18,7 +18,21 @@
   <div>
     <functionality-menu />
 
-    <div>
+    <Spin fix v-if="loadingSettings"></Spin>
+
+    <div v-else-if="countries.length === 0 || sources.length === 0 || teamsAssignableToFunctionalities.length === 0">
+      <h2 style="text-align: center; width: 75%; margin: auto; font-weight: normal;">
+        <span>
+          Before adding functionalities, please make sure to add at least
+          a <router-link :to="{ name: 'management-countries' }">country</router-link>,
+          a <router-link :to="{ name: 'management-sources' }">source</router-link> and
+          a <router-link :to="{ name: 'management-teams' }">team</router-link> (that is assignable to functionalities).
+        </span>
+      </h2>
+
+    </div>
+
+    <div v-else>
       <Spin fix v-if="loadingFunctionalities"/>
       <!-- Screen title with help -->
       <div style="display: flex;">
@@ -134,35 +148,57 @@
         <div class="headerCell" :style="'width: ' + (columnSizes[7]) + 'px; text-align: center;'">
           Actions
            <if-feature-enabled code="xprt-mprt-crtg">
-              <Dropdown title="Other actions" trigger="click" placement="bottom-end" :transfer="true" >
-                <Button size="small">
-                  <Icon type="md-menu"/>
+              <template v-if="!isMovingSelection">
+                <Dropdown title="Other actions" trigger="click" placement="bottom-end" :transfer="true" >
+                  <Button size="small">
+                    <Icon type="md-menu"/>
+                  </Button>
+                  <DropdownMenu slot="list">
+                    <DropdownItem>
+                      <div @click="removeAllFilters()">
+                        <Icon type="md-backspace"/> REMOVE ALL FILTERS
+                      </div>
+                    </DropdownItem>
+                    <DropdownItem divided>
+                      <div @click="openExportPopup">
+                        <Icon type="md-cloud-download" /> EXPORT CURRENT FUNCTIONALITIES
+                      </div>
+                    </DropdownItem>
+                    <DropdownItem>
+                      <div @click="openImportPopup">
+                        <Icon type="md-cloud-upload" /> IMPORT NEW FUNCTIONALITIES
+                      </div>
+                    </DropdownItem>
+                    <DropdownItem divided>
+                      <div @click="selectAll()">
+                        <Icon type="md-checkbox-outline"/> SELECT ALL
+                      </div>
+                    </DropdownItem>
+                    <DropdownItem>
+                      <div @click="clearSelection()">
+                        <Icon type="md-square-outline" /> CLEAR SELECTION
+                      </div>
+                    </DropdownItem>
+                    <DropdownItem :disabled="noSelection" divided>
+                      <div @click="startMovingSelection()">
+                        <Icon type="md-move"/> MOVE SELECTION TO...
+                      </div>
+                    </DropdownItem>
+                    <DropdownItem :disabled="noSelection">
+                      <div @click="deleteSelection()">
+                        <Icon type="md-trash" /> DELETE SELECTION
+                      </div>
+                    </DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
+                <functionality-export-popup ref="exportPopup" />
+                <functionality-import-popup ref="importPopup" />
+              </template>
+              <template v-else>
+                <Button size="small" type="warning" title="Cancel move" @click="cancelMove()" style="float: none;">
+                  <Icon type="md-close-circle"/>
                 </Button>
-                <DropdownMenu slot="list">
-                  <DropdownItem>
-                    <div @click="removeAllFilters()">
-                      <Icon type="md-backspace"/> REMOVE ALL FILTERS
-                    </div>
-                  </DropdownItem>
-                  <DropdownItem divided>
-                    <div @click="openExportPopup">
-                      <Icon type="md-cloud-download" /> EXPORT CURRENT FUNCTIONALITIES
-                    </div>
-                  </DropdownItem>
-                  <DropdownItem>
-                    <div @click="openImportPopup">
-                      <Icon type="md-cloud-upload" /> IMPORT NEW FUNCTIONALITIES
-                    </div>
-                  </DropdownItem>
-                  <DropdownItem :disabled="noSelection" divided>
-                    <div @click="startMovingSelection()">
-                      <Icon type="md-move"/> MOVE SELECTION TO...
-                    </div>
-                  </DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
-              <functionality-export-popup ref="exportPopup" />
-              <functionality-import-popup ref="importPopup" />
+              </template>
           </if-feature-enabled>
           <if-feature-disabled code="xprt-mprt-crtg">
             <Button size="small" :disabled="!hasFilter" @click="removeAllFilters()" title="Remove all filters">
@@ -170,6 +206,7 @@
             </Button>
           </if-feature-disabled>
         </div>
+        <div class="headerCell" :style="'width: ' + (columnSizes[8]) + 'px; text-align: center;'"></div>
 
       </div>
       <virtual-scroller :items="flattenedMatchingFunctionalities" item-height="31" pool-size="1000" buffer="200" page-mode>
@@ -190,7 +227,6 @@
             v-on:duplicate="startDuplicating"
             v-on:move="startMoving"
             v-on:completeMove="completeMove"
-            v-on:cancelMove="cancelMove"
             v-on:create="create"
             v-on:delete="deleteNode"
             v-on:showCoverage="showCoverage"/>
@@ -325,6 +361,7 @@
     data () {
       return {
         // Functionalities and filtering
+        loadingSettings: true,
         loadingFunctionalities: true,
         functionalities: [],
         flattenedMatchingFunctionalities: [],
@@ -337,7 +374,8 @@
           86, // Countries (default value: will be computed when countries are available, to know what width to allocate for all countries)
           180, // Coverage (default value: will be computed when sources are available, to know what width to allocate for all sources)
           110, // Comment
-          87 // Actions
+          60, // Actions
+          25 // Selection
         ],
         counts: {
           matching: 0,
@@ -431,7 +469,7 @@
         if (jsonNodes) {
           for (let i in jsonNodes) {
             let jsonNode = jsonNodes[i]
-            jsonNode.countryCodes = util.toSplitted(jsonNode.countryCodes)
+            jsonNode.countryCodes = util.toSplit(jsonNode.countryCodes)
             nodes.push({
               id: jsonNode.id, // For virtual-scroller
               row: jsonNode,
@@ -630,17 +668,17 @@
 
       flattenMatchingFunctionalities () {
         this.flattenedMatchingFunctionalities = []
-        this.flattenMatchingnodes(this.functionalities, this.flattenedMatchingFunctionalities)
+        this.flattenMatchingNodes(this.functionalities, this.flattenedMatchingFunctionalities)
       },
 
-      flattenMatchingnodes (nodes, flattenedNodes) {
+      flattenMatchingNodes (nodes, flattenedNodes) {
         for (let i in nodes) {
           let node = nodes[i]
           if (node.matches || node.hasMatchingChildren) {
             this.flattenedMatchingFunctionalities.push(node)
           }
           if (node.expanded && node.children && node.hasMatchingChildren) {
-            this.flattenMatchingnodes(node.children)
+            this.flattenMatchingNodes(node.children)
           }
         }
       },
@@ -676,14 +714,14 @@
           if (this.filter[propertyName]) {
             let value = this.filter[propertyName]
             if (propertyName === 'countries') {
-              value = util.fromSplitted(value)
+              value = util.fromSplit(value)
             }
             if (value !== '') {
               query[propertyName] = value
             }
           }
         }
-        this.$router.replace({ query })
+        this.$router.replace({ query }).catch(() => {})
       },
 
       fromQueryString () {
@@ -693,7 +731,7 @@
             if (query[propertyName]) {
               let value = query[propertyName]
               if (propertyName === 'countries') {
-                value = util.toSplitted(value)
+                value = util.toSplit(value)
               }
               this.filter[propertyName] = value
             }
@@ -716,7 +754,7 @@
         for (let property in serverRow) {
           let value = serverRow[property]
           if (property === 'countryCodes') {
-            value = util.toSplitted(value)
+            value = util.toSplit(value)
           }
           clientRow[property] = value
         }
@@ -987,7 +1025,7 @@
         return counts
       },
 
-      deleteNode (node) {
+      getDeleteMessage (node) {
         let childrenCounts = this.countChildren(node)
         let childrenMessage = ''
         if (childrenCounts.FOLDER > 0 || childrenCounts.FUNCTIONALITY > 0) {
@@ -1001,6 +1039,11 @@
             childrenMessage = ` (+ ${functionalitiesMessage})`
           }
         }
+        return childrenMessage
+      },
+
+      deleteNode (node) {
+        const childrenMessage = this.getDeleteMessage(node)
         let self = this
         this.$Modal.confirm({
           title: `Delete ${node.row.type === 'FOLDER' ? 'Folder' : 'Functionality'}`,
@@ -1029,27 +1072,260 @@
       },
 
       loadAll () {
+        this.isMovingSelection = false
+        this.nodesSelection = []
+
         this.fromQueryString()
         this.loadFunctionalities()
+
+        this.loadingSettings = true
 
         Vue.http
           .get(api.paths.countries(this), api.REQUEST_OPTIONS)
           .then((response) => {
             this.countries = response.body
             this.$set(this.columnSizes, 4, 24 * this.countries.length + 2 * 4)
+            Vue.http
+              .get(api.paths.sources(this), api.REQUEST_OPTIONS)
+              .then((response) => {
+                this.sources = response.body
+                // 32 is the size of ', 99 A'; we have 2 * 32 because normal and ignored scenario counts; and 52 is for margins, paddings, icons, and borders
+                this.$set(this.columnSizes, 5, Math.max(150, 32 * 2 * this.sources.length + 52))
+                this.loadingSettings = false
+              }, (error) => {
+                this.loadingSettings = false
+                api.handleError(error)
+              })
           }, (error) => {
+            this.loadingSettings = false
             api.handleError(error)
           })
+      },
 
-        Vue.http
-          .get(api.paths.sources(this), api.REQUEST_OPTIONS)
-          .then((response) => {
-            this.sources = response.body
-            // 32 is the size of ', 99 A'; we have 2 * 32 because normal and ignored scenario counts; and 52 is for margins, paddings, icons, and borders
-            this.$set(this.columnSizes, 5, Math.max(150, 32 * 2 * this.sources.length + 52))
-          }, (error) => {
-            api.handleError(error)
-          })
+      applySelectToNode (node, selected) {
+        node.isSelected = selected
+        if (node.children) {
+          for (let i in node.children) {
+            const child = node.children[i]
+            this.applySelectToNode(child, selected)
+          }
+        }
+      },
+
+      applySelectToAllNodes (selected) {
+        let selection = []
+        for (let i in this.functionalities) {
+          const child = this.functionalities[i]
+          this.applySelectToNode(child, selected)
+          if (selected) {
+            selection = selection.concat(child)
+          }
+        }
+        this.nodesSelection = selection
+      },
+
+      selectAll () {
+        this.applySelectToAllNodes(true)
+      },
+
+      clearSelection () {
+        this.applySelectToAllNodes(false)
+      },
+
+      propagateSelectionToChildren (node) {
+        if (node.children) {
+          for (let i in node.children) {
+            const child = node.children[i]
+            child.isSelected = node.isSelected
+            this.propagateSelectionToChildren(child)
+          }
+        }
+      },
+
+      propagateSelectionToParent (node) {
+        let currentParentId = node.row.parentId
+
+        while (currentParentId) {
+          const parentNode = this.getNodeFromId(this.functionalities, currentParentId)
+          const children = parentNode.children
+          const notAllChecked = !_(children).every('isSelected')
+          currentParentId = parentNode.row.parentId
+
+          if (notAllChecked) {
+            parentNode.isSelected = false
+          }
+        }
+      },
+
+      findNodeInElement (node, nodeId) {
+        if (node.id === nodeId) {
+          return node
+        } else if (node.children) {
+          let i
+          let result = null
+          for (i = 0; result == null && i < node.children.length; i++) {
+            let child = node.children[i]
+            result = this.findNodeInElement(child, nodeId)
+          }
+          return result
+        }
+        return null
+      },
+
+      getNodeFromId (nodes, nodeId) {
+        for (let i in nodes) {
+          let node = nodes[i]
+          let nodeFound = this.findNodeInElement(node, nodeId)
+          if (nodeFound) {
+            return nodeFound
+          }
+        }
+      },
+
+      getNodeSelection (node) {
+        const isFolder = node.row.type === 'FOLDER'
+        if (node.isSelected) {
+          return [node]
+        } else if (node.children && isFolder) {
+          let selection = []
+          for (let i in node.children) {
+            const child = node.children[i]
+            selection = selection.concat(this.getNodeSelection(child))
+          }
+          return selection
+        }
+        return []
+      },
+
+      updateNodesSelection () {
+        let selection = []
+        for (let i in this.functionalities) {
+          const child = this.functionalities[i]
+          selection = selection.concat(this.getNodeSelection(child))
+        }
+        this.nodesSelection = selection
+      },
+
+      updateSelection (node) {
+        this.propagateSelectionToChildren(node)
+        this.propagateSelectionToParent(node)
+        this.updateNodesSelection()
+      },
+
+      updateTargetDetails (node) {
+        const children = node.children
+
+        const isBeingMoved = _(this.nodesSelection).some(['id', node.id])
+        const isInLowerHierarchy = node.isSelected && !isBeingMoved
+        const isParentOfMovingNode = _(this.nodesSelection).map(function (n) { return n.row.parentId }).value().includes(node.id)
+        if (isBeingMoved) {
+          node.moveDetails.isBeingMoved = true
+        }
+        if (isInLowerHierarchy) {
+          node.moveDetails.isInLowerHierarchy = true
+        }
+        if (isParentOfMovingNode) {
+          node.moveDetails.isMovingNodesParent = true
+        }
+
+        if (children) {
+          for (let i in children) {
+            const child = children[i]
+            this.updateTargetDetails(child)
+          }
+        }
+      },
+
+      startMovingSelection () {
+        if (this.noSelection) {
+          return
+        }
+        this.isMovingSelection = true
+        for (let i in this.functionalities) {
+          const child = this.functionalities[i]
+          this.updateTargetDetails(child)
+        }
+      },
+
+      resetNodeTargetDetails (node) {
+        node.moveDetails.isBeingMoved = false
+        node.moveDetails.isInLowerHierarchy = false
+        node.moveDetails.isMovingNodesParent = false
+
+        const children = node.children
+
+        if (children) {
+          for (let i in children) {
+            const child = children[i]
+            this.resetNodeTargetDetails(child)
+          }
+        }
+      },
+
+      resetAllNodesTargetDetails () {
+        for (let i in this.functionalities) {
+          const child = this.functionalities[i]
+          this.resetNodeTargetDetails(child)
+        }
+      },
+
+      deleteSelection () {
+        if (this.noSelection) {
+          return
+        }
+
+        this.isMovingSelection = false
+
+        const selectionNumber = this.nodesSelection.length
+
+        const hasOnlyFunctionalities = _(this.nodesSelection).every((node) => node.row.type === 'FUNCTIONALITY')
+        const hasOnlyFolders = _(this.nodesSelection).every((node) => node.row.type === 'FOLDER')
+
+        let title = 'Delete '
+        if (hasOnlyFunctionalities) {
+          title += (selectionNumber === 1 ? 'a' : selectionNumber) + ' functionalit' + (selectionNumber > 1 ? 'ies' : 'y')
+        } else if (hasOnlyFolders) {
+          title += (selectionNumber === 1 ? 'a' : selectionNumber) + ' folder' + (selectionNumber > 1 ? 's' : '')
+        } else {
+          title += 'selection (' + selectionNumber + ')'
+        }
+
+        let content = '<p>Delete '
+        const nodeDescriptions = _(this.nodesSelection)
+          .map((node) => `<b>${util.escapeHtml(node.row.name)}</b> ` + this.getDeleteMessage(node))
+          .values()
+          .join(', ')
+        content += nodeDescriptions + '?</p>'
+
+        let okText = 'Delete selection'
+
+        const ids = _(this.nodesSelection)
+          .map((node) => `id=${node.id}`)
+          .values()
+          .join('&')
+
+        let self = this
+        this.$Modal.confirm({
+          title: title,
+          content: content,
+          okText: okText,
+          loading: true,
+          onOk () {
+            self.loadingFunctionalities = true
+            Vue.http
+              .delete(api.paths.functionalities(self) + '?' + ids, api.REQUEST_OPTIONS)
+              .then((response) => {
+                self.$Modal.remove()
+                self.loadingFunctionalities = false
+                self.nodesSelection = []
+                self.parseFunctionalities(response.body)
+              }, (error) => {
+                self.$Modal.remove()
+                self.loadingFunctionalities = false
+                api.handleError(error)
+              })
+          }
+        })
       },
 
       propagateSelectionToChildren (node) {

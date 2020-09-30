@@ -15,7 +15,7 @@
   ~
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
-  <span style="width: 100%;" :class="'functionality-node ' + (node.row.type) + (hasFilter && node.matches ? ' matches' : '') + (dropDownVisible ? ' dropDownVisible' : '') + (isMovingSelection && node.moveDetails.isBeingMoved ? ' moving' : '')" :id="node.row.id">
+  <span style="width: 100%;" :class="'functionality-node ' + (node.row.type) + (hasFilter && node.matches ? ' matches' : '') + (dropDownVisible ? ' dropDownVisible' : '') + (isMovingSelection && node.moveDetails.isBeingMoved ? ' moving' : '') + (node.isSelected ? ' selected-node' : '')" :id="node.row.id">
     <span class="name toHover cell" :style="'width: calc(100% - ' + sumColumnSizes + 'px); padding-left: ' + (node.level * 32 + 3) + 'px;'">
       <span class="expandedOnHover" v-if="hover" :style="'margin-left: ' + (node.level * 32) + 'px;'">
         <span v-if="node.hasMatchingChildren" @click="emitToggleExpand" class="expandButton"><!--
@@ -93,15 +93,17 @@
     <span class="cell" :style="'width: ' + (columnSizes[7]) + 'px; text-align: center; line-height: 25px;'">
 
       <ButtonGroup v-if="!isMovingSelection">
-        <Button size="small" title="Edit" @click="emitEdit">
-          <Icon type="md-create"/>
-        </Button>
         <Dropdown title="Other actions" trigger="click" placement="bottom-end" :transfer="true" @on-visible-change="dropDownVisibilityChanged">
           <Button size="small">
             <Icon type="md-menu"/>
           </Button>
           <DropdownMenu slot="list">
             <DropdownItem>
+              <div @click="emitEdit">
+                <Icon type="md-create"/> EDIT
+              </div>
+            </DropdownItem>
+            <DropdownItem divided>
               <div @click="emitMove">
                 <Icon type="md-move"/> MOVE TO...
               </div>
@@ -177,22 +179,23 @@
             </DropdownItem>
           </DropdownMenu>
         </Dropdown>
-        <Button size="small" type="warning" title="Cancel move" @click="emitCancelMove()" style="float: none;">
-          <Icon type="md-close-circle"/>
-        </Button>
-        <Checkbox @on-change="emitSelection()" v-model="node.isSelected" disabled></Checkbox>
       </ButtonGroup>
 
       <div v-else-if="(isMovingSelection && node.moveDetails.isBeingMoved)" :title="'Currently moving this ' + node.row.type.toLowerCase()">
         <span style="display: inline-block; text-align: center; width: 22px;">
           <Icon type="md-move" style="display: inline-block;"/>
         </span>
-        <Button size="small" type="warning" title="Cancel move" @click="emitCancelMove()" style="float: none;">
-          <Icon type="md-close-circle"/>
-        </Button>
-        <Checkbox @on-change="emitSelection()" v-model="node.isSelected" disabled></Checkbox>
       </div>
 
+    </span>
+
+    <span class="cell" :style="'width: ' + (columnSizes[8]) + 'px;'">
+      <Checkbox
+        @on-change="emitSelection()"
+        v-model="node.isSelected"
+        :disabled="isMovingSelection"
+        style="margin:0 0 0 10%;">
+      </Checkbox>
     </span>
 
   </span>
@@ -377,10 +380,6 @@
         this.dropDownVisible = false
       },
 
-      emitCancelMove () {
-        this.$emit('cancelMove')
-      },
-
       emitCreate (type, position) {
         this.$emit('create', type, this.node, position)
       },
@@ -438,6 +437,10 @@
   .moving .country.active {
     background-color: #0082C3 !important;
     color: white !important;
+  }
+
+  .selected-node {
+    background-color: #BFE6FF !important;
   }
 
   .expandButton,

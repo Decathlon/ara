@@ -41,6 +41,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
@@ -109,7 +111,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getFunctionality()).thenReturn(functionality);
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(null);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.empty());
 
         // Then
         functionalityService.create(projectId, newFunctionalityDTO);
@@ -135,7 +137,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getType()).thenReturn(FunctionalityType.FUNCTIONALITY);
 
         // Then
@@ -172,7 +174,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -221,7 +223,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -277,7 +279,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -339,7 +341,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -399,7 +401,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -461,7 +463,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -525,7 +527,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -591,7 +593,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -663,7 +665,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -738,7 +740,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -816,7 +818,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -896,7 +898,7 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(referenceFunctionality.getId()).thenReturn(referenceId);
         when(referenceFunctionality.getParentId()).thenReturn(parentId);
 
@@ -1007,7 +1009,7 @@ public class FunctionalityServiceTest {
         // When
         when(moveDetails.getReferenceId()).thenReturn(referenceId);
         when(moveDetails.getSourceIds()).thenReturn(Arrays.asList(sourceId1, sourceId2, sourceId3));
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(null);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.empty());
 
         // Then
         functionalityService.moveList(projectId, moveDetails);
@@ -1032,12 +1034,127 @@ public class FunctionalityServiceTest {
         // When
         when(moveDetails.getReferenceId()).thenReturn(referenceId);
         when(moveDetails.getSourceIds()).thenReturn(Arrays.asList(sourceId1, sourceId2, sourceId3));
-        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(referenceFunctionality);
+        when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(repository.findByProjectIdAndIdIn(projectId, Arrays.asList(sourceId1, sourceId2, sourceId3))).thenReturn(
                 Arrays.asList(sourceFunctionality1, sourceFunctionality2)
         );
 
         // Then
         functionalityService.moveList(projectId, moveDetails);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void delete_throwBadRequestException_whenIdIsNull() throws BadRequestException {
+        // Given
+        Long projectId = 1L;
+
+        // When
+
+        // Then
+        functionalityService.delete(projectId, null);
+        verify(repository, never()).delete(any());
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void delete_throwNotFoundException_whenIdIsUnknown() throws BadRequestException {
+        // Given
+        Long projectId = 1L;
+        Long id = 10L;
+
+        // When
+        when(repository.findByProjectIdAndId(projectId, id)).thenReturn(Optional.empty());
+
+        // Then
+        functionalityService.delete(projectId, id);
+        verify(repository, never()).delete(any());
+    }
+
+    @Test
+    public void delete_deleteFunctionality_whenIdExists() throws BadRequestException {
+        // Given
+        Long projectId = 1L;
+        Long id = 10L;
+
+        Functionality functionality = mock(Functionality.class);
+
+        // When
+        when(repository.findByProjectIdAndId(projectId, id)).thenReturn(Optional.of(functionality));
+
+        // Then
+        functionalityService.delete(projectId, id);
+        verify(repository).delete(functionality);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void deleteList_throwBadRequestException_whenIdsNull() throws BadRequestException {
+        // Given
+        Long projectId = 1L;
+
+        // When
+
+        // Then
+        functionalityService.deleteList(projectId, null);
+        verify(repository, never()).deleteAll(anyIterable());
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void deleteList_throwBadRequestException_whenIdsEmpty() throws BadRequestException {
+        // Given
+        Long projectId = 1L;
+
+        // When
+
+        // Then
+        functionalityService.deleteList(projectId, new ArrayList<>());
+        verify(repository, never()).deleteAll(anyIterable());
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void deleteList_throwNotFoundException_whenSomeIdsNotFound() throws BadRequestException {
+        // Given
+        Long projectId = 1L;
+
+        Long functionalityId1 = 11L;
+        Long functionalityId2 = 12L;
+        Long functionalityId3 = 13L;
+
+        Functionality functionality1 = mock(Functionality.class);
+        Functionality functionality2 = mock(Functionality.class);
+
+        List<Long> functionalityIds = Arrays.asList(functionalityId1, functionalityId2, functionalityId3);
+
+        // When
+        when(repository.findByProjectIdAndIdIn(projectId, functionalityIds)).thenReturn(
+                Arrays.asList(functionality1, functionality2)
+        );
+
+        // Then
+        functionalityService.deleteList(projectId, functionalityIds);
+        verify(repository, never()).deleteAll(anyIterable());
+    }
+
+    @Test
+    public void deleteList_deleteFunctionalities_whenAllIdsFound() throws BadRequestException {
+        // Given
+        Long projectId = 1L;
+
+        Long functionalityId1 = 11L;
+        Long functionalityId2 = 12L;
+        Long functionalityId3 = 13L;
+
+        Functionality functionality1 = mock(Functionality.class);
+        Functionality functionality2 = mock(Functionality.class);
+        Functionality functionality3 = mock(Functionality.class);
+
+        List<Long> functionalityIds = Arrays.asList(functionalityId1, functionalityId2, functionalityId3);
+
+        List<Functionality> functionalitiesToDelete = Arrays.asList(functionality1, functionality2, functionality3);
+
+        // When
+        when(repository.findByProjectIdAndIdIn(projectId, functionalityIds)).thenReturn(functionalitiesToDelete);
+
+        // Then
+        functionalityService.deleteList(projectId, functionalityIds);
+        verify(repository).deleteAll(functionalitiesToDelete);
     }
 }

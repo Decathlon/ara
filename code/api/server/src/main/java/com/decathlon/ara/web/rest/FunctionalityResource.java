@@ -155,17 +155,31 @@ public class FunctionalityResource {
     /**
      * DELETE one entity, and its children, if any.
      *
-     * @param projectCode the code of the project in which to work
-     * @param id the id of the entity to delete
+     * @param projectCode the project code
+     * @param id the functionality id to delete
      * @return the ResponseEntity with status 200 (OK)
      */
     @DeleteMapping("/{id:[0-9]+}")
     @Timed
-    public ResponseEntity<Void> delete(@PathVariable String projectCode, @PathVariable long id) {
+    public ResponseEntity<Void> delete(@PathVariable String projectCode, @PathVariable Long id) {
         try {
             service.delete(projectService.toId(projectCode), id);
             return ResponseUtil.deleted(NAME, id);
-        } catch (NotFoundException e) {
+        } catch (BadRequestException e) {
+            return ResponseUtil.handle(e);
+        }
+    }
+
+    @DeleteMapping
+    @Timed
+    public ResponseEntity<List<FunctionalityWithChildrenDTO>> deleteList(
+            @PathVariable String projectCode,
+            @RequestParam("id") List<Long> ids
+    ) {
+        try {
+            List<FunctionalityWithChildrenDTO> updatedTree = service.deleteList(projectService.toId(projectCode), ids);
+            return ResponseEntity.ok().body(updatedTree);
+        } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
         }
     }
