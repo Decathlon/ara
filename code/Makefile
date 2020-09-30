@@ -70,7 +70,7 @@ update-chart-version:
 
 commit-version:
 	@echo '-- Commit new version --'
-	@git add -A && git commit -m "⬆️ Upgrade to $(VERSION)" && git push
+	@git add -A && git commit -m "⬆️  Upgrade to $(VERSION)" && git push
 
 update-version: update-chart-version update-maven-version commit-version ## Update project version
 
