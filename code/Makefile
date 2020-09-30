@@ -68,7 +68,11 @@ update-chart-version:
 	@echo '-- Update Helm Chart version --'
 	@sed -i'.old' 's/^version:.*$\/version: $(VERSION)/' ../charts/stable/Chart.yaml
 
-update-version: update-chart-version update-maven-version ## Update project version
+commit-version:
+	@echo '-- Commit new version --'
+	@git add -A && git commit -m "⬆️ Upgrade to $(VERSION)" && git push
+
+update-version: update-chart-version update-maven-version commit-version ## Update project version
 
 helm-tempate:
 	@helm template ../charts/stable --debug
