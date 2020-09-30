@@ -61,8 +61,14 @@ stop: ## Stop ARA
 
 update-maven-version:
 	@echo '-- Update Maven version --'
-	@mvn -f api/pom.xml -s api/settings.xml release:update-versions -DautoVersionSubmodules=true
-	@mvn -f api/pom.xml -s api/settings.xml versions:set -DremoveSnapshot -DprocessAllModules
+	@mvn --batch-mode -f api/pom.xml -s api/settings.xml release:update-versions -DautoVersionSubmodules=true -DdevelopmentVersion=$(VERSION)-SNAPSHOT
+	@mvn --batch-mode -f api/pom.xml -s api/settings.xml versions:set -DremoveSnapshot -DprocessAllModules
+
+update-chart-version:
+	@echo '-- Update Helm Chart version --'
+	@sed -i'.old' 's/^version:.*$\/version: $(VERSION)/' ../charts/stable/Chart.yaml
+
+update-version: update-chart-version update-maven-version ## Update project version
 
 helm-tempate:
 	@helm template ../charts/stable --debug
