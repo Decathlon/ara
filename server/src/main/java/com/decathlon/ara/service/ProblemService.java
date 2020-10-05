@@ -287,7 +287,7 @@ public class ProblemService {
                 // Here, we keep the status and closingDateTime unchanged
             } else {
                 // Add defect assignation: is format valid? Fast check
-                if (!defectAdapter.isValidId(projectId, newDefectId)) {
+                if (!defectAdapter.isValidId(newDefectId)) {
                     final String hint = defectAdapter.getIdFormatHint(projectId);
                     final String message = String.format(Messages.RULE_PROBLEM_WITH_WRONG_DEFECT_ID_FORMAT, hint);
                     throw new BadRequestException(message, Entities.PROBLEM, "wrong_defect_id_format");

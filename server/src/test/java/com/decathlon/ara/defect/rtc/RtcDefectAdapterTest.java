@@ -79,20 +79,20 @@ public class RtcDefectAdapterTest {
     public void isValidId_should_work() {
         long anyProjectId = 42;
 
-        assertThat(cut.isValidId(anyProjectId, "-2147483648")).isTrue();
-        assertThat(cut.isValidId(anyProjectId, "-1")).isTrue();
-        assertThat(cut.isValidId(anyProjectId, "0")).isTrue();
-        assertThat(cut.isValidId(anyProjectId, "1")).isTrue();
-        assertThat(cut.isValidId(anyProjectId, "2147483647")).isTrue();
+        assertThat(cut.isValidId("-2147483648")).isTrue();
+        assertThat(cut.isValidId("-1")).isTrue();
+        assertThat(cut.isValidId("0")).isTrue();
+        assertThat(cut.isValidId("1")).isTrue();
+        assertThat(cut.isValidId("2147483647")).isTrue();
 
-        assertThat(cut.isValidId(anyProjectId, "-100000000000")).isFalse();
-        assertThat(cut.isValidId(anyProjectId, "-2147483649")).isFalse(); // RTC will respond ERROR 500 Invalid number format
-        assertThat(cut.isValidId(anyProjectId, "2147483648")).isFalse(); // if outside of Integer's [ MIN_VALUE .. MAX_VALUE ]
-        assertThat(cut.isValidId(anyProjectId, "10000000000")).isFalse();
-        assertThat(cut.isValidId(anyProjectId, " -42 ")).isFalse();
-        assertThat(cut.isValidId(anyProjectId, " 42")).isFalse();
-        assertThat(cut.isValidId(anyProjectId, "42 ")).isFalse();
-        assertThat(cut.isValidId(anyProjectId, "42not")).isFalse();
+        assertThat(cut.isValidId("-100000000000")).isFalse();
+        assertThat(cut.isValidId("-2147483649")).isFalse(); // RTC will respond ERROR 500 Invalid number format
+        assertThat(cut.isValidId("2147483648")).isFalse(); // if outside of Integer's [ MIN_VALUE .. MAX_VALUE ]
+        assertThat(cut.isValidId("10000000000")).isFalse();
+        assertThat(cut.isValidId(" -42 ")).isFalse();
+        assertThat(cut.isValidId(" 42")).isFalse();
+        assertThat(cut.isValidId("42 ")).isFalse();
+        assertThat(cut.isValidId("42not")).isFalse();
     }
 
     @Test

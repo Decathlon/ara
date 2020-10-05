@@ -101,7 +101,7 @@ public class GithubDefectAdapter implements DefectAdapter {
     }
 
     @Override
-    public boolean isValidId(long projectId, String id) {
+    public boolean isValidId(String id) {
         try {
             Integer value = Integer.valueOf(id);
             return value > 0;

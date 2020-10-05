@@ -17,40 +17,24 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.defect.TestDefectAdapter;
-import com.decathlon.ara.domain.enumeration.DefectExistence;
-import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
-import com.decathlon.ara.domain.enumeration.JobStatus;
-import com.decathlon.ara.domain.enumeration.ProblemStatus;
-import com.decathlon.ara.domain.enumeration.ProblemStatusFilter;
 import com.decathlon.ara.ci.util.FetchException;
+import com.decathlon.ara.defect.TestDefectAdapter;
+import com.decathlon.ara.defect.bean.Defect;
+import com.decathlon.ara.domain.enumeration.*;
 import com.decathlon.ara.service.dto.error.ErrorDTO;
 import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
 import com.decathlon.ara.service.dto.executedscenario.ExecutedScenarioWithRunAndExecutionDTO;
 import com.decathlon.ara.service.dto.execution.ExecutionDTO;
-import com.decathlon.ara.service.dto.problem.ProblemAggregateDTO;
-import com.decathlon.ara.service.dto.problem.ProblemDTO;
-import com.decathlon.ara.service.dto.problem.ProblemFilterDTO;
-import com.decathlon.ara.service.dto.problem.ProblemWithAggregateDTO;
-import com.decathlon.ara.service.dto.problem.ProblemWithPatternsAndAggregateTDO;
-import com.decathlon.ara.service.dto.problem.ProblemWithPatternsDTO;
+import com.decathlon.ara.service.dto.problem.*;
 import com.decathlon.ara.service.dto.problempattern.ProblemPatternDTO;
 import com.decathlon.ara.service.dto.response.PickUpPatternDTO;
 import com.decathlon.ara.service.dto.rootcause.RootCauseDTO;
 import com.decathlon.ara.service.dto.run.RunWithExecutionDTO;
 import com.decathlon.ara.service.dto.stability.ExecutionStabilityDTO;
 import com.decathlon.ara.service.dto.team.TeamDTO;
-import com.decathlon.ara.defect.bean.Defect;
 import com.decathlon.ara.util.TransactionalSpringIntegrationTest;
 import com.decathlon.ara.web.rest.util.HeaderUtil;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.persistence.EntityManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,17 +45,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static com.decathlon.ara.util.TestUtil.NONEXISTENT;
-import static com.decathlon.ara.util.TestUtil.firstPageOf10;
-import static com.decathlon.ara.util.TestUtil.header;
-import static com.decathlon.ara.util.TestUtil.longs;
-import static com.decathlon.ara.util.TestUtil.timestamp;
+import javax.persistence.EntityManager;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.decathlon.ara.util.TestUtil.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @TransactionalSpringIntegrationTest
@@ -382,7 +368,7 @@ public class ProblemResourceIT {
     public void testCreate() throws FetchException {
         // GIVEN
         Date closeDateTime = timestamp(2017, 12, 31, 23, 59, 59);
-        when(Boolean.valueOf(defectAdapter.isValidId(anyLong(), any()))).thenReturn(Boolean.TRUE);
+        when(Boolean.valueOf(defectAdapter.isValidId(anyString()))).thenReturn(Boolean.TRUE);
         doReturn(Collections.singletonList(new Defect("42", ProblemStatus.CLOSED, closeDateTime)))
                 .when(defectAdapter).getStatuses(anyLong(), any());
 
@@ -648,7 +634,7 @@ public class ProblemResourceIT {
     @Test
     public void testUpdate() throws FetchException {
         // GIVEN
-        when(Boolean.valueOf(defectAdapter.isValidId(anyLong(), any()))).thenReturn(Boolean.TRUE);
+        when(Boolean.valueOf(defectAdapter.isValidId(anyString()))).thenReturn(Boolean.TRUE);
         doReturn(Collections.singletonList(new Defect("42", ProblemStatus.OPEN, null)))
                 .when(defectAdapter).getStatuses(anyLong(), any());
         long problemId = 1001;

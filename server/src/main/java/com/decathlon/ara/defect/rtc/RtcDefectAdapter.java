@@ -104,7 +104,7 @@ public class RtcDefectAdapter implements DefectAdapter {
         final Map<String, String> cookies = authenticate(projectId);
 
         List<String> realIds = ids.stream()
-                .filter(id -> isValidId(projectId, id))
+                .filter(id -> isValidId(id))
                 .collect(Collectors.toList());
         if (!realIds.isEmpty()) {
             final int batchSize = settingService.getInt(projectId, Settings.DEFECT_RTC_BATCH_SIZE);
@@ -143,12 +143,11 @@ public class RtcDefectAdapter implements DefectAdapter {
     /**
      * Validate a user input for a defect ID in the tracker.
      *
-     * @param projectId the ID of the project in which to work
      * @param id        a user-typed defect ID
      * @return true if it is a valid ID for the backed defect tracking system
      */
     @Override
-    public boolean isValidId(long projectId, String id) {
+    public boolean isValidId(String id) {
         if (!RTC_ID_PATTERN.matcher(id).matches()) {
             return false;
         }

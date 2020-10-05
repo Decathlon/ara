@@ -56,7 +56,7 @@ public class JiraDefectAdapter implements DefectAdapter {
     public List<Defect> getStatuses(long projectId, List<String> ids) throws FetchException {
         try {
             List<String> validJiraKeys = ids.stream()
-                    .filter(id -> isValidId(projectId, id))
+                    .filter(id -> isValidId(id))
                     .collect(Collectors.toList());
             List<JiraIssue> jiraIssues = jiraRestClient.getIssuesFromKeys(projectId, validJiraKeys);
             List<Defect> defects = jiraMapper.toDefects(jiraIssues);
@@ -85,7 +85,7 @@ public class JiraDefectAdapter implements DefectAdapter {
     }
 
     @Override
-    public boolean isValidId(long projectId, String id) {
+    public boolean isValidId(String id) {
         return IssueKey.isValidKey(id);
     }
 
