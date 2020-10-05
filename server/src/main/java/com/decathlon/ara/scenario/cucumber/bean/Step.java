@@ -19,11 +19,14 @@ package com.decathlon.ara.scenario.cucumber.bean;
 
 import com.decathlon.ara.lib.embed.consumer.StructuredEmbeddingsHolder;
 import com.decathlon.ara.scenario.cucumber.support.ResultsWithMatch;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.Optional;
 import lombok.Data;
 
+import java.util.Optional;
+
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Step implements ResultsWithMatch {
 
     private String name;
