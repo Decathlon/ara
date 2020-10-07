@@ -15,6 +15,7 @@
  *                                                                            *
  ******************************************************************************/
 import moment from 'moment'
+import iView from 'iview'
 
 import Vue from 'vue'
 import api from './api'
@@ -129,6 +130,25 @@ util.ifFeatureEnabled = function (featureCode, callbackIfEnabled, callbackIfDisa
     }, (error) => {
       api.handleError(error, callbackIfDisabled)
     })
+}
+
+util.copyTextToClipboard = function (textToCopy) {
+  const elementContainingTheTextToCopy = document.createElement('textarea')
+  elementContainingTheTextToCopy.value = textToCopy
+  elementContainingTheTextToCopy.setAttribute('readonly', '')
+  elementContainingTheTextToCopy.visibility = 'hidden'
+  document.body.appendChild(elementContainingTheTextToCopy)
+
+  elementContainingTheTextToCopy.select()
+  document.execCommand('copy')
+
+  document.body.removeChild(elementContainingTheTextToCopy)
+
+  iView.Message.success({
+    content: 'Copied to clipboard!',
+    duration: 5,
+    closable: true
+  })
 }
 
 export default util
