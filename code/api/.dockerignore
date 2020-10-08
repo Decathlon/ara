@@ -1,2 +1,6 @@
 Dockerfile
 .gitignore
+Makefile
+
+# H2 db
+migration.*.db

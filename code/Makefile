@@ -7,16 +7,8 @@ VERSION?=latest
 API_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-api:${VERSION}
 WEB_UI_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-web-ui:${VERSION}
 
-MIGRATION_LABEL = "to-be-changed"
-DATE_WITH_TIME := $(shell /bin/date "+%Y%m%d%H%M%S")
-
 install: ## Install project for dev
 	@mvn -Dmaven.test.skip=true -f api/pom.xml clean install
-
-makeMigration: ## Create a migration file
-	mvn -f api/pom.xml -pl database liquibase:diff -DdiffChangeLogFile=api/database/src/main/resources/db/changelog/changes/${DATE_WITH_TIME}-${MIGRATION_LABEL}.yaml
-	@echo "  - include:" >> api/database/src/main/resources/db/changelog/db.changelog-master.yaml
-	@echo "      file: classpath*:db/changelog/changes/$(DATE_WITH_TIME)-$(MIGRATION_LABEL).yaml" >> api/database/src/main/resources/db/changelog/db.changelog-master.yaml
 
 cache-build-api:
 	@echo '-- Build java ara-api with local cache --'
