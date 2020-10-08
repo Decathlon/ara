@@ -48,6 +48,11 @@ public class Settings {
     public static final String DEFECT_GITHUB_REPONAME = "defect.github.repositoryName";
     public static final String DEFECT_GITHUB_TOKEN = "defect.github.authorizationToken";
 
+    public static final String DEFECT_JIRA_BASE_URL = "defect.jira.baseUrl";
+    public static final String DEFECT_JIRA_TOKEN = "defect.jira.token";
+    public static final String DEFECT_JIRA_LOGIN = "defect.jira.login";
+    public static final String DEFECT_JIRA_FILTER_PROJECTS = "defect.jira.filter.projects";
+
     public static final String EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH = "execution.indexer.file.executionBasePath";
     public static final String EXECUTION_INDEXER_FILE_CYCLE_DEFINITION_PATH = "execution.indexer.file.cycleDefinitionPath";
     public static final String EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH = "execution.indexer.file.buildInformationPath";

@@ -460,4 +460,63 @@ public class SettingProviderService {
         return result;
     }
 
+    public List<SettingDTO> getDefectJiraDefinitions() {
+        List<SettingDTO> result = new ArrayList<>();
+
+        result.add(new SettingDTO()
+                .withCode(Settings.DEFECT_JIRA_BASE_URL)
+                .withName("Base url")
+                .withType(SettingType.STRING)
+                .withRequired(true)
+                .withHelp(
+                        "The Jira base url of your organization or company." +
+                                "Hint: It usually follows this pattern: https://company.atlassian.net, where 'company' is your company name."
+                )
+        );
+
+        result.add(new SettingDTO()
+                .withCode(Settings.DEFECT_JIRA_TOKEN)
+                .withName("Authentication token")
+                .withType(SettingType.PASSWORD)
+                .withRequired(true)
+                .withHelp(
+                        "The token Jira uses to authenticate ARA.\n" +
+                                "You first need to set one in your Jira configuration, then copy the generated token here.\n" +
+                                "CAUTION: Jira lets you copy the token only once.\n" +
+                                "How to create your Jira token: https://confluence.atlassian.com/cloud/api-tokens-938839638.html"
+                )
+        );
+
+        result.add(new SettingDTO()
+                .withCode(Settings.DEFECT_JIRA_LOGIN)
+                .withName("Login")
+                .withType(SettingType.STRING)
+                .withRequired(true)
+                .withHelp(
+                        "This is simply the login matching the token previously set in Jira.\n" +
+                                "Bear in mind that it can also be an email address"
+                )
+        );
+
+        result.add(new SettingDTO()
+                .withCode(Settings.DEFECT_JIRA_FILTER_PROJECTS)
+                .withName("Project filters")
+                .withType(SettingType.STRING)
+                .withRequired(false)
+                .withHelp(
+                        "These filters let ARA load only the issues related to specific Jira projects.\n" +
+                                "Usually Jira company accounts contain at least thousands of issues shared with multiple teams.\n" +
+                                "WARNING: Not filtering them presents 2 main problems:\n" +
+                                "1. It is very likely that many Jira projects doesn't concern the current ARA project.\n" +
+                                "2. The issues loading can be extremely slow, as Jira does not enable to load all the results at once, " +
+                                "thus making several calls using pagination.\n\n" +
+                                "The filter contains the Jira projects code separated by a comma:\n" +
+                                "e.g. the filter PRJ-1, PRJ-2, PRJ-3 matches the Jira projects PRJ-1, PRJ-2 and PRJ-3." +
+                                "If left empty, no filter is applied."
+                )
+        );
+
+        return result;
+    }
+
 }
