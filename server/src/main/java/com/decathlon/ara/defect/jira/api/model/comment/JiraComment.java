@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2019 by the ARA Contributors                                 *
+ * Copyright (C) 2020 by the ARA Contributors                                 *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -15,31 +15,32 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.defect.bean;
+package com.decathlon.ara.defect.jira.api.model.comment;
 
-import com.decathlon.ara.domain.enumeration.ProblemStatus;
-import lombok.AllArgsConstructor;
+import com.decathlon.ara.defect.jira.api.model.user.JiraUser;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 
 @Data
-@AllArgsConstructor
-public class Defect {
+public class JiraComment {
 
-    /**
-     * The ID of the defect/issue/bug/... in the external issue-tracker.
-     */
+    private String self;
+
     private String id;
 
-    /**
-     * The fetched status (from the external issue-tracker) converted to a problem status.
-     */
-    private ProblemStatus status;
+    private JiraUser author;
 
-    /**
-     * The date and time of the last closing of the defect,
-     */
-    private Date closeDateTime;
+    private String body;
 
+    private JiraUser updateAuthor;
+
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    private ZonedDateTime created;
+
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    private ZonedDateTime updated;
+
+    private Boolean jsdPublic;
 }

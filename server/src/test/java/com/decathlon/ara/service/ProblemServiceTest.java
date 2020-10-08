@@ -195,7 +195,7 @@ public class ProblemServiceTest {
                 .withStatus(ProblemStatus.CLOSED)
                 .withClosingDateTime(oldDate);
         when(defectService.getAdapter(aProjectId)).thenReturn(Optional.of(defectAdapter));
-        when(Boolean.valueOf(defectAdapter.isValidId(aProjectId, "bad"))).thenReturn(Boolean.FALSE);
+        when(Boolean.valueOf(defectAdapter.isValidId("bad"))).thenReturn(Boolean.FALSE);
         when(defectAdapter.getIdFormatHint(aProjectId)).thenReturn("HINT");
 
         // WHEN
@@ -222,7 +222,7 @@ public class ProblemServiceTest {
                 .withStatus(ProblemStatus.CLOSED)
                 .withClosingDateTime(oldDate);
         when(defectService.getAdapter(aProjectId)).thenReturn(Optional.of(defectAdapter));
-        when(Boolean.valueOf(defectAdapter.isValidId(aProjectId, "new"))).thenReturn(Boolean.TRUE);
+        when(Boolean.valueOf(defectAdapter.isValidId("new"))).thenReturn(Boolean.TRUE);
         when(defectAdapter.getStatuses(aProjectId, Collections.singletonList("new")))
                 .thenThrow(new FetchException("any"));
 
@@ -248,7 +248,7 @@ public class ProblemServiceTest {
                 .withStatus(ProblemStatus.CLOSED)
                 .withClosingDateTime(oldDate);
         when(defectService.getAdapter(aProjectId)).thenReturn(Optional.of(defectAdapter));
-        when(Boolean.valueOf(defectAdapter.isValidId(aProjectId, "unknown"))).thenReturn(Boolean.TRUE);
+        when(Boolean.valueOf(defectAdapter.isValidId("unknown"))).thenReturn(Boolean.TRUE);
         when(defectAdapter.getStatuses(aProjectId, Collections.singletonList("unknown"))).thenReturn(Collections.emptyList());
 
         // WHEN
@@ -275,7 +275,7 @@ public class ProblemServiceTest {
                 .withStatus(ProblemStatus.CLOSED)
                 .withClosingDateTime(oldDate);
         when(defectService.getAdapter(aProjectId)).thenReturn(Optional.of(defectAdapter));
-        when(Boolean.valueOf(defectAdapter.isValidId(aProjectId, "new"))).thenReturn(Boolean.TRUE);
+        when(Boolean.valueOf(defectAdapter.isValidId("new"))).thenReturn(Boolean.TRUE);
         when(defectAdapter.getStatuses(aProjectId, Collections.singletonList("new"))).thenReturn(Collections.singletonList(
                 new Defect("new", ProblemStatus.OPEN, null)));
 
@@ -301,7 +301,7 @@ public class ProblemServiceTest {
                 .withStatus(ProblemStatus.OPEN)
                 .withClosingDateTime(null);
         when(defectService.getAdapter(aProjectId)).thenReturn(Optional.of(defectAdapter));
-        when(Boolean.valueOf(defectAdapter.isValidId(aProjectId, "new"))).thenReturn(Boolean.TRUE);
+        when(Boolean.valueOf(defectAdapter.isValidId("new"))).thenReturn(Boolean.TRUE);
         when(defectAdapter.getStatuses(aProjectId, Collections.singletonList("new"))).thenReturn(Collections.singletonList(
                 new Defect("new", ProblemStatus.CLOSED, newDate)));
 

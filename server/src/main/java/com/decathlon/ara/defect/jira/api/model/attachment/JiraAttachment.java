@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2019 by the ARA Contributors                                 *
+ * Copyright (C) 2020 by the ARA Contributors                                 *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -15,31 +15,33 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.defect.bean;
+package com.decathlon.ara.defect.jira.api.model.attachment;
 
-import com.decathlon.ara.domain.enumeration.ProblemStatus;
-import lombok.AllArgsConstructor;
+import com.decathlon.ara.defect.jira.api.model.user.JiraUser;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 
 @Data
-@AllArgsConstructor
-public class Defect {
+public class JiraAttachment {
 
-    /**
-     * The ID of the defect/issue/bug/... in the external issue-tracker.
-     */
+    private String self;
+
     private String id;
 
-    /**
-     * The fetched status (from the external issue-tracker) converted to a problem status.
-     */
-    private ProblemStatus status;
+    private String filename;
 
-    /**
-     * The date and time of the last closing of the defect,
-     */
-    private Date closeDateTime;
+    private JiraUser author;
 
+    @JsonProperty("created")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    private ZonedDateTime creationDate;
+
+    private Integer size;
+
+    private String mimeType;
+
+    private String content;
 }
