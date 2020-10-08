@@ -30,4 +30,4 @@ nbdist/
 .nb-gradle/
 
 # H2 db
-migration.*.db
+ara.*.db

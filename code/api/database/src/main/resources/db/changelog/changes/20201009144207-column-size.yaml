@@ -1,0 +1,694 @@
+databaseChangeLog:
+- changeSet:
+    id: 1602247665015-70
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: communication
+        constraintName: FK2wk6td65bobvjsaq9c81v9wen
+- changeSet:
+    id: 1602247665015-71
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: problem_pattern
+        constraintName: FK7jpqo5y6cyahys39sm0orwq8g
+- changeSet:
+    id: 1602247665015-72
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: problem_occurrence
+        constraintName: FK7ufw7w6ty9af8d2knfj8wf61s
+- changeSet:
+    id: 1602247665015-73
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: scenario
+        constraintName: FK7xjao8if8v7ngrr3d5fysl2xh
+- changeSet:
+    id: 1602247665015-74
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: type
+        constraintName: FK8bb2af2liwalk4v03f86ahqja
+- changeSet:
+    id: 1602247665015-75
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: functionality_coverage
+        constraintName: FK977tbrih0pi27hco0siana744
+- changeSet:
+    id: 1602247665015-76
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: run
+        constraintName: FK9lhk4jv9q31qayvj52ta7rfce
+- changeSet:
+    id: 1602247665015-77
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: execution
+        constraintName: FKbkthi8mbwaru241u7dqrbaxuh
+- changeSet:
+    id: 1602247665015-78
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: run
+        constraintName: FKcpc4mlahsqy8l57jhe3ks1jc8
+- changeSet:
+    id: 1602247665015-79
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: run
+        constraintName: FKfx9m2uogm587s519qvdaxikuu
+- changeSet:
+    id: 1602247665015-80
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: country_deployment
+        constraintName: FKi09oks9a5retlq886imdmk7v3
+- changeSet:
+    id: 1602247665015-81
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: error
+        constraintName: FKi9qjriqbyemy75cc7qytapl6j
+- changeSet:
+    id: 1602247665015-82
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: problem
+        constraintName: FKin8hwekccdrb0jy6dq136aowg
+- changeSet:
+    id: 1602247665015-83
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: executed_scenario
+        constraintName: FKjf6qljggvhle2upr7gj4j15aq
+- changeSet:
+    id: 1602247665015-84
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: problem
+        constraintName: FKn4axsqmo5lfarir5wsi6ly6qp
+- changeSet:
+    id: 1602247665015-85
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: problem_pattern
+        constraintName: FKn8vphj76n1ehosn36gecx7ril
+- changeSet:
+    id: 1602247665015-86
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: problem_occurrence
+        constraintName: FKorsa8kvts94kximvdh0lmlfjg
+- changeSet:
+    id: 1602247665015-87
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: country_deployment
+        constraintName: FKqaxgaqvt8qusu5v39nh20w5nj
+- changeSet:
+    id: 1602247665015-88
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: functionality_coverage
+        constraintName: FKqfv2fc357ofm8yxmnih36pw5q
+- changeSet:
+    id: 1602247665015-89
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: problem_pattern
+        constraintName: FKqt7rl8ot2vql5bhw477ig1r47
+- changeSet:
+    id: 1602247665015-1
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: acceptance
+        newDataType: varchar(16)
+        tableName: execution
+- changeSet:
+    id: 1602247665015-2
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: api_server
+        newDataType: varchar(16)
+        tableName: executed_scenario
+- changeSet:
+    id: 1602247665015-3
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: branch
+        newDataType: varchar(16)
+        tableName: cycle_definition
+- changeSet:
+    id: 1602247665015-4
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: branch
+        newDataType: varchar(16)
+        tableName: execution
+- changeSet:
+    id: 1602247665015-5
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: code
+        newDataType: varchar(32)
+        tableName: communication
+- changeSet:
+    id: 1602247665015-6
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: code
+        newDataType: varchar(2)
+        tableName: country
+- changeSet:
+    id: 1602247665015-7
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: code
+        newDataType: varchar(32)
+        tableName: project
+- changeSet:
+    id: 1602247665015-8
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: code
+        newDataType: varchar(64)
+        tableName: setting
+- changeSet:
+    id: 1602247665015-9
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: code
+        newDataType: varchar(32)
+        tableName: severity
+- changeSet:
+    id: 1602247665015-10
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: code
+        newDataType: varchar(16)
+        tableName: source
+- changeSet:
+    id: 1602247665015-11
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: code
+        newDataType: varchar(16)
+        tableName: type
+- changeSet:
+    id: 1602247665015-12
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: country_codes
+        newDataType: varchar(128)
+        tableName: functionality
+- changeSet:
+    id: 1602247665015-13
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: country_codes
+        newDataType: varchar(128)
+        tableName: scenario
+- changeSet:
+    id: 1602247665015-14
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: country_tags
+        newDataType: varchar(32)
+        tableName: run
+- changeSet:
+    id: 1602247665015-15
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: covered_country_scenarios
+        newDataType: varchar(512)
+        tableName: functionality
+- changeSet:
+    id: 1602247665015-16
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: created
+        newDataType: varchar(10)
+        tableName: functionality
+- changeSet:
+    id: 1602247665015-17
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: cucumber_id
+        newDataType: varchar(640)
+        tableName: executed_scenario
+- changeSet:
+    id: 1602247665015-18
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: cucumber_report_url
+        newDataType: varchar(512)
+        tableName: executed_scenario
+- changeSet:
+    id: 1602247665015-19
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: default_branch
+        newDataType: varchar(16)
+        tableName: source
+- changeSet:
+    id: 1602247665015-20
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: defect_existence
+        newDataType: varchar(11)
+        tableName: problem
+- changeSet:
+    id: 1602247665015-21
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: defect_id
+        newDataType: varchar(32)
+        tableName: problem
+- changeSet:
+    id: 1602247665015-22
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: diff_report_url
+        newDataType: varchar(512)
+        tableName: executed_scenario
+- changeSet:
+    id: 1602247665015-23
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: discard_reason
+        newDataType: varchar(512)
+        tableName: execution
+- changeSet:
+    id: 1602247665015-24
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: http_requests_url
+        newDataType: varchar(512)
+        tableName: executed_scenario
+- changeSet:
+    id: 1602247665015-25
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: ignored_country_scenarios
+        newDataType: varchar(512)
+        tableName: functionality
+- changeSet:
+    id: 1602247665015-26
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: initials
+        newDataType: varchar(8)
+        tableName: severity
+- changeSet:
+    id: 1602247665015-27
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: java_script_errors_url
+        newDataType: varchar(512)
+        tableName: executed_scenario
+- changeSet:
+    id: 1602247665015-28
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: logs_url
+        newDataType: varchar(512)
+        tableName: executed_scenario
+- changeSet:
+    id: 1602247665015-29
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: name
+        newDataType: varchar(64)
+        tableName: communication
+- changeSet:
+    id: 1602247665015-30
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: name
+        newDataType: varchar(40)
+        tableName: country
+- changeSet:
+    id: 1602247665015-31
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: name
+        newDataType: varchar(16)
+        tableName: cycle_definition
+- changeSet:
+    id: 1602247665015-32
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: name
+        newDataType: varchar(512)
+        tableName: executed_scenario
+- changeSet:
+    id: 1602247665015-33
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: name
+        newDataType: varchar(16)
+        tableName: execution
+- changeSet:
+    id: 1602247665015-34
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: name
+        newDataType: varchar(512)
+        tableName: functionality
+- changeSet:
+    id: 1602247665015-35
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: name
+        newDataType: varchar(64)
+        tableName: project
+- changeSet:
+    id: 1602247665015-36
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: name
+        newDataType: varchar(128)
+        tableName: root_cause
+- changeSet:
+    id: 1602247665015-37
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: name
+        newDataType: varchar(512)
+        tableName: scenario
+- changeSet:
+    id: 1602247665015-38
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: name
+        newDataType: varchar(32)
+        tableName: severity
+- changeSet:
+    id: 1602247665015-39
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: name
+        newDataType: varchar(32)
+        tableName: source
+- changeSet:
+    id: 1602247665015-40
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: name
+        newDataType: varchar(128)
+        tableName: team
+- changeSet:
+    id: 1602247665015-41
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: name
+        newDataType: varchar(50)
+        tableName: type
+- changeSet:
+    id: 1602247665015-42
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: platform
+        newDataType: varchar(32)
+        tableName: problem_pattern
+- changeSet:
+    id: 1602247665015-43
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: platform
+        newDataType: varchar(32)
+        tableName: run
+- changeSet:
+    id: 1602247665015-44
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: quality_severities
+        newDataType: varchar(4096)
+        tableName: execution
+- changeSet:
+    id: 1602247665015-45
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: quality_status
+        newDataType: varchar(10)
+        tableName: execution
+- changeSet:
+    id: 1602247665015-46
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: release
+        newDataType: varchar(32)
+        tableName: execution
+- changeSet:
+    id: 1602247665015-47
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: release
+        newDataType: varchar(32)
+        tableName: problem_pattern
+- changeSet:
+    id: 1602247665015-48
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: result
+        newDataType: varchar(16)
+        tableName: execution
+- changeSet:
+    id: 1602247665015-49
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: scenario_name
+        newDataType: varchar(512)
+        tableName: problem_pattern
+- changeSet:
+    id: 1602247665015-50
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: screenshot_url
+        newDataType: varchar(512)
+        tableName: executed_scenario
+- changeSet:
+    id: 1602247665015-51
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: selenium_node
+        newDataType: varchar(128)
+        tableName: executed_scenario
+- changeSet:
+    id: 1602247665015-52
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: severity
+        newDataType: varchar(32)
+        tableName: executed_scenario
+- changeSet:
+    id: 1602247665015-53
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: severity
+        newDataType: varchar(32)
+        tableName: functionality
+- changeSet:
+    id: 1602247665015-54
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: severity
+        newDataType: varchar(32)
+        tableName: scenario
+- changeSet:
+    id: 1602247665015-55
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: severity_tags
+        newDataType: varchar(64)
+        tableName: run
+- changeSet:
+    id: 1602247665015-56
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: short_name
+        newDataType: varchar(16)
+        tableName: severity
+- changeSet:
+    id: 1602247665015-57
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: status
+        newDataType: varchar(16)
+        tableName: execution
+- changeSet:
+    id: 1602247665015-58
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: status
+        newDataType: varchar(21)
+        tableName: problem
+- changeSet:
+    id: 1602247665015-59
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: status
+        newDataType: varchar(16)
+        tableName: run
+- changeSet:
+    id: 1602247665015-60
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: step
+        newDataType: varchar(2048)
+        tableName: error
+- changeSet:
+    id: 1602247665015-61
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: step
+        newDataType: varchar(2048)
+        tableName: problem_pattern
+- changeSet:
+    id: 1602247665015-62
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: step_definition
+        newDataType: varchar(2048)
+        tableName: error
+- changeSet:
+    id: 1602247665015-63
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: step_definition
+        newDataType: varchar(2048)
+        tableName: problem_pattern
+- changeSet:
+    id: 1602247665015-64
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: technology
+        newDataType: varchar(16)
+        tableName: source
+- changeSet:
+    id: 1602247665015-65
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: type
+        newDataType: varchar(4)
+        tableName: communication
+- changeSet:
+    id: 1602247665015-66
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: type
+        newDataType: varchar(13)
+        tableName: functionality
+- changeSet:
+    id: 1602247665015-67
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: value
+        newDataType: varchar(512)
+        tableName: setting
+- changeSet:
+    id: 1602247665015-68
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: version
+        newDataType: varchar(64)
+        tableName: execution
+- changeSet:
+    id: 1602247665015-69
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: video_url
+        newDataType: varchar(512)
+        tableName: executed_scenario
+

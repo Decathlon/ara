@@ -3,4 +3,5 @@ Dockerfile
 Makefile
 
 # H2 db
-migration.*.db
+ara.*.db
+migration.yaml
