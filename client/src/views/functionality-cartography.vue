@@ -525,7 +525,8 @@
             }
           }
           if (node.children) {
-            node.hasMatchingChildren = this.filterNodes(node.children)
+            const isEmptyFolder = node.row.type === 'FOLDER' && node.children.length === 0
+            node.hasMatchingChildren = isEmptyFolder ? true : this.filterNodes(node.children)
           } else {
             node.hasMatchingChildren = false
           }
