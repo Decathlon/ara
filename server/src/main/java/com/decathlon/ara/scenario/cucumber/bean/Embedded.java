@@ -19,14 +19,17 @@ package com.decathlon.ara.scenario.cucumber.bean;
 
 import com.decathlon.ara.lib.embed.consumer.StructuredEmbeddingsExtractor;
 import com.decathlon.ara.lib.embed.consumer.StructuredEmbeddingsHolder;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.Optional;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.Optional;
+
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Embedded {
 
     @JsonProperty("mime_type")
