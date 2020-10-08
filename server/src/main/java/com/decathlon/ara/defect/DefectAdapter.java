@@ -59,11 +59,10 @@ public interface DefectAdapter {
     /**
      * Validate a user input for a defect ID in the tracker.
      *
-     * @param projectId the ID of the project in which to work
      * @param id        a user-typed defect ID
      * @return true if it is a valid ID for the backed defect tracking system
      */
-    boolean isValidId(long projectId, String id);
+    boolean isValidId(String id);
 
     /**
      * Get the guiding help text to display to users when they type a wrongly-formatted defect ID.
