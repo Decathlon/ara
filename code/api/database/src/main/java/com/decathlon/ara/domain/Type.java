@@ -18,6 +18,8 @@
 package com.decathlon.ara.domain;
 
 import java.util.Comparator;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -52,8 +54,10 @@ public class Type implements Comparable<Type> {
 
     private long projectId;
 
+    @Column(length = 16)
     private String code;
 
+    @Column(length = 50)
     private String name;
 
     private boolean isBrowser;

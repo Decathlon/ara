@@ -18,6 +18,8 @@
 package com.decathlon.ara.domain;
 
 import java.util.Comparator;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -56,6 +58,7 @@ public class Severity implements Comparable<Severity> {
 
     private long projectId;
 
+    @Column(length = 32)
     private String code;
 
     /**
@@ -66,16 +69,19 @@ public class Severity implements Comparable<Severity> {
     /**
      * The full name (eg. "Sanity Check").
      */
+    @Column(length = 32)
     private String name;
 
     /**
      * The shorter name (but still intelligible) to display on table column headers where space is constrained (eg. "Sanity Ch.").
      */
+    @Column(length = 16)
     private String shortName;
 
     /**
      * The shortest name to display on email subjects to help keep it very short (eg. "S.C.").
      */
+    @Column(length = 8)
     private String initials;
 
     /**

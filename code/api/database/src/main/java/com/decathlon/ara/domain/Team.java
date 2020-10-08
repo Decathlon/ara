@@ -19,6 +19,8 @@ package com.decathlon.ara.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -50,6 +52,7 @@ public class Team {
 
     private long projectId;
 
+    @Column(length = 128)
     private String name;
 
     private boolean assignableToProblems;

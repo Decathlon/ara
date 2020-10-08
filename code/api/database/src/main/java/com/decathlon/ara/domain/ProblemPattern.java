@@ -81,6 +81,7 @@ public class ProblemPattern {
      * (exactly matching this text; or match the beginning of this text, optionally containing '%' for LIKE-matching,
      * if {@link #scenarioNameStartsWith} is true).
      */
+    @Column(length = 512)
     private String scenarioName;
 
     /**
@@ -95,6 +96,7 @@ public class ProblemPattern {
      * (exactly matching this text; or match the beginning of this text, optionally containing '%' for LIKE-matching,
      * if {@link #stepStartsWith} is true).
      */
+    @Column(length = 2048)
     private String step;
 
     /**
@@ -109,6 +111,7 @@ public class ProblemPattern {
      * (exactly matching this text; or match the beginning of this text, optionally containing '%' for LIKE-matching,
      * if {@link #stepStartsWith} is true).
      */
+    @Column(length = 2048)
     private String stepDefinition;
 
     /**
@@ -127,6 +130,7 @@ public class ProblemPattern {
     /**
      * Matches {@link Execution#release}.
      */
+    @Column(length = 32)
     private String release;
 
     /**
@@ -156,6 +160,7 @@ public class ProblemPattern {
     /**
      * Matches {@link Run#platform}.
      */
+    @Column(length = 32)
     private String platform;
 
     @ManyToMany(fetch = FetchType.LAZY)

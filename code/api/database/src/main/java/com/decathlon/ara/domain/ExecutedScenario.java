@@ -90,10 +90,13 @@ public class ExecutedScenario implements Comparable<ExecutedScenario> {
 
     private String tags;
 
+    @Column(length = 32)
     private String severity;
 
+    @Column(length = 512)
     private String name;
 
+    @Column(length = 640)
     private String cucumberId;
 
     private int line;
@@ -105,22 +108,31 @@ public class ExecutedScenario implements Comparable<ExecutedScenario> {
     @Temporal(TemporalType.TIMESTAMP)
     private Date startDateTime;
 
+    @Column(length = 512)
     private String screenshotUrl;
 
+    @Column(length = 512)
     private String videoUrl;
 
+    @Column(length = 512)
     private String logsUrl;
 
+    @Column(length = 512)
     private String httpRequestsUrl;
 
+    @Column(length = 512)
     private String javaScriptErrorsUrl;
 
+    @Column(length = 512)
     private String diffReportUrl;
 
+    @Column(length = 512)
     private String cucumberReportUrl;
 
+    @Column(length = 16)
     private String apiServer;
 
+    @Column(length = 128)
     private String seleniumNode;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "executedScenario", orphanRemoval = true)

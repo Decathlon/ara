@@ -19,6 +19,8 @@ package com.decathlon.ara.domain;
 
 import com.decathlon.ara.domain.enumeration.Technology;
 import java.util.Comparator;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -56,11 +58,13 @@ public class Source implements Comparable<Source> {
      * Technical and short code to be used by the build system to send Cucumber-scenarios and Postman-requests as they
      * sit on the Version Control System, for indexation purpose, and for functional coverage computation.
      */
+    @Column(length = 16)
     private String code;
 
     /**
      * Full name displayed in functionality cartography/coverage.
      */
+    @Column(length = 32)
     private String name;
 
     /**
@@ -72,6 +76,7 @@ public class Source implements Comparable<Source> {
      * The technology used for tests stored in this VCS source: Cucumber .feature files, Postman .json collections...
      */
     @Enumerated(EnumType.STRING)
+    @Column(length = 16)
     private Technology technology;
 
     /**
@@ -87,6 +92,7 @@ public class Source implements Comparable<Source> {
     /**
      * The primary reference branch to use with {@link #vcsUrl} when indexing functionalities coverage.
      */
+    @Column(length = 16)
     private String defaultBranch;
 
     /**

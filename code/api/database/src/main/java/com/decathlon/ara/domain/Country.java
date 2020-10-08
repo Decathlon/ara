@@ -18,6 +18,8 @@
 package com.decathlon.ara.domain;
 
 import java.util.Comparator;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -49,8 +51,10 @@ public class Country implements Comparable<Country> {
 
     private long projectId;
 
+    @Column(length = 2)
     private String code;
 
+    @Column(length = 40)
     private String name;
 
     @Override

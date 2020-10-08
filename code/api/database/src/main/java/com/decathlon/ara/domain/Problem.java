@@ -83,15 +83,18 @@ public class Problem implements Comparable<Problem> {
      * if the problem reappeared after its closing date, until the problem is reopened
      */
     @Enumerated(EnumType.STRING)
+    @Column(length = 21)
     private ProblemStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "blamed_team_id")
     private Team blamedTeam;
 
+    @Column(length = 32)
     private String defectId;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 11)
     private DefectExistence defectExistence;
 
     @Column(name = "closing_date_time")

@@ -18,6 +18,8 @@
 package com.decathlon.ara.domain;
 
 import java.util.Comparator;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -50,8 +52,10 @@ public class Setting implements Comparable<Setting> {
     // No access to the parent project entity: settings are obtained from a project, so the project is already known
     private long projectId;
 
+    @Column(length = 64)
     private String code;
 
+    @Column(length = 512)
     private String value;
 
     @Override

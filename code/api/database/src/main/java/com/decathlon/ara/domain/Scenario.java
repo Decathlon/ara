@@ -21,6 +21,8 @@ package com.decathlon.ara.domain;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -83,14 +85,17 @@ public class Scenario implements Comparable<Scenario> {
      *
      * @see #COUNTRY_CODES_SEPARATOR the separator used to join country-codes together
      */
+    @Column(length = 128)
     private String countryCodes;
 
     /**
      * The severity code of the scenario, as stated in Version Control System.<br>
      * This is not a strict foreign-key association because developers can commit typos and we want to surface these.
      */
+    @Column(length = 32)
     private String severity;
 
+    @Column(length = 512)
     private String name;
 
     private String wrongFunctionalityIds;

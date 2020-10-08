@@ -17,6 +17,7 @@
 
 package com.decathlon.ara.domain;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -44,8 +45,10 @@ public class CycleDefinition {
 
     private long projectId;
 
+    @Column(length = 16)
     private String branch;
 
+    @Column(length = 16)
     private String name;
 
     private int branchPosition;
