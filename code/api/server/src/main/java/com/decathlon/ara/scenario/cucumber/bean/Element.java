@@ -19,12 +19,15 @@ package com.decathlon.ara.scenario.cucumber.bean;
 
 import com.decathlon.ara.lib.embed.consumer.StructuredEmbeddingsHolder;
 import com.decathlon.ara.scenario.cucumber.support.ResultsWithMatch;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
+
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import lombok.Data;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Element {
 
     private static final String[] SCENARIO_KEYWORDS = { "Scenario", "Scenario Outline" };

@@ -17,6 +17,7 @@
 
 package com.decathlon.ara.scenario.cucumber.bean;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -25,6 +26,7 @@ import lombok.Data;
  * no need to find this text and match it in your Regexp. It will automatically be passed as the last parameter in the step definition.
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DocString {
 
     private String value;
