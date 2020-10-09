@@ -17,16 +17,19 @@
 
 package com.decathlon.ara.scenario.cucumber.bean;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 
 @Data
 @Slf4j
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Tag {
 
     public static final String IGNORE = "@ignore";
