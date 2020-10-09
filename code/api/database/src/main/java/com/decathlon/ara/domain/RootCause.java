@@ -19,6 +19,8 @@ package com.decathlon.ara.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -48,6 +50,7 @@ public class RootCause {
 
     private long projectId;
 
+    @Column(length = 128)
     private String name;
 
     // No cascade, as this collection is only used while removing a rootCause

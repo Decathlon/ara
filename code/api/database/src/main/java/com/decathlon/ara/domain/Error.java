@@ -58,8 +58,10 @@ public class Error implements Comparable<Error> {
     @QueryInit("run.*.*") // Requires Q* class regeneration https://github.com/querydsl/querydsl/issues/255
     private ExecutedScenario executedScenario;
 
+    @Column(length = 2048)
     private String step;
 
+    @Column(length = 2048)
     private String stepDefinition;
 
     private int stepLine;

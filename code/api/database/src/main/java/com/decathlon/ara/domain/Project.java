@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -54,8 +55,10 @@ public class Project implements Comparable<Project> {
     @GenericGenerator(name = "native", strategy = "native")
     private Long id;
 
+    @Column(length = 32)
     private String code;
 
+    @Column(length = 64)
     private String name;
 
     /**

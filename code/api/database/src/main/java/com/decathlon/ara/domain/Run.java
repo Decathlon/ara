@@ -95,6 +95,7 @@ public class Run implements Comparable<Run> {
     /**
      * The platform/environment/server on which this run executed the test-type for the given country.
      */
+    @Column(length = 32)
     private String platform;
 
     /**
@@ -112,6 +113,7 @@ public class Run implements Comparable<Run> {
      * ARA's workflow-status of the execution (interpreted from the many statuses of the Continuous Integration job).
      */
     @Enumerated(EnumType.STRING)
+    @Column(length = 16)
     private JobStatus status;
 
     /**
@@ -119,6 +121,7 @@ public class Run implements Comparable<Run> {
      * Can contain "all" to include @country-all core scenarios.<br>
      * Eg. "be,cn" for BE+CN specific scenarios, or "all,be" for core+BE scenarios.
      */
+    @Column(length = 32)
     private String countryTags;
 
     /**
@@ -146,6 +149,7 @@ public class Run implements Comparable<Run> {
      *
      * @see #SEVERITY_TAGS_SEPARATOR the separator used to join country-codes together
      */
+    @Column(length = 64)
     private String severityTags;
 
     /**

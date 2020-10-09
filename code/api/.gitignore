@@ -28,3 +28,6 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+
+# H2 db
+ara.*.db

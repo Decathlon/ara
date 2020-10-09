@@ -1,7 +1,7 @@
 JAVA_VERSION=14
 DOCKER_REGISTRY?=docker.io
 # Forks may use name/ara for their tests
-IMAGE_NAME?=Decathlon/ara
+IMAGE_NAME?=decathlon/ara
 VERSION?=latest
 
 API_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-api:${VERSION}
@@ -13,11 +13,6 @@ DATE_WITH_TIME := $(shell /bin/date "+%Y%m%d%H%M%S")
 install: ## Install project for dev
 	@mvn -Dmaven.test.skip=true -f api/pom.xml clean install
 
-makeMigration: ## Create a migration file
-	mvn -f api/pom.xml -pl database liquibase:diff -DdiffChangeLogFile=api/database/src/main/resources/db/changelog/changes/${DATE_WITH_TIME}-${MIGRATION_LABEL}.yaml
-	@echo "  - include:" >> api/database/src/main/resources/db/changelog/db.changelog-master.yaml
-	@echo "      file: classpath*:db/changelog/changes/$(DATE_WITH_TIME)-$(MIGRATION_LABEL).yaml" >> api/database/src/main/resources/db/changelog/db.changelog-master.yaml
-
 cache-build-api:
 	@echo '-- Build java ara-api with local cache --'
 	@docker container run -v "$$PWD/api":/root/ara -w /root/ara maven:3-jdk-$(JAVA_VERSION) mvn -s settings.xml clean package dependency:go-offline
@@ -25,6 +20,31 @@ cache-build-api:
 build-api: ## Build ara-api
 	@echo '-- Build ${API_IMAGE} --'
 	@docker build -t ${API_IMAGE} api
+
+compose-migration:
+	@echo '-- Up migration stack --'
+	@docker-compose -f api/migration.yaml build
+	@docker-compose -f api/migration.yaml up -d
+
+wait-migration-stack:
+	docker container run --rm --net=host aligor/wait-for-url --url http://localhost:9980/actuator/info --retries 20 --delay 3000
+	docker container run --rm --net=host aligor/wait-for-url -url http://localhost:9981/actuator/info --retries 20 --delay 3000
+
+makeMigration: compose-migration wait-migration-stack ## Create a migration file
+	@docker container run -it --net=host --rm \
+		--user $(shell id -u):$(shell id -g) \
+		-v $${HOME}/.m2:/var/maven/.m2:rw \
+		-e MAVEN_CONFIG=/var/maven/.m2 \
+		-v $(shell pwd):$(shell pwd):rw \
+		-w $(shell pwd) \
+		maven:alpine \
+		mvn -Duser.home=/var/maven -f api/pom.xml -pl database liquibase:diff -DdiffChangeLogFile=api/database/src/main/resources/db/changelog/changes/${DATE_WITH_TIME}-${MIGRATION_LABEL}.yaml
+	@echo "  - include:" >> api/database/src/main/resources/db/changelog/db.changelog-master.yaml
+	@echo "      file: classpath*:db/changelog/changes/$(DATE_WITH_TIME)-$(MIGRATION_LABEL).yaml" >> api/database/src/main/resources/db/changelog/db.changelog-master.yaml
+	@make stop-migration-stack
+
+stop-migration-stack:
+	@docker-compose -f api/migration.yaml down
 
 build-web-ui: ## Build ara-web-ui
 	@echo '-- Build ${WEB_UI_IMAGE} --'

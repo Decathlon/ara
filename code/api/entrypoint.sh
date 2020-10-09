@@ -32,6 +32,11 @@ then
     DATABASE_PARAMS="${DATABASE_PARAMS}-Dspring.liquibase.enabled=$LIQUIBASE_ACTIVE "
 fi
 
+if [[ ! -z $HBM2DDL ]]
+then
+    DATABASE_PARAMS="${DATABASE_PARAMS}-Dspring.jpa.properties.hibernate.hbm2ddl.auto=$HBM2DDL "
+fi
+
 java $JAVAOPS \
         -Djava.security.egd=file:/dev/./urandom \
         -Dspring.profiles.active=db-$DATABASE_TYPE \

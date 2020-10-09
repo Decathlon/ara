@@ -72,11 +72,14 @@ public class Communication implements Comparable<Communication> {
     @JoinColumn(name = "project_id")
     private Project project;
 
+    @Column(length = 32)
     private String code;
 
+    @Column(length = 64)
     private String name;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 4)
     private CommunicationType type;
 
     @Lob

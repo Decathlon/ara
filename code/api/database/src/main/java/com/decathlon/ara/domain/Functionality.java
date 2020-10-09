@@ -58,8 +58,10 @@ public class Functionality implements Comparable<Functionality> {
     private Double order;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 13)
     private FunctionalityType type;
 
+    @Column(length = 512)
     private String name;
 
     /**
@@ -69,13 +71,16 @@ public class Functionality implements Comparable<Functionality> {
      *
      * @see #COUNTRY_CODES_SEPARATOR the separator used to join country-codes together
      */
+    @Column(length = 128)
     private String countryCodes;
 
     private Long teamId;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 32)
     private FunctionalitySeverity severity;
 
+    @Column(length = 10)
     private String created;
 
     private Boolean started;
@@ -84,10 +89,12 @@ public class Functionality implements Comparable<Functionality> {
 
     private Integer coveredScenarios;
 
+    @Column(length = 512)
     private String coveredCountryScenarios;
 
     private Integer ignoredScenarios;
 
+    @Column(length = 512)
     private String ignoredCountryScenarios;
 
     @Getter(AccessLevel.NONE)

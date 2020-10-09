@@ -1,3 +1,5 @@
 databaseChangeLog:
   - include:
       file: classpath*:db/changelog/changes/20200918124934-user-creation.yaml
+  - include:
+      file: classpath*:db/changelog/changes/20201009144207-column-size.yaml

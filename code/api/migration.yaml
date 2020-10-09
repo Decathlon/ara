@@ -1,0 +1,66 @@
+# Please Note that this file IS NOT PRODUCTION READY.
+# It's only dedicated to local test & try
+
+version: '3.5'
+
+services:
+  ara-db-source:
+    image: "mysql:5.7"
+    restart: always
+    ports:
+      - 4306:3306
+    environment:
+      - MYSQL_DATABASE=ara
+      - MYSQL_USER=changeme
+      - MYSQL_PASSWORD=changeme
+      - MYSQL_ROOT_PASSWORD=to_change
+    networks:
+      - db_net
+  ara-db-target:
+    image: "mysql:5.7"
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_DATABASE=ara
+      - MYSQL_USER=changeme
+      - MYSQL_PASSWORD=changeme
+      - MYSQL_ROOT_PASSWORD=to_change
+    networks:
+      - db_net
+  ara-api:
+    build: .
+    restart: always
+    environment:
+      - DATABASE_TYPE=mysql
+      - DATABASE_HOST=ara-db-source:3306
+      - DATABASE_NAME=ara
+      - DATABASE_USER=root
+      - DATABASE_PASSWORD=to_change
+      - CLIENT_URL="http://localhost:80/"
+    ports:
+      - 9980:8080
+    networks:
+      - db_net
+    depends_on:
+      - ara-db-source
+  ara-mig-api:
+    build: .
+    restart: always
+    environment:
+      - DATABASE_TYPE=mysql
+      - DATABASE_HOST=ara-db-target:3306
+      - DATABASE_NAME=ara
+      - DATABASE_USER=root
+      - DATABASE_PASSWORD=to_change
+      - LIQUIBASE_ACTIVE=false
+      - HBM2DDL=create-drop
+      - CLIENT_URL="http://localhost:80/"
+    ports:
+      - 9981:8080
+    networks:
+      - db_net
+    depends_on:
+      - ara-db-target
+networks:
+  db_net:

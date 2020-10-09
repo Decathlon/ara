@@ -50,8 +50,10 @@ public class Execution {
     @GenericGenerator(name = "native", strategy = "native")
     private Long id;
 
+    @Column(length = 16)
     private String branch;
 
+    @Column(length = 16)
     private String name;
 
     /**
@@ -59,6 +61,7 @@ public class Execution {
      * (eg. "v2" or "1904" for the release encompassing all versions of April 2019).<br>
      * Optional: will not be filterable by problems if not provided.
      */
+    @Column(length = 32)
     private String release;
 
     /**
@@ -66,6 +69,7 @@ public class Execution {
      * (eg. "1904.3" for the third version of the April 2019 release, a timestamped version, or the Git commit ID).<br>
      * Optional: for display only.
      */
+    @Column(length = 64)
     private String version;
 
     /**
@@ -99,24 +103,28 @@ public class Execution {
      * ARA's workflow-status of the execution (interpreted from the many statuses of the Continuous Integration job).
      */
     @Enumerated(EnumType.STRING)
+    @Column(length = 16)
     private JobStatus status;
 
     /**
      * The raw status of the Continuous Integration job for this execution.
      */
     @Enumerated(EnumType.STRING)
+    @Column(length = 16)
     private Result result;
 
     /**
      * An execution is accepted, discarded (or not yet accepted nor discarded).
      */
     @Enumerated(EnumType.STRING)
+    @Column(length = 16)
     private ExecutionAcceptance acceptance;
 
     /**
      * If the {@link #acceptance} is {@link ExecutionAcceptance#DISCARDED DISCARDED}, the mandatory reason explains why
      * a user discarded the execution (too many network errors, etc.).
      */
+    @Column(length = 512)
     private String discardReason;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -128,6 +136,7 @@ public class Execution {
     private String qualityThresholds;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 10)
     private QualityStatus qualityStatus;
 
     @Column(length = 4096)
