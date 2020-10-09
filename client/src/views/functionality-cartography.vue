@@ -44,7 +44,8 @@
             <span v-if="counts.total === 0">No functionality</span>
             <span v-else-if="counts.matching === counts.total && counts.total === 1">Showing the only functionality</span>
             <span v-else-if="counts.matching === counts.total">Showing all <strong>{{counts.total}}</strong> functionalities</span>
-            <span v-else>Showing <strong>{{counts.matching}}</strong> filtered functionalit{{counts.matching == 1 ? 'y' : 'ies'}} out of the <strong>{{counts.total}}</strong> functionalit{{counts.total == 1 ? 'y' : 'ies'}}</span>
+            <span v-else>Showing <strong>{{counts.matching}}</strong> filtered functionalit{{counts.matching == 1 ? 'y' : 'ies'}} out of <strong>{{counts.total}}</strong></span>
+            <span v-if="counts.selected > 0">, {{counts.selected}} selected.</span>
           </h1>
         </div>
 
@@ -379,6 +380,7 @@
         ],
         counts: {
           matching: 0,
+          selected: 0,
           total: 0
         },
 
@@ -1136,6 +1138,13 @@
         if (node.children) {
           for (let i in node.children) {
             const child = node.children[i]
+            if (child.row.type === 'FUNCTIONALITY') {
+              if (node.isSelected && !child.isSelected) {
+                this.counts.selected += 1
+              } else if (!node.isSelected && child.isSelected) {
+                this.counts.selected -= 1
+              }
+            }
             child.isSelected = node.isSelected
             this.propagateSelectionToChildren(child)
           }
@@ -1207,6 +1216,13 @@
       },
 
       updateSelection (node) {
+        if (node.row.type === 'FUNCTIONALITY') {
+          if (node.isSelected) {
+            this.counts.selected += 1
+          } else {
+            this.counts.selected -= 1
+          }
+        }
         this.propagateSelectionToChildren(node)
         this.propagateSelectionToParent(node)
         this.updateNodesSelection()
