@@ -45,7 +45,7 @@ public class TestDefectAdapter implements DefectAdapter {
     }
 
     @Override
-    public boolean isValidId(long projectId, String id) {
+    public boolean isValidId(String id) {
         return false;
     }
 

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2019 by the ARA Contributors                                 *
+ * Copyright (C) 2020 by the ARA Contributors                                 *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -15,31 +15,29 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.defect.bean;
+package com.decathlon.ara.defect.jira.api.model.user;
 
-import com.decathlon.ara.domain.enumeration.ProblemStatus;
-import lombok.AllArgsConstructor;
+import com.decathlon.ara.defect.jira.api.model.avatar.JiraAvatar;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import java.util.Date;
-
 @Data
-@AllArgsConstructor
-public class Defect {
+public class JiraUser {
 
-    /**
-     * The ID of the defect/issue/bug/... in the external issue-tracker.
-     */
-    private String id;
+    private String self;
 
-    /**
-     * The fetched status (from the external issue-tracker) converted to a problem status.
-     */
-    private ProblemStatus status;
+    private String accountId;
 
-    /**
-     * The date and time of the last closing of the defect,
-     */
-    private Date closeDateTime;
+    private String emailAddress;
 
+    @JsonProperty("avatarUrls")
+    private JiraAvatar avatar;
+
+    private String displayName;
+
+    private Boolean active;
+
+    private String timeZone;
+
+    private String accountType;
 }

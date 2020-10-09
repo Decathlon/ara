@@ -17,17 +17,34 @@
 
 package com.decathlon.ara.defect.rtc;
 
+import com.decathlon.ara.ci.util.FetchException;
 import com.decathlon.ara.common.NotGonnaHappenException;
 import com.decathlon.ara.defect.DefectAdapter;
-import com.decathlon.ara.domain.enumeration.ProblemStatus;
-import com.decathlon.ara.ci.util.FetchException;
+import com.decathlon.ara.defect.bean.Defect;
 import com.decathlon.ara.defect.rtc.bean.WorkItem;
 import com.decathlon.ara.defect.rtc.bean.WorkItemContainer;
+import com.decathlon.ara.domain.enumeration.ProblemStatus;
 import com.decathlon.ara.service.SettingProviderService;
 import com.decathlon.ara.service.SettingService;
 import com.decathlon.ara.service.dto.setting.SettingDTO;
-import com.decathlon.ara.defect.bean.Defect;
 import com.decathlon.ara.service.support.Settings;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.ListUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.*;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -37,35 +54,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.ListUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 @Slf4j
 @Service
@@ -112,7 +104,7 @@ public class RtcDefectAdapter implements DefectAdapter {
         final Map<String, String> cookies = authenticate(projectId);
 
         List<String> realIds = ids.stream()
-                .filter(id -> isValidId(projectId, id))
+                .filter(id -> isValidId(id))
                 .collect(Collectors.toList());
         if (!realIds.isEmpty()) {
             final int batchSize = settingService.getInt(projectId, Settings.DEFECT_RTC_BATCH_SIZE);
@@ -151,12 +143,11 @@ public class RtcDefectAdapter implements DefectAdapter {
     /**
      * Validate a user input for a defect ID in the tracker.
      *
-     * @param projectId the ID of the project in which to work
      * @param id        a user-typed defect ID
      * @return true if it is a valid ID for the backed defect tracking system
      */
     @Override
-    public boolean isValidId(long projectId, String id) {
+    public boolean isValidId(String id) {
         if (!RTC_ID_PATTERN.matcher(id).matches()) {
             return false;
         }
