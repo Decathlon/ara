@@ -17,31 +17,49 @@
 
 package com.decathlon.ara.defect.jira.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
+
 import com.decathlon.ara.defect.jira.api.model.JiraIssue;
 import com.decathlon.ara.defect.jira.api.model.JiraIssueSearchResults;
 import com.decathlon.ara.service.SettingService;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.support.Settings;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.*;
-import org.springframework.web.client.RestTemplate;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class JiraRestClientTest {
 
     @Mock
@@ -53,7 +71,7 @@ public class JiraRestClientTest {
     @InjectMocks
     private JiraRestClient jiraRestClient;
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void getHeader_throwBadRequestException_whenTokenNotFound() throws BadRequestException {
         // Given
         Long projectId = 1L;
@@ -62,10 +80,10 @@ public class JiraRestClientTest {
         when(settingService.get(projectId, Settings.DEFECT_JIRA_TOKEN)).thenReturn(null);
 
         // Then
-        jiraRestClient.getHeader(projectId);
+        assertThrows(BadRequestException.class, () -> jiraRestClient.getHeader(projectId));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void getHeader_throwBadRequestException_whenLoginNotFound() throws BadRequestException {
         // Given
         Long projectId = 1L;
@@ -76,7 +94,7 @@ public class JiraRestClientTest {
         when(settingService.get(projectId, Settings.DEFECT_JIRA_LOGIN)).thenReturn(null);
 
         // Then
-        jiraRestClient.getHeader(projectId);
+        assertThrows(BadRequestException.class, () -> jiraRestClient.getHeader(projectId));
     }
 
     @Test
@@ -99,7 +117,7 @@ public class JiraRestClientTest {
         assertThat(header.get("Authorization")).isEqualTo(Arrays.asList(authorization));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void getIssue_throwBadRequestException_whenBaseUrlNotFound() throws BadRequestException {
         // Given
         Long projectId = 1L;
@@ -109,7 +127,7 @@ public class JiraRestClientTest {
         when(settingService.get(projectId, Settings.DEFECT_JIRA_BASE_URL)).thenReturn(null);
 
         // Then
-        jiraRestClient.getIssue(projectId, code);
+        assertThrows(BadRequestException.class, () -> jiraRestClient.getIssue(projectId, code));
     }
 
     @Test
@@ -151,7 +169,7 @@ public class JiraRestClientTest {
         assertThat(issue).isEmpty();
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void getIssue_throwBadRequestException_whenHttpStatusCodeIsNeither404Nor200() throws BadRequestException {
         // Given
         Long projectId = 1L;
@@ -172,7 +190,7 @@ public class JiraRestClientTest {
         when(responseEntity.getStatusCode()).thenReturn(HttpStatus.I_AM_A_TEAPOT);
 
         // Then
-        jiraRestClient.getIssue(projectId, code);
+        assertThrows(BadRequestException.class, () -> jiraRestClient.getIssue(projectId, code));
     }
 
     @Test
@@ -231,7 +249,7 @@ public class JiraRestClientTest {
         verify(restTemplate, never()).exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(ParameterizedTypeReference.class));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void getIssuesFromKeys_throwBadRequestException_whenBaseUrlNotFound() throws BadRequestException {
         // Given
         Long projectId = 1L;
@@ -241,10 +259,10 @@ public class JiraRestClientTest {
         when(settingService.get(projectId, Settings.DEFECT_JIRA_BASE_URL)).thenReturn(null);
 
         // Then
-        jiraRestClient.getIssuesFromKeys(projectId, codes);
+        assertThrows(BadRequestException.class, () -> jiraRestClient.getIssuesFromKeys(projectId, codes));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void getIssuesFromKeys_throwBadRequestException_whenResponseCodeStatusIsNot200() throws BadRequestException {
         // Given
         Long projectId = 1L;
@@ -265,7 +283,7 @@ public class JiraRestClientTest {
         when(responseEntity.getStatusCode()).thenReturn(HttpStatus.I_AM_A_TEAPOT);
 
         // Then
-        jiraRestClient.getIssuesFromKeys(projectId, codes);
+        assertThrows(BadRequestException.class, () -> jiraRestClient.getIssuesFromKeys(projectId, codes));
     }
 
     @Test
@@ -747,7 +765,7 @@ public class JiraRestClientTest {
                 );
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void getUpdatedIssues_throwBadRequestException_whenBaseUrlNotFoundAndUpdateDateNotNull() throws BadRequestException {
         // Given
         Long projectId = 1L;
@@ -757,10 +775,10 @@ public class JiraRestClientTest {
         when(settingService.get(projectId, Settings.DEFECT_JIRA_BASE_URL)).thenReturn(null);
 
         // Then
-        jiraRestClient.getUpdatedIssues(projectId, updateDate);
+        assertThrows(BadRequestException.class, () -> jiraRestClient.getUpdatedIssues(projectId, updateDate));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void getUpdatedIssues_throwBadRequestException_whenResponseCodeStatusIsNot200AndUpdateDateNotNull() throws BadRequestException {
         // Given
         Long projectId = 1L;
@@ -781,7 +799,7 @@ public class JiraRestClientTest {
         when(responseEntity.getStatusCode()).thenReturn(HttpStatus.I_AM_A_TEAPOT);
 
         // Then
-        jiraRestClient.getUpdatedIssues(projectId, updateDate);
+        assertThrows(BadRequestException.class, () -> jiraRestClient.getUpdatedIssues(projectId, updateDate));
     }
 
     @Test

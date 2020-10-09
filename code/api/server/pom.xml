@@ -216,7 +216,40 @@
             <artifactId>poi</artifactId>
             <version>4.1.2</version>
         </dependency>
+        
+        <!-- JIRA -->
+        <dependency>
+            <groupId>com.atlassian.jira</groupId>
+            <artifactId>jira-api</artifactId>
+            <version>7.0.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>osworkflow</groupId>
+                    <artifactId>osworkflow</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>jta</groupId>
+                    <artifactId>jta</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
+    
+    <repositories>
+        <repository>
+            <id>atlassian-public</id>
+            <url>https://packages.atlassian.com/mvn/maven-external/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+        </repository>
+    </repositories>
 
     <build>
         <finalName>${project.artifactId}</finalName>

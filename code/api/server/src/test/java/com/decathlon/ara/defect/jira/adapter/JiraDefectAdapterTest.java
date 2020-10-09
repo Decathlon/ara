@@ -17,6 +17,24 @@
 
 package com.decathlon.ara.defect.jira.adapter;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.ci.util.FetchException;
 import com.decathlon.ara.defect.bean.Defect;
@@ -26,22 +44,8 @@ import com.decathlon.ara.defect.jira.api.model.JiraIssue;
 import com.decathlon.ara.service.SettingProviderService;
 import com.decathlon.ara.service.dto.setting.SettingDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class JiraDefectAdapterTest {
 
     @Mock
@@ -56,7 +60,7 @@ public class JiraDefectAdapterTest {
     @InjectMocks
     private JiraDefectAdapter jiraDefectAdapter;
 
-    @Test(expected = FetchException.class)
+    @Test
     public void getStatuses_throwFetchException_whenBadRequestExceptionRaised() throws BadRequestException, FetchException {
         // Given
         Long projectId = 1L;
@@ -66,7 +70,7 @@ public class JiraDefectAdapterTest {
         when(jiraRestClient.getIssuesFromKeys(projectId, jiraIssueKeys)).thenThrow(new BadRequestException("Jira issues not fetched due to internal error!", Entities.SETTING, "some_error_code"));
 
         // Then
-        jiraDefectAdapter.getStatuses(projectId, jiraIssueKeys);
+        assertThrows(FetchException.class, () -> jiraDefectAdapter.getStatuses(projectId, jiraIssueKeys));
     }
 
     @Test
@@ -134,7 +138,7 @@ public class JiraDefectAdapterTest {
         verify(jiraRestClient).getIssuesFromKeys(projectId, filteredJiraIssueKeys);
     }
 
-    @Test(expected = FetchException.class)
+    @Test
     public void getChangedDefects_throwFetchException_whenBadRequestExceptionRaised() throws BadRequestException, FetchException, ParseException {
         // Given
         Long projectId = 1L;
@@ -145,7 +149,7 @@ public class JiraDefectAdapterTest {
         when(jiraRestClient.getUpdatedIssues(projectId, startDate)).thenThrow(new BadRequestException("Jira issues not fetched due to internal error!", Entities.SETTING, "some_error_code"));
 
         // Then
-        jiraDefectAdapter.getChangedDefects(projectId, startDate);
+        assertThrows(FetchException.class, () -> jiraDefectAdapter.getChangedDefects(projectId, startDate));
     }
 
     @Test

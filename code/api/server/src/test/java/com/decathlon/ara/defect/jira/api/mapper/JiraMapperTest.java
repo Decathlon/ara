@@ -17,16 +17,9 @@
 
 package com.decathlon.ara.defect.jira.api.mapper;
 
-import com.decathlon.ara.defect.bean.Defect;
-import com.decathlon.ara.defect.jira.api.model.JiraFields;
-import com.decathlon.ara.defect.jira.api.model.JiraIssue;
-import com.decathlon.ara.defect.jira.api.model.status.JiraStatus;
-import com.decathlon.ara.defect.jira.api.model.status.JiraStatusCategory;
-import com.decathlon.ara.domain.enumeration.ProblemStatus;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -36,11 +29,19 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+import com.decathlon.ara.defect.bean.Defect;
+import com.decathlon.ara.defect.jira.api.model.JiraFields;
+import com.decathlon.ara.defect.jira.api.model.JiraIssue;
+import com.decathlon.ara.defect.jira.api.model.status.JiraStatus;
+import com.decathlon.ara.defect.jira.api.model.status.JiraStatusCategory;
+import com.decathlon.ara.domain.enumeration.ProblemStatus;
+
+@ExtendWith(MockitoExtension.class)
 public class JiraMapperTest {
 
     @InjectMocks

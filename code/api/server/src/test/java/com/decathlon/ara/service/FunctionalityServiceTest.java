@@ -33,20 +33,23 @@ import com.decathlon.ara.service.exception.NotUniqueException;
 import com.decathlon.ara.service.mapper.FunctionalityMapper;
 import com.decathlon.ara.service.mapper.FunctionalityWithChildrenMapper;
 import com.decathlon.ara.service.mapper.ScenarioMapper;
-import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FunctionalityServiceTest {
 
     @Mock
@@ -76,7 +79,7 @@ public class FunctionalityServiceTest {
     @InjectMocks
     private FunctionalityService functionalityService;
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void create_throwBadRequestException_whenNoReferenceIdAndRelativePositionIsNotLastChild() throws BadRequestException {
         // Given
 
@@ -92,11 +95,11 @@ public class FunctionalityServiceTest {
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
         // Then
-        functionalityService.create(projectId, newFunctionalityDTO);
+        assertThrows(BadRequestException.class, () -> functionalityService.create(projectId, newFunctionalityDTO));
         verify(repository, never()).save(any(Functionality.class));
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void create_throwNotFoundException_whenReferenceIdNotNullButNotFound() throws BadRequestException {
         // Given
 
@@ -114,11 +117,11 @@ public class FunctionalityServiceTest {
         when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.empty());
 
         // Then
-        functionalityService.create(projectId, newFunctionalityDTO);
+        assertThrows(BadRequestException.class, () -> functionalityService.create(projectId, newFunctionalityDTO));
         verify(repository, never()).save(any(Functionality.class));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void create_throwBadRequestException_whenReferenceIdFoundAndPositionIsLastChildAndParentIdIsFunctionality() throws BadRequestException {
         // Given
 
@@ -141,11 +144,11 @@ public class FunctionalityServiceTest {
         when(referenceFunctionality.getType()).thenReturn(FunctionalityType.FUNCTIONALITY);
 
         // Then
-        functionalityService.create(projectId, newFunctionalityDTO);
+        assertThrows(BadRequestException.class, () -> functionalityService.create(projectId, newFunctionalityDTO));
         verify(repository, never()).save(any(Functionality.class));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void create_throwBadRequestException_whenFunctionalityTypeDoesNotExist() throws BadRequestException {
         // Given
 
@@ -190,11 +193,11 @@ public class FunctionalityServiceTest {
         when(functionality.getType()).thenReturn(functionalityType);
 
         // Then
-        functionalityService.create(projectId, newFunctionalityDTO);
+        assertThrows(BadRequestException.class, () -> functionalityService.create(projectId, newFunctionalityDTO));
         verify(repository, never()).save(any(Functionality.class));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void create_throwBadRequestException_whenFunctionalityHasNoName() throws BadRequestException {
         // Given
 
@@ -240,11 +243,11 @@ public class FunctionalityServiceTest {
         when(functionality.getName()).thenReturn(null);
 
         // Then
-        functionalityService.create(projectId, newFunctionalityDTO);
+        assertThrows(BadRequestException.class, () -> functionalityService.create(projectId, newFunctionalityDTO));
         verify(repository, never()).save(any(Functionality.class));
     }
 
-    @Test(expected = NotUniqueException.class)
+    @Test
     public void create_throwNotUniqueException_whenFunctionalityNameAlreadyExists() throws BadRequestException {
         // Given
 
@@ -302,11 +305,11 @@ public class FunctionalityServiceTest {
         when(existingFunctionality.getType()).thenReturn(FunctionalityType.FUNCTIONALITY);
 
         // Then
-        functionalityService.create(projectId, newFunctionalityDTO);
+        assertThrows(NotUniqueException.class, () -> functionalityService.create(projectId, newFunctionalityDTO));
         verify(repository, never()).save(any(Functionality.class));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void create_throwBadRequestException_whenFunctionalityIsAnInvalidFolder() throws BadRequestException {
         // Given
 
@@ -364,11 +367,11 @@ public class FunctionalityServiceTest {
         when(existingFunctionality.getId()).thenReturn(referenceId);
 
         // Then
-        functionalityService.create(projectId, newFunctionalityDTO);
+        assertThrows(BadRequestException.class, () -> functionalityService.create(projectId, newFunctionalityDTO));
         verify(repository, never()).save(any(Functionality.class));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void create_throwBadRequestException_whenFunctionalityHasNoTeam() throws BadRequestException {
         // Given
 
@@ -424,11 +427,11 @@ public class FunctionalityServiceTest {
         when(existingFunctionality.getId()).thenReturn(referenceId);
 
         // Then
-        functionalityService.create(projectId, newFunctionalityDTO);
+        assertThrows(BadRequestException.class, () -> functionalityService.create(projectId, newFunctionalityDTO));
         verify(repository, never()).save(any(Functionality.class));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void create_throwBadRequestException_whenFunctionalityHasNoSeverity() throws BadRequestException {
         // Given
 
@@ -487,11 +490,11 @@ public class FunctionalityServiceTest {
         when(existingFunctionality.getId()).thenReturn(referenceId);
 
         // Then
-        functionalityService.create(projectId, newFunctionalityDTO);
+        assertThrows(BadRequestException.class, () -> functionalityService.create(projectId, newFunctionalityDTO));
         verify(repository, never()).save(any(Functionality.class));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void create_throwBadRequestException_whenFunctionalityHasNoCountryCodes() throws BadRequestException {
         // Given
 
@@ -552,11 +555,11 @@ public class FunctionalityServiceTest {
         when(existingFunctionality.getId()).thenReturn(referenceId);
 
         // Then
-        functionalityService.create(projectId, newFunctionalityDTO);
+        assertThrows(BadRequestException.class, () -> functionalityService.create(projectId, newFunctionalityDTO));
         verify(repository, never()).save(any(Functionality.class));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void create_throwBadRequestException_whenFunctionalityHasStartedAndIsNotAutomatable() throws BadRequestException {
         // Given
 
@@ -620,11 +623,11 @@ public class FunctionalityServiceTest {
         when(existingFunctionality.getId()).thenReturn(referenceId);
 
         // Then
-        functionalityService.create(projectId, newFunctionalityDTO);
+        assertThrows(BadRequestException.class, () -> functionalityService.create(projectId, newFunctionalityDTO));
         verify(repository, never()).save(any(Functionality.class));
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void create_throwNotFoundException_whenACountryCodeNotFound() throws BadRequestException {
         // Given
 
@@ -694,11 +697,11 @@ public class FunctionalityServiceTest {
         when(countryRepository.findCodesByProjectId(projectId)).thenReturn(Arrays.asList(code1, code2, code3));
 
         // Then
-        functionalityService.create(projectId, newFunctionalityDTO);
+        assertThrows(NotFoundException.class, () -> functionalityService.create(projectId, newFunctionalityDTO));
         verify(repository, never()).save(any(Functionality.class));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void create_throwBadRequestException_whenFunctionalityTeamIsNotAssignable() throws BadRequestException {
         // Given
 
@@ -772,11 +775,11 @@ public class FunctionalityServiceTest {
         when(teamDTO.isAssignableToFunctionalities()).thenReturn(false);
 
         // Then
-        functionalityService.create(projectId, newFunctionalityDTO);
+        assertThrows(BadRequestException.class, () -> functionalityService.create(projectId, newFunctionalityDTO));
         verify(repository, never()).save(any(Functionality.class));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void create_throwBadRequestException_whenFunctionalitySeverityDoesNotExist() throws BadRequestException {
         // Given
 
@@ -850,7 +853,7 @@ public class FunctionalityServiceTest {
         when(teamDTO.isAssignableToFunctionalities()).thenReturn(true);
 
         // Then
-        functionalityService.create(projectId, newFunctionalityDTO);
+        assertThrows(BadRequestException.class, () -> functionalityService.create(projectId, newFunctionalityDTO));
         verify(repository, never()).save(any(Functionality.class));
     }
 
@@ -936,7 +939,7 @@ public class FunctionalityServiceTest {
         verify(repository).save(any(Functionality.class));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void moveList_throwBadRequestException_whenMoveRequestIsNull() throws BadRequestException {
         // Given
         Long projectId = 1L;
@@ -944,10 +947,10 @@ public class FunctionalityServiceTest {
         // When
 
         // Then
-        functionalityService.moveList(projectId, null);
+        assertThrows(BadRequestException.class, () -> functionalityService.moveList(projectId, null));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void moveList_throwBadRequestException_whenReferenceIdIsNull() throws BadRequestException {
         // Given
         Long projectId = 1L;
@@ -958,10 +961,10 @@ public class FunctionalityServiceTest {
         when(moveDetails.getReferenceId()).thenReturn(null);
 
         // Then
-        functionalityService.moveList(projectId, moveDetails);
+        assertThrows(BadRequestException.class, () -> functionalityService.moveList(projectId, moveDetails));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void moveList_throwBadRequestException_whenSourceIdsIsNull() throws BadRequestException {
         // Given
         Long projectId = 1L;
@@ -974,10 +977,10 @@ public class FunctionalityServiceTest {
         when(moveDetails.getSourceIds()).thenReturn(null);
 
         // Then
-        functionalityService.moveList(projectId, moveDetails);
+        assertThrows(BadRequestException.class, () -> functionalityService.moveList(projectId, moveDetails));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void moveList_throwBadRequestException_whenSourceIdsIsEmpty() throws BadRequestException {
         // Given
         Long projectId = 1L;
@@ -990,10 +993,10 @@ public class FunctionalityServiceTest {
         when(moveDetails.getSourceIds()).thenReturn(new ArrayList<>());
 
         // Then
-        functionalityService.moveList(projectId, moveDetails);
+        assertThrows(BadRequestException.class, () -> functionalityService.moveList(projectId, moveDetails));
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void moveList_throwNotFoundException_whenReferenceFunctionalityIsNotFound() throws BadRequestException {
         // Given
         Long projectId = 1L;
@@ -1012,10 +1015,10 @@ public class FunctionalityServiceTest {
         when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.empty());
 
         // Then
-        functionalityService.moveList(projectId, moveDetails);
+        assertThrows(NotFoundException.class, () -> functionalityService.moveList(projectId, moveDetails));
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void moveList_throwNotFoundException_whenSomeOfTheSourceFunctionalitiesAreNotFound() throws BadRequestException {
         // Given
         Long projectId = 1L;
@@ -1040,10 +1043,10 @@ public class FunctionalityServiceTest {
         );
 
         // Then
-        functionalityService.moveList(projectId, moveDetails);
+        assertThrows(NotFoundException.class, () -> functionalityService.moveList(projectId, moveDetails));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void delete_throwBadRequestException_whenIdIsNull() throws BadRequestException {
         // Given
         Long projectId = 1L;
@@ -1051,11 +1054,11 @@ public class FunctionalityServiceTest {
         // When
 
         // Then
-        functionalityService.delete(projectId, null);
+        assertThrows(BadRequestException.class, () -> functionalityService.delete(projectId, null));
         verify(repository, never()).delete(any());
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void delete_throwNotFoundException_whenIdIsUnknown() throws BadRequestException {
         // Given
         Long projectId = 1L;
@@ -1065,7 +1068,7 @@ public class FunctionalityServiceTest {
         when(repository.findByProjectIdAndId(projectId, id)).thenReturn(Optional.empty());
 
         // Then
-        functionalityService.delete(projectId, id);
+        assertThrows(NotFoundException.class, () -> functionalityService.delete(projectId, id));
         verify(repository, never()).delete(any());
     }
 
@@ -1085,7 +1088,7 @@ public class FunctionalityServiceTest {
         verify(repository).delete(functionality);
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void deleteList_throwBadRequestException_whenIdsNull() throws BadRequestException {
         // Given
         Long projectId = 1L;
@@ -1093,11 +1096,11 @@ public class FunctionalityServiceTest {
         // When
 
         // Then
-        functionalityService.deleteList(projectId, null);
+        assertThrows(BadRequestException.class, () -> functionalityService.deleteList(projectId, null));
         verify(repository, never()).deleteAll(anyIterable());
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void deleteList_throwBadRequestException_whenIdsEmpty() throws BadRequestException {
         // Given
         Long projectId = 1L;
@@ -1105,11 +1108,11 @@ public class FunctionalityServiceTest {
         // When
 
         // Then
-        functionalityService.deleteList(projectId, new ArrayList<>());
+        assertThrows(BadRequestException.class, () -> functionalityService.deleteList(projectId, new ArrayList<>()));
         verify(repository, never()).deleteAll(anyIterable());
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void deleteList_throwNotFoundException_whenSomeIdsNotFound() throws BadRequestException {
         // Given
         Long projectId = 1L;
@@ -1129,7 +1132,7 @@ public class FunctionalityServiceTest {
         );
 
         // Then
-        functionalityService.deleteList(projectId, functionalityIds);
+        assertThrows(NotFoundException.class, () -> functionalityService.deleteList(projectId, functionalityIds));
         verify(repository, never()).deleteAll(anyIterable());
     }
 
