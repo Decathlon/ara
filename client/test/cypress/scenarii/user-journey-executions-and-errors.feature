@@ -5,6 +5,61 @@ Background:
 
 
 @severity-medium
+  Scenario: Discard an execution
+    When on the executions and errors page, in the cart "5", the user clicks on the actions and job reports button
+    Then on the executions and errors page, in the cart "5", in the actions and job reports list, the "DiscardExecution" button is enabled
+     And on the executions and errors page, in the cart "5", in the actions and job reports list, the "DiscardExecution" button is visible
+     And on the executions and errors page, in the cart "5", in the actions and job reports list, the "DiscardExecution" button is named "DISCARD EXECUTION"
+     And on the executions and errors page, in the cart "5", in the actions and job reports list, the "UndiscardExecution" button is not visible
+
+    When on the executions and errors page, in the cart "5", in the actions and job reports list, the user clicks on the "DiscardExecution" button
+    Then on the executions and errors page, in the cart "5", the discard execution modal opens
+
+    # ADD - CANCEL
+    When on the executions and errors page, in the cart "5", in the discard execution modal, the user types the discard reason "Deploiement problem"
+     And on the executions and errors page, in the cart "5", in the discard execution modal, the user clicks on "Cancel" button
+    Then on the executions and errors page, in the cart "5", on the header, the discard reason "Deploiement problem" is not displayed
+     And on the executions and errors page, in the cart "5", the discard execution modal closes
+ 
+    # ADD - SAVE
+    When on the executions and errors page, in the cart "5", the user clicks on the actions and job reports button
+     And on the executions and errors page, in the cart "5", in the actions and job reports list, the user clicks on the "DiscardExecution" button
+     And on the executions and errors page, in the cart "5", in the discard execution modal, the user types the discard reason "Deploiement problem"
+     And on the executions and errors page, in the cart "5", in the discard execution modal, the user clicks on "Save" button
+    Then on the executions and errors page, in the cart "5", on the header, the discard reason "Deploiement problem" is displayed
+     And on the executions and errors page, in the cart "5", the discard execution modal closes
+
+    # CHANGE REASON
+    When on the executions and errors page, in the cart "5", the user clicks on the actions and job reports button
+    Then on the executions and errors page, in the cart "5", in the actions and job reports list, the "DiscardExecution" button is enabled
+     And on the executions and errors page, in the cart "5", in the actions and job reports list, the "DiscardExecution" button is visible
+     And on the executions and errors page, in the cart "5", in the actions and job reports list, the "DiscardExecution" button is named "CHANGE DISCARD REASON"
+     And on the executions and errors page, in the cart "5", in the actions and job reports list, the "UndiscardExecution" button is visible
+
+    When on the executions and errors page, in the cart "5", in the actions and job reports list, the user clicks on the "DiscardExecution" button
+    Then on the executions and errors page, in the cart "5", the discard execution modal opens
+
+    When on the executions and errors page, in the cart "5", in the discard execution modal, the user types the discard reason "New Deploiement problem"
+     And on the executions and errors page, in the cart "5", in the discard execution modal, the user clicks on "Update" button
+    Then on the executions and errors page, in the cart "5", on the header, the discard reason "New Deploiement problem" is displayed
+
+    # DELETE - CANCEL
+    When on the executions and errors page, in the cart "5", the user clicks on the actions and job reports button
+     And on the executions and errors page, in the cart "5", in the actions and job reports list, the user clicks on the "UndiscardExecution" button
+    Then on the executions and errors page, in the cart "5", the undiscard execution modal opens
+    When on the executions and errors page, in the cart "5", in the undiscard execution modal, the user clicks on "Cancel" button
+    Then on the executions and errors page, in the cart "5", on the header, the discard reason "New Deploiement problem" is displayed
+     And on the executions and errors page, in the cart "5", the undiscard execution modal closes
+
+    # DELETE - SAVE
+    When on the executions and errors page, in the cart "5", the user clicks on the actions and job reports button
+     And on the executions and errors page, in the cart "5", in the actions and job reports list, the user clicks on the "UndiscardExecution" button
+     And on the executions and errors page, in the cart "5", in the undiscard execution modal, the user clicks on "Save" button
+    Then on the executions and errors page, in the cart "5", on the header, the discard reason "New Deploiement problem" is not displayed
+     And on the executions and errors page, in the cart "5", the undiscard execution modal closes
+
+    
+@severity-medium
   Scenario: Check Ignored Scenarios
     Then on the executions and errors page, on ignored scenarios part, on the header, in the column "sanity-check", there is no ignored scenario
     And on the executions and errors page, on ignored scenarios part, on the header, in the column "high", there is 34% - i.e. "1/3" - of ignored scenarios
@@ -43,19 +98,19 @@ Background:
 
 @severity-medium
   Scenario: Check the Actions Buttons
-    When on the executions and errors page, the user clicks on the actions and job reports button "5"
-    Then on the executions and errors page, in the actions and job reports list, the "Actions" button "5" is visible
-    And on the executions and errors page, in the actions and job reports list, the "Actions" button "5" is disabled
-    And on the executions and errors page, in the actions and job reports list, the "JobReports" button "5" is visible
-    And on the executions and errors page, in the actions and job reports list, the "JobReports" button "5" is disabled
-    And on the executions and errors page, in the actions and job reports list, the "Execution" button "5" is visible
-    And on the executions and errors page, in the actions and job reports list, the "Execution" button "5" is enabled
-    And on the executions and errors page, in the actions and job reports list, the "fr_Deployment" button "5" is visible
-    And on the executions and errors page, in the actions and job reports list, the "fr_Deployment" button "5" is enabled
-    And on the executions and errors page, in the actions and job reports list, the "fr_api" button "5" is visible
-    And on the executions and errors page, in the actions and job reports list, the "fr_api" button "5" is enabled
-    And on the executions and errors page, in the actions and job reports list, the "fr_desktop" button "5" is visible
-    And on the executions and errors page, in the actions and job reports list, the "fr_desktop" button "5" is enabled
+    When on the executions and errors page, in the cart "5", the user clicks on the actions and job reports button
+    Then on the executions and errors page, in the cart "5", in the actions and job reports list, the "Actions" button is visible
+    And on the executions and errors page, in the cart "5", in the actions and job reports list, the "Actions" button is disabled
+    And on the executions and errors page, in the cart "5", in the actions and job reports list, the "JobReports" button is visible
+    And on the executions and errors page, in the cart "5", in the actions and job reports list, the "JobReports" button is disabled
+    And on the executions and errors page, in the cart "5", in the actions and job reports list, the "Execution" button is visible
+    And on the executions and errors page, in the cart "5", in the actions and job reports list, the "Execution" button is enabled
+    And on the executions and errors page, in the cart "5", in the actions and job reports list, the "fr_Deployment" button is visible
+    And on the executions and errors page, in the cart "5", in the actions and job reports list, the "fr_Deployment" button is enabled
+    And on the executions and errors page, in the cart "5", in the actions and job reports list, the "fr_api" button is visible
+    And on the executions and errors page, in the cart "5", in the actions and job reports list, the "fr_api" button is enabled
+    And on the executions and errors page, in the cart "5", in the actions and job reports list, the "fr_desktop" button is visible
+    And on the executions and errors page, in the cart "5", in the actions and job reports list, the "fr_desktop" button is enabled
 
 @severity-sanity-check
   Scenario: Check Header & Navigate between previous and next execution
