@@ -18,9 +18,11 @@
 package com.decathlon.ara.scenario.cucumber.bean;
 
 import com.decathlon.ara.scenario.cucumber.support.ResultsWithMatch;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Hook implements ResultsWithMatch {
 
     private Result result;

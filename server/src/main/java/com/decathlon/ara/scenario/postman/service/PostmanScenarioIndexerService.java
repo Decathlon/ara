@@ -25,6 +25,7 @@ import com.decathlon.ara.scenario.postman.util.JavaScriptCommentRemover;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -46,6 +47,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PostmanScenarioIndexerService {
@@ -74,10 +76,13 @@ public class PostmanScenarioIndexerService {
         final FileSystem zip = FileSystems.newFileSystem(zipFile.toPath(), this.getClass().getClassLoader());
 
         for (Path jsonFilePath : listJsonFilePaths(zip)) {
-            try (InputStream input = Files.newInputStream(jsonFilePath)) {
+            try {
+                InputStream input = Files.newInputStream(jsonFilePath);
                 final CollectionWithScripts collection = objectMapper.readValue(input, CollectionWithScripts.class);
                 final String pathToStore = jsonFilePath.toString().substring(1); // Remove leading slash
                 scenarios.addAll(collectCollectionScenarios(collection, source, pathToStore));
+            } catch (IOException e) {
+                log.error("The file {} was ignored...", jsonFilePath, e);
             }
         }
 
@@ -96,7 +101,8 @@ public class PostmanScenarioIndexerService {
     List<Scenario> collectCollectionScenarios(CollectionWithScripts collection, Source source, String jsonFilePath) {
         List<Scenario> scenarios = collectItemScenarios(collection.getItem(), source, new AtomicInteger(0), "", Collections.emptyList());
 
-        final String collectionName = collection.getInfo().getName();
+        final Info collectionInfo = collection.getInfo();
+        final String collectionName = collectionInfo != null ? collectionInfo.getName() : "";
         for (Scenario scenario : scenarios) {
             scenario.setFeatureFile(jsonFilePath);
             scenario.setFeatureName(collectionName);
