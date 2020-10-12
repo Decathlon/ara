@@ -1215,11 +1215,8 @@
 
       updateSelection (node) {
         if (node.row.type === 'FUNCTIONALITY') {
-          if (node.isSelected) {
-            this.counts.selected += 1
-          } else {
-            this.counts.selected -= 1
-          }
+          const increment = node.isSelected ? 1 : -1
+          this.counts.selected += increment
         }
         this.propagateSelectionToChildren(node)
         this.propagateSelectionToParent(node)
