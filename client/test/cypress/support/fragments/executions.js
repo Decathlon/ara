@@ -46,12 +46,28 @@ export const getNavigationButton = (executionId, navigation) => {
     return cy.GetByDataNrt('executions_Navigation' + navigation + 'Button_' + executionId);
 }
 
+export const getRelease = (executionId) => {
+    return cy.GetByDataNrt('executions_Release_' + executionId);
+}
+
+export const getBranch = (executionId) => {
+    return cy.GetByDataNrt('executions_Branch_' + executionId);
+}
+
+export const getExecution = (executionId) => {
+    return cy.GetByDataNrt('executions_Execution_' + executionId);
+}
+
 export const getShowRawExecutions = () => {
-    return cy.GetByDataNrt('executions_ShowRawExecutions');
+    return cy.GetByDataNrt('executions_ShowRawExecutionsButton');
 }
 
 export const getGoBackToExecutionsDashboard = () => {
-    return cy.GetByDataNrt('executions_GoBackToExecutionsDashboard');
+    return cy.GetByDataNrt('executions_GoBackToExecutionsDashboardButton');
+}
+
+export const getRefresh = () => {
+    return cy.GetByDataNrt('executions_RefreshButton');
 }
 
 export const getTableOfExecutions = () => {
@@ -85,4 +101,21 @@ export const getIgnoredScenarioDetailsEditScenarios = (feature) => {
 
 export const getIgnoredScenarioDetailsFeatureScenario = (feature, scenario) => {
     return cy.GetByDataNrt('executions_IgnoredScenariosDetailsFeature_' + feature + '_' + scenario);
+}
+
+export const getDiscardExecutionModal = (executionId) => {
+    return cy.GetByDataNrt('executions_DiscardExecutionModal_' + executionId);
+}
+
+export const getExecutionDiscardReason = (executionId) => {
+    return cy.GetByDataNrt('executions_DiscardReason_' + executionId);
+}
+
+export const getDiscardReasonInput = (executionId) => {
+    return cy.GetByDataNrt('executions_DiscardExecutionModal_DiscardReason_' + executionId);
+}
+
+
+export const getDiscardExecutionButton = (label, executionId) => {
+    return cy.GetByDataNrt('executions_ActionsAndJobReportsButton_' + label + '_' + executionId)
 }

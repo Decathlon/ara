@@ -92,7 +92,7 @@
 
       <div style="text-align: center; clear: both; padding-top: 16px;">
         <router-link :to="{ name: 'executions' }">
-          <Button :data-nrt=" 'executions_GoBackToExecutionsDashboard' "
+          <Button :data-nrt=" 'executions_GoBackToExecutionsDashboardButton' "
                   icon="md-arrow-round-back">GO BACK TO EXECUTIONS DASHBOARD</Button>
         </router-link>
       </div>
