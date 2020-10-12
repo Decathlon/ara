@@ -216,12 +216,13 @@
             <artifactId>poi</artifactId>
             <version>4.1.2</version>
         </dependency>
-        
+
         <!-- JIRA -->
         <dependency>
             <groupId>com.atlassian.jira</groupId>
             <artifactId>jira-api</artifactId>
             <version>7.0.0</version>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <groupId>osworkflow</groupId>
@@ -231,10 +232,14 @@
                     <groupId>jta</groupId>
                     <artifactId>jta</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
     </dependencies>
-    
+
     <repositories>
         <repository>
             <id>atlassian-public</id>
