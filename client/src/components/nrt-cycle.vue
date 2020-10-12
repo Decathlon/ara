@@ -18,8 +18,9 @@
   <div v-if="execution">
     <!-- Title -->
     <h2 style="padding: 0 17px; margin-top: 0;">
-      <span style="float: right;">{{execution.release}}</span>
-      <strong>{{execution.branch.toUpperCase()}}:</strong> {{execution.name}}
+      <span :data-nrt=" $route.name + '_Release_' + execution.id " 
+            style="float: right;">{{execution.release}}</span>
+      <strong :data-nrt=" $route.name + '_Branch_' + execution.id " >{{execution.branch.toUpperCase()}}:</strong><span :data-nrt=" $route.name + '_Execution_' + execution.id "> {{execution.name}} </span>
     </h2>
 
     <!-- Card -->
@@ -82,7 +83,7 @@
 
       <!-- Discard reason -->
       <div v-if="execution.discardReason" style="text-align: center; margin-bottom: 8px;">
-        <span class="discardReason">Discarded: {{execution.discardReason}}</span>
+        <span :data-nrt=" $route.name + '_DiscardReason_' + execution.id " class="discardReason">Discarded: {{execution.discardReason}}</span>
       </div>
       <Tabs v-if="problems" value="quality" style="margin-right: -16px; margin-left: -16px;">
         <TabPane :label="qualityTabLabel" name="quality">

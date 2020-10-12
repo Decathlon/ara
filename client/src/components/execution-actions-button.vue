@@ -23,20 +23,20 @@
       <DropdownMenu slot="list" style="text-transform: initial;" title="">
         <DropdownItem 
             :disabled="true"
-            :data-nrt=" $route.name + '_ActionsAndJobReportsButton_' + 'Actions_' + execution.id "
+            :data-nrt=" $route.name + '_ActionsAndJobReportsButton_Actions_' + execution.id "
             style="font-weight: bold;">
           <Icon type="md-open" style="visibility: hidden;"/>
           ACTIONS
         </DropdownItem>
 
-        <DropdownItem><div @click="discard(execution)"><Icon type="md-flag"/> {{execution.discardReason ? 'CHANGE DISCARD REASON' : 'DISCARD EXECUTION'}}</div></DropdownItem>
+        <DropdownItem :data-nrt=" $route.name + '_ActionsAndJobReportsButton_DiscardExecution_' + execution.id "><div @click="discard(execution)"><Icon type="md-flag"/> {{execution.discardReason ? 'CHANGE DISCARD REASON' : 'DISCARD EXECUTION'}}</div></DropdownItem>
         <DropdownItem 
-            :data-nrt=" $route.name + '_ActionsAndJobReportsButton_' + 'UndiscardExecution_' + execution.id "
+            :data-nrt=" $route.name + '_ActionsAndJobReportsButton_UndiscardExecution_' + execution.id "
             v-if="execution.discardReason"><div @click="unDiscard(execution.id)"><Icon type="md-checkmark"/> UN-DISCARD EXECUTION</div></DropdownItem>
 
         <DropdownItem 
             :disabled="true"
-            :data-nrt=" $route.name + '_ActionsAndJobReportsButton_' + 'JobReports_' + execution.id "
+            :data-nrt=" $route.name + '_ActionsAndJobReportsButton_JobReports_' + execution.id "
             style="border-top: 1px solid #DDDEE1; font-weight: bold;">
           <Icon type="md-open" style="visibility: hidden;"/>
           JOB REPORTS
@@ -45,7 +45,7 @@
         <a :href="execution.jobUrl ? (execution.jobUrl + 'console') : null" target="_blank">
           <DropdownItem 
               :disabled="!execution.jobUrl"
-              :data-nrt=" $route.name + '_ActionsAndJobReportsButton_' + 'Execution_' + execution.id ">
+              :data-nrt=" $route.name + '_ActionsAndJobReportsButton_Execution_' + execution.id ">
             <Icon type="md-open"/>
             Execution
             <job-status-result :job="execution" :showDuration="true"/>
@@ -79,7 +79,8 @@
 
     <Modal v-model="showDiscardDialog" @on-ok="confirmDiscard"
            title="Discard Execution"
-           okText="Discard" :loading="loadingDiscard" ref="discardPopup">
+           okText="Discard" :loading="loadingDiscard" ref="discardPopup"
+           :data-nrt=" 'executions_DiscardExecutionModal_' + execution.id ">
       <p class="help">
         Sometimes, an execution is exceptionaly wrong:
         a general network issue, a version that renders the server unusable...
@@ -92,7 +93,7 @@
         The execution will not appear as the default one on the home screen of ARA,
         revealing the previous not-discarded one for your team to analyze current regressions instead of loosing time by focusing on a bad execution.
       </p>
-      Discard reason: <Input ref="name" v-model="discardReason" @on-enter="confirmDiscard" />
+      Discard reason: <Input :data-nrt=" 'executions_DiscardExecutionModal_DiscardReason_' + execution.id " ref="name" v-model="discardReason" @on-enter="confirmDiscard" />
     </Modal>
   </div>
 </template>

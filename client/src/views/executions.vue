@@ -36,7 +36,7 @@
         </Alert>
       </div>
       <div :data-nrt=" 'executions_LatestExecutions' " v-if="latestExecutions" style="flex: 0 0 auto; margin-bottom: 16px;">
-        <Button icon="md-refresh" @click="loadLatestExecutions" style="margin-left: 8px;">REFRESH</Button>
+        <Button :data-nrt=" 'executions_RefreshButton' " icon="md-refresh" @click="loadLatestExecutions" style="margin-left: 8px;">REFRESH</Button>
       </div>
     </div>
 
@@ -54,7 +54,7 @@
 
       <div style="text-align: center; margin-top: 16px;">
         <router-link :to="{ name: 'raw-executions' }" :target="isFramed ? '_blank' : ''">
-          <Button :data-nrt=" 'executions_ShowRawExecutions' "
+          <Button :data-nrt=" 'executions_ShowRawExecutionsButton' "
                   icon="md-nuclear">SHOW RAW EXECUTIONS</Button>
         </router-link>
       </div>

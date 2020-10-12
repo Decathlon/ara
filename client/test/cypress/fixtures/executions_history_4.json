@@ -1,8 +1,8 @@
 {
   "id": 4,
-  "branch": "develop",
-  "name": "day",
-  "release": "v3",
+  "branch": "stab",
+  "name": "nigth",
+  "release": "v2",
   "version": "1a4b22b8c9a55f666f66666d7e856d210c05e64",
   "buildDateTime": "2020-02-27T07:55:00.000Z",
   "testDateTime": "2020-02-27T08:00:00.000Z",

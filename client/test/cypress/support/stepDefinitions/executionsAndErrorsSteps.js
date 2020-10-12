@@ -20,6 +20,7 @@ Given('executions and errors', () => {
   cy.fixture('executions_history_5.json').as('executionsHistory5');
   cy.route('GET', '/api/projects/the-demo-project/executions/5/history', '@executionsHistory5');
 
+
   cy.fixture('scenarios_ignored.json').as('scenariosIgnored');
   cy.route('GET', '/api/projects/the-demo-project/scenarios/ignored', '@scenariosIgnored');
 
@@ -29,7 +30,7 @@ Given('executions and errors', () => {
   cy.visit(executions.url);
 });
 
-When('on the executions and errors page, the user clicks on the actions and job reports button {string}', (executionId) => {
+When('on the executions and errors page, in the cart {string}, the user clicks on the actions and job reports button', (executionId) => {
   executions.getActionsAndJobReportsButton(executionId).click();
 });
 When('on the executions and errors page, in the cart {string}, the user clicks on the run {string}', (executionId, runId) => {
@@ -52,15 +53,78 @@ When('on the executions and errors page, on ignored scenarios part, on the run {
   executions.getIgnoredScenarioRaw(runId, qualityId).click();
 });
 
-Then('on the executions and errors page, in the actions and job reports list, the {string} button {string} is visible', (label, executionId) => {
+When('on the executions and errors page, the user clicks on the button "Refresh"', () => {
+  executions.getRefresh().click();
+});
+
+When('on the executions and errors page, in the cart {string}, in the actions and job reports list, the user clicks on the {string} button', (executionId, label) => {
+  executions.getButton(label, executionId).click();
+});
+
+When('on the executions and errors page, in the cart {string}, in the discard execution modal, the user types the discard reason {string}', (executionId, discardReason) => {
+  executions.getDiscardReasonInput(executionId).find('.ivu-input').clear().type(discardReason);
+});
+
+When('on the executions and errors page, in the cart {string}, in the discard execution modal, the user clicks on {string} button', (executionId, label) => {
+  if (label === "Save" || label === "Update") {
+
+    if (label === "Save") {
+      cy.route({
+        method: "PUT",
+        url: "/api/projects/the-demo-project/executions/5/discard",
+        params: "Deploiement problem",
+        response: "fixture:executions_discard_5.json"
+      })
+  
+      cy.fixture('executions_discard_5.json').as('executionsHistory5');
+    } else {
+      cy.route({
+        method: "PUT",
+        url: "/api/projects/the-demo-project/executions/5/discard",
+        params: "New Deploiement problem",
+        response: "fixture:executions_discard_5bis.json"
+      })
+  
+      cy.fixture('executions_discard_5bis.json').as('executionsHistory5');
+    }
+    cy.route('GET', '/api/projects/the-demo-project/executions/5/history', '@executionsHistory5');
+    executions.getDiscardExecutionModal(executionId).find('.ivu-btn-primary').click();
+  } else if (label === "Cancel") {
+    executions.getDiscardExecutionModal(executionId).find('.ivu-btn-text').click();
+  }
+});
+
+When('on the executions and errors page, in the cart {string}, in the undiscard execution modal, the user clicks on {string} button', (executionId, label) => {
+  if (label === "Save") {
+    cy.route({
+      method: "PUT",
+      url: "/api/projects/the-demo-project/executions/5/un-discard",
+      params: "New Deploiement problem",
+      response: "fixture:executions_history_5.json"
+    })
+
+    cy.fixture('executions_history_5.json').as('executionsHistory5');
+    cy.route('GET', '/api/projects/the-demo-project/executions/5/history', '@executionsHistory5');
+    cy.get('.ivu-modal-confirm-footer > .ivu-btn-primary > span').click();
+  } else if (label === "Cancel") {
+    cy.get('.ivu-modal-confirm-footer > .ivu-btn-text > span').click();
+  }
+});
+
+
+Then('on the executions and errors page, in the cart {string}, in the actions and job reports list, the {string} button is not visible', (executionId, label) => {
+  executions.getButton(label, executionId).should('be.not.visible');
+});
+
+Then('on the executions and errors page, in the cart {string}, in the actions and job reports list, the {string} button is visible', (executionId, label) => {
   executions.getButton(label, executionId).should('be.visible');
 });
 
-Then('on the executions and errors page, in the actions and job reports list, the {string} button {string} is disabled', (label, executionId) => {
+Then('on the executions and errors page, in the cart {string}, in the actions and job reports list, the {string} button is disabled', (executionId, label) => {
   executions.getButton(label, executionId).should('have.class', 'ivu-dropdown-item-disabled');
 });
 
-Then('on the executions and errors page, in the actions and job reports list, the {string} button {string} is enabled', (label, executionId) => {
+Then('on the executions and errors page, in the cart {string}, in the actions and job reports list, the {string} button is enabled', (executionId, label) => {
   executions.getButton(label, executionId).should('have.class', 'ivu-dropdown-item');
 });
 
@@ -183,6 +247,21 @@ Then('on the executions and errors page, in the cart {string}, the {string} exec
   executions.getNavigationButton(executionId, navigation).should('be.disabled');
 });
 
+Then('on the executions and errors page, in the cart {string}, the release is {string}', (executionId, release) => {
+  executions.getRelease(executionId).then(($release) => {
+    expect($release.text()).to.equal(release);
+  });
+});
+
+Then('on the executions and errors page, in the cart {string}, the branch is {string} and the execution is {string}', (executionId, branch, execution) => {
+  executions.getBranch(executionId).then(($branch) => {
+    expect($branch.text()).to.equal(branch.toUpperCase() + ':');
+  });
+  executions.getExecution(executionId).then(($execution) => {
+    expect(normalizeText($execution.text())).to.equal(execution);
+  });
+});
+
 Then('on the executions and errors page, the button "Show Raw Executions" is visible', () => {
   executions.getShowRawExecutions().should('be.visible');
   executions.getShowRawExecutions().should('be.not.disabled');
@@ -261,4 +340,39 @@ Then('on the executions and errors page, on ignored scenarios part, the ignored 
   executions.getIgnoredScenarioDetailsFeatureScenario(feature, scenario).find('.severityStyle').then(($severity) => {
     expect(normalizeText($severity.text()).toLowerCase()).to.equal(normalizeText(qualityId).toLowerCase());
   })
+});
+
+Then('on the executions and errors page, in the cart {string}, the discard execution modal opens', (executionId) => {
+  executions.getDiscardExecutionModal(executionId).find('.ivu-modal-body').should('be.visible'); 
+});
+
+Then('on the executions and errors page, in the cart {string}, on the header, the discard reason {string} is displayed', (executionId, discardReason) => {
+  executions.getExecutionDiscardReason(executionId).should('be.visible');
+  executions.getExecutionDiscardReason(executionId).then(($discardReason) => {
+    expect($discardReason.text()).to.equal("Discarded: " + discardReason);
+  });  
+});
+
+Then('on the executions and errors page, in the cart {string}, on the header, the discard reason {string} is not displayed', (executionId, discardReason) => {
+  executions.getExecutionDiscardReason(executionId).should('be.not.visible');
+});
+
+
+Then('on the executions and errors page, in the cart {string}, the discard execution modal closes', (executionId) => {
+  executions.getDiscardExecutionModal(executionId).find('.ivu-modal-body').should('be.not.visible'); 
+});
+
+
+Then('on the executions and errors page, in the cart {string}, in the actions and job reports list, the {string} button is named {string}', (executionId, label, buttonName) => {
+  executions.getButton(label, executionId).then(($buttonName) => {
+    expect(normalizeText($buttonName.text())).to.equal(normalizeText(buttonName));
+  });  
+});
+
+Then('on the executions and errors page, in the cart {string}, the undiscard execution modal opens', (executionId) => {
+  cy.contains('Un-Discard').should('be.visible'); 
+});
+
+Then('on the executions and errors page, in the cart {string}, the undiscard execution modal closes', (executionId) => {
+  cy.contains('Un-Discard').should('be.not.visible'); 
 });
