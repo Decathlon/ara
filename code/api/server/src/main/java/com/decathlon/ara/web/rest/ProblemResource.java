@@ -18,36 +18,26 @@
 package com.decathlon.ara.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
+import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.ProblemService;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
-import com.decathlon.ara.service.dto.problem.ProblemDTO;
-import com.decathlon.ara.service.dto.problem.ProblemFilterDTO;
-import com.decathlon.ara.service.dto.problem.ProblemWithAggregateDTO;
-import com.decathlon.ara.service.dto.problem.ProblemWithPatternsAndAggregateTDO;
-import com.decathlon.ara.service.dto.problem.ProblemWithPatternsDTO;
+import com.decathlon.ara.service.dto.problem.*;
 import com.decathlon.ara.service.dto.problempattern.ProblemPatternDTO;
 import com.decathlon.ara.service.dto.response.PickUpPatternDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.web.rest.util.HeaderUtil;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
-import com.decathlon.ara.Entities;
-import javax.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 

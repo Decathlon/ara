@@ -22,6 +22,7 @@
       <a v-if="problem.defectUrl && problem.defectExistence !== 'NONEXISTENT'" :href="problem.defectUrl" target="_blank">
         <Button icon="md-open" type="info">GO TO WORK ITEM #{{problem.defectId}}</Button>
       </a>
+      <Button type="primary" icon="md-clipboard" @click="copyDescriptionToClipboard">COPY DESCRIPTION TO CLIPBOARD</Button>
       <span v-if="problem.effectiveStatus === 'OPEN'">({{problem.effectiveStatus}})</span>
     </h2>
 
@@ -63,7 +64,7 @@
       <ul>
         <li>
           <strong>The problem really reappeared and is not fixed yet?</strong><br>
-          => reoppen the {{problem.defectUrl ? 'associated defect' : 'problem'}};
+          => reopen the {{problem.defectUrl ? 'associated defect' : 'problem'}};
         </li>
         <li>
           <strong>A new error match the problem but has a different cause (a new regression or a new correction to be made to test scenarios)?</strong><br>
@@ -186,6 +187,8 @@ If you updated the work-item a few seconds ago, you may want to speed up the ARA
   import problemTagComponent from '../components/problem-tag'
   import problemPropertiesEditorComponent from '../components/problem-properties-editor'
   import problemListComponent from '../components/problem-list'
+
+  import _ from 'lodash'
 
   export default {
     name: 'problem',
@@ -510,6 +513,7 @@ If you updated the work-item a few seconds ago, you may want to speed up the ARA
           }, 0)
         }
       },
+
       withEllipsis (string) {
         const MAX_LENGTH = 32 // Max 3 lines of text, like other columns, etc.
         const SUFFIX = '...'
@@ -523,6 +527,116 @@ If you updated the work-item a few seconds ago, you may want to speed up the ARA
           return trimmed.substr(0, MAX_LENGTH - SUFFIX.length).trim() + SUFFIX
         }
         return trimmed
+      },
+
+      copyDescriptionToClipboard () {
+        const problemDescription = this.getProblemDescription()
+        util.copyTextToClipboard(problemDescription)
+      },
+
+      getProblemDescription () {
+        let description = ''
+
+        let urlLine = `ARA URL: ${window.location.href}\n`
+
+        let typeLine = ''
+        let sourceLine = ''
+        let platformLine = ''
+        let countryLine = ''
+        let teamLine = ''
+        let problemLine = ''
+        let lastScenarioLine = ''
+        let lastStepsLine = ''
+
+        if (this.problem) {
+          const team = this.problem.blamedTeam
+          if (team && team.name) {
+            teamLine = `Team: ${team.name}\n`
+          }
+
+          const problemName = this.problem.name
+          const problemId = this.problem.id
+          if (problemName && problemId) {
+            problemLine = `ARA problem: "${this.problem.name}" (${this.problem.id})\n`
+          }
+
+          const aggregate = this.problem.aggregate
+          if (aggregate) {
+            platformLine = `Platform: ${aggregate.firstPlatform}\n`
+            const type = aggregate.firstType
+            if (type) {
+              typeLine = `NRT type: ${type.name} (${type.code})\n`
+              const source = type.source
+              if (source && source.technology && source.name && source.code) {
+                sourceLine = `NRT source: ${source.technology} -> ${source.name} (${source.code})\n`
+              }
+            }
+
+            const country = aggregate.firstCountry
+            if (country && country.name && country.code) {
+              countryLine = `Country: ${country.name} (${country.code})\n`
+            }
+          }
+        }
+
+        if (this.matchingErrors && this.matchingErrors.data && this.matchingErrors.data.content) {
+          const matchingErrors = this.matchingErrors.data.content
+          const latestMatchingError = _(matchingErrors)
+            .filter(error => error)
+            .filter(error => error.executedScenario)
+            .filter(error => error.executedScenario.startDateTime)
+            .maxBy(error => error.executedScenario.startDateTime)
+          if (latestMatchingError && latestMatchingError.executedScenario) {
+            const executedScenario = latestMatchingError.executedScenario
+            if (executedScenario.name) {
+              lastScenarioLine = `Last impacted scenario: ${executedScenario.name}\n`
+            }
+            if (executedScenario.content) {
+              const latestSteps = executedScenario.content
+              const formattedSteps = this.getFormattedSteps(latestSteps)
+              lastStepsLine = `Last steps: \n${formattedSteps}`
+            }
+          }
+        }
+
+        description += typeLine
+        description += sourceLine
+        description += platformLine
+        description += countryLine
+        description += teamLine
+        description += urlLine
+        description += problemLine
+        description += lastScenarioLine
+        description += lastStepsLine
+
+        return description
+      },
+
+      getFormattedSteps (rawSteps) {
+        const splitRawSteps = rawSteps.split(`\n`)
+        const formatLine = function (line) {
+          if (!line || line.trim().length === 0) {
+            return ''
+          }
+
+          const splitLine = line.split(`:`)
+
+          const splitLineLength = splitLine.length
+          if (splitLineLength < 3) {
+            return ''
+          }
+
+          const state = splitLine[1]
+          if (state !== 'failed' && state !== 'passed') {
+            return ''
+          }
+
+          const lineStateSymbol = state === 'failed' ? 'X' : ' '
+          const value = splitLine[splitLineLength - 1]
+          return `${lineStateSymbol} ${value}`
+        }
+        const formattedSteps = _(splitRawSteps).map(line => formatLine(line)).filter(line => line).values().join(`\n`)
+        return formattedSteps
       }
     },
 

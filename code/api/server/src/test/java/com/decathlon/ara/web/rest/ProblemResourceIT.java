@@ -25,6 +25,7 @@ import static com.decathlon.ara.util.TestUtil.timestamp;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -65,12 +66,7 @@ import com.decathlon.ara.service.dto.error.ErrorDTO;
 import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
 import com.decathlon.ara.service.dto.executedscenario.ExecutedScenarioWithRunAndExecutionDTO;
 import com.decathlon.ara.service.dto.execution.ExecutionDTO;
-import com.decathlon.ara.service.dto.problem.ProblemAggregateDTO;
-import com.decathlon.ara.service.dto.problem.ProblemDTO;
-import com.decathlon.ara.service.dto.problem.ProblemFilterDTO;
-import com.decathlon.ara.service.dto.problem.ProblemWithAggregateDTO;
-import com.decathlon.ara.service.dto.problem.ProblemWithPatternsAndAggregateTDO;
-import com.decathlon.ara.service.dto.problem.ProblemWithPatternsDTO;
+import com.decathlon.ara.service.dto.problem.*;
 import com.decathlon.ara.service.dto.problempattern.ProblemPatternDTO;
 import com.decathlon.ara.service.dto.response.PickUpPatternDTO;
 import com.decathlon.ara.service.dto.rootcause.RootCauseDTO;
@@ -394,7 +390,7 @@ public class ProblemResourceIT {
     public void testCreate() throws FetchException {
         // GIVEN
         Date closeDateTime = timestamp(2017, 12, 31, 23, 59, 59);
-        when(Boolean.valueOf(defectAdapter.isValidId(anyLong(), any()))).thenReturn(Boolean.TRUE);
+        when(Boolean.valueOf(defectAdapter.isValidId(anyString()))).thenReturn(Boolean.TRUE);
         doReturn(Collections.singletonList(new Defect("42", ProblemStatus.CLOSED, closeDateTime)))
                 .when(defectAdapter).getStatuses(anyLong(), any());
 
@@ -660,7 +656,7 @@ public class ProblemResourceIT {
     @Test
     public void testUpdate() throws FetchException {
         // GIVEN
-        when(Boolean.valueOf(defectAdapter.isValidId(anyLong(), any()))).thenReturn(Boolean.TRUE);
+        when(Boolean.valueOf(defectAdapter.isValidId(anyString()))).thenReturn(Boolean.TRUE);
         doReturn(Collections.singletonList(new Defect("42", ProblemStatus.OPEN, null)))
                 .when(defectAdapter).getStatuses(anyLong(), any());
         long problemId = 1001;

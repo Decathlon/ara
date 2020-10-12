@@ -18,9 +18,10 @@
 package com.decathlon.ara.defect.bean;
 
 import com.decathlon.ara.domain.enumeration.ProblemStatus;
-import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+
+import java.util.Date;
 
 @Data
 @AllArgsConstructor
