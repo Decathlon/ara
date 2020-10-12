@@ -45,7 +45,7 @@
             <span v-else-if="counts.matching === counts.total && counts.total === 1">Showing the only functionality</span>
             <span v-else-if="counts.matching === counts.total">Showing all <strong>{{counts.total}}</strong> functionalities</span>
             <span v-else>Showing <strong>{{counts.matching}}</strong> filtered functionalit{{counts.matching == 1 ? 'y' : 'ies'}} out of <strong>{{counts.total}}</strong></span><!--
-            --><span v-if="counts.selected > 0">, <strong>{{counts.selected}}</strong> selected</span>
+            --><span v-if="selectionCount > 0">, <strong>{{selectionCount}}</strong> selected</span>
           </h1>
         </div>
 
@@ -380,7 +380,6 @@
         ],
         counts: {
           matching: 0,
-          selected: 0,
           total: 0
         },
 
@@ -444,6 +443,19 @@
 
       noSelection () {
         return !this.nodesSelection || this.nodesSelection.length === 0
+      },
+
+      selectionCount () {
+        let count = 0
+        for (let i in this.nodesSelection) {
+          const selection = this.nodesSelection[i]
+          if (selection.row.type === 'FUNCTIONALITY') {
+            count++
+          } else {
+            count += this.countChildren(selection).FUNCTIONALITY
+          }
+        }
+        return count
       }
     },
 
@@ -1139,10 +1151,6 @@
         if (node.children) {
           for (let i in node.children) {
             const child = node.children[i]
-            if (child.row.type === 'FUNCTIONALITY' && node.isSelected !== child.isSelected) {
-              const increment = node.isSelected ? 1 : -1
-              this.counts.selected += increment
-            }
             child.isSelected = node.isSelected
             this.propagateSelectionToChildren(child)
           }
@@ -1214,10 +1222,6 @@
       },
 
       updateSelection (node) {
-        if (node.row.type === 'FUNCTIONALITY') {
-          const increment = node.isSelected ? 1 : -1
-          this.counts.selected += increment
-        }
         this.propagateSelectionToChildren(node)
         this.propagateSelectionToParent(node)
         this.updateNodesSelection()
