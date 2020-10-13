@@ -51,13 +51,11 @@ Please note the following :
 
 1. Open a Terminal
 2. Run the command `wget https://raw.githubusercontent.com/Decathlon/ara/main/code/docker-compose.yaml`
-3. Edit the `docker-compose.yaml` file and replace the `host.docker.internal` at line 22 by `172.17.0.1` (see
-https://github.com/Decathlon/ara/issues/222[this PR]) for more details
-4. Run the command `docker-compose up`
-5. Open up a browser on `http://localhost:8081`
-6. Enjoy !
-7. To stop it, in the command line, just do a `docker-compose down` in the same directory as the `docker-compose.yaml`
-8. To restart it, in the command line do a `docker-compose up` in the same directory as the `docker-compose.yaml`
+3. Run the command `docker-compose up`
+4. Open up a browser on `http://localhost:8081`
+5. Enjoy !
+6. To stop it, in the command line, just do a `docker-compose down` in the same directory as the `docker-compose.yaml`
+7. To restart it, in the command line do a `docker-compose up` in the same directory as the `docker-compose.yaml`
 
 == How to install it on my Infrastructure
 
@@ -86,8 +84,4 @@ to learn how the project is structured and how to develop new features in ARA an
 
 == IDEAS
 
-1. Circle CI to docker hub: make promote / think about adding unit tests process
-2. Custom CI
-3. Document dev cs prod process
-4. Dockerize the dev environment
-
+1. Dockerize the dev environment
