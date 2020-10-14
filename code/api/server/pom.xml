@@ -334,7 +334,7 @@
         <profile>
             <id>dev</id>
             <properties>
-                <spring.profiles.active>db-h2,dev,dev-db-h2</spring.profiles.active>
+                <spring.profiles.active>db-h2,dev,dev-db-h2,db-h2-file</spring.profiles.active>
             </properties>
         </profile>
         <profile>

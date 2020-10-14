@@ -1,6 +1,11 @@
 // see http://vuejs-templates.github.io/webpack for documentation.
 var path = require('path')
 
+var araAPIHost = process.env.ARA_API_HOST || 'localhost'
+var araAPIPort = process.env.ARA_API_PORT || 8080
+
+var araAPIURL = 'http://' + araAPIHost + ':' + araAPIPort
+
 module.exports = {
   build: {
     env: require('./prod.env'),
@@ -35,15 +40,15 @@ module.exports = {
     cssSourceMap: false,
     proxyTable: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: araAPIURL,
         changeOrigin: true
       },
       '/actuator': {
-        target: 'http://localhost:8080',
+        target: araAPIURL,
         changeOrigin: true
       },
       '/demo-files': {
-        target: 'http://localhost:8080',
+        target: araAPIURL,
         changeOrigin: true
       }
     }
