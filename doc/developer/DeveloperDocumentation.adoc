@@ -58,7 +58,7 @@ mvn clean install
 mvn -Pdev spring-boot:run -pl server
 ```
 
-NOTE: La base par défaut sans profil maven est une base h2 in memory. Les données seront perdues au redémarrage de l'application. En passant au profil `dev` via `-Pdev` la base h2 est persistée dans un fichier.
+NOTE: The default database without maven profile is an h2 in memory database. Data will be lost when application will restart. By switching to `dev` profile with `-Pdev` h2 database will be persist in a file.
 
 API is available at `localhost:8080`, you can check this url http://localhost:8080/actuator/info to observe the API is up.
 
@@ -94,3 +94,46 @@ npm run dev
 ```
 
 WEB-UI is available at `localhost:8081`, you can check this url http://localhost:8081 to observe the web-ui is up.
+
+== Available for developer
+
+We have made some tools for developer with `make` command.
+
+You can find `Makefile` in this directories:
+
+* `code`: for general usage
+* `code/api`: for api usage
+* `code/web-ui`: for web-ui usage
+
+You can check available command by running:
+
+```bash
+make
+# or make help
+```
+
+== Use case
+
+=== Database modification
+
+In dev mode, modifications on a java entity model are applied with hibernate ddl `update` mode.
+
+In `code` folder.
+
+But it's for dev usage. For production, we use **liquibase**. To automatically generate a diff liquibase file from java model, you can run:
+
+```bash
+make liquibase-diff DIFF_LABEL=XXX
+```
+
+=== Update ARA version
+
+In `code` folder.
+
+You can update ARA version with this command:
+
+```bash
+make update-version VERSION=X.Y.Z
+```
+
+It will update maven version and stable helm chart.
