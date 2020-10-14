@@ -14,7 +14,7 @@ mvn-install: ## DEV - install project
 	@mvn -Dmaven.test.skip=true clean install
 
 mvn-run: ## DEV - run api
-	@mvn spring-boot:run -pl server
+	@mvn -Pdev spring-boot:run -pl server
 
 # WITH DOCKER
 
@@ -41,7 +41,7 @@ dkr-run: ## DEV - run api with docker
 				-v $(shell pwd):$(shell pwd):rw \
 				-w $(shell pwd) \
 		maven:3-jdk-$(JAVA_VERSION) \
-		mvn spring-boot:run -pl server
+		mvn -Pdev spring-boot:run -pl server
 
 .PHONY: help
 help:

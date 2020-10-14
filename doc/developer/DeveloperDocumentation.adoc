@@ -2,90 +2,95 @@
 
 Check you are agree with the terms and conditions of contributor license agreements. <</doc/contributing/contributing.adoc#head, Contributing>>
 
-== Getting Started in Two Minutes
+== Getting Started
+
+What you need:
+
+* Docker
+
+Optional:
+
+* make
+* Maven & Java 14
+* Node 12
 
 Below is what you will need to set up on your development machine.
 
-* *Create a database and start it:*
-  ** Go to the folder containing the script `manage-db.sh`:  `cd <ARA_ROOT>/database/instance`, where `<ARA_ROOT>` is your project path location in your computer.
-  ** (Optional) You can change your database root account's password in the `manage-db.sh` script.
-  By default, it is `dev_password_to_change`.
-  ** Run it: `./manage-db.sh create <FOLDER_PATH_TO_PERSISTS>`, where `<FOLDER_PATH_TO_PERSISTS>` is the path where you want to save your data.
-  ** (Optional) You can check that your relational database management system is up and running: `./manage-db.sh mysqladmin`
-* *Build your project:*
-  ** +++<u>Build the client</u>+++:
-     *** Go to the client folder: `cd <ARA_ROOT>/client`
-     *** Run `npm install` to install all the required dependencies
-     *** Run `npm run build` to build the client
-  ** +++<u>Build the server</u>+++:
-     *** Run `mvn clean install -Pdev` in the `<ARA_ROOT>` folder to build the server.
-     *** Bear in mind that:
-         **** you can speed up the build by skipping the unit tests `mvn clean install -Pdev -Dmaven.test.skip=true`
-         **** for now, your `JAVA_HOME` environment variable should point to Java 8. Make sure `mvn -v` displays this version. We're currently working (https://github.com/Decathlon/ara/pull/167) to accept all java versions above this version.
-         **** later, when modifying the server, just run `mvn clean install -Pdev` in the `<ARA-ROOT>/server` folder to only compile the server, instead of rebuilding all the project.
-* *Launch your project:*
-  ** +++<u>Start the server</u>+++:
-     *** From the root of your project, run `java -Dspring.profiles.active=dev -cp final/target/ara-<ARA_CURRENT_VERSION_SNAPSHOT>.jar -Dspring.datasource.password=<YOUR DB ACCOUNT PASS> -Dloader.main=com.decathlon.ara.AraApplication org.springframework.boot.loader.PropertiesLauncher` to launch the back-end server. This step is more suitable for integration tests rather than active development phase. +
-  ** +++<u>Start the client</u>+++:
-     *** Wait for the server to be up and running
-     *** Run `npm run dev` in the `<ARA_ROOT>/client` folder to start the front-end server.
-     *** ARA's GUI is available at http://localhost:8081.
-* *(Optional) Generate the project site:*
-  ** Clean your project by running `mvn clean` command from `<ARA_ROOT>`
-  ** Run `mvn package site site:phase` to generate the maven site containing all the details concerning this project.
-     Please note that this operation may take a while (up to 15 minutes).
-  ** Open the generated `<ARA_ROOT>/target/staging/index.html` file to browse the site
+```bash
+cd code
+```
 
-More information are provided below and in linked detailed documentations.
+`code` is the directory where the code is placed.
 
-== Technical Details of the Project
+We can find 2 subdirectories:
 
-=== Modules
+* `api`: contains the *api server* in **maven / java 14**
+* `web-ui`: contains the *web interface* in **node 12**
 
-Follow links for module-specific documentations:
+== Start the api
 
-* *<<../client/README.adoc#head, client>>*: the front-end with the user experience
-  (generates static files packaged as a JAR to be included in the server JAR)
-* *db*: a script to create an ARA database using Docker:
-  use the parameter `create` to create one database server
-  with both the `ara-dev` (to run both client and server for manual tests)
-  and `ara-dev-in` (for integration tests of the server project) schemas,
-  or use the parameter `help` for more information about available commands
-  (start, stop, destroy, mysqladmin, shell, purge)
-* *doc*: <<../integrator/main/IntegratorDocumentation.adoc#head, integrator>>,
-  <<../user/main/UserDocumentation.adoc#head, user>> and
-  <<../developer/DeveloperDocumentation.adoc#head, developer>> documentations
-* *generated-cucumber-report*: contains Cucumber feature files used to generate report files
-  used on the server integration tests to run into all possible cases while indexing such reports
-* *ide-resources*: IDE <<../ide-resources/eclipse/README.adoc#head, configuration for Eclipse>> and
-  <<../ide-resources/intellij/README.adoc#head, configuration for IntelliJ>>
-* *<<../server/README.adoc#head, server>>*: the back-end which handles the logic and communication with the database
-  (depends on the `generated-cucumber-report` projects for integration tests,
-  and includes the `client` project to only have one server to start in production)
+In `api` folder.
 
-=== How to View/Edit the Documentation
+**With Docker and make**
 
-In order to edit and view rendered ASCII-arts (images with Ditaa and UML with PlantUML),
-you need to download and install AsciidocFX + GraphViz: they contain all "plugins" like Ditaaa and PlantUML:
+```bash
+# Install
+make dkr-install
+# Run
+make dkr-run
+```
 
-* Install AsciidocFX : +
-  https://asciidocfx.com/#truehow-to-install-asciidocfx
-* Install GraphViz: +
-  http://www.graphviz.org/download/ +
-  Choose eg. "Stable 2.38 Windows install packages"
+**With maven/java 14**
 
-TIP: On the AsciidocFX page, you can see how to create UML, ASCII-art, directory-listing, math expressions, graphics...
+```bash
+# Install
+make mvn-install
+# Run
+make mvn-run
+```
 
-You can open and edit the .adoc files with AsciidocFX.
+ou
 
-Once AsciidocFX + GraphViz is installed, the AsciiDoc plugin in IntelliJ IDEA will display ASCII-art and
-UML generated images for you without any further installation nor configuration. This is pretty neat.
+```bash
+# Install
+mvn clean install
+# Run
+mvn -Pdev spring-boot:run -pl server
+```
 
-Useful links:
+NOTE: La base par défaut sans profil maven est une base h2 in memory. Les données seront perdues au redémarrage de l'application. En passant au profil `dev` via `-Pdev` la base h2 est persistée dans un fichier.
 
-* AsciiDoctor syntax: +
-  https://asciidoctor.org/docs/asciidoc-syntax-quick-reference/
-* Ditaa syntax for ASCII-art: +
-  http://ditaa.sourceforge.net/#usage
-* PlantUML syntax for UML diagrams: +
-  http://plantuml.com/sitemap-language-specification
+API is available at `localhost:8080`, you can check this url http://localhost:8080/actuator/info to observe the API is up.
+
+== Start the web-ui
+
+In `web-ui` folder.
+
+**With Docker and make**
+
+```bash
+# Install
+make dkr-install
+# Run
+make dkr-run
+```
+
+**With node 12**
+
+```bash
+# Install
+make mpm-install
+# Run
+make npm-run
+```
+
+ou
+
+```bash
+# Install
+npm install
+# Run
+npm run dev
+```
+
+WEB-UI is available at `localhost:8081`, you can check this url http://localhost:8081 to observe the web-ui is up.

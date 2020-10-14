@@ -7,8 +7,6 @@ services:
   ara-db:
     image: "mysql:5.7"
     restart: always
-    ports:
-      - 3306:3306
     environment:
       - MYSQL_DATABASE=ara
       - MYSQL_USER=changeme
@@ -26,8 +24,6 @@ services:
       - DATABASE_USER=root
       - DATABASE_PASSWORD=to_change
       - CLIENT_URL="http://localhost:80/"
-    ports:
-      - 8080:8080
     networks:
       - web_net
       - db_net
