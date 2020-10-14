@@ -28,7 +28,7 @@ Please note the following :
 === I've got a Windows PC !
 
 1. Open a Powershell Command Prompt
-2. Run the command `Invoke-WebRequest -OutFile docker-compose.yaml https://raw.githubusercontent.com/Decathlon/ara/main/code/docker-compose.yaml`
+2. Run the command `Invoke-WebRequest -OutFile docker-compose.yml https://raw.githubusercontent.com/Decathlon/ara/main/code/docker-compose.yaml`
 3. Run the command `docker-compose up`
 4. Open up a browser on `http://localhost:8081`
 5. Enjoy !
