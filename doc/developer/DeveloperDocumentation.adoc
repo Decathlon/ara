@@ -49,7 +49,7 @@ make mvn-install
 make mvn-run
 ```
 
-ou
+or
 
 ```bash
 # Install
@@ -84,7 +84,7 @@ make mpm-install
 make npm-run
 ```
 
-ou
+or
 
 ```bash
 # Install
