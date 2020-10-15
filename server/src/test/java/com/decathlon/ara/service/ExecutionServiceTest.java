@@ -375,14 +375,16 @@ public class ExecutionServiceTest {
         File executionPath = new File("/opt/executions/123");
         PlannedIndexation plannedIndexation = new PlannedIndexation().withCycleDefinition(cycleDefinition).withExecutionFolder(executionPath);
         List<File> unzipMock = Collections.singletonList(executionPath);
+
+        // When
         doReturn(unzipMock).when(cut).unzipExecutions(any(), any(), any());
         doReturn("/opt/data/{{project}}/{{branch}}/{{cycle}}").when(settingService).get(projectId, Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH);
         doReturn(Optional.of(cycleDefinition)).when(cycleDefinitionRepository).findByProjectIdAndBranchAndName(projectId, branch, cycle);
         doNothing().when(executionIndexerService).indexExecution(any());
-        // When
-        cut.uploadExecutionReport(projectId, projectCode, branch, cycle, zip);
+
         // Then
-        verify(executionIndexerService).indexExecution(plannedIndexation);
+        cut.uploadExecutionReport(projectId, projectCode, branch, cycle, zip);
+        verify(cut).launchExecutionDirectoriesProcessingThread(anyLong(), anyList(), any(CycleDefinition.class));
     }
 
     @Test(expected = IllegalArgumentException.class)
