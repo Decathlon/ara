@@ -252,19 +252,22 @@ public class ExecutionResource {
                                        @RequestParam("branch") String branch,
                                        @RequestParam("cycle") String cycle,
                                        @RequestParam("zip") MultipartFile zipFile) {
-        ResponseEntity<Void> result;
+        ResponseEntity<Void> result = ResponseEntity.status(HttpStatus.ACCEPTED).build();
         log.info("Receiving new zip report for project {}...", projectCode);
         try {
             long projectId = projectService.toId(projectCode);
             service.uploadExecutionReport(projectId, projectCode, branch, cycle, zipFile);
-            result = ResponseEntity.ok().build();
         } catch (NotFoundException | IllegalArgumentException e) {
-            log.error("The given project doesn't exists or doesn't use the FS indexer.", e);
+            log.error("Some parameters may not be correct");
+            log.error("Please check your logs, or the stacktrace below:", e);
             result = ResponseUtil.handle(new BadRequestException(e.getMessage(), Entities.EXECUTION, VALIDATION_ERRROR));
         } catch (IOException ex) {
             log.error("Unable to index the uploaded execution.", ex);
             result = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+
+        log.info("Freeing the /upload resource...");
+        log.info("ARA is still uploading executions");
         return result;
     }
 

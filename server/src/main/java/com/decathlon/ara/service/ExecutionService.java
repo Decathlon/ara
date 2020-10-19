@@ -379,17 +379,35 @@ public class ExecutionService {
                 .replace(Settings.CYCLE_VARIABLE, cycle);
         File destinationDirectory = new File(path, "incoming");
         String buildInformationFilePath = settingService.get(projectId, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH);
-        List<File> executionDirectories = this.unzipExecutions(destinationDirectory, zipFile, buildInformationFilePath);
-        for (final File executionDirectory : executionDirectories) {
-            try {
-                processSpecificDirectory(cycleDefinition, executionDirectory);
-            } catch (Exception e) {
-                log.error("A problem occurred while indexing this execution [{}]", executionDirectory.getPath(), e);
-            } finally {
-                log.info("Cleaning the incoming folder: {}", executionDirectory.getAbsolutePath());
-                cleanExecutionFiles(projectId, executionDirectory);
+        List<File> executionDirectories = unzipExecutions(destinationDirectory, zipFile, buildInformationFilePath);
+        launchExecutionDirectoriesProcessingThread(projectId, executionDirectories, cycleDefinition);
+    }
+
+    /**
+     * Process the execution directories asynchronously
+     * @param projectId the project id
+     * @param executionDirectories the execution directories
+     * @param cycleDefinition the cycle definition
+     */
+    public synchronized void launchExecutionDirectoriesProcessingThread(
+            Long projectId,
+            List<File> executionDirectories,
+            CycleDefinition cycleDefinition
+    ) {
+        Thread processExecutionDirectoriesThread = new Thread(() -> {
+            log.info("Processing execution files in a new thread");
+            for (final File executionDirectory : executionDirectories) {
+                try {
+                    processSpecificDirectory(cycleDefinition, executionDirectory);
+                } catch (Exception e) {
+                    log.error("A problem occurred while indexing this execution [{}]", executionDirectory.getPath(), e);
+                } finally {
+                    log.info("Cleaning the incoming folder: {}", executionDirectory.getAbsolutePath());
+                    cleanExecutionFiles(projectId, executionDirectory);
+                }
             }
-        }
+        });
+        processExecutionDirectoriesThread.start();
     }
 
     public void processSpecificDirectory(CycleDefinition cycleDefinition, File executionDirectory) {
