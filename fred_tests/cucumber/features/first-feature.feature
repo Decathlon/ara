@@ -1,7 +1,7 @@
 Feature: ASN creation on Seller Toolbox
 
   @severity-High
-  Scenario: Check the ASN creation for 1 product
+  Scenario: Functionality 26: Check the ASN creation for 1 product
     Given a seller with MF contract
     When the user connects to his toolbox
     And the user create an ASN for 1 product
