@@ -661,7 +661,7 @@
       },
 
       removeAllFilters () {
-        if (this.hasFilter()) {
+        if (this.hasFilter) {
           this.filter = { ...DEFAULT_FILTER }
           this.filterFunctionalities()
         }
