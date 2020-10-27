@@ -44,16 +44,22 @@
       </div>
 
       <div id="helps">
+        <span style="margin-right: 10px">Connected as <b>{{getUserLogin()}}</b></span>
         <span>V{{ appVersion }}</span>
         <!-- Keep the same width as logo+select: this is to center the menu when space is available -->
         <Tooltip content="How to use ARA?" placement="bottom-end" :transfer="true">
           <a :href="'https://github.com/decathlon/ara/blob/master/doc/user/main/UserDocumentation.adoc'"
              target="_blank"><Icon type="md-help-circle" size="24" style="padding: 0;"/></a>
-        </Tooltip><!-- No space between items
-     --><Tooltip content="What's new in ARA?" placement="bottom-end" :transfer="false">
+        </Tooltip><!-- No space between items -->
+        <Tooltip content="What's new in ARA?" placement="bottom-end" :transfer="false">
           <a :href="'https://github.com/Decathlon/ara/releases/tag/ara-' + appVersion"
              @click="setLatestChangelogVersion"
              target="_blank"><Badge dot :count="changelogCount"><Icon type="md-notifications" size="24"/></Badge></a>
+        </Tooltip>
+        <Tooltip content="Logout from ARA" placement="bottom-end">
+          <a @click="logout()">
+            <Icon type="md-exit" size="24"></Icon>
+          </a>
         </Tooltip>
       </div>
     </div>
@@ -69,6 +75,8 @@
   import projectsSelect from '../components/projects-select.vue'
 
   import constants from '../libs/constants.js'
+
+  import { AuthenticationService } from '../service/authentication.service'
 
   // Will contain the latest version when the user clicked to view the CHANGELOG:
   // a red badge will appear on the CHANGELOG icon when a new version will be available
@@ -169,6 +177,16 @@
           this.latestChangelogVersion = this.appVersion
           this.setCookie(LATEST_CHANGELOG_VERSION_COOKIE_NAME, this.latestChangelogVersion)
         }
+      },
+
+      getUserLogin () {
+        const loginDetails = AuthenticationService.getDetails()
+        const userDetails = loginDetails.user
+        return userDetails.name
+      },
+
+      logout () {
+        AuthenticationService.logout()
       }
     },
 
@@ -206,7 +224,6 @@
   }
   #helps {
     flex: 0 1 auto;
-    width: 274px;
     text-align: right;
     line-height: calc(30px - 14px);
     font-size: 14px;

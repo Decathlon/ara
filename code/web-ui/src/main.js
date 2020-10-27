@@ -30,6 +30,7 @@ import 'iview/dist/styles/iview.css'
 
 import VueVirtualScroller from 'vue-virtual-scroller'
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
+import { AuthenticationService } from './service/authentication.service'
 
 Vue.use(Vue2Filters)
 Vue.use(VueResource)
@@ -53,10 +54,42 @@ const router = new VueRouter({
   routes
 })
 
+const manageLoginRedirection = function (to, from, next) {
+  const isPublic = to.matched.some(record => record.meta.public)
+  const onlyWhenLoggedOut = to.matched.some(record => record.meta.onlyWhenLoggedOut)
+  const loggedIn = AuthenticationService.isAlreadyLoggedIn()
+
+  const canAccess = isPublic || loggedIn
+  if (!canAccess) {
+    iView.Notice.open({
+      title: 'Access denied',
+      desc: 'You need to login first if you want to access this page.'
+    })
+    return next({
+      path: '/login',
+      query: {
+        redirect: to.fullPath
+      }
+    })
+  }
+
+  const loggedInButTryingToReachALoggedOutPage = loggedIn && onlyWhenLoggedOut
+  if (loggedInButTryingToReachALoggedOutPage) {
+    iView.Notice.open({
+      title: 'You are already connected!',
+      desc: 'Logged out pages (such as the login page) can\'t be viewed if you are already connected. Please logout from ARA first.'
+    })
+    return next('/')
+  }
+}
+
 router.beforeEach((to, from, next) => {
+  manageLoginRedirection(to, from, next)
+
   iView.LoadingBar.start()
   util.title(to.meta.title)
   iView.Message.destroy()
+
   next()
 })
 
@@ -72,3 +105,5 @@ new Vue({
   store,
   render: h => h(app)
 })
+
+export default router

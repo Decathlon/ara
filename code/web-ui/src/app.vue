@@ -16,7 +16,7 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
   <div id="app" :class="isFramed ? 'isFramed' : ''">
-    <top-menu data-nrt="topMenu" v-if='!isFramed' style="position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;"></top-menu>
+    <top-menu data-nrt="topMenu" v-if='!isFramed && isLoggedInPage' style="position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;"></top-menu>
     <div class="layout-content">
       <router-view></router-view>
     </div>
@@ -39,6 +39,9 @@
         // We do not want the menu to flicker (appear for just a few milliseconds) when loading framed window
         // '/' is always a temporary state: a redirection to a default or requested screen will happen shortly
         return this.$route.fullPath === '/' || this.$route.matched.some(record => record.meta.isFramed)
+      },
+      isLoggedInPage () {
+        return !this.$route.matched.some(record => record.meta.onlyWhenLoggedOut)
       }
     },
 
