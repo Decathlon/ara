@@ -14,7 +14,10 @@
  * limitations under the License.                                             *
  *                                                                            *
  ******************************************************************************/
-export default [
+
+import Login from './views/login.vue'
+
+const routes = [
   // Home page and other URLs without any project code
   {
     path: '/', // Home page
@@ -257,5 +260,18 @@ export default [
     },
     component: (resolve) => require(['./views/not-found.vue'], resolve)
   },
-  { path: '*', redirect: '/not-found' }
+  { path: '*', redirect: '/not-found' },
+
+  {
+    path: '/login',
+    name: 'login',
+    meta: {
+      title: 'ARA Login',
+      public: true,
+      onlyWhenLoggedOut: true
+    },
+    component: Login
+  }
 ]
+
+export default routes
