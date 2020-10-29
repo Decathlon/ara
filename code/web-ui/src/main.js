@@ -49,6 +49,7 @@ iView.Message.config({
 })
 
 const router = new VueRouter({
+  mode: 'history',
   routes
 })
 
