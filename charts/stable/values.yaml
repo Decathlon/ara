@@ -1,10 +1,10 @@
 ##
 ## Official ara image
 ##
-image:
-    registry: docker.io
-    # tag:
-    pullPolicy: IfNotPresent
+
+registry: docker.io
+# image:
+pullPolicy: IfNotPresent
 
 # Override default app name
 # nameOverride:
