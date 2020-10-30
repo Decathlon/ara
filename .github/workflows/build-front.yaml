@@ -45,7 +45,7 @@ jobs:
           elif [[ $GITHUB_REF == refs/pull/* ]]; then
             VERSION=pr-${{ github.event.number }}
             if [[ "${{ toJson(github.event.pull_request.labels.*.name) }}" == *"release-candidate"* ]]; then
-              VERSION=RC-$(echo -n ${$(cat charts/stable/Chart.yaml | grep version)#version:})
+              VERSION=rc-$(echo -n ${$(cat charts/stable/Chart.yaml | grep version)#version:})
             fi
           fi
           TAGS="${DOCKER_IMAGE}:${VERSION}"
