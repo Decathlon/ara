@@ -28,7 +28,7 @@ spec:
       containers:
       - name: {{ $name }}
         image: "mysql:5.7"
-        imagePullPolicy: {{ .Values.pullPolicy }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: MYSQL_DATABASE
           valueFrom:

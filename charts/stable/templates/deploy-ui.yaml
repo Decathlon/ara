@@ -1,5 +1,4 @@
 {{- $name := printf "%s-%s" .Chart.Name "ui" -}}
-{{- $defaultImage := printf "%s:%s" "decathlon/ara-web-ui" .Chart.Version -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -31,8 +30,8 @@ spec:
     spec:
       containers:
       - name: {{ $name }}
-        image: "{{ .Values.registry }}/{{ default $defaultImage .Values.image }}"
-        imagePullPolicy: {{ .Values.pullPolicy }}
+        image: "{{ .Values.image.registry }}/decathlon/ara-web-ui:{{ default .Chart.Version .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: API_URL
           valueFrom:
