@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: {{ $name }}
-        image: "{{ .Values.image.registry }}/decathlon/ara-api:{{ .Chart.Version }}"
+        image: "{{ .Values.image.registry }}/decathlon/ara-api:{{ default .Chart.Version .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: SERVER_PORT

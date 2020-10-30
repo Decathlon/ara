@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: {{ $name }}
-        image: "{{ .Values.image.registry }}/decathlon/ara-web-ui:{{ .Chart.Version }}"
+        image: "{{ .Values.image.registry }}/decathlon/ara-web-ui:{{ default .Chart.Version .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: API_URL
