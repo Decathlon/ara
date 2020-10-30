@@ -3,8 +3,8 @@
 ##
 image:
     registry: docker.io
+    # tag:
     pullPolicy: IfNotPresent
-    #tag:
 
 # Override default app name
 # nameOverride:
