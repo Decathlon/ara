@@ -28,7 +28,7 @@
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-database</artifactId>
-    <version>7.2.1</version>
+    <version>7.2.2</version>
 
     <name>ARA Database</name>
     <description>
