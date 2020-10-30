@@ -10,6 +10,10 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/version: {{ .Chart.Version }}
     app.kubernetes.io/component: {{ $name }}
+  {{- if .Values.api.annotations }}
+  annotations:
+{{ toYaml .Values.api.annotations | indent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.api.replicas }}
   selector:
