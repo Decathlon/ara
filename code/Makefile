@@ -94,7 +94,7 @@ stop-migration-stack:
 
 # UPDATE ARA VERSION
 
-update-version: update-chart-version update-maven-version commit-version ## Update ARA version -- VERSION required
+update-version: update-chart-version update-maven-version ## Update ARA version -- VERSION required
 
 update-chart-version:
 	@echo '-- Update Helm Chart version --'

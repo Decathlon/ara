@@ -1,0 +1,37 @@
+name: Upgrade Release
+
+on:
+  push:
+    branches:
+      - release/*.*.*
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Prepare
+        id: prep
+        run: |
+          RELEASE=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
+          VERSION=$(cat charts/stable/Chart.yaml | grep version | sed -e 's/version: //')
+          echo ::set-output name=version::${VERSION}
+          echo ::set-output name=release::${RELEASE}
+      -
+        name: Upgrade version
+        if: steps.prep.outputs.version != steps.prep.outputs.release
+        run: |
+          cd code
+          make update-version VERSION=${{ steps.prep.outputs.release }}
+          cd ..
+      -
+        name: Commit changes
+        if: steps.prep.outputs.version != steps.prep.outputs.release
+        uses: EndBug/add-and-commit@v5
+        with:
+          message: "⬆️  Upgrade to ${{ steps.prep.outputs.release }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
