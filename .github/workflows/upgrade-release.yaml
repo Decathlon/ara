@@ -16,7 +16,8 @@ jobs:
         name: Prepare
         id: prep
         run: |
-          RELEASE=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
+          RELEASE_BRANCH=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
+          RELEASE=${RELEASE_BRANCH#release-}
           VERSION=$(cat charts/stable/Chart.yaml | grep version | sed -e 's/version: //')
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=release::${RELEASE}
