@@ -21,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -388,14 +390,15 @@ public class ExecutionServiceTest {
         File executionPath = new File("/opt/executions/123");
         PlannedIndexation plannedIndexation = new PlannedIndexation().withCycleDefinition(cycleDefinition).withExecutionFolder(executionPath);
         List<File> unzipMock = Collections.singletonList(executionPath);
+
+        // When
         doReturn(unzipMock).when(cut).unzipExecutions(any(), any(), any());
         doReturn("/opt/data/{{project}}/{{branch}}/{{cycle}}").when(settingService).get(projectId, Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH);
         doReturn(Optional.of(cycleDefinition)).when(cycleDefinitionRepository).findByProjectIdAndBranchAndName(projectId, branch, cycle);
-        doNothing().when(executionIndexerService).indexExecution(any());
-        // When
-        cut.uploadExecutionReport(projectId, projectCode, branch, cycle, zip);
+
         // Then
-        verify(executionIndexerService).indexExecution(plannedIndexation);
+        cut.uploadExecutionReport(projectId, projectCode, branch, cycle, zip);
+        verify(cut).launchExecutionDirectoriesProcessingThread(anyLong(), anyList(), any(CycleDefinition.class));
     }
 
     @Test
