@@ -39,6 +39,10 @@ module.exports = {
     // just be aware of this issue when enabling this option.
     cssSourceMap: false,
     proxyTable: {
+      '/auth': {
+        target: araAPIURL,
+        changeOrigin: true
+      },
       '/api': {
         target: araAPIURL,
         changeOrigin: true

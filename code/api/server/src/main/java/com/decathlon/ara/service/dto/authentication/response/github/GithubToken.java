@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2019 by the ARA Contributors                                 *
+ * Copyright (C) 2020 by the ARA Contributors                                 *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -15,27 +15,19 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.web.rest.util;
+package com.decathlon.ara.service.dto.authentication.response.github;
 
-import lombok.experimental.UtilityClass;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 
-import static com.decathlon.ara.service.support.DtoConstants.CODE_PATTERN;
+@Data
+public class GithubToken {
 
-@UtilityClass
-public final class RestConstants {
+    @JsonProperty("access_token")
+    private String accessToken;
 
-    public static final String AUTH_PATH = "/auth";
+    @JsonProperty("token_type")
+    private String tokenType;
 
-    /**
-     * The root path of all REST API resources.
-     */
-    public static final String API_PATH = "/api";
-
-    public static final String PROJECT_CODE_REQUEST_PARAMETER = "{projectCode:" + CODE_PATTERN + "}";
-
-    /**
-     * The root path of all REST API resources requiring the context of a project to be able to operate.
-     */
-    public static final String PROJECT_API_PATH = API_PATH + "/projects/" + PROJECT_CODE_REQUEST_PARAMETER;
-
+    private String scope;
 }

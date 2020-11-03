@@ -51,7 +51,7 @@ iView.Message.config({
 
 const router = new VueRouter({
   mode: 'history',
-  routes
+  routes: routes
 })
 
 const manageLoginRedirection = function (to, from, next) {
@@ -66,10 +66,7 @@ const manageLoginRedirection = function (to, from, next) {
       desc: 'You need to login first if you want to access this page.'
     })
     return next({
-      path: '/login',
-      query: {
-        redirect: to.fullPath
-      }
+      path: '/login'
     })
   }
 

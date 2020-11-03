@@ -182,7 +182,7 @@
       getUserLogin () {
         const loginDetails = AuthenticationService.getDetails()
         const userDetails = loginDetails.user
-        return userDetails.name
+        return userDetails.login
       },
 
       logout () {

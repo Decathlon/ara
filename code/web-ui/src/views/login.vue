@@ -9,6 +9,7 @@
         <div class="signin-title"><span>Sign in with</span></div>
         <div class="authentication-buttons-container">
           <google-authentication class="authentication-button"></google-authentication>
+          <github-authentication-button class="authentication-button"></github-authentication-button>
         </div>
       </div>
     </div>
@@ -17,11 +18,13 @@
 
 <script>
 import GoogleAuthentication from '../components/authentication/google-authentication-button'
+import GithubAuthenticationButton from '../components/authentication/github-authentication-button'
 
 export default {
   name: 'login',
 
   components: {
+    GithubAuthenticationButton,
     GoogleAuthentication
   }
 }
@@ -77,7 +80,7 @@ export default {
   color: #5b6987;
   display: -ms-grid;
   display: grid;
-  font-size: 16px;
+  font-size: 20px;
   width: 100%;
   line-height: 40px;
   -webkit-box-align: center;
@@ -101,8 +104,29 @@ export default {
 }
 
 .authentication-button {
-  margin: 0 auto;
-  width: 35%;
+  margin: 10px auto 0;
+  width: 100%;
+
+  color: #031b4e;
+  background: #f2f8ff;
+  border: 1px solid rgba(0, 105, 255, 0.2);
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  border-radius: 3px;
+  display: inline-block;
+  padding: 15px;
+  text-align: center;
+  position: inherit;
+  font-size: 15px;
+}
+
+.authentication-button:hover {
+  cursor: pointer;
+  background: #dbecff;
+}
+
+.authentication-button span {
+  margin-left: 5px;
 }
 
 </style>
