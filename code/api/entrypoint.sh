@@ -5,7 +5,7 @@ DATABASE_PARAMS=''
 case $DATABASE_TYPE in
     mysql)
         echo "ARA configured with mysql database"
-        DATABASE_PARAMS="${DATABASE_PARAMS}-Dspring.datasource.url=jdbc:mysql://$DATABASE_HOST/$DATABASE_NAME "
+        DATABASE_PARAMS="${DATABASE_PARAMS}-Dspring.datasource.url=jdbc:mysql://$DATABASE_HOST/$DATABASE_NAME?sessionVariables=sql_mode='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' "
         ;;
     h2)
         echo "ARA configured with his h2 embedded database"
