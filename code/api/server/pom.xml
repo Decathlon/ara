@@ -28,7 +28,7 @@
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-server</artifactId>
-    <version>7.2.0</version>
+    <version>7.2.3</version>
 
     <name>ARA Server</name>
     <description>
