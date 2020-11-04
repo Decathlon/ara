@@ -1,4 +1,4 @@
-= ARA - Client
+= ARA - Web UI
 
 Agile Regression Analyzer front app. +
 A VueJS front-end, packaged with webpack as a JAR to include in the server WAR.
