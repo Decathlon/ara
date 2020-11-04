@@ -1,26 +1,25 @@
-name: build
+name: build web-ui
 
 on:
   schedule:
     - cron: '0 10 * * *' # everyday at 10am
   push:
     paths:
-      - 'code/**'
+      - 'code/web-ui/**'
     branches:
       - 'main'
       - 'develop'
     tags:
       - 'ara-*.*.*'
   pull_request:
-    types: [opened, synchronize, reopened, labeled]
     paths:
-      - 'code/**'
+      - 'code/web-ui/**'
     branches:
       - 'main'
       - 'develop'
 
 jobs:
-  docker:
+  build-web-ui:
     runs-on: ubuntu-latest
     steps:
       -
@@ -44,9 +43,6 @@ jobs:
             fi
           elif [[ $GITHUB_REF == refs/pull/* ]]; then
             VERSION=pr-${{ github.event.number }}
-            if [[ "${{ toJson(github.event.pull_request.labels.*.name) }}" == *"release-candidate"* ]]; then
-              VERSION=rc-$(cat charts/stable/Chart.yaml | grep version | sed -e 's/version: //')
-            fi
           fi
           TAGS="${DOCKER_IMAGE}:${VERSION}"
           if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
@@ -65,7 +61,7 @@ jobs:
         uses: docker/setup-buildx-action@v1
       -
         name: Login to DockerHub
-        if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'release-candidate')
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -78,7 +74,7 @@ jobs:
           context: ./code/web-ui
           file: ./code/web-ui/Dockerfile
           platforms: linux/amd64
-          push: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'release-candidate') }}
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.prep.outputs.tags }}
           labels: |
             org.opencontainers.image.title=${{ github.event.repository.name }}
