@@ -6,7 +6,7 @@ on:
       - release/*.*.*
 
 jobs:
-  docker:
+  upgrade-release:
     runs-on: ubuntu-latest
     steps:
       -

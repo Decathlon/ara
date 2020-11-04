@@ -94,7 +94,10 @@ stop-migration-stack:
 
 # UPDATE ARA VERSION
 
-update-version: update-chart-version update-maven-version ## Update ARA version -- VERSION required
+update-version: ## Update ARA version -- VERSION required
+	@$(MAKE) update-all-version -j3 -k
+
+update-all-version: update-chart-version update-maven-version update-front-version
 
 update-chart-version:
 	@echo '-- Update Helm Chart version --'
@@ -104,6 +107,10 @@ update-maven-version:
 	@echo '-- Update Maven version --'
 	@mvn --batch-mode -f api/pom.xml -s api/settings.xml release:update-versions -DautoVersionSubmodules=true -DdevelopmentVersion=$(VERSION)-SNAPSHOT
 	@mvn --batch-mode -f api/pom.xml -s api/settings.xml versions:set -DremoveSnapshot -DprocessAllModules
+
+update-front-version:
+	@echo '-- Update Web-UI version --'
+	@npm --prefix web-ui version $(VERSION)
 
 commit-version:
 	@echo '-- Commit new version --'
