@@ -41,3 +41,7 @@ nbdist/
 /test/cypress/outputs/
 /mochawesome-report/
 /mochawesome.json
+
+# Environment variables
+.env*
+!.env.example

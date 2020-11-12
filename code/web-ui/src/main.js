@@ -31,12 +31,14 @@ import 'iview/dist/styles/iview.css'
 import VueVirtualScroller from 'vue-virtual-scroller'
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import { AuthenticationService } from './service/authentication.service'
+import configurationPlugin from '@/config'
 
 Vue.use(Vue2Filters)
 Vue.use(VueResource)
 Vue.use(VueRouter)
 Vue.use(iView, { locale })
 Vue.use(VueVirtualScroller)
+Vue.use(configurationPlugin)
 
 iView.LoadingBar.config({
   color: '#FFEA28', // Yellowish

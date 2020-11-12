@@ -15,7 +15,7 @@ export default {
   data () {
     return {
       provider: 'github',
-      clientId: 'YOUR_CLIENT_ID'
+      clientId: this.$appConfig.authentication.github.clientId
     }
   },
 

@@ -23,7 +23,7 @@ export default {
         const scope = 'email profile openid'
         const that = this
         window.gapi.client.init({
-          'clientId': 'YOUR_CLIENT_ID',
+          'clientId': this.$appConfig.authentication.google.clientId,
           'scope': scope
         }).then(function () {
           that.googleAuth = window.gapi.auth2.getAuthInstance()
