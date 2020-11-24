@@ -34,6 +34,8 @@ public class AuthenticationTokenDTO {
 
     private String accessToken;
 
+    private String refreshToken;
+
     private Integer expirationDuration;
 
     private Timestamp expirationTimestamp;

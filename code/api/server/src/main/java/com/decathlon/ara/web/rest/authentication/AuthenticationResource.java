@@ -19,6 +19,7 @@ package com.decathlon.ara.web.rest.authentication;
 
 import com.codahale.metrics.annotation.Timed;
 import com.decathlon.ara.service.authentication.AuthenticationService;
+import com.decathlon.ara.service.authentication.exception.AuthenticationException;
 import com.decathlon.ara.service.dto.authentication.request.AuthenticationRequestDTO;
 import com.decathlon.ara.service.dto.authentication.response.AuthenticationDetailsDTO;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +47,12 @@ public class AuthenticationResource {
     @PostMapping
     @Timed
     public ResponseEntity<AuthenticationDetailsDTO> authenticate(@Valid @RequestBody AuthenticationRequestDTO request) {
-        AuthenticationDetailsDTO authenticationDetails = authenticationService.authenticate(request);
-        return ResponseEntity.ok(authenticationDetails);
+        try {
+            AuthenticationDetailsDTO authenticationDetails = authenticationService.authenticate(request);
+            return ResponseEntity.ok(authenticationDetails);
+        } catch (AuthenticationException e) {
+            log.error(String.format("Error while authenticating to ARA (via %s)", request.getProvider()), e);
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

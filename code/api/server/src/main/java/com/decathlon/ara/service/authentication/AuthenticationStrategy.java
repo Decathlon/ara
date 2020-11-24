@@ -17,47 +17,49 @@
 
 package com.decathlon.ara.service.authentication;
 
-import com.decathlon.ara.service.authentication.exception.AuthenticationException;
 import com.decathlon.ara.service.authentication.provider.Authenticator;
-import com.decathlon.ara.service.dto.authentication.request.AuthenticationRequestDTO;
-import com.decathlon.ara.service.dto.authentication.response.AuthenticationDetailsDTO;
+import com.decathlon.ara.service.authentication.provider.custom.CustomAuthenticator;
+import com.decathlon.ara.service.authentication.provider.github.GithubAuthenticator;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.stereotype.Component;
 
-@Slf4j
-@Service
-@Transactional
+import java.util.Map;
+import java.util.Optional;
+
+import static java.util.Map.entry;
+
+@Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class AuthenticationService {
+@Slf4j
+public class AuthenticationStrategy {
 
     @NonNull
-    private final RestTemplate restTemplate;
+    private final CustomAuthenticator customAuthenticator;
 
     @NonNull
-    private final AuthenticationStrategy authenticationStrategy;
+    private final GithubAuthenticator githubAuthenticator;
 
     /**
-     * Authenticate a user and return the authentication details
-     * @param request the request sent to authenticate the user
-     * @return the authentication details
-     * @throws AuthenticationException thrown if the authentication has failed
+     * If found, return an authenticator matching the provider name given
+     * @param providerName the provider name (e.g. "custom", "google", "github", etc.)
+     *                     Note that it is case insensitive
+     * @return the matching authenticator, if any
      */
-    public AuthenticationDetailsDTO authenticate(AuthenticationRequestDTO request) throws AuthenticationException {
-        if (request == null) {
-            throw new AuthenticationException("Couldn't not authenticate because the request was null");
+    public Optional<Authenticator> getAuthenticator(String providerName) {
+        if (StringUtils.isBlank(providerName)) {
+            return Optional.empty();
         }
-        String providerName = request.getProvider();
-        Authenticator authenticator = authenticationStrategy
-                .getAuthenticator(providerName)
-                .orElseThrow(() ->
-                        new AuthenticationException(String.format("The provider given (%s) is not supported", providerName))
-                );
-        AuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
-        return authenticationDetails;
+
+        Map<String, Authenticator> authenticatorsByProviderName = Map.ofEntries(
+                entry("custom", customAuthenticator),
+                entry("github", githubAuthenticator)
+        );
+
+        Authenticator authenticator = authenticatorsByProviderName.get(providerName.toLowerCase());
+        return Optional.ofNullable(authenticator);
     }
 }

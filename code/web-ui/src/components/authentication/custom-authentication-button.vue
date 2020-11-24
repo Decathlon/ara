@@ -1,5 +1,5 @@
 <template>
-  <div @click="goToGithubOAuthPage()">
+  <div @click="goToAuthenticationURI()">
     <i :class="'fa fa-' + provider.icon + ' fa-fw'"></i><span>{{provider.display}}</span>
   </div>
 </template>
@@ -7,16 +7,16 @@
 <script>
 
 export default {
-  name: 'github-authentication-button',
+  name: 'custom-authentication-button',
 
   data () {
     return {
-      provider: this.$appConfig.authentication.providers.github
+      provider: this.$appConfig.authentication.providers.custom
     }
   },
 
   methods: {
-    goToGithubOAuthPage () {
+    goToAuthenticationURI () {
       window.location.href = this.provider.uri
     }
   }

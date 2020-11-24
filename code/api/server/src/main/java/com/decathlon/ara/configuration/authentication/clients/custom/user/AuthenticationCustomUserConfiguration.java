@@ -15,20 +15,39 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.response.github;
+package com.decathlon.ara.configuration.authentication.clients.custom.user;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.decathlon.ara.configuration.authentication.clients.custom.AuthenticationCustomValueConfiguration;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.With;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpMethod;
 
 @Data
-public class GithubUser {
+@With
+@AllArgsConstructor
+@NoArgsConstructor
+public class AuthenticationCustomUserConfiguration extends AuthenticationCustomValueConfiguration {
 
-    private Integer id;
+    private String method;
 
-    private String login;
+    private AuthenticationCustomUserFieldsConfiguration fields;
 
-    private String email;
+    /**
+     * Get the HTTP method to use when calling the custom user API
+     * @return the HTTP method
+     */
+    public HttpMethod getHttpMethod() {
+        if (StringUtils.isBlank(method)) {
+            return HttpMethod.GET;
+        }
+        String upperCasedMethod = method.toUpperCase();
+        if ("POST".equals(upperCasedMethod)) {
+            return HttpMethod.POST;
+        }
+        return HttpMethod.GET;
+    }
 
-    @JsonProperty("avatar_url")
-    private String picture;
 }

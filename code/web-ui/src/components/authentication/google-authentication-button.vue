@@ -1,6 +1,6 @@
 <template>
   <div @click="login()">
-    <i class="fa fa-google fa-fw"></i><span>Google</span>
+    <i :class="'fa fa-' + provider.icon + ' fa-fw'"></i><span>{{provider.display}}</span>
   </div>
 </template>
 
@@ -12,7 +12,7 @@ export default {
 
   data () {
     return {
-      provider: 'google',
+      provider: this.$appConfig.authentication.providers.google,
       googleAuth: undefined
     }
   },
@@ -23,7 +23,7 @@ export default {
         const scope = 'email profile openid'
         const that = this
         window.gapi.client.init({
-          'clientId': this.$appConfig.authentication.google.clientId,
+          'clientId': this.provider.clientId,
           'scope': scope
         }).then(function () {
           that.googleAuth = window.gapi.auth2.getAuthInstance()
@@ -82,7 +82,7 @@ export default {
       const googleUserProfile = googleUser.getBasicProfile()
       const googleAuthenticationResponse = googleUser.getAuthResponse()
       const authenticationDetails = {
-        provider: this.provider,
+        provider: this.provider.name,
         user: {
           id: googleUser.getId(),
           name: googleUserProfile.getName(),
@@ -107,7 +107,7 @@ export default {
 
     updateSigninStatus () {
       const authenticationDetails = AuthenticationService.getDetails()
-      const hasBeenLoggedInToARAWithAGoogleAccount = AuthenticationService.isAlreadyLoggedIn() && authenticationDetails && authenticationDetails.provider === this.provider
+      const hasBeenLoggedInToARAWithAGoogleAccount = AuthenticationService.isAlreadyLoggedIn() && authenticationDetails && authenticationDetails.provider === this.provider.name
       const isNoLongerLoggedInToGoogle = !this.googleAuth.isSignedIn.get()
       if (hasBeenLoggedInToARAWithAGoogleAccount && isNoLongerLoggedInToGoogle) {
         this.$Notice.open({

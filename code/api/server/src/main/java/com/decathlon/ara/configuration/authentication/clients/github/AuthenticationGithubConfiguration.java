@@ -15,17 +15,16 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.configuration.authentication;
+package com.decathlon.ara.configuration.authentication.clients.github;
 
-import com.decathlon.ara.configuration.authentication.clients.AuthenticationClientsConfiguration;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Data
 @Configuration
-@ConfigurationProperties("authentication")
-public class AuthenticationConfiguration {
+@ConfigurationProperties("authentication.clients.github")
+public class AuthenticationGithubConfiguration {
 
-    private AuthenticationClientsConfiguration clients;
+    private String clientSecret;
 }

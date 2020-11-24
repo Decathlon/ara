@@ -15,17 +15,19 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.configuration.authentication;
+package com.decathlon.ara.service.dto.authentication.provider.github;
 
-import com.decathlon.ara.configuration.authentication.clients.AuthenticationClientsConfiguration;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 @Data
-@Configuration
-@ConfigurationProperties("authentication")
-public class AuthenticationConfiguration {
+public class GithubToken {
 
-    private AuthenticationClientsConfiguration clients;
+    @JsonProperty("access_token")
+    private String accessToken;
+
+    @JsonProperty("token_type")
+    private String tokenType;
+
+    private String scope;
 }

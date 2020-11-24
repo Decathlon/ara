@@ -262,6 +262,7 @@ const routes = [
   },
   { path: '*', redirect: '/not-found' },
 
+  // Login
   {
     path: '/login',
     name: 'login',
@@ -271,7 +272,18 @@ const routes = [
       onlyWhenLoggedOut: true
     },
     component: Login
+  },
+  {
+    path: '/login/:provider',
+    name: 'authentication',
+    meta: {
+      title: 'Authentication in progress, please wait...',
+      public: true,
+      onlyWhenLoggedOut: true
+    },
+    component: Login
   }
+
 ]
 
 export default routes

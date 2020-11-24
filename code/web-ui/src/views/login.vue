@@ -8,24 +8,115 @@
       <div class="signin-selection">
         <div class="signin-title"><span>Sign in with</span></div>
         <div class="authentication-buttons-container">
+          <custom-authentication-button class="authentication-button"></custom-authentication-button>
           <google-authentication class="authentication-button"></google-authentication>
           <github-authentication-button class="authentication-button"></github-authentication-button>
         </div>
       </div>
     </div>
+    <Spin fix v-if="authenticating"/>
   </div>
 </template>
 
 <script>
 import GoogleAuthentication from '../components/authentication/google-authentication-button'
 import GithubAuthenticationButton from '../components/authentication/github-authentication-button'
+import CustomAuthenticationButton from '../components/authentication/custom-authentication-button'
+
+import { AuthenticationService } from '../service/authentication.service'
+import api from '../libs/api'
+import Vue from 'vue'
 
 export default {
   name: 'login',
 
   components: {
+    CustomAuthenticationButton,
     GithubAuthenticationButton,
     GoogleAuthentication
+  },
+
+  data () {
+    return {
+      authenticating: false
+    }
+  },
+
+  methods: {
+    loginAs (user) {
+      const tokenDetails = user.token
+      const userDetails = user.user
+      const authenticationDetails = {
+        provider: user.provider,
+        user: {
+          id: userDetails.id,
+          name: userDetails.name,
+          login: userDetails.login,
+          picture: userDetails.picture,
+          email: userDetails.email
+        },
+        token: {
+          id: tokenDetails.id,
+          access: tokenDetails.accessToken,
+          refresh: tokenDetails.refreshToken,
+          expiration: {
+            duration: tokenDetails.expirationDuration,
+            timestamp: tokenDetails.expirationTimestamp
+          },
+          type: tokenDetails.type,
+          scope: tokenDetails.scope
+        }
+      }
+
+      AuthenticationService.login(authenticationDetails)
+    },
+
+    authenticate () {
+      const providerName = this.$route.params.provider
+      const provider = this.$appConfig.getProvider(providerName)
+      const providerGivenIsUnknown = providerName && !provider
+      if (providerGivenIsUnknown) {
+        this.$Notice.open({
+          title: 'Unknown OAuth2 provider',
+          desc: `The provider <b>'${providerName}'</b> is not supported by ARA!`,
+          duration: 0
+        })
+        this.backToLogin()
+      }
+      const code = this.$route.query.code
+      if (provider && code) {
+        const url = api.paths.authentication()
+        const loginRequest = {
+          code: code,
+          provider: provider.name,
+          clientId: provider.clientId
+        }
+        this.authenticating = true
+        Vue.http
+          .post(url, loginRequest, api.REQUEST_OPTIONS)
+          .then(response => {
+            this.authenticating = false
+            const user = response.body
+            this.loginAs(user)
+          }, () => {
+            this.authenticating = false
+            this.$Notice.open({
+              title: 'Login attempt failed...',
+              desc: `You were not able to login to ARA through <b>${provider.display}</b>.<br> It may be linked to your configuration files.`,
+              duration: 0
+            })
+            this.backToLogin()
+          })
+      }
+    },
+
+    backToLogin () {
+      this.$router.push({ name: 'login' })
+    }
+  },
+
+  mounted () {
+    this.authenticate()
   }
 }
 </script>

@@ -15,19 +15,22 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.response.github;
+package com.decathlon.ara.configuration.authentication.clients.custom.token;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class GithubToken {
+public class AuthenticationCustomTokenFieldsConfiguration {
 
-    @JsonProperty("access_token")
-    private String accessToken;
+    private String id;
 
-    @JsonProperty("token_type")
-    private String tokenType;
+    private String access;
+
+    private String refresh;
+
+    private String expiration;
+
+    private String type;
 
     private String scope;
 }
