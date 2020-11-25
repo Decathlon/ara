@@ -11,10 +11,10 @@ var araAPIURL = 'http://' + araAPIHost + ':' + araAPIPort
 const environment = process.env
 
 const development = { ...environment }
-development.NODE_ENV = '"development"'
+development.NODE_ENV = 'development'
 
 const production = { ...environment }
-production.NODE_ENV = '"production"'
+production.NODE_ENV = 'production'
 
 module.exports = {
   build: {
