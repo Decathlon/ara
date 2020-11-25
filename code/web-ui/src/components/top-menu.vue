@@ -44,7 +44,7 @@
       </div>
 
       <div id="helps">
-        <span style="margin-right: 10px">Connected as <b>{{getUserLogin()}}</b></span>
+        <span v-if="requireLogin" style="margin-right: 10px">Connected as <b>{{getUserLogin()}}</b></span>
         <span>V{{ appVersion }}</span>
         <!-- Keep the same width as logo+select: this is to center the menu when space is available -->
         <Tooltip content="How to use ARA?" placement="bottom-end" :transfer="true">
@@ -56,7 +56,7 @@
              @click="setLatestChangelogVersion"
              target="_blank"><Badge dot :count="changelogCount"><Icon type="md-notifications" size="24"/></Badge></a>
         </Tooltip>
-        <Tooltip content="Logout from ARA" placement="bottom-end">
+        <Tooltip v-if="requireLogin" content="Logout from ARA" placement="bottom-end">
           <a @click="logout()">
             <Icon type="md-exit" size="24"></Icon>
           </a>
@@ -99,7 +99,8 @@
       return {
         appVersion: undefined,
         latestChangelogVersion: this.getCookie(LATEST_CHANGELOG_VERSION_COOKIE_NAME),
-        projectCode: this.$route.params.projectCode || this.defaultProjectCode
+        projectCode: this.$route.params.projectCode || this.defaultProjectCode,
+        requireLogin: this.$appConfig.authentication.enabled
       }
     },
 

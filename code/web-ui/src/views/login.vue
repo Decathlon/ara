@@ -8,9 +8,9 @@
       <div class="signin-selection">
         <div class="signin-title"><span>Sign in with</span></div>
         <div class="authentication-buttons-container">
-          <custom-authentication-button class="authentication-button"></custom-authentication-button>
-          <google-authentication class="authentication-button"></google-authentication>
-          <github-authentication-button class="authentication-button"></github-authentication-button>
+          <custom-authentication-button v-if="providers.custom.enabled" class="authentication-button"></custom-authentication-button>
+          <google-authentication v-if="providers.google.enabled" class="authentication-button"></google-authentication>
+          <github-authentication-button v-if="providers.github.enabled" class="authentication-button"></github-authentication-button>
         </div>
       </div>
     </div>
@@ -38,6 +38,7 @@ export default {
 
   data () {
     return {
+      providers: this.$appConfig.authentication.providers,
       authenticating: false
     }
   },
@@ -83,8 +84,27 @@ export default {
         })
         this.backToLogin()
       }
-      const code = this.$route.query.code
-      if (provider && code) {
+
+      if (provider) {
+        if (!provider.enabled) {
+          this.$Notice.open({
+            title: 'Authentication forbidden...',
+            desc: `You cannot authenticate to <b>${provider.display}</b> because it is not enabled.<br>Check your configuration files if you want to enable it.`,
+            duration: 0
+          })
+          this.backToLogin()
+          return
+        }
+        const code = this.$route.query.code
+        if (!code) {
+          this.$Notice.open({
+            title: 'Authentication code required...',
+            desc: `You need a code to authenticate to <b>${provider.display}</b>`,
+            duration: 0
+          })
+          this.backToLogin()
+          return
+        }
         const url = api.paths.authentication()
         const loginRequest = {
           code: code,
@@ -102,7 +122,7 @@ export default {
             this.authenticating = false
             this.$Notice.open({
               title: 'Login attempt failed...',
-              desc: `You were not able to login to ARA through <b>${provider.display}</b>.<br> It may be linked to your configuration files.`,
+              desc: `You were not able to login to ARA through <b>${provider.display}</b>.<br>It may be linked to your configuration files.`,
               duration: 0
             })
             this.backToLogin()
