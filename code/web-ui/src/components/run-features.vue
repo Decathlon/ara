@@ -143,7 +143,8 @@
       },
 
       showVideo (executedScenario) {
-        this.$refs.errorPopups.showVideo(executedScenario)
+        // Use this to open video in new tab (prevent mixed content errors in chrome)
+        window.open(executedScenario.videoUrl)
       },
 
       showHistory (run, executedScenario) {
