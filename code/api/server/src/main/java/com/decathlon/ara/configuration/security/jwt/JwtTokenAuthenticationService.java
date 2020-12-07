@@ -17,6 +17,7 @@
 
 package com.decathlon.ara.configuration.security.jwt;
 
+import com.decathlon.ara.configuration.authentication.AuthenticationConfiguration;
 import com.decathlon.ara.configuration.security.AuthenticationJwtTokenConfiguration;
 import io.jsonwebtoken.*;
 import lombok.NonNull;
@@ -42,17 +43,26 @@ import java.util.*;
 public class JwtTokenAuthenticationService {
 
     @NonNull
+    private final AuthenticationConfiguration authenticationConfiguration;
+
+    @NonNull
     private final AuthenticationJwtTokenConfiguration tokenConfiguration;
 
     private final String tokenCookieName = "ara-access-token";
 
     /**
-     * Create a header containing an authentication cookie
-     * @return a http header containing an authentication cookie
+     * Create a header containing an authentication cookie, if the authentication is enabled
+     * @return a http header containing an authentication cookie, if the authentication is enabled
      */
     public HttpHeaders createAuthenticationResponseCookieHeader() {
-        String jwt = generateToken();
-        HttpHeaders responseHeaders = createCookieHeaderFromJwt(Optional.of(jwt));
+        HttpHeaders responseHeaders = new HttpHeaders();
+
+        Boolean authenticationIsEnabled = authenticationConfiguration.isEnabled();
+        if (authenticationIsEnabled) {
+            String jwt = generateToken();
+            responseHeaders = createCookieHeaderFromJwt(Optional.of(jwt));
+        }
+
         return responseHeaders;
     }
 
@@ -136,6 +146,10 @@ public class JwtTokenAuthenticationService {
             this.jwt = jwt;
         }
 
+        /**
+         * Check if the JWT token is valid
+         * @return true iff the token is valid
+         */
         private boolean hasAValidToken() {
             try {
                 String secret = tokenConfiguration.getTokenSecret();

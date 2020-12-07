@@ -17,6 +17,7 @@
 
 package com.decathlon.ara.configuration.security;
 
+import com.decathlon.ara.configuration.authentication.AuthenticationConfiguration;
 import com.decathlon.ara.configuration.security.filter.JwtRequestFilter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -35,10 +36,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
 
     @NonNull
+    private AuthenticationConfiguration authenticationConfiguration;
+
+    @NonNull
     private JwtRequestFilter jwtRequestFilter;
 
     @Override
     public void configure(WebSecurity web) throws Exception {
+        Boolean authenticationIsDisabled = !authenticationConfiguration.isEnabled();
+        if (authenticationIsDisabled) {
+            web.ignoring().antMatchers("**");
+            return;
+        }
         web.ignoring().antMatchers("/auth/**");
     }
 

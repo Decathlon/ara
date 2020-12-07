@@ -17,23 +17,38 @@
 
 package com.decathlon.ara.configuration.authentication;
 
-import com.decathlon.ara.configuration.authentication.clients.AuthenticationClientsConfiguration;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@Data
-@NoArgsConstructor
-@Configuration
-@ConfigurationProperties("authentication")
-public class AuthenticationConfiguration {
+import static org.assertj.core.api.Assertions.assertThat;
 
-    private AuthenticationClientsConfiguration clients;
+@ExtendWith(MockitoExtension.class)
+public class AuthenticationConfigurationTest {
 
-    private Boolean enabled;
+    @Test
+    public void isEnabled_returnFalse_whenEnabledIsNull() {
+        // Given
+        AuthenticationConfiguration authenticationConfiguration = new AuthenticationConfiguration();
+        authenticationConfiguration.setEnabled(null);
 
-    public Boolean isEnabled() {
-        return enabled != null && enabled;
+        // When
+
+        // Then
+        Boolean isEnabled = authenticationConfiguration.isEnabled();
+        assertThat(isEnabled).isFalse();
+    }
+
+    @Test
+    public void isEnabled_returnEnabledValue_whenEnabledIsNotNull() {
+        // Given
+        AuthenticationConfiguration authenticationConfiguration = new AuthenticationConfiguration();
+        authenticationConfiguration.setEnabled(true);
+
+        // When
+
+        // Then
+        Boolean isEnabled = authenticationConfiguration.isEnabled();
+        assertThat(isEnabled).isTrue();
     }
 }
