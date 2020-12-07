@@ -18,13 +18,16 @@
 package com.decathlon.ara.web.rest.authentication;
 
 import com.codahale.metrics.annotation.Timed;
+import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationService;
 import com.decathlon.ara.service.authentication.AuthenticationService;
 import com.decathlon.ara.service.authentication.exception.AuthenticationException;
 import com.decathlon.ara.service.dto.authentication.request.AuthenticationRequestDTO;
 import com.decathlon.ara.service.dto.authentication.response.AuthenticationDetailsDTO;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,18 +44,29 @@ import static com.decathlon.ara.web.rest.util.RestConstants.AUTH_PATH;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AuthenticationResource {
 
-    @Autowired
-    private AuthenticationService authenticationService;
+    @NonNull
+    private final AuthenticationService authenticationService;
+
+    @NonNull
+    private final JwtTokenAuthenticationService jwtTokenAuthenticationService;
 
     @PostMapping
     @Timed
     public ResponseEntity<AuthenticationDetailsDTO> authenticate(@Valid @RequestBody AuthenticationRequestDTO request) {
         try {
             AuthenticationDetailsDTO authenticationDetails = authenticationService.authenticate(request);
-            return ResponseEntity.ok(authenticationDetails);
+            HttpHeaders headers = jwtTokenAuthenticationService.createAuthenticationResponseCookieHeader();
+            return ResponseEntity.ok().headers(headers).body(authenticationDetails);
         } catch (AuthenticationException e) {
             log.error(String.format("Error while authenticating to ARA (via %s)", request.getProvider()), e);
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @PostMapping("/logout")
+    @Timed
+    public ResponseEntity<Void> logout() {
+        HttpHeaders headers = jwtTokenAuthenticationService.deleteAuthenticationCookie();
+        return ResponseEntity.ok().headers(headers).build();
     }
 }

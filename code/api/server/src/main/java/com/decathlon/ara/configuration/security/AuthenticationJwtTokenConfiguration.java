@@ -15,20 +15,30 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.response;
+package com.decathlon.ara.configuration.security;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.With;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
-@With
-public class AuthenticationDetailsDTO {
+@Configuration
+@ConfigurationProperties("authentication.jwt-token")
+public class AuthenticationJwtTokenConfiguration {
 
-    private String provider;
+    private Boolean usingHttps;
 
-    private AuthenticationUserDetailsDTO user;
+    private String tokenSecret;
+
+    private Long accessTokenExpirationInSecond;
+
+    public Long getAccessTokenExpirationInMillisecond() {
+        return accessTokenExpirationInSecond != null ? accessTokenExpirationInSecond * 1000 : 0L;
+    }
+
+    public Boolean isUsingHttps() {
+        return usingHttps != null && usingHttps;
+    }
 }

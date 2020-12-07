@@ -51,7 +51,6 @@ public abstract class Authenticator {
 
         return new AuthenticationDetailsDTO()
                 .withProvider(provider)
-                .withToken(token)
                 .withUser(user);
     }
 

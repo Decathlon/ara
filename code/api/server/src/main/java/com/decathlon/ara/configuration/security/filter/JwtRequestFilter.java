@@ -15,20 +15,34 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.response;
+package com.decathlon.ara.configuration.security.filter;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
+import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
-public class AuthenticationDetailsDTO {
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Optional;
 
-    private String provider;
+@Component
+public class JwtRequestFilter extends OncePerRequestFilter {
 
-    private AuthenticationUserDetailsDTO user;
+    @Autowired
+    private JwtTokenAuthenticationService jwtTokenAuthenticationService;
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
+        Optional<Authentication> authentication = jwtTokenAuthenticationService.getAuthenticationFromRequest(request);
+        authentication.ifPresent(SecurityContextHolder.getContext()::setAuthentication);
+
+        chain.doFilter(request, response);
+    }
 }

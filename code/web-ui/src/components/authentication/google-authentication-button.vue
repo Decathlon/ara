@@ -80,7 +80,6 @@ export default {
 
     loginAs (googleUser) {
       const googleUserProfile = googleUser.getBasicProfile()
-      const googleAuthenticationResponse = googleUser.getAuthResponse()
       const authenticationDetails = {
         provider: this.provider.name,
         user: {
@@ -89,16 +88,6 @@ export default {
           login: googleUserProfile.getName(),
           picture: googleUserProfile.getImageUrl(),
           email: googleUserProfile.getEmail()
-        },
-        token: {
-          id: googleAuthenticationResponse.id_token,
-          access: googleAuthenticationResponse.access_token,
-          expiration: {
-            duration: googleAuthenticationResponse.expires_in,
-            timestamp: googleAuthenticationResponse.expires_at
-          },
-          type: googleAuthenticationResponse.token_type,
-          scope: googleAuthenticationResponse.scope
         }
       }
 

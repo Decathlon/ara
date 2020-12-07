@@ -45,7 +45,6 @@ export default {
 
   methods: {
     loginAs (user) {
-      const tokenDetails = user.token
       const userDetails = user.user
       const authenticationDetails = {
         provider: user.provider,
@@ -55,17 +54,6 @@ export default {
           login: userDetails.login,
           picture: userDetails.picture,
           email: userDetails.email
-        },
-        token: {
-          id: tokenDetails.id,
-          access: tokenDetails.accessToken,
-          refresh: tokenDetails.refreshToken,
-          expiration: {
-            duration: tokenDetails.expirationDuration,
-            timestamp: tokenDetails.expirationTimestamp
-          },
-          type: tokenDetails.type,
-          scope: tokenDetails.scope
         }
       }
 

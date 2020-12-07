@@ -551,25 +551,6 @@ public class CustomAuthenticatorTest {
         AuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
         assertThat(authenticationDetails).isNotNull();
         assertThat(authenticationDetails.getProvider()).isEqualTo("provider");
-        assertThat(authenticationDetails.getToken())
-                .extracting(
-                        "id",
-                        "accessToken",
-                        "refreshToken",
-                        "expirationDuration",
-                        "expirationTimestamp",
-                        "type",
-                        "scope"
-                )
-                .contains(
-                        tokenId,
-                        tokenAccess,
-                        tokenRefresh,
-                        tokenExpiration,
-                        null,
-                        tokenType,
-                        tokenScope
-                );
         assertThat(authenticationDetails.getUser())
                 .extracting(
                         "id",
@@ -674,25 +655,6 @@ public class CustomAuthenticatorTest {
         AuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
         assertThat(authenticationDetails).isNotNull();
         assertThat(authenticationDetails.getProvider()).isEqualTo("provider");
-        assertThat(authenticationDetails.getToken())
-                .extracting(
-                        "id",
-                        "accessToken",
-                        "refreshToken",
-                        "expirationDuration",
-                        "expirationTimestamp",
-                        "type",
-                        "scope"
-                )
-                .contains(
-                        "12345",
-                        tokenAccess,
-                        tokenRefresh,
-                        tokenExpiration,
-                        null,
-                        tokenType,
-                        tokenScope
-                );
         assertThat(authenticationDetails.getUser())
                 .extracting(
                         "id",
@@ -797,25 +759,6 @@ public class CustomAuthenticatorTest {
         AuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
         assertThat(authenticationDetails).isNotNull();
         assertThat(authenticationDetails.getProvider()).isEqualTo("provider");
-        assertThat(authenticationDetails.getToken())
-                .extracting(
-                        "id",
-                        "accessToken",
-                        "refreshToken",
-                        "expirationDuration",
-                        "expirationTimestamp",
-                        "type",
-                        "scope"
-                )
-                .contains(
-                        tokenId,
-                        tokenAccess,
-                        tokenRefresh,
-                        3600,
-                        null,
-                        tokenType,
-                        tokenScope
-                );
         assertThat(authenticationDetails.getUser())
                 .extracting(
                         "id",
@@ -920,25 +863,6 @@ public class CustomAuthenticatorTest {
         AuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
         assertThat(authenticationDetails).isNotNull();
         assertThat(authenticationDetails.getProvider()).isEqualTo("provider");
-        assertThat(authenticationDetails.getToken())
-                .extracting(
-                        "id",
-                        "accessToken",
-                        "refreshToken",
-                        "expirationDuration",
-                        "expirationTimestamp",
-                        "type",
-                        "scope"
-                )
-                .contains(
-                        tokenId,
-                        tokenAccess,
-                        tokenRefresh,
-                        null,
-                        null,
-                        tokenType,
-                        tokenScope
-                );
         assertThat(authenticationDetails.getUser())
                 .extracting(
                         "id",

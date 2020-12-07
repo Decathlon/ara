@@ -41,6 +41,22 @@ Vue.use(iView, { locale })
 Vue.use(VueVirtualScroller)
 Vue.use(configurationPlugin)
 
+Vue.http.interceptors.push(function (request, next) {
+  next(function (response) {
+    const status = response.status
+    const accessDenied = status === 401 || status === 403
+    const noLongerConnected = accessDenied && AuthenticationService.isAlreadyLoggedIn()
+    if (noLongerConnected) {
+      iView.Notice.open({
+        title: 'You were logged out from ARA...',
+        desc: 'It seems that your session has expired. Please login again to ARA',
+        duration: 0
+      })
+      AuthenticationService.logout()
+    }
+  })
+})
+
 iView.LoadingBar.config({
   color: '#FFEA28', // Yellowish
   height: 3

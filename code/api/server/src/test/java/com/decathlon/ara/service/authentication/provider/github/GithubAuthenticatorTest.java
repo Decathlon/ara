@@ -231,7 +231,7 @@ public class GithubAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_returnAuthenticationDetails_whenNoErrorOccured() throws AuthenticationException {
+    public void authenticate_returnAuthenticationDetails_whenNoErrorOccurred() throws AuthenticationException {
         // Given
         AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
         String clientId = "github_client_id";
@@ -302,25 +302,6 @@ public class GithubAuthenticatorTest {
         assertThat(userHeader.get("Authorization")).isEqualTo(Arrays.asList("token access"));
         assertThat(authenticationDetails).isNotNull();
         assertThat(authenticationDetails.getProvider()).isEqualTo("provider");
-        assertThat(authenticationDetails.getToken())
-                .extracting(
-                        "id",
-                        "accessToken",
-                        "refreshToken",
-                        "expirationDuration",
-                        "expirationTimestamp",
-                        "type",
-                        "scope"
-                )
-                .contains(
-                        null,
-                        accessToken,
-                        null,
-                        null,
-                        null,
-                        tokenType,
-                        tokenScope
-                );
         assertThat(authenticationDetails.getUser())
                 .extracting(
                         "id",
