@@ -153,7 +153,6 @@
             </DropdownItem>
           </DropdownMenu>
         </Dropdown>
-        <Checkbox @on-change="emitSelection()" v-model="node.isSelected"></Checkbox>
       </ButtonGroup>
 
       <ButtonGroup v-else-if="isAvailableMoveTarget">
