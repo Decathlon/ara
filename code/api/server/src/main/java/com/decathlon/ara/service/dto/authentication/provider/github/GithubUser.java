@@ -29,6 +29,8 @@ public class GithubUser {
 
     private String email;
 
+    private String name;
+
     @JsonProperty("avatar_url")
     private String picture;
 }

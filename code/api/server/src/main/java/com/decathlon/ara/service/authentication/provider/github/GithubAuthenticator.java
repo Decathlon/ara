@@ -62,8 +62,10 @@ public class GithubAuthenticator extends Authenticator {
         String clientId = request.getClientId();
         String code = request.getCode();
 
+        String scope = "user:email%20read:user";
+
         String tokenBaseUrl = "https://github.com/login/oauth/access_token";
-        String tokenParameters = String.format("client_id=%s&client_secret=%s&code=%s", clientId, clientSecret, code);
+        String tokenParameters = String.format("client_id=%s&scope=%s&client_secret=%s&code=%s", clientId, scope, clientSecret, code);
         String tokenFinalUrl = String.format("%s?%s", tokenBaseUrl, tokenParameters);
 
         HttpHeaders tokenHeader = new HttpHeaders();
@@ -113,6 +115,7 @@ public class GithubAuthenticator extends Authenticator {
         GithubUser user = responseEntity.getBody();
         return new AuthenticationUserDetailsDTO()
                 .withId(user.getId() != null ? String.valueOf(user.getId()) : null)
+                .withName(user.getName())
                 .withLogin(user.getLogin())
                 .withEmail(user.getEmail())
                 .withPicture(user.getPicture());

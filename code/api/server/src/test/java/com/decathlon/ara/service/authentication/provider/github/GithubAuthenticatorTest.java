@@ -96,7 +96,7 @@ public class GithubAuthenticatorTest {
         when(githubConfiguration.getClientSecret()).thenReturn(secret);
         when(
                 restTemplate.postForObject(
-                        "https://github.com/login/oauth/access_token?client_id=github_client_id&client_secret=github_secret&code=github_code",
+                        "https://github.com/login/oauth/access_token?client_id=github_client_id&scope=user:email%20read:user&client_secret=github_secret&code=github_code",
                         tokenRequest,
                         GithubToken.class
                 )
@@ -134,7 +134,7 @@ public class GithubAuthenticatorTest {
         when(githubConfiguration.getClientSecret()).thenReturn(secret);
         when(
                 restTemplate.postForObject(
-                        "https://github.com/login/oauth/access_token?client_id=github_client_id&client_secret=github_secret&code=github_code",
+                        "https://github.com/login/oauth/access_token?client_id=github_client_id&scope=user:email%20read:user&client_secret=github_secret&code=github_code",
                         tokenRequest,
                         GithubToken.class
                 )
@@ -196,7 +196,7 @@ public class GithubAuthenticatorTest {
         when(githubConfiguration.getClientSecret()).thenReturn(secret);
         when(
                 restTemplate.postForObject(
-                        "https://github.com/login/oauth/access_token?client_id=github_client_id&client_secret=github_secret&code=github_code",
+                        "https://github.com/login/oauth/access_token?client_id=github_client_id&scope=user:email%20read:user&client_secret=github_secret&code=github_code",
                         tokenRequest,
                         GithubToken.class
                 )
@@ -264,7 +264,7 @@ public class GithubAuthenticatorTest {
         when(githubConfiguration.getClientSecret()).thenReturn(secret);
         when(
                 restTemplate.postForObject(
-                        "https://github.com/login/oauth/access_token?client_id=github_client_id&client_secret=github_secret&code=github_code",
+                        "https://github.com/login/oauth/access_token?client_id=github_client_id&scope=user:email%20read:user&client_secret=github_secret&code=github_code",
                         tokenRequest,
                         GithubToken.class
                 )
