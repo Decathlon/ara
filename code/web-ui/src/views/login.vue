@@ -97,7 +97,8 @@ export default {
         const loginRequest = {
           code: code,
           provider: provider.name,
-          clientId: provider.clientId
+          clientId: provider.clientId,
+          redirectUri: provider.redirectUri
         }
         this.authenticating = true
         Vue.http

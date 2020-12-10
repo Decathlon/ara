@@ -16,7 +16,18 @@ const config = {
         display: 'Google',
         icon: 'google',
         enabled: parseBoolean(process.env.GOOGLE_ENABLED),
-        clientId: process.env.GOOGLE_CLIENT_ID
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        redirectUri: process.env.GOOGLE_REDIRECT_URI,
+        get uri () {
+          const baseUrl = 'https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount'
+          const responseTypeParameter = 'response_type=code'
+          const flowNameParameter = `flowName=GeneralOAuthFlow`
+          const scopeParameter = 'scope=https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email'
+          const clientIdParameter = `client_id=${process.env.GOOGLE_CLIENT_ID}`
+          const redirectUriParameter = `redirect_uri=${process.env.GOOGLE_REDIRECT_URI}`
+          const finalUrl = `${baseUrl}?${clientIdParameter}&${responseTypeParameter}&${redirectUriParameter}&${scopeParameter}&${flowNameParameter}`
+          return finalUrl
+        }
       },
       github: {
         name: 'github',
@@ -24,7 +35,7 @@ const config = {
         icon: 'github',
         enabled: parseBoolean(process.env.GITHUB_ENABLED),
         clientId: process.env.GITHUB_CLIENT_ID,
-        uri: 'https://github.com/login/oauth/authorize?client_id=' + process.env.GITHUB_CLIENT_ID || undefined
+        uri: 'https://github.com/login/oauth/authorize?client_id=' + process.env.GITHUB_CLIENT_ID
       },
       custom: {
         name: 'custom',

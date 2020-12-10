@@ -20,6 +20,7 @@ package com.decathlon.ara.service.authentication;
 import com.decathlon.ara.service.authentication.provider.Authenticator;
 import com.decathlon.ara.service.authentication.provider.custom.CustomAuthenticator;
 import com.decathlon.ara.service.authentication.provider.github.GithubAuthenticator;
+import com.decathlon.ara.service.authentication.provider.google.GoogleAuthenticator;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +44,9 @@ public class AuthenticationStrategy {
     @NonNull
     private final GithubAuthenticator githubAuthenticator;
 
+    @NonNull
+    private final GoogleAuthenticator googleAuthenticator;
+
     /**
      * If found, return an authenticator matching the provider name given
      * @param providerName the provider name (e.g. "custom", "google", "github", etc.)
@@ -56,7 +60,8 @@ public class AuthenticationStrategy {
 
         Map<String, Authenticator> authenticatorsByProviderName = Map.ofEntries(
                 entry("custom", customAuthenticator),
-                entry("github", githubAuthenticator)
+                entry("github", githubAuthenticator),
+                entry("google", googleAuthenticator)
         );
 
         Authenticator authenticator = authenticatorsByProviderName.get(providerName.toLowerCase());

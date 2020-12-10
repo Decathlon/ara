@@ -15,26 +15,22 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.request;
+package com.decathlon.ara.service.dto.authentication.provider.google;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class AuthenticationRequestDTO {
+public class GoogleToken {
 
-    private String clientId;
+    @JsonProperty("access_token")
+    private String accessToken;
 
-    private String code;
+    @JsonProperty("expires_in")
+    private Integer expiration;
 
-    private String provider;
+    private String scope;
 
-    private String redirectUri;
+    @JsonProperty("token_type")
+    private String type;
 }

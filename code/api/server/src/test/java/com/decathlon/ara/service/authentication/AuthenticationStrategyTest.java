@@ -20,6 +20,7 @@ package com.decathlon.ara.service.authentication;
 import com.decathlon.ara.service.authentication.provider.Authenticator;
 import com.decathlon.ara.service.authentication.provider.custom.CustomAuthenticator;
 import com.decathlon.ara.service.authentication.provider.github.GithubAuthenticator;
+import com.decathlon.ara.service.authentication.provider.google.GoogleAuthenticator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -38,6 +39,9 @@ public class AuthenticationStrategyTest {
 
     @Mock
     private GithubAuthenticator githubAuthenticator;
+
+    @Mock
+    private GoogleAuthenticator googleAuthenticator;
 
     @InjectMocks
     private AuthenticationStrategy authenticationStrategy;
@@ -83,6 +87,21 @@ public class AuthenticationStrategyTest {
                 .isNotNull()
                 .isNotEmpty()
                 .containsInstanceOf(GithubAuthenticator.class);
+    }
+
+    @Test
+    public void getAuthenticator_returnGoogleAuthenticator_whenGoogleProviderNameGiven() {
+        // Given
+        String providerName = "google";
+
+        // When
+
+        // Then
+        Optional<Authenticator> authenticator = authenticationStrategy.getAuthenticator(providerName);
+        assertThat(authenticator)
+                .isNotNull()
+                .isNotEmpty()
+                .containsInstanceOf(GoogleAuthenticator.class);
     }
 
     @Test

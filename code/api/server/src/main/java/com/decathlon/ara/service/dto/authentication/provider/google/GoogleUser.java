@@ -15,26 +15,31 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.request;
+package com.decathlon.ara.service.dto.authentication.provider.google;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class AuthenticationRequestDTO {
+public class GoogleUser {
 
-    private String clientId;
+    @JsonProperty("sub")
+    private String accountId;
 
-    private String code;
+    private String name;
 
-    private String provider;
+    @JsonProperty("given_name")
+    private String givenName;
 
-    private String redirectUri;
+    @JsonProperty("family_name")
+    private String familyName;
+
+    private String picture;
+
+    private String locale;
+
+    private String email;
+
+    @JsonProperty("email_verified")
+    private Boolean verifiedEmail;
 }

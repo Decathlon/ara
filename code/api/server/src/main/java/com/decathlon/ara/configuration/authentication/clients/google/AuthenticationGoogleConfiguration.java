@@ -15,26 +15,16 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.request;
+package com.decathlon.ara.configuration.authentication.clients.google;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class AuthenticationRequestDTO {
+@Configuration
+@ConfigurationProperties("authentication.clients.google")
+public class AuthenticationGoogleConfiguration {
 
-    private String clientId;
-
-    private String code;
-
-    private String provider;
-
-    private String redirectUri;
+    private String clientSecret;
 }
