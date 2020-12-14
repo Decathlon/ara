@@ -35,6 +35,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
 
+    private final String[] SWAGGER_RESOURCES = {
+            "/v3/api-docs/**",
+            "/configuration/ui",
+            "/swagger-resources/**",
+            "/configuration/security",
+            "/swagger-ui.html",
+            "/swagger-ui/**",
+            "/webjars/**"
+    };
+
     @NonNull
     private AuthenticationConfiguration authenticationConfiguration;
 
@@ -48,7 +58,9 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
             web.ignoring().antMatchers("**");
             return;
         }
-        web.ignoring().antMatchers("/auth/**");
+        web.ignoring()
+                .antMatchers("/auth/**")
+                .antMatchers(SWAGGER_RESOURCES);
     }
 
     @Override
