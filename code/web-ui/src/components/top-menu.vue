@@ -44,7 +44,18 @@
       </div>
 
       <div id="helps">
-        <span v-if="requireLogin" style="margin-right: 10px">Connected as <b>{{getUserLogin()}}</b></span>
+        <span v-if="requireLogin" style="margin-right: 10px" class="user-avatar">
+          <Tooltip placement="bottom">
+            <Avatar v-if="getUserDetails().picture" :src="getUserDetails().picture" size="large" />
+            <Avatar v-else icon="md-person" style="color: #0082c3;background-color: white" size="large"/>
+            <div slot="content">
+              <p v-if="getCurrentProvider()">Connected via <b>{{getCurrentProvider().display}}</b></p>
+              <p v-if="getUserDetails().login">> Login: <b>{{getUserDetails().login}}</b></p>
+              <p v-if="getUserDetails().name">> Name: <b>{{getUserDetails().name}}</b></p>
+              <p v-if="getUserDetails().email">> Email: <b>{{getUserDetails().email}}</b></p>
+            </div>
+          </Tooltip>
+        </span>
         <span>V{{ appVersion }}</span>
         <!-- Keep the same width as logo+select: this is to center the menu when space is available -->
         <Tooltip content="How to use ARA?" placement="bottom-end" :transfer="true">
@@ -180,10 +191,15 @@
         }
       },
 
-      getUserLogin () {
+      getCurrentProvider () {
+        const providerName = AuthenticationService.getDetails().provider
+        const provider = this.$appConfig.getProvider(providerName)
+        return provider
+      },
+
+      getUserDetails () {
         const loginDetails = AuthenticationService.getDetails()
-        const userDetails = loginDetails.user
-        return userDetails.login
+        return loginDetails.user
       },
 
       logout () {
@@ -248,5 +264,9 @@
   #home-logo:hover,
   #helps a:hover {
     background-color: #2B85E4;
+  }
+
+  .user-avatar:hover {
+    cursor: pointer;
   }
 </style>
