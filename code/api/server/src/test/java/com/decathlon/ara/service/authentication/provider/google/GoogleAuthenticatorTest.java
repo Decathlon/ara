@@ -18,14 +18,19 @@
 package com.decathlon.ara.service.authentication.provider.google;
 
 import com.decathlon.ara.configuration.authentication.clients.google.AuthenticationGoogleConfiguration;
+import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationService;
 import com.decathlon.ara.service.authentication.exception.AuthenticationConfigurationNotFoundException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationTokenNotFetchedException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationUserNotFetchedException;
 import com.decathlon.ara.service.dto.authentication.provider.google.GoogleToken;
 import com.decathlon.ara.service.dto.authentication.provider.google.GoogleUser;
-import com.decathlon.ara.service.dto.authentication.request.AuthenticationRequestDTO;
-import com.decathlon.ara.service.dto.authentication.response.AuthenticationDetailsDTO;
+import com.decathlon.ara.service.dto.authentication.request.AppAuthenticationRequestDTO;
+import com.decathlon.ara.service.dto.authentication.request.UserAuthenticationRequestDTO;
+import com.decathlon.ara.service.dto.authentication.response.app.AppAuthenticationDetailsDTO;
+import com.decathlon.ara.service.dto.authentication.response.user.UserAuthenticationDetailsDTO;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -51,13 +56,38 @@ public class GoogleAuthenticatorTest {
     @Mock
     private RestTemplate restTemplate;
 
+    @Mock
+    private JwtTokenAuthenticationService jwtTokenAuthenticationService;
+
     @InjectMocks
     private GoogleAuthenticator authenticator;
 
+    @Data
+    @AllArgsConstructor
+    private class DummyGoogleVerificationTokenContainingVerifiedEmailFieldAsString {
+
+        private String email_verified;
+    }
+
+    @Data
+    @AllArgsConstructor
+    private class DummyGoogleVerificationTokenContainingVerifiedEmailFieldAsBoolean {
+
+        private Boolean email_verified;
+    }
+
+    @Data
+    @AllArgsConstructor
+    private class DummyGoogleVerificationTokenNotContainingVerifiedEmailField {
+
+        private String does_not_contain_email_verified_field;
+    }
+
+    // User
     @Test
     public void authenticate_throwAuthenticationTokenNotFetchedException_whenRedirectUriNull() {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String clientId = "google_client_id";
         String code = "google_code";
         String provider = "provider";
@@ -76,7 +106,7 @@ public class GoogleAuthenticatorTest {
     @Test
     public void authenticate_throwAuthenticationConfigurationNotFoundException_whenClientSecretNotFound() {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String clientId = "google_client_id";
         String code = "google_code";
         String provider = "provider";
@@ -97,7 +127,7 @@ public class GoogleAuthenticatorTest {
     @Test
     public void authenticate_throwAuthenticationTokenNotFetchedException_whenTokenAPICallThrowException() {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String clientId = "google_client_id";
         String code = "google_code";
         String provider = "provider";
@@ -136,7 +166,7 @@ public class GoogleAuthenticatorTest {
     @Test
     public void authenticate_throwAuthenticationUserNotFetchedException_whenUserAPICallThrowException() {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String clientId = "google_client_id";
         String code = "google_code";
         String provider = "provider";
@@ -193,7 +223,7 @@ public class GoogleAuthenticatorTest {
     @Test
     public void authenticate_throwAuthenticationUserNotFetchedException_whenUserAPICallReturnsAnErrorStatus() {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String clientId = "google_client_id";
         String code = "google_code";
         String provider = "provider";
@@ -253,7 +283,7 @@ public class GoogleAuthenticatorTest {
     @Test
     public void authenticate_throwAuthenticationUserNotFetchedException_whenUserEmailIsNotVerified() {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String clientId = "google_client_id";
         String code = "google_code";
         String provider = "provider";
@@ -317,7 +347,7 @@ public class GoogleAuthenticatorTest {
     @Test
     public void authenticate_returnAuthenticationDetails_whenNoErrorOccurred() throws AuthenticationException {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String clientId = "google_client_id";
         String code = "google_code";
         String provider = "provider";
@@ -382,7 +412,7 @@ public class GoogleAuthenticatorTest {
         when(user.getPicture()).thenReturn(picture);
 
         // Then
-        AuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        UserAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
         assertThat(authenticationDetails).isNotNull();
         assertThat(authenticationDetails.getProvider()).isEqualTo(provider);
         assertThat(authenticationDetails.getUser())
@@ -400,5 +430,199 @@ public class GoogleAuthenticatorTest {
                         email,
                         picture
                 );
+    }
+
+    // Application
+    @Test
+    public void authenticate_throwAuthenticationException_whenRequestIsNull() {
+        // Given
+
+        // When
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate((AppAuthenticationRequestDTO) null))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenNoTokenGiven() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+
+        // When
+        when(request.getToken()).thenReturn(null);
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenExceptionThrownWhileCheckingToken() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "token";
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(restTemplate.exchange("https://oauth2.googleapis.com/tokeninfo?access_token=token", HttpMethod.GET, null, Object.class))
+                .thenThrow(new RestClientException("Token checking API call error"));
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenTokenCheckingApiCallReturnsAnErrorStatus() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "token";
+
+        ResponseEntity response = mock(ResponseEntity.class);
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(restTemplate.exchange("https://oauth2.googleapis.com/tokeninfo?access_token=token", HttpMethod.GET, null, Object.class))
+                .thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.BAD_REQUEST);
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenEmailVerifiedFieldNotFound() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "token";
+
+        ResponseEntity response = mock(ResponseEntity.class);
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(restTemplate.exchange("https://oauth2.googleapis.com/tokeninfo?access_token=token", HttpMethod.GET, null, Object.class))
+                .thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(response.getBody()).thenReturn(new DummyGoogleVerificationTokenNotContainingVerifiedEmailField("some_dummy_value"));
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenEmailVerifiedFieldFoundButWasNull() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "token";
+
+        ResponseEntity response = mock(ResponseEntity.class);
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(restTemplate.exchange("https://oauth2.googleapis.com/tokeninfo?access_token=token", HttpMethod.GET, null, Object.class))
+                .thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(response.getBody()).thenReturn(new DummyGoogleVerificationTokenContainingVerifiedEmailFieldAsString(null));
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenEmailVerifiedFieldFoundButCannotBeCastToBoolean() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "token";
+
+        ResponseEntity response = mock(ResponseEntity.class);
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(restTemplate.exchange("https://oauth2.googleapis.com/tokeninfo?access_token=token", HttpMethod.GET, null, Object.class))
+                .thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(response.getBody()).thenReturn(new DummyGoogleVerificationTokenContainingVerifiedEmailFieldAsString("not_a_boolean_value"));
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenEmailVerifiedFieldFoundButWasFalse() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "token";
+
+        ResponseEntity response = mock(ResponseEntity.class);
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(restTemplate.exchange("https://oauth2.googleapis.com/tokeninfo?access_token=token", HttpMethod.GET, null, Object.class))
+                .thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(response.getBody()).thenReturn(new DummyGoogleVerificationTokenContainingVerifiedEmailFieldAsString("false"));
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_returnAuthenticationDetails_whenEmailVerifiedIsAStringAndValidTokenGiven() throws AuthenticationException {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "token";
+        String provider = "provider";
+
+        ResponseEntity response = mock(ResponseEntity.class);
+
+        String jwt = "generated_jwt";
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(request.getProvider()).thenReturn(provider);
+        when(restTemplate.exchange("https://oauth2.googleapis.com/tokeninfo?access_token=token", HttpMethod.GET, null, Object.class))
+                .thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(jwtTokenAuthenticationService.generateToken()).thenReturn(jwt);
+        when(response.getBody()).thenReturn(new DummyGoogleVerificationTokenContainingVerifiedEmailFieldAsString("true"));
+
+        // Then
+        AppAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        assertThat(authenticationDetails).isNotNull();
+        assertThat(authenticationDetails.getProvider()).isEqualTo(provider);
+        assertThat(authenticationDetails.getAccessToken()).isEqualTo(jwt);
+    }
+
+    @Test
+    public void authenticate_returnAuthenticationDetails_whenEmailVerifiedIsABooleanAndValidTokenGiven() throws AuthenticationException {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "token";
+        String provider = "provider";
+
+        ResponseEntity response = mock(ResponseEntity.class);
+
+        String jwt = "generated_jwt";
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(request.getProvider()).thenReturn(provider);
+        when(restTemplate.exchange("https://oauth2.googleapis.com/tokeninfo?access_token=token", HttpMethod.GET, null, Object.class))
+                .thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(jwtTokenAuthenticationService.generateToken()).thenReturn(jwt);
+        when(response.getBody()).thenReturn(new DummyGoogleVerificationTokenContainingVerifiedEmailFieldAsBoolean(true));
+
+        // Then
+        AppAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        assertThat(authenticationDetails).isNotNull();
+        assertThat(authenticationDetails.getProvider()).isEqualTo(provider);
+        assertThat(authenticationDetails.getAccessToken()).isEqualTo(jwt);
     }
 }

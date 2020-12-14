@@ -17,6 +17,7 @@
 
 package com.decathlon.ara.service.dto.authentication.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,9 +27,10 @@ import lombok.With;
 @NoArgsConstructor
 @AllArgsConstructor
 @With
-public class AuthenticationRequestDTO {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class UserAuthenticationRequestDTO extends AuthenticationRequestDTO {
 
-    protected String clientId;
+    private String code;
 
-    protected String provider;
+    private String redirectUri;
 }

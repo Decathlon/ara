@@ -26,9 +26,7 @@ import lombok.With;
 @NoArgsConstructor
 @AllArgsConstructor
 @With
-public class AuthenticationRequestDTO {
+public class AppAuthenticationRequestDTO extends AuthenticationRequestDTO {
 
-    protected String clientId;
-
-    protected String provider;
+    private String token;
 }

@@ -15,20 +15,14 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.request;
+package com.decathlon.ara.configuration.authentication.clients.custom.validation;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
-public class AuthenticationRequestDTO {
+public class AuthenticationCustomTokenValidationFieldConfiguration {
 
-    protected String clientId;
+    private String name;
 
-    protected String provider;
+    private String expectedValue;
 }

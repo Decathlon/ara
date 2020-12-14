@@ -22,12 +22,17 @@ import com.decathlon.ara.configuration.authentication.clients.custom.token.Authe
 import com.decathlon.ara.configuration.authentication.clients.custom.token.AuthenticationCustomTokenFieldsConfiguration;
 import com.decathlon.ara.configuration.authentication.clients.custom.user.AuthenticationCustomUserConfiguration;
 import com.decathlon.ara.configuration.authentication.clients.custom.user.AuthenticationCustomUserFieldsConfiguration;
+import com.decathlon.ara.configuration.authentication.clients.custom.validation.AuthenticationCustomTokenValidationConfiguration;
+import com.decathlon.ara.configuration.authentication.clients.custom.validation.AuthenticationCustomTokenValidationFieldConfiguration;
+import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationService;
 import com.decathlon.ara.service.authentication.exception.AuthenticationConfigurationNotFoundException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationTokenNotFetchedException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationUserNotFetchedException;
-import com.decathlon.ara.service.dto.authentication.request.AuthenticationRequestDTO;
-import com.decathlon.ara.service.dto.authentication.response.AuthenticationDetailsDTO;
+import com.decathlon.ara.service.dto.authentication.request.AppAuthenticationRequestDTO;
+import com.decathlon.ara.service.dto.authentication.request.UserAuthenticationRequestDTO;
+import com.decathlon.ara.service.dto.authentication.response.app.AppAuthenticationDetailsDTO;
+import com.decathlon.ara.service.dto.authentication.response.user.UserAuthenticationDetailsDTO;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,6 +47,9 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Map;
+
+import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -56,6 +64,12 @@ public class CustomAuthenticatorTest {
 
     @Mock
     private RestTemplate restTemplate;
+
+    @Mock
+    private JwtTokenAuthenticationService jwtTokenAuthenticationService;
+
+    @Mock
+    private AuthenticationCustomTokenValidationConfiguration tokenValidationConfiguration;
 
     @InjectMocks
     private CustomAuthenticator authenticator;
@@ -96,6 +110,18 @@ public class CustomAuthenticatorTest {
         private String dummyPictureUrl;
     }
 
+    @Data
+    private class DummyTokenVerificationContainingBooleanField {
+
+        private Boolean stillActive;
+    }
+
+    @Data
+    private class DummyTokenVerificationContainingNonBooleanField {
+
+        private String stillActive;
+    }
+
     @Test
     public void authenticate_throwAuthenticationException_whenNoRequestGiven() {
         // Given
@@ -103,14 +129,14 @@ public class CustomAuthenticatorTest {
         // When
 
         // Then
-        assertThatThrownBy(() -> authenticator.authenticate(null))
+        assertThatThrownBy(() -> authenticator.authenticate((UserAuthenticationRequestDTO) null))
                 .isInstanceOf(AuthenticationException.class);
     }
 
     @Test
     public void authenticate_throwAuthenticationException_whenNoProviderGiven() {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
 
         // When
         when(request.getProvider()).thenReturn(null);
@@ -123,7 +149,7 @@ public class CustomAuthenticatorTest {
     @Test
     public void authenticate_throwAuthenticationTokenNotFetchedException_whenNoCodeGiven() {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
 
         // When
         when(request.getProvider()).thenReturn("provider");
@@ -137,7 +163,7 @@ public class CustomAuthenticatorTest {
     @Test
     public void authenticate_throwAuthenticationTokenNotFetchedException_whenNoClientIdGiven() {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
 
         // When
         when(request.getProvider()).thenReturn("provider");
@@ -152,7 +178,7 @@ public class CustomAuthenticatorTest {
     @Test
     public void authenticate_throwAuthenticationConfigurationNotFoundException_whenTokenConfigurationNotFound() {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
 
         // When
         when(request.getProvider()).thenReturn("provider");
@@ -169,7 +195,7 @@ public class CustomAuthenticatorTest {
     @Test
     public void authenticate_throwAuthenticationConfigurationNotFoundException_whenTokenConfigurationUriNotFound() {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
 
         // When
@@ -188,7 +214,7 @@ public class CustomAuthenticatorTest {
     @Test
     public void authenticate_throwAuthenticationConfigurationNotFoundException_whenTokenConfigurationFieldsNotFound() {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
 
         // When
@@ -208,7 +234,7 @@ public class CustomAuthenticatorTest {
     @Test
     public void authenticate_throwAuthenticationTokenNotFetchedException_whenTokenAPICallThrowException() {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
 
@@ -235,7 +261,7 @@ public class CustomAuthenticatorTest {
     @Test
     public void authenticate_throwAuthenticationTokenNotFetchedException_whenTokenAPICallReturnsAnErrorStatus() {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
 
@@ -265,7 +291,7 @@ public class CustomAuthenticatorTest {
     @Test
     public void authenticate_throwAuthenticationConfigurationNotFoundException_whenUserConfigurationNotFound() {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
 
@@ -297,7 +323,7 @@ public class CustomAuthenticatorTest {
     @Test
     public void authenticate_throwAuthenticationConfigurationNotFoundException_whenUserConfigurationURINotFound() {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
 
@@ -332,7 +358,7 @@ public class CustomAuthenticatorTest {
     @Test
     public void authenticate_throwAuthenticationConfigurationNotFoundException_whenUserConfigurationFieldsNotFound() {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
 
@@ -370,7 +396,7 @@ public class CustomAuthenticatorTest {
     @Test
     public void authenticate_throwAuthenticationUserNotFetchedException_whenUserAPICallThrowException() {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
 
@@ -417,7 +443,7 @@ public class CustomAuthenticatorTest {
     @Test
     public void authenticate_throwAuthenticationUserNotFetchedException_whenUserAPICallReturnsAnErrorStatus() {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
 
@@ -467,7 +493,7 @@ public class CustomAuthenticatorTest {
     @Test
     public void authenticate_returnFullyFilledAuthenticationDetails_whenAllFieldsGivenAndFound() throws AuthenticationException {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
 
@@ -548,7 +574,7 @@ public class CustomAuthenticatorTest {
         when(userResponseEntity.getBody()).thenReturn(dummyUserForTest);
 
         // Then
-        AuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        UserAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
         assertThat(authenticationDetails).isNotNull();
         assertThat(authenticationDetails.getProvider()).isEqualTo("provider");
         assertThat(authenticationDetails.getUser())
@@ -571,7 +597,7 @@ public class CustomAuthenticatorTest {
     @Test
     public void authenticate_returnFullyFilledAuthenticationDetails_whenAllFieldsGivenAndFoundAndIdsAreIntegers() throws AuthenticationException {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
 
@@ -652,7 +678,7 @@ public class CustomAuthenticatorTest {
         when(userResponseEntity.getBody()).thenReturn(dummyUserForTest);
 
         // Then
-        AuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        UserAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
         assertThat(authenticationDetails).isNotNull();
         assertThat(authenticationDetails.getProvider()).isEqualTo("provider");
         assertThat(authenticationDetails.getUser())
@@ -675,7 +701,7 @@ public class CustomAuthenticatorTest {
     @Test
     public void authenticate_returnFullyFilledAuthenticationDetails_whenAllFieldsGivenAndFoundAndTokenExpirationAsStringButCorrectIntegerRepresentation() throws AuthenticationException {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
 
@@ -756,7 +782,7 @@ public class CustomAuthenticatorTest {
         when(userResponseEntity.getBody()).thenReturn(dummyUserForTest);
 
         // Then
-        AuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        UserAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
         assertThat(authenticationDetails).isNotNull();
         assertThat(authenticationDetails.getProvider()).isEqualTo("provider");
         assertThat(authenticationDetails.getUser())
@@ -779,7 +805,7 @@ public class CustomAuthenticatorTest {
     @Test
     public void authenticate_returnFullyFilledAuthenticationDetails_whenAllFieldsGivenAndFoundAndTokenExpirationAsStringButNotAnIntegerRepresentation() throws AuthenticationException {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
 
@@ -860,7 +886,7 @@ public class CustomAuthenticatorTest {
         when(userResponseEntity.getBody()).thenReturn(dummyUserForTest);
 
         // Then
-        AuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        UserAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
         assertThat(authenticationDetails).isNotNull();
         assertThat(authenticationDetails.getProvider()).isEqualTo("provider");
         assertThat(authenticationDetails.getUser())
@@ -878,5 +904,416 @@ public class CustomAuthenticatorTest {
                         userEmail,
                         userPictureUrl
                 );
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenRequestIsNull() {
+        // Given
+
+        // When
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate((AppAuthenticationRequestDTO) null))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenNoTokenGiven() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+
+        // When
+        when(request.getToken()).thenReturn(null);
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationConfigurationNotFoundException_whenNoTokenValidationUriFound() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "custom_token";
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(tokenValidationConfiguration.getUri()).thenReturn(null);
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationConfigurationNotFoundException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenExceptionThrownWhileCheckingToken() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "custom_token";
+
+        String url = "token_validation_url";
+        HttpMethod method = HttpMethod.POST;
+        Map<String, String> parameters = Map.ofEntries(
+                entry("token_value", token)
+        );
+        HttpEntity<MultiValueMap<String, String>> customRequest = mock(HttpEntity.class);
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(tokenValidationConfiguration.getUri()).thenReturn(url);
+        when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
+        when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
+        when(restTemplate.exchange(url, method, customRequest, Object.class))
+                .thenThrow(new RestClientException("Custom token validation API failure"));
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenTokenCheckingApiCallReturnsAnErrorStatus() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "custom_token";
+
+        String url = "token_validation_url";
+        HttpMethod method = HttpMethod.POST;
+        Map<String, String> parameters = Map.ofEntries(
+                entry("token_value", token)
+        );
+        HttpEntity<MultiValueMap<String, String>> customRequest = mock(HttpEntity.class);
+
+        ResponseEntity<Object> response = mock(ResponseEntity.class);
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(tokenValidationConfiguration.getUri()).thenReturn(url);
+        when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
+        when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
+        when(restTemplate.exchange(url, method, customRequest, Object.class)).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.BAD_REQUEST);
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_returnAuthenticationDetails_whenNoTokenValidationFieldFound() throws AuthenticationException {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "custom_token";
+        String provider = "provider";
+
+        String url = "token_validation_url";
+        HttpMethod method = HttpMethod.POST;
+        Map<String, String> parameters = Map.ofEntries(
+                entry("token_value", token)
+        );
+        HttpEntity<MultiValueMap<String, String>> customRequest = mock(HttpEntity.class);
+
+        ResponseEntity<Object> response = mock(ResponseEntity.class);
+
+        String jwt = "generated_token";
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(request.getProvider()).thenReturn(provider);
+        when(tokenValidationConfiguration.getUri()).thenReturn(url);
+        when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
+        when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
+        when(restTemplate.exchange(url, method, customRequest, Object.class)).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(tokenValidationConfiguration.getValidationField()).thenReturn(null);
+        when(jwtTokenAuthenticationService.generateToken()).thenReturn(jwt);
+
+        // Then
+        AppAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        assertThat(authenticationDetails).isNotNull();
+        assertThat(authenticationDetails.getProvider()).isEqualTo(provider);
+        assertThat(authenticationDetails.getAccessToken()).isEqualTo(jwt);
+    }
+
+    @Test
+    public void authenticate_returnAuthenticationDetails_whenNoTokenValidationFieldNameFound() throws AuthenticationException {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "custom_token";
+        String provider = "provider";
+
+        String url = "token_validation_url";
+        HttpMethod method = HttpMethod.POST;
+        Map<String, String> parameters = Map.ofEntries(
+                entry("token_value", token)
+        );
+        HttpEntity<MultiValueMap<String, String>> customRequest = mock(HttpEntity.class);
+
+        ResponseEntity<Object> response = mock(ResponseEntity.class);
+
+        String jwt = "generated_token";
+
+        AuthenticationCustomTokenValidationFieldConfiguration tokenValidationFieldConfiguration = mock(AuthenticationCustomTokenValidationFieldConfiguration.class);
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(request.getProvider()).thenReturn(provider);
+        when(tokenValidationConfiguration.getUri()).thenReturn(url);
+        when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
+        when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
+        when(restTemplate.exchange(url, method, customRequest, Object.class)).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(tokenValidationConfiguration.getValidationField()).thenReturn(tokenValidationFieldConfiguration);
+        when(tokenValidationFieldConfiguration.getName()).thenReturn(null);
+        when(jwtTokenAuthenticationService.generateToken()).thenReturn(jwt);
+
+        // Then
+        AppAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        assertThat(authenticationDetails).isNotNull();
+        assertThat(authenticationDetails.getProvider()).isEqualTo(provider);
+        assertThat(authenticationDetails.getAccessToken()).isEqualTo(jwt);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationConfigurationNotFoundException_whenTokenValidationFieldNameFoundButNotFoundInResponse() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "custom_token";
+
+        String url = "token_validation_url";
+        HttpMethod method = HttpMethod.POST;
+        Map<String, String> parameters = Map.ofEntries(
+                entry("token_value", token)
+        );
+        HttpEntity<MultiValueMap<String, String>> customRequest = mock(HttpEntity.class);
+
+        ResponseEntity<Object> response = mock(ResponseEntity.class);
+
+        AuthenticationCustomTokenValidationFieldConfiguration tokenValidationFieldConfiguration = mock(AuthenticationCustomTokenValidationFieldConfiguration.class);
+
+        String fieldName = "anotherFieldName";
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(tokenValidationConfiguration.getUri()).thenReturn(url);
+        when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
+        when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
+        when(restTemplate.exchange(url, method, customRequest, Object.class)).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(response.getBody()).thenReturn(new DummyTokenVerificationContainingNonBooleanField());
+        when(tokenValidationConfiguration.getValidationField()).thenReturn(tokenValidationFieldConfiguration);
+        when(tokenValidationFieldConfiguration.getName()).thenReturn(fieldName);
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationConfigurationNotFoundException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationConfigurationNotFoundException_whenNoTokenValidationExpectedValueAndFieldNotABoolean() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "custom_token";
+
+        String url = "token_validation_url";
+        HttpMethod method = HttpMethod.POST;
+        Map<String, String> parameters = Map.ofEntries(
+                entry("token_value", token)
+        );
+        HttpEntity<MultiValueMap<String, String>> customRequest = mock(HttpEntity.class);
+
+        ResponseEntity<Object> response = mock(ResponseEntity.class);
+
+        AuthenticationCustomTokenValidationFieldConfiguration tokenValidationFieldConfiguration = mock(AuthenticationCustomTokenValidationFieldConfiguration.class);
+
+        String fieldName = "stillActive";
+
+        DummyTokenVerificationContainingNonBooleanField tokenVerification = new DummyTokenVerificationContainingNonBooleanField();
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(tokenValidationConfiguration.getUri()).thenReturn(url);
+        when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
+        when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
+        when(restTemplate.exchange(url, method, customRequest, Object.class)).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(response.getBody()).thenReturn(tokenVerification);
+        when(tokenValidationConfiguration.getValidationField()).thenReturn(tokenValidationFieldConfiguration);
+        when(tokenValidationFieldConfiguration.getExpectedValue()).thenReturn(null);
+        when(tokenValidationFieldConfiguration.getName()).thenReturn(fieldName);
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationConfigurationNotFoundException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenNoTokenValidationExpectedValueAndFieldIsBooleanAndIsFalse() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "custom_token";
+
+        String url = "token_validation_url";
+        HttpMethod method = HttpMethod.POST;
+        Map<String, String> parameters = Map.ofEntries(
+                entry("token_value", token)
+        );
+        HttpEntity<MultiValueMap<String, String>> customRequest = mock(HttpEntity.class);
+
+        ResponseEntity<Object> response = mock(ResponseEntity.class);
+
+        AuthenticationCustomTokenValidationFieldConfiguration tokenValidationFieldConfiguration = mock(AuthenticationCustomTokenValidationFieldConfiguration.class);
+
+        String fieldName = "stillActive";
+
+        DummyTokenVerificationContainingBooleanField tokenVerification = new DummyTokenVerificationContainingBooleanField();
+        tokenVerification.setStillActive(false);
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(tokenValidationConfiguration.getUri()).thenReturn(url);
+        when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
+        when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
+        when(restTemplate.exchange(url, method, customRequest, Object.class)).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(response.getBody()).thenReturn(tokenVerification);
+        when(tokenValidationConfiguration.getValidationField()).thenReturn(tokenValidationFieldConfiguration);
+        when(tokenValidationFieldConfiguration.getExpectedValue()).thenReturn(null);
+        when(tokenValidationFieldConfiguration.getName()).thenReturn(fieldName);
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_returnAuthenticationDetails_whenNoTokenValidationExpectedValueAndFieldIsBooleanAndIsTrue() throws AuthenticationException {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "custom_token";
+        String provider = "provider";
+
+        String url = "token_validation_url";
+        HttpMethod method = HttpMethod.POST;
+        Map<String, String> parameters = Map.ofEntries(
+                entry("token_value", token)
+        );
+        HttpEntity<MultiValueMap<String, String>> customRequest = mock(HttpEntity.class);
+
+        ResponseEntity<Object> response = mock(ResponseEntity.class);
+
+        AuthenticationCustomTokenValidationFieldConfiguration tokenValidationFieldConfiguration = mock(AuthenticationCustomTokenValidationFieldConfiguration.class);
+
+        String fieldName = "stillActive";
+
+        DummyTokenVerificationContainingBooleanField tokenVerification = new DummyTokenVerificationContainingBooleanField();
+        tokenVerification.setStillActive(true);
+
+        String jwt = "generated_jwt";
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(request.getProvider()).thenReturn(provider);
+        when(tokenValidationConfiguration.getUri()).thenReturn(url);
+        when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
+        when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
+        when(restTemplate.exchange(url, method, customRequest, Object.class)).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(response.getBody()).thenReturn(tokenVerification);
+        when(tokenValidationConfiguration.getValidationField()).thenReturn(tokenValidationFieldConfiguration);
+        when(tokenValidationFieldConfiguration.getExpectedValue()).thenReturn(null);
+        when(tokenValidationFieldConfiguration.getName()).thenReturn(fieldName);
+        when(jwtTokenAuthenticationService.generateToken()).thenReturn(jwt);
+
+        // Then
+        AppAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        assertThat(authenticationDetails).isNotNull();
+        assertThat(authenticationDetails.getProvider()).isEqualTo(provider);
+        assertThat(authenticationDetails.getAccessToken()).isEqualTo(jwt);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenTokenValidationExpectedValueAndFieldIsNonBooleanAndValuesAreNotEqual() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "custom_token";
+
+        String url = "token_validation_url";
+        HttpMethod method = HttpMethod.POST;
+        Map<String, String> parameters = Map.ofEntries(
+                entry("token_value", token)
+        );
+        HttpEntity<MultiValueMap<String, String>> customRequest = mock(HttpEntity.class);
+
+        ResponseEntity<Object> response = mock(ResponseEntity.class);
+
+        AuthenticationCustomTokenValidationFieldConfiguration tokenValidationFieldConfiguration = mock(AuthenticationCustomTokenValidationFieldConfiguration.class);
+
+        String fieldName = "stillActive";
+
+        DummyTokenVerificationContainingNonBooleanField tokenVerification = new DummyTokenVerificationContainingNonBooleanField();
+        tokenVerification.setStillActive("some_validation_value");
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(tokenValidationConfiguration.getUri()).thenReturn(url);
+        when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
+        when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
+        when(restTemplate.exchange(url, method, customRequest, Object.class)).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(response.getBody()).thenReturn(tokenVerification);
+        when(tokenValidationConfiguration.getValidationField()).thenReturn(tokenValidationFieldConfiguration);
+        when(tokenValidationFieldConfiguration.getExpectedValue()).thenReturn("another_validation_value");
+        when(tokenValidationFieldConfiguration.getName()).thenReturn(fieldName);
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_returnAuthenticationDetails_whenTokenValidationExpectedValueAndFieldIsNonBooleanAndValuesAreEqual() throws AuthenticationException {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "custom_token";
+        String provider = "provider";
+
+        String url = "token_validation_url";
+        HttpMethod method = HttpMethod.POST;
+        Map<String, String> parameters = Map.ofEntries(
+                entry("token_value", token)
+        );
+        HttpEntity<MultiValueMap<String, String>> customRequest = mock(HttpEntity.class);
+
+        ResponseEntity<Object> response = mock(ResponseEntity.class);
+
+        AuthenticationCustomTokenValidationFieldConfiguration tokenValidationFieldConfiguration = mock(AuthenticationCustomTokenValidationFieldConfiguration.class);
+
+        String fieldName = "stillActive";
+
+        DummyTokenVerificationContainingNonBooleanField tokenVerification = new DummyTokenVerificationContainingNonBooleanField();
+        tokenVerification.setStillActive("same_value");
+
+        String jwt = "generated_token";
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(request.getProvider()).thenReturn(provider);
+        when(tokenValidationConfiguration.getUri()).thenReturn(url);
+        when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
+        when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
+        when(restTemplate.exchange(url, method, customRequest, Object.class)).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(response.getBody()).thenReturn(tokenVerification);
+        when(tokenValidationConfiguration.getValidationField()).thenReturn(tokenValidationFieldConfiguration);
+        when(tokenValidationFieldConfiguration.getExpectedValue()).thenReturn("same_value");
+        when(tokenValidationFieldConfiguration.getName()).thenReturn(fieldName);
+        when(jwtTokenAuthenticationService.generateToken()).thenReturn(jwt);
+
+        // Then
+        AppAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        assertThat(authenticationDetails).isNotNull();
+        assertThat(authenticationDetails.getProvider()).isEqualTo(provider);
+        assertThat(authenticationDetails.getAccessToken()).isEqualTo(jwt);
     }
 }

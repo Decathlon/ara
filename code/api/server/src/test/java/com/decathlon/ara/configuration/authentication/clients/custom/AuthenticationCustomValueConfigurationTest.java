@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.MultiValueMap;
 
 import java.util.Arrays;
@@ -104,5 +105,57 @@ public class AuthenticationCustomValueConfigurationTest {
         assertThat(request.getBody()).isNotEmpty().hasSize(2);
         assertThat(request.getBody().get("body_attribute1")).isEqualTo(Arrays.asList("body_value1"));
         assertThat(request.getBody().get("body_attribute2")).isEqualTo(Arrays.asList("some value custom_value4"));
+    }
+
+    @Test
+    public void getHttpMethod_getGETMethod_whenMethodBlank() {
+        // Given
+        AuthenticationCustomValueConfiguration customUserConfiguration = new AuthenticationCustomValueConfiguration()
+                .withMethod(null);
+
+        // When
+
+        // Then
+        HttpMethod httpMethod = customUserConfiguration.getHttpMethod();
+        assertThat(httpMethod).isEqualTo(HttpMethod.GET);
+    }
+
+    @Test
+    public void getHttpMethod_getGETMethod_whenMethodIsGet() {
+        // Given
+        AuthenticationCustomValueConfiguration customUserConfiguration = new AuthenticationCustomValueConfiguration()
+                .withMethod("get");
+
+        // When
+
+        // Then
+        HttpMethod httpMethod = customUserConfiguration.getHttpMethod();
+        assertThat(httpMethod).isEqualTo(HttpMethod.GET);
+    }
+
+    @Test
+    public void getHttpMethod_getGETMethod_whenMethodIsNeitherGetNorPost() {
+        // Given
+        AuthenticationCustomValueConfiguration customUserConfiguration = new AuthenticationCustomValueConfiguration()
+                .withMethod("neither-get-nor-post");
+
+        // When
+
+        // Then
+        HttpMethod httpMethod = customUserConfiguration.getHttpMethod();
+        assertThat(httpMethod).isEqualTo(HttpMethod.GET);
+    }
+
+    @Test
+    public void getHttpMethod_getPostMethod_whenMethodIsPost() {
+        // Given
+        AuthenticationCustomValueConfiguration customUserConfiguration = new AuthenticationCustomValueConfiguration()
+                .withMethod("post");
+
+        // When
+
+        // Then
+        HttpMethod httpMethod = customUserConfiguration.getHttpMethod();
+        assertThat(httpMethod).isEqualTo(HttpMethod.POST);
     }
 }

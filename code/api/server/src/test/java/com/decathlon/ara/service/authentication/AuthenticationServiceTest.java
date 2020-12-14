@@ -19,8 +19,11 @@ package com.decathlon.ara.service.authentication;
 
 import com.decathlon.ara.service.authentication.exception.AuthenticationException;
 import com.decathlon.ara.service.authentication.provider.Authenticator;
-import com.decathlon.ara.service.dto.authentication.request.AuthenticationRequestDTO;
+import com.decathlon.ara.service.dto.authentication.request.AppAuthenticationRequestDTO;
+import com.decathlon.ara.service.dto.authentication.request.UserAuthenticationRequestDTO;
 import com.decathlon.ara.service.dto.authentication.response.AuthenticationDetailsDTO;
+import com.decathlon.ara.service.dto.authentication.response.app.AppAuthenticationDetailsDTO;
+import com.decathlon.ara.service.dto.authentication.response.user.UserAuthenticationDetailsDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -48,20 +51,20 @@ public class AuthenticationServiceTest {
     private AuthenticationService authenticationService;
 
     @Test
-    public void authenticate_throwAuthenticationException_whenRequestIsNull() {
+    public void authenticate_throwAuthenticationException_whenUserRequestIsNull() {
         // Given
 
         // When
 
         // Then
-        assertThatThrownBy(() -> authenticationService.authenticate(null))
+        assertThatThrownBy(() -> authenticationService.authenticate((UserAuthenticationRequestDTO) null))
                 .isInstanceOf(AuthenticationException.class);
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenNoAuthenticatorFound() {
+    public void authenticate_throwAuthenticationException_whenNoUserAuthenticatorFound() {
         // Given
-        AuthenticationRequestDTO authenticationRequest = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO authenticationRequest = mock(UserAuthenticationRequestDTO.class);
 
         String provider = "provider";
 
@@ -75,15 +78,63 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    public void authenticate_returnAuthenticationDetails_whenAuthenticatorFound() throws AuthenticationException {
+    public void authenticate_returnUserAuthenticationDetails_whenAuthenticatorFound() throws AuthenticationException {
         // Given
-        AuthenticationRequestDTO authenticationRequest = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO authenticationRequest = mock(UserAuthenticationRequestDTO.class);
 
         String provider = "provider";
 
         Authenticator authenticator = mock(Authenticator.class);
 
-        AuthenticationDetailsDTO authenticationDetails = mock(AuthenticationDetailsDTO.class);
+        UserAuthenticationDetailsDTO authenticationDetails = mock(UserAuthenticationDetailsDTO.class);
+
+        // When
+        when(authenticationRequest.getProvider()).thenReturn(provider);
+        when(authenticationStrategy.getAuthenticator(provider)).thenReturn(Optional.of(authenticator));
+        when(authenticator.authenticate(authenticationRequest)).thenReturn(authenticationDetails);
+
+        // Then
+        AuthenticationDetailsDTO result = authenticationService.authenticate(authenticationRequest);
+        assertThat(result).isEqualTo(authenticationDetails);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenAppRequestIsNull() {
+        // Given
+
+        // When
+
+        // Then
+        assertThatThrownBy(() -> authenticationService.authenticate((AppAuthenticationRequestDTO) null))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenNoAppAuthenticatorFound() {
+        // Given
+        AppAuthenticationRequestDTO authenticationRequest = mock(AppAuthenticationRequestDTO.class);
+
+        String provider = "provider";
+
+        // When
+        when(authenticationRequest.getProvider()).thenReturn(provider);
+        when(authenticationStrategy.getAuthenticator(provider)).thenReturn(Optional.empty());
+
+        // Then
+        assertThatThrownBy(() -> authenticationService.authenticate(authenticationRequest))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_returnAppAuthenticationDetails_whenAuthenticatorFound() throws AuthenticationException {
+        // Given
+        AppAuthenticationRequestDTO authenticationRequest = mock(AppAuthenticationRequestDTO.class);
+
+        String provider = "provider";
+
+        Authenticator authenticator = mock(Authenticator.class);
+
+        AppAuthenticationDetailsDTO authenticationDetails = mock(AppAuthenticationDetailsDTO.class);
 
         // When
         when(authenticationRequest.getProvider()).thenReturn(provider);

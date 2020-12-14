@@ -15,8 +15,9 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.request;
+package com.decathlon.ara.service.dto.authentication.response.app;
 
+import com.decathlon.ara.service.dto.authentication.response.AuthenticationDetailsDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,9 +27,7 @@ import lombok.With;
 @NoArgsConstructor
 @AllArgsConstructor
 @With
-public class AuthenticationRequestDTO {
+public class AppAuthenticationDetailsDTO extends AuthenticationDetailsDTO {
 
-    protected String clientId;
-
-    protected String provider;
+    private String accessToken;
 }

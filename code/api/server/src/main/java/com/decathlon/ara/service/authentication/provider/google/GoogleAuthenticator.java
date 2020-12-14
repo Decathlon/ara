@@ -18,17 +18,17 @@
 package com.decathlon.ara.service.authentication.provider.google;
 
 import com.decathlon.ara.configuration.authentication.clients.google.AuthenticationGoogleConfiguration;
+import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationService;
 import com.decathlon.ara.service.authentication.exception.AuthenticationConfigurationNotFoundException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationTokenNotFetchedException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationUserNotFetchedException;
 import com.decathlon.ara.service.authentication.provider.Authenticator;
 import com.decathlon.ara.service.dto.authentication.provider.google.GoogleToken;
 import com.decathlon.ara.service.dto.authentication.provider.google.GoogleUser;
-import com.decathlon.ara.service.dto.authentication.request.AuthenticationRequestDTO;
-import com.decathlon.ara.service.dto.authentication.response.AuthenticationTokenDTO;
-import com.decathlon.ara.service.dto.authentication.response.AuthenticationUserDetailsDTO;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import com.decathlon.ara.service.dto.authentication.request.UserAuthenticationRequestDTO;
+import com.decathlon.ara.service.dto.authentication.response.user.AuthenticationTokenDTO;
+import com.decathlon.ara.service.dto.authentication.response.user.AuthenticationUserDetailsDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,20 +38,29 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
+import java.util.Map;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GoogleAuthenticator extends Authenticator {
 
-    @NonNull
     private final AuthenticationGoogleConfiguration googleConfiguration;
 
-    @NonNull
     private final RestTemplate restTemplate;
 
+    @Autowired
+    public GoogleAuthenticator(
+            JwtTokenAuthenticationService jwtTokenAuthenticationService,
+            AuthenticationGoogleConfiguration googleConfiguration,
+            RestTemplate restTemplate
+    ) {
+        super(jwtTokenAuthenticationService);
+        this.googleConfiguration = googleConfiguration;
+        this.restTemplate = restTemplate;
+    }
+
     @Override
-    protected AuthenticationTokenDTO getToken(AuthenticationRequestDTO request) throws AuthenticationTokenNotFetchedException, AuthenticationConfigurationNotFoundException {
+    protected AuthenticationTokenDTO getToken(UserAuthenticationRequestDTO request) throws AuthenticationTokenNotFetchedException, AuthenticationConfigurationNotFoundException {
         String redirectUri = request.getRedirectUri();
         if (StringUtils.isBlank(redirectUri)) {
             String errorMessage = "The Google token cannot be fetched without the redirect uri";
@@ -143,5 +152,30 @@ public class GoogleAuthenticator extends Authenticator {
                 .withName(user.getName())
                 .withEmail(user.getEmail())
                 .withPicture(user.getPicture());
+    }
+
+    @Override
+    protected Boolean isAValidToken(String token) {
+        String url = String.format("https://oauth2.googleapis.com/tokeninfo?access_token=%s", token);
+        ResponseEntity<Object> response;
+
+        try {
+            response = restTemplate.exchange(url, HttpMethod.GET, null, Object.class);
+        } catch (RestClientException exception) {
+            return false;
+        }
+
+        HttpStatus status = response.getStatusCode();
+        if (status.isError()) {
+            return false;
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> allValues = mapper.convertValue(response.getBody(), Map.class);
+        Object emailVerifiedValue = allValues.get("email_verified");
+        Boolean isEmailVerified =
+                emailVerifiedValue != null &&
+                ((emailVerifiedValue instanceof Boolean && (Boolean) emailVerifiedValue) ||
+                        (emailVerifiedValue instanceof String && Boolean.parseBoolean((String) emailVerifiedValue)));
+        return isEmailVerified;
     }
 }

@@ -93,7 +93,7 @@ export default {
           this.backToLogin()
           return
         }
-        const url = api.paths.authentication()
+        const url = api.paths.login()
         const loginRequest = {
           code: code,
           provider: provider.name,

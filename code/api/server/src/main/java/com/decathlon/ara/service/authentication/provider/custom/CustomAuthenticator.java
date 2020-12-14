@@ -22,23 +22,21 @@ import com.decathlon.ara.configuration.authentication.clients.custom.token.Authe
 import com.decathlon.ara.configuration.authentication.clients.custom.token.AuthenticationCustomTokenFieldsConfiguration;
 import com.decathlon.ara.configuration.authentication.clients.custom.user.AuthenticationCustomUserConfiguration;
 import com.decathlon.ara.configuration.authentication.clients.custom.user.AuthenticationCustomUserFieldsConfiguration;
+import com.decathlon.ara.configuration.authentication.clients.custom.validation.AuthenticationCustomTokenValidationConfiguration;
+import com.decathlon.ara.configuration.authentication.clients.custom.validation.AuthenticationCustomTokenValidationFieldConfiguration;
+import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationService;
 import com.decathlon.ara.service.authentication.exception.AuthenticationConfigurationNotFoundException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationTokenNotFetchedException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationUserNotFetchedException;
 import com.decathlon.ara.service.authentication.provider.Authenticator;
-import com.decathlon.ara.service.dto.authentication.request.AuthenticationRequestDTO;
-import com.decathlon.ara.service.dto.authentication.response.AuthenticationTokenDTO;
-import com.decathlon.ara.service.dto.authentication.response.AuthenticationUserDetailsDTO;
+import com.decathlon.ara.service.dto.authentication.request.UserAuthenticationRequestDTO;
+import com.decathlon.ara.service.dto.authentication.response.user.AuthenticationTokenDTO;
+import com.decathlon.ara.service.dto.authentication.response.user.AuthenticationUserDetailsDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
@@ -51,16 +49,28 @@ import static java.util.Map.entry;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CustomAuthenticator extends Authenticator {
 
-    @NonNull
     private final AuthenticationCustomConfiguration customConfiguration;
 
-    @NonNull
     private final RestTemplate restTemplate;
 
-    protected AuthenticationTokenDTO getToken(AuthenticationRequestDTO request) throws AuthenticationConfigurationNotFoundException, AuthenticationTokenNotFetchedException {
+    private final AuthenticationCustomTokenValidationConfiguration tokenValidationConfiguration;
+
+    @Autowired
+    public CustomAuthenticator(
+            JwtTokenAuthenticationService jwtTokenAuthenticationService,
+            AuthenticationCustomConfiguration customConfiguration,
+            RestTemplate restTemplate,
+            AuthenticationCustomTokenValidationConfiguration tokenValidationConfiguration
+    ) {
+        super(jwtTokenAuthenticationService);
+        this.customConfiguration = customConfiguration;
+        this.restTemplate = restTemplate;
+        this.tokenValidationConfiguration = tokenValidationConfiguration;
+    }
+
+    protected AuthenticationTokenDTO getToken(UserAuthenticationRequestDTO request) throws AuthenticationConfigurationNotFoundException, AuthenticationTokenNotFetchedException {
         String code = request.getCode();
         String clientId = request.getClientId();
 
@@ -200,5 +210,62 @@ public class CustomAuthenticator extends Authenticator {
                 .withName(userName)
                 .withEmail(userEmail)
                 .withPicture(userPictureUrl);
+    }
+
+    @Override
+    protected Boolean isAValidToken(String token) throws AuthenticationConfigurationNotFoundException {
+        String url = tokenValidationConfiguration.getUri();
+        if (StringUtils.isBlank(url)) {
+            String errorMessage = "To validate the token, a validation url is required but was not found in the configuration";
+            log.error(errorMessage);
+            throw new AuthenticationConfigurationNotFoundException(errorMessage);
+        }
+
+        HttpMethod method = tokenValidationConfiguration.getHttpMethod();
+        Map<String, String> parameters = Map.ofEntries(
+                entry("token_value", token)
+        );
+        HttpEntity<MultiValueMap<String, String>> request = tokenValidationConfiguration.getRequest(parameters);
+
+        ResponseEntity<Object> response;
+        try {
+            response = restTemplate.exchange(url, method, request, Object.class);
+        }
+        catch (RestClientException exception) {
+            return false;
+        }
+
+        HttpStatus status = response.getStatusCode();
+        if (status.isError()) {
+            return false;
+        }
+
+        AuthenticationCustomTokenValidationFieldConfiguration validationField = tokenValidationConfiguration.getValidationField();
+        if (validationField == null) {
+            return true;
+        }
+        String fieldName = validationField.getName();
+        if (StringUtils.isBlank(fieldName)) {
+            return true;
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> allValues = mapper.convertValue(response.getBody(), Map.class);
+        if (!allValues.containsKey(fieldName)) {
+            String errorMessage = String.format("The field %s was not found when checking the token.", fieldName);
+            log.error(errorMessage);
+            throw new AuthenticationConfigurationNotFoundException(errorMessage);
+        }
+        Object expectedFieldValue = validationField.getExpectedValue();
+        Object actualFieldValue = allValues.get(fieldName);
+        if (expectedFieldValue == null) {
+            if (actualFieldValue instanceof Boolean) {
+                return (Boolean) actualFieldValue;
+            }
+            String errorMessage = "If the expected value is not provided in the configuration, then the returned value must be a boolean. Otherwise, there are no value to compare to";
+            log.error(errorMessage);
+            throw new AuthenticationConfigurationNotFoundException(errorMessage);
+        }
+        return expectedFieldValue.equals(actualFieldValue);
     }
 }

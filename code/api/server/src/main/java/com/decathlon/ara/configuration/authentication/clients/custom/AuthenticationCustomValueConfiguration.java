@@ -24,6 +24,7 @@ import lombok.With;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -44,6 +45,8 @@ public class AuthenticationCustomValueConfiguration {
     protected String headerValues;
 
     protected String bodyValues;
+
+    protected String method;
 
     /**
      * Parse the configuration file and return its representation as a map.
@@ -111,5 +114,20 @@ public class AuthenticationCustomValueConfiguration {
         HttpHeaders header = new HttpHeaders();
         header.setAll(headerValuesByAttribute);
         return new HttpEntity<>(body, header);
+    }
+
+    /**
+     * Get the HTTP method to use when calling the custom user API
+     * @return the HTTP method
+     */
+    public HttpMethod getHttpMethod() {
+        if (StringUtils.isBlank(method)) {
+            return HttpMethod.GET;
+        }
+        String upperCasedMethod = method.toUpperCase();
+        if ("POST".equals(upperCasedMethod)) {
+            return HttpMethod.POST;
+        }
+        return HttpMethod.GET;
     }
 }

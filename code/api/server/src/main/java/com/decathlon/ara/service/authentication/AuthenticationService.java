@@ -19,8 +19,11 @@ package com.decathlon.ara.service.authentication;
 
 import com.decathlon.ara.service.authentication.exception.AuthenticationException;
 import com.decathlon.ara.service.authentication.provider.Authenticator;
+import com.decathlon.ara.service.dto.authentication.request.AppAuthenticationRequestDTO;
 import com.decathlon.ara.service.dto.authentication.request.AuthenticationRequestDTO;
-import com.decathlon.ara.service.dto.authentication.response.AuthenticationDetailsDTO;
+import com.decathlon.ara.service.dto.authentication.request.UserAuthenticationRequestDTO;
+import com.decathlon.ara.service.dto.authentication.response.app.AppAuthenticationDetailsDTO;
+import com.decathlon.ara.service.dto.authentication.response.user.UserAuthenticationDetailsDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,12 +45,36 @@ public class AuthenticationService {
     private final AuthenticationStrategy authenticationStrategy;
 
     /**
-     * Authenticate a user and return the authentication details
+     * Authenticate an user and return the authentication details
      * @param request the request sent to authenticate the user
      * @return the authentication details
      * @throws AuthenticationException thrown if the authentication has failed
      */
-    public AuthenticationDetailsDTO authenticate(AuthenticationRequestDTO request) throws AuthenticationException {
+    public UserAuthenticationDetailsDTO authenticate(UserAuthenticationRequestDTO request) throws AuthenticationException {
+        Authenticator authenticator = getAuthenticator(request);
+        UserAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        return authenticationDetails;
+    }
+
+    /**
+     * Authenticate an  external application and return the authentication details
+     * @param request the request sent to authenticate the application
+     * @return the authentication details
+     * @throws AuthenticationException thrown if the authentication has failed
+     */
+    public AppAuthenticationDetailsDTO authenticate(AppAuthenticationRequestDTO request) throws AuthenticationException {
+        Authenticator authenticator = getAuthenticator(request);
+        AppAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        return authenticationDetails;
+    }
+
+    /**
+     * Get an authenticator from a request, if any one matching
+     * @param request the request
+     * @return the authenticator
+     * @throws AuthenticationException if no authenticator matching the request found
+     */
+    private Authenticator getAuthenticator(AuthenticationRequestDTO request) throws AuthenticationException {
         if (request == null) {
             throw new AuthenticationException("Couldn't not authenticate because the request was null");
         }
@@ -57,7 +84,6 @@ public class AuthenticationService {
                 .orElseThrow(() ->
                         new AuthenticationException(String.format("The provider given (%s) is not supported", providerName))
                 );
-        AuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
-        return authenticationDetails;
+        return authenticator;
     }
 }

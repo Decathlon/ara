@@ -18,14 +18,17 @@
 package com.decathlon.ara.service.authentication.provider.github;
 
 import com.decathlon.ara.configuration.authentication.clients.github.AuthenticationGithubConfiguration;
+import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationService;
 import com.decathlon.ara.service.authentication.exception.AuthenticationConfigurationNotFoundException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationTokenNotFetchedException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationUserNotFetchedException;
 import com.decathlon.ara.service.dto.authentication.provider.github.GithubToken;
 import com.decathlon.ara.service.dto.authentication.provider.github.GithubUser;
-import com.decathlon.ara.service.dto.authentication.request.AuthenticationRequestDTO;
-import com.decathlon.ara.service.dto.authentication.response.AuthenticationDetailsDTO;
+import com.decathlon.ara.service.dto.authentication.request.AppAuthenticationRequestDTO;
+import com.decathlon.ara.service.dto.authentication.request.UserAuthenticationRequestDTO;
+import com.decathlon.ara.service.dto.authentication.response.app.AppAuthenticationDetailsDTO;
+import com.decathlon.ara.service.dto.authentication.response.user.UserAuthenticationDetailsDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -39,7 +42,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -53,13 +57,16 @@ public class GithubAuthenticatorTest {
     @Mock
     private RestTemplate restTemplate;
 
+    @Mock
+    private JwtTokenAuthenticationService jwtTokenAuthenticationService;
+
     @InjectMocks
     private GithubAuthenticator authenticator;
 
     @Test
     public void authenticate_throwAuthenticationConfigurationNotFoundException_whenClientSecretNotFound() {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String clientId = "github_client_id";
         String code = "github_code";
         String provider = "provider";
@@ -78,7 +85,7 @@ public class GithubAuthenticatorTest {
     @Test
     public void authenticate_throwAuthenticationTokenNotFetchedException_whenTokenAPICallThrowException() {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String clientId = "github_client_id";
         String code = "github_code";
         String provider = "provider";
@@ -110,7 +117,7 @@ public class GithubAuthenticatorTest {
     @Test
     public void authenticate_throwAuthenticationUserNotFetchedException_whenUserAPICallThrowException() {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String clientId = "github_client_id";
         String code = "github_code";
         String provider = "provider";
@@ -170,7 +177,7 @@ public class GithubAuthenticatorTest {
     @Test
     public void authenticate_throwAuthenticationUserNotFetchedException_whenUserAPICallReturnsAnErrorStatus() {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String clientId = "github_client_id";
         String code = "github_code";
         String provider = "provider";
@@ -233,7 +240,7 @@ public class GithubAuthenticatorTest {
     @Test
     public void authenticate_returnAuthenticationDetails_whenNoErrorOccurred() throws AuthenticationException {
         // Given
-        AuthenticationRequestDTO request = mock(AuthenticationRequestDTO.class);
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String clientId = "github_client_id";
         String code = "github_code";
         String provider = "provider";
@@ -282,7 +289,7 @@ public class GithubAuthenticatorTest {
         when(user.getPicture()).thenReturn(userPicture);
 
         // Then
-        AuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        UserAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
 
         ArgumentCaptor<String> userUrlArgumentCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<HttpMethod> userHttpMethodArgumentCaptor = ArgumentCaptor.forClass(HttpMethod.class);
@@ -317,5 +324,102 @@ public class GithubAuthenticatorTest {
                         userEmail,
                         userPicture
                 );
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenRequestIsNull() {
+        // Given
+
+        // When
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate((AppAuthenticationRequestDTO) null))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenNoTokenGiven() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+
+        // When
+        when(request.getToken()).thenReturn(null);
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenExceptionThrownWhileCheckingToken() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "github_token";
+
+        HttpHeaders header = new HttpHeaders();
+        header.set("Authorization", "token github_token");
+        HttpEntity<Object> requestEntity = new HttpEntity<>(header);
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(restTemplate.exchange("https://api.github.com", HttpMethod.GET, requestEntity, Object.class))
+                .thenThrow(new RestClientException("Token checking API call error"));
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenTokenCheckingApiCallReturnsAnErrorStatus() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "github_token";
+
+        HttpHeaders header = new HttpHeaders();
+        header.set("Authorization", "token github_token");
+        HttpEntity<Object> requestEntity = new HttpEntity<>(header);
+
+        ResponseEntity response = mock(ResponseEntity.class);
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(restTemplate.exchange("https://api.github.com", HttpMethod.GET, requestEntity, Object.class))
+                .thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.BAD_REQUEST);
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_returnAuthenticationDetails_whenValidTokenGiven() throws AuthenticationException {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "github_token";
+        String provider = "provider";
+
+        HttpHeaders header = new HttpHeaders();
+        header.set("Authorization", "token github_token");
+        HttpEntity<Object> requestEntity = new HttpEntity<>(header);
+
+        ResponseEntity response = mock(ResponseEntity.class);
+
+        String jwt = "generated_jwt";
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(request.getProvider()).thenReturn(provider);
+        when(restTemplate.exchange("https://api.github.com", HttpMethod.GET, requestEntity, Object.class))
+                .thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(jwtTokenAuthenticationService.generateToken()).thenReturn(jwt);
+
+        // Then
+        AppAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        assertThat(authenticationDetails).isNotNull();
+        assertThat(authenticationDetails.getProvider()).isEqualTo(provider);
+        assertThat(authenticationDetails.getAccessToken()).isEqualTo(jwt);
     }
 }

@@ -22,8 +22,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpMethod;
 
 @Data
 @With
@@ -31,23 +29,6 @@ import org.springframework.http.HttpMethod;
 @NoArgsConstructor
 public class AuthenticationCustomUserConfiguration extends AuthenticationCustomValueConfiguration {
 
-    private String method;
-
     private AuthenticationCustomUserFieldsConfiguration fields;
-
-    /**
-     * Get the HTTP method to use when calling the custom user API
-     * @return the HTTP method
-     */
-    public HttpMethod getHttpMethod() {
-        if (StringUtils.isBlank(method)) {
-            return HttpMethod.GET;
-        }
-        String upperCasedMethod = method.toUpperCase();
-        if ("POST".equals(upperCasedMethod)) {
-            return HttpMethod.POST;
-        }
-        return HttpMethod.GET;
-    }
 
 }

@@ -24,6 +24,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
@@ -95,7 +96,7 @@ public class JwtTokenAuthenticationService {
      * Generate a new JWT token
      * @return the generated JWT token
      */
-    private String generateToken() {
+    public String generateToken() {
         Integer min = 10;
         Integer max = 30;
         String subject = RandomStringUtils.randomAscii(min, max);
@@ -128,6 +129,16 @@ public class JwtTokenAuthenticationService {
      * @return the authentication, if the cookie is found
      */
     public Optional<Authentication> getAuthenticationFromRequest(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (StringUtils.isNotBlank(bearerToken)) {
+            String[] headerRawValue = bearerToken.split("\\s+");
+            Boolean requestContainsBearerInHeader = headerRawValue.length == 2 &&  "Bearer".equals(headerRawValue[0]);
+            if (requestContainsBearerInHeader) {
+                String jwt = headerRawValue[1];
+                JwtAuthentication authentication = requestContainsBearerInHeader ? new JwtAuthentication(jwt) : null;
+                return Optional.ofNullable(authentication);
+            }
+        }
         Cookie[] cookies = request.getCookies() != null ? request.getCookies() : new Cookie[0];
         Optional<Authentication> authentication = Arrays.stream(cookies)
                 .filter(cookie -> tokenCookieName.equals(cookie.getName()))

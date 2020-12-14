@@ -15,32 +15,17 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.response;
+package com.decathlon.ara.configuration.authentication.clients.custom.validation;
 
-import lombok.AllArgsConstructor;
+import com.decathlon.ara.configuration.authentication.clients.custom.AuthenticationCustomValueConfiguration;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-
-import java.sql.Timestamp;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
-public class AuthenticationTokenDTO {
+@Configuration
+@ConfigurationProperties("authentication.clients.custom.token-validation")
+public class AuthenticationCustomTokenValidationConfiguration extends AuthenticationCustomValueConfiguration {
 
-    private String id;
-
-    private String accessToken;
-
-    private String refreshToken;
-
-    private Integer expirationDuration;
-
-    private Timestamp expirationTimestamp;
-
-    private String type;
-
-    private String scope;
+    private AuthenticationCustomTokenValidationFieldConfiguration validationField;
 }

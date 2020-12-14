@@ -21,8 +21,10 @@ import com.codahale.metrics.annotation.Timed;
 import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationService;
 import com.decathlon.ara.service.authentication.AuthenticationService;
 import com.decathlon.ara.service.authentication.exception.AuthenticationException;
-import com.decathlon.ara.service.dto.authentication.request.AuthenticationRequestDTO;
-import com.decathlon.ara.service.dto.authentication.response.AuthenticationDetailsDTO;
+import com.decathlon.ara.service.dto.authentication.request.AppAuthenticationRequestDTO;
+import com.decathlon.ara.service.dto.authentication.request.UserAuthenticationRequestDTO;
+import com.decathlon.ara.service.dto.authentication.response.app.AppAuthenticationDetailsDTO;
+import com.decathlon.ara.service.dto.authentication.response.user.UserAuthenticationDetailsDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,11 +52,11 @@ public class AuthenticationResource {
     @NonNull
     private final JwtTokenAuthenticationService jwtTokenAuthenticationService;
 
-    @PostMapping
+    @PostMapping("/login")
     @Timed
-    public ResponseEntity<AuthenticationDetailsDTO> authenticate(@Valid @RequestBody AuthenticationRequestDTO request) {
+    public ResponseEntity<UserAuthenticationDetailsDTO> authenticate(@Valid @RequestBody UserAuthenticationRequestDTO request) {
         try {
-            AuthenticationDetailsDTO authenticationDetails = authenticationService.authenticate(request);
+            UserAuthenticationDetailsDTO authenticationDetails = authenticationService.authenticate(request);
             HttpHeaders headers = jwtTokenAuthenticationService.createAuthenticationResponseCookieHeader();
             return ResponseEntity.ok().headers(headers).body(authenticationDetails);
         } catch (AuthenticationException e) {
@@ -68,5 +70,17 @@ public class AuthenticationResource {
     public ResponseEntity<Void> logout() {
         HttpHeaders headers = jwtTokenAuthenticationService.deleteAuthenticationCookie();
         return ResponseEntity.ok().headers(headers).build();
+    }
+
+    @PostMapping
+    @Timed
+    public ResponseEntity<AppAuthenticationDetailsDTO> authenticate(@Valid @RequestBody AppAuthenticationRequestDTO request) {
+        try {
+            AppAuthenticationDetailsDTO authenticationDetails = authenticationService.authenticate(request);
+            return ResponseEntity.ok().body(authenticationDetails);
+        } catch (AuthenticationException e) {
+            log.error(String.format("Error while authenticating your application to ARA (via %s)", request.getProvider()), e);
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

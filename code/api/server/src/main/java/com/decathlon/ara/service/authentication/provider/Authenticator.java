@@ -17,19 +17,32 @@
 
 package com.decathlon.ara.service.authentication.provider;
 
+import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationService;
 import com.decathlon.ara.service.authentication.exception.AuthenticationConfigurationNotFoundException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationTokenNotFetchedException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationUserNotFetchedException;
-import com.decathlon.ara.service.dto.authentication.request.AuthenticationRequestDTO;
-import com.decathlon.ara.service.dto.authentication.response.AuthenticationDetailsDTO;
-import com.decathlon.ara.service.dto.authentication.response.AuthenticationTokenDTO;
-import com.decathlon.ara.service.dto.authentication.response.AuthenticationUserDetailsDTO;
+import com.decathlon.ara.service.dto.authentication.request.AppAuthenticationRequestDTO;
+import com.decathlon.ara.service.dto.authentication.request.UserAuthenticationRequestDTO;
+import com.decathlon.ara.service.dto.authentication.response.app.AppAuthenticationDetailsDTO;
+import com.decathlon.ara.service.dto.authentication.response.user.AuthenticationTokenDTO;
+import com.decathlon.ara.service.dto.authentication.response.user.AuthenticationUserDetailsDTO;
+import com.decathlon.ara.service.dto.authentication.response.user.UserAuthenticationDetailsDTO;
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
+@AllArgsConstructor
 public abstract class Authenticator {
 
-    public AuthenticationDetailsDTO authenticate(AuthenticationRequestDTO request) throws AuthenticationException {
+    private JwtTokenAuthenticationService jwtTokenAuthenticationService;
+
+    /**
+     * Authenticate an user and return the authentication details if successfully authenticated
+     * @param request the request
+     * @return the authentication details
+     * @throws AuthenticationException if the authentication failed
+     */
+    public UserAuthenticationDetailsDTO authenticate(UserAuthenticationRequestDTO request) throws AuthenticationException {
         if (request == null) {
             throw new AuthenticationException("The request cannot be null");
         }
@@ -49,12 +62,60 @@ public abstract class Authenticator {
         AuthenticationTokenDTO token = getToken(request);
         AuthenticationUserDetailsDTO user = getUser(token);
 
-        return new AuthenticationDetailsDTO()
-                .withProvider(provider)
-                .withUser(user);
+        UserAuthenticationDetailsDTO authenticationDetails = new UserAuthenticationDetailsDTO(user);
+        authenticationDetails.setProvider(provider);
+        return authenticationDetails;
     }
 
-    protected abstract AuthenticationTokenDTO getToken(AuthenticationRequestDTO request) throws AuthenticationTokenNotFetchedException, AuthenticationConfigurationNotFoundException;
+    /**
+     * Get token details from a request
+     * @param request the request
+     * @return the token details
+     * @throws AuthenticationTokenNotFetchedException if the token could not be fetched
+     * @throws AuthenticationConfigurationNotFoundException if any required configuration value was missing
+     */
+    protected abstract AuthenticationTokenDTO getToken(UserAuthenticationRequestDTO request) throws AuthenticationTokenNotFetchedException, AuthenticationConfigurationNotFoundException;
 
+    /**
+     * Get the user details from a token
+     * @param token the token
+     * @return the user details
+     * @throws AuthenticationUserNotFetchedException if the user could not be fetched
+     * @throws AuthenticationConfigurationNotFoundException if any required configuration value was missing
+     */
     protected abstract AuthenticationUserDetailsDTO getUser(AuthenticationTokenDTO token) throws AuthenticationUserNotFetchedException, AuthenticationConfigurationNotFoundException;
+
+    /**
+     * Authenticate an application and return the authentication details if successfully authenticated
+     * @param request the request
+     * @return the authentication details
+     * @throws AuthenticationException if the authentication failed
+     */
+    public AppAuthenticationDetailsDTO authenticate(AppAuthenticationRequestDTO request) throws AuthenticationException {
+        if (request == null) {
+            throw new AuthenticationException("Authentication failed because the request cannot be null");
+        }
+
+        String accessToken = request.getToken();
+        if (StringUtils.isBlank(accessToken)) {
+            throw new AuthenticationException("Authentication failed because no token found in the request");
+        }
+
+        Boolean isAValidToken = isAValidToken(accessToken);
+        if (isAValidToken) {
+            String generatedToken = jwtTokenAuthenticationService.generateToken();
+            AppAuthenticationDetailsDTO authenticationDetails = new AppAuthenticationDetailsDTO(generatedToken);
+            authenticationDetails.setProvider(request.getProvider());
+            return authenticationDetails;
+        }
+        String errorMessage = String.format("The authentication failed because the token (%s) given was not valid", accessToken);
+        throw new AuthenticationException(errorMessage);
+    }
+
+    /**
+     * Check whether a token is valid or not
+     * @param token the token to check
+     * @return true iff the token is still valid
+     */
+    protected abstract Boolean isAValidToken(String token) throws AuthenticationConfigurationNotFoundException;
 }

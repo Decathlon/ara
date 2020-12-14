@@ -23,7 +23,7 @@ let api = {}
 const API_PATH = '/api'
 const PROJECT_API_PATH = API_PATH + '/projects'
 
-const AUTHENTICATION_PATH = '/auth'
+const LOGIN_PATH = '/auth/login'
 const LOGOUT_PATH = '/auth/logout'
 
 const projectPath = function (viewOrProjectCode) {
@@ -36,7 +36,7 @@ api.REQUEST_OPTIONS = {
 }
 
 api.paths = {
-  authentication: () => AUTHENTICATION_PATH,
+  login: () => LOGIN_PATH,
   logout: () => LOGOUT_PATH,
   communications: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/communications',
   countries: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/countries',

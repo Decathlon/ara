@@ -15,7 +15,7 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.response;
+package com.decathlon.ara.service.dto.authentication.response.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

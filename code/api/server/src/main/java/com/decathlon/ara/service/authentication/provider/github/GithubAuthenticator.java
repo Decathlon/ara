@@ -18,17 +18,16 @@
 package com.decathlon.ara.service.authentication.provider.github;
 
 import com.decathlon.ara.configuration.authentication.clients.github.AuthenticationGithubConfiguration;
+import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationService;
 import com.decathlon.ara.service.authentication.exception.AuthenticationConfigurationNotFoundException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationTokenNotFetchedException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationUserNotFetchedException;
 import com.decathlon.ara.service.authentication.provider.Authenticator;
 import com.decathlon.ara.service.dto.authentication.provider.github.GithubToken;
 import com.decathlon.ara.service.dto.authentication.provider.github.GithubUser;
-import com.decathlon.ara.service.dto.authentication.request.AuthenticationRequestDTO;
-import com.decathlon.ara.service.dto.authentication.response.AuthenticationTokenDTO;
-import com.decathlon.ara.service.dto.authentication.response.AuthenticationUserDetailsDTO;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import com.decathlon.ara.service.dto.authentication.request.UserAuthenticationRequestDTO;
+import com.decathlon.ara.service.dto.authentication.response.user.AuthenticationTokenDTO;
+import com.decathlon.ara.service.dto.authentication.response.user.AuthenticationUserDetailsDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,17 +41,25 @@ import java.util.Arrays;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GithubAuthenticator extends Authenticator {
 
-    @NonNull
     private final AuthenticationGithubConfiguration githubConfiguration;
 
-    @NonNull
     private final RestTemplate restTemplate;
 
+    @Autowired
+    public GithubAuthenticator(
+            JwtTokenAuthenticationService jwtTokenAuthenticationService,
+            AuthenticationGithubConfiguration githubConfiguration,
+            RestTemplate restTemplate
+    ) {
+        super(jwtTokenAuthenticationService);
+        this.githubConfiguration = githubConfiguration;
+        this.restTemplate = restTemplate;
+    }
+
     @Override
-    protected AuthenticationTokenDTO getToken(AuthenticationRequestDTO request) throws AuthenticationConfigurationNotFoundException, AuthenticationTokenNotFetchedException {
+    protected AuthenticationTokenDTO getToken(UserAuthenticationRequestDTO request) throws AuthenticationConfigurationNotFoundException, AuthenticationTokenNotFetchedException {
         String clientSecret = githubConfiguration.getClientSecret();
         if (StringUtils.isBlank(clientSecret)) {
             String errorMessage = "Github client secret not found";
@@ -119,5 +126,24 @@ public class GithubAuthenticator extends Authenticator {
                 .withLogin(user.getLogin())
                 .withEmail(user.getEmail())
                 .withPicture(user.getPicture());
+    }
+
+    @Override
+    protected Boolean isAValidToken(String token) {
+        String url = "https://api.github.com";
+        HttpHeaders header = new HttpHeaders();
+        String authorization = String.format("token %s", token);
+        header.set("Authorization", authorization);
+        HttpEntity<Object> request = new HttpEntity<>(header);
+
+        ResponseEntity<Object> response;
+        try {
+            response = restTemplate.exchange(url, HttpMethod.GET, request, Object.class);
+        } catch (RestClientException exception) {
+            return false;
+        }
+
+        HttpStatus status = response.getStatusCode();
+        return status.is2xxSuccessful();
     }
 }
