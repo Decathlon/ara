@@ -139,7 +139,8 @@
       },
 
       showScreenshot (executedScenario) {
-        this.$refs.errorPopups.showScreenshot(executedScenario)
+        // Use this to open screenshot in new tab (prevent mixed content errors in chrome)
+        window.open(executedScenario.screenshotUrl)
       },
 
       showVideo (executedScenario) {
