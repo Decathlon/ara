@@ -19,6 +19,7 @@ package com.decathlon.ara.configuration.security.jwt;
 
 import com.decathlon.ara.configuration.authentication.AuthenticationConfiguration;
 import com.decathlon.ara.configuration.security.AuthenticationJwtTokenConfiguration;
+import com.decathlon.ara.service.authentication.exception.AuthenticationConfigurationNotFoundException;
 import io.jsonwebtoken.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -55,7 +56,7 @@ public class JwtTokenAuthenticationService {
      * Create a header containing an authentication cookie, if the authentication is enabled
      * @return a http header containing an authentication cookie, if the authentication is enabled
      */
-    public HttpHeaders createAuthenticationResponseCookieHeader() {
+    public HttpHeaders createAuthenticationResponseCookieHeader() throws AuthenticationConfigurationNotFoundException {
         HttpHeaders responseHeaders = new HttpHeaders();
 
         Boolean authenticationIsEnabled = authenticationConfiguration.isEnabled();
@@ -96,14 +97,21 @@ public class JwtTokenAuthenticationService {
      * Generate a new JWT token
      * @return the generated JWT token
      */
-    public String generateToken() {
+    public String generateToken() throws AuthenticationConfigurationNotFoundException {
         Integer min = 10;
         Integer max = 30;
         String subject = RandomStringUtils.randomAscii(min, max);
         Date now = new Date();
-        Long duration = now.getTime() + tokenConfiguration.getAccessTokenExpirationInMillisecond();
+        Long tokenExpiration = tokenConfiguration.getAccessTokenExpirationInMillisecond();
+        if (tokenExpiration == null || tokenExpiration == 0L) {
+            throw new AuthenticationConfigurationNotFoundException("Authentication failed: ARA cannot generate a JWT token because token expiration value was not found in the configuration file");
+        }
+        Long duration = now.getTime() + tokenExpiration;
         Date expirationDate = new Date(duration);
         String secret = tokenConfiguration.getTokenSecret();
+        if (StringUtils.isBlank(secret)) {
+            throw new AuthenticationConfigurationNotFoundException("Authentication failed: ARA cannot generate a JWT token because no secret found in the configuration file");
+        }
         String token = Jwts.builder()
                 .setClaims(new HashMap<>())
                 .setSubject(subject)
@@ -135,8 +143,8 @@ public class JwtTokenAuthenticationService {
             Boolean requestContainsBearerInHeader = headerRawValue.length == 2 &&  "Bearer".equals(headerRawValue[0]);
             if (requestContainsBearerInHeader) {
                 String jwt = headerRawValue[1];
-                JwtAuthentication authentication = requestContainsBearerInHeader ? new JwtAuthentication(jwt) : null;
-                return Optional.ofNullable(authentication);
+                JwtAuthentication authentication = new JwtAuthentication(jwt);
+                return Optional.of(authentication);
             }
         }
         Cookie[] cookies = request.getCookies() != null ? request.getCookies() : new Cookie[0];
