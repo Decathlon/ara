@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.configuration.authentication;
 
-import com.decathlon.ara.configuration.authentication.clients.AuthenticationClientsConfiguration;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -28,8 +27,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties("authentication")
 public class AuthenticationConfiguration {
-
-    private AuthenticationClientsConfiguration clients;
 
     private Boolean enabled;
 

@@ -19,8 +19,12 @@ package com.decathlon.ara.configuration.authentication.clients.custom.token;
 
 import com.decathlon.ara.configuration.authentication.clients.custom.AuthenticationCustomValueConfiguration;
 import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 @Data
+@Configuration
+@ConfigurationProperties("authentication.clients.custom.token")
 public class AuthenticationCustomTokenConfiguration extends AuthenticationCustomValueConfiguration {
 
     private AuthenticationCustomTokenFieldsConfiguration fields;

@@ -17,11 +17,12 @@
 
 package com.decathlon.ara.service.dto.authentication.provider.google;
 
+import com.decathlon.ara.service.dto.authentication.provider.AuthenticatorToken;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class GoogleToken {
+public class GoogleToken extends AuthenticatorToken {
 
     @JsonProperty("access_token")
     private String accessToken;

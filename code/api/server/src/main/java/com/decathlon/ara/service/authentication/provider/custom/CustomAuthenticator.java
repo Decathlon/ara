@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.service.authentication.provider.custom;
 
-import com.decathlon.ara.configuration.authentication.clients.custom.AuthenticationCustomConfiguration;
 import com.decathlon.ara.configuration.authentication.clients.custom.token.AuthenticationCustomTokenConfiguration;
 import com.decathlon.ara.configuration.authentication.clients.custom.token.AuthenticationCustomTokenFieldsConfiguration;
 import com.decathlon.ara.configuration.authentication.clients.custom.user.AuthenticationCustomUserConfiguration;
@@ -29,14 +28,19 @@ import com.decathlon.ara.service.authentication.exception.AuthenticationConfigur
 import com.decathlon.ara.service.authentication.exception.AuthenticationTokenNotFetchedException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationUserNotFetchedException;
 import com.decathlon.ara.service.authentication.provider.Authenticator;
+import com.decathlon.ara.service.dto.authentication.provider.custom.CustomToken;
+import com.decathlon.ara.service.dto.authentication.provider.custom.CustomUser;
 import com.decathlon.ara.service.dto.authentication.request.UserAuthenticationRequestDTO;
-import com.decathlon.ara.service.dto.authentication.response.user.AuthenticationTokenDTO;
 import com.decathlon.ara.service.dto.authentication.response.user.AuthenticationUserDetailsDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.data.util.Pair;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
@@ -44,48 +48,40 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Map.entry;
 
 @Slf4j
 @Service
-public class CustomAuthenticator extends Authenticator {
+public class CustomAuthenticator extends Authenticator<CustomToken, CustomUser> {
 
-    private final AuthenticationCustomConfiguration customConfiguration;
+    private final AuthenticationCustomTokenConfiguration tokenConfiguration;
 
-    private final RestTemplate restTemplate;
+    private final AuthenticationCustomUserConfiguration userConfiguration;
 
     private final AuthenticationCustomTokenValidationConfiguration tokenValidationConfiguration;
 
     @Autowired
     public CustomAuthenticator(
             JwtTokenAuthenticationService jwtTokenAuthenticationService,
-            AuthenticationCustomConfiguration customConfiguration,
             RestTemplate restTemplate,
+            AuthenticationCustomTokenConfiguration tokenConfiguration,
+            AuthenticationCustomUserConfiguration userConfiguration,
             AuthenticationCustomTokenValidationConfiguration tokenValidationConfiguration
     ) {
-        super(jwtTokenAuthenticationService);
-        this.customConfiguration = customConfiguration;
-        this.restTemplate = restTemplate;
+        super(CustomToken.class, CustomUser.class, jwtTokenAuthenticationService, restTemplate);
+        this.tokenConfiguration = tokenConfiguration;
+        this.userConfiguration = userConfiguration;
         this.tokenValidationConfiguration = tokenValidationConfiguration;
     }
 
-    protected AuthenticationTokenDTO getToken(UserAuthenticationRequestDTO request) throws AuthenticationConfigurationNotFoundException, AuthenticationTokenNotFetchedException {
-        String code = request.getCode();
-        String clientId = request.getClientId();
+    @Override
+    protected CustomToken getToken(UserAuthenticationRequestDTO request) throws AuthenticationConfigurationNotFoundException, AuthenticationTokenNotFetchedException {
+        String tokenUri = getTokenUri(request);
+        HttpMethod tokenMethod = getTokenMethod();
+        HttpEntity<MultiValueMap<String, String>> tokenRequest = getTokenRequest(request);
 
-        AuthenticationCustomTokenConfiguration tokenConfiguration = customConfiguration.getToken();
-        if (tokenConfiguration == null) {
-            String errorMessage = "No custom token configuration found";
-            log.error(errorMessage);
-            throw new AuthenticationConfigurationNotFoundException(errorMessage);
-        }
-        String tokenUri = tokenConfiguration.getUri();
-        if (StringUtils.isBlank(tokenUri)) {
-            String errorMessage = "No custom token configuration URI found";
-            log.error(errorMessage);
-            throw new AuthenticationConfigurationNotFoundException(errorMessage);
-        }
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = tokenConfiguration.getFields();
         if (tokenFieldsConfiguration == null) {
             String errorMessage = "No custom token configuration fields found";
@@ -93,15 +89,9 @@ public class CustomAuthenticator extends Authenticator {
             throw new AuthenticationConfigurationNotFoundException(errorMessage);
         }
 
-        Map<String, String> tokenParameters = Map.ofEntries(
-                entry("code", code),
-                entry("client_id", clientId)
-        );
-        HttpEntity<MultiValueMap<String, String>> tokenRequest = tokenConfiguration.getRequest(tokenParameters);
-
         ResponseEntity<Object> tokenResponseEntity;
         try {
-            tokenResponseEntity = restTemplate.postForEntity(tokenUri, tokenRequest, Object.class);
+            tokenResponseEntity = restTemplate.exchange(tokenUri, tokenMethod, tokenRequest, Object.class);
         } catch (RestClientException exception) {
             String errorMessage = String.format("Token not fetched because an error occurred while calling the token API (%s)", tokenUri);
             log.error(errorMessage);
@@ -137,7 +127,7 @@ public class CustomAuthenticator extends Authenticator {
                 }
             }
         }
-        return new AuthenticationTokenDTO()
+        return new CustomToken()
                 .withId(tokenId)
                 .withAccessToken(accessToken)
                 .withRefreshToken(refreshToken)
@@ -146,26 +136,52 @@ public class CustomAuthenticator extends Authenticator {
                 .withType(tokenType);
     }
 
-    protected AuthenticationUserDetailsDTO getUser(AuthenticationTokenDTO token) throws AuthenticationConfigurationNotFoundException, AuthenticationUserNotFetchedException {
-        AuthenticationCustomUserConfiguration userConfiguration = customConfiguration.getUser();
-        if (userConfiguration == null) {
-            String errorMessage = "No custom user configuration found";
+    @Override
+    protected String getTokenUri(UserAuthenticationRequestDTO request) throws AuthenticationConfigurationNotFoundException {
+        String tokenUri = tokenConfiguration.getUri();
+        if (StringUtils.isBlank(tokenUri)) {
+            String errorMessage = "No custom token configuration URI found";
             log.error(errorMessage);
             throw new AuthenticationConfigurationNotFoundException(errorMessage);
         }
+        return tokenUri;
+    }
+
+    @Override
+    protected HttpMethod getTokenMethod() {
+        return tokenConfiguration.getHttpMethod();
+    }
+
+    @Override
+    protected HttpEntity<MultiValueMap<String, String>> getTokenRequest(UserAuthenticationRequestDTO request) {
+        String code = request.getCode();
+        String clientId = request.getClientId();
+        Map<String, String> tokenParameters = Map.ofEntries(
+                entry("code", code),
+                entry("client_id", clientId)
+        );
+        HttpEntity<MultiValueMap<String, String>> tokenRequest = tokenConfiguration.getRequest(tokenParameters);
+        return tokenRequest;
+    }
+
+    @Override
+    protected String getUserUri() throws AuthenticationConfigurationNotFoundException {
         String userUri = userConfiguration.getUri();
         if (StringUtils.isBlank(userUri)) {
             String errorMessage = "No custom user configuration URI found";
             log.error(errorMessage);
             throw new AuthenticationConfigurationNotFoundException(errorMessage);
         }
-        AuthenticationCustomUserFieldsConfiguration userFieldsConfiguration = userConfiguration.getFields();
-        if (userFieldsConfiguration == null) {
-            String errorMessage = "No custom user configuration fields found";
-            log.error(errorMessage);
-            throw new AuthenticationConfigurationNotFoundException(errorMessage);
-        }
+        return userUri;
+    }
 
+    @Override
+    protected HttpMethod getUserMethod() {
+        return userConfiguration.getHttpMethod();
+    }
+
+    @Override
+    protected HttpEntity<MultiValueMap<String, String>> getUserRequest(CustomToken token) {
         Map<String, String> userParameters = new HashMap<>();
         String tokenType = token.getType();
         String tokenValue = token.getAccessToken();
@@ -177,10 +193,34 @@ public class CustomAuthenticator extends Authenticator {
         }
 
         HttpEntity<MultiValueMap<String, String>> userRequest = userConfiguration.getRequest(userParameters);
-        HttpMethod userHttpMethod = userConfiguration.getHttpMethod();
+        return userRequest;
+    }
+
+    @Override
+    protected AuthenticationUserDetailsDTO convertUser(CustomUser user) {
+        return new AuthenticationUserDetailsDTO()
+                .withId(user.getId())
+                .withLogin(user.getLogin())
+                .withName(user.getName())
+                .withEmail(user.getEmail())
+                .withPicture(user.getPicture());
+    }
+
+    @Override
+    protected CustomUser getUser(CustomToken token) throws AuthenticationConfigurationNotFoundException, AuthenticationUserNotFetchedException {
+        String userUri = getUserUri();
+        AuthenticationCustomUserFieldsConfiguration userFieldsConfiguration = userConfiguration.getFields();
+        if (userFieldsConfiguration == null) {
+            String errorMessage = "No custom user configuration fields found";
+            log.error(errorMessage);
+            throw new AuthenticationConfigurationNotFoundException(errorMessage);
+        }
+
+        HttpEntity<MultiValueMap<String, String>> userRequest = getUserRequest(token);
+        HttpMethod userMethod = getUserMethod();
         ResponseEntity<Object> userResponseEntity;
         try {
-            userResponseEntity = restTemplate.exchange(userUri, userHttpMethod, userRequest, Object.class);
+            userResponseEntity = restTemplate.exchange(userUri, userMethod, userRequest, Object.class);
         } catch (RestClientException exception) {
             String errorMessage = String.format("User not fetched because an error occurred while calling the user API (%s)", userUri);
             log.error(errorMessage);
@@ -204,7 +244,7 @@ public class CustomAuthenticator extends Authenticator {
         String userLogin = (String) allUserValues.get(userFieldsConfiguration.getLogin());
         String userEmail = (String) allUserValues.get(userFieldsConfiguration.getEmail());
         String userPictureUrl = (String) allUserValues.get(userFieldsConfiguration.getPictureUrl());
-        return new AuthenticationUserDetailsDTO()
+        return new CustomUser()
                 .withId(userId)
                 .withLogin(userLogin)
                 .withName(userName)
@@ -213,59 +253,41 @@ public class CustomAuthenticator extends Authenticator {
     }
 
     @Override
-    protected Boolean isAValidToken(String token) throws AuthenticationConfigurationNotFoundException {
+    protected String getTokenValidationUri(String token) throws AuthenticationConfigurationNotFoundException {
         String url = tokenValidationConfiguration.getUri();
         if (StringUtils.isBlank(url)) {
             String errorMessage = "To validate the token, a validation url is required but was not found in the configuration";
             log.error(errorMessage);
             throw new AuthenticationConfigurationNotFoundException(errorMessage);
         }
+        return url;
+    }
 
-        HttpMethod method = tokenValidationConfiguration.getHttpMethod();
+    @Override
+    protected HttpMethod getTokenValidationMethod() {
+        return tokenValidationConfiguration.getHttpMethod();
+    }
+
+    @Override
+    protected HttpEntity getTokenValidationRequest(String token) {
         Map<String, String> parameters = Map.ofEntries(
                 entry("token_value", token)
         );
         HttpEntity<MultiValueMap<String, String>> request = tokenValidationConfiguration.getRequest(parameters);
+        return request;
+    }
 
-        ResponseEntity<Object> response;
-        try {
-            response = restTemplate.exchange(url, method, request, Object.class);
-        }
-        catch (RestClientException exception) {
-            return false;
-        }
-
-        HttpStatus status = response.getStatusCode();
-        if (status.isError()) {
-            return false;
-        }
-
+    @Override
+    protected Optional<Pair<String, Optional<Object>>> getValueToCheck() {
         AuthenticationCustomTokenValidationFieldConfiguration validationField = tokenValidationConfiguration.getValidationField();
         if (validationField == null) {
-            return true;
+            return Optional.empty();
         }
         String fieldName = validationField.getName();
         if (StringUtils.isBlank(fieldName)) {
-            return true;
-        }
-
-        ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> allValues = mapper.convertValue(response.getBody(), Map.class);
-        if (!allValues.containsKey(fieldName)) {
-            String errorMessage = String.format("The field %s was not found when checking the token.", fieldName);
-            log.error(errorMessage);
-            throw new AuthenticationConfigurationNotFoundException(errorMessage);
+            return Optional.empty();
         }
         Object expectedFieldValue = validationField.getExpectedValue();
-        Object actualFieldValue = allValues.get(fieldName);
-        if (expectedFieldValue == null) {
-            if (actualFieldValue instanceof Boolean) {
-                return (Boolean) actualFieldValue;
-            }
-            String errorMessage = "If the expected value is not provided in the configuration, then the returned value must be a boolean. Otherwise, there are no value to compare to";
-            log.error(errorMessage);
-            throw new AuthenticationConfigurationNotFoundException(errorMessage);
-        }
-        return expectedFieldValue.equals(actualFieldValue);
+        return Optional.of(Pair.of(fieldName, Optional.ofNullable(expectedFieldValue)));
     }
 }

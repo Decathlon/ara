@@ -15,32 +15,7 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.response.user;
+package com.decathlon.ara.service.dto.authentication.provider;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-
-import java.sql.Timestamp;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
-public class AuthenticationTokenDTO {
-
-    private String id;
-
-    private String accessToken;
-
-    private String refreshToken;
-
-    private Integer expirationDuration;
-
-    private Timestamp expirationTimestamp;
-
-    private String type;
-
-    private String scope;
+public abstract class AuthenticatorToken {
 }

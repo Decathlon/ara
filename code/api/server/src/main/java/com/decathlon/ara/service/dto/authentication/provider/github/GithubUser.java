@@ -17,11 +17,12 @@
 
 package com.decathlon.ara.service.dto.authentication.provider.github;
 
+import com.decathlon.ara.service.dto.authentication.provider.AuthenticatorUser;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class GithubUser {
+public class GithubUser extends AuthenticatorUser {
 
     private Integer id;
 

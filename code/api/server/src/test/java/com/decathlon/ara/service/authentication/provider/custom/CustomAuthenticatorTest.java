@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.service.authentication.provider.custom;
 
-import com.decathlon.ara.configuration.authentication.clients.custom.AuthenticationCustomConfiguration;
 import com.decathlon.ara.configuration.authentication.clients.custom.token.AuthenticationCustomTokenConfiguration;
 import com.decathlon.ara.configuration.authentication.clients.custom.token.AuthenticationCustomTokenFieldsConfiguration;
 import com.decathlon.ara.configuration.authentication.clients.custom.user.AuthenticationCustomUserConfiguration;
@@ -60,7 +59,10 @@ import static org.mockito.Mockito.when;
 public class CustomAuthenticatorTest {
 
     @Mock
-    private AuthenticationCustomConfiguration configuration;
+    private AuthenticationCustomTokenConfiguration tokenConfiguration;
+
+    @Mock
+    private AuthenticationCustomUserConfiguration userConfiguration;
 
     @Mock
     private RestTemplate restTemplate;
@@ -176,34 +178,15 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationConfigurationNotFoundException_whenTokenConfigurationNotFound() {
-        // Given
-        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
-
-        // When
-        when(request.getProvider()).thenReturn("provider");
-        when(request.getCode()).thenReturn("some_code");
-        when(request.getClientId()).thenReturn("client_id");
-
-        when(configuration.getToken()).thenReturn(null);
-
-        // Then
-        assertThatThrownBy(() -> authenticator.authenticate(request))
-                .isInstanceOf(AuthenticationConfigurationNotFoundException.class);
-    }
-
-    @Test
     public void authenticate_throwAuthenticationConfigurationNotFoundException_whenTokenConfigurationUriNotFound() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
-        AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
 
         // When
         when(request.getProvider()).thenReturn("provider");
         when(request.getCode()).thenReturn("some_code");
         when(request.getClientId()).thenReturn("client_id");
 
-        when(configuration.getToken()).thenReturn(tokenConfiguration);
         when(tokenConfiguration.getUri()).thenReturn(null);
 
         // Then
@@ -215,15 +198,14 @@ public class CustomAuthenticatorTest {
     public void authenticate_throwAuthenticationConfigurationNotFoundException_whenTokenConfigurationFieldsNotFound() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
-        AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
 
         // When
         when(request.getProvider()).thenReturn("provider");
         when(request.getCode()).thenReturn("some_code");
         when(request.getClientId()).thenReturn("client_id");
 
-        when(configuration.getToken()).thenReturn(tokenConfiguration);
         when(tokenConfiguration.getUri()).thenReturn("the_token_uri");
+        when(tokenConfiguration.getHttpMethod()).thenReturn(HttpMethod.POST);
         when(tokenConfiguration.getFields()).thenReturn(null);
 
         // Then
@@ -235,7 +217,6 @@ public class CustomAuthenticatorTest {
     public void authenticate_throwAuthenticationTokenNotFetchedException_whenTokenAPICallThrowException() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
-        AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
 
         String tokenUri = "the_token_uri";
@@ -247,11 +228,11 @@ public class CustomAuthenticatorTest {
         when(request.getCode()).thenReturn("some_code");
         when(request.getClientId()).thenReturn("client_id");
 
-        when(configuration.getToken()).thenReturn(tokenConfiguration);
         when(tokenConfiguration.getUri()).thenReturn(tokenUri);
+        when(tokenConfiguration.getHttpMethod()).thenReturn(HttpMethod.POST);
         when(tokenConfiguration.getFields()).thenReturn(tokenFieldsConfiguration);
         when(tokenConfiguration.getRequest(anyMap())).thenReturn(tokenRequest);
-        when(restTemplate.postForEntity(tokenUri, tokenRequest, Object.class)).thenThrow(new RestClientException("API call error"));
+        when(restTemplate.exchange(tokenUri, HttpMethod.POST, tokenRequest, Object.class)).thenThrow(new RestClientException("API call error"));
 
         // Then
         assertThatThrownBy(() -> authenticator.authenticate(request))
@@ -262,7 +243,6 @@ public class CustomAuthenticatorTest {
     public void authenticate_throwAuthenticationTokenNotFetchedException_whenTokenAPICallReturnsAnErrorStatus() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
-        AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
 
         String tokenUri = "the_token_uri";
@@ -276,11 +256,11 @@ public class CustomAuthenticatorTest {
         when(request.getCode()).thenReturn("some_code");
         when(request.getClientId()).thenReturn("client_id");
 
-        when(configuration.getToken()).thenReturn(tokenConfiguration);
         when(tokenConfiguration.getUri()).thenReturn(tokenUri);
+        when(tokenConfiguration.getHttpMethod()).thenReturn(HttpMethod.POST);
         when(tokenConfiguration.getFields()).thenReturn(tokenFieldsConfiguration);
         when(tokenConfiguration.getRequest(anyMap())).thenReturn(tokenRequest);
-        when(restTemplate.postForEntity(tokenUri, tokenRequest, Object.class)).thenReturn(tokenResponseEntity);
+        when(restTemplate.exchange(tokenUri, HttpMethod.POST, tokenRequest, Object.class)).thenReturn(tokenResponseEntity);
         when(tokenResponseEntity.getStatusCode()).thenReturn(HttpStatus.BAD_REQUEST);
 
         // Then
@@ -289,42 +269,9 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationConfigurationNotFoundException_whenUserConfigurationNotFound() {
-        // Given
-        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
-        AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
-        AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
-
-        String tokenUri = "the_token_uri";
-
-        HttpEntity<MultiValueMap<String, String>> tokenRequest = mock(HttpEntity.class);
-
-        ResponseEntity<Object> tokenResponseEntity = mock(ResponseEntity.class);
-
-        // When
-        when(request.getProvider()).thenReturn("provider");
-        when(request.getCode()).thenReturn("some_code");
-        when(request.getClientId()).thenReturn("client_id");
-
-        when(configuration.getToken()).thenReturn(tokenConfiguration);
-        when(tokenConfiguration.getUri()).thenReturn(tokenUri);
-        when(tokenConfiguration.getFields()).thenReturn(tokenFieldsConfiguration);
-        when(tokenConfiguration.getRequest(anyMap())).thenReturn(tokenRequest);
-        when(restTemplate.postForEntity(tokenUri, tokenRequest, Object.class)).thenReturn(tokenResponseEntity);
-        when(tokenResponseEntity.getStatusCode()).thenReturn(HttpStatus.OK);
-        when(tokenResponseEntity.getBody()).thenReturn(new DummyTokenForTest());
-        when(configuration.getUser()).thenReturn(null);
-
-        // Then
-        assertThatThrownBy(() -> authenticator.authenticate(request))
-                .isInstanceOf(AuthenticationConfigurationNotFoundException.class);
-    }
-
-    @Test
     public void authenticate_throwAuthenticationConfigurationNotFoundException_whenUserConfigurationURINotFound() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
-        AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
 
         String tokenUri = "the_token_uri";
@@ -333,21 +280,18 @@ public class CustomAuthenticatorTest {
 
         ResponseEntity<Object> tokenResponseEntity = mock(ResponseEntity.class);
 
-        AuthenticationCustomUserConfiguration userConfiguration = mock(AuthenticationCustomUserConfiguration.class);
-
         // When
         when(request.getProvider()).thenReturn("provider");
         when(request.getCode()).thenReturn("some_code");
         when(request.getClientId()).thenReturn("client_id");
 
-        when(configuration.getToken()).thenReturn(tokenConfiguration);
         when(tokenConfiguration.getUri()).thenReturn(tokenUri);
+        when(tokenConfiguration.getHttpMethod()).thenReturn(HttpMethod.POST);
         when(tokenConfiguration.getFields()).thenReturn(tokenFieldsConfiguration);
         when(tokenConfiguration.getRequest(anyMap())).thenReturn(tokenRequest);
-        when(restTemplate.postForEntity(tokenUri, tokenRequest, Object.class)).thenReturn(tokenResponseEntity);
+        when(restTemplate.exchange(tokenUri, HttpMethod.POST, tokenRequest, Object.class)).thenReturn(tokenResponseEntity);
         when(tokenResponseEntity.getStatusCode()).thenReturn(HttpStatus.OK);
         when(tokenResponseEntity.getBody()).thenReturn(new DummyTokenForTest());
-        when(configuration.getUser()).thenReturn(userConfiguration);
         when(userConfiguration.getUri()).thenReturn(null);
 
         // Then
@@ -359,7 +303,6 @@ public class CustomAuthenticatorTest {
     public void authenticate_throwAuthenticationConfigurationNotFoundException_whenUserConfigurationFieldsNotFound() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
-        AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
 
         String tokenUri = "the_token_uri";
@@ -368,8 +311,6 @@ public class CustomAuthenticatorTest {
 
         ResponseEntity<Object> tokenResponseEntity = mock(ResponseEntity.class);
 
-        AuthenticationCustomUserConfiguration userConfiguration = mock(AuthenticationCustomUserConfiguration.class);
-
         String userUri = "the_user_uri";
 
         // When
@@ -377,14 +318,13 @@ public class CustomAuthenticatorTest {
         when(request.getCode()).thenReturn("some_code");
         when(request.getClientId()).thenReturn("client_id");
 
-        when(configuration.getToken()).thenReturn(tokenConfiguration);
         when(tokenConfiguration.getUri()).thenReturn(tokenUri);
+        when(tokenConfiguration.getHttpMethod()).thenReturn(HttpMethod.POST);
         when(tokenConfiguration.getFields()).thenReturn(tokenFieldsConfiguration);
         when(tokenConfiguration.getRequest(anyMap())).thenReturn(tokenRequest);
-        when(restTemplate.postForEntity(tokenUri, tokenRequest, Object.class)).thenReturn(tokenResponseEntity);
+        when(restTemplate.exchange(tokenUri, HttpMethod.POST, tokenRequest, Object.class)).thenReturn(tokenResponseEntity);
         when(tokenResponseEntity.getStatusCode()).thenReturn(HttpStatus.OK);
         when(tokenResponseEntity.getBody()).thenReturn(new DummyTokenForTest());
-        when(configuration.getUser()).thenReturn(userConfiguration);
         when(userConfiguration.getUri()).thenReturn(userUri);
         when(userConfiguration.getFields()).thenReturn(null);
 
@@ -397,7 +337,6 @@ public class CustomAuthenticatorTest {
     public void authenticate_throwAuthenticationUserNotFetchedException_whenUserAPICallThrowException() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
-        AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
 
         String tokenUri = "the_token_uri";
@@ -405,8 +344,6 @@ public class CustomAuthenticatorTest {
         HttpEntity<MultiValueMap<String, String>> tokenRequest = mock(HttpEntity.class);
 
         ResponseEntity<Object> tokenResponseEntity = mock(ResponseEntity.class);
-
-        AuthenticationCustomUserConfiguration userConfiguration = mock(AuthenticationCustomUserConfiguration.class);
 
         String userUri = "the_user_uri";
 
@@ -421,14 +358,13 @@ public class CustomAuthenticatorTest {
         when(request.getCode()).thenReturn("some_code");
         when(request.getClientId()).thenReturn("client_id");
 
-        when(configuration.getToken()).thenReturn(tokenConfiguration);
         when(tokenConfiguration.getUri()).thenReturn(tokenUri);
+        when(tokenConfiguration.getHttpMethod()).thenReturn(HttpMethod.POST);
         when(tokenConfiguration.getFields()).thenReturn(tokenFieldsConfiguration);
         when(tokenConfiguration.getRequest(anyMap())).thenReturn(tokenRequest);
-        when(restTemplate.postForEntity(tokenUri, tokenRequest, Object.class)).thenReturn(tokenResponseEntity);
+        when(restTemplate.exchange(tokenUri, HttpMethod.POST, tokenRequest, Object.class)).thenReturn(tokenResponseEntity);
         when(tokenResponseEntity.getStatusCode()).thenReturn(HttpStatus.OK);
         when(tokenResponseEntity.getBody()).thenReturn(new DummyTokenForTest());
-        when(configuration.getUser()).thenReturn(userConfiguration);
         when(userConfiguration.getUri()).thenReturn(userUri);
         when(userConfiguration.getFields()).thenReturn(userFieldsConfiguration);
         when(userConfiguration.getRequest(anyMap())).thenReturn(userRequest);
@@ -444,7 +380,6 @@ public class CustomAuthenticatorTest {
     public void authenticate_throwAuthenticationUserNotFetchedException_whenUserAPICallReturnsAnErrorStatus() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
-        AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
 
         String tokenUri = "the_token_uri";
@@ -452,8 +387,6 @@ public class CustomAuthenticatorTest {
         HttpEntity<MultiValueMap<String, String>> tokenRequest = mock(HttpEntity.class);
 
         ResponseEntity<Object> tokenResponseEntity = mock(ResponseEntity.class);
-
-        AuthenticationCustomUserConfiguration userConfiguration = mock(AuthenticationCustomUserConfiguration.class);
 
         String userUri = "the_user_uri";
 
@@ -470,14 +403,13 @@ public class CustomAuthenticatorTest {
         when(request.getCode()).thenReturn("some_code");
         when(request.getClientId()).thenReturn("client_id");
 
-        when(configuration.getToken()).thenReturn(tokenConfiguration);
         when(tokenConfiguration.getUri()).thenReturn(tokenUri);
+        when(tokenConfiguration.getHttpMethod()).thenReturn(HttpMethod.POST);
         when(tokenConfiguration.getFields()).thenReturn(tokenFieldsConfiguration);
         when(tokenConfiguration.getRequest(anyMap())).thenReturn(tokenRequest);
-        when(restTemplate.postForEntity(tokenUri, tokenRequest, Object.class)).thenReturn(tokenResponseEntity);
+        when(restTemplate.exchange(tokenUri, HttpMethod.POST, tokenRequest, Object.class)).thenReturn(tokenResponseEntity);
         when(tokenResponseEntity.getStatusCode()).thenReturn(HttpStatus.OK);
         when(tokenResponseEntity.getBody()).thenReturn(new DummyTokenForTest());
-        when(configuration.getUser()).thenReturn(userConfiguration);
         when(userConfiguration.getUri()).thenReturn(userUri);
         when(userConfiguration.getFields()).thenReturn(userFieldsConfiguration);
         when(userConfiguration.getRequest(anyMap())).thenReturn(userRequest);
@@ -494,7 +426,6 @@ public class CustomAuthenticatorTest {
     public void authenticate_returnFullyFilledAuthenticationDetails_whenAllFieldsGivenAndFound() throws AuthenticationException {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
-        AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
 
         String tokenUri = "the_token_uri";
@@ -502,8 +433,6 @@ public class CustomAuthenticatorTest {
         HttpEntity<MultiValueMap<String, String>> tokenRequest = mock(HttpEntity.class);
 
         ResponseEntity<Object> tokenResponseEntity = mock(ResponseEntity.class);
-
-        AuthenticationCustomUserConfiguration userConfiguration = mock(AuthenticationCustomUserConfiguration.class);
 
         String userUri = "the_user_uri";
 
@@ -546,8 +475,8 @@ public class CustomAuthenticatorTest {
         when(request.getCode()).thenReturn("some_code");
         when(request.getClientId()).thenReturn("client_id");
 
-        when(configuration.getToken()).thenReturn(tokenConfiguration);
         when(tokenConfiguration.getUri()).thenReturn(tokenUri);
+        when(tokenConfiguration.getHttpMethod()).thenReturn(HttpMethod.POST);
         when(tokenConfiguration.getFields()).thenReturn(tokenFieldsConfiguration);
         when(tokenFieldsConfiguration.getId()).thenReturn("dummyTokenIdAsString");
         when(tokenFieldsConfiguration.getAccess()).thenReturn("dummyAccess");
@@ -556,10 +485,9 @@ public class CustomAuthenticatorTest {
         when(tokenFieldsConfiguration.getType()).thenReturn("dummyType");
         when(tokenFieldsConfiguration.getScope()).thenReturn("dummyScope");
         when(tokenConfiguration.getRequest(anyMap())).thenReturn(tokenRequest);
-        when(restTemplate.postForEntity(tokenUri, tokenRequest, Object.class)).thenReturn(tokenResponseEntity);
+        when(restTemplate.exchange(tokenUri, HttpMethod.POST, tokenRequest, Object.class)).thenReturn(tokenResponseEntity);
         when(tokenResponseEntity.getStatusCode()).thenReturn(HttpStatus.OK);
         when(tokenResponseEntity.getBody()).thenReturn(dummyTokenForTest);
-        when(configuration.getUser()).thenReturn(userConfiguration);
         when(userConfiguration.getUri()).thenReturn(userUri);
         when(userConfiguration.getFields()).thenReturn(userFieldsConfiguration);
         when(userFieldsConfiguration.getId()).thenReturn("dummyUserIdAsString");
@@ -598,7 +526,6 @@ public class CustomAuthenticatorTest {
     public void authenticate_returnFullyFilledAuthenticationDetails_whenAllFieldsGivenAndFoundAndIdsAreIntegers() throws AuthenticationException {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
-        AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
 
         String tokenUri = "the_token_uri";
@@ -606,8 +533,6 @@ public class CustomAuthenticatorTest {
         HttpEntity<MultiValueMap<String, String>> tokenRequest = mock(HttpEntity.class);
 
         ResponseEntity<Object> tokenResponseEntity = mock(ResponseEntity.class);
-
-        AuthenticationCustomUserConfiguration userConfiguration = mock(AuthenticationCustomUserConfiguration.class);
 
         String userUri = "the_user_uri";
 
@@ -650,8 +575,8 @@ public class CustomAuthenticatorTest {
         when(request.getCode()).thenReturn("some_code");
         when(request.getClientId()).thenReturn("client_id");
 
-        when(configuration.getToken()).thenReturn(tokenConfiguration);
         when(tokenConfiguration.getUri()).thenReturn(tokenUri);
+        when(tokenConfiguration.getHttpMethod()).thenReturn(HttpMethod.POST);
         when(tokenConfiguration.getFields()).thenReturn(tokenFieldsConfiguration);
         when(tokenFieldsConfiguration.getId()).thenReturn("dummyTokenIdAsInteger");
         when(tokenFieldsConfiguration.getAccess()).thenReturn("dummyAccess");
@@ -660,10 +585,9 @@ public class CustomAuthenticatorTest {
         when(tokenFieldsConfiguration.getType()).thenReturn("dummyType");
         when(tokenFieldsConfiguration.getScope()).thenReturn("dummyScope");
         when(tokenConfiguration.getRequest(anyMap())).thenReturn(tokenRequest);
-        when(restTemplate.postForEntity(tokenUri, tokenRequest, Object.class)).thenReturn(tokenResponseEntity);
+        when(restTemplate.exchange(tokenUri, HttpMethod.POST, tokenRequest, Object.class)).thenReturn(tokenResponseEntity);
         when(tokenResponseEntity.getStatusCode()).thenReturn(HttpStatus.OK);
         when(tokenResponseEntity.getBody()).thenReturn(dummyTokenForTest);
-        when(configuration.getUser()).thenReturn(userConfiguration);
         when(userConfiguration.getUri()).thenReturn(userUri);
         when(userConfiguration.getFields()).thenReturn(userFieldsConfiguration);
         when(userFieldsConfiguration.getId()).thenReturn("dummyUserIdAsInteger");
@@ -702,7 +626,6 @@ public class CustomAuthenticatorTest {
     public void authenticate_returnFullyFilledAuthenticationDetails_whenAllFieldsGivenAndFoundAndTokenExpirationAsStringButCorrectIntegerRepresentation() throws AuthenticationException {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
-        AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
 
         String tokenUri = "the_token_uri";
@@ -710,8 +633,6 @@ public class CustomAuthenticatorTest {
         HttpEntity<MultiValueMap<String, String>> tokenRequest = mock(HttpEntity.class);
 
         ResponseEntity<Object> tokenResponseEntity = mock(ResponseEntity.class);
-
-        AuthenticationCustomUserConfiguration userConfiguration = mock(AuthenticationCustomUserConfiguration.class);
 
         String userUri = "the_user_uri";
 
@@ -754,8 +675,8 @@ public class CustomAuthenticatorTest {
         when(request.getCode()).thenReturn("some_code");
         when(request.getClientId()).thenReturn("client_id");
 
-        when(configuration.getToken()).thenReturn(tokenConfiguration);
         when(tokenConfiguration.getUri()).thenReturn(tokenUri);
+        when(tokenConfiguration.getHttpMethod()).thenReturn(HttpMethod.POST);
         when(tokenConfiguration.getFields()).thenReturn(tokenFieldsConfiguration);
         when(tokenFieldsConfiguration.getId()).thenReturn("dummyTokenIdAsString");
         when(tokenFieldsConfiguration.getAccess()).thenReturn("dummyAccess");
@@ -764,10 +685,9 @@ public class CustomAuthenticatorTest {
         when(tokenFieldsConfiguration.getType()).thenReturn("dummyType");
         when(tokenFieldsConfiguration.getScope()).thenReturn("dummyScope");
         when(tokenConfiguration.getRequest(anyMap())).thenReturn(tokenRequest);
-        when(restTemplate.postForEntity(tokenUri, tokenRequest, Object.class)).thenReturn(tokenResponseEntity);
+        when(restTemplate.exchange(tokenUri, HttpMethod.POST, tokenRequest, Object.class)).thenReturn(tokenResponseEntity);
         when(tokenResponseEntity.getStatusCode()).thenReturn(HttpStatus.OK);
         when(tokenResponseEntity.getBody()).thenReturn(dummyTokenForTest);
-        when(configuration.getUser()).thenReturn(userConfiguration);
         when(userConfiguration.getUri()).thenReturn(userUri);
         when(userConfiguration.getFields()).thenReturn(userFieldsConfiguration);
         when(userFieldsConfiguration.getId()).thenReturn("dummyUserIdAsString");
@@ -806,7 +726,6 @@ public class CustomAuthenticatorTest {
     public void authenticate_returnFullyFilledAuthenticationDetails_whenAllFieldsGivenAndFoundAndTokenExpirationAsStringButNotAnIntegerRepresentation() throws AuthenticationException {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
-        AuthenticationCustomTokenConfiguration tokenConfiguration = mock(AuthenticationCustomTokenConfiguration.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
 
         String tokenUri = "the_token_uri";
@@ -814,8 +733,6 @@ public class CustomAuthenticatorTest {
         HttpEntity<MultiValueMap<String, String>> tokenRequest = mock(HttpEntity.class);
 
         ResponseEntity<Object> tokenResponseEntity = mock(ResponseEntity.class);
-
-        AuthenticationCustomUserConfiguration userConfiguration = mock(AuthenticationCustomUserConfiguration.class);
 
         String userUri = "the_user_uri";
 
@@ -858,8 +775,8 @@ public class CustomAuthenticatorTest {
         when(request.getCode()).thenReturn("some_code");
         when(request.getClientId()).thenReturn("client_id");
 
-        when(configuration.getToken()).thenReturn(tokenConfiguration);
         when(tokenConfiguration.getUri()).thenReturn(tokenUri);
+        when(tokenConfiguration.getHttpMethod()).thenReturn(HttpMethod.POST);
         when(tokenConfiguration.getFields()).thenReturn(tokenFieldsConfiguration);
         when(tokenFieldsConfiguration.getId()).thenReturn("dummyTokenIdAsString");
         when(tokenFieldsConfiguration.getAccess()).thenReturn("dummyAccess");
@@ -868,10 +785,9 @@ public class CustomAuthenticatorTest {
         when(tokenFieldsConfiguration.getType()).thenReturn("dummyType");
         when(tokenFieldsConfiguration.getScope()).thenReturn("dummyScope");
         when(tokenConfiguration.getRequest(anyMap())).thenReturn(tokenRequest);
-        when(restTemplate.postForEntity(tokenUri, tokenRequest, Object.class)).thenReturn(tokenResponseEntity);
+        when(restTemplate.exchange(tokenUri, HttpMethod.POST, tokenRequest, Object.class)).thenReturn(tokenResponseEntity);
         when(tokenResponseEntity.getStatusCode()).thenReturn(HttpStatus.OK);
         when(tokenResponseEntity.getBody()).thenReturn(dummyTokenForTest);
-        when(configuration.getUser()).thenReturn(userConfiguration);
         when(userConfiguration.getUri()).thenReturn(userUri);
         when(userConfiguration.getFields()).thenReturn(userFieldsConfiguration);
         when(userFieldsConfiguration.getId()).thenReturn("dummyUserIdAsString");
@@ -1075,7 +991,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationConfigurationNotFoundException_whenTokenValidationFieldNameFoundButNotFoundInResponse() {
+    public void authenticate_throwAuthenticationException_whenTokenValidationFieldNameFoundButNotFoundInResponse() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";
@@ -1106,11 +1022,11 @@ public class CustomAuthenticatorTest {
 
         // Then
         assertThatThrownBy(() -> authenticator.authenticate(request))
-                .isInstanceOf(AuthenticationConfigurationNotFoundException.class);
+                .isInstanceOf(AuthenticationException.class);
     }
 
     @Test
-    public void authenticate_throwAuthenticationConfigurationNotFoundException_whenNoTokenValidationExpectedValueAndFieldNotABoolean() {
+    public void authenticate_throwAuthenticationException_whenNoTokenValidationExpectedValueAndFieldNotABoolean() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";
@@ -1144,7 +1060,7 @@ public class CustomAuthenticatorTest {
 
         // Then
         assertThatThrownBy(() -> authenticator.authenticate(request))
-                .isInstanceOf(AuthenticationConfigurationNotFoundException.class);
+                .isInstanceOf(AuthenticationException.class);
     }
 
     @Test
@@ -1208,6 +1124,91 @@ public class CustomAuthenticatorTest {
 
         DummyTokenVerificationContainingBooleanField tokenVerification = new DummyTokenVerificationContainingBooleanField();
         tokenVerification.setStillActive(true);
+
+        String jwt = "generated_jwt";
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(request.getProvider()).thenReturn(provider);
+        when(tokenValidationConfiguration.getUri()).thenReturn(url);
+        when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
+        when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
+        when(restTemplate.exchange(url, method, customRequest, Object.class)).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(response.getBody()).thenReturn(tokenVerification);
+        when(tokenValidationConfiguration.getValidationField()).thenReturn(tokenValidationFieldConfiguration);
+        when(tokenValidationFieldConfiguration.getExpectedValue()).thenReturn(null);
+        when(tokenValidationFieldConfiguration.getName()).thenReturn(fieldName);
+        when(jwtTokenAuthenticationService.generateToken()).thenReturn(jwt);
+
+        // Then
+        AppAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        assertThat(authenticationDetails).isNotNull();
+        assertThat(authenticationDetails.getProvider()).isEqualTo(provider);
+        assertThat(authenticationDetails.getAccessToken()).isEqualTo(jwt);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenNoTokenValidationExpectedValueAndFieldIsStringAndIsConsideredFalse() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "custom_token";
+
+        String url = "token_validation_url";
+        HttpMethod method = HttpMethod.POST;
+        Map<String, String> parameters = Map.ofEntries(
+                entry("token_value", token)
+        );
+        HttpEntity<MultiValueMap<String, String>> customRequest = mock(HttpEntity.class);
+
+        ResponseEntity<Object> response = mock(ResponseEntity.class);
+
+        AuthenticationCustomTokenValidationFieldConfiguration tokenValidationFieldConfiguration = mock(AuthenticationCustomTokenValidationFieldConfiguration.class);
+
+        String fieldName = "stillActive";
+
+        DummyTokenVerificationContainingNonBooleanField tokenVerification = new DummyTokenVerificationContainingNonBooleanField();
+        tokenVerification.setStillActive("not even a boolean!");
+
+        // When
+        when(request.getToken()).thenReturn(token);
+        when(tokenValidationConfiguration.getUri()).thenReturn(url);
+        when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
+        when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
+        when(restTemplate.exchange(url, method, customRequest, Object.class)).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(response.getBody()).thenReturn(tokenVerification);
+        when(tokenValidationConfiguration.getValidationField()).thenReturn(tokenValidationFieldConfiguration);
+        when(tokenValidationFieldConfiguration.getExpectedValue()).thenReturn(null);
+        when(tokenValidationFieldConfiguration.getName()).thenReturn(fieldName);
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_returnAuthenticationDetails_whenNoTokenValidationExpectedValueAndFieldIsStringAndIsConsideredTrue() throws AuthenticationException {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "custom_token";
+        String provider = "provider";
+
+        String url = "token_validation_url";
+        HttpMethod method = HttpMethod.POST;
+        Map<String, String> parameters = Map.ofEntries(
+                entry("token_value", token)
+        );
+        HttpEntity<MultiValueMap<String, String>> customRequest = mock(HttpEntity.class);
+
+        ResponseEntity<Object> response = mock(ResponseEntity.class);
+
+        AuthenticationCustomTokenValidationFieldConfiguration tokenValidationFieldConfiguration = mock(AuthenticationCustomTokenValidationFieldConfiguration.class);
+
+        String fieldName = "stillActive";
+
+        DummyTokenVerificationContainingNonBooleanField tokenVerification = new DummyTokenVerificationContainingNonBooleanField();
+        tokenVerification.setStillActive("true");
 
         String jwt = "generated_jwt";
 

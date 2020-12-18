@@ -17,11 +17,12 @@
 
 package com.decathlon.ara.service.dto.authentication.provider.google;
 
+import com.decathlon.ara.service.dto.authentication.provider.AuthenticatorUser;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class GoogleUser {
+public class GoogleUser extends AuthenticatorUser {
 
     @JsonProperty("sub")
     private String accountId;

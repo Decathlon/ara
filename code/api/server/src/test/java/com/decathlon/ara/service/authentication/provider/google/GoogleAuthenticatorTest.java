@@ -146,17 +146,61 @@ public class GoogleAuthenticatorTest {
         when(request.getRedirectUri()).thenReturn(redirectUri);
         when(googleConfiguration.getClientSecret()).thenReturn(secret);
         when(
-                restTemplate.postForObject(
+                restTemplate.exchange(
                         "https://oauth2.googleapis.com/token?" +
                                 "client_id=google_client_id&" +
                                 "client_secret=google_secret&" +
                                 "redirect_uri=http://redirect_uri.com&" +
                                 "grant_type=authorization_code&" +
                                 "code=google_code",
+                        HttpMethod.POST,
                         tokenRequest,
                         GoogleToken.class
                 )
         ).thenThrow(new RestClientException("Token API call error"));
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationTokenNotFetchedException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationTokenNotFetchedException_whenTokenAPICallReturnsAnErrorStatus() {
+        // Given
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
+        String clientId = "google_client_id";
+        String code = "google_code";
+        String provider = "provider";
+        String redirectUri = "http://redirect_uri.com";
+
+        String secret = "google_secret";
+
+        HttpHeaders tokenHeader = new HttpHeaders();
+        tokenHeader.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        HttpEntity<GoogleToken> tokenRequest = new HttpEntity<>(tokenHeader);
+
+        ResponseEntity<GoogleToken> response = mock(ResponseEntity.class);
+
+        // When
+        when(request.getClientId()).thenReturn(clientId);
+        when(request.getCode()).thenReturn(code);
+        when(request.getProvider()).thenReturn(provider);
+        when(request.getRedirectUri()).thenReturn(redirectUri);
+        when(googleConfiguration.getClientSecret()).thenReturn(secret);
+        when(
+                restTemplate.exchange(
+                        "https://oauth2.googleapis.com/token?" +
+                                "client_id=google_client_id&" +
+                                "client_secret=google_secret&" +
+                                "redirect_uri=http://redirect_uri.com&" +
+                                "grant_type=authorization_code&" +
+                                "code=google_code",
+                        HttpMethod.POST,
+                        tokenRequest,
+                        GoogleToken.class
+                )
+        ).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.FORBIDDEN);
 
         // Then
         assertThatThrownBy(() -> authenticator.authenticate(request))
@@ -178,12 +222,10 @@ public class GoogleAuthenticatorTest {
         tokenHeader.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
         HttpEntity<GoogleToken> tokenRequest = new HttpEntity<>(tokenHeader);
 
+        ResponseEntity<GoogleToken> response = mock(ResponseEntity.class);
         GoogleToken token = mock(GoogleToken.class);
 
         String accessToken = "access";
-        Integer expiration = 3600;
-        String tokenType = "token_type";
-        String tokenScope = "token_scope";
 
         HttpHeaders userHeader = new HttpHeaders();
         String authorization = String.format("Bearer %s", accessToken);
@@ -197,21 +239,21 @@ public class GoogleAuthenticatorTest {
         when(request.getRedirectUri()).thenReturn(redirectUri);
         when(googleConfiguration.getClientSecret()).thenReturn(secret);
         when(
-                restTemplate.postForObject(
+                restTemplate.exchange(
                         "https://oauth2.googleapis.com/token?" +
                                 "client_id=google_client_id&" +
                                 "client_secret=google_secret&" +
                                 "redirect_uri=http://redirect_uri.com&" +
                                 "grant_type=authorization_code&" +
                                 "code=google_code",
+                        HttpMethod.POST,
                         tokenRequest,
                         GoogleToken.class
                 )
-        ).thenReturn(token);
+        ).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(response.getBody()).thenReturn(token);
         when(token.getAccessToken()).thenReturn(accessToken);
-        when(token.getExpiration()).thenReturn(expiration);
-        when(token.getScope()).thenReturn(tokenScope);
-        when(token.getType()).thenReturn(tokenType);
         when(restTemplate.exchange("https://www.googleapis.com/oauth2/v3/userinfo", HttpMethod.GET, userRequest, GoogleUser.class))
                 .thenThrow(new RestClientException("User API call error"));
 
@@ -235,12 +277,10 @@ public class GoogleAuthenticatorTest {
         tokenHeader.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
         HttpEntity<GoogleToken> tokenRequest = new HttpEntity<>(tokenHeader);
 
+        ResponseEntity<GoogleToken> response = mock(ResponseEntity.class);
         GoogleToken token = mock(GoogleToken.class);
 
         String accessToken = "access";
-        Integer expiration = 3600;
-        String tokenType = "token_type";
-        String tokenScope = "token_scope";
 
         HttpHeaders userHeader = new HttpHeaders();
         String authorization = String.format("Bearer %s", accessToken);
@@ -256,21 +296,21 @@ public class GoogleAuthenticatorTest {
         when(request.getRedirectUri()).thenReturn(redirectUri);
         when(googleConfiguration.getClientSecret()).thenReturn(secret);
         when(
-                restTemplate.postForObject(
+                restTemplate.exchange(
                         "https://oauth2.googleapis.com/token?" +
                                 "client_id=google_client_id&" +
                                 "client_secret=google_secret&" +
                                 "redirect_uri=http://redirect_uri.com&" +
                                 "grant_type=authorization_code&" +
                                 "code=google_code",
+                        HttpMethod.POST,
                         tokenRequest,
                         GoogleToken.class
                 )
-        ).thenReturn(token);
+        ).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(response.getBody()).thenReturn(token);
         when(token.getAccessToken()).thenReturn(accessToken);
-        when(token.getExpiration()).thenReturn(expiration);
-        when(token.getScope()).thenReturn(tokenScope);
-        when(token.getType()).thenReturn(tokenType);
         when(restTemplate.exchange("https://www.googleapis.com/oauth2/v3/userinfo", HttpMethod.GET, userRequest, GoogleUser.class))
                 .thenReturn(userResponseEntity);
         when(userResponseEntity.getStatusCode()).thenReturn(HttpStatus.BAD_REQUEST);
@@ -295,12 +335,10 @@ public class GoogleAuthenticatorTest {
         tokenHeader.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
         HttpEntity<GoogleToken> tokenRequest = new HttpEntity<>(tokenHeader);
 
+        ResponseEntity<GoogleToken> response = mock(ResponseEntity.class);
         GoogleToken token = mock(GoogleToken.class);
 
         String accessToken = "access";
-        Integer expiration = 3600;
-        String tokenType = "token_type";
-        String tokenScope = "token_scope";
 
         HttpHeaders userHeader = new HttpHeaders();
         String authorization = String.format("Bearer %s", accessToken);
@@ -318,21 +356,21 @@ public class GoogleAuthenticatorTest {
         when(request.getRedirectUri()).thenReturn(redirectUri);
         when(googleConfiguration.getClientSecret()).thenReturn(secret);
         when(
-                restTemplate.postForObject(
+                restTemplate.exchange(
                         "https://oauth2.googleapis.com/token?" +
                                 "client_id=google_client_id&" +
                                 "client_secret=google_secret&" +
                                 "redirect_uri=http://redirect_uri.com&" +
                                 "grant_type=authorization_code&" +
                                 "code=google_code",
+                        HttpMethod.POST,
                         tokenRequest,
                         GoogleToken.class
                 )
-        ).thenReturn(token);
+        ).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(response.getBody()).thenReturn(token);
         when(token.getAccessToken()).thenReturn(accessToken);
-        when(token.getExpiration()).thenReturn(expiration);
-        when(token.getScope()).thenReturn(tokenScope);
-        when(token.getType()).thenReturn(tokenType);
         when(restTemplate.exchange("https://www.googleapis.com/oauth2/v3/userinfo", HttpMethod.GET, userRequest, GoogleUser.class))
                 .thenReturn(userResponseEntity);
         when(userResponseEntity.getStatusCode()).thenReturn(HttpStatus.OK);
@@ -359,12 +397,10 @@ public class GoogleAuthenticatorTest {
         tokenHeader.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
         HttpEntity<GoogleToken> tokenRequest = new HttpEntity<>(tokenHeader);
 
+        ResponseEntity<GoogleToken> response = mock(ResponseEntity.class);
         GoogleToken token = mock(GoogleToken.class);
 
         String accessToken = "access";
-        Integer expiration = 3600;
-        String tokenType = "token_type";
-        String tokenScope = "token_scope";
 
         HttpHeaders userHeader = new HttpHeaders();
         String authorization = String.format("Bearer %s", accessToken);
@@ -386,21 +422,21 @@ public class GoogleAuthenticatorTest {
         when(request.getRedirectUri()).thenReturn(redirectUri);
         when(googleConfiguration.getClientSecret()).thenReturn(secret);
         when(
-                restTemplate.postForObject(
+                restTemplate.exchange(
                         "https://oauth2.googleapis.com/token?" +
                                 "client_id=google_client_id&" +
                                 "client_secret=google_secret&" +
                                 "redirect_uri=http://redirect_uri.com&" +
                                 "grant_type=authorization_code&" +
                                 "code=google_code",
+                        HttpMethod.POST,
                         tokenRequest,
                         GoogleToken.class
                 )
-        ).thenReturn(token);
+        ).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(response.getBody()).thenReturn(token);
         when(token.getAccessToken()).thenReturn(accessToken);
-        when(token.getExpiration()).thenReturn(expiration);
-        when(token.getScope()).thenReturn(tokenScope);
-        when(token.getType()).thenReturn(tokenType);
         when(restTemplate.exchange("https://www.googleapis.com/oauth2/v3/userinfo", HttpMethod.GET, userRequest, GoogleUser.class))
                 .thenReturn(userResponseEntity);
         when(userResponseEntity.getStatusCode()).thenReturn(HttpStatus.OK);

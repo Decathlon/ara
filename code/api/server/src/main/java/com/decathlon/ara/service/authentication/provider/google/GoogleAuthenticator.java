@@ -22,31 +22,30 @@ import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationServic
 import com.decathlon.ara.service.authentication.exception.AuthenticationConfigurationNotFoundException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationTokenNotFetchedException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationUserNotFetchedException;
-import com.decathlon.ara.service.authentication.provider.Authenticator;
+import com.decathlon.ara.service.authentication.provider.ProviderAuthenticator;
 import com.decathlon.ara.service.dto.authentication.provider.google.GoogleToken;
 import com.decathlon.ara.service.dto.authentication.provider.google.GoogleUser;
 import com.decathlon.ara.service.dto.authentication.request.UserAuthenticationRequestDTO;
-import com.decathlon.ara.service.dto.authentication.response.user.AuthenticationTokenDTO;
 import com.decathlon.ara.service.dto.authentication.response.user.AuthenticationUserDetailsDTO;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.data.util.Pair;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
-import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
-public class GoogleAuthenticator extends Authenticator {
+public class GoogleAuthenticator extends ProviderAuthenticator<GoogleToken, GoogleUser> {
 
     private final AuthenticationGoogleConfiguration googleConfiguration;
-
-    private final RestTemplate restTemplate;
 
     @Autowired
     public GoogleAuthenticator(
@@ -54,13 +53,12 @@ public class GoogleAuthenticator extends Authenticator {
             AuthenticationGoogleConfiguration googleConfiguration,
             RestTemplate restTemplate
     ) {
-        super(jwtTokenAuthenticationService);
+        super(GoogleToken.class, GoogleUser.class, jwtTokenAuthenticationService, restTemplate);
         this.googleConfiguration = googleConfiguration;
-        this.restTemplate = restTemplate;
     }
 
     @Override
-    protected AuthenticationTokenDTO getToken(UserAuthenticationRequestDTO request) throws AuthenticationTokenNotFetchedException, AuthenticationConfigurationNotFoundException {
+    protected String getTokenUri(UserAuthenticationRequestDTO request) throws AuthenticationTokenNotFetchedException, AuthenticationConfigurationNotFoundException {
         String redirectUri = request.getRedirectUri();
         if (StringUtils.isBlank(redirectUri)) {
             String errorMessage = "The Google token cannot be fetched without the redirect uri";
@@ -92,60 +90,44 @@ public class GoogleAuthenticator extends Authenticator {
                 code
         );
         String tokenFinalUrl = String.format("%s?%s", tokenBaseUrl, tokenParameters);
-
-        HttpHeaders tokenHeader = new HttpHeaders();
-        tokenHeader.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-        HttpEntity<GoogleToken> tokenRequest = new HttpEntity<>(tokenHeader);
-
-        GoogleToken token;
-        try {
-            token = restTemplate.postForObject(tokenFinalUrl, tokenRequest, GoogleToken.class);
-        } catch (RestClientException exception) {
-            String errorMessage = String.format("Google token not fetched because an error occurred while calling the API (%s)", tokenFinalUrl);
-            log.error(errorMessage, exception);
-            throw new AuthenticationTokenNotFetchedException(errorMessage, exception);
-        }
-
-        return new AuthenticationTokenDTO()
-                .withAccessToken(token.getAccessToken())
-                .withExpirationDuration(token.getExpiration())
-                .withScope(token.getScope())
-                .withType(token.getType());
+        return tokenFinalUrl;
     }
 
     @Override
-    protected AuthenticationUserDetailsDTO getUser(AuthenticationTokenDTO token) throws AuthenticationUserNotFetchedException {
+    protected HttpMethod getTokenMethod() {
+        return HttpMethod.POST;
+    }
+
+    @Override
+    protected HttpEntity getTokenRequest(UserAuthenticationRequestDTO request) {
+        HttpHeaders tokenHeader = new HttpHeaders();
+        tokenHeader.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        HttpEntity<GoogleToken> tokenRequest = new HttpEntity<>(tokenHeader);
+        return tokenRequest;
+    }
+
+    @Override
+    protected String getUserUri() {
+        return "https://www.googleapis.com/oauth2/v3/userinfo";
+    }
+
+    @Override
+    protected HttpMethod getUserMethod() {
+        return HttpMethod.GET;
+    }
+
+    @Override
+    protected HttpEntity<GoogleUser> getUserRequest(GoogleToken token) {
         String accessToken = token.getAccessToken();
-        String userUrl = "https://www.googleapis.com/oauth2/v3/userinfo";
         HttpHeaders userHeader = new HttpHeaders();
         String authorization = String.format("Bearer %s", accessToken);
         userHeader.set("Authorization", authorization);
         HttpEntity<GoogleUser> userRequest = new HttpEntity<>(userHeader);
+        return userRequest;
+    }
 
-        ResponseEntity<GoogleUser> userResponseEntity;
-        try {
-            userResponseEntity = restTemplate.exchange(userUrl, HttpMethod.GET, userRequest, GoogleUser.class);
-        } catch (RestClientException exception) {
-            String errorMessage = String.format("Google user not fetched because an error occurred while calling the API (%s)", userUrl);
-            log.error(errorMessage, exception);
-            throw new AuthenticationUserNotFetchedException(errorMessage, exception);
-        }
-
-        HttpStatus userHttpStatus = userResponseEntity.getStatusCode();
-        if (userHttpStatus.isError()) {
-            String errorMessage = String.format("Google user not fetched because the user API (%s) returned an error code (%s)", userUrl, userHttpStatus);
-            log.error(errorMessage);
-            throw new AuthenticationUserNotFetchedException(errorMessage);
-        }
-
-        GoogleUser user = userResponseEntity.getBody();
-        Boolean userEmailIsNotVerified = user.getVerifiedEmail() != null && !user.getVerifiedEmail();
-        if (userEmailIsNotVerified) {
-            String errorMessage = String.format("The authentication has failed because this Google user account is not verified. Please login with a verified account.");
-            log.error(errorMessage);
-            throw new AuthenticationUserNotFetchedException(errorMessage);
-        }
-
+    @Override
+    protected AuthenticationUserDetailsDTO convertUser(GoogleUser user) {
         return new AuthenticationUserDetailsDTO()
                 .withId(user.getAccountId())
                 .withLogin(user.getName())
@@ -155,27 +137,36 @@ public class GoogleAuthenticator extends Authenticator {
     }
 
     @Override
-    protected Boolean isAValidToken(String token) {
-        String url = String.format("https://oauth2.googleapis.com/tokeninfo?access_token=%s", token);
-        ResponseEntity<Object> response;
+    protected GoogleUser getUser(GoogleToken token) throws AuthenticationUserNotFetchedException, AuthenticationConfigurationNotFoundException {
+        GoogleUser user = super.getUser(token);
 
-        try {
-            response = restTemplate.exchange(url, HttpMethod.GET, null, Object.class);
-        } catch (RestClientException exception) {
-            return false;
+        Boolean userEmailIsNotVerified = user.getVerifiedEmail() != null && !user.getVerifiedEmail();
+        if (userEmailIsNotVerified) {
+            String errorMessage = String.format("The authentication has failed because this Google user account is not verified. Please login with a verified account.");
+            log.error(errorMessage);
+            throw new AuthenticationUserNotFetchedException(errorMessage);
         }
 
-        HttpStatus status = response.getStatusCode();
-        if (status.isError()) {
-            return false;
-        }
-        ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> allValues = mapper.convertValue(response.getBody(), Map.class);
-        Object emailVerifiedValue = allValues.get("email_verified");
-        Boolean isEmailVerified =
-                emailVerifiedValue != null &&
-                ((emailVerifiedValue instanceof Boolean && (Boolean) emailVerifiedValue) ||
-                        (emailVerifiedValue instanceof String && Boolean.parseBoolean((String) emailVerifiedValue)));
-        return isEmailVerified;
+        return user;
+    }
+
+    @Override
+    protected String getTokenValidationUri(String token) {
+        return String.format("https://oauth2.googleapis.com/tokeninfo?access_token=%s", token);
+    }
+
+    @Override
+    protected HttpMethod getTokenValidationMethod() {
+        return HttpMethod.GET;
+    }
+
+    @Override
+    protected HttpEntity getTokenValidationRequest(String token) {
+        return null;
+    }
+
+    @Override
+    protected Optional<Pair<String, Optional<Object>>> getValueToCheck() {
+        return Optional.of(Pair.of("email_verified", Optional.empty()));
     }
 }

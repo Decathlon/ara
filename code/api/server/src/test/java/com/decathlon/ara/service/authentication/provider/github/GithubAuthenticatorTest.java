@@ -31,11 +31,9 @@ import com.decathlon.ara.service.dto.authentication.response.app.AppAuthenticati
 import com.decathlon.ara.service.dto.authentication.response.user.UserAuthenticationDetailsDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -44,9 +42,8 @@ import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class GithubAuthenticatorTest {
@@ -102,12 +99,49 @@ public class GithubAuthenticatorTest {
         when(request.getProvider()).thenReturn(provider);
         when(githubConfiguration.getClientSecret()).thenReturn(secret);
         when(
-                restTemplate.postForObject(
+                restTemplate.exchange(
                         "https://github.com/login/oauth/access_token?client_id=github_client_id&scope=user:email%20read:user&client_secret=github_secret&code=github_code",
+                        HttpMethod.POST,
                         tokenRequest,
                         GithubToken.class
                 )
         ).thenThrow(new RestClientException("Token API call error"));
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationTokenNotFetchedException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationTokenNotFetchedException_whenTokenAPICallReturnsAnErrorStatus() {
+        // Given
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
+        String clientId = "github_client_id";
+        String code = "github_code";
+        String provider = "provider";
+
+        String secret = "github_secret";
+
+        HttpHeaders tokenHeader = new HttpHeaders();
+        tokenHeader.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        HttpEntity<GithubToken> tokenRequest = new HttpEntity<>(tokenHeader);
+
+        ResponseEntity<GithubToken> response = mock(ResponseEntity.class);
+
+        // When
+        when(request.getClientId()).thenReturn(clientId);
+        when(request.getCode()).thenReturn(code);
+        when(request.getProvider()).thenReturn(provider);
+        when(githubConfiguration.getClientSecret()).thenReturn(secret);
+        when(
+                restTemplate.exchange(
+                        "https://github.com/login/oauth/access_token?client_id=github_client_id&scope=user:email%20read:user&client_secret=github_secret&code=github_code",
+                        HttpMethod.POST,
+                        tokenRequest,
+                        GithubToken.class
+                )
+        ).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.UNAUTHORIZED);
 
         // Then
         assertThatThrownBy(() -> authenticator.authenticate(request))
@@ -128,11 +162,15 @@ public class GithubAuthenticatorTest {
         tokenHeader.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
         HttpEntity<GithubToken> tokenRequest = new HttpEntity<>(tokenHeader);
 
+        ResponseEntity<GithubToken> response = mock(ResponseEntity.class);
         GithubToken token = mock(GithubToken.class);
 
         String accessToken = "access";
-        String tokenType = "token_type";
-        String tokenScope = "token_scope";
+
+        HttpHeaders userHeader = new HttpHeaders();
+        String authorization = String.format("token %s", accessToken);
+        userHeader.set("Authorization", authorization);
+        HttpEntity<GithubUser> userRequest = new HttpEntity<>(userHeader);
 
         // When
         when(request.getClientId()).thenReturn(clientId);
@@ -140,38 +178,22 @@ public class GithubAuthenticatorTest {
         when(request.getProvider()).thenReturn(provider);
         when(githubConfiguration.getClientSecret()).thenReturn(secret);
         when(
-                restTemplate.postForObject(
+                restTemplate.exchange(
                         "https://github.com/login/oauth/access_token?client_id=github_client_id&scope=user:email%20read:user&client_secret=github_secret&code=github_code",
+                        HttpMethod.POST,
                         tokenRequest,
                         GithubToken.class
                 )
-        ).thenReturn(token);
+        ).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(response.getBody()).thenReturn(token);
         when(token.getAccessToken()).thenReturn(accessToken);
-        when(token.getTokenType()).thenReturn(tokenType);
-        when(token.getScope()).thenReturn(tokenScope);
-        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(ParameterizedTypeReference.class)))
+        when(restTemplate.exchange("https://api.github.com/user", HttpMethod.GET, userRequest, GithubUser.class))
                 .thenThrow(new RestClientException("User API call error"));
 
         // Then
         assertThatThrownBy(() -> authenticator.authenticate(request))
                 .isInstanceOf(AuthenticationUserNotFetchedException.class);
-
-        ArgumentCaptor<String> userUrlArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<HttpMethod> userHttpMethodArgumentCaptor = ArgumentCaptor.forClass(HttpMethod.class);
-        ArgumentCaptor<HttpEntity> userHttpEntityArgumentCaptor = ArgumentCaptor.forClass(HttpEntity.class);
-        verify(restTemplate).exchange(
-                userUrlArgumentCaptor.capture(),
-                userHttpMethodArgumentCaptor.capture(),
-                userHttpEntityArgumentCaptor.capture(),
-                any(ParameterizedTypeReference.class)
-        );
-        assertThat(userUrlArgumentCaptor.getValue()).isEqualTo("https://api.github.com/user");
-        assertThat(userHttpMethodArgumentCaptor.getValue()).isEqualTo(HttpMethod.GET);
-        HttpEntity<GithubUser> userRequest = userHttpEntityArgumentCaptor.getValue();
-        HttpHeaders userHeader = userRequest.getHeaders();
-        assertThat(userRequest.hasBody()).isFalse();
-        assertThat(userHeader).hasSize(1);
-        assertThat(userHeader.get("Authorization")).isEqualTo(Arrays.asList("token access"));
     }
 
     @Test
@@ -188,12 +210,15 @@ public class GithubAuthenticatorTest {
         tokenHeader.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
         HttpEntity<GithubToken> tokenRequest = new HttpEntity<>(tokenHeader);
 
+        ResponseEntity<GithubToken> response = mock(ResponseEntity.class);
         GithubToken token = mock(GithubToken.class);
 
         String accessToken = "access";
-        String tokenType = "token_type";
-        String tokenScope = "token_scope";
 
+        HttpHeaders userHeader = new HttpHeaders();
+        String authorization = String.format("token %s", accessToken);
+        userHeader.set("Authorization", authorization);
+        HttpEntity<GithubUser> userRequest = new HttpEntity<>(userHeader);
         ResponseEntity<GithubUser> userResponseEntity = mock(ResponseEntity.class);
 
         // When
@@ -202,39 +227,23 @@ public class GithubAuthenticatorTest {
         when(request.getProvider()).thenReturn(provider);
         when(githubConfiguration.getClientSecret()).thenReturn(secret);
         when(
-                restTemplate.postForObject(
+                restTemplate.exchange(
                         "https://github.com/login/oauth/access_token?client_id=github_client_id&scope=user:email%20read:user&client_secret=github_secret&code=github_code",
+                        HttpMethod.POST,
                         tokenRequest,
                         GithubToken.class
                 )
-        ).thenReturn(token);
+        ).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(response.getBody()).thenReturn(token);
         when(token.getAccessToken()).thenReturn(accessToken);
-        when(token.getTokenType()).thenReturn(tokenType);
-        when(token.getScope()).thenReturn(tokenScope);
-        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(ParameterizedTypeReference.class)))
+        when(restTemplate.exchange("https://api.github.com/user", HttpMethod.GET, userRequest, GithubUser.class))
                 .thenReturn(userResponseEntity);
         when(userResponseEntity.getStatusCode()).thenReturn(HttpStatus.BAD_REQUEST);
 
         // Then
         assertThatThrownBy(() -> authenticator.authenticate(request))
                 .isInstanceOf(AuthenticationUserNotFetchedException.class);
-
-        ArgumentCaptor<String> userUrlArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<HttpMethod> userHttpMethodArgumentCaptor = ArgumentCaptor.forClass(HttpMethod.class);
-        ArgumentCaptor<HttpEntity> userHttpEntityArgumentCaptor = ArgumentCaptor.forClass(HttpEntity.class);
-        verify(restTemplate).exchange(
-                userUrlArgumentCaptor.capture(),
-                userHttpMethodArgumentCaptor.capture(),
-                userHttpEntityArgumentCaptor.capture(),
-                any(ParameterizedTypeReference.class)
-        );
-        assertThat(userUrlArgumentCaptor.getValue()).isEqualTo("https://api.github.com/user");
-        assertThat(userHttpMethodArgumentCaptor.getValue()).isEqualTo(HttpMethod.GET);
-        HttpEntity<GithubUser> userRequest = userHttpEntityArgumentCaptor.getValue();
-        HttpHeaders userHeader = userRequest.getHeaders();
-        assertThat(userRequest.hasBody()).isFalse();
-        assertThat(userHeader).hasSize(1);
-        assertThat(userHeader.get("Authorization")).isEqualTo(Arrays.asList("token access"));
     }
 
     @Test
@@ -251,12 +260,15 @@ public class GithubAuthenticatorTest {
         tokenHeader.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
         HttpEntity<GithubToken> tokenRequest = new HttpEntity<>(tokenHeader);
 
+        ResponseEntity<GithubToken> response = mock(ResponseEntity.class);
         GithubToken token = mock(GithubToken.class);
 
         String accessToken = "access";
-        String tokenType = "token_type";
-        String tokenScope = "token_scope";
 
+        HttpHeaders userHeader = new HttpHeaders();
+        String authorization = String.format("token %s", accessToken);
+        userHeader.set("Authorization", authorization);
+        HttpEntity<GithubUser> userRequest = new HttpEntity<>(userHeader);
         ResponseEntity<GithubUser> userResponseEntity = mock(ResponseEntity.class);
         GithubUser user = mock(GithubUser.class);
         Integer userId = 123;
@@ -270,16 +282,17 @@ public class GithubAuthenticatorTest {
         when(request.getProvider()).thenReturn(provider);
         when(githubConfiguration.getClientSecret()).thenReturn(secret);
         when(
-                restTemplate.postForObject(
+                restTemplate.exchange(
                         "https://github.com/login/oauth/access_token?client_id=github_client_id&scope=user:email%20read:user&client_secret=github_secret&code=github_code",
+                        HttpMethod.POST,
                         tokenRequest,
                         GithubToken.class
                 )
-        ).thenReturn(token);
+        ).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(response.getBody()).thenReturn(token);
         when(token.getAccessToken()).thenReturn(accessToken);
-        when(token.getTokenType()).thenReturn(tokenType);
-        when(token.getScope()).thenReturn(tokenScope);
-        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(ParameterizedTypeReference.class)))
+        when(restTemplate.exchange("https://api.github.com/user", HttpMethod.GET, userRequest, GithubUser.class))
                 .thenReturn(userResponseEntity);
         when(userResponseEntity.getStatusCode()).thenReturn(HttpStatus.OK);
         when(userResponseEntity.getBody()).thenReturn(user);
@@ -291,22 +304,6 @@ public class GithubAuthenticatorTest {
         // Then
         UserAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
 
-        ArgumentCaptor<String> userUrlArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<HttpMethod> userHttpMethodArgumentCaptor = ArgumentCaptor.forClass(HttpMethod.class);
-        ArgumentCaptor<HttpEntity> userHttpEntityArgumentCaptor = ArgumentCaptor.forClass(HttpEntity.class);
-        verify(restTemplate).exchange(
-                userUrlArgumentCaptor.capture(),
-                userHttpMethodArgumentCaptor.capture(),
-                userHttpEntityArgumentCaptor.capture(),
-                any(ParameterizedTypeReference.class)
-        );
-        assertThat(userUrlArgumentCaptor.getValue()).isEqualTo("https://api.github.com/user");
-        assertThat(userHttpMethodArgumentCaptor.getValue()).isEqualTo(HttpMethod.GET);
-        HttpEntity<GithubUser> userRequest = userHttpEntityArgumentCaptor.getValue();
-        HttpHeaders userHeader = userRequest.getHeaders();
-        assertThat(userRequest.hasBody()).isFalse();
-        assertThat(userHeader).hasSize(1);
-        assertThat(userHeader.get("Authorization")).isEqualTo(Arrays.asList("token access"));
         assertThat(authenticationDetails).isNotNull();
         assertThat(authenticationDetails.getProvider()).isEqualTo("provider");
         assertThat(authenticationDetails.getUser())

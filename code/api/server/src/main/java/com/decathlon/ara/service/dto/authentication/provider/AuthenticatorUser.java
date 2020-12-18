@@ -15,16 +15,7 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.configuration.authentication.clients;
+package com.decathlon.ara.service.dto.authentication.provider;
 
-import com.decathlon.ara.configuration.authentication.clients.custom.AuthenticationCustomConfiguration;
-import com.decathlon.ara.configuration.authentication.clients.github.AuthenticationGithubConfiguration;
-import lombok.Data;
-
-@Data
-public class AuthenticationClientsConfiguration {
-
-    private AuthenticationCustomConfiguration custom;
-
-    private AuthenticationGithubConfiguration github;
+public abstract class AuthenticatorUser {
 }

@@ -15,20 +15,33 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.configuration.authentication.clients.custom;
+package com.decathlon.ara.service.dto.authentication.provider.custom;
 
-import com.decathlon.ara.configuration.authentication.clients.custom.token.AuthenticationCustomTokenConfiguration;
-import com.decathlon.ara.configuration.authentication.clients.custom.user.AuthenticationCustomUserConfiguration;
+import com.decathlon.ara.service.dto.authentication.provider.AuthenticatorToken;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import lombok.NoArgsConstructor;
+import lombok.With;
+
+import java.sql.Timestamp;
 
 @Data
-@Configuration
-@ConfigurationProperties("authentication.clients.custom")
-public class AuthenticationCustomConfiguration {
+@With
+@NoArgsConstructor
+@AllArgsConstructor
+public class CustomToken extends AuthenticatorToken {
 
-    private AuthenticationCustomTokenConfiguration token;
+    private String id;
 
-    private AuthenticationCustomUserConfiguration user;
+    private String accessToken;
+
+    private String refreshToken;
+
+    private Integer expirationDuration;
+
+    private Timestamp expirationTimestamp;
+
+    private String type;
+
+    private String scope;
 }
