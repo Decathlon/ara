@@ -4,19 +4,13 @@ on:
   schedule:
     - cron: '0 10 * * *' # everyday at 10am
   push:
-    paths:
-      - 'code/**'
     branches:
       - 'main'
       - 'develop'
+      - 'release/*.*.*'
     tags:
       - 'ara-*.*.*'
   pull_request:
-    paths:
-      - 'code/**'
-    branches:
-      - 'main'
-      - 'develop'
 
 jobs:
   pre_job:
@@ -54,6 +48,13 @@ jobs:
             VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
             if [ "${{ github.event.repository.default_branch }}" = "$VERSION" ]; then
               VERSION=edge
+            elif [[ $VERSION == release-* ]]; then
+              RELEASE=${VERSION#release-}
+              VERSION=$(cat charts/stable/Chart.yaml | grep version | sed -e 's/version: //')
+              if [ ! "$VERSION" = "$RELEASE" ]; then
+                >&2 echo "Chart Version ($VERSION) and Release Version ($RELEASE) not equals"
+                exit 1
+              fi
             fi
           elif [[ $GITHUB_REF == refs/pull/* ]]; then
             VERSION=pr-${{ github.event.number }}
