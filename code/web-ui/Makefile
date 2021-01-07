@@ -10,7 +10,7 @@ NODE_VERSION=12
 
 # WITH NODE
 
-mpm-install: ## DEV - install project
+npm-install: ## DEV - install project
 	@npm install
 
 npm-run: ## DEV - run web-ui
@@ -33,6 +33,7 @@ dkr-run: ## DEV - run api with docker
 	@docker network create ara-net > /dev/null 2>&1 || echo 'Network ara-net already created'
 	@docker container run -it --name ara-web-ui --rm \
         --network="ara-net" \
+        --net-alias="ara-web-ui" \
 				--user $(shell id -u):$(shell id -g) \
         -p 8081:8081 \
         -v $${HOME}/.ara-web:/var/node:rw \

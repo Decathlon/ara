@@ -1,0 +1,3 @@
+databaseChangeLog:
+  - include:
+      file: classpath*:db/changelog/changes/postgresql/20210105152218-postgresql_migration.yaml

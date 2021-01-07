@@ -7,6 +7,10 @@ case $DATABASE_TYPE in
         echo "ARA configured with mysql database"
         DATABASE_PARAMS="${DATABASE_PARAMS}-Dspring.datasource.url=jdbc:mysql://$DATABASE_HOST/$DATABASE_NAME?sessionVariables=sql_mode='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' "
         ;;
+    postgresql)
+        echo "ARA configured with postgresql database"
+        DATABASE_PARAMS="${DATABASE_PARAMS}-Dspring.datasource.url=jdbc:postgresql://$DATABASE_HOST/$DATABASE_NAME "
+        ;;
     h2)
         echo "ARA configured with his h2 embedded database"
         DATABASE_PARAMS="${DATABASE_PARAMS}-Dspring.datasource.url=jdbc:h2:$DATABASE_HOST:$DATABASE_NAME;DB_CLOSE_ON_EXIT=FALSE "

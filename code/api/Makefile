@@ -27,12 +27,42 @@ dkr-install: ## DEV - install project with docker
 				-v $(shell pwd):$(shell pwd):rw \
 				-w $(shell pwd) \
 		maven:3-jdk-$(JAVA_VERSION) \
-		mvn -Dmaven.test.skip=true clean install
+		mvn -Dmaven.test.skip=true -s settings.xml clean install
+
+start-db-pg: ## DEV - start pg db
+	@docker network create ara-net > /dev/null 2>&1 || echo 'Network ara-net already created'
+	@docker container run -d --name ara-db --rm \
+			--network="ara-net" \
+			--net-alias="ara-db" \
+			-p 5432:5432 \
+			-e POSTGRES_DB=ara \
+		 	-e POSTGRES_USER=changeme \
+		 	-e POSTGRES_PASSWORD=changeme \
+		 	postgres:9.6
+
+start-db-mysql: ## DEV - start mysql db
+	@docker network create ara-net > /dev/null 2>&1 || echo 'Network ara-net already created'
+	@docker container run -d --name ara-db-mysql --rm \
+			--network="ara-net" \
+			--net-alias="ara-db-mysql" \
+			-p 3306:3306 \
+			-e MYSQL_DATABASE=ara \
+            -e MYSQL_USER=changeme \
+            -e MYSQL_PASSWORD=changeme \
+            -e MYSQL_ROOT_PASSWORD=to_change \
+		 	mysql:5.7
+
+stop-db-pg: ## DEV - remove pg db
+	@docker container rm -f ara-db
+
+stop-db-mysql: ## DEV - remove mysql db
+	@docker container rm -f ara-db-mysql
 
 dkr-run: ## DEV - run api with docker
 	@docker network create ara-net > /dev/null 2>&1 || echo 'Network ara-net already created'
 	@docker container run -it --name ara-api --rm \
 				--network="ara-net" \
+				--net-alias="ara-api" \
 				--user $(shell id -u):$(shell id -g) \
 				-v $${HOME}/.m2:/var/maven/.m2:rw \
 				-e MAVEN_CONFIG=/var/maven/.m2 \
@@ -41,7 +71,7 @@ dkr-run: ## DEV - run api with docker
 				-v $(shell pwd):$(shell pwd):rw \
 				-w $(shell pwd) \
 		maven:3-jdk-$(JAVA_VERSION) \
-		mvn -Pdev spring-boot:run -pl server
+		mvn -Pint -Dspring-boot.run.arguments="--spring.datasource.url=jdbc:postgresql://ara-db:5432/ara" spring-boot:run -pl server
 
 .PHONY: help
 help:

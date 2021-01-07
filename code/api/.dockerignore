@@ -4,4 +4,4 @@ Makefile
 
 # H2 db
 ara.*.db
-migration.yaml
+migration-*.yaml

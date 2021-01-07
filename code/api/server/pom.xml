@@ -340,7 +340,7 @@
         <profile>
             <id>int</id>
             <properties>
-                <spring.profiles.active>db-mysql</spring.profiles.active>
+                <spring.profiles.active>db-postgresql</spring.profiles.active>
             </properties>
         </profile>
     </profiles>

@@ -8,14 +8,14 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import com.decathlon.ara.domain.enumeration.FunctionalityType;
 import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
 
 @SpringBootTest
-@TestPropertySource(
-		locations = "classpath:application-db-h2.properties")
+@ActiveProfiles("db-h2")
 public class AraExporterTest {
 
     @Autowired
