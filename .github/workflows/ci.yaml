@@ -1,13 +1,26 @@
 name: Lint and Test Charts
 
 on:
-  pull_request:
-    paths:
-      - 'charts/**'
+  pull_request_target:
+    branches:
+      - main
 
 jobs:
+  pre_job:
+    # continue-on-error: true # Uncomment once integration is finished
+    runs-on: ubuntu-latest
+    # Map a step output to a job output
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@master
+        with:
+          github_token: ${{ github.token }}
+          paths: '["charts/**"]'
   lint-chart:
     runs-on: ubuntu-latest
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -18,6 +31,7 @@ jobs:
           config: .github/ct.yaml
   lint-docs:
     runs-on: ubuntu-latest
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
     needs: lint-chart
     steps:
       - name: Checkout
@@ -26,6 +40,7 @@ jobs:
         run: .github/helm-docs.sh
   kubeval-chart:
     runs-on: ubuntu-latest
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
     needs:
       - lint-chart
       - lint-docs
