@@ -1,0 +1,77 @@
+# Please Note that this file IS NOT PRODUCTION READY.
+# It's only dedicated to local test & try
+
+version: '3.5'
+
+services:
+  ara-db-source:
+    image: "postgres:9.6"
+    restart: always
+    ports:
+      - 6432:5432
+    environment:
+      - POSTGRES_DB=ara
+      - POSTGRES_USER=changeme
+      - POSTGRES_PASSWORD=changeme
+    networks:
+      - db_net
+  ara-db-target:
+    image: "postgres:9.6"
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=ara
+      - POSTGRES_USER=changeme
+      - POSTGRES_PASSWORD=changeme
+    networks:
+      - db_net
+  ara-api:
+    image: docker.io/decathlon/ara-api
+    restart: always
+    environment:
+      - DATABASE_TYPE=postgresql
+      - DATABASE_HOST=ara-db-source:5432
+      - DATABASE_NAME=ara
+      - DATABASE_USER=changeme
+      - DATABASE_PASSWORD=changeme
+      - CLIENT_URL="http://localhost:80/"
+    networks:
+      - db_net
+      - api_net
+    depends_on:
+      - ara-db-source
+  ara-mig-api:
+    image: docker.io/decathlon/ara-api
+    restart: always
+    environment:
+      - DATABASE_TYPE=postgresql
+      - DATABASE_HOST=ara-db-target:5432
+      - DATABASE_NAME=ara
+      - DATABASE_USER=changeme
+      - DATABASE_PASSWORD=changeme
+      - LIQUIBASE_ACTIVE=false
+      - HBM2DDL=create-drop
+      - CLIENT_URL="http://localhost:80/"
+    networks:
+      - db_net
+      - api_net
+    depends_on:
+      - ara-db-target
+  waiter-api:
+    image: aligor/wait-for-url
+    command: ["--url", "http://ara-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
+    networks:
+      - api_net
+    depends_on:
+      - ara-api
+  waiter-mig-api:
+    image: aligor/wait-for-url
+    command: ["--url", "http://ara-mig-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
+    networks:
+      - api_net
+    depends_on:
+      - ara-mig-api
+networks:
+  db_net:
+  api_net:

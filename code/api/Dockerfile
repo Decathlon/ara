@@ -23,6 +23,7 @@ COPY lib lib
 COPY generated-cucumber-report generated-cucumber-report
 COPY database database
 COPY server server
+COPY . .
 RUN mvn -s settings.xml clean install
 
 FROM openjdk:$JAVA_VERSION-slim as runtime
