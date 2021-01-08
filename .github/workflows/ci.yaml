@@ -75,7 +75,7 @@ jobs:
         run: |
           mkdir helm-templates-stable
           helm template charts/stable --output-dir helm-templates-stable
-      - name: validate manifests in dir1 and dir2
+      - name: validate manifests
         uses: makocchi-git/actions-k8s-manifests-validate-kubeval@v1.0.1
         with:
           files: helm-templates-stable
