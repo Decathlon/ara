@@ -5,10 +5,6 @@ server {
     #charset koi8-r;
     #access_log  /var/log/nginx/host.access.log  main;
 
-    location /auth {
-      proxy_pass http://${API_URL}/auth;
-    }
-
     location /api {
       proxy_pass http://${API_URL}/api;
     }

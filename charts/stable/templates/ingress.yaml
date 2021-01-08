@@ -32,10 +32,6 @@ spec:
           serviceName: {{ printf "%s-%s" .Chart.Name "api" }}
           servicePort: http-port
         path: /actuator/info
-      - backend:
-          serviceName: {{ printf "%s-%s" .Chart.Name "api" }}
-          servicePort: http-port
-        path: /auth
 {{- if .Values.ingress.tls }}
   tls:
 {{ toYaml .Values.ingress.tls | indent 4 }}
