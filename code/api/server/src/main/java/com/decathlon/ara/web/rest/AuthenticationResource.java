@@ -15,7 +15,7 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.web.rest.authentication;
+package com.decathlon.ara.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
 import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationService;
@@ -38,11 +38,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.AUTH_PATH;
-
 @Slf4j
 @RestController
-@RequestMapping(AUTH_PATH)
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AuthenticationResource {
 
