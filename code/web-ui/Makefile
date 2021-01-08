@@ -46,6 +46,13 @@ dkr-run: ## DEV - run api with docker
 		node:$(NODE_VERSION) \
 		npm run dev
 
+#####################################
+##              UTILS              ##
+#####################################
+
+get-version:
+	@cat package.json | docker container run --rm -i aligor/jq jq -r '.version'
+
 .PHONY: help
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
