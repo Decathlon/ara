@@ -57,7 +57,7 @@ jobs:
                 >&2 echo "Chart Version ($VERSION) and Release Version ($RELEASE) not equals"
                 exit 1
               fi
-              VERSION=${VERSION}.${GITHUB_SHA:0:7}
+              VERSION=rc-${VERSION}.${GITHUB_SHA:0:7}
             fi
           elif [[ $GITHUB_REF == refs/pull/* ]]; then
             VERSION=pr-${{ github.event.number }}
