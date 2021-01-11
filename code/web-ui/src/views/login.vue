@@ -135,7 +135,7 @@ export default {
 .main-container {
   position: relative;
   border: darkgrey solid 1px;
-  border-radius: 5px;
+  border-radius: 7px;
   background-color: #145c93;
   margin: 0 auto;
   width: 75%;
@@ -145,6 +145,7 @@ export default {
 .login-box {
   background-color: white;
   position: absolute;
+  border-radius: 5px;
   width: 50%;
   margin: 0;
   top: 50%;
