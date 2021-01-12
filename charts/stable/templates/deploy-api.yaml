@@ -47,10 +47,10 @@ spec:
               name: {{ include "ara.configmap.name" . }}
               key: database_host
         - name: DATABASE_CUSTOM_OPTIONS
-            valueFrom:
-              configMapKeyRef:
-                name: { { include "ara.configmap.name" . } }
-                key: database_options
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "ara.configmap.name" . }}
+              key: database_options
         - name: DATABASE_NAME
           valueFrom:
             secretKeyRef:
