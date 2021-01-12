@@ -14,7 +14,7 @@ services:
     networks:
       - db_net
     ports:
-      - 5432:5432
+      - 8432:5432
   ara-api:
     image: "decathlon/ara-api:${VERSION:-latest}"
     restart: always
