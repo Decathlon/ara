@@ -31,3 +31,6 @@ nbdist/
 
 # H2 db
 ara.*.db
+
+# Build
+server/src/main/resources/static/api/version/about.json

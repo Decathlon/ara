@@ -41,3 +41,6 @@ nbdist/
 /test/cypress/outputs/
 /mochawesome-report/
 /mochawesome.json
+
+# Build
+static/version/about.json

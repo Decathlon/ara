@@ -53,9 +53,35 @@ build: ## Build ARA in parallel
 
 build-full: build-api build-web-ui ## Build ARA
 
-build-web-ui: ## Build ara-web-ui
+about-web-ui:
+	@mkdir -p web-ui/static/version
+	@SHA=$(shell git rev-parse --short HEAD) && \
+	 WEB_VERSION=$(shell cat web-ui/package.json | docker container run --rm -i aligor/jq jq -r '.version') && \
+	 docker container run --rm -i \
+	 						-v $(shell pwd)/web-ui/build/template:/usr/src/app:ro \
+                            -w /usr/src/app \
+	 						aligor/jq \
+							jq -n --arg version $$SHA \
+								  --arg sha $$WEB_VERSION \
+								  -f about.jq > \
+								  web-ui/static/version/about.json
+
+build-web-ui: about-web-ui ## Build ara-web-ui
 	@echo '-- Build ${WEB_UI_IMAGE} --'
 	@docker build -t ${WEB_UI_IMAGE} web-ui
+
+about-api:
+	@mkdir -p api/server/src/main/resources/static/api/version
+	@SHA=$(shell git rev-parse --short HEAD) && \
+	 API_VERSION=$(shell xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' api/pom.xml) && \
+	 docker container run --rm -i \
+    	 						-v $(shell pwd)/api/build/template:/usr/src/app:ro \
+                                -w /usr/src/app \
+    	 						aligor/jq \
+    							jq -n --arg version $$SHA \
+    								  --arg sha $$API_VERSION \
+    								  -f about.jq > \
+    								  api/server/src/main/resources/static/api/version/about.json
 
 build-api: ## Build ara-api
 	@echo '-- Build ${API_IMAGE} --'
