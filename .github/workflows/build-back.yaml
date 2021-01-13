@@ -70,6 +70,12 @@ jobs:
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=tags::${TAGS}
           echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+      - name: Create about.json
+        run: |
+          SHA=${GITHUB_SHA:0:7}
+          VERSION=$(shell xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' code/api/pom.xml)
+          mkdir -p code/api/server/src/main/resources/static/api/version
+          jq -n --arg version $VERSION --arg sha $SHA -f code/api/build/template/about.jq > code/api/server/src/main/resources/static/api/version/about.json
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v1
