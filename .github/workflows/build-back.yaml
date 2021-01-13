@@ -70,6 +70,8 @@ jobs:
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=tags::${TAGS}
           echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+      - name: Install xmllint
+        run: sudo apt-get install libxml2-utils
       - name: Create about.json
         run: |
           SHA=${GITHUB_SHA:0:7}
