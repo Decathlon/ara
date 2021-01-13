@@ -73,7 +73,7 @@ jobs:
       - name: Create about.json
         run: |
           SHA=${GITHUB_SHA:0:7}
-          VERSION=$(shell xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' code/api/pom.xml)
+          VERSION=$(xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' code/api/pom.xml)
           mkdir -p code/api/server/src/main/resources/static/api/version
           jq -n --arg version $VERSION --arg sha $SHA -f code/api/build/template/about.jq > code/api/server/src/main/resources/static/api/version/about.json
       -
