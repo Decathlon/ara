@@ -28,7 +28,7 @@
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-database</artifactId>
-    <version>7.2.0</version>
+    <version>7.2.3</version>
 
     <name>ARA Database</name>
     <description>
@@ -39,7 +39,6 @@
     <properties>
         <java.version>14</java.version>
         <querydsl.version>4.3.1</querydsl.version>
-        <diffChangeLogFile>src/main/resources/db/changelog/to-be-changed.yaml</diffChangeLogFile>
     </properties>
 
     <dependencies>
@@ -58,6 +57,11 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -163,7 +167,7 @@
                 <version>${liquibase.version}</version>
                 <configuration>
                     <diffChangeLogFile>${diffChangeLogFile}</diffChangeLogFile>
-                    <propertyFile>src/main/resources/liquibase.properties</propertyFile>
+                    <propertyFile>${liquibasePropertyFile}</propertyFile>
                 </configuration>
                 <dependencies>
                     <dependency>
@@ -185,4 +189,22 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>db-mysql</id>
+            <properties>
+                <diffChangeLogFile>src/main/resources/changelog/changes/mysql/to-be-changed.yaml</diffChangeLogFile>
+                <liquibasePropertyFile>src/main/resources/liquibase-mysql.properties</liquibasePropertyFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>db-postgresql</id>
+            <properties>
+                <diffChangeLogFile>src/main/resources/changelog/changes/postgresql/to-be-changed.yaml</diffChangeLogFile>
+                <liquibasePropertyFile>src/main/resources/liquibase-postgresql.properties</liquibasePropertyFile>
+            </properties>
+        </profile>
+    </profiles>
+
 </project>

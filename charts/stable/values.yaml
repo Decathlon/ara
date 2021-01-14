@@ -68,6 +68,7 @@ database:
     liquibaseActive: true
     # Name of the database
     name: ara
+    options: ''
     # Set if no existing secret
     username: ara
     password: changeme

@@ -93,7 +93,12 @@ build-api: ## Build ara-api
 
 # CREATE LIQUIBASE DIFF
 
-liquibase-diff: compose-migration wait-migration-stack ## Create a liquibase diff file -- DIFF_LABEL required
+liquibase-diff: ## Create a liquibase diff file -- DIFF_LABEL required
+	@$(MAKE) liquibase-diff-all-bases -j2 -k
+
+liquibase-diff-all-bases: build-api liquibase-diff-mysql liquibase-diff-postgresql
+
+liquibase-diff-%: up-migration-% ## Create a liquibase diff file -- DIFF_LABEL required
 	@docker container run -it --net=host --rm \
 		--user $(shell id -u):$(shell id -g) \
 		-v $${HOME}/.m2:/var/maven/.m2:rw \
@@ -101,22 +106,20 @@ liquibase-diff: compose-migration wait-migration-stack ## Create a liquibase dif
 		-v $(shell pwd):$(shell pwd):rw \
 		-w $(shell pwd) \
 		maven:alpine \
-		mvn -Duser.home=/var/maven -f api/pom.xml -pl database liquibase:diff -DdiffChangeLogFile=api/database/src/main/resources/db/changelog/changes/${DATE_WITH_TIME}-${DIFF_LABEL}.yaml
-	@echo "  - include:" >> api/database/src/main/resources/db/changelog/db.changelog-master.yaml
-	@echo "      file: classpath*:db/changelog/changes/$(DATE_WITH_TIME)-$(DIFF_LABEL).yaml" >> api/database/src/main/resources/db/changelog/db.changelog-master.yaml
-	@$(MAKE) stop-migration-stack
+		mvn -Pdb-$* -Duser.home=/var/maven -f api/pom.xml -pl database liquibase:diff -DdiffChangeLogFile=api/database/src/main/resources/db/changelog/changes/$*/${DATE_WITH_TIME}-${DIFF_LABEL}.yaml
+	@echo "  - include:" >> api/database/src/main/resources/db/changelog/db.changelog-master-$*.yaml
+	@echo "      file: classpath*:db/changelog/changes/$*/$(DATE_WITH_TIME)-$(DIFF_LABEL).yaml" >> api/database/src/main/resources/db/changelog/db.changelog-master-$*.yaml
+	@$(MAKE) stop-migration-stack-$*
 
-compose-migration:
+up-migration-%:
 	@echo '-- Up migration stack --'
-	@docker-compose -f api/migration.yaml build
-	@docker-compose -f api/migration.yaml up -d
+	@docker-compose -f api/migration-$*.yaml up -d ara-api
+	@docker-compose -f api/migration-$*.yaml up -d ara-mig-api
+	@docker-compose -f api/migration-$*.yaml run waiter-api
+	@docker-compose -f api/migration-$*.yaml run waiter-mig-api
 
-wait-migration-stack:
-	docker container run --rm --net=host aligor/wait-for-url --url http://localhost:9980/actuator/info --retries 20 --delay 3000
-	docker container run --rm --net=host aligor/wait-for-url -url http://localhost:9981/actuator/info --retries 20 --delay 3000
-
-stop-migration-stack:
-	@docker-compose -f api/migration.yaml down
+stop-migration-stack-%:
+	@docker-compose -f api/migration-$*.yaml down
 
 # UPDATE ARA VERSION
 
