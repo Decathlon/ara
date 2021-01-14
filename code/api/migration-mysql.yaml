@@ -38,10 +38,9 @@ services:
       - DATABASE_USER=root
       - DATABASE_PASSWORD=to_change
       - CLIENT_URL="http://localhost:80/"
-    ports:
-      - 9980:8080
     networks:
       - db_net
+      - api_net
     depends_on:
       - ara-db-source
   ara-mig-api:
@@ -56,11 +55,25 @@ services:
       - LIQUIBASE_ACTIVE=false
       - HBM2DDL=create-drop
       - CLIENT_URL="http://localhost:80/"
-    ports:
-      - 9981:8080
     networks:
       - db_net
+      - api_net
     depends_on:
       - ara-db-target
+  waiter-api:
+    image: aligor/wait-for-url
+    command: ["--url", "http://ara-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
+    networks:
+      - api_net
+    depends_on:
+      - ara-api
+  waiter-mig-api:
+    image: aligor/wait-for-url
+    command: ["--url", "http://ara-mig-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
+    networks:
+      - api_net
+    depends_on:
+      - ara-mig-api
 networks:
   db_net:
+  api_net:

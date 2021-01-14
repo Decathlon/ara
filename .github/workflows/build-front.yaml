@@ -4,19 +4,14 @@ on:
   schedule:
     - cron: '0 10 * * *' # everyday at 10am
   push:
-    paths:
-      - 'code/**'
     branches:
       - 'main'
-      - 'develop'
+      - 'release/*.*.*'
     tags:
       - 'ara-*.*.*'
   pull_request:
-    paths:
-      - 'code/**'
     branches:
-      - 'main'
-      - 'develop'
+      - '!main'
 
 jobs:
   pre_job:
@@ -54,6 +49,14 @@ jobs:
             VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
             if [ "${{ github.event.repository.default_branch }}" = "$VERSION" ]; then
               VERSION=edge
+            elif [[ $VERSION == release-* ]]; then
+              RELEASE=${VERSION#release-}
+              VERSION=$(cat charts/stable/Chart.yaml | grep version | sed -e 's/version: //')
+              if [ ! "$VERSION" = "$RELEASE" ]; then
+                >&2 echo "Chart Version ($VERSION) and Release Version ($RELEASE) not equals"
+                exit 1
+              fi
+              VERSION=rc-${VERSION}.${GITHUB_SHA:0:7}
             fi
           elif [[ $GITHUB_REF == refs/pull/* ]]; then
             VERSION=pr-${{ github.event.number }}
@@ -67,6 +70,12 @@ jobs:
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=tags::${TAGS}
           echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+      - name: Create about.json
+        run: |
+          SHA=${GITHUB_SHA:0:7}
+          VERSION=$(cat code/web-ui/package.json | jq -r '.version')
+          mkdir -p code/web-ui/static/version
+          jq -n --arg version $VERSION --arg sha $SHA -f code/web-ui/build/template/about.jq > code/web-ui/static/version/about.json
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v1

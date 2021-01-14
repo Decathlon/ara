@@ -67,6 +67,7 @@ public class Error implements Comparable<Error> {
     private int stepLine;
 
     @Lob
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.TextType")
     private String exception;
 
     @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE, region = PROBLEM_PATTERNS_COLLECTION_CACHE)

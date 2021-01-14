@@ -1,11 +1,24 @@
 #!/bin/bash
 
 DATABASE_PARAMS=''
+DATABASE_OPTIONS=''
 
 case $DATABASE_TYPE in
     mysql)
         echo "ARA configured with mysql database"
-        DATABASE_PARAMS="${DATABASE_PARAMS}-Dspring.datasource.url=jdbc:mysql://$DATABASE_HOST/$DATABASE_NAME?sessionVariables=sql_mode='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' "
+        DATABASE_DEFAULT_OPTIONS="sessionVariables=sql_mode='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION'"
+        DATABASE_OPTIONS="?$DATABASE_DEFAULT_OPTIONS"
+        if [[ -n $DATABASE_CUSTOM_OPTIONS ]]; then
+          DATABASE_OPTIONS=";$DATABASE_CUSTOM_OPTIONS"
+        fi
+        DATABASE_PARAMS="${DATABASE_PARAMS}-Dspring.datasource.url=jdbc:mysql://$DATABASE_HOST/$DATABASE_NAME$DATABASE_OPTIONS "
+        ;;
+    postgresql)
+        echo "ARA configured with postgresql database"
+        if [[ -n $DATABASE_CUSTOM_OPTIONS ]]; then
+          DATABASE_OPTIONS="?$DATABASE_CUSTOM_OPTIONS"
+        fi
+        DATABASE_PARAMS="${DATABASE_PARAMS}-Dspring.datasource.url=jdbc:postgresql://$DATABASE_HOST/$DATABASE_NAME$DATABASE_OPTIONS "
         ;;
     h2)
         echo "ARA configured with his h2 embedded database"

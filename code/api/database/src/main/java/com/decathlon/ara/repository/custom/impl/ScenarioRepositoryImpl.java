@@ -19,6 +19,7 @@ package com.decathlon.ara.repository.custom.impl;
 
 import com.decathlon.ara.domain.QScenario;
 import com.decathlon.ara.domain.Country;
+import com.decathlon.ara.domain.QSource;
 import com.decathlon.ara.domain.Scenario;
 import com.decathlon.ara.domain.projection.IgnoredScenario;
 import com.decathlon.ara.domain.projection.ScenarioIgnoreCount;
@@ -67,15 +68,16 @@ public class ScenarioRepositoryImpl implements ScenarioRepositoryCustom {
     @Override
     public List<ScenarioIgnoreCount> findIgnoreCounts(long projectId) {
         final QScenario scenario = QScenario.scenario;
+        final QSource source = QSource.source;
         return jpaQueryFactory
                 .select(Projections.constructor(ScenarioIgnoreCount.class,
-                        scenario.source,
+                        source,
                         scenario.severity,
                         scenario.ignored,
-                        scenario.count()))
-                .from(scenario)
-                .where(scenario.source.projectId.eq(Long.valueOf(projectId)))
-                .groupBy(scenario.source,
+                        source.count()))
+                .from(scenario).innerJoin(source).on(scenario.source.id.eq(source.id))
+                .where(source.projectId.eq(Long.valueOf(projectId)))
+                .groupBy(source,
                         scenario.severity,
                         scenario.ignored)
                 .fetch();
