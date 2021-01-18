@@ -29,10 +29,15 @@ jobs:
           make update-version VERSION=${{ steps.prep.outputs.release }}
           cd ..
       -
-        name: Commit changes
+        name: Create PR with changes
         if: steps.prep.outputs.version != steps.prep.outputs.release
-        uses: EndBug/add-and-commit@v5
+        uses: peter-evans/create-pull-request@v3
         with:
-          message: "⬆️  Upgrade to ${{ steps.prep.outputs.release }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.CR_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "⬆️  Upgrade to ${{ steps.prep.outputs.release }}"
+          committer: GitHub <noreply@github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          branch: "upgrade/${{ steps.prep.outputs.release }}"
+          body: "Auto-update to release/${{ steps.prep.outputs.release }}"
+          delete-branch: true
+          title: "⬆️  Upgrade to ${{ steps.prep.outputs.release }}"
