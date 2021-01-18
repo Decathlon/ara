@@ -35,4 +35,4 @@ jobs:
         with:
           message: "⬆️  Upgrade to ${{ steps.prep.outputs.release }}"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.CR_TOKEN }}
