@@ -33,11 +33,11 @@ jobs:
         if: steps.prep.outputs.version != steps.prep.outputs.release
         uses: peter-evans/create-pull-request@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "⬆️  Upgrade to ${{ steps.prep.outputs.release }}"
+          token: ${{ secrets.CR_TOKEN }}
+          commit-message: "chore: ⬆️  Upgrade to ${{ steps.prep.outputs.release }}"
           committer: GitHub <noreply@github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           branch: "upgrade/${{ steps.prep.outputs.release }}"
           body: "Auto-update to release/${{ steps.prep.outputs.release }}"
           delete-branch: true
-          title: "⬆️  Upgrade to ${{ steps.prep.outputs.release }}"
+          title: "chore: ⬆️  Upgrade to ${{ steps.prep.outputs.release }}"
