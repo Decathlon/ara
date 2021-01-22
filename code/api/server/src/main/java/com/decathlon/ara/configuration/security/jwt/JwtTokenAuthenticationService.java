@@ -20,6 +20,7 @@ package com.decathlon.ara.configuration.security.jwt;
 import com.decathlon.ara.configuration.authentication.AuthenticationConfiguration;
 import com.decathlon.ara.configuration.security.AuthenticationJwtTokenConfiguration;
 import com.decathlon.ara.service.authentication.exception.AuthenticationConfigurationNotFoundException;
+import com.decathlon.ara.service.authentication.exception.AuthenticationException;
 import io.jsonwebtoken.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -54,15 +56,18 @@ public class JwtTokenAuthenticationService {
 
     /**
      * Create a header containing an authentication cookie, if the authentication is enabled
+     * @param authenticationTokenExpirationInSeconds the authentication token expiration (in seconds), if any
      * @return a http header containing an authentication cookie, if the authentication is enabled
+     * @throws AuthenticationException thrown if the header could not be generated
      */
-    public HttpHeaders createAuthenticationResponseCookieHeader() throws AuthenticationConfigurationNotFoundException {
+    public HttpHeaders createAuthenticationResponseCookieHeader(Optional<Integer> authenticationTokenExpirationInSeconds) throws AuthenticationException {
         HttpHeaders responseHeaders = new HttpHeaders();
 
         Boolean authenticationIsEnabled = authenticationConfiguration.isEnabled();
         if (authenticationIsEnabled) {
-            String jwt = generateToken();
-            responseHeaders = createCookieHeaderFromJwt(Optional.of(jwt));
+            Long ageInSeconds = getJWTTokenExpirationInSecond(authenticationTokenExpirationInSeconds);
+            String jwt = generateToken(ageInSeconds);
+            responseHeaders = createCookieHeaderFromJwt(Optional.of(Pair.of(jwt, ageInSeconds)));
         }
 
         return responseHeaders;
@@ -70,18 +75,19 @@ public class JwtTokenAuthenticationService {
 
     /**
      * Create a header containing a cookie holding a JWT token value, if given
-     * @param jwt the JWT token value
+     * @param tokenValueAndAge a pair of the JWT token value and age (in seconds)
      * @return a header containing the JWT cookie
      */
-    private HttpHeaders createCookieHeaderFromJwt(Optional<String> jwt) {
-        String tokenCookieValue = null;
+    private HttpHeaders createCookieHeaderFromJwt(Optional<Pair<String, Long>> tokenValueAndAge) {
+        String cookieValue = null;
         Long cookieAge = 0L;
 
-        if (jwt.isPresent()) {
-            tokenCookieValue = jwt.get();
-            cookieAge = tokenConfiguration.getAccessTokenExpirationInSecond();
+        if (tokenValueAndAge.isPresent()) {
+            Pair<String, Long> cookieValueAndAge = tokenValueAndAge.get();
+            cookieValue = cookieValueAndAge.getFirst();
+            cookieAge = cookieValueAndAge.getSecond();
         }
-        HttpCookie cookie = ResponseCookie.from(tokenCookieName, tokenCookieValue)
+        HttpCookie cookie = ResponseCookie.from(tokenCookieName, cookieValue)
                 .maxAge(cookieAge)
                 .httpOnly(true)
                 .secure(tokenConfiguration.isUsingHttps())
@@ -95,17 +101,16 @@ public class JwtTokenAuthenticationService {
 
     /**
      * Generate a new JWT token
+     * @param tokenAgeInSeconds the token age in seconds
      * @return the generated JWT token
+     * @throws AuthenticationConfigurationNotFoundException thrown if the secret was not found in the configuration
      */
-    public String generateToken() throws AuthenticationConfigurationNotFoundException {
+    public String generateToken(Long tokenAgeInSeconds) throws AuthenticationConfigurationNotFoundException {
         Integer min = 10;
         Integer max = 30;
         String subject = RandomStringUtils.randomAscii(min, max);
         Date now = new Date();
-        Long tokenExpiration = tokenConfiguration.getAccessTokenExpirationInMillisecond();
-        if (tokenExpiration == null || tokenExpiration == 0L) {
-            throw new AuthenticationConfigurationNotFoundException("Authentication failed: ARA cannot generate a JWT token because token expiration value was not found in the configuration file");
-        }
+        Long tokenExpiration = tokenAgeInSeconds * 1000;
         Long duration = now.getTime() + tokenExpiration;
         Date expirationDate = new Date(duration);
         String secret = tokenConfiguration.getTokenSecret();
@@ -120,6 +125,38 @@ public class JwtTokenAuthenticationService {
                 .signWith(SignatureAlgorithm.HS512, secret)
                 .compact();
         return token;
+    }
+
+    /**
+     * Get the JWT token expiration: it cannot be greater than the authentication token expiration value
+     * @param authenticationTokenExpirationInSecond the authentication token expiration (in seconds), if any
+     * @return the JWT token expiration
+     * @throws AuthenticationException thrown if no token expiration found,
+     * i.e. neither configuration nor authentication token expiration value greater than zero
+     */
+    public Long getJWTTokenExpirationInSecond(Optional<Integer> authenticationTokenExpirationInSecond) throws AuthenticationException {
+        Long authenticationTokenExpirationInSecondsValue = authenticationTokenExpirationInSecond
+                .map(Integer::longValue)
+                .orElse(0L);
+        Long configurationExpiration = tokenConfiguration.getAccessTokenExpirationInSecond();
+        if (configurationExpiration == null) {
+            configurationExpiration = 0L;
+        }
+        if (configurationExpiration <= 0 && authenticationTokenExpirationInSecondsValue <= 0) {
+            String errorMessage = "The token must have an expiration greater than 0";
+            log.error(errorMessage);
+            throw new AuthenticationException(errorMessage);
+        }
+        if (authenticationTokenExpirationInSecondsValue <= 0) {
+            return configurationExpiration;
+        }
+        if (configurationExpiration <= 0) {
+            return authenticationTokenExpirationInSecondsValue;
+        }
+        if (authenticationTokenExpirationInSecondsValue >= configurationExpiration) {
+            return configurationExpiration;
+        }
+        return authenticationTokenExpirationInSecondsValue;
     }
 
     /**

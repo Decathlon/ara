@@ -56,9 +56,8 @@ public class AuthenticationResource {
     @Timed
     public ResponseEntity<UserAuthenticationDetailsDTO> authenticate(@Valid @RequestBody UserAuthenticationRequestDTO request) {
         try {
-            UserAuthenticationDetailsDTO authenticationDetails = authenticationService.authenticate(request);
-            HttpHeaders headers = jwtTokenAuthenticationService.createAuthenticationResponseCookieHeader();
-            return ResponseEntity.ok().headers(headers).body(authenticationDetails);
+            ResponseEntity<UserAuthenticationDetailsDTO> authenticationResponse = authenticationService.authenticate(request);
+            return authenticationResponse;
         } catch (AuthenticationException e) {
             log.error(String.format("Error while authenticating to ARA (via %s)", request.getProvider()), e);
             return ResponseEntity.badRequest().build();
@@ -76,8 +75,8 @@ public class AuthenticationResource {
     @Timed
     public ResponseEntity<AppAuthenticationDetailsDTO> authenticate(@Valid @RequestBody AppAuthenticationRequestDTO request) {
         try {
-            AppAuthenticationDetailsDTO authenticationDetails = authenticationService.authenticate(request);
-            return ResponseEntity.ok().body(authenticationDetails);
+            ResponseEntity<AppAuthenticationDetailsDTO> authenticationResponse = authenticationService.authenticate(request);
+            return authenticationResponse;
         } catch (AuthenticationException e) {
             log.error(String.format("Error while authenticating your application to ARA (via %s)", request.getProvider()), e);
             return ResponseEntity.badRequest().build();

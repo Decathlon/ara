@@ -21,7 +21,6 @@ import com.decathlon.ara.service.authentication.exception.AuthenticationExceptio
 import com.decathlon.ara.service.authentication.provider.Authenticator;
 import com.decathlon.ara.service.dto.authentication.request.AppAuthenticationRequestDTO;
 import com.decathlon.ara.service.dto.authentication.request.UserAuthenticationRequestDTO;
-import com.decathlon.ara.service.dto.authentication.response.AuthenticationDetailsDTO;
 import com.decathlon.ara.service.dto.authentication.response.app.AppAuthenticationDetailsDTO;
 import com.decathlon.ara.service.dto.authentication.response.user.UserAuthenticationDetailsDTO;
 import org.junit.jupiter.api.Test;
@@ -29,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
@@ -78,7 +78,7 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    public void authenticate_returnUserAuthenticationDetails_whenAuthenticatorFound() throws AuthenticationException {
+    public void authenticate_returnUserAuthenticationResponse_whenAuthenticatorFound() throws AuthenticationException {
         // Given
         UserAuthenticationRequestDTO authenticationRequest = mock(UserAuthenticationRequestDTO.class);
 
@@ -86,16 +86,16 @@ public class AuthenticationServiceTest {
 
         Authenticator authenticator = mock(Authenticator.class);
 
-        UserAuthenticationDetailsDTO authenticationDetails = mock(UserAuthenticationDetailsDTO.class);
+        ResponseEntity<UserAuthenticationDetailsDTO> authenticationResponse = mock(ResponseEntity.class);
 
         // When
         when(authenticationRequest.getProvider()).thenReturn(provider);
         when(authenticationStrategy.getAuthenticator(provider)).thenReturn(Optional.of(authenticator));
-        when(authenticator.authenticate(authenticationRequest)).thenReturn(authenticationDetails);
+        when(authenticator.authenticate(authenticationRequest)).thenReturn(authenticationResponse);
 
         // Then
-        AuthenticationDetailsDTO result = authenticationService.authenticate(authenticationRequest);
-        assertThat(result).isEqualTo(authenticationDetails);
+        ResponseEntity<UserAuthenticationDetailsDTO> result = authenticationService.authenticate(authenticationRequest);
+        assertThat(result).isEqualTo(authenticationResponse);
     }
 
     @Test
@@ -134,15 +134,15 @@ public class AuthenticationServiceTest {
 
         Authenticator authenticator = mock(Authenticator.class);
 
-        AppAuthenticationDetailsDTO authenticationDetails = mock(AppAuthenticationDetailsDTO.class);
+        ResponseEntity<AppAuthenticationDetailsDTO> authenticationResponse = mock(ResponseEntity.class);
 
         // When
         when(authenticationRequest.getProvider()).thenReturn(provider);
         when(authenticationStrategy.getAuthenticator(provider)).thenReturn(Optional.of(authenticator));
-        when(authenticator.authenticate(authenticationRequest)).thenReturn(authenticationDetails);
+        when(authenticator.authenticate(authenticationRequest)).thenReturn(authenticationResponse);
 
         // Then
-        AuthenticationDetailsDTO result = authenticationService.authenticate(authenticationRequest);
-        assertThat(result).isEqualTo(authenticationDetails);
+        ResponseEntity<AppAuthenticationDetailsDTO> result = authenticationService.authenticate(authenticationRequest);
+        assertThat(result).isEqualTo(authenticationResponse);
     }
 }

@@ -20,6 +20,7 @@ package com.decathlon.ara.configuration.security.jwt;
 import com.decathlon.ara.configuration.authentication.AuthenticationConfiguration;
 import com.decathlon.ara.configuration.security.AuthenticationJwtTokenConfiguration;
 import com.decathlon.ara.service.authentication.exception.AuthenticationConfigurationNotFoundException;
+import com.decathlon.ara.service.authentication.exception.AuthenticationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -50,29 +51,29 @@ public class JwtTokenAuthenticationServiceTest {
     private JwtTokenAuthenticationService tokenAuthenticationService;
 
     @Test
-    public void createAuthenticationResponseCookieHeader_returnEmptyHeader_whenAuthenticationIsNotEnabled() throws AuthenticationConfigurationNotFoundException {
+    public void createAuthenticationResponseCookieHeader_returnEmptyHeader_whenAuthenticationIsNotEnabled() throws AuthenticationException {
         // Given
 
         // When
         when(authenticationConfiguration.isEnabled()).thenReturn(false);
 
         // Then
-        HttpHeaders header = tokenAuthenticationService.createAuthenticationResponseCookieHeader();
+        HttpHeaders header = tokenAuthenticationService.createAuthenticationResponseCookieHeader(Optional.empty());
         assertThat(header).isNotNull();
         assertThat(header).isEmpty();
     }
 
     @Test
-    public void createAuthenticationResponseCookieHeader_throwAuthenticationConfigurationNotFoundException_whenTokenExpirationNotFound() {
+    public void createAuthenticationResponseCookieHeader_throwAuthenticationException_whenTokenExpirationNotFound() {
         // Given
 
         // When
         when(authenticationConfiguration.isEnabled()).thenReturn(true);
-        when(tokenConfiguration.getAccessTokenExpirationInMillisecond()).thenReturn(0L);
+        when(tokenConfiguration.getAccessTokenExpirationInSecond()).thenReturn(0L);
 
         // Then
-        assertThatThrownBy(() -> tokenAuthenticationService.createAuthenticationResponseCookieHeader())
-                .isExactlyInstanceOf(AuthenticationConfigurationNotFoundException.class);
+        assertThatThrownBy(() -> tokenAuthenticationService.createAuthenticationResponseCookieHeader(Optional.empty()))
+                .isExactlyInstanceOf(AuthenticationException.class);
     }
 
     @Test
@@ -82,31 +83,29 @@ public class JwtTokenAuthenticationServiceTest {
 
         // When
         when(authenticationConfiguration.isEnabled()).thenReturn(true);
-        when(tokenConfiguration.getAccessTokenExpirationInMillisecond()).thenReturn(tokenExpirationInMilliseconds);
+        when(tokenConfiguration.getAccessTokenExpirationInSecond()).thenReturn(tokenExpirationInMilliseconds);
         when(tokenConfiguration.getTokenSecret()).thenReturn(null);
 
         // Then
-        assertThatThrownBy(() -> tokenAuthenticationService.createAuthenticationResponseCookieHeader())
+        assertThatThrownBy(() -> tokenAuthenticationService.createAuthenticationResponseCookieHeader(Optional.empty()))
                 .isExactlyInstanceOf(AuthenticationConfigurationNotFoundException.class);
     }
 
     @Test
-    public void createAuthenticationResponseCookieHeader_returnHeaderContainingCookie_whenNoError() throws AuthenticationConfigurationNotFoundException {
+    public void createAuthenticationResponseCookieHeader_returnHeaderContainingCookie_whenNoError() throws AuthenticationException {
         // Given
-        Long tokenExpirationInMilliseconds = 3600000L;
         Long tokenExpirationInSeconds = 3600L;
 
         String secret = "well_hidden_jwt_secret!";
 
         // When
         when(authenticationConfiguration.isEnabled()).thenReturn(true);
-        when(tokenConfiguration.getAccessTokenExpirationInMillisecond()).thenReturn(tokenExpirationInMilliseconds);
         when(tokenConfiguration.getAccessTokenExpirationInSecond()).thenReturn(tokenExpirationInSeconds);
         when(tokenConfiguration.getTokenSecret()).thenReturn(secret);
         when(tokenConfiguration.isUsingHttps()).thenReturn(true);
 
         // Then
-        HttpHeaders header = tokenAuthenticationService.createAuthenticationResponseCookieHeader();
+        HttpHeaders header = tokenAuthenticationService.createAuthenticationResponseCookieHeader(Optional.empty());
         assertThat(header).isNotNull();
         assertThat(header).isNotEmpty();
         assertThat(header.get(HttpHeaders.SET_COOKIE).get(0))
@@ -304,5 +303,95 @@ public class JwtTokenAuthenticationServiceTest {
         assertThat(authentication)
                 .isNotNull()
                 .isNotEmpty();
+    }
+
+    @Test
+    public void getJWTTokenExpiration_throwAuthenticationException_whenTokenExpirationConfigurationNotFoundAndAuthenticationTokenExpirationHasNoValue() {
+        // Given
+
+        // When
+        when(tokenConfiguration.getAccessTokenExpirationInSecond()).thenReturn(null);
+
+        // Then
+        assertThatThrownBy(() -> tokenAuthenticationService.getJWTTokenExpirationInSecond(Optional.empty()))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void getJWTTokenExpiration_throwAuthenticationException_whenConfigurationTokenExpirationZeroAndAuthenticationTokenExpirationHasNoValue() {
+        // Given
+
+        // When
+        when(tokenConfiguration.getAccessTokenExpirationInSecond()).thenReturn(0L);
+
+        // Then
+        assertThatThrownBy(() -> tokenAuthenticationService.getJWTTokenExpirationInSecond(Optional.empty()))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void getJWTTokenExpiration_throwAuthenticationException_whenConfigurationTokenExpirationZeroAndAuthenticationTokenExpirationZero() {
+        // Given
+
+        // When
+        when(tokenConfiguration.getAccessTokenExpirationInSecond()).thenReturn(0L);
+
+        // Then
+        assertThatThrownBy(() -> tokenAuthenticationService.getJWTTokenExpirationInSecond(Optional.of(0)))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void getJWTTokenExpiration_returnConfigurationExpiration_whenConfigurationTokenExpirationGreaterThanZeroAndAuthenticationTokenExpirationZero() throws AuthenticationException {
+        // Given
+        Long configurationExpiration = 3600L;
+
+        // When
+        when(tokenConfiguration.getAccessTokenExpirationInSecond()).thenReturn(configurationExpiration);
+
+        // Then
+        Long expiration = tokenAuthenticationService.getJWTTokenExpirationInSecond(Optional.of(0));
+        assertThat(expiration).isEqualTo(configurationExpiration);
+    }
+
+    @Test
+    public void getJWTTokenExpiration_returnAuthenticationTokenExpiration_whenTokenExpirationConfigurationNotFoundAndAuthenticationTokenExpirationGreaterThanZero() throws AuthenticationException {
+        // Given
+        Integer authenticationTokenExpiration = 3600;
+
+        // When
+        when(tokenConfiguration.getAccessTokenExpirationInSecond()).thenReturn(null);
+
+        // Then
+        Long expiration = tokenAuthenticationService.getJWTTokenExpirationInSecond(Optional.of(authenticationTokenExpiration));
+        assertThat(expiration).isEqualTo(authenticationTokenExpiration.longValue());
+    }
+
+    @Test
+    public void getJWTTokenExpiration_returnConfigurationExpiration_whenTokenExpirationConfigurationLowerThanAuthenticationTokenExpiration() throws AuthenticationException {
+        // Given
+        Integer authenticationTokenExpiration = 3600;
+        Long configurationExpiration = 1800L;
+
+        // When
+        when(tokenConfiguration.getAccessTokenExpirationInSecond()).thenReturn(configurationExpiration);
+
+        // Then
+        Long expiration = tokenAuthenticationService.getJWTTokenExpirationInSecond(Optional.of(authenticationTokenExpiration));
+        assertThat(expiration).isEqualTo(configurationExpiration);
+    }
+
+    @Test
+    public void getJWTTokenExpiration_returnAuthenticationTokenExpiration_whenTokenExpirationConfigurationGreaterThanAuthenticationTokenExpiration() throws AuthenticationException {
+        // Given
+        Integer authenticationTokenExpiration = 1800;
+        Long configurationExpiration = 3600L;
+
+        // When
+        when(tokenConfiguration.getAccessTokenExpirationInSecond()).thenReturn(configurationExpiration);
+
+        // Then
+        Long expiration = tokenAuthenticationService.getJWTTokenExpirationInSecond(Optional.of(authenticationTokenExpiration));
+        assertThat(expiration).isEqualTo(authenticationTokenExpiration.longValue());
     }
 }

@@ -169,4 +169,14 @@ public class GoogleAuthenticator extends ProviderAuthenticator<GoogleToken, Goog
     protected Optional<Pair<String, Optional<Object>>> getValueToCheck() {
         return Optional.of(Pair.of("email_verified", Optional.empty()));
     }
+
+    @Override
+    protected Optional<String> getTokenExpirationFieldName() {
+        return Optional.of("expires_in");
+    }
+
+    @Override
+    protected Optional<String> getTokenExpirationTimestampFieldName() {
+        return Optional.of("exp");
+    }
 }

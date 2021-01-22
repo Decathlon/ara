@@ -28,6 +28,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -47,25 +48,25 @@ public class AuthenticationService {
     /**
      * Authenticate an user and return the authentication details
      * @param request the request sent to authenticate the user
-     * @return the authentication details
+     * @return the authentication response
      * @throws AuthenticationException thrown if the authentication has failed
      */
-    public UserAuthenticationDetailsDTO authenticate(UserAuthenticationRequestDTO request) throws AuthenticationException {
+    public ResponseEntity<UserAuthenticationDetailsDTO> authenticate(UserAuthenticationRequestDTO request) throws AuthenticationException {
         Authenticator authenticator = getAuthenticator(request);
-        UserAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
-        return authenticationDetails;
+        ResponseEntity<UserAuthenticationDetailsDTO> authenticationResponse = authenticator.authenticate(request);
+        return authenticationResponse;
     }
 
     /**
      * Authenticate an  external application and return the authentication details
      * @param request the request sent to authenticate the application
-     * @return the authentication details
+     * @return the authentication response
      * @throws AuthenticationException thrown if the authentication has failed
      */
-    public AppAuthenticationDetailsDTO authenticate(AppAuthenticationRequestDTO request) throws AuthenticationException {
+    public ResponseEntity<AppAuthenticationDetailsDTO> authenticate(AppAuthenticationRequestDTO request) throws AuthenticationException {
         Authenticator authenticator = getAuthenticator(request);
-        AppAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
-        return authenticationDetails;
+        ResponseEntity<AppAuthenticationDetailsDTO> authenticationResponse = authenticator.authenticate(request);
+        return authenticationResponse;
     }
 
     /**

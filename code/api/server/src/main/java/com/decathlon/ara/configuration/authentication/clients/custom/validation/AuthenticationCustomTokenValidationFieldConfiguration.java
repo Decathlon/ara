@@ -25,4 +25,8 @@ public class AuthenticationCustomTokenValidationFieldConfiguration {
     private String name;
 
     private String expectedValue;
+
+    private String remainingTime;
+
+    private String expirationTimestamp;
 }

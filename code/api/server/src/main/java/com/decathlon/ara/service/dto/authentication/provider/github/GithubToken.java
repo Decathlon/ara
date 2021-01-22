@@ -21,6 +21,8 @@ import com.decathlon.ara.service.dto.authentication.provider.AuthenticatorToken;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import java.util.Optional;
+
 @Data
 public class GithubToken extends AuthenticatorToken {
 
@@ -31,4 +33,9 @@ public class GithubToken extends AuthenticatorToken {
     private String tokenType;
 
     private String scope;
+
+    @Override
+    public Optional<Integer> getAccessTokenDurationInSeconds() {
+        return Optional.empty();
+    }
 }

@@ -39,11 +39,11 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class GithubAuthenticatorTest {
@@ -302,8 +302,8 @@ public class GithubAuthenticatorTest {
         when(user.getPicture()).thenReturn(userPicture);
 
         // Then
-        UserAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
-
+        ResponseEntity<UserAuthenticationDetailsDTO> authenticationResponse = authenticator.authenticate(request);
+        UserAuthenticationDetailsDTO authenticationDetails = authenticationResponse.getBody();
         assertThat(authenticationDetails).isNotNull();
         assertThat(authenticationDetails.getProvider()).isEqualTo("provider");
         assertThat(authenticationDetails.getUser())
@@ -321,6 +321,7 @@ public class GithubAuthenticatorTest {
                         userEmail,
                         userPicture
                 );
+        verify(jwtTokenAuthenticationService).createAuthenticationResponseCookieHeader(Optional.empty());
     }
 
     @Test
@@ -405,16 +406,21 @@ public class GithubAuthenticatorTest {
 
         String jwt = "generated_jwt";
 
+        Long tokenAge = 3600L;
+
         // When
         when(request.getToken()).thenReturn(token);
         when(request.getProvider()).thenReturn(provider);
         when(restTemplate.exchange("https://api.github.com", HttpMethod.GET, requestEntity, Object.class))
                 .thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.OK);
-        when(jwtTokenAuthenticationService.generateToken()).thenReturn(jwt);
+        when(response.getBody()).thenReturn(null);
+        when(jwtTokenAuthenticationService.getJWTTokenExpirationInSecond(Optional.empty())).thenReturn(tokenAge);
+        when(jwtTokenAuthenticationService.generateToken(tokenAge)).thenReturn(jwt);
 
         // Then
-        AppAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        ResponseEntity<AppAuthenticationDetailsDTO> authenticationResponse = authenticator.authenticate(request);
+        AppAuthenticationDetailsDTO authenticationDetails = authenticationResponse.getBody();
         assertThat(authenticationDetails).isNotNull();
         assertThat(authenticationDetails.getProvider()).isEqualTo(provider);
         assertThat(authenticationDetails.getAccessToken()).isEqualTo(jwt);

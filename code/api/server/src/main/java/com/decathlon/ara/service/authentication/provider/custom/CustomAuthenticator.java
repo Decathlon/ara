@@ -290,4 +290,22 @@ public class CustomAuthenticator extends Authenticator<CustomToken, CustomUser> 
         Object expectedFieldValue = validationField.getExpectedValue();
         return Optional.of(Pair.of(fieldName, Optional.ofNullable(expectedFieldValue)));
     }
+
+    @Override
+    protected Optional<String> getTokenExpirationFieldName() {
+        AuthenticationCustomTokenValidationFieldConfiguration validationField = tokenValidationConfiguration.getValidationField();
+        if (validationField == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(validationField.getRemainingTime());
+    }
+
+    @Override
+    protected Optional<String> getTokenExpirationTimestampFieldName() {
+        AuthenticationCustomTokenValidationFieldConfiguration validationField = tokenValidationConfiguration.getValidationField();
+        if (validationField == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(validationField.getExpirationTimestamp());
+    }
 }

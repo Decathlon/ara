@@ -21,6 +21,8 @@ import com.decathlon.ara.service.dto.authentication.provider.AuthenticatorToken;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import java.util.Optional;
+
 @Data
 public class GoogleToken extends AuthenticatorToken {
 
@@ -34,4 +36,9 @@ public class GoogleToken extends AuthenticatorToken {
 
     @JsonProperty("token_type")
     private String type;
+
+    @Override
+    public Optional<Integer> getAccessTokenDurationInSeconds() {
+        return Optional.ofNullable(expiration);
+    }
 }

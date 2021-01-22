@@ -140,4 +140,14 @@ public class GithubAuthenticator extends ProviderAuthenticator<GithubToken, Gith
     protected Optional<Pair<String, Optional<Object>>> getValueToCheck() {
         return Optional.empty();
     }
+
+    @Override
+    protected Optional<String> getTokenExpirationFieldName() {
+        return Optional.empty();
+    }
+
+    @Override
+    protected Optional<String> getTokenExpirationTimestampFieldName() {
+        return Optional.empty();
+    }
 }
