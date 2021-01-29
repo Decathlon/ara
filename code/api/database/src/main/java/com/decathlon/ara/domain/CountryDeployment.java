@@ -83,6 +83,7 @@ public class CountryDeployment implements Comparable<CountryDeployment> {
     /**
      * The URL of the Continuous Integration job, visible in the client GUI to access logs of the job.
      */
+    @Column(length = 512)
     private String jobUrl;
 
     /**

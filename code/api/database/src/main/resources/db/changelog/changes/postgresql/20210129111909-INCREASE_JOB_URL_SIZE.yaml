@@ -1,0 +1,34 @@
+databaseChangeLog:
+- changeSet:
+    id: 1611915611098-1
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: job_url
+        newDataType: varchar(512)
+        tableName: country_deployment
+- changeSet:
+    id: 1611915611098-2
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: job_url
+        newDataType: varchar(512)
+        tableName: execution
+- changeSet:
+    id: 1611915611098-3
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: job_url
+        newDataType: varchar(512)
+        tableName: execution_completion_request
+- changeSet:
+    id: 1611915611098-4
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: job_url
+        newDataType: varchar(512)
+        tableName: run
+
