@@ -30,7 +30,13 @@ public class AuthenticationConfiguration {
 
     private Boolean enabled;
 
+    private Boolean frontEnabled;
+
     public Boolean isEnabled() {
         return enabled != null && enabled;
+    }
+
+    public Boolean isFrontEnabled() {
+        return frontEnabled != null && frontEnabled;
     }
 }

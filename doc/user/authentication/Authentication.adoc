@@ -146,33 +146,12 @@ After setting up your OAuth2 credentials, you can now configure your front authe
 * For any provider you do not want to use, you can simply disable it
 * You can also disable the whole front authentication (*not recommended* for production environments!)
 
-To do so, create your environment variables:
+To do so, create your environment variables.
 
-. Create a `.env` file (in the `code/web-ui` folder root)
-. In the same folder, copy the `.env.example` contents in it.
-. You can now replace the copied values with the right values
-
-Here are what your `.env` file should contain:
-
-. General:
-.. `*AUTHENTICATION_ENABLED*`: this field is to set to `true` if you want to enable the front authentication.
-+
-WARNING: Please, note that if all the providers are disabled, then the authentication is disabled as well, even if it is set to `true`.
-. Custom: It concerns your custom configuration (e.g. matching your company's settings)
-.. `*CUSTOM_OAUTH_PROVIDER_NAME*`: the name displayed, it can be your company name. By default it's `Custom` if left empty
-.. `*CUSTOM_OAUTH_PROVIDER_CLIENT_ID*`: the client id
-.. `*CUSTOM_OAUTH_PROVIDER_URI*`: the login page uri to get the code
-.. `*CUSTOM_ENABLED*`: `true` if you want to use it
-. Google:
-.. `*GOOGLE_CLIENT_ID*`: the Google client id. It should look like `_xxxxxxxxxx.apps.googleusercontent.com_`
-.. `*GOOGLE_REDIRECT_URI*`: As seen previously, it must match this pattern: `_{{your_ara_base_url}}/login/google_`
-.. `*GOOGLE_ENABLED*`: `true` if you want to use it
-. Github:
-.. `*GITHUB_CLIENT_ID*`: the Github client id
-.. `*GITHUB_ENABLED*`: `true` if you want to use it
+IMPORTANT: The front authentication configuration being stored on the server side, it will be described below.
 
 === Back authentication
-Like the front authentication, you can configure the back authentication as well. To do so:
+To configure the authentication, you'll need to:
 
 . Create the file `code/api/server/src/main/resources/application-auth.properties`. Note that this file is ignored, preventing you from submitting your credentials by mistake
 . Copy the example file (`code/api/server/src/main/resources/application-auth.properties.example`) content in the newly created file
@@ -181,18 +160,26 @@ Like the front authentication, you can configure the back authentication as well
 TIP: You can also pass the values as parameters (*highly recommended* on production environment, especially for sensitive data related to authentication!).
 
 * *Authentication enabling*:
-** `*authentication.enabled*`: enable (`true`) or disable (`false`) the back authentication.
+** `*authentication.enabled*`: enable (`true`) or disable (`false`) the *back* authentication.
+** `*authentication.front-enabled*`: enable (`true`) or disable (`false`) the *front* authentication.
 +
-WARNING: You have to explicitly set it to true to enable the authentication,  If left empty, it is considered disabled
+WARNING: You have to explicitly set the value to true to enable the back or front authentication. If left empty, it is considered disabled.
 * *OAuth2 providers*:
 ** *Github*:
+*** `*authentication.clients.github.front-enabled*`: a boolean to enable or disable the Github *front* authentication
+*** `*authentication.clients.github.client-id*`: the Github client id
 *** `*authentication.clients.github.client-secret*`: the Github client secret
 ** *Google*:
-*** `*authentication.clients.google.client_secret*`: the Google client secret
+*** `*authentication.clients.google.front-enabled*`: a boolean to enable or disable the Google *front* authentication
+*** `*authentication.clients.google.client-id*`: the Google client id
+*** `*authentication.clients.google.client-secret*`: the Google client secret
 ** *Custom*:
+*** `*authentication.clients.custom.front-enabled*`: a boolean to enable or disable the custom *front* authentication
+*** `*authentication.clients.custom.displayed-name*`: the name you want to display (e.g. authentication button, popover, etc.). It can be your company name. If none, the value `Custom` is then displayed
+*** `*authentication.clients.custom.login-uri*`: the uri used by a browser to login and get the code
 +
 ****
-The custom configuration is divided into 3 main parts: token, user and token validation. Each part is itself divided into: +
+The custom configuration below is divided into 3 main parts: token, user and token validation. Each part is itself divided into: +
 
 * *Request*: +
 It describes how to request the data (uri, HTTP method, header and body). +
@@ -207,7 +194,7 @@ It describes where to get the expected values in the returned object, by matchin
 *** *Token*: +
 This part contains the configuration required to fetch the token
 **** *Request*: +
-You can use *code* `{{code}}` and *client id* `{{client_id}}` variables in the body and/or header
+You can use *code* `{{code}}` variable in the body and/or header
 ***** `*authentication.clients.custom.token.uri*`: the token API uri
 ***** `*authentication.clients.custom.token.method*`: the HTTP method used to get the token.
 +

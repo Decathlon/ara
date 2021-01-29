@@ -64,15 +64,33 @@ public class GithubAuthenticatorTest {
     public void authenticate_throwAuthenticationConfigurationNotFoundException_whenClientSecretNotFound() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
-        String clientId = "github_client_id";
         String code = "github_code";
         String provider = "provider";
 
         // When
-        when(request.getClientId()).thenReturn(clientId);
         when(request.getCode()).thenReturn(code);
         when(request.getProvider()).thenReturn(provider);
         when(githubConfiguration.getClientSecret()).thenReturn(null);
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationConfigurationNotFoundException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationConfigurationNotFoundException_whenClientIdNotFound() {
+        // Given
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
+        String code = "github_code";
+        String provider = "provider";
+
+        String secret = "github_secret";
+
+        // When
+        when(request.getCode()).thenReturn(code);
+        when(request.getProvider()).thenReturn(provider);
+        when(githubConfiguration.getClientSecret()).thenReturn(secret);
+        when(githubConfiguration.getClientId()).thenReturn(null);
 
         // Then
         assertThatThrownBy(() -> authenticator.authenticate(request))
@@ -94,10 +112,10 @@ public class GithubAuthenticatorTest {
         HttpEntity<GithubToken> tokenRequest = new HttpEntity<>(tokenHeader);
 
         // When
-        when(request.getClientId()).thenReturn(clientId);
         when(request.getCode()).thenReturn(code);
         when(request.getProvider()).thenReturn(provider);
         when(githubConfiguration.getClientSecret()).thenReturn(secret);
+        when(githubConfiguration.getClientId()).thenReturn(clientId);
         when(
                 restTemplate.exchange(
                         "https://github.com/login/oauth/access_token?client_id=github_client_id&scope=user:email%20read:user&client_secret=github_secret&code=github_code",
@@ -129,10 +147,10 @@ public class GithubAuthenticatorTest {
         ResponseEntity<GithubToken> response = mock(ResponseEntity.class);
 
         // When
-        when(request.getClientId()).thenReturn(clientId);
         when(request.getCode()).thenReturn(code);
         when(request.getProvider()).thenReturn(provider);
         when(githubConfiguration.getClientSecret()).thenReturn(secret);
+        when(githubConfiguration.getClientId()).thenReturn(clientId);
         when(
                 restTemplate.exchange(
                         "https://github.com/login/oauth/access_token?client_id=github_client_id&scope=user:email%20read:user&client_secret=github_secret&code=github_code",
@@ -173,10 +191,10 @@ public class GithubAuthenticatorTest {
         HttpEntity<GithubUser> userRequest = new HttpEntity<>(userHeader);
 
         // When
-        when(request.getClientId()).thenReturn(clientId);
         when(request.getCode()).thenReturn(code);
         when(request.getProvider()).thenReturn(provider);
         when(githubConfiguration.getClientSecret()).thenReturn(secret);
+        when(githubConfiguration.getClientId()).thenReturn(clientId);
         when(
                 restTemplate.exchange(
                         "https://github.com/login/oauth/access_token?client_id=github_client_id&scope=user:email%20read:user&client_secret=github_secret&code=github_code",
@@ -222,10 +240,10 @@ public class GithubAuthenticatorTest {
         ResponseEntity<GithubUser> userResponseEntity = mock(ResponseEntity.class);
 
         // When
-        when(request.getClientId()).thenReturn(clientId);
         when(request.getCode()).thenReturn(code);
         when(request.getProvider()).thenReturn(provider);
         when(githubConfiguration.getClientSecret()).thenReturn(secret);
+        when(githubConfiguration.getClientId()).thenReturn(clientId);
         when(
                 restTemplate.exchange(
                         "https://github.com/login/oauth/access_token?client_id=github_client_id&scope=user:email%20read:user&client_secret=github_secret&code=github_code",
@@ -277,10 +295,10 @@ public class GithubAuthenticatorTest {
         String userPicture = "github_picture_url";
 
         // When
-        when(request.getClientId()).thenReturn(clientId);
         when(request.getCode()).thenReturn(code);
         when(request.getProvider()).thenReturn(provider);
         when(githubConfiguration.getClientSecret()).thenReturn(secret);
+        when(githubConfiguration.getClientId()).thenReturn(clientId);
         when(
                 restTemplate.exchange(
                         "https://github.com/login/oauth/access_token?client_id=github_client_id&scope=user:email%20read:user&client_secret=github_secret&code=github_code",
@@ -305,7 +323,6 @@ public class GithubAuthenticatorTest {
         ResponseEntity<UserAuthenticationDetailsDTO> authenticationResponse = authenticator.authenticate(request);
         UserAuthenticationDetailsDTO authenticationDetails = authenticationResponse.getBody();
         assertThat(authenticationDetails).isNotNull();
-        assertThat(authenticationDetails.getProvider()).isEqualTo("provider");
         assertThat(authenticationDetails.getUser())
                 .extracting(
                         "id",
@@ -410,7 +427,6 @@ public class GithubAuthenticatorTest {
 
         // When
         when(request.getToken()).thenReturn(token);
-        when(request.getProvider()).thenReturn(provider);
         when(restTemplate.exchange("https://api.github.com", HttpMethod.GET, requestEntity, Object.class))
                 .thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.OK);
@@ -422,7 +438,6 @@ public class GithubAuthenticatorTest {
         ResponseEntity<AppAuthenticationDetailsDTO> authenticationResponse = authenticator.authenticate(request);
         AppAuthenticationDetailsDTO authenticationDetails = authenticationResponse.getBody();
         assertThat(authenticationDetails).isNotNull();
-        assertThat(authenticationDetails.getProvider()).isEqualTo(provider);
         assertThat(authenticationDetails.getAccessToken()).isEqualTo(jwt);
     }
 }

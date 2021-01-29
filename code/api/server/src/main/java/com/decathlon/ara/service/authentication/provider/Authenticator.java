@@ -70,17 +70,12 @@ public abstract class Authenticator<T extends AuthenticatorToken, U extends Auth
         if (StringUtils.isBlank(code)) {
             throw new AuthenticationTokenNotFetchedException("The token cannot be fetched without a code");
         }
-        String clientId = request.getClientId();
-        if (StringUtils.isBlank(clientId)) {
-            throw new AuthenticationTokenNotFetchedException("The token cannot be fetched without a client id");
-        }
 
         T token = getToken(request);
         U user = getUser(token);
         AuthenticationUserDetailsDTO convertedUser = convertUser(user);
 
-        UserAuthenticationDetailsDTO authenticationDetails = new UserAuthenticationDetailsDTO(convertedUser);
-        authenticationDetails.setProvider(provider);
+        UserAuthenticationDetailsDTO authenticationDetails = new UserAuthenticationDetailsDTO().withUser(convertedUser);
 
         Optional<Integer> accessTokenDurationInSeconds = token.getAccessTokenDurationInSeconds();
         HttpHeaders headers = jwtTokenAuthenticationService.createAuthenticationResponseCookieHeader(accessTokenDurationInSeconds);
@@ -178,7 +173,6 @@ public abstract class Authenticator<T extends AuthenticatorToken, U extends Auth
             Long tokenAgeValue = jwtTokenAuthenticationService.getJWTTokenExpirationInSecond(tokenAge);
             String generatedToken = jwtTokenAuthenticationService.generateToken(tokenAgeValue);
             AppAuthenticationDetailsDTO authenticationDetails = new AppAuthenticationDetailsDTO(generatedToken);
-            authenticationDetails.setProvider(request.getProvider());
             return ResponseEntity.ok().body(authenticationDetails);
         }
         String errorMessage = String.format("The authentication failed because the token (%s) given was not valid", accessToken);

@@ -24,6 +24,7 @@ import com.decathlon.ara.service.authentication.exception.AuthenticationExceptio
 import com.decathlon.ara.service.dto.authentication.request.AppAuthenticationRequestDTO;
 import com.decathlon.ara.service.dto.authentication.request.UserAuthenticationRequestDTO;
 import com.decathlon.ara.service.dto.authentication.response.app.AppAuthenticationDetailsDTO;
+import com.decathlon.ara.service.dto.authentication.response.configuration.front.FrontAuthenticationConfigurationDTO;
 import com.decathlon.ara.service.dto.authentication.response.user.UserAuthenticationDetailsDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -31,10 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -81,5 +79,12 @@ public class AuthenticationResource {
             log.error(String.format("Error while authenticating your application to ARA (via %s)", request.getProvider()), e);
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping("/configuration")
+    @Timed
+    public ResponseEntity<FrontAuthenticationConfigurationDTO> getFrontConfiguration() {
+        FrontAuthenticationConfigurationDTO frontConfiguration = authenticationService.getFrontConfiguration();
+        return ResponseEntity.ok(frontConfiguration);
     }
 }

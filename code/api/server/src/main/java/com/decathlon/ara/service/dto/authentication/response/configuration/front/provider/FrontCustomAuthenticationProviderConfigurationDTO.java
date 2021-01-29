@@ -15,24 +15,24 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.configuration.authentication.clients.github;
+package com.decathlon.ara.service.dto.authentication.response.configuration.front.provider;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import java.util.Optional;
 
-@Data
-@Configuration
-@ConfigurationProperties("authentication.clients.github")
-public class AuthenticationGithubConfiguration {
+public class FrontCustomAuthenticationProviderConfigurationDTO extends FrontAuthenticationProviderConfigurationDTO {
 
-    private Boolean frontEnabled;
+    public FrontCustomAuthenticationProviderConfigurationDTO(Boolean enabled, Optional<String> displayedName, String loginUri) {
+        super(enabled, "custom", displayedName.orElse("Custom"), "building", loginUri);
+    }
 
-    private String clientId;
-
-    private String clientSecret;
-
-    public Boolean isFrontEnabled() {
-        return frontEnabled != null && frontEnabled;
+    /**
+     * Get the login uri. As a custom provider, the login uri is the first parameter.
+     * @param parameters the parameters used to create the login uri (here the first parameter is the custom login uri)
+     * @return the login uri
+     */
+    @Override
+    protected String getLoginUrl(String... parameters) {
+        String loginUri = parameters[0];
+        return loginUri;
     }
 }

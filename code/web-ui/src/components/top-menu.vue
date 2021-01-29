@@ -44,15 +44,15 @@
       </div>
 
       <div id="helps">
-        <span v-if="requireLogin" style="margin-right: 10px" class="user-avatar">
+        <span v-if="isLoggedIn" style="margin-right: 10px" class="user-avatar">
           <Tooltip placement="bottom">
-            <Avatar v-if="getUserDetails().picture" :src="getUserDetails().picture" size="large" />
+            <Avatar v-if="user && user.picture" :src="user.picture" size="large" />
             <Avatar v-else icon="md-person" style="color: #0082c3;background-color: white" size="large"/>
             <div slot="content">
-              <p v-if="getCurrentProvider()">Connected via <b>{{getCurrentProvider().display}}</b></p>
-              <p v-if="getUserDetails().login">> Login: <b>{{getUserDetails().login}}</b></p>
-              <p v-if="getUserDetails().name">> Name: <b>{{getUserDetails().name}}</b></p>
-              <p v-if="getUserDetails().email">> Email: <b>{{getUserDetails().email}}</b></p>
+              <p v-if="provider && provider.name">Connected via <b>{{provider.name}}</b></p>
+              <p v-if="user && user.login">> Login: <b>{{user.login}}</b></p>
+              <p v-if="user && user.name">> Name: <b>{{user.name}}</b></p>
+              <p v-if="user && user.email">> Email: <b>{{user.email}}</b></p>
             </div>
           </Tooltip>
         </span>
@@ -67,7 +67,7 @@
              @click="setLatestChangelogVersion"
              target="_blank"><Badge dot :count="changelogCount"><Icon type="md-notifications" size="24"/></Badge></a>
         </Tooltip>
-        <Tooltip v-if="requireLogin" content="Logout from ARA" placement="bottom-end">
+        <Tooltip v-if="isLoggedIn" content="Logout from ARA" placement="bottom-end">
           <a @click="logout()">
             <Icon type="md-exit" size="24"></Icon>
           </a>
@@ -111,11 +111,25 @@
         appVersion: undefined,
         latestChangelogVersion: this.getCookie(LATEST_CHANGELOG_VERSION_COOKIE_NAME),
         projectCode: this.$route.params.projectCode || this.defaultProjectCode,
-        requireLogin: this.$appConfig.authentication.enabled
+        isLoggedIn: AuthenticationService.isAlreadyLoggedIn()
       }
     },
 
     computed: {
+      provider () {
+        const authenticationDetails = this.getAuthenticationDetails()
+        if (authenticationDetails) {
+          return authenticationDetails.provider
+        }
+      },
+
+      user () {
+        const authenticationDetails = this.getAuthenticationDetails()
+        if (authenticationDetails) {
+          return authenticationDetails.user
+        }
+      },
+
       ...mapState('projects', [
         'projects',
         'defaultProjectCode'
@@ -191,15 +205,8 @@
         }
       },
 
-      getCurrentProvider () {
-        const providerName = AuthenticationService.getDetails().provider
-        const provider = this.$appConfig.getProvider(providerName)
-        return provider
-      },
-
-      getUserDetails () {
-        const loginDetails = AuthenticationService.getDetails()
-        return loginDetails.user
+      getAuthenticationDetails () {
+        return AuthenticationService.getDetails()
       },
 
       logout () {

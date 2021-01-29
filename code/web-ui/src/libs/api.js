@@ -23,8 +23,7 @@ let api = {}
 const API_PATH = '/api'
 const PROJECT_API_PATH = API_PATH + '/projects'
 
-const LOGIN_PATH = '/auth/login'
-const LOGOUT_PATH = '/auth/logout'
+const AUTH = '/auth'
 
 const projectPath = function (viewOrProjectCode) {
   let projectCode = (typeof viewOrProjectCode === 'string' ? viewOrProjectCode : viewOrProjectCode.$route.params.projectCode)
@@ -36,8 +35,9 @@ api.REQUEST_OPTIONS = {
 }
 
 api.paths = {
-  login: () => LOGIN_PATH,
-  logout: () => LOGOUT_PATH,
+  authenticationConfiguration: () => `${AUTH}/configuration`,
+  login: () => `${AUTH}/login`,
+  logout: () => `${AUTH}/logout`,
   communications: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/communications',
   countries: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/countries',
   cycleDefinitions: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/cycle-definitions',

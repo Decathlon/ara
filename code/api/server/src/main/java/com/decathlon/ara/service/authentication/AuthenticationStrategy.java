@@ -21,11 +21,14 @@ import com.decathlon.ara.service.authentication.provider.Authenticator;
 import com.decathlon.ara.service.authentication.provider.custom.CustomAuthenticator;
 import com.decathlon.ara.service.authentication.provider.github.GithubAuthenticator;
 import com.decathlon.ara.service.authentication.provider.google.GoogleAuthenticator;
+import com.decathlon.ara.service.dto.authentication.response.configuration.front.provider.*;
+import com.decathlon.ara.service.dto.authentication.response.user.AuthenticationProviderDetailsDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -48,23 +51,48 @@ public class AuthenticationStrategy {
     private final GoogleAuthenticator googleAuthenticator;
 
     /**
-     * If found, return an authenticator matching the provider name given
+     * If found, return an authenticator and the provider details, matching the provider name given
      * @param providerName the provider name (e.g. "custom", "google", "github", etc.)
      *                     Note that it is case insensitive
-     * @return the matching authenticator, if any
+     * @param providersConfiguration the provider configuration
+     * @return the matching authenticator and provider details, if any
      */
-    public Optional<Authenticator> getAuthenticator(String providerName) {
-        if (StringUtils.isBlank(providerName)) {
+    public Optional<Pair<Authenticator, AuthenticationProviderDetailsDTO>> getAuthenticatorAndProviderDetails(
+            String providerName,
+            FrontAuthenticationProvidersConfigurationDTO providersConfiguration
+    ) {
+        if (StringUtils.isBlank(providerName) || providersConfiguration == null) {
             return Optional.empty();
         }
 
-        Map<String, Authenticator> authenticatorsByProviderName = Map.ofEntries(
-                entry("custom", customAuthenticator),
-                entry("github", githubAuthenticator),
-                entry("google", googleAuthenticator)
+        FrontCustomAuthenticationProviderConfigurationDTO customConfiguration = providersConfiguration.getCustom();
+        FrontGithubAuthenticationProviderConfigurationDTO githubConfiguration = providersConfiguration.getGithub();
+        FrontGoogleAuthenticationProviderConfigurationDTO googleConfiguration = providersConfiguration.getGoogle();
+
+        AuthenticationProviderDetailsDTO customProviderDetails = getProviderDetails(customConfiguration);
+        AuthenticationProviderDetailsDTO githubProviderDetails = getProviderDetails(githubConfiguration);
+        AuthenticationProviderDetailsDTO googleProviderDetails = getProviderDetails(googleConfiguration);
+
+        Map<String, Pair<Authenticator, AuthenticationProviderDetailsDTO>> authenticatorAndProviderDetailsByProviderName = Map.ofEntries(
+                entry("custom", Pair.of(customAuthenticator, customProviderDetails)),
+                entry("github", Pair.of(githubAuthenticator, githubProviderDetails)),
+                entry("google", Pair.of(googleAuthenticator, googleProviderDetails))
         );
 
-        Authenticator authenticator = authenticatorsByProviderName.get(providerName.toLowerCase());
-        return Optional.ofNullable(authenticator);
+        Pair<Authenticator, AuthenticationProviderDetailsDTO> authenticatorAndProviderDetails = authenticatorAndProviderDetailsByProviderName.get(providerName.toLowerCase());
+        return Optional.ofNullable(authenticatorAndProviderDetails);
+    }
+
+    /**
+     * Get provider details from the provider configuration
+     * @param providerConfiguration the provider configuration
+     * @return the provider details
+     */
+    private AuthenticationProviderDetailsDTO getProviderDetails(FrontAuthenticationProviderConfigurationDTO providerConfiguration) {
+        String name = providerConfiguration.getDisplay();
+        String code = providerConfiguration.getName();
+        return new AuthenticationProviderDetailsDTO()
+                .withName(name)
+                .withCode(code);
     }
 }

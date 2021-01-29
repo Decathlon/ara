@@ -15,24 +15,22 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.configuration.authentication.clients.github;
+package com.decathlon.ara.service.dto.authentication.response.configuration.front.provider;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+public class FrontGithubAuthenticationProviderConfigurationDTO extends FrontAuthenticationProviderConfigurationDTO {
 
-@Data
-@Configuration
-@ConfigurationProperties("authentication.clients.github")
-public class AuthenticationGithubConfiguration {
+    public FrontGithubAuthenticationProviderConfigurationDTO(Boolean enabled, String clientId) {
+        super(enabled, "github", "Github", "github", clientId);
+    }
 
-    private Boolean frontEnabled;
-
-    private String clientId;
-
-    private String clientSecret;
-
-    public Boolean isFrontEnabled() {
-        return frontEnabled != null && frontEnabled;
+    /**
+     * Get login uri from client id
+     * @param parameters the parameters used to create the login uri (here the first parameter is the client id)
+     * @return the login uri
+     */
+    @Override
+    protected String getLoginUrl(String... parameters) {
+        String clientId = parameters[0];
+        return String.format("https://github.com/login/oauth/authorize?client_id=%s", clientId);
     }
 }

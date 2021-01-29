@@ -15,7 +15,7 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.configuration.authentication.clients.github;
+package com.decathlon.ara.configuration.authentication.clients.custom;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -23,14 +23,14 @@ import org.springframework.context.annotation.Configuration;
 
 @Data
 @Configuration
-@ConfigurationProperties("authentication.clients.github")
-public class AuthenticationGithubConfiguration {
+@ConfigurationProperties("authentication.clients.custom")
+public class AuthenticationCustomConfiguration {
 
     private Boolean frontEnabled;
 
-    private String clientId;
+    private String displayedName;
 
-    private String clientSecret;
+    private String loginUri;
 
     public Boolean isFrontEnabled() {
         return frontEnabled != null && frontEnabled;

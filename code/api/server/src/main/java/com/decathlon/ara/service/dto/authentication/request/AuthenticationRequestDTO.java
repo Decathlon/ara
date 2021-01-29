@@ -28,7 +28,5 @@ import lombok.With;
 @With
 public class AuthenticationRequestDTO {
 
-    protected String clientId;
-
     protected String provider;
 }

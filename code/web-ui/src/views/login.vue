@@ -5,16 +5,22 @@
         <img src="../assets/favicon.png" width="32" height="32"/>
         <span>Login to ARA</span>
       </div>
-      <div class="signin-selection">
+      <div class="signin-selection" v-if="configuration.isComplete">
         <div class="signin-title"><span>Sign in with</span></div>
         <div class="authentication-buttons-container">
-          <custom-authentication-button v-if="providers.custom.enabled" class="authentication-button"></custom-authentication-button>
-          <google-authentication v-if="providers.google.enabled" class="authentication-button"></google-authentication>
-          <github-authentication-button v-if="providers.github.enabled" class="authentication-button"></github-authentication-button>
+          <custom-authentication-button v-if="configuration.authentication.providers.custom.enabled" class="authentication-button"></custom-authentication-button>
+          <google-authentication v-if="configuration.authentication.providers.google.enabled" class="authentication-button"></google-authentication>
+          <github-authentication-button v-if="configuration.authentication.providers.github.enabled" class="authentication-button"></github-authentication-button>
         </div>
       </div>
+      <div v-else-if="error" class="configuration-not-loaded info-box">
+        Configuration not found, you can't login to ARA.
+      </div>
+      <div v-else class="configuration-loading info-box">
+        Loading the configuration... Please wait...
+      </div>
     </div>
-    <Spin fix v-if="authenticating"/>
+    <Spin fix v-if="loadingConfiguration || authenticating"/>
   </div>
 </template>
 
@@ -26,6 +32,7 @@ import CustomAuthenticationButton from '../components/authentication/custom-auth
 import { AuthenticationService } from '../service/authentication.service'
 import api from '../libs/api'
 import Vue from 'vue'
+import iView from 'iview'
 
 export default {
   name: 'login',
@@ -38,26 +45,16 @@ export default {
 
   data () {
     return {
-      providers: this.$appConfig.authentication.providers,
+      configuration: this.$appConfig,
+      loadingConfiguration: false,
+      error: false,
       authenticating: false
     }
   },
 
   methods: {
     loginAs (user) {
-      const userDetails = user.user
-      const authenticationDetails = {
-        provider: user.provider,
-        user: {
-          id: userDetails.id,
-          name: userDetails.name,
-          login: userDetails.login,
-          picture: userDetails.picture,
-          email: userDetails.email
-        }
-      }
-
-      AuthenticationService.login(authenticationDetails)
+      AuthenticationService.login(user)
     },
 
     authenticate () {
@@ -96,9 +93,7 @@ export default {
         const url = api.paths.login()
         const loginRequest = {
           code: code,
-          provider: provider.name,
-          clientId: provider.clientId,
-          redirectUri: provider.redirectUri
+          provider: provider.name
         }
         this.authenticating = true
         Vue.http
@@ -119,13 +114,41 @@ export default {
       }
     },
 
+    downloadConfiguration () {
+      this.loadingConfiguration = true
+      Vue.http
+        .get(api.paths.authenticationConfiguration(), api.REQUEST_OPTIONS)
+        .then(response => {
+          this.$appConfig.authentication = response.body
+          this.error = false
+          this.loadingConfiguration = false
+          if (this.$appConfig.authentication.enabled === false) {
+            iView.Notice.open({
+              title: 'No authentication required',
+              desc: 'You are redirected to the home page because no authentication is required. To change that, update your configuration.',
+              duration: 0
+            })
+            this.$router.push('/')
+          } else if (this.$appConfig.authentication.enabled === true) {
+            this.authenticate()
+          }
+        }, () => {
+          this.error = true
+          this.loadingConfiguration = false
+        })
+    },
+
     backToLogin () {
       this.$router.push({ name: 'login' })
     }
   },
 
   mounted () {
-    this.authenticate()
+    if (this.$appConfig.isComplete) {
+      this.authenticate()
+    } else {
+      this.downloadConfiguration()
+    }
   }
 }
 </script>
@@ -228,6 +251,28 @@ export default {
 
 .authentication-button span {
   margin-left: 5px;
+}
+
+.configuration-loading {
+  color: #00529B;
+  background-color: #BDE5F8;
+  border-color: #00529B;
+}
+
+.configuration-not-loaded {
+  color: #D8000C;
+  background-color: #FFBABA;
+  border-color: #D8000C;
+}
+
+.info-box {
+  border: 1px solid;
+  font-size: 16px;
+
+  padding: 10px 0 10px 0;
+  margin: 0 auto 15px;
+  width: 75%;
+  text-align: center;
 }
 
 </style>

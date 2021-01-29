@@ -64,7 +64,10 @@ public class GithubAuthenticator extends ProviderAuthenticator<GithubToken, Gith
             throw new AuthenticationConfigurationNotFoundException(errorMessage);
         }
 
-        String clientId = request.getClientId();
+        String clientId = githubConfiguration.getClientId();
+        if (StringUtils.isBlank(clientId)) {
+            throw new AuthenticationConfigurationNotFoundException("The Github token cannot be fetched without a client id");
+        }
         String code = request.getCode();
         String scope = "user:email%20read:user";
 

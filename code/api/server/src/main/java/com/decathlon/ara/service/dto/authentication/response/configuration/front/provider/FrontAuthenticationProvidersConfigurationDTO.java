@@ -15,24 +15,23 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.configuration.authentication.clients.github;
+package com.decathlon.ara.service.dto.authentication.response.configuration.front.provider;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import lombok.NoArgsConstructor;
+import lombok.With;
 
 @Data
-@Configuration
-@ConfigurationProperties("authentication.clients.github")
-public class AuthenticationGithubConfiguration {
+@NoArgsConstructor
+@AllArgsConstructor
+@With
+public class FrontAuthenticationProvidersConfigurationDTO {
 
-    private Boolean frontEnabled;
+    private FrontGoogleAuthenticationProviderConfigurationDTO google;
 
-    private String clientId;
+    private FrontGithubAuthenticationProviderConfigurationDTO github;
 
-    private String clientSecret;
+    private FrontCustomAuthenticationProviderConfigurationDTO custom;
 
-    public Boolean isFrontEnabled() {
-        return frontEnabled != null && frontEnabled;
-    }
 }

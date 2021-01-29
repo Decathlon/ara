@@ -26,5 +26,13 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("authentication.clients.google")
 public class AuthenticationGoogleConfiguration {
 
+    private Boolean frontEnabled;
+
+    private String clientId;
+
     private String clientSecret;
+
+    public Boolean isFrontEnabled() {
+        return frontEnabled != null && frontEnabled;
+    }
 }

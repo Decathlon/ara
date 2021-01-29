@@ -15,24 +15,35 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.configuration.authentication.clients.github;
+package com.decathlon.ara.service.dto.authentication.response.configuration.front.provider;
 
 import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 @Data
-@Configuration
-@ConfigurationProperties("authentication.clients.github")
-public class AuthenticationGithubConfiguration {
+public abstract class FrontAuthenticationProviderConfigurationDTO {
 
-    private Boolean frontEnabled;
-
-    private String clientId;
-
-    private String clientSecret;
-
-    public Boolean isFrontEnabled() {
-        return frontEnabled != null && frontEnabled;
+    public FrontAuthenticationProviderConfigurationDTO(Boolean enabled, String name, String displayedName, String icon, String... parameters) {
+        this.enabled = enabled;
+        this.name = name;
+        this.display = displayedName;
+        this.icon = icon;
+        this.uri = getLoginUrl(parameters);
     }
+
+    protected Boolean enabled;
+
+    protected String name;
+
+    protected String display;
+
+    protected String icon;
+
+    protected String uri;
+
+    /**
+     * Get the login uri
+     * @param parameters the parameters used to create the login uri (e.g. client id, etc...)
+     * @return the login uri
+     */
+    protected abstract String getLoginUrl(String... parameters);
 }

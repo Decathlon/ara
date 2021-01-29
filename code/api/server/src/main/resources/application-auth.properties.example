@@ -24,18 +24,27 @@
 # Authentication
 # OAuth2
 authentication.enabled=false
+authentication.front-enabled=true
 
 # Github
+authentication.clients.github.front-enabled=true
+authentication.clients.github.client-id=your_github_client_id
 authentication.clients.github.client-secret=your_github_client_secret
 
 # Google
-authentication.clients.google.client_secret=your_google_client_secret
+authentication.clients.google.front-enabled=true
+authentication.clients.google.client-id=your_google_client_id
+authentication.clients.google.client-secret=your_google_client_secret
 
 # Custom
+authentication.clients.custom.front-enabled=true
+authentication.clients.custom.displayed-name=Company Name
+authentication.clients.custom.login-uri=the_custom_token_uri
+
 authentication.clients.custom.token.uri=your_custom_token_uri
 authentication.clients.custom.token.method=POST
 authentication.clients.custom.token.header-values=your_token_header_attribute1,your_token_header_value1|your_token_header_attribute2,your_token_header_value2
-authentication.clients.custom.token.body-values=your_token_body_attribute1,your_token_body_value1|your_token_body_attribute2,your_token_body_value2|your_client_id_attribute,{{client_id}}|your_code_attribute,{{code}}
+authentication.clients.custom.token.body-values=your_token_body_attribute1,your_token_body_value1|your_token_body_attribute2,your_token_body_value2|your_code_attribute,{{code}}
 
 authentication.clients.custom.token.fields.id=your_token_id_field
 authentication.clients.custom.token.fields.access=your_token_access_field
