@@ -56,10 +56,10 @@
         </plugins>
     </build>
 
-     <scm>
-         <connection>scm:git:https://github.com/Decathlon/ara.git</connection>
-         <developerConnection>scm:git:https://github.com/Decathlon/ara.git</developerConnection>
-         <url>https://github.com/Decathlon/ara</url>
+    <scm>
+        <connection>scm:git:https://github.com/Decathlon/ara.git</connection>
+        <developerConnection>scm:git:https://github.com/Decathlon/ara.git</developerConnection>
+        <url>https://github.com/Decathlon/ara</url>
     </scm>
 
     <distributionManagement>
