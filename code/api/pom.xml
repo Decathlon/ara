@@ -30,17 +30,22 @@
     <packaging>pom</packaging>
     <version>7.2.4</version>
 
-    <name>ARA Parent</name>
+    <name>ARA API</name>
     <description>
         Agile Regression Analyzer (or ARA for short) is a tool that helps you avoid regressions in your projects.
         It's open-source, so you can contribute ! For more details, go to https://github.com/Decathlon/ara.
     </description>
+
+    <properties>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/jacoco-aggregation/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+    </properties>
 
     <modules>
         <module>lib</module>
         <module>generated-cucumber-report</module>
         <module>database</module>
         <module>server</module>
+        <module>jacoco-aggregation</module>
     </modules>
 
     <build>
@@ -52,6 +57,18 @@
                 <configuration>
                     <locales>en</locales>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
