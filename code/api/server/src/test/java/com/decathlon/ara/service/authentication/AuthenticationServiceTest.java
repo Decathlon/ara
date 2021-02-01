@@ -19,9 +19,9 @@ package com.decathlon.ara.service.authentication;
 
 import com.decathlon.ara.configuration.AraConfiguration;
 import com.decathlon.ara.configuration.authentication.AuthenticationConfiguration;
-import com.decathlon.ara.configuration.authentication.clients.custom.AuthenticationCustomConfiguration;
-import com.decathlon.ara.configuration.authentication.clients.github.AuthenticationGithubConfiguration;
-import com.decathlon.ara.configuration.authentication.clients.google.AuthenticationGoogleConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.custom.AuthenticationCustomConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.github.AuthenticationGithubConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.google.AuthenticationGoogleConfiguration;
 import com.decathlon.ara.service.authentication.exception.AuthenticationException;
 import com.decathlon.ara.service.authentication.provider.Authenticator;
 import com.decathlon.ara.service.dto.authentication.request.AppAuthenticationRequestDTO;

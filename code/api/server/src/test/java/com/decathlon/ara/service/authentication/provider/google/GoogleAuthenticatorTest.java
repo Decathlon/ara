@@ -18,7 +18,7 @@
 package com.decathlon.ara.service.authentication.provider.google;
 
 import com.decathlon.ara.configuration.AraConfiguration;
-import com.decathlon.ara.configuration.authentication.clients.google.AuthenticationGoogleConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.google.AuthenticationGoogleConfiguration;
 import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationService;
 import com.decathlon.ara.service.authentication.exception.AuthenticationConfigurationNotFoundException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationException;

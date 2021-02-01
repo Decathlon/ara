@@ -17,7 +17,7 @@
 
 package com.decathlon.ara.service.authentication.provider.github;
 
-import com.decathlon.ara.configuration.authentication.clients.github.AuthenticationGithubConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.github.AuthenticationGithubConfiguration;
 import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationService;
 import com.decathlon.ara.service.authentication.exception.AuthenticationConfigurationNotFoundException;
 import com.decathlon.ara.service.authentication.provider.ProviderAuthenticator;

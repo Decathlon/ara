@@ -162,17 +162,17 @@ TIP: You can also pass the values as parameters (*highly recommended* on product
 WARNING: You have to explicitly set the value to true to enable the authentication. If left empty, it is considered disabled.
 * *OAuth2 providers*:
 ** *Github*:
-*** `*authentication.clients.github.enabled*`: a boolean to enable or disable the Github authentication
-*** `*authentication.clients.github.client-id*`: the Github client id
-*** `*authentication.clients.github.client-secret*`: the Github client secret
+*** `*authentication.provider.github.enabled*`: a boolean to enable or disable the Github authentication
+*** `*authentication.provider.github.client-id*`: the Github client id
+*** `*authentication.provider.github.client-secret*`: the Github client secret
 ** *Google*:
-*** `*authentication.clients.google.enabled*`: a boolean to enable or disable the Google authentication
-*** `*authentication.clients.google.client-id*`: the Google client id
-*** `*authentication.clients.google.client-secret*`: the Google client secret
+*** `*authentication.provider.google.enabled*`: a boolean to enable or disable the Google authentication
+*** `*authentication.provider.google.client-id*`: the Google client id
+*** `*authentication.provider.google.client-secret*`: the Google client secret
 ** *Custom*:
-*** `*authentication.clients.custom.enabled*`: a boolean to enable or disable the custom authentication
-*** `*authentication.clients.custom.displayed-name*`: the name you want to display (e.g. authentication button, popover, etc.). It can be your company name. If none, the value `Custom` is then displayed
-*** `*authentication.clients.custom.login-uri*`: the uri used by a browser to login and get the code
+*** `*authentication.provider.custom.enabled*`: a boolean to enable or disable the custom authentication
+*** `*authentication.provider.custom.displayed-name*`: the name you want to display (e.g. authentication button, popover, etc.). It can be your company name. If none, the value `Custom` is then displayed
+*** `*authentication.provider.custom.login-uri*`: the uri used by a browser to login and get the code
 +
 ****
 The custom configuration below is divided into 3 main parts: token, user and token validation. Each part is itself divided into: +
@@ -191,57 +191,57 @@ It describes where to get the expected values in the returned object, by matchin
 This part contains the configuration required to fetch the token
 **** *Request*: +
 You can use *code* `{{code}}` variable in the body and/or header
-***** `*authentication.clients.custom.token.uri*`: the token API uri
-***** `*authentication.clients.custom.token.method*`: the HTTP method used to get the token.
+***** `*authentication.provider.custom.token.uri*`: the token API uri
+***** `*authentication.provider.custom.token.method*`: the HTTP method used to get the token.
 +
 IMPORTANT: Only `GET` and `POST` method accepted. If left empty, the default value is applied, i.e. `GET`
-***** `*authentication.clients.custom.token.header-values*`: all the header values
-***** `*authentication.clients.custom.token.body-values*`: all the body values
+***** `*authentication.provider.custom.token.header-values*`: all the header values
+***** `*authentication.provider.custom.token.body-values*`: all the body values
 **** *Response*:
-***** `*authentication.clients.custom.token.fields.id*`: the token *id* field name
-***** `*authentication.clients.custom.token.fields.access*`: the *access* token value field name
-***** `*authentication.clients.custom.token.fields.refresh*`: the *refresh* token value field name
-***** `*authentication.clients.custom.token.fields.expiration*`: the *expiration* token field name
-***** `*authentication.clients.custom.token.fields.type*`: the token *type* field name
-***** `*authentication.clients.custom.token.fields.scope*`: the token *scope* field name
+***** `*authentication.provider.custom.token.fields.id*`: the token *id* field name
+***** `*authentication.provider.custom.token.fields.access*`: the *access* token value field name
+***** `*authentication.provider.custom.token.fields.refresh*`: the *refresh* token value field name
+***** `*authentication.provider.custom.token.fields.expiration*`: the *expiration* token field name
+***** `*authentication.provider.custom.token.fields.type*`: the token *type* field name
+***** `*authentication.provider.custom.token.fields.scope*`: the token *scope* field name
 *** *User*: +
 This part contains the configuration required to fetch the user
 **** *Request*: +
 You can use *token type* `{{token_type}}` and *token value* `{{token_value}}` variables in the body and/or header
-***** `*authentication.clients.custom.user.uri*`: the user API uri
-***** `*authentication.clients.custom.user.method*`: the HTTP method used to get the user.
+***** `*authentication.provider.custom.user.uri*`: the user API uri
+***** `*authentication.provider.custom.user.method*`: the HTTP method used to get the user.
 +
 IMPORTANT: Only `GET` and `POST` method accepted. If left empty, the default value is applied, i.e. `GET`
-***** `*authentication.clients.custom.user.header-values*`: all the header values
-***** `*authentication.clients.custom.user.body-values*`: all the body values
+***** `*authentication.provider.custom.user.header-values*`: all the header values
+***** `*authentication.provider.custom.user.body-values*`: all the body values
 **** *Response*:
-***** `*authentication.clients.custom.user.fields.id*`: the user *id* field name
-***** `*authentication.clients.custom.user.fields.name*`: the user *name* field name
-***** `*authentication.clients.custom.user.fields.login*`: the user *login* field name
-***** `*authentication.clients.custom.user.fields.email*`: the user *email* field name
-***** `*authentication.clients.custom.user.fields.picture-url*`: the user *picture url* field name
+***** `*authentication.provider.custom.user.fields.id*`: the user *id* field name
+***** `*authentication.provider.custom.user.fields.name*`: the user *name* field name
+***** `*authentication.provider.custom.user.fields.login*`: the user *login* field name
+***** `*authentication.provider.custom.user.fields.email*`: the user *email* field name
+***** `*authentication.provider.custom.user.fields.picture-url*`: the user *picture url* field name
 *** *Verification*: +
 This part contains the configuration required to check the token validity
 **** *Request*:
-***** `*authentication.clients.custom.token-validation.uri*`: the token validation uri
-***** `*authentication.clients.custom.token-validation.method*`: the HTTP method used to check the token validity.
+***** `*authentication.provider.custom.token-validation.uri*`: the token validation uri
+***** `*authentication.provider.custom.token-validation.method*`: the HTTP method used to check the token validity.
 +
 IMPORTANT: Only `GET` and `POST` method accepted. If left empty, the default value is applied, i.e. `GET`
-***** `*authentication.clients.custom.token-validation.header-values*`: all the header values
-***** `*authentication.clients.custom.token-validation.body-values*`: all the body values
+***** `*authentication.provider.custom.token-validation.header-values*`: all the header values
+***** `*authentication.provider.custom.token-validation.body-values*`: all the body values
 **** *Response*: +
 When checking a token, if the API returns: +
 => an error code, or threw an exception, then the token is not valid +
 => a 2xx code, then it is enough to assume its validity, in some cases.
 However, sometimes the verification also requires to check a value in the returned object. In this scenario, fill the fields below:
-***** `*authentication.clients.custom.token-validation.validation-field.name*`: the field name to look up to check the token validity
-***** `*authentication.clients.custom.token-validation.validation-field.expected-value*`: +
+***** `*authentication.provider.custom.token-validation.validation-field.name*`: the field name to look up to check the token validity
+***** `*authentication.provider.custom.token-validation.validation-field.expected-value*`: +
 => if left blank, it assumes that the value is a boolean (or a string representing a boolean, i.e `"true"` or `"false"`). For instance lets assume the field name is `active`, then the token is assumed to be valid iff `active` equals `true` (or `active` equals `"true"`). +
 => if a value is given, then this value is compared to the value returned: iff there are the same, then the token is considered valid
 +
 IMPORTANT: The configurations below are not mandatory. There are used to get the remaining time (in second) for an OAuth2 token to expire: the JWT generated token cannot exceed this duration.
-***** `*authentication.clients.custom.token-validation.validation-field.remaining-time*`: the field to get the token expiration remaining time (expected to be in second) *(_optional_)*
-***** `*authentication.clients.custom.token-validation.validation-field.expiration-timestamp*`: the field to get the token expiration timestamp (expected to be in second) *(_optional_)*
+***** `*authentication.provider.custom.token-validation.validation-field.remaining-time*`: the field to get the token expiration remaining time (expected to be in second) *(_optional_)*
+***** `*authentication.provider.custom.token-validation.validation-field.expiration-timestamp*`: the field to get the token expiration timestamp (expected to be in second) *(_optional_)*
 * *JWT*:
 ** `*authentication.jwt-token.using-https*`: `true` if Ara is deployed in an HTTPS environment (_**highly recommended** on production environment_)
 ** `*authentication.jwt-token.token-secret*`: the secret with which the JWT token is created or verified.

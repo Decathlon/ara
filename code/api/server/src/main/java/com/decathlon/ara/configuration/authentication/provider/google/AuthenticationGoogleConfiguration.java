@@ -15,18 +15,24 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.configuration.authentication.clients.custom.validation;
+package com.decathlon.ara.configuration.authentication.provider.google;
 
 import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 @Data
-public class AuthenticationCustomTokenValidationFieldConfiguration {
+@Configuration
+@ConfigurationProperties("authentication.provider.google")
+public class AuthenticationGoogleConfiguration {
 
-    private String name;
+    private Boolean enabled;
 
-    private String expectedValue;
+    private String clientId;
 
-    private String remainingTime;
+    private String clientSecret;
 
-    private String expirationTimestamp;
+    public Boolean isEnabled() {
+        return enabled != null && enabled;
+    }
 }

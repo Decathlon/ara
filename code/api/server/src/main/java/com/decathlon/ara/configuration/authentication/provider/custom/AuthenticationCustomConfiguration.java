@@ -15,18 +15,24 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.configuration.authentication.clients.custom.user;
+package com.decathlon.ara.configuration.authentication.provider.custom;
 
-import com.decathlon.ara.configuration.authentication.clients.custom.AuthenticationCustomValueConfiguration;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Data
 @Configuration
-@ConfigurationProperties("authentication.clients.custom.user")
-public class AuthenticationCustomUserConfiguration extends AuthenticationCustomValueConfiguration {
+@ConfigurationProperties("authentication.provider.custom")
+public class AuthenticationCustomConfiguration {
 
-    private AuthenticationCustomUserFieldsConfiguration fields;
+    private Boolean enabled;
 
+    private String displayedName;
+
+    private String loginUri;
+
+    public Boolean isEnabled() {
+        return enabled != null && enabled;
+    }
 }

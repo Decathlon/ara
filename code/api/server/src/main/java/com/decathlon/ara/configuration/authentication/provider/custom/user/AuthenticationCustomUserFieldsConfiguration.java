@@ -15,24 +15,20 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.configuration.authentication.clients.google;
+package com.decathlon.ara.configuration.authentication.provider.custom.user;
 
 import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 @Data
-@Configuration
-@ConfigurationProperties("authentication.clients.google")
-public class AuthenticationGoogleConfiguration {
+public class AuthenticationCustomUserFieldsConfiguration {
 
-    private Boolean enabled;
+    private String id;
 
-    private String clientId;
+    private String name;
 
-    private String clientSecret;
+    private String login;
 
-    public Boolean isEnabled() {
-        return enabled != null && enabled;
-    }
+    private String email;
+
+    private String pictureUrl;
 }

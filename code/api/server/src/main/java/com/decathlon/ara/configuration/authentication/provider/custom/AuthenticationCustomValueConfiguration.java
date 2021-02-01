@@ -15,7 +15,7 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.configuration.authentication.clients.custom;
+package com.decathlon.ara.configuration.authentication.provider.custom;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

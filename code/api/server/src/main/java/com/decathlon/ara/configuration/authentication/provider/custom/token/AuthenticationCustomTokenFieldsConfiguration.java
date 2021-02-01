@@ -15,24 +15,22 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.configuration.authentication.clients.custom;
+package com.decathlon.ara.configuration.authentication.provider.custom.token;
 
 import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 @Data
-@Configuration
-@ConfigurationProperties("authentication.clients.custom")
-public class AuthenticationCustomConfiguration {
+public class AuthenticationCustomTokenFieldsConfiguration {
 
-    private Boolean enabled;
+    private String id;
 
-    private String displayedName;
+    private String access;
 
-    private String loginUri;
+    private String refresh;
 
-    public Boolean isEnabled() {
-        return enabled != null && enabled;
-    }
+    private String expiration;
+
+    private String type;
+
+    private String scope;
 }

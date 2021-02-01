@@ -15,20 +15,18 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.configuration.authentication.clients.custom.user;
+package com.decathlon.ara.configuration.authentication.provider.custom.validation;
 
 import lombok.Data;
 
 @Data
-public class AuthenticationCustomUserFieldsConfiguration {
-
-    private String id;
+public class AuthenticationCustomTokenValidationFieldConfiguration {
 
     private String name;
 
-    private String login;
+    private String expectedValue;
 
-    private String email;
+    private String remainingTime;
 
-    private String pictureUrl;
+    private String expirationTimestamp;
 }

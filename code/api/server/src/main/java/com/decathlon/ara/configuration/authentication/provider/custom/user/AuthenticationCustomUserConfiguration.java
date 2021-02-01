@@ -15,17 +15,18 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.configuration.authentication.clients.custom.validation;
+package com.decathlon.ara.configuration.authentication.provider.custom.user;
 
-import com.decathlon.ara.configuration.authentication.clients.custom.AuthenticationCustomValueConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.custom.AuthenticationCustomValueConfiguration;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Data
 @Configuration
-@ConfigurationProperties("authentication.clients.custom.token-validation")
-public class AuthenticationCustomTokenValidationConfiguration extends AuthenticationCustomValueConfiguration {
+@ConfigurationProperties("authentication.provider.custom.user")
+public class AuthenticationCustomUserConfiguration extends AuthenticationCustomValueConfiguration {
 
-    private AuthenticationCustomTokenValidationFieldConfiguration validationField;
+    private AuthenticationCustomUserFieldsConfiguration fields;
+
 }
