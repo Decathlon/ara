@@ -21,10 +21,10 @@ import com.decathlon.ara.service.authentication.provider.Authenticator;
 import com.decathlon.ara.service.authentication.provider.custom.CustomAuthenticator;
 import com.decathlon.ara.service.authentication.provider.github.GithubAuthenticator;
 import com.decathlon.ara.service.authentication.provider.google.GoogleAuthenticator;
-import com.decathlon.ara.service.dto.authentication.response.configuration.front.provider.FrontAuthenticationProvidersConfigurationDTO;
-import com.decathlon.ara.service.dto.authentication.response.configuration.front.provider.FrontCustomAuthenticationProviderConfigurationDTO;
-import com.decathlon.ara.service.dto.authentication.response.configuration.front.provider.FrontGithubAuthenticationProviderConfigurationDTO;
-import com.decathlon.ara.service.dto.authentication.response.configuration.front.provider.FrontGoogleAuthenticationProviderConfigurationDTO;
+import com.decathlon.ara.service.dto.authentication.response.configuration.provider.AuthenticationProvidersConfigurationDTO;
+import com.decathlon.ara.service.dto.authentication.response.configuration.provider.CustomAuthenticationProviderConfigurationDTO;
+import com.decathlon.ara.service.dto.authentication.response.configuration.provider.GithubAuthenticationProviderConfigurationDTO;
+import com.decathlon.ara.service.dto.authentication.response.configuration.provider.GoogleAuthenticationProviderConfigurationDTO;
 import com.decathlon.ara.service.dto.authentication.response.user.AuthenticationProviderDetailsDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,7 +57,7 @@ public class AuthenticationStrategyTest {
     @Test
     public void getAuthenticatorAndProviderDetails_returnEmptyOptional_whenNameIsBlank() {
         // Given
-        FrontAuthenticationProvidersConfigurationDTO providersConfiguration = mock(FrontAuthenticationProvidersConfigurationDTO.class);
+        AuthenticationProvidersConfigurationDTO providersConfiguration = mock(AuthenticationProvidersConfigurationDTO.class);
 
         // When
 
@@ -86,10 +86,10 @@ public class AuthenticationStrategyTest {
     public void getAuthenticatorAndProviderDetails_returnCustomAuthenticator_whenCustomProviderNameGiven() {
         // Given
         String providerName = "custom";
-        FrontAuthenticationProvidersConfigurationDTO providersConfiguration = mock(FrontAuthenticationProvidersConfigurationDTO.class);
-        FrontCustomAuthenticationProviderConfigurationDTO customConfiguration = new FrontCustomAuthenticationProviderConfigurationDTO(true, Optional.empty(), "login-uri");
-        FrontGoogleAuthenticationProviderConfigurationDTO googleConfiguration = new FrontGoogleAuthenticationProviderConfigurationDTO(true, "google-client-id", "base-url");
-        FrontGithubAuthenticationProviderConfigurationDTO githubConfiguration = new FrontGithubAuthenticationProviderConfigurationDTO(true, "github-client-id");
+        AuthenticationProvidersConfigurationDTO providersConfiguration = mock(AuthenticationProvidersConfigurationDTO.class);
+        CustomAuthenticationProviderConfigurationDTO customConfiguration = new CustomAuthenticationProviderConfigurationDTO(true, Optional.empty(), "login-uri");
+        GoogleAuthenticationProviderConfigurationDTO googleConfiguration = new GoogleAuthenticationProviderConfigurationDTO(true, "google-client-id", "base-url");
+        GithubAuthenticationProviderConfigurationDTO githubConfiguration = new GithubAuthenticationProviderConfigurationDTO(true, "github-client-id");
 
         // When
         when(providersConfiguration.getCustom()).thenReturn(customConfiguration);
@@ -109,10 +109,10 @@ public class AuthenticationStrategyTest {
     public void getAuthenticatorAndProviderDetails_returnGithubAuthenticator_whenGithubProviderNameGiven() {
         // Given
         String providerName = "github";
-        FrontAuthenticationProvidersConfigurationDTO providersConfiguration = mock(FrontAuthenticationProvidersConfigurationDTO.class);
-        FrontCustomAuthenticationProviderConfigurationDTO customConfiguration = new FrontCustomAuthenticationProviderConfigurationDTO(true, Optional.empty(), "login-uri");
-        FrontGoogleAuthenticationProviderConfigurationDTO googleConfiguration = new FrontGoogleAuthenticationProviderConfigurationDTO(true, "google-client-id", "base-url");
-        FrontGithubAuthenticationProviderConfigurationDTO githubConfiguration = new FrontGithubAuthenticationProviderConfigurationDTO(true, "github-client-id");
+        AuthenticationProvidersConfigurationDTO providersConfiguration = mock(AuthenticationProvidersConfigurationDTO.class);
+        CustomAuthenticationProviderConfigurationDTO customConfiguration = new CustomAuthenticationProviderConfigurationDTO(true, Optional.empty(), "login-uri");
+        GoogleAuthenticationProviderConfigurationDTO googleConfiguration = new GoogleAuthenticationProviderConfigurationDTO(true, "google-client-id", "base-url");
+        GithubAuthenticationProviderConfigurationDTO githubConfiguration = new GithubAuthenticationProviderConfigurationDTO(true, "github-client-id");
 
         // When
         when(providersConfiguration.getCustom()).thenReturn(customConfiguration);
@@ -132,10 +132,10 @@ public class AuthenticationStrategyTest {
     public void getAuthenticatorAndProviderDetails_returnGoogleAuthenticator_whenGoogleProviderNameGiven() {
         // Given
         String providerName = "google";
-        FrontAuthenticationProvidersConfigurationDTO providersConfiguration = mock(FrontAuthenticationProvidersConfigurationDTO.class);
-        FrontCustomAuthenticationProviderConfigurationDTO customConfiguration = new FrontCustomAuthenticationProviderConfigurationDTO(true, Optional.empty(), "login-uri");
-        FrontGoogleAuthenticationProviderConfigurationDTO googleConfiguration = new FrontGoogleAuthenticationProviderConfigurationDTO(true, "google-client-id", "base-url");
-        FrontGithubAuthenticationProviderConfigurationDTO githubConfiguration = new FrontGithubAuthenticationProviderConfigurationDTO(true, "github-client-id");
+        AuthenticationProvidersConfigurationDTO providersConfiguration = mock(AuthenticationProvidersConfigurationDTO.class);
+        CustomAuthenticationProviderConfigurationDTO customConfiguration = new CustomAuthenticationProviderConfigurationDTO(true, Optional.empty(), "login-uri");
+        GoogleAuthenticationProviderConfigurationDTO googleConfiguration = new GoogleAuthenticationProviderConfigurationDTO(true, "google-client-id", "base-url");
+        GithubAuthenticationProviderConfigurationDTO githubConfiguration = new GithubAuthenticationProviderConfigurationDTO(true, "github-client-id");
 
         // When
         when(providersConfiguration.getCustom()).thenReturn(customConfiguration);
@@ -155,10 +155,10 @@ public class AuthenticationStrategyTest {
     public void getAuthenticatorAndProviderDetails_returnEmptyOptional_whenUnknownProviderNameGiven() {
         // Given
         String providerName = "<unknown-provider-name>";
-        FrontAuthenticationProvidersConfigurationDTO providersConfiguration = mock(FrontAuthenticationProvidersConfigurationDTO.class);
-        FrontCustomAuthenticationProviderConfigurationDTO customConfiguration = new FrontCustomAuthenticationProviderConfigurationDTO(true, Optional.empty(), "login-uri");
-        FrontGoogleAuthenticationProviderConfigurationDTO googleConfiguration = new FrontGoogleAuthenticationProviderConfigurationDTO(true, "google-client-id", "base-url");
-        FrontGithubAuthenticationProviderConfigurationDTO githubConfiguration = new FrontGithubAuthenticationProviderConfigurationDTO(true, "github-client-id");
+        AuthenticationProvidersConfigurationDTO providersConfiguration = mock(AuthenticationProvidersConfigurationDTO.class);
+        CustomAuthenticationProviderConfigurationDTO customConfiguration = new CustomAuthenticationProviderConfigurationDTO(true, Optional.empty(), "login-uri");
+        GoogleAuthenticationProviderConfigurationDTO googleConfiguration = new GoogleAuthenticationProviderConfigurationDTO(true, "google-client-id", "base-url");
+        GithubAuthenticationProviderConfigurationDTO githubConfiguration = new GithubAuthenticationProviderConfigurationDTO(true, "github-client-id");
 
         // When
         when(providersConfiguration.getCustom()).thenReturn(customConfiguration);

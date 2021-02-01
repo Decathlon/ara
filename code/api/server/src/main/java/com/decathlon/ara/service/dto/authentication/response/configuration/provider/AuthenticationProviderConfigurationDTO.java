@@ -15,14 +15,14 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.response.configuration.front.provider;
+package com.decathlon.ara.service.dto.authentication.response.configuration.provider;
 
 import lombok.Data;
 
 @Data
-public abstract class FrontAuthenticationProviderConfigurationDTO {
+public abstract class AuthenticationProviderConfigurationDTO {
 
-    public FrontAuthenticationProviderConfigurationDTO(Boolean enabled, String name, String displayedName, String icon, String... parameters) {
+    public AuthenticationProviderConfigurationDTO(Boolean enabled, String name, String displayedName, String icon, String... parameters) {
         this.enabled = enabled;
         this.name = name;
         this.display = displayedName;

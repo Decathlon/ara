@@ -15,9 +15,9 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.response.configuration.front;
+package com.decathlon.ara.service.dto.authentication.response.configuration;
 
-import com.decathlon.ara.service.dto.authentication.response.configuration.front.provider.FrontAuthenticationProvidersConfigurationDTO;
+import com.decathlon.ara.service.dto.authentication.response.configuration.provider.AuthenticationProvidersConfigurationDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.With;
@@ -25,13 +25,13 @@ import lombok.With;
 @Data
 @AllArgsConstructor
 @With
-public class FrontAuthenticationConfigurationDTO {
+public class AuthenticationConfigurationDTO {
 
-    public FrontAuthenticationConfigurationDTO(Boolean enabled) {
+    public AuthenticationConfigurationDTO(Boolean enabled) {
         this.enabled = enabled;
     }
 
     private Boolean enabled;
 
-    private FrontAuthenticationProvidersConfigurationDTO providers;
+    private AuthenticationProvidersConfigurationDTO providers;
 }

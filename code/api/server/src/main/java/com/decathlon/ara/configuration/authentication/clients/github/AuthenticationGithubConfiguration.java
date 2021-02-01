@@ -26,13 +26,13 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("authentication.clients.github")
 public class AuthenticationGithubConfiguration {
 
-    private Boolean frontEnabled;
+    private Boolean enabled;
 
     private String clientId;
 
     private String clientSecret;
 
-    public Boolean isFrontEnabled() {
-        return frontEnabled != null && frontEnabled;
+    public Boolean isEnabled() {
+        return enabled != null && enabled;
     }
 }

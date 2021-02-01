@@ -24,20 +24,19 @@
 # Authentication
 # OAuth2
 authentication.enabled=false
-authentication.front-enabled=true
 
 # Github
-authentication.clients.github.front-enabled=true
+authentication.clients.github.enabled=true
 authentication.clients.github.client-id=your_github_client_id
 authentication.clients.github.client-secret=your_github_client_secret
 
 # Google
-authentication.clients.google.front-enabled=true
+authentication.clients.google.enabled=true
 authentication.clients.google.client-id=your_google_client_id
 authentication.clients.google.client-secret=your_google_client_secret
 
 # Custom
-authentication.clients.custom.front-enabled=true
+authentication.clients.custom.enabled=true
 authentication.clients.custom.displayed-name=Company Name
 authentication.clients.custom.login-uri=the_custom_token_uri
 

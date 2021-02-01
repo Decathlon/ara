@@ -21,7 +21,7 @@ import com.decathlon.ara.service.authentication.provider.Authenticator;
 import com.decathlon.ara.service.authentication.provider.custom.CustomAuthenticator;
 import com.decathlon.ara.service.authentication.provider.github.GithubAuthenticator;
 import com.decathlon.ara.service.authentication.provider.google.GoogleAuthenticator;
-import com.decathlon.ara.service.dto.authentication.response.configuration.front.provider.*;
+import com.decathlon.ara.service.dto.authentication.response.configuration.provider.*;
 import com.decathlon.ara.service.dto.authentication.response.user.AuthenticationProviderDetailsDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -59,15 +59,15 @@ public class AuthenticationStrategy {
      */
     public Optional<Pair<Authenticator, AuthenticationProviderDetailsDTO>> getAuthenticatorAndProviderDetails(
             String providerName,
-            FrontAuthenticationProvidersConfigurationDTO providersConfiguration
+            AuthenticationProvidersConfigurationDTO providersConfiguration
     ) {
         if (StringUtils.isBlank(providerName) || providersConfiguration == null) {
             return Optional.empty();
         }
 
-        FrontCustomAuthenticationProviderConfigurationDTO customConfiguration = providersConfiguration.getCustom();
-        FrontGithubAuthenticationProviderConfigurationDTO githubConfiguration = providersConfiguration.getGithub();
-        FrontGoogleAuthenticationProviderConfigurationDTO googleConfiguration = providersConfiguration.getGoogle();
+        CustomAuthenticationProviderConfigurationDTO customConfiguration = providersConfiguration.getCustom();
+        GithubAuthenticationProviderConfigurationDTO githubConfiguration = providersConfiguration.getGithub();
+        GoogleAuthenticationProviderConfigurationDTO googleConfiguration = providersConfiguration.getGoogle();
 
         AuthenticationProviderDetailsDTO customProviderDetails = getProviderDetails(customConfiguration);
         AuthenticationProviderDetailsDTO githubProviderDetails = getProviderDetails(githubConfiguration);
@@ -88,7 +88,7 @@ public class AuthenticationStrategy {
      * @param providerConfiguration the provider configuration
      * @return the provider details
      */
-    private AuthenticationProviderDetailsDTO getProviderDetails(FrontAuthenticationProviderConfigurationDTO providerConfiguration) {
+    private AuthenticationProviderDetailsDTO getProviderDetails(AuthenticationProviderConfigurationDTO providerConfiguration) {
         String name = providerConfiguration.getDisplay();
         String code = providerConfiguration.getName();
         return new AuthenticationProviderDetailsDTO()

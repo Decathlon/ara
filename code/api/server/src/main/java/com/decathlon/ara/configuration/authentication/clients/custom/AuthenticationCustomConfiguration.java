@@ -26,13 +26,13 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("authentication.clients.custom")
 public class AuthenticationCustomConfiguration {
 
-    private Boolean frontEnabled;
+    private Boolean enabled;
 
     private String displayedName;
 
     private String loginUri;
 
-    public Boolean isFrontEnabled() {
-        return frontEnabled != null && frontEnabled;
+    public Boolean isEnabled() {
+        return enabled != null && enabled;
     }
 }

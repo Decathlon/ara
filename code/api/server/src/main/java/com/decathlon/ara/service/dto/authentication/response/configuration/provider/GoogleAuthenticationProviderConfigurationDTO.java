@@ -15,13 +15,13 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.response.configuration.front.provider;
+package com.decathlon.ara.service.dto.authentication.response.configuration.provider;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class FrontGoogleAuthenticationProviderConfigurationDTO extends FrontAuthenticationProviderConfigurationDTO {
+public class GoogleAuthenticationProviderConfigurationDTO extends AuthenticationProviderConfigurationDTO {
 
-    public FrontGoogleAuthenticationProviderConfigurationDTO(Boolean enabled, String clientId, String frontBaseUrl) {
+    public GoogleAuthenticationProviderConfigurationDTO(Boolean enabled, String clientId, String frontBaseUrl) {
         super(enabled, "google", "Google", "google", clientId, frontBaseUrl);
     }
 

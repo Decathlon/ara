@@ -24,7 +24,7 @@ import com.decathlon.ara.service.authentication.exception.AuthenticationExceptio
 import com.decathlon.ara.service.dto.authentication.request.AppAuthenticationRequestDTO;
 import com.decathlon.ara.service.dto.authentication.request.UserAuthenticationRequestDTO;
 import com.decathlon.ara.service.dto.authentication.response.app.AppAuthenticationDetailsDTO;
-import com.decathlon.ara.service.dto.authentication.response.configuration.front.FrontAuthenticationConfigurationDTO;
+import com.decathlon.ara.service.dto.authentication.response.configuration.AuthenticationConfigurationDTO;
 import com.decathlon.ara.service.dto.authentication.response.user.UserAuthenticationDetailsDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -83,8 +83,8 @@ public class AuthenticationResource {
 
     @GetMapping("/configuration")
     @Timed
-    public ResponseEntity<FrontAuthenticationConfigurationDTO> getFrontConfiguration() {
-        FrontAuthenticationConfigurationDTO frontConfiguration = authenticationService.getFrontConfiguration();
-        return ResponseEntity.ok(frontConfiguration);
+    public ResponseEntity<AuthenticationConfigurationDTO> getAuthenticationConfiguration() {
+        AuthenticationConfigurationDTO configuration = authenticationService.getAuthenticationConfiguration();
+        return ResponseEntity.ok(configuration);
     }
 }

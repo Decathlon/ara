@@ -27,8 +27,8 @@ import com.decathlon.ara.service.authentication.provider.Authenticator;
 import com.decathlon.ara.service.dto.authentication.request.AppAuthenticationRequestDTO;
 import com.decathlon.ara.service.dto.authentication.request.UserAuthenticationRequestDTO;
 import com.decathlon.ara.service.dto.authentication.response.app.AppAuthenticationDetailsDTO;
-import com.decathlon.ara.service.dto.authentication.response.configuration.front.FrontAuthenticationConfigurationDTO;
-import com.decathlon.ara.service.dto.authentication.response.configuration.front.provider.FrontAuthenticationProvidersConfigurationDTO;
+import com.decathlon.ara.service.dto.authentication.response.configuration.AuthenticationConfigurationDTO;
+import com.decathlon.ara.service.dto.authentication.response.configuration.provider.AuthenticationProvidersConfigurationDTO;
 import com.decathlon.ara.service.dto.authentication.response.user.AuthenticationProviderDetailsDTO;
 import com.decathlon.ara.service.dto.authentication.response.user.UserAuthenticationDetailsDTO;
 import org.junit.jupiter.api.Test;
@@ -91,13 +91,13 @@ public class AuthenticationServiceTest {
 
         // When
         when(authenticationRequest.getProvider()).thenReturn(provider);
-        when(authenticationStrategy.getAuthenticatorAndProviderDetails(anyString(), any(FrontAuthenticationProvidersConfigurationDTO.class))).thenReturn(Optional.empty());
+        when(authenticationStrategy.getAuthenticatorAndProviderDetails(anyString(), any(AuthenticationProvidersConfigurationDTO.class))).thenReturn(Optional.empty());
 
         // Then
         assertThatThrownBy(() -> authenticationService.authenticate(authenticationRequest))
                 .isInstanceOf(AuthenticationException.class);
         ArgumentCaptor<String> providerArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(authenticationStrategy).getAuthenticatorAndProviderDetails(providerArgumentCaptor.capture(), any(FrontAuthenticationProvidersConfigurationDTO.class));
+        verify(authenticationStrategy).getAuthenticatorAndProviderDetails(providerArgumentCaptor.capture(), any(AuthenticationProvidersConfigurationDTO.class));
         String capturedProvider = providerArgumentCaptor.getValue();
         assertThat(capturedProvider).isEqualTo(provider);
     }
@@ -117,7 +117,7 @@ public class AuthenticationServiceTest {
 
         // When
         when(authenticationRequest.getProvider()).thenReturn(provider);
-        when(authenticationStrategy.getAuthenticatorAndProviderDetails(anyString(), any(FrontAuthenticationProvidersConfigurationDTO.class))).thenReturn(Optional.of(Pair.of(authenticator, providerDetails)));
+        when(authenticationStrategy.getAuthenticatorAndProviderDetails(anyString(), any(AuthenticationProvidersConfigurationDTO.class))).thenReturn(Optional.of(Pair.of(authenticator, providerDetails)));
         when(authenticator.authenticate(authenticationRequest)).thenReturn(authenticationResponse);
         when(authenticationResponse.getBody()).thenReturn(responseBody);
 
@@ -125,7 +125,7 @@ public class AuthenticationServiceTest {
         ResponseEntity<UserAuthenticationDetailsDTO> result = authenticationService.authenticate(authenticationRequest);
         assertThat(result).isEqualTo(authenticationResponse);
         ArgumentCaptor<String> providerArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(authenticationStrategy).getAuthenticatorAndProviderDetails(providerArgumentCaptor.capture(), any(FrontAuthenticationProvidersConfigurationDTO.class));
+        verify(authenticationStrategy).getAuthenticatorAndProviderDetails(providerArgumentCaptor.capture(), any(AuthenticationProvidersConfigurationDTO.class));
         String capturedProvider = providerArgumentCaptor.getValue();
         assertThat(capturedProvider).isEqualTo(provider);
     }
@@ -150,13 +150,13 @@ public class AuthenticationServiceTest {
 
         // When
         when(authenticationRequest.getProvider()).thenReturn(provider);
-        when(authenticationStrategy.getAuthenticatorAndProviderDetails(anyString(), any(FrontAuthenticationProvidersConfigurationDTO.class))).thenReturn(Optional.empty());
+        when(authenticationStrategy.getAuthenticatorAndProviderDetails(anyString(), any(AuthenticationProvidersConfigurationDTO.class))).thenReturn(Optional.empty());
 
         // Then
         assertThatThrownBy(() -> authenticationService.authenticate(authenticationRequest))
                 .isInstanceOf(AuthenticationException.class);
         ArgumentCaptor<String> providerArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(authenticationStrategy).getAuthenticatorAndProviderDetails(providerArgumentCaptor.capture(), any(FrontAuthenticationProvidersConfigurationDTO.class));
+        verify(authenticationStrategy).getAuthenticatorAndProviderDetails(providerArgumentCaptor.capture(), any(AuthenticationProvidersConfigurationDTO.class));
         String capturedProvider = providerArgumentCaptor.getValue();
         assertThat(capturedProvider).isEqualTo(provider);
     }
@@ -176,20 +176,20 @@ public class AuthenticationServiceTest {
 
         // When
         when(authenticationRequest.getProvider()).thenReturn(provider);
-        when(authenticationStrategy.getAuthenticatorAndProviderDetails(anyString(), any(FrontAuthenticationProvidersConfigurationDTO.class))).thenReturn(Optional.of(Pair.of(authenticator, providerDetails)));
+        when(authenticationStrategy.getAuthenticatorAndProviderDetails(anyString(), any(AuthenticationProvidersConfigurationDTO.class))).thenReturn(Optional.of(Pair.of(authenticator, providerDetails)));
         when(authenticator.authenticate(authenticationRequest)).thenReturn(authenticationResponse);
 
         // Then
         ResponseEntity<AppAuthenticationDetailsDTO> result = authenticationService.authenticate(authenticationRequest);
         assertThat(result).isEqualTo(authenticationResponse);
         ArgumentCaptor<String> providerArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(authenticationStrategy).getAuthenticatorAndProviderDetails(providerArgumentCaptor.capture(), any(FrontAuthenticationProvidersConfigurationDTO.class));
+        verify(authenticationStrategy).getAuthenticatorAndProviderDetails(providerArgumentCaptor.capture(), any(AuthenticationProvidersConfigurationDTO.class));
         String capturedProvider = providerArgumentCaptor.getValue();
         assertThat(capturedProvider).isEqualTo(provider);
     }
 
     @Test
-    public void getFrontConfiguration_returnClientConfiguration_whenNoProviderConfigurationMissing() {
+    public void getAuthenticationConfiguration_returnClientConfiguration_whenNoProviderConfigurationMissing() {
         // Given
         String googleClientId = "google-client-id";
         String clientBaseUrl = "http://my-front-base-url.org";
@@ -198,19 +198,19 @@ public class AuthenticationServiceTest {
         String customLoginUri = "http://my-custom-login-url.com";
 
         // When
-        when(authenticationConfiguration.isFrontEnabled()).thenReturn(true);
-        when(googleConfiguration.isFrontEnabled()).thenReturn(true);
+        when(authenticationConfiguration.isEnabled()).thenReturn(true);
+        when(googleConfiguration.isEnabled()).thenReturn(true);
         when(googleConfiguration.getClientId()).thenReturn(googleClientId);
         when(araConfiguration.getClientBaseUrl()).thenReturn(clientBaseUrl);
-        when(githubConfiguration.isFrontEnabled()).thenReturn(true);
+        when(githubConfiguration.isEnabled()).thenReturn(true);
         when(githubConfiguration.getClientId()).thenReturn(githubClientId);
-        when(customConfiguration.isFrontEnabled()).thenReturn(true);
+        when(customConfiguration.isEnabled()).thenReturn(true);
         when(customConfiguration.getDisplayedName()).thenReturn(customDisplayedName);
         when(customConfiguration.getLoginUri()).thenReturn(customLoginUri);
 
         // Then
-        FrontAuthenticationConfigurationDTO frontConfiguration = authenticationService.getFrontConfiguration();
-        assertThat(frontConfiguration)
+        AuthenticationConfigurationDTO authenticationConfiguration = authenticationService.getAuthenticationConfiguration();
+        assertThat(authenticationConfiguration)
                 .extracting(
                         "enabled",
 
@@ -261,7 +261,7 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    public void getFrontConfiguration_returnClientConfigurationWithGoogleDisabled_whenNoGoogleClientId() {
+    public void getAuthenticationConfiguration_returnClientConfigurationWithGoogleDisabled_whenNoGoogleClientId() {
         // Given
         String clientBaseUrl = "http://my-front-base-url.org";
         String githubClientId = "github-client-id";
@@ -269,19 +269,19 @@ public class AuthenticationServiceTest {
         String customLoginUri = "http://my-custom-login-url.com";
 
         // When
-        when(authenticationConfiguration.isFrontEnabled()).thenReturn(true);
-        when(googleConfiguration.isFrontEnabled()).thenReturn(true);
+        when(authenticationConfiguration.isEnabled()).thenReturn(true);
+        when(googleConfiguration.isEnabled()).thenReturn(true);
         when(googleConfiguration.getClientId()).thenReturn(null);
         when(araConfiguration.getClientBaseUrl()).thenReturn(clientBaseUrl);
-        when(githubConfiguration.isFrontEnabled()).thenReturn(true);
+        when(githubConfiguration.isEnabled()).thenReturn(true);
         when(githubConfiguration.getClientId()).thenReturn(githubClientId);
-        when(customConfiguration.isFrontEnabled()).thenReturn(true);
+        when(customConfiguration.isEnabled()).thenReturn(true);
         when(customConfiguration.getDisplayedName()).thenReturn(customDisplayedName);
         when(customConfiguration.getLoginUri()).thenReturn(customLoginUri);
 
         // Then
-        FrontAuthenticationConfigurationDTO frontConfiguration = authenticationService.getFrontConfiguration();
-        assertThat(frontConfiguration)
+        AuthenticationConfigurationDTO authenticationConfiguration = authenticationService.getAuthenticationConfiguration();
+        assertThat(authenticationConfiguration)
                 .extracting(
                         "enabled",
 
@@ -332,7 +332,7 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    public void getFrontConfiguration_returnClientConfigurationWithGoogleDisabled_whenNoClientBaseUrl() {
+    public void getAuthenticationConfiguration_returnClientConfigurationWithGoogleDisabled_whenNoClientBaseUrl() {
         // Given
         String googleClientId = "google-client-id";
         String githubClientId = "github-client-id";
@@ -340,19 +340,19 @@ public class AuthenticationServiceTest {
         String customLoginUri = "http://my-custom-login-url.com";
 
         // When
-        when(authenticationConfiguration.isFrontEnabled()).thenReturn(true);
-        when(googleConfiguration.isFrontEnabled()).thenReturn(true);
+        when(authenticationConfiguration.isEnabled()).thenReturn(true);
+        when(googleConfiguration.isEnabled()).thenReturn(true);
         when(googleConfiguration.getClientId()).thenReturn(googleClientId);
         when(araConfiguration.getClientBaseUrl()).thenReturn(null);
-        when(githubConfiguration.isFrontEnabled()).thenReturn(true);
+        when(githubConfiguration.isEnabled()).thenReturn(true);
         when(githubConfiguration.getClientId()).thenReturn(githubClientId);
-        when(customConfiguration.isFrontEnabled()).thenReturn(true);
+        when(customConfiguration.isEnabled()).thenReturn(true);
         when(customConfiguration.getDisplayedName()).thenReturn(customDisplayedName);
         when(customConfiguration.getLoginUri()).thenReturn(customLoginUri);
 
         // Then
-        FrontAuthenticationConfigurationDTO frontConfiguration = authenticationService.getFrontConfiguration();
-        assertThat(frontConfiguration)
+        AuthenticationConfigurationDTO authenticationConfiguration = authenticationService.getAuthenticationConfiguration();
+        assertThat(authenticationConfiguration)
                 .extracting(
                         "enabled",
 
@@ -403,7 +403,7 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    public void getFrontConfiguration_returnClientConfigurationWithGithubDisabled_whenNoGithubClientId() {
+    public void getAuthenticationConfiguration_returnClientConfigurationWithGithubDisabled_whenNoGithubClientId() {
         // Given
         String googleClientId = "google-client-id";
         String clientBaseUrl = "http://my-front-base-url.org";
@@ -411,19 +411,19 @@ public class AuthenticationServiceTest {
         String customLoginUri = "http://my-custom-login-url.com";
 
         // When
-        when(authenticationConfiguration.isFrontEnabled()).thenReturn(true);
-        when(googleConfiguration.isFrontEnabled()).thenReturn(true);
+        when(authenticationConfiguration.isEnabled()).thenReturn(true);
+        when(googleConfiguration.isEnabled()).thenReturn(true);
         when(googleConfiguration.getClientId()).thenReturn(googleClientId);
         when(araConfiguration.getClientBaseUrl()).thenReturn(clientBaseUrl);
-        when(githubConfiguration.isFrontEnabled()).thenReturn(true);
+        when(githubConfiguration.isEnabled()).thenReturn(true);
         when(githubConfiguration.getClientId()).thenReturn(null);
-        when(customConfiguration.isFrontEnabled()).thenReturn(true);
+        when(customConfiguration.isEnabled()).thenReturn(true);
         when(customConfiguration.getDisplayedName()).thenReturn(customDisplayedName);
         when(customConfiguration.getLoginUri()).thenReturn(customLoginUri);
 
         // Then
-        FrontAuthenticationConfigurationDTO frontConfiguration = authenticationService.getFrontConfiguration();
-        assertThat(frontConfiguration)
+        AuthenticationConfigurationDTO authenticationConfiguration = authenticationService.getAuthenticationConfiguration();
+        assertThat(authenticationConfiguration)
                 .extracting(
                         "enabled",
 
@@ -474,7 +474,7 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    public void getFrontConfiguration_returnClientConfigurationWithCustomDisabled_whenNoCustomLoginUrl() {
+    public void getAuthenticationConfiguration_returnClientConfigurationWithCustomDisabled_whenNoCustomLoginUrl() {
         // Given
         String googleClientId = "google-client-id";
         String clientBaseUrl = "http://my-front-base-url.org";
@@ -482,19 +482,19 @@ public class AuthenticationServiceTest {
         String customDisplayedName = "My Company Name";
 
         // When
-        when(authenticationConfiguration.isFrontEnabled()).thenReturn(true);
-        when(googleConfiguration.isFrontEnabled()).thenReturn(true);
+        when(authenticationConfiguration.isEnabled()).thenReturn(true);
+        when(googleConfiguration.isEnabled()).thenReturn(true);
         when(googleConfiguration.getClientId()).thenReturn(googleClientId);
         when(araConfiguration.getClientBaseUrl()).thenReturn(clientBaseUrl);
-        when(githubConfiguration.isFrontEnabled()).thenReturn(true);
+        when(githubConfiguration.isEnabled()).thenReturn(true);
         when(githubConfiguration.getClientId()).thenReturn(githubClientId);
-        when(customConfiguration.isFrontEnabled()).thenReturn(true);
+        when(customConfiguration.isEnabled()).thenReturn(true);
         when(customConfiguration.getDisplayedName()).thenReturn(customDisplayedName);
         when(customConfiguration.getLoginUri()).thenReturn(null);
 
         // Then
-        FrontAuthenticationConfigurationDTO frontConfiguration = authenticationService.getFrontConfiguration();
-        assertThat(frontConfiguration)
+        AuthenticationConfigurationDTO authenticationConfiguration = authenticationService.getAuthenticationConfiguration();
+        assertThat(authenticationConfiguration)
                 .extracting(
                         "enabled",
 
@@ -545,7 +545,7 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    public void getFrontConfiguration_returnDisabledClientConfiguration_whenEveryProviderConfigurationDisabled() {
+    public void getAuthenticationConfiguration_returnDisabledClientConfiguration_whenEveryProviderConfigurationDisabled() {
         // Given
         String googleClientId = "google-client-id";
         String clientBaseUrl = "http://my-front-base-url.org";
@@ -554,19 +554,19 @@ public class AuthenticationServiceTest {
         String customLoginUri = "http://my-custom-login-url.com";
 
         // When
-        when(authenticationConfiguration.isFrontEnabled()).thenReturn(true);
-        when(googleConfiguration.isFrontEnabled()).thenReturn(false);
+        when(authenticationConfiguration.isEnabled()).thenReturn(true);
+        when(googleConfiguration.isEnabled()).thenReturn(false);
         when(googleConfiguration.getClientId()).thenReturn(googleClientId);
         when(araConfiguration.getClientBaseUrl()).thenReturn(clientBaseUrl);
-        when(githubConfiguration.isFrontEnabled()).thenReturn(false);
+        when(githubConfiguration.isEnabled()).thenReturn(false);
         when(githubConfiguration.getClientId()).thenReturn(githubClientId);
-        when(customConfiguration.isFrontEnabled()).thenReturn(false);
+        when(customConfiguration.isEnabled()).thenReturn(false);
         when(customConfiguration.getDisplayedName()).thenReturn(customDisplayedName);
         when(customConfiguration.getLoginUri()).thenReturn(customLoginUri);
 
         // Then
-        FrontAuthenticationConfigurationDTO frontConfiguration = authenticationService.getFrontConfiguration();
-        assertThat(frontConfiguration)
+        AuthenticationConfigurationDTO authenticationConfiguration = authenticationService.getAuthenticationConfiguration();
+        assertThat(authenticationConfiguration)
                 .extracting(
                         "enabled",
 

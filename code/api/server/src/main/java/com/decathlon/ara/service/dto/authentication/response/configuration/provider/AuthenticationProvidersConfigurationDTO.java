@@ -15,22 +15,23 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.response.configuration.front.provider;
+package com.decathlon.ara.service.dto.authentication.response.configuration.provider;
 
-public class FrontGithubAuthenticationProviderConfigurationDTO extends FrontAuthenticationProviderConfigurationDTO {
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.With;
 
-    public FrontGithubAuthenticationProviderConfigurationDTO(Boolean enabled, String clientId) {
-        super(enabled, "github", "Github", "github", clientId);
-    }
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@With
+public class AuthenticationProvidersConfigurationDTO {
 
-    /**
-     * Get login uri from client id
-     * @param parameters the parameters used to create the login uri (here the first parameter is the client id)
-     * @return the login uri
-     */
-    @Override
-    protected String getLoginUrl(String... parameters) {
-        String clientId = parameters[0];
-        return String.format("https://github.com/login/oauth/authorize?client_id=%s", clientId);
-    }
+    private GoogleAuthenticationProviderConfigurationDTO google;
+
+    private GithubAuthenticationProviderConfigurationDTO github;
+
+    private CustomAuthenticationProviderConfigurationDTO custom;
+
 }

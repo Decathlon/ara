@@ -15,23 +15,24 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.response.configuration.front.provider;
+package com.decathlon.ara.service.dto.authentication.response.configuration.provider;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
+import java.util.Optional;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
-public class FrontAuthenticationProvidersConfigurationDTO {
+public class CustomAuthenticationProviderConfigurationDTO extends AuthenticationProviderConfigurationDTO {
 
-    private FrontGoogleAuthenticationProviderConfigurationDTO google;
+    public CustomAuthenticationProviderConfigurationDTO(Boolean enabled, Optional<String> displayedName, String loginUri) {
+        super(enabled, "custom", displayedName.orElse("Custom"), "building", loginUri);
+    }
 
-    private FrontGithubAuthenticationProviderConfigurationDTO github;
-
-    private FrontCustomAuthenticationProviderConfigurationDTO custom;
-
+    /**
+     * Get the login uri. As a custom provider, the login uri is the first parameter.
+     * @param parameters the parameters used to create the login uri (here the first parameter is the custom login uri)
+     * @return the login uri
+     */
+    @Override
+    protected String getLoginUrl(String... parameters) {
+        String loginUri = parameters[0];
+        return loginUri;
+    }
 }

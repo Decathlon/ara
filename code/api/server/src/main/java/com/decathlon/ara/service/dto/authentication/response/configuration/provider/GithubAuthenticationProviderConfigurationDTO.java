@@ -15,24 +15,22 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.response.configuration.front.provider;
+package com.decathlon.ara.service.dto.authentication.response.configuration.provider;
 
-import java.util.Optional;
+public class GithubAuthenticationProviderConfigurationDTO extends AuthenticationProviderConfigurationDTO {
 
-public class FrontCustomAuthenticationProviderConfigurationDTO extends FrontAuthenticationProviderConfigurationDTO {
-
-    public FrontCustomAuthenticationProviderConfigurationDTO(Boolean enabled, Optional<String> displayedName, String loginUri) {
-        super(enabled, "custom", displayedName.orElse("Custom"), "building", loginUri);
+    public GithubAuthenticationProviderConfigurationDTO(Boolean enabled, String clientId) {
+        super(enabled, "github", "Github", "github", clientId);
     }
 
     /**
-     * Get the login uri. As a custom provider, the login uri is the first parameter.
-     * @param parameters the parameters used to create the login uri (here the first parameter is the custom login uri)
+     * Get login uri from client id
+     * @param parameters the parameters used to create the login uri (here the first parameter is the client id)
      * @return the login uri
      */
     @Override
     protected String getLoginUrl(String... parameters) {
-        String loginUri = parameters[0];
-        return loginUri;
+        String clientId = parameters[0];
+        return String.format("https://github.com/login/oauth/authorize?client_id=%s", clientId);
     }
 }

@@ -28,8 +28,11 @@ import com.decathlon.ara.service.dto.authentication.request.AppAuthenticationReq
 import com.decathlon.ara.service.dto.authentication.request.AuthenticationRequestDTO;
 import com.decathlon.ara.service.dto.authentication.request.UserAuthenticationRequestDTO;
 import com.decathlon.ara.service.dto.authentication.response.app.AppAuthenticationDetailsDTO;
-import com.decathlon.ara.service.dto.authentication.response.configuration.front.FrontAuthenticationConfigurationDTO;
-import com.decathlon.ara.service.dto.authentication.response.configuration.front.provider.*;
+import com.decathlon.ara.service.dto.authentication.response.configuration.AuthenticationConfigurationDTO;
+import com.decathlon.ara.service.dto.authentication.response.configuration.provider.AuthenticationProvidersConfigurationDTO;
+import com.decathlon.ara.service.dto.authentication.response.configuration.provider.CustomAuthenticationProviderConfigurationDTO;
+import com.decathlon.ara.service.dto.authentication.response.configuration.provider.GithubAuthenticationProviderConfigurationDTO;
+import com.decathlon.ara.service.dto.authentication.response.configuration.provider.GoogleAuthenticationProviderConfigurationDTO;
 import com.decathlon.ara.service.dto.authentication.response.user.AuthenticationProviderDetailsDTO;
 import com.decathlon.ara.service.dto.authentication.response.user.UserAuthenticationDetailsDTO;
 import lombok.NonNull;
@@ -107,9 +110,9 @@ public class AuthenticationService {
             throw new AuthenticationException("Could not authenticate because the request was null");
         }
         String providerName = request.getProvider();
-        FrontAuthenticationConfigurationDTO frontConfiguration = getFrontConfiguration();
+        AuthenticationConfigurationDTO authenticationConfiguration = getAuthenticationConfiguration();
         Pair<Authenticator, AuthenticationProviderDetailsDTO> authenticatorAndProviderDetails = authenticationStrategy
-                .getAuthenticatorAndProviderDetails(providerName, frontConfiguration.getProviders())
+                .getAuthenticatorAndProviderDetails(providerName, authenticationConfiguration.getProviders())
                 .orElseThrow(() ->
                         new AuthenticationException(String.format("The provider given (%s) is not supported", providerName))
                 );
@@ -117,56 +120,56 @@ public class AuthenticationService {
     }
 
     /**
-     * Get the client configuration
-     * @return the client configuration
+     * Get the provider authentication configuration
+     * @return the provider authentication configuration
      */
-    public FrontAuthenticationConfigurationDTO getFrontConfiguration() {
-        FrontGoogleAuthenticationProviderConfigurationDTO googleConfiguration = getFrontGoogleConfiguration();
-        FrontGithubAuthenticationProviderConfigurationDTO githubConfiguration = getFrontGithubConfiguration();
-        FrontCustomAuthenticationProviderConfigurationDTO customConfiguration = getFrontCustomConfiguration();
+    public AuthenticationConfigurationDTO getAuthenticationConfiguration() {
+        GoogleAuthenticationProviderConfigurationDTO googleConfiguration = getGoogleConfiguration();
+        GithubAuthenticationProviderConfigurationDTO githubConfiguration = getGithubConfiguration();
+        CustomAuthenticationProviderConfigurationDTO customConfiguration = getCustomConfiguration();
 
         Boolean atLeastOneProviderEnabled = googleConfiguration.getEnabled() ||
                 githubConfiguration.getEnabled() ||
                 customConfiguration.getEnabled();
-        Boolean isFrontEnabled = authenticationConfiguration.isFrontEnabled() && atLeastOneProviderEnabled;
-        FrontAuthenticationProvidersConfigurationDTO providers = new FrontAuthenticationProvidersConfigurationDTO()
+        Boolean isEnabled = authenticationConfiguration.isEnabled() && atLeastOneProviderEnabled;
+        AuthenticationProvidersConfigurationDTO providers = new AuthenticationProvidersConfigurationDTO()
                 .withGoogle(googleConfiguration)
                 .withGithub(githubConfiguration)
                 .withCustom(customConfiguration);
-        return new FrontAuthenticationConfigurationDTO(isFrontEnabled).withProviders(providers);
+        return new AuthenticationConfigurationDTO(isEnabled).withProviders(providers);
     }
 
     /**
-     * Get the front Google configuration
-     * @return the front Google configuration
+     * Get the Google configuration
+     * @return the Google configuration
      */
-    private FrontGoogleAuthenticationProviderConfigurationDTO getFrontGoogleConfiguration() {
+    private GoogleAuthenticationProviderConfigurationDTO getGoogleConfiguration() {
         String clientId = googleConfiguration.getClientId();
         String frontBaseUrl = araConfiguration.getClientBaseUrl();
-        Boolean isFrontEnabled = googleConfiguration.isFrontEnabled() &&
+        Boolean isEnabled = googleConfiguration.isEnabled() &&
                 StringUtils.isNotBlank(clientId) &&
                 StringUtils.isNotBlank(frontBaseUrl);
-        return new FrontGoogleAuthenticationProviderConfigurationDTO(isFrontEnabled, clientId, frontBaseUrl);
+        return new GoogleAuthenticationProviderConfigurationDTO(isEnabled, clientId, frontBaseUrl);
     }
 
     /**
-     * Get the front Github configuration
-     * @return the front Github configuration
+     * Get the Github configuration
+     * @return the Github configuration
      */
-    private FrontGithubAuthenticationProviderConfigurationDTO getFrontGithubConfiguration() {
+    private GithubAuthenticationProviderConfigurationDTO getGithubConfiguration() {
         String clientId = githubConfiguration.getClientId();
-        Boolean isFrontEnabled = githubConfiguration.isFrontEnabled() && StringUtils.isNotBlank(clientId);
-        return new FrontGithubAuthenticationProviderConfigurationDTO(isFrontEnabled, clientId);
+        Boolean isEnabled = githubConfiguration.isEnabled() && StringUtils.isNotBlank(clientId);
+        return new GithubAuthenticationProviderConfigurationDTO(isEnabled, clientId);
     }
 
     /**
-     * Get the front Github configuration
-     * @return the front Github configuration
+     * Get the Github configuration
+     * @return the Github configuration
      */
-    private FrontCustomAuthenticationProviderConfigurationDTO getFrontCustomConfiguration() {
+    private CustomAuthenticationProviderConfigurationDTO getCustomConfiguration() {
         String displayedName = customConfiguration.getDisplayedName();
         String loginUri = customConfiguration.getLoginUri();
-        Boolean isFrontEnabled = customConfiguration.isFrontEnabled() && StringUtils.isNotBlank(loginUri);
-        return new FrontCustomAuthenticationProviderConfigurationDTO(isFrontEnabled, Optional.ofNullable(displayedName), loginUri);
+        Boolean isEnabled = customConfiguration.isEnabled() && StringUtils.isNotBlank(loginUri);
+        return new CustomAuthenticationProviderConfigurationDTO(isEnabled, Optional.ofNullable(displayedName), loginUri);
     }
 }

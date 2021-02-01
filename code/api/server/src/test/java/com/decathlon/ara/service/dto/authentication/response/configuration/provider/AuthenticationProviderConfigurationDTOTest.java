@@ -15,7 +15,7 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.response.configuration.front.provider;
+package com.decathlon.ara.service.dto.authentication.response.configuration.provider;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,12 +26,12 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-public class FrontAuthenticationProviderConfigurationDTOTest {
+public class AuthenticationProviderConfigurationDTOTest {
 
     @Test
     public void getLoginUri_returnLoginUri_whenInstanceOfGithubAuthenticationProviderConfigurationDTO() {
         // Given
-        FrontGithubAuthenticationProviderConfigurationDTO provider = new FrontGithubAuthenticationProviderConfigurationDTO(true, "my-client-id");
+        GithubAuthenticationProviderConfigurationDTO provider = new GithubAuthenticationProviderConfigurationDTO(true, "my-client-id");
 
         // When
 
@@ -43,7 +43,7 @@ public class FrontAuthenticationProviderConfigurationDTOTest {
     @Test
     public void getLoginUri_returnLoginUri_whenInstanceOfGoogleAuthenticationProviderConfigurationDTOAndFrontBaseUrlDoesNotEndWithSlash() {
         // Given
-        FrontGoogleAuthenticationProviderConfigurationDTO provider = new FrontGoogleAuthenticationProviderConfigurationDTO(true, "my-client-id", "http://my-front-base-url.org");
+        GoogleAuthenticationProviderConfigurationDTO provider = new GoogleAuthenticationProviderConfigurationDTO(true, "my-client-id", "http://my-front-base-url.org");
 
         // When
 
@@ -62,7 +62,7 @@ public class FrontAuthenticationProviderConfigurationDTOTest {
     @Test
     public void getLoginUri_returnLoginUri_whenInstanceOfGoogleAuthenticationProviderConfigurationDTOAndFrontBaseUrlEndsWithSlash() {
         // Given
-        FrontGoogleAuthenticationProviderConfigurationDTO provider = new FrontGoogleAuthenticationProviderConfigurationDTO(true, "my-client-id", "http://my-front-base-url.org/");
+        GoogleAuthenticationProviderConfigurationDTO provider = new GoogleAuthenticationProviderConfigurationDTO(true, "my-client-id", "http://my-front-base-url.org/");
 
         // When
 
@@ -83,7 +83,7 @@ public class FrontAuthenticationProviderConfigurationDTOTest {
         // Given
         String displayedName = "My Company Name";
         String customLoginUrl = "http://my-custom-login-url.com";
-        FrontCustomAuthenticationProviderConfigurationDTO provider = new FrontCustomAuthenticationProviderConfigurationDTO(true, Optional.of(displayedName), customLoginUrl);
+        CustomAuthenticationProviderConfigurationDTO provider = new CustomAuthenticationProviderConfigurationDTO(true, Optional.of(displayedName), customLoginUrl);
 
         // When
 
@@ -97,7 +97,7 @@ public class FrontAuthenticationProviderConfigurationDTOTest {
         // Given
         String displayedName = "My Company Name";
         String customLoginUrl = "http://my-custom-login-url.com";
-        FrontCustomAuthenticationProviderConfigurationDTO provider = new FrontCustomAuthenticationProviderConfigurationDTO(true, Optional.of(displayedName), customLoginUrl);
+        CustomAuthenticationProviderConfigurationDTO provider = new CustomAuthenticationProviderConfigurationDTO(true, Optional.of(displayedName), customLoginUrl);
 
         // When
 
@@ -110,7 +110,7 @@ public class FrontAuthenticationProviderConfigurationDTOTest {
     public void getDisplay_returnDisplayedNameAsCustom_whenInstanceOfCustomAuthenticationProviderConfigurationDTOAndNoDisplayedNameGiven() {
         // Given
         String customLoginUrl = "http://my-custom-login-url.com";
-        FrontCustomAuthenticationProviderConfigurationDTO provider = new FrontCustomAuthenticationProviderConfigurationDTO(true, Optional.empty(), customLoginUrl);
+        CustomAuthenticationProviderConfigurationDTO provider = new CustomAuthenticationProviderConfigurationDTO(true, Optional.empty(), customLoginUrl);
 
         // When
 
