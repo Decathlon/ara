@@ -198,7 +198,6 @@ public class AuthenticationServiceTest {
         String customLoginUri = "http://my-custom-login-url.com";
 
         // When
-        when(authenticationConfiguration.isEnabled()).thenReturn(true);
         when(googleConfiguration.isEnabled()).thenReturn(true);
         when(googleConfiguration.getClientId()).thenReturn(googleClientId);
         when(araConfiguration.getClientBaseUrl()).thenReturn(clientBaseUrl);
@@ -212,8 +211,6 @@ public class AuthenticationServiceTest {
         AuthenticationConfigurationDTO authenticationConfiguration = authenticationService.getAuthenticationConfiguration();
         assertThat(authenticationConfiguration)
                 .extracting(
-                        "enabled",
-
                         "providers.google.enabled",
                         "providers.google.name",
                         "providers.google.display",
@@ -233,8 +230,6 @@ public class AuthenticationServiceTest {
                         "providers.custom.uri"
                 )
                 .containsExactly(
-                        true,
-
                         true,
                         "google",
                         "Google",
@@ -269,7 +264,6 @@ public class AuthenticationServiceTest {
         String customLoginUri = "http://my-custom-login-url.com";
 
         // When
-        when(authenticationConfiguration.isEnabled()).thenReturn(true);
         when(googleConfiguration.isEnabled()).thenReturn(true);
         when(googleConfiguration.getClientId()).thenReturn(null);
         when(araConfiguration.getClientBaseUrl()).thenReturn(clientBaseUrl);
@@ -283,8 +277,6 @@ public class AuthenticationServiceTest {
         AuthenticationConfigurationDTO authenticationConfiguration = authenticationService.getAuthenticationConfiguration();
         assertThat(authenticationConfiguration)
                 .extracting(
-                        "enabled",
-
                         "providers.google.enabled",
                         "providers.google.name",
                         "providers.google.display",
@@ -304,8 +296,6 @@ public class AuthenticationServiceTest {
                         "providers.custom.uri"
                 )
                 .containsExactly(
-                        true,
-
                         false,
                         "google",
                         "Google",
@@ -340,7 +330,6 @@ public class AuthenticationServiceTest {
         String customLoginUri = "http://my-custom-login-url.com";
 
         // When
-        when(authenticationConfiguration.isEnabled()).thenReturn(true);
         when(googleConfiguration.isEnabled()).thenReturn(true);
         when(googleConfiguration.getClientId()).thenReturn(googleClientId);
         when(araConfiguration.getClientBaseUrl()).thenReturn(null);
@@ -354,8 +343,6 @@ public class AuthenticationServiceTest {
         AuthenticationConfigurationDTO authenticationConfiguration = authenticationService.getAuthenticationConfiguration();
         assertThat(authenticationConfiguration)
                 .extracting(
-                        "enabled",
-
                         "providers.google.enabled",
                         "providers.google.name",
                         "providers.google.display",
@@ -375,8 +362,6 @@ public class AuthenticationServiceTest {
                         "providers.custom.uri"
                 )
                 .containsExactly(
-                        true,
-
                         false,
                         "google",
                         "Google",
@@ -411,7 +396,6 @@ public class AuthenticationServiceTest {
         String customLoginUri = "http://my-custom-login-url.com";
 
         // When
-        when(authenticationConfiguration.isEnabled()).thenReturn(true);
         when(googleConfiguration.isEnabled()).thenReturn(true);
         when(googleConfiguration.getClientId()).thenReturn(googleClientId);
         when(araConfiguration.getClientBaseUrl()).thenReturn(clientBaseUrl);
@@ -425,8 +409,6 @@ public class AuthenticationServiceTest {
         AuthenticationConfigurationDTO authenticationConfiguration = authenticationService.getAuthenticationConfiguration();
         assertThat(authenticationConfiguration)
                 .extracting(
-                        "enabled",
-
                         "providers.google.enabled",
                         "providers.google.name",
                         "providers.google.display",
@@ -446,8 +428,6 @@ public class AuthenticationServiceTest {
                         "providers.custom.uri"
                 )
                 .containsExactly(
-                        true,
-
                         true,
                         "google",
                         "Google",
@@ -482,7 +462,6 @@ public class AuthenticationServiceTest {
         String customDisplayedName = "My Company Name";
 
         // When
-        when(authenticationConfiguration.isEnabled()).thenReturn(true);
         when(googleConfiguration.isEnabled()).thenReturn(true);
         when(googleConfiguration.getClientId()).thenReturn(googleClientId);
         when(araConfiguration.getClientBaseUrl()).thenReturn(clientBaseUrl);
@@ -496,8 +475,6 @@ public class AuthenticationServiceTest {
         AuthenticationConfigurationDTO authenticationConfiguration = authenticationService.getAuthenticationConfiguration();
         assertThat(authenticationConfiguration)
                 .extracting(
-                        "enabled",
-
                         "providers.google.enabled",
                         "providers.google.name",
                         "providers.google.display",
@@ -517,8 +494,6 @@ public class AuthenticationServiceTest {
                         "providers.custom.uri"
                 )
                 .containsExactly(
-                        true,
-
                         true,
                         "google",
                         "Google",
@@ -541,78 +516,6 @@ public class AuthenticationServiceTest {
                         "My Company Name",
                         "building",
                         null
-                );
-    }
-
-    @Test
-    public void getAuthenticationConfiguration_returnDisabledClientConfiguration_whenEveryProviderConfigurationDisabled() {
-        // Given
-        String googleClientId = "google-client-id";
-        String clientBaseUrl = "http://my-front-base-url.org";
-        String githubClientId = "github-client-id";
-        String customDisplayedName = "My Company Name";
-        String customLoginUri = "http://my-custom-login-url.com";
-
-        // When
-        when(authenticationConfiguration.isEnabled()).thenReturn(true);
-        when(googleConfiguration.isEnabled()).thenReturn(false);
-        when(googleConfiguration.getClientId()).thenReturn(googleClientId);
-        when(araConfiguration.getClientBaseUrl()).thenReturn(clientBaseUrl);
-        when(githubConfiguration.isEnabled()).thenReturn(false);
-        when(githubConfiguration.getClientId()).thenReturn(githubClientId);
-        when(customConfiguration.isEnabled()).thenReturn(false);
-        when(customConfiguration.getDisplayedName()).thenReturn(customDisplayedName);
-        when(customConfiguration.getLoginUri()).thenReturn(customLoginUri);
-
-        // Then
-        AuthenticationConfigurationDTO authenticationConfiguration = authenticationService.getAuthenticationConfiguration();
-        assertThat(authenticationConfiguration)
-                .extracting(
-                        "enabled",
-
-                        "providers.google.enabled",
-                        "providers.google.name",
-                        "providers.google.display",
-                        "providers.google.icon",
-                        "providers.google.uri",
-
-                        "providers.github.enabled",
-                        "providers.github.name",
-                        "providers.github.display",
-                        "providers.github.icon",
-                        "providers.github.uri",
-
-                        "providers.custom.enabled",
-                        "providers.custom.name",
-                        "providers.custom.display",
-                        "providers.custom.icon",
-                        "providers.custom.uri"
-                )
-                .containsExactly(
-                        false,
-
-                        false,
-                        "google",
-                        "Google",
-                        "google",
-                        "https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?" +
-                                "client_id=google-client-id&" +
-                                "response_type=code&" +
-                                "redirect_uri=http://my-front-base-url.org/login/google&" +
-                                "scope=https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email&" +
-                                "flowName=GeneralOAuthFlow",
-
-                        false,
-                        "github",
-                        "Github",
-                        "github",
-                        "https://github.com/login/oauth/authorize?client_id=github-client-id",
-
-                        false,
-                        "custom",
-                        "My Company Name",
-                        "building",
-                        "http://my-custom-login-url.com"
                 );
     }
 }

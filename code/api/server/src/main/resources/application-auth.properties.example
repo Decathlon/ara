@@ -21,21 +21,22 @@
 # 2. Copy the content below into application-auth.properties
 # 3. Replace the example values to match your configuration (check the documentation to see how)
 
-# Authentication
-# OAuth2
-authentication.enabled=false
+#Note: if you want to disable your authentication, disable all providers (by setting enable to false)
 
-# Github
+# Authentication
+## OAuth2 providers
+
+### Github
 authentication.provider.github.enabled=true
 authentication.provider.github.client-id=your_github_client_id
 authentication.provider.github.client-secret=your_github_client_secret
 
-# Google
+### Google
 authentication.provider.google.enabled=true
 authentication.provider.google.client-id=your_google_client_id
 authentication.provider.google.client-secret=your_google_client_secret
 
-# Custom
+### Custom
 authentication.provider.custom.enabled=true
 authentication.provider.custom.displayed-name=Company Name
 authentication.provider.custom.login-uri=the_custom_token_uri
@@ -72,7 +73,7 @@ authentication.provider.custom.token-validation.validation-field.expected-value=
 authentication.provider.custom.token-validation.validation-field.remaining-time=expire-in
 authentication.provider.custom.token-validation.validation-field.expiration-timestamp=expiration-date
 
-# JWT
+## JWT
 authentication.jwt-token.using-https=false
 authentication.jwt-token.token-secret=your-token-secret
 authentication.jwt-token.access-token-expiration-in-second=3600

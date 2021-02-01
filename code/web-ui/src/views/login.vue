@@ -119,7 +119,7 @@ export default {
       Vue.http
         .get(api.paths.authenticationConfiguration(), api.REQUEST_OPTIONS)
         .then(response => {
-          this.$appConfig.authentication = response.body
+          this.$appConfig.authentication.providers = response.body.providers
           this.error = false
           this.loadingConfiguration = false
           if (this.$appConfig.authentication.enabled === false) {

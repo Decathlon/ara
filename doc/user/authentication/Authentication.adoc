@@ -143,10 +143,18 @@ a|
 After setting up your OAuth2 credentials, you can now configure your authentication, i.e. :
 
 * For each OAuth2 provider you want to use, enable it and then add the credentials previously set up
++
+WARNING: You have to explicitly set the value to true to enable a provider authentication. If left empty, it is considered disabled.
 * For any provider you do not want to use, you can simply disable it
-* You can also disable the whole authentication:
-** Disabled: useful for quick demos, to discover Ara without worrying about setting authentication
-** Enabled: *highly recommended* for production environments!
+* You can also disable the whole authentication
++
+TIP: To do so, disable every provider
++
+[NOTE]
+====
+* *Disabling* authentication is useful for quick demos, to discover Ara without worrying about all the setups
+* *Enabling* authentication is *highly recommended* for production environments!
+====
 
 To configure the authentication, you'll need to:
 
@@ -156,10 +164,6 @@ To configure the authentication, you'll need to:
 
 TIP: You can also pass the values as parameters (*highly recommended* on production environment, especially for sensitive data related to authentication!).
 
-* *Authentication enabling*:
-** `*authentication.enabled*`: enable (`true`) or disable (`false`) the authentication.
-+
-WARNING: You have to explicitly set the value to true to enable the authentication. If left empty, it is considered disabled.
 * *OAuth2 providers*:
 ** *Github*:
 *** `*authentication.provider.github.enabled*`: a boolean to enable or disable the Github authentication

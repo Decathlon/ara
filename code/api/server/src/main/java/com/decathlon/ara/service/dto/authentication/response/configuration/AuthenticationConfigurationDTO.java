@@ -27,11 +27,5 @@ import lombok.With;
 @With
 public class AuthenticationConfigurationDTO {
 
-    public AuthenticationConfigurationDTO(Boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    private Boolean enabled;
-
     private AuthenticationProvidersConfigurationDTO providers;
 }

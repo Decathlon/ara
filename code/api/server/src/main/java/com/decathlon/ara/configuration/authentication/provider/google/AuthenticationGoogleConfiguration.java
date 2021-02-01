@@ -17,6 +17,7 @@
 
 package com.decathlon.ara.configuration.authentication.provider.google;
 
+import com.decathlon.ara.configuration.authentication.provider.AuthenticationProviderConfiguration;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -24,15 +25,9 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @Configuration
 @ConfigurationProperties("authentication.provider.google")
-public class AuthenticationGoogleConfiguration {
-
-    private Boolean enabled;
+public class AuthenticationGoogleConfiguration extends AuthenticationProviderConfiguration {
 
     private String clientId;
 
     private String clientSecret;
-
-    public Boolean isEnabled() {
-        return enabled != null && enabled;
-    }
 }

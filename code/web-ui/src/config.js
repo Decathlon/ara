@@ -1,6 +1,14 @@
+import _ from 'lodash'
+
 const config = {
+  authentication: {
+    get enabled () {
+      const atLeastOneProvidersEnabled = _(Object.values(this.providers)).some('enabled')
+      return atLeastOneProvidersEnabled
+    }
+  },
   get isComplete () {
-    return this.authentication && this.authentication.providers
+    return this.authentication.providers
   },
   getProvider: function (providerName) {
     if (this.isComplete && providerName) {

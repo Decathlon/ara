@@ -17,6 +17,7 @@
 
 package com.decathlon.ara.configuration.authentication.provider.github;
 
+import com.decathlon.ara.configuration.authentication.provider.AuthenticationProviderConfiguration;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -24,15 +25,9 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @Configuration
 @ConfigurationProperties("authentication.provider.github")
-public class AuthenticationGithubConfiguration {
-
-    private Boolean enabled;
+public class AuthenticationGithubConfiguration extends AuthenticationProviderConfiguration {
 
     private String clientId;
 
     private String clientSecret;
-
-    public Boolean isEnabled() {
-        return enabled != null && enabled;
-    }
 }

@@ -18,7 +18,6 @@
 package com.decathlon.ara.service.authentication;
 
 import com.decathlon.ara.configuration.AraConfiguration;
-import com.decathlon.ara.configuration.authentication.AuthenticationConfiguration;
 import com.decathlon.ara.configuration.authentication.provider.custom.AuthenticationCustomConfiguration;
 import com.decathlon.ara.configuration.authentication.provider.github.AuthenticationGithubConfiguration;
 import com.decathlon.ara.configuration.authentication.provider.google.AuthenticationGoogleConfiguration;
@@ -58,9 +57,6 @@ public class AuthenticationService {
 
     @NonNull
     private final AraConfiguration araConfiguration;
-
-    @NonNull
-    private final AuthenticationConfiguration authenticationConfiguration;
 
     @NonNull
     private final AuthenticationGithubConfiguration githubConfiguration;
@@ -128,15 +124,11 @@ public class AuthenticationService {
         GithubAuthenticationProviderConfigurationDTO githubConfiguration = getGithubConfiguration();
         CustomAuthenticationProviderConfigurationDTO customConfiguration = getCustomConfiguration();
 
-        Boolean atLeastOneProviderEnabled = googleConfiguration.getEnabled() ||
-                githubConfiguration.getEnabled() ||
-                customConfiguration.getEnabled();
-        Boolean isEnabled = authenticationConfiguration.isEnabled() && atLeastOneProviderEnabled;
         AuthenticationProvidersConfigurationDTO providers = new AuthenticationProvidersConfigurationDTO()
                 .withGoogle(googleConfiguration)
                 .withGithub(githubConfiguration)
                 .withCustom(customConfiguration);
-        return new AuthenticationConfigurationDTO(isEnabled).withProviders(providers);
+        return new AuthenticationConfigurationDTO(providers);
     }
 
     /**
