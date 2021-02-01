@@ -137,10 +137,14 @@ public class AuthenticationService {
      */
     private GoogleAuthenticationProviderConfigurationDTO getGoogleConfiguration() {
         String clientId = googleConfiguration.getClientId();
+        if (StringUtils.isBlank(clientId)) {
+            log.warn("Google client id is not found");
+        }
         String frontBaseUrl = araConfiguration.getClientBaseUrl();
-        Boolean isEnabled = googleConfiguration.isEnabled() &&
-                StringUtils.isNotBlank(clientId) &&
-                StringUtils.isNotBlank(frontBaseUrl);
+        if (StringUtils.isBlank(frontBaseUrl)) {
+            log.warn("The client base url (used by Google) is not found");
+        }
+        Boolean isEnabled = googleConfiguration.isEnabled();
         return new GoogleAuthenticationProviderConfigurationDTO(isEnabled, clientId, frontBaseUrl);
     }
 
@@ -150,7 +154,10 @@ public class AuthenticationService {
      */
     private GithubAuthenticationProviderConfigurationDTO getGithubConfiguration() {
         String clientId = githubConfiguration.getClientId();
-        Boolean isEnabled = githubConfiguration.isEnabled() && StringUtils.isNotBlank(clientId);
+        if (StringUtils.isBlank(clientId)) {
+            log.warn("Github client id is not found");
+        }
+        Boolean isEnabled = githubConfiguration.isEnabled();
         return new GithubAuthenticationProviderConfigurationDTO(isEnabled, clientId);
     }
 
@@ -161,7 +168,10 @@ public class AuthenticationService {
     private CustomAuthenticationProviderConfigurationDTO getCustomConfiguration() {
         String displayedName = customConfiguration.getDisplayedName();
         String loginUri = customConfiguration.getLoginUri();
-        Boolean isEnabled = customConfiguration.isEnabled() && StringUtils.isNotBlank(loginUri);
+        if (StringUtils.isBlank(loginUri)) {
+            log.warn("Custom login url is not found");
+        }
+        Boolean isEnabled = customConfiguration.isEnabled();
         return new CustomAuthenticationProviderConfigurationDTO(isEnabled, Optional.ofNullable(displayedName), loginUri);
     }
 }
