@@ -17,6 +17,7 @@
 
 package com.decathlon.ara.service.authentication.provider.custom;
 
+import com.decathlon.ara.configuration.authentication.provider.custom.AuthenticationCustomConfiguration;
 import com.decathlon.ara.configuration.authentication.provider.custom.token.AuthenticationCustomTokenConfiguration;
 import com.decathlon.ara.configuration.authentication.provider.custom.token.AuthenticationCustomTokenFieldsConfiguration;
 import com.decathlon.ara.configuration.authentication.provider.custom.user.AuthenticationCustomUserConfiguration;
@@ -54,7 +55,7 @@ import static java.util.Map.entry;
 
 @Slf4j
 @Service
-public class CustomAuthenticator extends Authenticator<CustomToken, CustomUser> {
+public class CustomAuthenticator extends Authenticator<CustomToken, CustomUser, AuthenticationCustomConfiguration> {
 
     private final AuthenticationCustomTokenConfiguration tokenConfiguration;
 
@@ -62,18 +63,27 @@ public class CustomAuthenticator extends Authenticator<CustomToken, CustomUser> 
 
     private final AuthenticationCustomTokenValidationConfiguration tokenValidationConfiguration;
 
+    private final AuthenticationCustomConfiguration customConfiguration;
+
     @Autowired
     public CustomAuthenticator(
             JwtTokenAuthenticationService jwtTokenAuthenticationService,
             RestTemplate restTemplate,
             AuthenticationCustomTokenConfiguration tokenConfiguration,
             AuthenticationCustomUserConfiguration userConfiguration,
-            AuthenticationCustomTokenValidationConfiguration tokenValidationConfiguration
+            AuthenticationCustomTokenValidationConfiguration tokenValidationConfiguration,
+            AuthenticationCustomConfiguration customConfiguration
     ) {
-        super(CustomToken.class, CustomUser.class, jwtTokenAuthenticationService, restTemplate);
+        super(CustomToken.class, CustomUser.class, AuthenticationCustomConfiguration.class, jwtTokenAuthenticationService, restTemplate);
         this.tokenConfiguration = tokenConfiguration;
         this.userConfiguration = userConfiguration;
         this.tokenValidationConfiguration = tokenValidationConfiguration;
+        this.customConfiguration = customConfiguration;
+    }
+
+    @Override
+    protected AuthenticationCustomConfiguration getAuthenticatorConfiguration() {
+        return customConfiguration;
     }
 
     @Override

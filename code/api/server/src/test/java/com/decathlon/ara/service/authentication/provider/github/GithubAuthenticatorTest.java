@@ -61,6 +61,23 @@ public class GithubAuthenticatorTest {
     private GithubAuthenticator authenticator;
 
     @Test
+    public void authenticate_throwAuthenticationException_whenProviderNotEnabled() {
+        // Given
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
+        String code = "github_code";
+        String provider = "provider";
+
+        // When
+        when(request.getCode()).thenReturn(code);
+        when(request.getProvider()).thenReturn(provider);
+        when(githubConfiguration.isEnabled()).thenReturn(false);
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
     public void authenticate_throwAuthenticationConfigurationNotFoundException_whenClientSecretNotFound() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
@@ -70,6 +87,7 @@ public class GithubAuthenticatorTest {
         // When
         when(request.getCode()).thenReturn(code);
         when(request.getProvider()).thenReturn(provider);
+        when(githubConfiguration.isEnabled()).thenReturn(true);
         when(githubConfiguration.getClientSecret()).thenReturn(null);
 
         // Then
@@ -89,6 +107,7 @@ public class GithubAuthenticatorTest {
         // When
         when(request.getCode()).thenReturn(code);
         when(request.getProvider()).thenReturn(provider);
+        when(githubConfiguration.isEnabled()).thenReturn(true);
         when(githubConfiguration.getClientSecret()).thenReturn(secret);
         when(githubConfiguration.getClientId()).thenReturn(null);
 
@@ -114,6 +133,7 @@ public class GithubAuthenticatorTest {
         // When
         when(request.getCode()).thenReturn(code);
         when(request.getProvider()).thenReturn(provider);
+        when(githubConfiguration.isEnabled()).thenReturn(true);
         when(githubConfiguration.getClientSecret()).thenReturn(secret);
         when(githubConfiguration.getClientId()).thenReturn(clientId);
         when(
@@ -149,6 +169,7 @@ public class GithubAuthenticatorTest {
         // When
         when(request.getCode()).thenReturn(code);
         when(request.getProvider()).thenReturn(provider);
+        when(githubConfiguration.isEnabled()).thenReturn(true);
         when(githubConfiguration.getClientSecret()).thenReturn(secret);
         when(githubConfiguration.getClientId()).thenReturn(clientId);
         when(
@@ -193,6 +214,7 @@ public class GithubAuthenticatorTest {
         // When
         when(request.getCode()).thenReturn(code);
         when(request.getProvider()).thenReturn(provider);
+        when(githubConfiguration.isEnabled()).thenReturn(true);
         when(githubConfiguration.getClientSecret()).thenReturn(secret);
         when(githubConfiguration.getClientId()).thenReturn(clientId);
         when(
@@ -242,6 +264,7 @@ public class GithubAuthenticatorTest {
         // When
         when(request.getCode()).thenReturn(code);
         when(request.getProvider()).thenReturn(provider);
+        when(githubConfiguration.isEnabled()).thenReturn(true);
         when(githubConfiguration.getClientSecret()).thenReturn(secret);
         when(githubConfiguration.getClientId()).thenReturn(clientId);
         when(
@@ -297,6 +320,7 @@ public class GithubAuthenticatorTest {
         // When
         when(request.getCode()).thenReturn(code);
         when(request.getProvider()).thenReturn(provider);
+        when(githubConfiguration.isEnabled()).thenReturn(true);
         when(githubConfiguration.getClientSecret()).thenReturn(secret);
         when(githubConfiguration.getClientId()).thenReturn(clientId);
         when(
@@ -353,12 +377,44 @@ public class GithubAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenNoTokenGiven() {
+    public void authenticate_throwAuthenticationException_whenNoProviderGiven() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
 
         // When
+        when(request.getProvider()).thenReturn(null);
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenNoTokenGiven() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String provider = "provider";
+
+        // When
+        when(request.getProvider()).thenReturn(provider);
         when(request.getToken()).thenReturn(null);
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenProviderIsNotEnabled() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "github_token";
+        String provider = "provider";
+
+        // When
+        when(request.getProvider()).thenReturn(provider);
+        when(request.getToken()).thenReturn(token);
+        when(githubConfiguration.isEnabled()).thenReturn(false);
 
         // Then
         assertThatThrownBy(() -> authenticator.authenticate(request))
@@ -370,13 +426,16 @@ public class GithubAuthenticatorTest {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "github_token";
+        String provider = "provider";
 
         HttpHeaders header = new HttpHeaders();
         header.set("Authorization", "token github_token");
         HttpEntity<Object> requestEntity = new HttpEntity<>(header);
 
         // When
+        when(request.getProvider()).thenReturn(provider);
         when(request.getToken()).thenReturn(token);
+        when(githubConfiguration.isEnabled()).thenReturn(true);
         when(restTemplate.exchange("https://api.github.com", HttpMethod.GET, requestEntity, Object.class))
                 .thenThrow(new RestClientException("Token checking API call error"));
 
@@ -390,6 +449,7 @@ public class GithubAuthenticatorTest {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "github_token";
+        String provider = "provider";
 
         HttpHeaders header = new HttpHeaders();
         header.set("Authorization", "token github_token");
@@ -398,7 +458,9 @@ public class GithubAuthenticatorTest {
         ResponseEntity response = mock(ResponseEntity.class);
 
         // When
+        when(request.getProvider()).thenReturn(provider);
         when(request.getToken()).thenReturn(token);
+        when(githubConfiguration.isEnabled()).thenReturn(true);
         when(restTemplate.exchange("https://api.github.com", HttpMethod.GET, requestEntity, Object.class))
                 .thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.BAD_REQUEST);
@@ -426,7 +488,9 @@ public class GithubAuthenticatorTest {
         Long tokenAge = 3600L;
 
         // When
+        when(request.getProvider()).thenReturn(provider);
         when(request.getToken()).thenReturn(token);
+        when(githubConfiguration.isEnabled()).thenReturn(true);
         when(restTemplate.exchange("https://api.github.com", HttpMethod.GET, requestEntity, Object.class))
                 .thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.OK);

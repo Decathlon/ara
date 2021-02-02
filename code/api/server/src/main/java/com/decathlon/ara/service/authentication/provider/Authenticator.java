@@ -17,6 +17,7 @@
 
 package com.decathlon.ara.service.authentication.provider;
 
+import com.decathlon.ara.configuration.authentication.provider.AuthenticationProviderConfiguration;
 import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationService;
 import com.decathlon.ara.service.authentication.exception.AuthenticationConfigurationNotFoundException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationException;
@@ -42,11 +43,13 @@ import java.util.Map;
 import java.util.Optional;
 
 @AllArgsConstructor
-public abstract class Authenticator<T extends AuthenticatorToken, U extends AuthenticatorUser> {
+public abstract class Authenticator<T extends AuthenticatorToken, U extends AuthenticatorUser, C extends AuthenticationProviderConfiguration> {
 
     protected Class<T> tokenType;
 
     protected Class<U> userType;
+
+    protected Class<C> configurationType;
 
     protected JwtTokenAuthenticationService jwtTokenAuthenticationService;
 
@@ -70,6 +73,10 @@ public abstract class Authenticator<T extends AuthenticatorToken, U extends Auth
         if (StringUtils.isBlank(code)) {
             throw new AuthenticationTokenNotFetchedException("The token cannot be fetched without a code");
         }
+        C configuration = getAuthenticatorConfiguration();
+        if (!configuration.isEnabled()) {
+            throw new AuthenticationException(String.format("You cannot authenticate with this provider (%s) because it is not enabled", provider));
+        }
 
         T token = getToken(request);
         U user = getUser(token);
@@ -82,6 +89,12 @@ public abstract class Authenticator<T extends AuthenticatorToken, U extends Auth
 
         return ResponseEntity.ok().headers(headers).body(authenticationDetails);
     }
+
+    /**
+     * Get the authenticator authentication
+     * @return the authenticator authentication
+     */
+    protected abstract C getAuthenticatorConfiguration();
 
     /**
      * Get token from a request
@@ -161,9 +174,19 @@ public abstract class Authenticator<T extends AuthenticatorToken, U extends Auth
             throw new AuthenticationException("Authentication failed because the request cannot be null");
         }
 
+        String provider = request.getProvider();
+        if (StringUtils.isBlank(provider)) {
+            throw new AuthenticationException("Authentication failed because no provider given");
+        }
+
         String accessToken = request.getToken();
         if (StringUtils.isBlank(accessToken)) {
             throw new AuthenticationException("Authentication failed because no token found in the request");
+        }
+
+        C configuration = getAuthenticatorConfiguration();
+        if (!configuration.isEnabled()) {
+            throw new AuthenticationException(String.format("You cannot authenticate with this provider (%s) because it is not enabled", provider));
         }
 
         Pair<Boolean, Optional<Integer>> validTokenPair = isAValidToken(accessToken);

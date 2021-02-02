@@ -41,7 +41,7 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-public class GithubAuthenticator extends ProviderAuthenticator<GithubToken, GithubUser> {
+public class GithubAuthenticator extends ProviderAuthenticator<GithubToken, GithubUser, AuthenticationGithubConfiguration> {
 
     private final AuthenticationGithubConfiguration githubConfiguration;
 
@@ -51,8 +51,13 @@ public class GithubAuthenticator extends ProviderAuthenticator<GithubToken, Gith
             AuthenticationGithubConfiguration githubConfiguration,
             RestTemplate restTemplate
     ) {
-        super(GithubToken.class, GithubUser.class, jwtTokenAuthenticationService, restTemplate);
+        super(GithubToken.class, GithubUser.class, AuthenticationGithubConfiguration.class, jwtTokenAuthenticationService, restTemplate);
         this.githubConfiguration = githubConfiguration;
+    }
+
+    @Override
+    protected AuthenticationGithubConfiguration getAuthenticatorConfiguration() {
+        return githubConfiguration;
     }
 
     @Override

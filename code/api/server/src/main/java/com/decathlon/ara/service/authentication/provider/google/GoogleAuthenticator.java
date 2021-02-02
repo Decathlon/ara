@@ -44,7 +44,7 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-public class GoogleAuthenticator extends ProviderAuthenticator<GoogleToken, GoogleUser> {
+public class GoogleAuthenticator extends ProviderAuthenticator<GoogleToken, GoogleUser, AuthenticationGoogleConfiguration> {
 
     private final AuthenticationGoogleConfiguration googleConfiguration;
 
@@ -57,7 +57,7 @@ public class GoogleAuthenticator extends ProviderAuthenticator<GoogleToken, Goog
             RestTemplate restTemplate,
             AraConfiguration araConfiguration
     ) {
-        super(GoogleToken.class, GoogleUser.class, jwtTokenAuthenticationService, restTemplate);
+        super(GoogleToken.class, GoogleUser.class, AuthenticationGoogleConfiguration.class, jwtTokenAuthenticationService, restTemplate);
         this.googleConfiguration = googleConfiguration;
         this.araConfiguration = araConfiguration;
     }
@@ -153,6 +153,11 @@ public class GoogleAuthenticator extends ProviderAuthenticator<GoogleToken, Goog
                 .withName(user.getName())
                 .withEmail(user.getEmail())
                 .withPicture(user.getPicture());
+    }
+
+    @Override
+    protected AuthenticationGoogleConfiguration getAuthenticatorConfiguration() {
+        return googleConfiguration;
     }
 
     @Override
