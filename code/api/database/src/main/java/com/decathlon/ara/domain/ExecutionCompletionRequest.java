@@ -19,6 +19,7 @@ package com.decathlon.ara.domain;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,6 +31,7 @@ import lombok.NoArgsConstructor;
 public class ExecutionCompletionRequest {
 
     @Id
+    @Column(length = 512)
     private String jobUrl;
 
 }

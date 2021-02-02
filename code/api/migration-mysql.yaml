@@ -29,7 +29,7 @@ services:
     networks:
       - db_net
   ara-api:
-    build: .
+    image: docker.io/decathlon/ara-api
     restart: always
     environment:
       - DATABASE_TYPE=mysql
@@ -44,7 +44,7 @@ services:
     depends_on:
       - ara-db-source
   ara-mig-api:
-    build: .
+    image: docker.io/decathlon/ara-api
     restart: always
     environment:
       - DATABASE_TYPE=mysql

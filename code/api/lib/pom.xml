@@ -27,7 +27,7 @@
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-lib</artifactId>
-    <version>7.2.4</version>
+    <version>7.2.5</version>
 
     <properties>
         <java.version>14</java.version>
@@ -141,6 +141,25 @@
                     <sourcepath>${project.build.directory}/delombokified-sources-for-javadoc;${project.build.directory}/generated-sources/annotations</sourcepath>
                     <source>${java.version}</source>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.6</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

@@ -3,3 +3,5 @@ databaseChangeLog:
       file: classpath*:db/changelog/changes/mysql/20200918124934-user-creation.yaml
   - include:
       file: classpath*:db/changelog/changes/mysql/20201009144207-column-size.yaml
+  - include:
+      file: classpath*:db/changelog/changes/mysql/20210129163524-INCREASE_JOB_URL_SIZE.yaml

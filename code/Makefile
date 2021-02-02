@@ -93,10 +93,10 @@ build-api: ## Build ara-api
 
 # CREATE LIQUIBASE DIFF
 
-liquibase-diff: ## Create a liquibase diff file -- DIFF_LABEL required
-	@$(MAKE) liquibase-diff-all-bases -j2 -k
+liquibase-diff: build-api ## Create a liquibase diff file -- DIFF_LABEL required
+	@$(MAKE) liquibase-all-bases-diff -j2 -k
 
-liquibase-diff-all-bases: build-api liquibase-diff-mysql liquibase-diff-postgresql
+liquibase-all-bases-diff: liquibase-diff-mysql liquibase-diff-postgresql
 
 liquibase-diff-%: up-migration-% ## Create a liquibase diff file -- DIFF_LABEL required
 	@docker container run -it --net=host --rm \
