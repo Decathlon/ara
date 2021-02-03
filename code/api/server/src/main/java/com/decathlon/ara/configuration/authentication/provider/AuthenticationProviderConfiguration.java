@@ -22,9 +22,6 @@ import lombok.Data;
 @Data
 public class AuthenticationProviderConfiguration {
 
-    protected Boolean enabled;
+    protected boolean enabled;
 
-    public Boolean isEnabled() {
-        return enabled != null && enabled;
-    }
 }
