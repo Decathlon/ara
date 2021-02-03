@@ -13,14 +13,11 @@
           <github-authentication-button v-if="configuration.authentication.providers.github.enabled" class="authentication-button"></github-authentication-button>
         </div>
       </div>
-      <div v-else-if="error" class="configuration-not-loaded info-box">
+      <div v-else-if="configuration.downloadError" class="configuration-not-loaded info-box">
         Configuration not found, you can't login to ARA.
       </div>
-      <div v-else class="configuration-loading info-box">
-        Loading the configuration... Please wait...
-      </div>
     </div>
-    <Spin fix v-if="loadingConfiguration || authenticating"/>
+    <Spin fix v-if="authenticating"/>
   </div>
 </template>
 
@@ -32,7 +29,6 @@ import CustomAuthenticationButton from '../components/authentication/custom-auth
 import { AuthenticationService } from '../service/authentication.service'
 import api from '../libs/api'
 import Vue from 'vue'
-import iView from 'iview'
 
 export default {
   name: 'login',
@@ -46,8 +42,6 @@ export default {
   data () {
     return {
       configuration: this.$appConfig,
-      loadingConfiguration: false,
-      error: false,
       authenticating: false
     }
   },
@@ -114,41 +108,13 @@ export default {
       }
     },
 
-    downloadConfiguration () {
-      this.loadingConfiguration = true
-      Vue.http
-        .get(api.paths.authenticationConfiguration(), api.REQUEST_OPTIONS)
-        .then(response => {
-          this.$appConfig.authentication.providers = response.body.providers
-          this.error = false
-          this.loadingConfiguration = false
-          if (this.$appConfig.authentication.enabled === false) {
-            iView.Notice.open({
-              title: 'No authentication required',
-              desc: 'You are redirected to the home page because no authentication is required. To change that, update your configuration.',
-              duration: 0
-            })
-            this.$router.push('/')
-          } else if (this.$appConfig.authentication.enabled === true) {
-            this.authenticate()
-          }
-        }, () => {
-          this.error = true
-          this.loadingConfiguration = false
-        })
-    },
-
     backToLogin () {
       this.$router.push({ name: 'login' })
     }
   },
 
   mounted () {
-    if (this.$appConfig.isComplete) {
-      this.authenticate()
-    } else {
-      this.downloadConfiguration()
-    }
+    this.authenticate()
   }
 }
 </script>

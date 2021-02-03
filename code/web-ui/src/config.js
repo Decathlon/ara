@@ -7,6 +7,7 @@ const config = {
       return atLeastOneProvidersEnabled
     }
   },
+  downloadError: false,
   get isComplete () {
     return this.authentication.providers
   },
