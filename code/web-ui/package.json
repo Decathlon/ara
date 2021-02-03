@@ -21,6 +21,7 @@
     "cy:report:html": "npm run cy:report:merge; npx marge test/cypress/outputs/reports/json/merged/final-report.json --overwrite=true --charts=true --reportDir=test/cypress/outputs/reports/html"
   },
   "dependencies": {
+    "dotenv": "^8.2.0",
     "eslint-plugin-html": "^3.1.1",
     "iview": "^3.1.3",
     "moment": "^2.22.2",
