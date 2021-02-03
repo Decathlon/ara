@@ -10,8 +10,8 @@ on:
     tags:
       - 'ara-*.*.*'
   pull_request:
-    branches:
-      - '!main'
+    branches-ignore:
+      - 'main'
 
 jobs:
   pre_job:
