@@ -139,54 +139,47 @@ a|
 
 |===
 
-=== Front authentication
-After setting up your OAuth2 credentials, you can now configure your front authentication, i.e. :
+=== Configuration
+After setting up your OAuth2 credentials, you can now configure your authentication, i.e. :
 
 * For each OAuth2 provider you want to use, enable it and then add the credentials previously set up
++
+WARNING: You have to explicitly set the value to true to enable a provider authentication. If left empty, it is considered disabled.
 * For any provider you do not want to use, you can simply disable it
-* You can also disable the whole front authentication (*not recommended* for production environments!)
-
-To do so, create your environment variables:
-
-. Create a `.env` file (in the `code/web-ui` folder root)
-. In the same folder, copy the `.env.example` contents in it.
-. You can now replace the copied values with the right values
-
-Here are what your `.env` file should contain:
-
-. General:
-.. `*AUTHENTICATION_ENABLED*`: this field is to set to `true` if you want to enable the front authentication.
+* You can also disable the whole authentication
 +
-WARNING: Please, note that if all the providers are disabled, then the authentication is disabled as well, even if it is set to `true`.
-. Custom: It concerns your custom configuration (e.g. matching your company's settings)
-.. `*CUSTOM_OAUTH_PROVIDER_NAME*`: the name displayed, it can be your company name. By default it's `Custom` if left empty
-.. `*CUSTOM_OAUTH_PROVIDER_CLIENT_ID*`: the client id
-.. `*CUSTOM_OAUTH_PROVIDER_URI*`: the login page uri to get the code
-.. `*CUSTOM_ENABLED*`: `true` if you want to use it
-. Google:
-.. `*GOOGLE_CLIENT_ID*`: the Google client id. It should look like `_xxxxxxxxxx.apps.googleusercontent.com_`
-.. `*GOOGLE_REDIRECT_URI*`: As seen previously, it must match this pattern: `_{{your_ara_base_url}}/login/google_`
-.. `*GOOGLE_ENABLED*`: `true` if you want to use it
-. Github:
-.. `*GITHUB_CLIENT_ID*`: the Github client id
-.. `*GITHUB_ENABLED*`: `true` if you want to use it
-
-=== Back authentication
-Like the front authentication, you can configure the back authentication as well. In fact, you can update the `application.properties` values:
-
-* *Authentication enabling*:
-** `*authentication.enabled*`: enable (`true`) or disable (`false`) the back authentication.
+TIP: To do so, disable every provider
 +
-WARNING: You have to explicitly set it to true to enable the authentication,  If left empty, it is considered disabled
+[NOTE]
+====
+* *Disabling* authentication is useful for quick demos, to discover Ara without worrying about all the setups
+* *Enabling* authentication is *highly recommended* for production environments!
+====
+
+To configure the authentication, you'll need to:
+
+. Create the file `code/api/server/src/main/resources/application-auth.properties`. Note that this file is ignored, preventing you from submitting your credentials by mistake
+. Copy the example file (`code/api/server/src/main/resources/application-auth.properties.example`) content in the newly created file
+. Replace the values with your real credentials. Each field is described below
+
+TIP: You can also pass the values as parameters (*highly recommended* on production environment, especially for sensitive data related to authentication!).
+
 * *OAuth2 providers*:
 ** *Github*:
-*** `*authentication.clients.github.client-secret*`: the Github client secret
+*** `*authentication.provider.github.enabled*`: a boolean to enable or disable the Github authentication
+*** `*authentication.provider.github.client-id*`: the Github client id
+*** `*authentication.provider.github.client-secret*`: the Github client secret
 ** *Google*:
-*** `*authentication.clients.google.client_secret*`: the Google client secret
+*** `*authentication.provider.google.enabled*`: a boolean to enable or disable the Google authentication
+*** `*authentication.provider.google.client-id*`: the Google client id
+*** `*authentication.provider.google.client-secret*`: the Google client secret
 ** *Custom*:
+*** `*authentication.provider.custom.enabled*`: a boolean to enable or disable the custom authentication
+*** `*authentication.provider.custom.displayed-name*`: the name you want to display (e.g. authentication button, popover, etc.). It can be your company name. If none, the value `Custom` is then displayed
+*** `*authentication.provider.custom.login-uri*`: the uri used by a browser to login and get the code
 +
 ****
-The custom configuration is divided into 3 main parts: token, user and token validation. Each part is itself divided into: +
+The custom configuration below is divided into 3 main parts: token, user and token validation. Each part is itself divided into: +
 
 * *Request*: +
 It describes how to request the data (uri, HTTP method, header and body). +
@@ -201,54 +194,58 @@ It describes where to get the expected values in the returned object, by matchin
 *** *Token*: +
 This part contains the configuration required to fetch the token
 **** *Request*: +
-You can use *code* `{{code}}` and *client id* `{{client_id}}` variables in the body and/or header
-***** `*authentication.clients.custom.token.uri*`: the token API uri
-***** `*authentication.clients.custom.token.method*`: the HTTP method used to get the token.
+You can use *code* `{{code}}` variable in the body and/or header
+***** `*authentication.provider.custom.token.uri*`: the token API uri
+***** `*authentication.provider.custom.token.method*`: the HTTP method used to get the token.
 +
 IMPORTANT: Only `GET` and `POST` method accepted. If left empty, the default value is applied, i.e. `GET`
-***** `*authentication.clients.custom.token.header-values*`: all the header values
-***** `*authentication.clients.custom.token.body-values*`: all the body values
+***** `*authentication.provider.custom.token.header-values*`: all the header values
+***** `*authentication.provider.custom.token.body-values*`: all the body values
 **** *Response*:
-***** `*authentication.clients.custom.token.fields.id*`: the token *id* field name
-***** `*authentication.clients.custom.token.fields.access*`: the *access* token value field name
-***** `*authentication.clients.custom.token.fields.refresh*`: the *refresh* token value field name
-***** `*authentication.clients.custom.token.fields.expiration*`: the *expiration* token field name
-***** `*authentication.clients.custom.token.fields.type*`: the token *type* field name
-***** `*authentication.clients.custom.token.fields.scope*`: the token *scope* field name
+***** `*authentication.provider.custom.token.fields.id*`: the token *id* field name
+***** `*authentication.provider.custom.token.fields.access*`: the *access* token value field name
+***** `*authentication.provider.custom.token.fields.refresh*`: the *refresh* token value field name
+***** `*authentication.provider.custom.token.fields.expiration*`: the *expiration* token field name
+***** `*authentication.provider.custom.token.fields.type*`: the token *type* field name
+***** `*authentication.provider.custom.token.fields.scope*`: the token *scope* field name
 *** *User*: +
 This part contains the configuration required to fetch the user
 **** *Request*: +
 You can use *token type* `{{token_type}}` and *token value* `{{token_value}}` variables in the body and/or header
-***** `*authentication.clients.custom.user.uri*`: the user API uri
-***** `*authentication.clients.custom.user.method*`: the HTTP method used to get the user.
+***** `*authentication.provider.custom.user.uri*`: the user API uri
+***** `*authentication.provider.custom.user.method*`: the HTTP method used to get the user.
 +
 IMPORTANT: Only `GET` and `POST` method accepted. If left empty, the default value is applied, i.e. `GET`
-***** `*authentication.clients.custom.user.header-values*`: all the header values
-***** `*authentication.clients.custom.user.body-values*`: all the body values
+***** `*authentication.provider.custom.user.header-values*`: all the header values
+***** `*authentication.provider.custom.user.body-values*`: all the body values
 **** *Response*:
-***** `*authentication.clients.custom.user.fields.id*`: the user *id* field name
-***** `*authentication.clients.custom.user.fields.name*`: the user *name* field name
-***** `*authentication.clients.custom.user.fields.login*`: the user *login* field name
-***** `*authentication.clients.custom.user.fields.email*`: the user *email* field name
-***** `*authentication.clients.custom.user.fields.picture-url*`: the user *picture url* field name
+***** `*authentication.provider.custom.user.fields.id*`: the user *id* field name
+***** `*authentication.provider.custom.user.fields.name*`: the user *name* field name
+***** `*authentication.provider.custom.user.fields.login*`: the user *login* field name
+***** `*authentication.provider.custom.user.fields.email*`: the user *email* field name
+***** `*authentication.provider.custom.user.fields.picture-url*`: the user *picture url* field name
 *** *Verification*: +
 This part contains the configuration required to check the token validity
 **** *Request*:
-***** `*authentication.clients.custom.token-validation.uri*`: the token validation uri
-***** `*authentication.clients.custom.token-validation.method*`: the HTTP method used to check the token validity.
+***** `*authentication.provider.custom.token-validation.uri*`: the token validation uri
+***** `*authentication.provider.custom.token-validation.method*`: the HTTP method used to check the token validity.
 +
 IMPORTANT: Only `GET` and `POST` method accepted. If left empty, the default value is applied, i.e. `GET`
-***** `*authentication.clients.custom.token-validation.header-values*`: all the header values
-***** `*authentication.clients.custom.token-validation.body-values*`: all the body values
+***** `*authentication.provider.custom.token-validation.header-values*`: all the header values
+***** `*authentication.provider.custom.token-validation.body-values*`: all the body values
 **** *Response*: +
 When checking a token, if the API returns: +
 => an error code, or threw an exception, then the token is not valid +
 => a 2xx code, then it is enough to assume its validity, in some cases.
 However, sometimes the verification also requires to check a value in the returned object. In this scenario, fill the fields below:
-***** `*authentication.clients.custom.token-validation.validation-field.name*`: the field name to look up to check the token validity
-***** `*authentication.clients.custom.token-validation.validation-field.expected-value*`: +
+***** `*authentication.provider.custom.token-validation.validation-field.name*`: the field name to look up to check the token validity
+***** `*authentication.provider.custom.token-validation.validation-field.expected-value*`: +
 => if left blank, it assumes that the value is a boolean (or a string representing a boolean, i.e `"true"` or `"false"`). For instance lets assume the field name is `active`, then the token is assumed to be valid iff `active` equals `true` (or `active` equals `"true"`). +
 => if a value is given, then this value is compared to the value returned: iff there are the same, then the token is considered valid
++
+IMPORTANT: The configurations below are not mandatory. There are used to get the remaining time (in second) for an OAuth2 token to expire: the JWT generated token cannot exceed this duration.
+***** `*authentication.provider.custom.token-validation.validation-field.remaining-time*`: the field to get the token expiration remaining time (expected to be in second) *(_optional_)*
+***** `*authentication.provider.custom.token-validation.validation-field.expiration-timestamp*`: the field to get the token expiration timestamp (expected to be in second) *(_optional_)*
 * *JWT*:
 ** `*authentication.jwt-token.using-https*`: `true` if Ara is deployed in an HTTPS environment (_**highly recommended** on production environment_)
 ** `*authentication.jwt-token.token-secret*`: the secret with which the JWT token is created or verified.
@@ -259,21 +256,21 @@ It goes without saying that: +
 => the more *complex* and *longer* the secret is, the better, +
 => as the name suggests, it must remain *unknown* at any cost!
 ****
-** `*authentication.jwt-token.access-token-expiration-in-second*`: your token validity duration (in seconds). This field is *mandatory* (if a token has a duration of 0 second, then it's not valid!)
-
-TIP: This file is found in `code/api/server/src/main/resources/application.properties` in your project. You can also pass the values as parameters (*highly recommended* on production environment, especially for sensitive data related to authentication!).
+** `*authentication.jwt-token.access-token-expiration-in-second*`: your token validity duration (in seconds).
++
+IMPORTANT: Please note that the JWT token generated by ARA cannot last longer than the OAuth2 token used to authenticate. In the case the OAuth2 token doesn't contain any details about its expiration, then this field is *mandatory* (if a token has a duration of 0 second, then it's not valid!)
 
 ==== Swagger
 To use the Swagger, there are 3 options:
 
-. Disable the back authentication
+. Disable the authentication
 +
 WARNING: *Dangerous* in a production environment, to be avoided!
 . Login to Ara front before. Indeed, the cookie created is used to authenticate every API call.
 . Authenticate to Swagger. To do so:
 .. Get the token <<manual-workflow, manually>> 
 +
-IMPORTANT: To login via Google, use the email scope (`https://www.googleapis.com/auth/userinfo.email`) -> the email must be verified: to check if it's the case, Ara requires this scope to get this details!)
+IMPORTANT: To login via Google, use the email scope (`https://www.googleapis.com/auth/userinfo.email`) -> the email must be *verified*: to check if it's the case, Ara requires this scope to get this details!)
 .. Call this resource `/auth` with your provider (`custom`, `github` or `google`) and the token you just fetched
 +
 [source,json]
@@ -294,34 +291,6 @@ image::swagger-authorize-popup.png[]
 .. You are now authenticated, you can use Swagger resources
 +
 IMPORTANT: After the token expiration, you'll need to re-authenticate
-
-=== Authentication combinations
-There are 4 possible authentication combinations:
-
-.Authentication combinations
-[%header]
-|===
-|Front |Back |Comment
-
-a| * [ ] disabled
-a| * [ ] disabled
-|*No authentication at all*: useful for demos, to discover Ara (sandbox)
-
-a| * [x] enabled
-a| * [ ] disabled
-|*Only front authentication*: useful if you only want to focus on developments related to front authentication
-
-a| * [ ] disabled
-a| * [x] enabled
-a|*Only back authentication*: useful if you only want to focus on developments related to back authentication
-
-WARNING: Keep in mind that you can't use the front: the back is expecting an authentication token but the front is not sending any!
-
-a| * [x] enabled
-a| * [x] enabled
-|*Full authentication*: use this for production environment
-
-|===
 
 == Further reading
 

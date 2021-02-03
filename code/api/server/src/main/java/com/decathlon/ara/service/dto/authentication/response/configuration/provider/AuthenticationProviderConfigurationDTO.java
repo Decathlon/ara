@@ -15,20 +15,35 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.configuration.authentication.clients.custom.user;
+package com.decathlon.ara.service.dto.authentication.response.configuration.provider;
 
 import lombok.Data;
 
 @Data
-public class AuthenticationCustomUserFieldsConfiguration {
+public abstract class AuthenticationProviderConfigurationDTO {
 
-    private String id;
+    public AuthenticationProviderConfigurationDTO(Boolean enabled, String name, String displayedName, String icon, String... parameters) {
+        this.enabled = enabled;
+        this.name = name;
+        this.display = displayedName;
+        this.icon = icon;
+        this.uri = getLoginUrl(parameters);
+    }
 
-    private String name;
+    protected Boolean enabled;
 
-    private String login;
+    protected String name;
 
-    private String email;
+    protected String display;
 
-    private String pictureUrl;
+    protected String icon;
+
+    protected String uri;
+
+    /**
+     * Get the login uri
+     * @param parameters the parameters used to create the login uri (e.g. client id, etc...)
+     * @return the login uri
+     */
+    protected abstract String getLoginUrl(String... parameters);
 }

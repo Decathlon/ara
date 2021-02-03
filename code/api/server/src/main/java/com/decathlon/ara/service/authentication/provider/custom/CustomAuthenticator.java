@@ -17,12 +17,13 @@
 
 package com.decathlon.ara.service.authentication.provider.custom;
 
-import com.decathlon.ara.configuration.authentication.clients.custom.token.AuthenticationCustomTokenConfiguration;
-import com.decathlon.ara.configuration.authentication.clients.custom.token.AuthenticationCustomTokenFieldsConfiguration;
-import com.decathlon.ara.configuration.authentication.clients.custom.user.AuthenticationCustomUserConfiguration;
-import com.decathlon.ara.configuration.authentication.clients.custom.user.AuthenticationCustomUserFieldsConfiguration;
-import com.decathlon.ara.configuration.authentication.clients.custom.validation.AuthenticationCustomTokenValidationConfiguration;
-import com.decathlon.ara.configuration.authentication.clients.custom.validation.AuthenticationCustomTokenValidationFieldConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.custom.AuthenticationCustomConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.custom.token.AuthenticationCustomTokenConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.custom.token.AuthenticationCustomTokenFieldsConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.custom.user.AuthenticationCustomUserConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.custom.user.AuthenticationCustomUserFieldsConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.custom.validation.AuthenticationCustomTokenValidationConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.custom.validation.AuthenticationCustomTokenValidationFieldConfiguration;
 import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationService;
 import com.decathlon.ara.service.authentication.exception.AuthenticationConfigurationNotFoundException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationTokenNotFetchedException;
@@ -54,7 +55,7 @@ import static java.util.Map.entry;
 
 @Slf4j
 @Service
-public class CustomAuthenticator extends Authenticator<CustomToken, CustomUser> {
+public class CustomAuthenticator extends Authenticator<CustomToken, CustomUser, AuthenticationCustomConfiguration> {
 
     private final AuthenticationCustomTokenConfiguration tokenConfiguration;
 
@@ -62,18 +63,27 @@ public class CustomAuthenticator extends Authenticator<CustomToken, CustomUser> 
 
     private final AuthenticationCustomTokenValidationConfiguration tokenValidationConfiguration;
 
+    private final AuthenticationCustomConfiguration customConfiguration;
+
     @Autowired
     public CustomAuthenticator(
             JwtTokenAuthenticationService jwtTokenAuthenticationService,
             RestTemplate restTemplate,
             AuthenticationCustomTokenConfiguration tokenConfiguration,
             AuthenticationCustomUserConfiguration userConfiguration,
-            AuthenticationCustomTokenValidationConfiguration tokenValidationConfiguration
+            AuthenticationCustomTokenValidationConfiguration tokenValidationConfiguration,
+            AuthenticationCustomConfiguration customConfiguration
     ) {
-        super(CustomToken.class, CustomUser.class, jwtTokenAuthenticationService, restTemplate);
+        super(CustomToken.class, CustomUser.class, AuthenticationCustomConfiguration.class, jwtTokenAuthenticationService, restTemplate);
         this.tokenConfiguration = tokenConfiguration;
         this.userConfiguration = userConfiguration;
         this.tokenValidationConfiguration = tokenValidationConfiguration;
+        this.customConfiguration = customConfiguration;
+    }
+
+    @Override
+    protected AuthenticationCustomConfiguration getAuthenticatorConfiguration() {
+        return customConfiguration;
     }
 
     @Override
@@ -155,11 +165,7 @@ public class CustomAuthenticator extends Authenticator<CustomToken, CustomUser> 
     @Override
     protected HttpEntity<MultiValueMap<String, String>> getTokenRequest(UserAuthenticationRequestDTO request) {
         String code = request.getCode();
-        String clientId = request.getClientId();
-        Map<String, String> tokenParameters = Map.ofEntries(
-                entry("code", code),
-                entry("client_id", clientId)
-        );
+        Map<String, String> tokenParameters = Map.ofEntries(entry("code", code));
         HttpEntity<MultiValueMap<String, String>> tokenRequest = tokenConfiguration.getRequest(tokenParameters);
         return tokenRequest;
     }
@@ -289,5 +295,23 @@ public class CustomAuthenticator extends Authenticator<CustomToken, CustomUser> 
         }
         Object expectedFieldValue = validationField.getExpectedValue();
         return Optional.of(Pair.of(fieldName, Optional.ofNullable(expectedFieldValue)));
+    }
+
+    @Override
+    protected Optional<String> getTokenExpirationFieldName() {
+        AuthenticationCustomTokenValidationFieldConfiguration validationField = tokenValidationConfiguration.getValidationField();
+        if (validationField == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(validationField.getRemainingTime());
+    }
+
+    @Override
+    protected Optional<String> getTokenExpirationTimestampFieldName() {
+        AuthenticationCustomTokenValidationFieldConfiguration validationField = tokenValidationConfiguration.getValidationField();
+        if (validationField == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(validationField.getExpirationTimestamp());
     }
 }

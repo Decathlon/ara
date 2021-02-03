@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.service.dto.authentication.response.user;
 
-import com.decathlon.ara.service.dto.authentication.response.AuthenticationDetailsDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,7 +26,9 @@ import lombok.With;
 @NoArgsConstructor
 @AllArgsConstructor
 @With
-public class UserAuthenticationDetailsDTO extends AuthenticationDetailsDTO {
+public class UserAuthenticationDetailsDTO {
 
     private AuthenticationUserDetailsDTO user;
+
+    private AuthenticationProviderDetailsDTO provider;
 }

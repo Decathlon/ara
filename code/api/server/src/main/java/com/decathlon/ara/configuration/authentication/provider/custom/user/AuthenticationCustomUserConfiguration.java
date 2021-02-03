@@ -15,30 +15,18 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.provider.google;
+package com.decathlon.ara.configuration.authentication.provider.custom.user;
 
-import com.decathlon.ara.service.dto.authentication.provider.AuthenticatorToken;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.decathlon.ara.configuration.authentication.provider.custom.AuthenticationCustomValueConfiguration;
 import lombok.Data;
-
-import java.util.Optional;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 @Data
-public class GoogleToken extends AuthenticatorToken {
+@Configuration
+@ConfigurationProperties("authentication.provider.custom.user")
+public class AuthenticationCustomUserConfiguration extends AuthenticationCustomValueConfiguration {
 
-    @JsonProperty("access_token")
-    private String accessToken;
+    private AuthenticationCustomUserFieldsConfiguration fields;
 
-    @JsonProperty("expires_in")
-    private Integer expiration;
-
-    private String scope;
-
-    @JsonProperty("token_type")
-    private String type;
-
-    @Override
-    public Optional<Integer> getAccessTokenDurationInSeconds() {
-        return Optional.ofNullable(expiration);
-    }
 }

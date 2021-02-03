@@ -17,6 +17,7 @@
 
 package com.decathlon.ara.service.authentication.provider;
 
+import com.decathlon.ara.configuration.authentication.provider.AuthenticationProviderConfiguration;
 import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationService;
 import com.decathlon.ara.service.authentication.exception.AuthenticationConfigurationNotFoundException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationTokenNotFetchedException;
@@ -31,15 +32,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-public abstract class ProviderAuthenticator<T extends AuthenticatorToken, U extends AuthenticatorUser> extends Authenticator<T, U> {
+public abstract class ProviderAuthenticator<T extends AuthenticatorToken, U extends AuthenticatorUser, C extends AuthenticationProviderConfiguration> extends Authenticator<T, U, C> {
 
     public ProviderAuthenticator(
             Class<T> tokenType,
             Class<U> userType,
+            Class<C> configurationType,
             JwtTokenAuthenticationService jwtTokenAuthenticationService,
             RestTemplate restTemplate
     ) {
-        super(tokenType, userType, jwtTokenAuthenticationService, restTemplate);
+        super(tokenType, userType, configurationType, jwtTokenAuthenticationService, restTemplate);
     }
 
     @Override

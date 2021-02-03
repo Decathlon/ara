@@ -17,7 +17,8 @@
 
 package com.decathlon.ara.service.authentication.provider.google;
 
-import com.decathlon.ara.configuration.authentication.clients.google.AuthenticationGoogleConfiguration;
+import com.decathlon.ara.configuration.AraConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.google.AuthenticationGoogleConfiguration;
 import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationService;
 import com.decathlon.ara.service.authentication.exception.AuthenticationConfigurationNotFoundException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationTokenNotFetchedException;
@@ -43,28 +44,43 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-public class GoogleAuthenticator extends ProviderAuthenticator<GoogleToken, GoogleUser> {
+public class GoogleAuthenticator extends ProviderAuthenticator<GoogleToken, GoogleUser, AuthenticationGoogleConfiguration> {
 
     private final AuthenticationGoogleConfiguration googleConfiguration;
+
+    private final AraConfiguration araConfiguration;
 
     @Autowired
     public GoogleAuthenticator(
             JwtTokenAuthenticationService jwtTokenAuthenticationService,
             AuthenticationGoogleConfiguration googleConfiguration,
-            RestTemplate restTemplate
+            RestTemplate restTemplate,
+            AraConfiguration araConfiguration
     ) {
-        super(GoogleToken.class, GoogleUser.class, jwtTokenAuthenticationService, restTemplate);
+        super(GoogleToken.class, GoogleUser.class, AuthenticationGoogleConfiguration.class, jwtTokenAuthenticationService, restTemplate);
         this.googleConfiguration = googleConfiguration;
+        this.araConfiguration = araConfiguration;
+    }
+
+    /**
+     * Get Google redirect uri
+     * @return redirect uri
+     * @throws AuthenticationConfigurationNotFoundException thrown if no client base url found
+     */
+    private String getRedirectUri() throws AuthenticationConfigurationNotFoundException {
+        String frontBaseUrl = araConfiguration.getClientBaseUrl();
+        if (StringUtils.isBlank(frontBaseUrl)) {
+            String errorMessage = "The Google token cannot be fetched without the redirect uri: require the client base url";
+            log.error(errorMessage);
+            throw new AuthenticationConfigurationNotFoundException(errorMessage);
+        }
+        String separator = frontBaseUrl.endsWith("/") ? "" : "/";
+        return String.format("%s%slogin/google", frontBaseUrl, separator);
     }
 
     @Override
     protected String getTokenUri(UserAuthenticationRequestDTO request) throws AuthenticationTokenNotFetchedException, AuthenticationConfigurationNotFoundException {
-        String redirectUri = request.getRedirectUri();
-        if (StringUtils.isBlank(redirectUri)) {
-            String errorMessage = "The Google token cannot be fetched without the redirect uri";
-            log.error(errorMessage);
-            throw new AuthenticationTokenNotFetchedException(errorMessage);
-        }
+        String redirectUri = getRedirectUri();
 
         String clientSecret = googleConfiguration.getClientSecret();
         if (StringUtils.isBlank(clientSecret)) {
@@ -73,7 +89,10 @@ public class GoogleAuthenticator extends ProviderAuthenticator<GoogleToken, Goog
             throw new AuthenticationConfigurationNotFoundException(errorMessage);
         }
 
-        String clientId = request.getClientId();
+        String clientId = googleConfiguration.getClientId();
+        if (StringUtils.isBlank(clientId)) {
+            throw new AuthenticationConfigurationNotFoundException("The Google token cannot be fetched without a client id");
+        }
         String code = request.getCode();
         String grantType = "authorization_code";
 
@@ -137,6 +156,11 @@ public class GoogleAuthenticator extends ProviderAuthenticator<GoogleToken, Goog
     }
 
     @Override
+    protected AuthenticationGoogleConfiguration getAuthenticatorConfiguration() {
+        return googleConfiguration;
+    }
+
+    @Override
     protected GoogleUser getUser(GoogleToken token) throws AuthenticationUserNotFetchedException, AuthenticationConfigurationNotFoundException {
         GoogleUser user = super.getUser(token);
 
@@ -168,5 +192,15 @@ public class GoogleAuthenticator extends ProviderAuthenticator<GoogleToken, Goog
     @Override
     protected Optional<Pair<String, Optional<Object>>> getValueToCheck() {
         return Optional.of(Pair.of("email_verified", Optional.empty()));
+    }
+
+    @Override
+    protected Optional<String> getTokenExpirationFieldName() {
+        return Optional.of("expires_in");
+    }
+
+    @Override
+    protected Optional<String> getTokenExpirationTimestampFieldName() {
+        return Optional.of("exp");
     }
 }

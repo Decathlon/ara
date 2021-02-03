@@ -15,30 +15,22 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.provider.google;
+package com.decathlon.ara.service.dto.authentication.response.configuration.provider;
 
-import com.decathlon.ara.service.dto.authentication.provider.AuthenticatorToken;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+public class GithubAuthenticationProviderConfigurationDTO extends AuthenticationProviderConfigurationDTO {
 
-import java.util.Optional;
+    public GithubAuthenticationProviderConfigurationDTO(Boolean enabled, String clientId) {
+        super(enabled, "github", "Github", "github", clientId);
+    }
 
-@Data
-public class GoogleToken extends AuthenticatorToken {
-
-    @JsonProperty("access_token")
-    private String accessToken;
-
-    @JsonProperty("expires_in")
-    private Integer expiration;
-
-    private String scope;
-
-    @JsonProperty("token_type")
-    private String type;
-
+    /**
+     * Get login uri from client id
+     * @param parameters the parameters used to create the login uri (here the first parameter is the client id)
+     * @return the login uri
+     */
     @Override
-    public Optional<Integer> getAccessTokenDurationInSeconds() {
-        return Optional.ofNullable(expiration);
+    protected String getLoginUrl(String... parameters) {
+        String clientId = parameters[0];
+        return String.format("https://github.com/login/oauth/authorize?client_id=%s", clientId);
     }
 }

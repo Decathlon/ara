@@ -31,6 +31,4 @@ import lombok.With;
 public class UserAuthenticationRequestDTO extends AuthenticationRequestDTO {
 
     private String code;
-
-    private String redirectUri;
 }

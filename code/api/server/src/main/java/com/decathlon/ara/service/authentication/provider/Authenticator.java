@@ -17,6 +17,7 @@
 
 package com.decathlon.ara.service.authentication.provider;
 
+import com.decathlon.ara.configuration.authentication.provider.AuthenticationProviderConfiguration;
 import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationService;
 import com.decathlon.ara.service.authentication.exception.AuthenticationConfigurationNotFoundException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationException;
@@ -33,22 +34,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.util.Pair;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 
 @AllArgsConstructor
-public abstract class Authenticator<T extends AuthenticatorToken, U extends AuthenticatorUser> {
+public abstract class Authenticator<T extends AuthenticatorToken, U extends AuthenticatorUser, C extends AuthenticationProviderConfiguration> {
 
     protected Class<T> tokenType;
 
     protected Class<U> userType;
+
+    protected Class<C> configurationType;
 
     protected JwtTokenAuthenticationService jwtTokenAuthenticationService;
 
@@ -60,7 +61,7 @@ public abstract class Authenticator<T extends AuthenticatorToken, U extends Auth
      * @return the authentication details
      * @throws AuthenticationException if the authentication failed
      */
-    public UserAuthenticationDetailsDTO authenticate(UserAuthenticationRequestDTO request) throws AuthenticationException {
+    public ResponseEntity<UserAuthenticationDetailsDTO> authenticate(UserAuthenticationRequestDTO request) throws AuthenticationException {
         if (request == null) {
             throw new AuthenticationException("The request cannot be null");
         }
@@ -72,19 +73,28 @@ public abstract class Authenticator<T extends AuthenticatorToken, U extends Auth
         if (StringUtils.isBlank(code)) {
             throw new AuthenticationTokenNotFetchedException("The token cannot be fetched without a code");
         }
-        String clientId = request.getClientId();
-        if (StringUtils.isBlank(clientId)) {
-            throw new AuthenticationTokenNotFetchedException("The token cannot be fetched without a client id");
+        C configuration = getAuthenticatorConfiguration();
+        if (!configuration.isEnabled()) {
+            throw new AuthenticationException(String.format("You cannot authenticate with this provider (%s) because it is not enabled", provider));
         }
 
         T token = getToken(request);
         U user = getUser(token);
         AuthenticationUserDetailsDTO convertedUser = convertUser(user);
 
-        UserAuthenticationDetailsDTO authenticationDetails = new UserAuthenticationDetailsDTO(convertedUser);
-        authenticationDetails.setProvider(provider);
-        return authenticationDetails;
+        UserAuthenticationDetailsDTO authenticationDetails = new UserAuthenticationDetailsDTO().withUser(convertedUser);
+
+        Optional<Integer> accessTokenDurationInSeconds = token.getAccessTokenDurationInSeconds();
+        HttpHeaders headers = jwtTokenAuthenticationService.createAuthenticationResponseCookieHeader(accessTokenDurationInSeconds);
+
+        return ResponseEntity.ok().headers(headers).body(authenticationDetails);
     }
+
+    /**
+     * Get the authenticator authentication
+     * @return the authenticator authentication
+     */
+    protected abstract C getAuthenticatorConfiguration();
 
     /**
      * Get token from a request
@@ -159,9 +169,14 @@ public abstract class Authenticator<T extends AuthenticatorToken, U extends Auth
      * @return the authentication details
      * @throws AuthenticationException if the authentication failed
      */
-    public AppAuthenticationDetailsDTO authenticate(AppAuthenticationRequestDTO request) throws AuthenticationException {
+    public ResponseEntity<AppAuthenticationDetailsDTO> authenticate(AppAuthenticationRequestDTO request) throws AuthenticationException {
         if (request == null) {
             throw new AuthenticationException("Authentication failed because the request cannot be null");
+        }
+
+        String provider = request.getProvider();
+        if (StringUtils.isBlank(provider)) {
+            throw new AuthenticationException("Authentication failed because no provider given");
         }
 
         String accessToken = request.getToken();
@@ -169,23 +184,30 @@ public abstract class Authenticator<T extends AuthenticatorToken, U extends Auth
             throw new AuthenticationException("Authentication failed because no token found in the request");
         }
 
-        Boolean isAValidToken = isAValidToken(accessToken);
+        C configuration = getAuthenticatorConfiguration();
+        if (!configuration.isEnabled()) {
+            throw new AuthenticationException(String.format("You cannot authenticate with this provider (%s) because it is not enabled", provider));
+        }
+
+        Pair<Boolean, Optional<Integer>> validTokenPair = isAValidToken(accessToken);
+        Boolean isAValidToken = validTokenPair.getFirst();
         if (isAValidToken) {
-            String generatedToken = jwtTokenAuthenticationService.generateToken();
+            Optional<Integer> tokenAge = validTokenPair.getSecond();
+            Long tokenAgeValue = jwtTokenAuthenticationService.getJWTTokenExpirationInSecond(tokenAge);
+            String generatedToken = jwtTokenAuthenticationService.generateToken(tokenAgeValue);
             AppAuthenticationDetailsDTO authenticationDetails = new AppAuthenticationDetailsDTO(generatedToken);
-            authenticationDetails.setProvider(request.getProvider());
-            return authenticationDetails;
+            return ResponseEntity.ok().body(authenticationDetails);
         }
         String errorMessage = String.format("The authentication failed because the token (%s) given was not valid", accessToken);
         throw new AuthenticationException(errorMessage);
     }
 
     /**
-     * Check whether a token is valid or not
+     * Check whether a token is valid or not. If valid, can also return the age (in second)
      * @param token the token to check
      * @return true iff the token is still valid
      */
-    protected Boolean isAValidToken(String token) throws AuthenticationException {
+    protected Pair<Boolean, Optional<Integer>> isAValidToken(String token) throws AuthenticationException {
         String url = getTokenValidationUri(token);
         HttpMethod method = getTokenValidationMethod();
         HttpEntity request = getTokenValidationRequest(token);
@@ -195,23 +217,29 @@ public abstract class Authenticator<T extends AuthenticatorToken, U extends Auth
             response = restTemplate.exchange(url, method, request, Object.class);
         }
         catch (RestClientException exception) {
-            return false;
+            return Pair.of(false, Optional.empty());
         }
 
         HttpStatus status = response.getStatusCode();
         if (status.isError()) {
-            return false;
+            return Pair.of(false, Optional.empty());
         }
 
+        Object responseBody = response.getBody();
+        if (responseBody == null) {
+            return Pair.of(true, Optional.empty());
+        }
+
+        Optional<Integer> expiration = getTokenRemainingTimeInSecond(responseBody);
         Optional<Pair<String, Optional<Object>>> valueToCheck = getValueToCheck();
         if (!valueToCheck.isPresent()) {
-            return true;
+            return Pair.of(true, expiration);
         }
 
-        String fieldName = valueToCheck.get().getFirst();
-
         ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> allValues = mapper.convertValue(response.getBody(), Map.class);
+        Map<String, Object> allValues = mapper.convertValue(responseBody, Map.class);
+
+        String fieldName = valueToCheck.get().getFirst();
 
         if (!allValues.containsKey(fieldName)) {
             String errorMessage = String.format("The field %s was not found when checking the token.", fieldName);
@@ -221,13 +249,13 @@ public abstract class Authenticator<T extends AuthenticatorToken, U extends Auth
         Object actualValue = allValues.get(fieldName);
         Optional<Object> expectedValue = valueToCheck.get().getSecond();
         if (expectedValue.isPresent()) {
-            return expectedValue.get().equals(actualValue);
+            return Pair.of(expectedValue.get().equals(actualValue), expiration);
         }
         if (actualValue instanceof Boolean) {
-            return (Boolean) actualValue;
+            return Pair.of((Boolean) actualValue, expiration);
         }
         if (actualValue instanceof String) {
-            return Boolean.parseBoolean((String) actualValue);
+            return Pair.of(Boolean.parseBoolean((String) actualValue), expiration);
         }
         String errorMessage = "Authentication failed: the token validation api returned an unexpected value";
         throw new AuthenticationException(errorMessage);
@@ -266,4 +294,58 @@ public abstract class Authenticator<T extends AuthenticatorToken, U extends Auth
      * @return the value to check, if any
      */
     protected abstract Optional<Pair<String, Optional<Object>>> getValueToCheck();
+
+    /**
+     * Get the remaining token age, in seconds
+     * @param validationToken the validation token details
+     * @return the remaining token age, if any
+     */
+    private Optional<Integer> getTokenRemainingTimeInSecond(Object validationToken) {
+        if (validationToken == null) {
+            return Optional.empty();
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> allValues = mapper.convertValue(validationToken, Map.class);
+
+        Optional<String> expirationFieldName = getTokenExpirationFieldName();
+        if (expirationFieldName.isPresent()) {
+            Object expiration = allValues.get(expirationFieldName.get());
+            if (expiration instanceof String) {
+                return Optional.of(Integer.valueOf((String) expiration));
+            }
+            if (expiration instanceof Integer) {
+                return Optional.of((Integer) expiration);
+            }
+        }
+
+        Optional<String> timestampFieldName = getTokenExpirationTimestampFieldName();
+        if (timestampFieldName.isPresent()) {
+            Object rawTimestamp = allValues.get(timestampFieldName.get());
+            Integer timestamp = null;
+            if (rawTimestamp instanceof String) {
+                timestamp = Integer.valueOf((String) rawTimestamp);
+            }
+            if (rawTimestamp instanceof Integer) {
+                timestamp = (Integer) rawTimestamp;
+            }
+            if (timestamp != null) {
+                Long remainingTimeInMillisecond = timestamp.longValue() * 1000 - new Date().getTime();
+                Integer remainingTimeInSecond = remainingTimeInMillisecond >= 0 ? remainingTimeInMillisecond.intValue() / 1000 : null ;
+                return Optional.ofNullable(remainingTimeInSecond);
+            }
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Get token expiration field name, if any
+     * @return token expiration field name, if any
+     */
+    protected abstract Optional<String> getTokenExpirationFieldName();
+
+    /**
+     * Get token expiration timestamp field name, if any
+     * @return token expiration timestamp field name, if any
+     */
+    protected abstract Optional<String> getTokenExpirationTimestampFieldName();
 }

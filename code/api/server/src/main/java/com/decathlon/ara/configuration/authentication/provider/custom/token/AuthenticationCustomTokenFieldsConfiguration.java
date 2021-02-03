@@ -15,16 +15,22 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.configuration.authentication.clients.github;
+package com.decathlon.ara.configuration.authentication.provider.custom.token;
 
 import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 @Data
-@Configuration
-@ConfigurationProperties("authentication.clients.github")
-public class AuthenticationGithubConfiguration {
+public class AuthenticationCustomTokenFieldsConfiguration {
 
-    private String clientSecret;
+    private String id;
+
+    private String access;
+
+    private String refresh;
+
+    private String expiration;
+
+    private String type;
+
+    private String scope;
 }

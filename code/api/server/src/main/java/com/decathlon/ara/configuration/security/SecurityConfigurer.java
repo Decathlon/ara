@@ -21,6 +21,7 @@ import com.decathlon.ara.configuration.authentication.AuthenticationConfiguratio
 import com.decathlon.ara.configuration.security.filter.JwtRequestFilter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -30,6 +31,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+@Slf4j
 @EnableWebSecurity
 @Configuration
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -55,6 +57,7 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) throws Exception {
         Boolean authenticationIsDisabled = !authenticationConfiguration.isEnabled();
         if (authenticationIsDisabled) {
+            log.warn("ARA is starting without any authentication");
             web.ignoring().antMatchers("**");
             return;
         }

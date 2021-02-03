@@ -33,6 +33,7 @@ import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import { AuthenticationService } from './service/authentication.service'
 import configurationPlugin from '@/config'
 import { config } from './config'
+import api from './libs/api'
 
 Vue.use(Vue2Filters)
 Vue.use(VueResource)
@@ -73,10 +74,34 @@ const router = new VueRouter({
   routes: routes
 })
 
-const manageLoginRedirection = function (to, from, next) {
+const downloadConfig = async function () {
+  return Vue.http.get(api.paths.authenticationConfiguration(), api.REQUEST_OPTIONS)
+}
+
+const manageLoginRedirection = async function (to, from, next) {
   const isPublic = to.matched.some(record => record.meta.public)
   const onlyWhenLoggedOut = to.matched.some(record => record.meta.onlyWhenLoggedOut)
+  const goingToLoginPage = to.name === 'login'
+
+  if (config.downloadError) {
+    if (goingToLoginPage) {
+      return next()
+    }
+    return next('login')
+  }
+
   const loggedIn = AuthenticationService.isAlreadyLoggedIn()
+  const needToDownloadConfig = !(loggedIn || config.isComplete)
+  if (needToDownloadConfig) {
+    try {
+      const response = await downloadConfig()
+      config.authentication.providers = response.body.providers
+      config.downloadError = false
+    } catch (err) {
+      config.downloadError = true
+      return next('login')
+    }
+  }
   const requireLogin = config.authentication.enabled
 
   const canAccess = isPublic || loggedIn || !requireLogin

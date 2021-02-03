@@ -15,22 +15,13 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.configuration.authentication.clients.custom.token;
+package com.decathlon.ara.configuration.authentication.provider;
 
 import lombok.Data;
 
 @Data
-public class AuthenticationCustomTokenFieldsConfiguration {
+public class AuthenticationProviderConfiguration {
 
-    private String id;
+    protected boolean enabled;
 
-    private String access;
-
-    private String refresh;
-
-    private String expiration;
-
-    private String type;
-
-    private String scope;
 }

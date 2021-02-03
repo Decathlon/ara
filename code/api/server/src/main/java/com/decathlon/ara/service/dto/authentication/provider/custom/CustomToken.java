@@ -24,6 +24,7 @@ import lombok.NoArgsConstructor;
 import lombok.With;
 
 import java.sql.Timestamp;
+import java.util.Optional;
 
 @Data
 @With
@@ -44,4 +45,9 @@ public class CustomToken extends AuthenticatorToken {
     private String type;
 
     private String scope;
+
+    @Override
+    public Optional<Integer> getAccessTokenDurationInSeconds() {
+        return Optional.ofNullable(expirationDuration);
+    }
 }

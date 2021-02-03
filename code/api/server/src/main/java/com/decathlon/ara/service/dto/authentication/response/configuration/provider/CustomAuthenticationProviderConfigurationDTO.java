@@ -15,30 +15,24 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.provider.google;
-
-import com.decathlon.ara.service.dto.authentication.provider.AuthenticatorToken;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+package com.decathlon.ara.service.dto.authentication.response.configuration.provider;
 
 import java.util.Optional;
 
-@Data
-public class GoogleToken extends AuthenticatorToken {
+public class CustomAuthenticationProviderConfigurationDTO extends AuthenticationProviderConfigurationDTO {
 
-    @JsonProperty("access_token")
-    private String accessToken;
+    public CustomAuthenticationProviderConfigurationDTO(Boolean enabled, Optional<String> displayedName, String loginUri) {
+        super(enabled, "custom", displayedName.orElse("Custom"), "building", loginUri);
+    }
 
-    @JsonProperty("expires_in")
-    private Integer expiration;
-
-    private String scope;
-
-    @JsonProperty("token_type")
-    private String type;
-
+    /**
+     * Get the login uri. As a custom provider, the login uri is the first parameter.
+     * @param parameters the parameters used to create the login uri (here the first parameter is the custom login uri)
+     * @return the login uri
+     */
     @Override
-    public Optional<Integer> getAccessTokenDurationInSeconds() {
-        return Optional.ofNullable(expiration);
+    protected String getLoginUrl(String... parameters) {
+        String loginUri = parameters[0];
+        return loginUri;
     }
 }

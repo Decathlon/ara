@@ -253,7 +253,8 @@ const routes = [
   },
 
   // Not found page
-  { path: '/not-found',
+  {
+    path: '/not-found',
     name: 'not-found',
     meta: {
       title: 'Page not found...'

@@ -17,7 +17,7 @@
 
 package com.decathlon.ara.service.authentication.provider.github;
 
-import com.decathlon.ara.configuration.authentication.clients.github.AuthenticationGithubConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.github.AuthenticationGithubConfiguration;
 import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationService;
 import com.decathlon.ara.service.authentication.exception.AuthenticationConfigurationNotFoundException;
 import com.decathlon.ara.service.authentication.provider.ProviderAuthenticator;
@@ -41,7 +41,7 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-public class GithubAuthenticator extends ProviderAuthenticator<GithubToken, GithubUser> {
+public class GithubAuthenticator extends ProviderAuthenticator<GithubToken, GithubUser, AuthenticationGithubConfiguration> {
 
     private final AuthenticationGithubConfiguration githubConfiguration;
 
@@ -51,8 +51,13 @@ public class GithubAuthenticator extends ProviderAuthenticator<GithubToken, Gith
             AuthenticationGithubConfiguration githubConfiguration,
             RestTemplate restTemplate
     ) {
-        super(GithubToken.class, GithubUser.class, jwtTokenAuthenticationService, restTemplate);
+        super(GithubToken.class, GithubUser.class, AuthenticationGithubConfiguration.class, jwtTokenAuthenticationService, restTemplate);
         this.githubConfiguration = githubConfiguration;
+    }
+
+    @Override
+    protected AuthenticationGithubConfiguration getAuthenticatorConfiguration() {
+        return githubConfiguration;
     }
 
     @Override
@@ -64,7 +69,10 @@ public class GithubAuthenticator extends ProviderAuthenticator<GithubToken, Gith
             throw new AuthenticationConfigurationNotFoundException(errorMessage);
         }
 
-        String clientId = request.getClientId();
+        String clientId = githubConfiguration.getClientId();
+        if (StringUtils.isBlank(clientId)) {
+            throw new AuthenticationConfigurationNotFoundException("The Github token cannot be fetched without a client id");
+        }
         String code = request.getCode();
         String scope = "user:email%20read:user";
 
@@ -138,6 +146,16 @@ public class GithubAuthenticator extends ProviderAuthenticator<GithubToken, Gith
 
     @Override
     protected Optional<Pair<String, Optional<Object>>> getValueToCheck() {
+        return Optional.empty();
+    }
+
+    @Override
+    protected Optional<String> getTokenExpirationFieldName() {
+        return Optional.empty();
+    }
+
+    @Override
+    protected Optional<String> getTokenExpirationTimestampFieldName() {
         return Optional.empty();
     }
 }

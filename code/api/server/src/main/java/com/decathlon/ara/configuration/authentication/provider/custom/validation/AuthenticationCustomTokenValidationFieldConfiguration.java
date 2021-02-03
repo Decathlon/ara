@@ -15,30 +15,18 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.provider.google;
+package com.decathlon.ara.configuration.authentication.provider.custom.validation;
 
-import com.decathlon.ara.service.dto.authentication.provider.AuthenticatorToken;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import java.util.Optional;
-
 @Data
-public class GoogleToken extends AuthenticatorToken {
+public class AuthenticationCustomTokenValidationFieldConfiguration {
 
-    @JsonProperty("access_token")
-    private String accessToken;
+    private String name;
 
-    @JsonProperty("expires_in")
-    private Integer expiration;
+    private String expectedValue;
 
-    private String scope;
+    private String remainingTime;
 
-    @JsonProperty("token_type")
-    private String type;
-
-    @Override
-    public Optional<Integer> getAccessTokenDurationInSeconds() {
-        return Optional.ofNullable(expiration);
-    }
+    private String expirationTimestamp;
 }

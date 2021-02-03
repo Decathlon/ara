@@ -21,15 +21,23 @@ import com.decathlon.ara.service.authentication.provider.Authenticator;
 import com.decathlon.ara.service.authentication.provider.custom.CustomAuthenticator;
 import com.decathlon.ara.service.authentication.provider.github.GithubAuthenticator;
 import com.decathlon.ara.service.authentication.provider.google.GoogleAuthenticator;
+import com.decathlon.ara.service.dto.authentication.response.configuration.provider.AuthenticationProvidersConfigurationDTO;
+import com.decathlon.ara.service.dto.authentication.response.configuration.provider.CustomAuthenticationProviderConfigurationDTO;
+import com.decathlon.ara.service.dto.authentication.response.configuration.provider.GithubAuthenticationProviderConfigurationDTO;
+import com.decathlon.ara.service.dto.authentication.response.configuration.provider.GoogleAuthenticationProviderConfigurationDTO;
+import com.decathlon.ara.service.dto.authentication.response.user.AuthenticationProviderDetailsDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.util.Pair;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthenticationStrategyTest {
@@ -47,73 +55,119 @@ public class AuthenticationStrategyTest {
     private AuthenticationStrategy authenticationStrategy;
 
     @Test
-    public void getAuthenticator_returnEmptyOptional_whenNameIsBlank() {
+    public void getAuthenticatorAndProviderDetails_returnEmptyOptional_whenNameIsBlank() {
         // Given
+        AuthenticationProvidersConfigurationDTO providersConfiguration = mock(AuthenticationProvidersConfigurationDTO.class);
 
         // When
 
         // Then
-        Optional<Authenticator> authenticator = authenticationStrategy.getAuthenticator(null);
-        assertThat(authenticator)
+        Optional<Pair<Authenticator, AuthenticationProviderDetailsDTO>> authenticatorAndProviderDetails = authenticationStrategy.getAuthenticatorAndProviderDetails(null, providersConfiguration);
+        assertThat(authenticatorAndProviderDetails)
                 .isNotNull()
                 .isEmpty();
     }
 
     @Test
-    public void getAuthenticator_returnCustomAuthenticator_whenCustomProviderNameGiven() {
+    public void getAuthenticatorAndProviderDetails_returnEmptyOptional_whenProviderIsNull() {
+        // Given
+        String providerName = "any_provider_name";
+
+        // When
+
+        // Then
+        Optional<Pair<Authenticator, AuthenticationProviderDetailsDTO>> authenticatorAndProviderDetails = authenticationStrategy.getAuthenticatorAndProviderDetails(providerName, null);
+        assertThat(authenticatorAndProviderDetails)
+                .isNotNull()
+                .isEmpty();
+    }
+
+    @Test
+    public void getAuthenticatorAndProviderDetails_returnCustomAuthenticator_whenCustomProviderNameGiven() {
         // Given
         String providerName = "custom";
+        AuthenticationProvidersConfigurationDTO providersConfiguration = mock(AuthenticationProvidersConfigurationDTO.class);
+        CustomAuthenticationProviderConfigurationDTO customConfiguration = new CustomAuthenticationProviderConfigurationDTO(true, Optional.empty(), "login-uri");
+        GoogleAuthenticationProviderConfigurationDTO googleConfiguration = new GoogleAuthenticationProviderConfigurationDTO(true, "google-client-id", "base-url");
+        GithubAuthenticationProviderConfigurationDTO githubConfiguration = new GithubAuthenticationProviderConfigurationDTO(true, "github-client-id");
 
         // When
+        when(providersConfiguration.getCustom()).thenReturn(customConfiguration);
+        when(providersConfiguration.getGoogle()).thenReturn(googleConfiguration);
+        when(providersConfiguration.getGithub()).thenReturn(githubConfiguration);
 
         // Then
-        Optional<Authenticator> authenticator = authenticationStrategy.getAuthenticator(providerName);
-        assertThat(authenticator)
+        Optional<Pair<Authenticator, AuthenticationProviderDetailsDTO>> authenticatorAndProviderDetails = authenticationStrategy.getAuthenticatorAndProviderDetails(providerName, providersConfiguration);
+        assertThat(authenticatorAndProviderDetails)
                 .isNotNull()
-                .isNotEmpty()
-                .containsInstanceOf(CustomAuthenticator.class);
+                .isNotEmpty();
+        assertThat(authenticatorAndProviderDetails.get().getFirst()).isInstanceOf(CustomAuthenticator.class);
+        assertThat(authenticatorAndProviderDetails.get().getSecond()).extracting("name", "code").containsExactly("Custom", "custom");
     }
 
     @Test
-    public void getAuthenticator_returnGithubAuthenticator_whenGithubProviderNameGiven() {
+    public void getAuthenticatorAndProviderDetails_returnGithubAuthenticator_whenGithubProviderNameGiven() {
         // Given
         String providerName = "github";
+        AuthenticationProvidersConfigurationDTO providersConfiguration = mock(AuthenticationProvidersConfigurationDTO.class);
+        CustomAuthenticationProviderConfigurationDTO customConfiguration = new CustomAuthenticationProviderConfigurationDTO(true, Optional.empty(), "login-uri");
+        GoogleAuthenticationProviderConfigurationDTO googleConfiguration = new GoogleAuthenticationProviderConfigurationDTO(true, "google-client-id", "base-url");
+        GithubAuthenticationProviderConfigurationDTO githubConfiguration = new GithubAuthenticationProviderConfigurationDTO(true, "github-client-id");
 
         // When
+        when(providersConfiguration.getCustom()).thenReturn(customConfiguration);
+        when(providersConfiguration.getGoogle()).thenReturn(googleConfiguration);
+        when(providersConfiguration.getGithub()).thenReturn(githubConfiguration);
 
         // Then
-        Optional<Authenticator> authenticator = authenticationStrategy.getAuthenticator(providerName);
-        assertThat(authenticator)
+        Optional<Pair<Authenticator, AuthenticationProviderDetailsDTO>> authenticatorAndProviderDetails = authenticationStrategy.getAuthenticatorAndProviderDetails(providerName, providersConfiguration);
+        assertThat(authenticatorAndProviderDetails)
                 .isNotNull()
-                .isNotEmpty()
-                .containsInstanceOf(GithubAuthenticator.class);
+                .isNotEmpty();
+        assertThat(authenticatorAndProviderDetails.get().getFirst()).isInstanceOf(GithubAuthenticator.class);
+        assertThat(authenticatorAndProviderDetails.get().getSecond()).extracting("name", "code").containsExactly("Github", "github");
     }
 
     @Test
-    public void getAuthenticator_returnGoogleAuthenticator_whenGoogleProviderNameGiven() {
+    public void getAuthenticatorAndProviderDetails_returnGoogleAuthenticator_whenGoogleProviderNameGiven() {
         // Given
         String providerName = "google";
+        AuthenticationProvidersConfigurationDTO providersConfiguration = mock(AuthenticationProvidersConfigurationDTO.class);
+        CustomAuthenticationProviderConfigurationDTO customConfiguration = new CustomAuthenticationProviderConfigurationDTO(true, Optional.empty(), "login-uri");
+        GoogleAuthenticationProviderConfigurationDTO googleConfiguration = new GoogleAuthenticationProviderConfigurationDTO(true, "google-client-id", "base-url");
+        GithubAuthenticationProviderConfigurationDTO githubConfiguration = new GithubAuthenticationProviderConfigurationDTO(true, "github-client-id");
 
         // When
+        when(providersConfiguration.getCustom()).thenReturn(customConfiguration);
+        when(providersConfiguration.getGoogle()).thenReturn(googleConfiguration);
+        when(providersConfiguration.getGithub()).thenReturn(githubConfiguration);
 
         // Then
-        Optional<Authenticator> authenticator = authenticationStrategy.getAuthenticator(providerName);
-        assertThat(authenticator)
+        Optional<Pair<Authenticator, AuthenticationProviderDetailsDTO>> authenticatorAndProviderDetails = authenticationStrategy.getAuthenticatorAndProviderDetails(providerName, providersConfiguration);
+        assertThat(authenticatorAndProviderDetails)
                 .isNotNull()
-                .isNotEmpty()
-                .containsInstanceOf(GoogleAuthenticator.class);
+                .isNotEmpty();
+        assertThat(authenticatorAndProviderDetails.get().getFirst()).isInstanceOf(GoogleAuthenticator.class);
+        assertThat(authenticatorAndProviderDetails.get().getSecond()).extracting("name", "code").containsExactly("Google", "google");
     }
 
     @Test
-    public void getAuthenticator_returnEmptyOptional_whenUnknownProviderNameGiven() {
+    public void getAuthenticatorAndProviderDetails_returnEmptyOptional_whenUnknownProviderNameGiven() {
         // Given
         String providerName = "<unknown-provider-name>";
+        AuthenticationProvidersConfigurationDTO providersConfiguration = mock(AuthenticationProvidersConfigurationDTO.class);
+        CustomAuthenticationProviderConfigurationDTO customConfiguration = new CustomAuthenticationProviderConfigurationDTO(true, Optional.empty(), "login-uri");
+        GoogleAuthenticationProviderConfigurationDTO googleConfiguration = new GoogleAuthenticationProviderConfigurationDTO(true, "google-client-id", "base-url");
+        GithubAuthenticationProviderConfigurationDTO githubConfiguration = new GithubAuthenticationProviderConfigurationDTO(true, "github-client-id");
 
         // When
+        when(providersConfiguration.getCustom()).thenReturn(customConfiguration);
+        when(providersConfiguration.getGoogle()).thenReturn(googleConfiguration);
+        when(providersConfiguration.getGithub()).thenReturn(githubConfiguration);
 
         // Then
-        Optional<Authenticator> authenticator = authenticationStrategy.getAuthenticator(providerName);
-        assertThat(authenticator)
+        Optional<Pair<Authenticator, AuthenticationProviderDetailsDTO>> authenticatorAndProviderDetails = authenticationStrategy.getAuthenticatorAndProviderDetails(providerName, providersConfiguration);
+        assertThat(authenticatorAndProviderDetails)
                 .isNotNull()
                 .isEmpty();
     }

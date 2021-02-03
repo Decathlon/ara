@@ -17,12 +17,13 @@
 
 package com.decathlon.ara.service.authentication.provider.custom;
 
-import com.decathlon.ara.configuration.authentication.clients.custom.token.AuthenticationCustomTokenConfiguration;
-import com.decathlon.ara.configuration.authentication.clients.custom.token.AuthenticationCustomTokenFieldsConfiguration;
-import com.decathlon.ara.configuration.authentication.clients.custom.user.AuthenticationCustomUserConfiguration;
-import com.decathlon.ara.configuration.authentication.clients.custom.user.AuthenticationCustomUserFieldsConfiguration;
-import com.decathlon.ara.configuration.authentication.clients.custom.validation.AuthenticationCustomTokenValidationConfiguration;
-import com.decathlon.ara.configuration.authentication.clients.custom.validation.AuthenticationCustomTokenValidationFieldConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.custom.AuthenticationCustomConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.custom.token.AuthenticationCustomTokenConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.custom.token.AuthenticationCustomTokenFieldsConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.custom.user.AuthenticationCustomUserConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.custom.user.AuthenticationCustomUserFieldsConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.custom.validation.AuthenticationCustomTokenValidationConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.custom.validation.AuthenticationCustomTokenValidationFieldConfiguration;
 import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationService;
 import com.decathlon.ara.service.authentication.exception.AuthenticationConfigurationNotFoundException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationException;
@@ -47,13 +48,13 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class CustomAuthenticatorTest {
@@ -72,6 +73,9 @@ public class CustomAuthenticatorTest {
 
     @Mock
     private AuthenticationCustomTokenValidationConfiguration tokenValidationConfiguration;
+
+    @Mock
+    private AuthenticationCustomConfiguration customConfiguration;
 
     @InjectMocks
     private CustomAuthenticator authenticator;
@@ -163,18 +167,18 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationTokenNotFetchedException_whenNoClientIdGiven() {
+    public void authenticate_throwAuthenticationException_whenProviderIsNotEnabled() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
 
         // When
         when(request.getProvider()).thenReturn("provider");
         when(request.getCode()).thenReturn("some_code");
-        when(request.getClientId()).thenReturn(null);
+        when(customConfiguration.isEnabled()).thenReturn(false);
 
         // Then
         assertThatThrownBy(() -> authenticator.authenticate(request))
-                .isInstanceOf(AuthenticationTokenNotFetchedException.class);
+                .isInstanceOf(AuthenticationException.class);
     }
 
     @Test
@@ -185,7 +189,7 @@ public class CustomAuthenticatorTest {
         // When
         when(request.getProvider()).thenReturn("provider");
         when(request.getCode()).thenReturn("some_code");
-        when(request.getClientId()).thenReturn("client_id");
+        when(customConfiguration.isEnabled()).thenReturn(true);
 
         when(tokenConfiguration.getUri()).thenReturn(null);
 
@@ -202,7 +206,7 @@ public class CustomAuthenticatorTest {
         // When
         when(request.getProvider()).thenReturn("provider");
         when(request.getCode()).thenReturn("some_code");
-        when(request.getClientId()).thenReturn("client_id");
+        when(customConfiguration.isEnabled()).thenReturn(true);
 
         when(tokenConfiguration.getUri()).thenReturn("the_token_uri");
         when(tokenConfiguration.getHttpMethod()).thenReturn(HttpMethod.POST);
@@ -226,7 +230,7 @@ public class CustomAuthenticatorTest {
         // When
         when(request.getProvider()).thenReturn("provider");
         when(request.getCode()).thenReturn("some_code");
-        when(request.getClientId()).thenReturn("client_id");
+        when(customConfiguration.isEnabled()).thenReturn(true);
 
         when(tokenConfiguration.getUri()).thenReturn(tokenUri);
         when(tokenConfiguration.getHttpMethod()).thenReturn(HttpMethod.POST);
@@ -254,7 +258,7 @@ public class CustomAuthenticatorTest {
         // When
         when(request.getProvider()).thenReturn("provider");
         when(request.getCode()).thenReturn("some_code");
-        when(request.getClientId()).thenReturn("client_id");
+        when(customConfiguration.isEnabled()).thenReturn(true);
 
         when(tokenConfiguration.getUri()).thenReturn(tokenUri);
         when(tokenConfiguration.getHttpMethod()).thenReturn(HttpMethod.POST);
@@ -283,7 +287,7 @@ public class CustomAuthenticatorTest {
         // When
         when(request.getProvider()).thenReturn("provider");
         when(request.getCode()).thenReturn("some_code");
-        when(request.getClientId()).thenReturn("client_id");
+        when(customConfiguration.isEnabled()).thenReturn(true);
 
         when(tokenConfiguration.getUri()).thenReturn(tokenUri);
         when(tokenConfiguration.getHttpMethod()).thenReturn(HttpMethod.POST);
@@ -316,7 +320,7 @@ public class CustomAuthenticatorTest {
         // When
         when(request.getProvider()).thenReturn("provider");
         when(request.getCode()).thenReturn("some_code");
-        when(request.getClientId()).thenReturn("client_id");
+        when(customConfiguration.isEnabled()).thenReturn(true);
 
         when(tokenConfiguration.getUri()).thenReturn(tokenUri);
         when(tokenConfiguration.getHttpMethod()).thenReturn(HttpMethod.POST);
@@ -356,7 +360,7 @@ public class CustomAuthenticatorTest {
         // When
         when(request.getProvider()).thenReturn("provider");
         when(request.getCode()).thenReturn("some_code");
-        when(request.getClientId()).thenReturn("client_id");
+        when(customConfiguration.isEnabled()).thenReturn(true);
 
         when(tokenConfiguration.getUri()).thenReturn(tokenUri);
         when(tokenConfiguration.getHttpMethod()).thenReturn(HttpMethod.POST);
@@ -401,7 +405,7 @@ public class CustomAuthenticatorTest {
         // When
         when(request.getProvider()).thenReturn("provider");
         when(request.getCode()).thenReturn("some_code");
-        when(request.getClientId()).thenReturn("client_id");
+        when(customConfiguration.isEnabled()).thenReturn(true);
 
         when(tokenConfiguration.getUri()).thenReturn(tokenUri);
         when(tokenConfiguration.getHttpMethod()).thenReturn(HttpMethod.POST);
@@ -473,7 +477,7 @@ public class CustomAuthenticatorTest {
         // When
         when(request.getProvider()).thenReturn("provider");
         when(request.getCode()).thenReturn("some_code");
-        when(request.getClientId()).thenReturn("client_id");
+        when(customConfiguration.isEnabled()).thenReturn(true);
 
         when(tokenConfiguration.getUri()).thenReturn(tokenUri);
         when(tokenConfiguration.getHttpMethod()).thenReturn(HttpMethod.POST);
@@ -502,9 +506,9 @@ public class CustomAuthenticatorTest {
         when(userResponseEntity.getBody()).thenReturn(dummyUserForTest);
 
         // Then
-        UserAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        ResponseEntity<UserAuthenticationDetailsDTO> authenticationResponse = authenticator.authenticate(request);
+        UserAuthenticationDetailsDTO authenticationDetails = authenticationResponse.getBody();
         assertThat(authenticationDetails).isNotNull();
-        assertThat(authenticationDetails.getProvider()).isEqualTo("provider");
         assertThat(authenticationDetails.getUser())
                 .extracting(
                         "id",
@@ -520,6 +524,7 @@ public class CustomAuthenticatorTest {
                         userEmail,
                         userPictureUrl
                 );
+        verify(jwtTokenAuthenticationService).createAuthenticationResponseCookieHeader(Optional.of(tokenExpiration));
     }
 
     @Test
@@ -573,7 +578,7 @@ public class CustomAuthenticatorTest {
         // When
         when(request.getProvider()).thenReturn("provider");
         when(request.getCode()).thenReturn("some_code");
-        when(request.getClientId()).thenReturn("client_id");
+        when(customConfiguration.isEnabled()).thenReturn(true);
 
         when(tokenConfiguration.getUri()).thenReturn(tokenUri);
         when(tokenConfiguration.getHttpMethod()).thenReturn(HttpMethod.POST);
@@ -602,9 +607,9 @@ public class CustomAuthenticatorTest {
         when(userResponseEntity.getBody()).thenReturn(dummyUserForTest);
 
         // Then
-        UserAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        ResponseEntity<UserAuthenticationDetailsDTO> authenticationResponse = authenticator.authenticate(request);
+        UserAuthenticationDetailsDTO authenticationDetails = authenticationResponse.getBody();
         assertThat(authenticationDetails).isNotNull();
-        assertThat(authenticationDetails.getProvider()).isEqualTo("provider");
         assertThat(authenticationDetails.getUser())
                 .extracting(
                         "id",
@@ -620,6 +625,7 @@ public class CustomAuthenticatorTest {
                         userEmail,
                         userPictureUrl
                 );
+        verify(jwtTokenAuthenticationService).createAuthenticationResponseCookieHeader(Optional.of(tokenExpiration));
     }
 
     @Test
@@ -673,7 +679,7 @@ public class CustomAuthenticatorTest {
         // When
         when(request.getProvider()).thenReturn("provider");
         when(request.getCode()).thenReturn("some_code");
-        when(request.getClientId()).thenReturn("client_id");
+        when(customConfiguration.isEnabled()).thenReturn(true);
 
         when(tokenConfiguration.getUri()).thenReturn(tokenUri);
         when(tokenConfiguration.getHttpMethod()).thenReturn(HttpMethod.POST);
@@ -702,9 +708,9 @@ public class CustomAuthenticatorTest {
         when(userResponseEntity.getBody()).thenReturn(dummyUserForTest);
 
         // Then
-        UserAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        ResponseEntity<UserAuthenticationDetailsDTO> authenticationResponse = authenticator.authenticate(request);
+        UserAuthenticationDetailsDTO authenticationDetails = authenticationResponse.getBody();
         assertThat(authenticationDetails).isNotNull();
-        assertThat(authenticationDetails.getProvider()).isEqualTo("provider");
         assertThat(authenticationDetails.getUser())
                 .extracting(
                         "id",
@@ -720,6 +726,7 @@ public class CustomAuthenticatorTest {
                         userEmail,
                         userPictureUrl
                 );
+        verify(jwtTokenAuthenticationService).createAuthenticationResponseCookieHeader(Optional.of(3600));
     }
 
     @Test
@@ -773,7 +780,7 @@ public class CustomAuthenticatorTest {
         // When
         when(request.getProvider()).thenReturn("provider");
         when(request.getCode()).thenReturn("some_code");
-        when(request.getClientId()).thenReturn("client_id");
+        when(customConfiguration.isEnabled()).thenReturn(true);
 
         when(tokenConfiguration.getUri()).thenReturn(tokenUri);
         when(tokenConfiguration.getHttpMethod()).thenReturn(HttpMethod.POST);
@@ -802,9 +809,9 @@ public class CustomAuthenticatorTest {
         when(userResponseEntity.getBody()).thenReturn(dummyUserForTest);
 
         // Then
-        UserAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        ResponseEntity<UserAuthenticationDetailsDTO> authenticationResponse = authenticator.authenticate(request);
+        UserAuthenticationDetailsDTO authenticationDetails = authenticationResponse.getBody();
         assertThat(authenticationDetails).isNotNull();
-        assertThat(authenticationDetails.getProvider()).isEqualTo("provider");
         assertThat(authenticationDetails.getUser())
                 .extracting(
                         "id",
@@ -820,6 +827,7 @@ public class CustomAuthenticatorTest {
                         userEmail,
                         userPictureUrl
                 );
+        verify(jwtTokenAuthenticationService).createAuthenticationResponseCookieHeader(Optional.empty());
     }
 
     @Test
@@ -834,12 +842,44 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenNoTokenGiven() {
+    public void authenticate_throwAuthenticationException_whenNoProviderIsGiven() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
 
         // When
+        when(request.getProvider()).thenReturn(null);
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenNoTokenGiven() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String provider = "provider";
+
+        // When
+        when(request.getProvider()).thenReturn(provider);
         when(request.getToken()).thenReturn(null);
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenProviderNotEnabled() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "custom_token";
+        String provider = "provider";
+
+        // When
+        when(request.getProvider()).thenReturn(provider);
+        when(request.getToken()).thenReturn(token);
+        when(customConfiguration.isEnabled()).thenReturn(false);
 
         // Then
         assertThatThrownBy(() -> authenticator.authenticate(request))
@@ -851,9 +891,12 @@ public class CustomAuthenticatorTest {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";
+        String provider = "provider";
 
         // When
+        when(request.getProvider()).thenReturn(provider);
         when(request.getToken()).thenReturn(token);
+        when(customConfiguration.isEnabled()).thenReturn(true);
         when(tokenValidationConfiguration.getUri()).thenReturn(null);
 
         // Then
@@ -866,6 +909,7 @@ public class CustomAuthenticatorTest {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";
+        String provider = "provider";
 
         String url = "token_validation_url";
         HttpMethod method = HttpMethod.POST;
@@ -875,7 +919,9 @@ public class CustomAuthenticatorTest {
         HttpEntity<MultiValueMap<String, String>> customRequest = mock(HttpEntity.class);
 
         // When
+        when(request.getProvider()).thenReturn(provider);
         when(request.getToken()).thenReturn(token);
+        when(customConfiguration.isEnabled()).thenReturn(true);
         when(tokenValidationConfiguration.getUri()).thenReturn(url);
         when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
         when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
@@ -892,6 +938,7 @@ public class CustomAuthenticatorTest {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";
+        String provider = "provider";
 
         String url = "token_validation_url";
         HttpMethod method = HttpMethod.POST;
@@ -903,7 +950,9 @@ public class CustomAuthenticatorTest {
         ResponseEntity<Object> response = mock(ResponseEntity.class);
 
         // When
+        when(request.getProvider()).thenReturn(provider);
         when(request.getToken()).thenReturn(token);
+        when(customConfiguration.isEnabled()).thenReturn(true);
         when(tokenValidationConfiguration.getUri()).thenReturn(url);
         when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
         when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
@@ -933,21 +982,26 @@ public class CustomAuthenticatorTest {
 
         String jwt = "generated_token";
 
+        Long tokenAge = 3600L;
+
         // When
-        when(request.getToken()).thenReturn(token);
         when(request.getProvider()).thenReturn(provider);
+        when(request.getToken()).thenReturn(token);
+        when(customConfiguration.isEnabled()).thenReturn(true);
         when(tokenValidationConfiguration.getUri()).thenReturn(url);
         when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
         when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
         when(restTemplate.exchange(url, method, customRequest, Object.class)).thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(response.getBody()).thenReturn(new DummyTokenVerificationContainingBooleanField());
         when(tokenValidationConfiguration.getValidationField()).thenReturn(null);
-        when(jwtTokenAuthenticationService.generateToken()).thenReturn(jwt);
+        when(jwtTokenAuthenticationService.getJWTTokenExpirationInSecond(Optional.empty())).thenReturn(tokenAge);
+        when(jwtTokenAuthenticationService.generateToken(tokenAge)).thenReturn(jwt);
 
         // Then
-        AppAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        ResponseEntity<AppAuthenticationDetailsDTO> authenticationResponse = authenticator.authenticate(request);
+        AppAuthenticationDetailsDTO authenticationDetails = authenticationResponse.getBody();
         assertThat(authenticationDetails).isNotNull();
-        assertThat(authenticationDetails.getProvider()).isEqualTo(provider);
         assertThat(authenticationDetails.getAccessToken()).isEqualTo(jwt);
     }
 
@@ -971,22 +1025,27 @@ public class CustomAuthenticatorTest {
 
         AuthenticationCustomTokenValidationFieldConfiguration tokenValidationFieldConfiguration = mock(AuthenticationCustomTokenValidationFieldConfiguration.class);
 
+        Long tokenAge = 3600L;
+
         // When
-        when(request.getToken()).thenReturn(token);
         when(request.getProvider()).thenReturn(provider);
+        when(request.getToken()).thenReturn(token);
+        when(customConfiguration.isEnabled()).thenReturn(true);
         when(tokenValidationConfiguration.getUri()).thenReturn(url);
         when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
         when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
         when(restTemplate.exchange(url, method, customRequest, Object.class)).thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(response.getBody()).thenReturn(new DummyTokenVerificationContainingBooleanField());
         when(tokenValidationConfiguration.getValidationField()).thenReturn(tokenValidationFieldConfiguration);
         when(tokenValidationFieldConfiguration.getName()).thenReturn(null);
-        when(jwtTokenAuthenticationService.generateToken()).thenReturn(jwt);
+        when(jwtTokenAuthenticationService.getJWTTokenExpirationInSecond(Optional.empty())).thenReturn(tokenAge);
+        when(jwtTokenAuthenticationService.generateToken(tokenAge)).thenReturn(jwt);
 
         // Then
-        AppAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        ResponseEntity<AppAuthenticationDetailsDTO> authenticationResponse = authenticator.authenticate(request);
+        AppAuthenticationDetailsDTO authenticationDetails = authenticationResponse.getBody();
         assertThat(authenticationDetails).isNotNull();
-        assertThat(authenticationDetails.getProvider()).isEqualTo(provider);
         assertThat(authenticationDetails.getAccessToken()).isEqualTo(jwt);
     }
 
@@ -995,6 +1054,7 @@ public class CustomAuthenticatorTest {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";
+        String provider = "provider";
 
         String url = "token_validation_url";
         HttpMethod method = HttpMethod.POST;
@@ -1010,7 +1070,9 @@ public class CustomAuthenticatorTest {
         String fieldName = "anotherFieldName";
 
         // When
+        when(request.getProvider()).thenReturn(provider);
         when(request.getToken()).thenReturn(token);
+        when(customConfiguration.isEnabled()).thenReturn(true);
         when(tokenValidationConfiguration.getUri()).thenReturn(url);
         when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
         when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
@@ -1030,6 +1092,7 @@ public class CustomAuthenticatorTest {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";
+        String provider = "provider";
 
         String url = "token_validation_url";
         HttpMethod method = HttpMethod.POST;
@@ -1047,7 +1110,9 @@ public class CustomAuthenticatorTest {
         DummyTokenVerificationContainingNonBooleanField tokenVerification = new DummyTokenVerificationContainingNonBooleanField();
 
         // When
+        when(request.getProvider()).thenReturn(provider);
         when(request.getToken()).thenReturn(token);
+        when(customConfiguration.isEnabled()).thenReturn(true);
         when(tokenValidationConfiguration.getUri()).thenReturn(url);
         when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
         when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
@@ -1068,6 +1133,7 @@ public class CustomAuthenticatorTest {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";
+        String provider = "provider";
 
         String url = "token_validation_url";
         HttpMethod method = HttpMethod.POST;
@@ -1086,7 +1152,9 @@ public class CustomAuthenticatorTest {
         tokenVerification.setStillActive(false);
 
         // When
+        when(request.getProvider()).thenReturn(provider);
         when(request.getToken()).thenReturn(token);
+        when(customConfiguration.isEnabled()).thenReturn(true);
         when(tokenValidationConfiguration.getUri()).thenReturn(url);
         when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
         when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
@@ -1127,9 +1195,12 @@ public class CustomAuthenticatorTest {
 
         String jwt = "generated_jwt";
 
+        Long tokenAge = 3600L;
+
         // When
-        when(request.getToken()).thenReturn(token);
         when(request.getProvider()).thenReturn(provider);
+        when(request.getToken()).thenReturn(token);
+        when(customConfiguration.isEnabled()).thenReturn(true);
         when(tokenValidationConfiguration.getUri()).thenReturn(url);
         when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
         when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
@@ -1139,12 +1210,13 @@ public class CustomAuthenticatorTest {
         when(tokenValidationConfiguration.getValidationField()).thenReturn(tokenValidationFieldConfiguration);
         when(tokenValidationFieldConfiguration.getExpectedValue()).thenReturn(null);
         when(tokenValidationFieldConfiguration.getName()).thenReturn(fieldName);
-        when(jwtTokenAuthenticationService.generateToken()).thenReturn(jwt);
+        when(jwtTokenAuthenticationService.getJWTTokenExpirationInSecond(Optional.empty())).thenReturn(tokenAge);
+        when(jwtTokenAuthenticationService.generateToken(tokenAge)).thenReturn(jwt);
 
         // Then
-        AppAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        ResponseEntity<AppAuthenticationDetailsDTO> authenticationResponse = authenticator.authenticate(request);
+        AppAuthenticationDetailsDTO authenticationDetails = authenticationResponse.getBody();
         assertThat(authenticationDetails).isNotNull();
-        assertThat(authenticationDetails.getProvider()).isEqualTo(provider);
         assertThat(authenticationDetails.getAccessToken()).isEqualTo(jwt);
     }
 
@@ -1153,6 +1225,7 @@ public class CustomAuthenticatorTest {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";
+        String provider = "provider";
 
         String url = "token_validation_url";
         HttpMethod method = HttpMethod.POST;
@@ -1171,7 +1244,9 @@ public class CustomAuthenticatorTest {
         tokenVerification.setStillActive("not even a boolean!");
 
         // When
+        when(request.getProvider()).thenReturn(provider);
         when(request.getToken()).thenReturn(token);
+        when(customConfiguration.isEnabled()).thenReturn(true);
         when(tokenValidationConfiguration.getUri()).thenReturn(url);
         when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
         when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
@@ -1212,9 +1287,12 @@ public class CustomAuthenticatorTest {
 
         String jwt = "generated_jwt";
 
+        Long tokenAge = 3600L;
+
         // When
-        when(request.getToken()).thenReturn(token);
         when(request.getProvider()).thenReturn(provider);
+        when(request.getToken()).thenReturn(token);
+        when(customConfiguration.isEnabled()).thenReturn(true);
         when(tokenValidationConfiguration.getUri()).thenReturn(url);
         when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
         when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
@@ -1224,12 +1302,13 @@ public class CustomAuthenticatorTest {
         when(tokenValidationConfiguration.getValidationField()).thenReturn(tokenValidationFieldConfiguration);
         when(tokenValidationFieldConfiguration.getExpectedValue()).thenReturn(null);
         when(tokenValidationFieldConfiguration.getName()).thenReturn(fieldName);
-        when(jwtTokenAuthenticationService.generateToken()).thenReturn(jwt);
+        when(jwtTokenAuthenticationService.getJWTTokenExpirationInSecond(Optional.empty())).thenReturn(tokenAge);
+        when(jwtTokenAuthenticationService.generateToken(tokenAge)).thenReturn(jwt);
 
         // Then
-        AppAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        ResponseEntity<AppAuthenticationDetailsDTO> authenticationResponse = authenticator.authenticate(request);
+        AppAuthenticationDetailsDTO authenticationDetails = authenticationResponse.getBody();
         assertThat(authenticationDetails).isNotNull();
-        assertThat(authenticationDetails.getProvider()).isEqualTo(provider);
         assertThat(authenticationDetails.getAccessToken()).isEqualTo(jwt);
     }
 
@@ -1238,6 +1317,7 @@ public class CustomAuthenticatorTest {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";
+        String provider = "provider";
 
         String url = "token_validation_url";
         HttpMethod method = HttpMethod.POST;
@@ -1256,7 +1336,9 @@ public class CustomAuthenticatorTest {
         tokenVerification.setStillActive("some_validation_value");
 
         // When
+        when(request.getProvider()).thenReturn(provider);
         when(request.getToken()).thenReturn(token);
+        when(customConfiguration.isEnabled()).thenReturn(true);
         when(tokenValidationConfiguration.getUri()).thenReturn(url);
         when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
         when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
@@ -1297,9 +1379,12 @@ public class CustomAuthenticatorTest {
 
         String jwt = "generated_token";
 
+        Long tokenAge = 3600L;
+
         // When
-        when(request.getToken()).thenReturn(token);
         when(request.getProvider()).thenReturn(provider);
+        when(request.getToken()).thenReturn(token);
+        when(customConfiguration.isEnabled()).thenReturn(true);
         when(tokenValidationConfiguration.getUri()).thenReturn(url);
         when(tokenValidationConfiguration.getHttpMethod()).thenReturn(method);
         when(tokenValidationConfiguration.getRequest(parameters)).thenReturn(customRequest);
@@ -1309,12 +1394,13 @@ public class CustomAuthenticatorTest {
         when(tokenValidationConfiguration.getValidationField()).thenReturn(tokenValidationFieldConfiguration);
         when(tokenValidationFieldConfiguration.getExpectedValue()).thenReturn("same_value");
         when(tokenValidationFieldConfiguration.getName()).thenReturn(fieldName);
-        when(jwtTokenAuthenticationService.generateToken()).thenReturn(jwt);
+        when(jwtTokenAuthenticationService.getJWTTokenExpirationInSecond(Optional.empty())).thenReturn(tokenAge);
+        when(jwtTokenAuthenticationService.generateToken(tokenAge)).thenReturn(jwt);
 
         // Then
-        AppAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        ResponseEntity<AppAuthenticationDetailsDTO> authenticationResponse = authenticator.authenticate(request);
+        AppAuthenticationDetailsDTO authenticationDetails = authenticationResponse.getBody();
         assertThat(authenticationDetails).isNotNull();
-        assertThat(authenticationDetails.getProvider()).isEqualTo(provider);
         assertThat(authenticationDetails.getAccessToken()).isEqualTo(jwt);
     }
 }

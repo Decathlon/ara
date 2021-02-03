@@ -17,7 +17,8 @@
 
 package com.decathlon.ara.service.authentication.provider.google;
 
-import com.decathlon.ara.configuration.authentication.clients.google.AuthenticationGoogleConfiguration;
+import com.decathlon.ara.configuration.AraConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.google.AuthenticationGoogleConfiguration;
 import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationService;
 import com.decathlon.ara.service.authentication.exception.AuthenticationConfigurationNotFoundException;
 import com.decathlon.ara.service.authentication.exception.AuthenticationException;
@@ -41,11 +42,11 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class GoogleAuthenticatorTest {
@@ -58,6 +59,9 @@ public class GoogleAuthenticatorTest {
 
     @Mock
     private JwtTokenAuthenticationService jwtTokenAuthenticationService;
+
+    @Mock
+    private AraConfiguration araConfiguration;
 
     @InjectMocks
     private GoogleAuthenticator authenticator;
@@ -83,41 +87,79 @@ public class GoogleAuthenticatorTest {
         private String does_not_contain_email_verified_field;
     }
 
-    // User
     @Test
-    public void authenticate_throwAuthenticationTokenNotFetchedException_whenRedirectUriNull() {
+    public void authenticate_throwAuthenticationException_whenProviderNotEnabled() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
-        String clientId = "google_client_id";
         String code = "google_code";
         String provider = "provider";
 
         // When
-        when(request.getClientId()).thenReturn(clientId);
         when(request.getCode()).thenReturn(code);
         when(request.getProvider()).thenReturn(provider);
-        when(request.getRedirectUri()).thenReturn(null);
+        when(googleConfiguration.isEnabled()).thenReturn(false);
 
         // Then
         assertThatThrownBy(() -> authenticator.authenticate(request))
-                .isInstanceOf(AuthenticationTokenNotFetchedException.class);
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    // User
+    @Test
+    public void authenticate_throwAuthenticationConfigurationNotFoundException_whenClientBaseUrlNull() {
+        // Given
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
+        String code = "google_code";
+        String provider = "provider";
+
+        // When
+        when(request.getCode()).thenReturn(code);
+        when(request.getProvider()).thenReturn(provider);
+        when(googleConfiguration.isEnabled()).thenReturn(true);
+        when(araConfiguration.getClientBaseUrl()).thenReturn(null);
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationConfigurationNotFoundException.class);
     }
 
     @Test
     public void authenticate_throwAuthenticationConfigurationNotFoundException_whenClientSecretNotFound() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
-        String clientId = "google_client_id";
         String code = "google_code";
         String provider = "provider";
-        String redirectUri = "http://redirect_uri.com";
+        String clientBaseUrl = "http://client_base_url.org";
 
         // When
-        when(request.getClientId()).thenReturn(clientId);
         when(request.getCode()).thenReturn(code);
         when(request.getProvider()).thenReturn(provider);
-        when(request.getRedirectUri()).thenReturn(redirectUri);
+        when(googleConfiguration.isEnabled()).thenReturn(true);
+        when(araConfiguration.getClientBaseUrl()).thenReturn(clientBaseUrl);
         when(googleConfiguration.getClientSecret()).thenReturn(null);
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationConfigurationNotFoundException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationConfigurationNotFoundException_whenClientIdNotFound() {
+        // Given
+        UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
+        String code = "google_code";
+        String provider = "provider";
+        String clientBaseUrl = "http://client_base_url.org";
+
+        String secret = "google_secret";
+
+        // When
+        when(request.getCode()).thenReturn(code);
+        when(request.getProvider()).thenReturn(provider);
+        when(googleConfiguration.isEnabled()).thenReturn(true);
+        when(araConfiguration.getClientBaseUrl()).thenReturn(clientBaseUrl);
+        when(googleConfiguration.getClientSecret()).thenReturn(secret);
+        when(googleConfiguration.getClientId()).thenReturn(null);
 
         // Then
         assertThatThrownBy(() -> authenticator.authenticate(request))
@@ -131,7 +173,7 @@ public class GoogleAuthenticatorTest {
         String clientId = "google_client_id";
         String code = "google_code";
         String provider = "provider";
-        String redirectUri = "http://redirect_uri.com";
+        String clientBaseUrl = "http://client_base_url.org";
 
         String secret = "google_secret";
 
@@ -140,17 +182,18 @@ public class GoogleAuthenticatorTest {
         HttpEntity<GoogleToken> tokenRequest = new HttpEntity<>(tokenHeader);
 
         // When
-        when(request.getClientId()).thenReturn(clientId);
         when(request.getCode()).thenReturn(code);
         when(request.getProvider()).thenReturn(provider);
-        when(request.getRedirectUri()).thenReturn(redirectUri);
+        when(googleConfiguration.isEnabled()).thenReturn(true);
+        when(araConfiguration.getClientBaseUrl()).thenReturn(clientBaseUrl);
         when(googleConfiguration.getClientSecret()).thenReturn(secret);
+        when(googleConfiguration.getClientId()).thenReturn(clientId);
         when(
                 restTemplate.exchange(
                         "https://oauth2.googleapis.com/token?" +
                                 "client_id=google_client_id&" +
                                 "client_secret=google_secret&" +
-                                "redirect_uri=http://redirect_uri.com&" +
+                                "redirect_uri=http://client_base_url.org/login/google&" +
                                 "grant_type=authorization_code&" +
                                 "code=google_code",
                         HttpMethod.POST,
@@ -171,7 +214,7 @@ public class GoogleAuthenticatorTest {
         String clientId = "google_client_id";
         String code = "google_code";
         String provider = "provider";
-        String redirectUri = "http://redirect_uri.com";
+        String clientBaseUrl = "http://client_base_url.org/";
 
         String secret = "google_secret";
 
@@ -182,17 +225,18 @@ public class GoogleAuthenticatorTest {
         ResponseEntity<GoogleToken> response = mock(ResponseEntity.class);
 
         // When
-        when(request.getClientId()).thenReturn(clientId);
         when(request.getCode()).thenReturn(code);
         when(request.getProvider()).thenReturn(provider);
-        when(request.getRedirectUri()).thenReturn(redirectUri);
+        when(googleConfiguration.isEnabled()).thenReturn(true);
+        when(araConfiguration.getClientBaseUrl()).thenReturn(clientBaseUrl);
         when(googleConfiguration.getClientSecret()).thenReturn(secret);
+        when(googleConfiguration.getClientId()).thenReturn(clientId);
         when(
                 restTemplate.exchange(
                         "https://oauth2.googleapis.com/token?" +
                                 "client_id=google_client_id&" +
                                 "client_secret=google_secret&" +
-                                "redirect_uri=http://redirect_uri.com&" +
+                                "redirect_uri=http://client_base_url.org/login/google&" +
                                 "grant_type=authorization_code&" +
                                 "code=google_code",
                         HttpMethod.POST,
@@ -214,7 +258,7 @@ public class GoogleAuthenticatorTest {
         String clientId = "google_client_id";
         String code = "google_code";
         String provider = "provider";
-        String redirectUri = "http://redirect_uri.com";
+        String clientBaseUrl = "http://client_base_url.org";
 
         String secret = "google_secret";
 
@@ -233,17 +277,18 @@ public class GoogleAuthenticatorTest {
         HttpEntity<GoogleUser> userRequest = new HttpEntity<>(userHeader);
 
         // When
-        when(request.getClientId()).thenReturn(clientId);
         when(request.getCode()).thenReturn(code);
         when(request.getProvider()).thenReturn(provider);
-        when(request.getRedirectUri()).thenReturn(redirectUri);
+        when(googleConfiguration.isEnabled()).thenReturn(true);
+        when(araConfiguration.getClientBaseUrl()).thenReturn(clientBaseUrl);
         when(googleConfiguration.getClientSecret()).thenReturn(secret);
+        when(googleConfiguration.getClientId()).thenReturn(clientId);
         when(
                 restTemplate.exchange(
                         "https://oauth2.googleapis.com/token?" +
                                 "client_id=google_client_id&" +
                                 "client_secret=google_secret&" +
-                                "redirect_uri=http://redirect_uri.com&" +
+                                "redirect_uri=http://client_base_url.org/login/google&" +
                                 "grant_type=authorization_code&" +
                                 "code=google_code",
                         HttpMethod.POST,
@@ -269,7 +314,7 @@ public class GoogleAuthenticatorTest {
         String clientId = "google_client_id";
         String code = "google_code";
         String provider = "provider";
-        String redirectUri = "http://redirect_uri.com";
+        String clientBaseUrl = "http://client_base_url.org/";
 
         String secret = "google_secret";
 
@@ -290,17 +335,18 @@ public class GoogleAuthenticatorTest {
         ResponseEntity<GoogleUser> userResponseEntity = mock(ResponseEntity.class);
 
         // When
-        when(request.getClientId()).thenReturn(clientId);
         when(request.getCode()).thenReturn(code);
         when(request.getProvider()).thenReturn(provider);
-        when(request.getRedirectUri()).thenReturn(redirectUri);
+        when(googleConfiguration.isEnabled()).thenReturn(true);
+        when(araConfiguration.getClientBaseUrl()).thenReturn(clientBaseUrl);
         when(googleConfiguration.getClientSecret()).thenReturn(secret);
+        when(googleConfiguration.getClientId()).thenReturn(clientId);
         when(
                 restTemplate.exchange(
                         "https://oauth2.googleapis.com/token?" +
                                 "client_id=google_client_id&" +
                                 "client_secret=google_secret&" +
-                                "redirect_uri=http://redirect_uri.com&" +
+                                "redirect_uri=http://client_base_url.org/login/google&" +
                                 "grant_type=authorization_code&" +
                                 "code=google_code",
                         HttpMethod.POST,
@@ -327,7 +373,7 @@ public class GoogleAuthenticatorTest {
         String clientId = "google_client_id";
         String code = "google_code";
         String provider = "provider";
-        String redirectUri = "http://redirect_uri.com";
+        String clientBaseUrl = "http://client_base_url.org";
 
         String secret = "google_secret";
 
@@ -350,17 +396,18 @@ public class GoogleAuthenticatorTest {
         GoogleUser user = mock(GoogleUser.class);
 
         // When
-        when(request.getClientId()).thenReturn(clientId);
         when(request.getCode()).thenReturn(code);
         when(request.getProvider()).thenReturn(provider);
-        when(request.getRedirectUri()).thenReturn(redirectUri);
+        when(googleConfiguration.isEnabled()).thenReturn(true);
+        when(araConfiguration.getClientBaseUrl()).thenReturn(clientBaseUrl);
         when(googleConfiguration.getClientSecret()).thenReturn(secret);
+        when(googleConfiguration.getClientId()).thenReturn(clientId);
         when(
                 restTemplate.exchange(
                         "https://oauth2.googleapis.com/token?" +
                                 "client_id=google_client_id&" +
                                 "client_secret=google_secret&" +
-                                "redirect_uri=http://redirect_uri.com&" +
+                                "redirect_uri=http://client_base_url.org/login/google&" +
                                 "grant_type=authorization_code&" +
                                 "code=google_code",
                         HttpMethod.POST,
@@ -389,7 +436,7 @@ public class GoogleAuthenticatorTest {
         String clientId = "google_client_id";
         String code = "google_code";
         String provider = "provider";
-        String redirectUri = "http://redirect_uri.com";
+        String clientBaseUrl = "http://client_base_url.org/";
 
         String secret = "google_secret";
 
@@ -416,17 +463,18 @@ public class GoogleAuthenticatorTest {
         String email = "user@gmail.com";
 
         // When
-        when(request.getClientId()).thenReturn(clientId);
         when(request.getCode()).thenReturn(code);
         when(request.getProvider()).thenReturn(provider);
-        when(request.getRedirectUri()).thenReturn(redirectUri);
+        when(googleConfiguration.isEnabled()).thenReturn(true);
+        when(araConfiguration.getClientBaseUrl()).thenReturn(clientBaseUrl);
         when(googleConfiguration.getClientSecret()).thenReturn(secret);
+        when(googleConfiguration.getClientId()).thenReturn(clientId);
         when(
                 restTemplate.exchange(
                         "https://oauth2.googleapis.com/token?" +
                                 "client_id=google_client_id&" +
                                 "client_secret=google_secret&" +
-                                "redirect_uri=http://redirect_uri.com&" +
+                                "redirect_uri=http://client_base_url.org/login/google&" +
                                 "grant_type=authorization_code&" +
                                 "code=google_code",
                         HttpMethod.POST,
@@ -448,9 +496,9 @@ public class GoogleAuthenticatorTest {
         when(user.getPicture()).thenReturn(picture);
 
         // Then
-        UserAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        ResponseEntity<UserAuthenticationDetailsDTO> authenticationResponse = authenticator.authenticate(request);
+        UserAuthenticationDetailsDTO authenticationDetails = authenticationResponse.getBody();
         assertThat(authenticationDetails).isNotNull();
-        assertThat(authenticationDetails.getProvider()).isEqualTo(provider);
         assertThat(authenticationDetails.getUser())
                 .extracting(
                         "id",
@@ -466,6 +514,7 @@ public class GoogleAuthenticatorTest {
                         email,
                         picture
                 );
+        verify(jwtTokenAuthenticationService).createAuthenticationResponseCookieHeader(Optional.empty());
     }
 
     // Application
@@ -481,12 +530,44 @@ public class GoogleAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenNoTokenGiven() {
+    public void authenticate_throwAuthenticationException_whenNoProviderGiven() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
 
         // When
+        when(request.getProvider()).thenReturn(null);
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenNoTokenGiven() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String provider = "provider";
+
+        // When
+        when(request.getProvider()).thenReturn(provider);
         when(request.getToken()).thenReturn(null);
+
+        // Then
+        assertThatThrownBy(() -> authenticator.authenticate(request))
+                .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    public void authenticate_throwAuthenticationException_whenProviderIsNotEnabled() {
+        // Given
+        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
+        String token = "token";
+        String provider = "provider";
+
+        // When
+        when(request.getProvider()).thenReturn(provider);
+        when(request.getToken()).thenReturn(token);
+        when(googleConfiguration.isEnabled()).thenReturn(false);
 
         // Then
         assertThatThrownBy(() -> authenticator.authenticate(request))
@@ -498,9 +579,12 @@ public class GoogleAuthenticatorTest {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "token";
+        String provider = "provider";
 
         // When
+        when(request.getProvider()).thenReturn(provider);
         when(request.getToken()).thenReturn(token);
+        when(googleConfiguration.isEnabled()).thenReturn(true);
         when(restTemplate.exchange("https://oauth2.googleapis.com/tokeninfo?access_token=token", HttpMethod.GET, null, Object.class))
                 .thenThrow(new RestClientException("Token checking API call error"));
 
@@ -514,11 +598,14 @@ public class GoogleAuthenticatorTest {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "token";
+        String provider = "provider";
 
         ResponseEntity response = mock(ResponseEntity.class);
 
         // When
+        when(request.getProvider()).thenReturn(provider);
         when(request.getToken()).thenReturn(token);
+        when(googleConfiguration.isEnabled()).thenReturn(true);
         when(restTemplate.exchange("https://oauth2.googleapis.com/tokeninfo?access_token=token", HttpMethod.GET, null, Object.class))
                 .thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.BAD_REQUEST);
@@ -533,11 +620,14 @@ public class GoogleAuthenticatorTest {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "token";
+        String provider = "provider";
 
         ResponseEntity response = mock(ResponseEntity.class);
 
         // When
+        when(request.getProvider()).thenReturn(provider);
         when(request.getToken()).thenReturn(token);
+        when(googleConfiguration.isEnabled()).thenReturn(true);
         when(restTemplate.exchange("https://oauth2.googleapis.com/tokeninfo?access_token=token", HttpMethod.GET, null, Object.class))
                 .thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.OK);
@@ -553,11 +643,14 @@ public class GoogleAuthenticatorTest {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "token";
+        String provider = "provider";
 
         ResponseEntity response = mock(ResponseEntity.class);
 
         // When
+        when(request.getProvider()).thenReturn(provider);
         when(request.getToken()).thenReturn(token);
+        when(googleConfiguration.isEnabled()).thenReturn(true);
         when(restTemplate.exchange("https://oauth2.googleapis.com/tokeninfo?access_token=token", HttpMethod.GET, null, Object.class))
                 .thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.OK);
@@ -573,11 +666,14 @@ public class GoogleAuthenticatorTest {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "token";
+        String provider = "provider";
 
         ResponseEntity response = mock(ResponseEntity.class);
 
         // When
+        when(request.getProvider()).thenReturn(provider);
         when(request.getToken()).thenReturn(token);
+        when(googleConfiguration.isEnabled()).thenReturn(true);
         when(restTemplate.exchange("https://oauth2.googleapis.com/tokeninfo?access_token=token", HttpMethod.GET, null, Object.class))
                 .thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.OK);
@@ -593,11 +689,14 @@ public class GoogleAuthenticatorTest {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "token";
+        String provider = "provider";
 
         ResponseEntity response = mock(ResponseEntity.class);
 
         // When
+        when(request.getProvider()).thenReturn(provider);
         when(request.getToken()).thenReturn(token);
+        when(googleConfiguration.isEnabled()).thenReturn(true);
         when(restTemplate.exchange("https://oauth2.googleapis.com/tokeninfo?access_token=token", HttpMethod.GET, null, Object.class))
                 .thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.OK);
@@ -619,19 +718,23 @@ public class GoogleAuthenticatorTest {
 
         String jwt = "generated_jwt";
 
+        Long tokenAge = 3600L;
+
         // When
-        when(request.getToken()).thenReturn(token);
         when(request.getProvider()).thenReturn(provider);
+        when(request.getToken()).thenReturn(token);
+        when(googleConfiguration.isEnabled()).thenReturn(true);
         when(restTemplate.exchange("https://oauth2.googleapis.com/tokeninfo?access_token=token", HttpMethod.GET, null, Object.class))
                 .thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.OK);
-        when(jwtTokenAuthenticationService.generateToken()).thenReturn(jwt);
+        when(jwtTokenAuthenticationService.getJWTTokenExpirationInSecond(Optional.empty())).thenReturn(tokenAge);
+        when(jwtTokenAuthenticationService.generateToken(tokenAge)).thenReturn(jwt);
         when(response.getBody()).thenReturn(new DummyGoogleVerificationTokenContainingVerifiedEmailFieldAsString("true"));
 
         // Then
-        AppAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        ResponseEntity<AppAuthenticationDetailsDTO> authenticationResponse = authenticator.authenticate(request);
+        AppAuthenticationDetailsDTO authenticationDetails = authenticationResponse.getBody();
         assertThat(authenticationDetails).isNotNull();
-        assertThat(authenticationDetails.getProvider()).isEqualTo(provider);
         assertThat(authenticationDetails.getAccessToken()).isEqualTo(jwt);
     }
 
@@ -646,19 +749,23 @@ public class GoogleAuthenticatorTest {
 
         String jwt = "generated_jwt";
 
+        Long tokenAge = 3600L;
+
         // When
-        when(request.getToken()).thenReturn(token);
         when(request.getProvider()).thenReturn(provider);
+        when(request.getToken()).thenReturn(token);
+        when(googleConfiguration.isEnabled()).thenReturn(true);
         when(restTemplate.exchange("https://oauth2.googleapis.com/tokeninfo?access_token=token", HttpMethod.GET, null, Object.class))
                 .thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.OK);
-        when(jwtTokenAuthenticationService.generateToken()).thenReturn(jwt);
+        when(jwtTokenAuthenticationService.getJWTTokenExpirationInSecond(Optional.empty())).thenReturn(tokenAge);
+        when(jwtTokenAuthenticationService.generateToken(tokenAge)).thenReturn(jwt);
         when(response.getBody()).thenReturn(new DummyGoogleVerificationTokenContainingVerifiedEmailFieldAsBoolean(true));
 
         // Then
-        AppAuthenticationDetailsDTO authenticationDetails = authenticator.authenticate(request);
+        ResponseEntity<AppAuthenticationDetailsDTO> authenticationResponse = authenticator.authenticate(request);
+        AppAuthenticationDetailsDTO authenticationDetails = authenticationResponse.getBody();
         assertThat(authenticationDetails).isNotNull();
-        assertThat(authenticationDetails.getProvider()).isEqualTo(provider);
         assertThat(authenticationDetails.getAccessToken()).isEqualTo(jwt);
     }
 }

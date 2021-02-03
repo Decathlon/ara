@@ -17,5 +17,13 @@
 
 package com.decathlon.ara.service.dto.authentication.provider;
 
+import java.util.Optional;
+
 public abstract class AuthenticatorToken {
+
+    /**
+     * Get the access token duration in seconds, if any
+     * @return the duration, if any
+     */
+    public abstract Optional<Integer> getAccessTokenDurationInSeconds();
 }
