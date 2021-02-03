@@ -29,10 +29,22 @@ jobs:
           make update-version VERSION=${{ steps.prep.outputs.release }}
           cd ..
       -
-        name: Commit changes
+        name: Create PR with changes
+        id: cpr
         if: steps.prep.outputs.version != steps.prep.outputs.release
-        uses: EndBug/add-and-commit@v5
+        uses: peter-evans/create-pull-request@v3
         with:
-          message: "⬆️  Upgrade to ${{ steps.prep.outputs.release }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.CR_TOKEN }}
+          commit-message: "chore: ⬆️ Upgrade to ${{ steps.prep.outputs.release }}"
+          committer: GitHub <noreply@github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          branch: "upgrade/${{ steps.prep.outputs.release }}"
+          body: "Auto-update to release/${{ steps.prep.outputs.release }}"
+          delete-branch: true
+          title: "chore: ⬆️ Upgrade to ${{ steps.prep.outputs.release }}"
+      - 
+        name: Check outputs
+        if: steps.prep.outputs.version != steps.prep.outputs.release
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"

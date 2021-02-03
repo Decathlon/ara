@@ -1,0 +1,47 @@
+name: Sonar analysis
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  sonarcloud-web-ui:
+    name: SonarCloud Web UI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v1.5
+        with:
+          projectBaseDir: code/web-ui
+          args: >
+            -Dsonar.organization=decathlon
+            -Dsonar.projectKey=Decathlon_ara_web_ui
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  sonarcloud-api:
+    name: SonarCloud API
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: '14'
+      - name: Analyze with SonarCloud
+        run: |
+          cd code/api
+          mvn -B verify sonar:sonar \
+                          -Dsonar.projectKey=Decathlon_ara_api \
+                          -Dsonar.organization=decathlon \
+                          -Dsonar.host.url=https://sonarcloud.io \
+                          -Dsonar.login=$SONAR_TOKEN
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
