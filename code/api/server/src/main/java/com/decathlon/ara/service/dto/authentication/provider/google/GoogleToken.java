@@ -20,9 +20,11 @@ package com.decathlon.ara.service.dto.authentication.provider.google;
 import com.decathlon.ara.service.dto.authentication.provider.AuthenticatorToken;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.Optional;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class GoogleToken extends AuthenticatorToken {
 

@@ -17,6 +17,7 @@
 
 package com.decathlon.ara.configuration.authentication;
 
+import com.decathlon.ara.configuration.authentication.provider.AuthenticationProviderConfiguration;
 import com.decathlon.ara.configuration.authentication.provider.custom.AuthenticationCustomConfiguration;
 import com.decathlon.ara.configuration.authentication.provider.github.AuthenticationGithubConfiguration;
 import com.decathlon.ara.configuration.authentication.provider.google.AuthenticationGoogleConfiguration;
@@ -24,6 +25,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
+import java.util.Optional;
 
 @Data
 @NoArgsConstructor
@@ -39,10 +43,18 @@ public class AuthenticationConfiguration {
 
     /**
      * Show if the authentication is enabled, i.e. at least one authentication provider is enabled
+     *
      * @return true iff authentication is enabled
      */
-    public Boolean isEnabled() {
-        Boolean atLeastOneProviderEnabled = github.isEnabled() || google.isEnabled() || custom.isEnabled();
-        return atLeastOneProviderEnabled;
+    public boolean isEnabled() {
+        return List.of(
+                    Optional.ofNullable(github),
+                    Optional.ofNullable(google),
+                    Optional.ofNullable(custom))
+                .stream().anyMatch(this::isProviderEnabled);
+    }
+
+    private boolean isProviderEnabled(Optional<? extends AuthenticationProviderConfiguration> providerConfiguration) {
+        return providerConfiguration.isPresent() && providerConfiguration.get().isEnabled();
     }
 }

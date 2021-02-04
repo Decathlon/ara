@@ -18,11 +18,9 @@
 package com.decathlon.ara.service.dto.authentication.provider.custom;
 
 import com.decathlon.ara.service.dto.authentication.provider.AuthenticatorUser;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
+import lombok.*;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @With
 @NoArgsConstructor

@@ -19,9 +19,11 @@ package com.decathlon.ara.configuration.authentication.provider.custom.user;
 
 import com.decathlon.ara.configuration.authentication.provider.custom.AuthenticationCustomValueConfiguration;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Configuration
 @ConfigurationProperties("authentication.provider.custom.user")
