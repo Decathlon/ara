@@ -18,14 +18,12 @@
 package com.decathlon.ara.service.dto.authentication.provider.custom;
 
 import com.decathlon.ara.service.dto.authentication.provider.AuthenticatorToken;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
+import lombok.*;
 
 import java.sql.Timestamp;
 import java.util.Optional;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @With
 @NoArgsConstructor
