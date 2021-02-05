@@ -76,6 +76,10 @@ spec:
             configMapKeyRef:
                 name: {{ include "ara.configmap.name" . }}
                 key: liquibase_active
+        volumeMounts:
+          - name: config
+            mountPath: "/app/config"
+            readOnly: true
         ports:
         - containerPort: {{ .Values.api.port }}
           name: http-port
@@ -102,8 +106,14 @@ spec:
       {{- if .Values.api.sideCarContainer }}
 {{ toYaml .Values.api.sideCarContainer | indent 6 }}
       {{- end}}
-      {{- if .Values.api.volumes }}
       volumes:
+        - name: config
+          configMap:
+            name: {{ include "ara.configmap.name" . }}
+            items:
+              - key: "application-auth.properties"
+                path: "application-auth.properties"
+      {{- if .Values.api.volumes }}
 {{ toYaml .Values.api.volumes | indent 6 }}
       {{- end}}
 ---
