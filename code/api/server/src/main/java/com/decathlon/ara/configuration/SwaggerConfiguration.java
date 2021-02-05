@@ -59,7 +59,7 @@ public class SwaggerConfiguration {
                                                 .url("http://www.apache.org/licenses/")
                                 )
                 );
-        Boolean authenticationIsEnabled = authenticationConfiguration.isEnabled();
+        boolean authenticationIsEnabled = authenticationConfiguration.isEnabled();
         if (authenticationIsEnabled) {
             openAPI = openAPI.addSecurityItem(
                     new SecurityRequirement().addList(securitySchemeName)

@@ -72,7 +72,7 @@ public class AuthenticationCustomValueConfiguration {
                 .collect(
                         Collectors.toMap(splitValue -> splitValue[0], splitValue -> splitValue.length == 2 ? splitValue[1] : "")
                 );
-        Boolean hasParameters = !CollectionUtils.isEmpty(parameters);
+        boolean hasParameters = !CollectionUtils.isEmpty(parameters);
         Map<String, String> formattedParameters = hasParameters ?
                 parameters
                         .entrySet()
