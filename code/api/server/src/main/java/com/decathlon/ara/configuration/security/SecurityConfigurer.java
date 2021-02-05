@@ -38,7 +38,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
 
-    @Value("${security.enable-csrf}")
+    @Value("${security.enable-csrf:false}")
     private boolean csrfEnabled;
 
     private final String[] SWAGGER_RESOURCES = {
