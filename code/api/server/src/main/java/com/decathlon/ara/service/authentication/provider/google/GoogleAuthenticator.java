@@ -108,8 +108,7 @@ public class GoogleAuthenticator extends ProviderAuthenticator<GoogleToken, Goog
                 grantType,
                 code
         );
-        String tokenFinalUrl = String.format("%s?%s", tokenBaseUrl, tokenParameters);
-        return tokenFinalUrl;
+        return String.format("%s?%s", tokenBaseUrl, tokenParameters);
     }
 
     @Override
@@ -121,8 +120,7 @@ public class GoogleAuthenticator extends ProviderAuthenticator<GoogleToken, Goog
     protected HttpEntity getTokenRequest(UserAuthenticationRequestDTO request) {
         HttpHeaders tokenHeader = new HttpHeaders();
         tokenHeader.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-        HttpEntity<GoogleToken> tokenRequest = new HttpEntity<>(tokenHeader);
-        return tokenRequest;
+        return new HttpEntity<>(tokenHeader);
     }
 
     @Override
@@ -141,8 +139,7 @@ public class GoogleAuthenticator extends ProviderAuthenticator<GoogleToken, Goog
         HttpHeaders userHeader = new HttpHeaders();
         String authorization = String.format("Bearer %s", accessToken);
         userHeader.set("Authorization", authorization);
-        HttpEntity<GoogleUser> userRequest = new HttpEntity<>(userHeader);
-        return userRequest;
+        return new HttpEntity<>(userHeader);
     }
 
     @Override

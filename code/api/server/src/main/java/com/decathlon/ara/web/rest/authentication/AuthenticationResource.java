@@ -54,8 +54,7 @@ public class AuthenticationResource {
     @Timed
     public ResponseEntity<UserAuthenticationDetailsDTO> authenticate(@Valid @RequestBody UserAuthenticationRequestDTO request) {
         try {
-            ResponseEntity<UserAuthenticationDetailsDTO> authenticationResponse = authenticationService.authenticate(request);
-            return authenticationResponse;
+            return authenticationService.authenticate(request);
         } catch (AuthenticationException e) {
             log.error(String.format("Error while authenticating to ARA (via %s)", request.getProvider()), e);
             return ResponseEntity.badRequest().build();
@@ -73,8 +72,7 @@ public class AuthenticationResource {
     @Timed
     public ResponseEntity<AppAuthenticationDetailsDTO> authenticate(@Valid @RequestBody AppAuthenticationRequestDTO request) {
         try {
-            ResponseEntity<AppAuthenticationDetailsDTO> authenticationResponse = authenticationService.authenticate(request);
-            return authenticationResponse;
+            return authenticationService.authenticate(request);
         } catch (AuthenticationException e) {
             log.error(String.format("Error while authenticating your application to ARA (via %s)", request.getProvider()), e);
             return ResponseEntity.badRequest().build();

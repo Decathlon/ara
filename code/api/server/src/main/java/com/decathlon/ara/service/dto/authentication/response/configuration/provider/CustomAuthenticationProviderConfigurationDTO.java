@@ -32,7 +32,6 @@ public class CustomAuthenticationProviderConfigurationDTO extends Authentication
      */
     @Override
     protected String getLoginUrl(String... parameters) {
-        String loginUri = parameters[0];
-        return loginUri;
+        return parameters[0];
     }
 }

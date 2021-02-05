@@ -166,8 +166,7 @@ public class CustomAuthenticator extends Authenticator<CustomToken, CustomUser, 
     protected HttpEntity<MultiValueMap<String, String>> getTokenRequest(UserAuthenticationRequestDTO request) {
         String code = request.getCode();
         Map<String, String> tokenParameters = Map.ofEntries(entry("code", code));
-        HttpEntity<MultiValueMap<String, String>> tokenRequest = tokenConfiguration.getRequest(tokenParameters);
-        return tokenRequest;
+        return tokenConfiguration.getRequest(tokenParameters);
     }
 
     @Override
@@ -198,8 +197,7 @@ public class CustomAuthenticator extends Authenticator<CustomToken, CustomUser, 
             userParameters.put("token_value", tokenValue);
         }
 
-        HttpEntity<MultiValueMap<String, String>> userRequest = userConfiguration.getRequest(userParameters);
-        return userRequest;
+        return userConfiguration.getRequest(userParameters);
     }
 
     @Override
@@ -279,8 +277,7 @@ public class CustomAuthenticator extends Authenticator<CustomToken, CustomUser, 
         Map<String, String> parameters = Map.ofEntries(
                 entry("token_value", token)
         );
-        HttpEntity<MultiValueMap<String, String>> request = tokenValidationConfiguration.getRequest(parameters);
-        return request;
+        return tokenValidationConfiguration.getRequest(parameters);
     }
 
     @Override
