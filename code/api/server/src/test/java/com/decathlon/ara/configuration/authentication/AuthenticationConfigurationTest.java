@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class AuthenticationConfigurationTest {
+class AuthenticationConfigurationTest {
 
     @Mock
     private AuthenticationGithubConfiguration github;
@@ -45,7 +45,7 @@ public class AuthenticationConfigurationTest {
     private AuthenticationConfiguration authenticationConfiguration;
 
     @Test
-    public void isEnabled_returnTrue_whenAtLeastOneProviderEnabled() {
+    void isEnabled_returnTrue_whenAtLeastOneProviderEnabled() {
         // Given
 
         // When
@@ -59,7 +59,7 @@ public class AuthenticationConfigurationTest {
     }
 
     @Test
-    public void isEnabled_returnFalse_whenAllProvidersDisabled() {
+    void isEnabled_returnFalse_whenAllProvidersDisabled() {
         // Given
 
         // When

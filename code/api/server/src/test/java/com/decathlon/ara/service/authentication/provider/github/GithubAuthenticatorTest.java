@@ -46,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class GithubAuthenticatorTest {
+class GithubAuthenticatorTest {
 
     @Mock
     private AuthenticationGithubConfiguration githubConfiguration;
@@ -61,7 +61,7 @@ public class GithubAuthenticatorTest {
     private GithubAuthenticator authenticator;
 
     @Test
-    public void authenticate_throwAuthenticationException_whenProviderNotEnabled() {
+    void authenticate_throwAuthenticationException_whenProviderNotEnabled() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String code = "github_code";
@@ -78,7 +78,7 @@ public class GithubAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationConfigurationNotFoundException_whenClientSecretNotFound() {
+    void authenticate_throwAuthenticationConfigurationNotFoundException_whenClientSecretNotFound() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String code = "github_code";
@@ -96,7 +96,7 @@ public class GithubAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationConfigurationNotFoundException_whenClientIdNotFound() {
+    void authenticate_throwAuthenticationConfigurationNotFoundException_whenClientIdNotFound() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String code = "github_code";
@@ -117,7 +117,7 @@ public class GithubAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationTokenNotFetchedException_whenTokenAPICallThrowException() {
+    void authenticate_throwAuthenticationTokenNotFetchedException_whenTokenAPICallThrowException() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String clientId = "github_client_id";
@@ -151,7 +151,7 @@ public class GithubAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationTokenNotFetchedException_whenTokenAPICallReturnsAnErrorStatus() {
+    void authenticate_throwAuthenticationTokenNotFetchedException_whenTokenAPICallReturnsAnErrorStatus() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String clientId = "github_client_id";
@@ -188,7 +188,7 @@ public class GithubAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationUserNotFetchedException_whenUserAPICallThrowException() {
+    void authenticate_throwAuthenticationUserNotFetchedException_whenUserAPICallThrowException() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String clientId = "github_client_id";
@@ -237,7 +237,7 @@ public class GithubAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationUserNotFetchedException_whenUserAPICallReturnsAnErrorStatus() {
+    void authenticate_throwAuthenticationUserNotFetchedException_whenUserAPICallReturnsAnErrorStatus() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String clientId = "github_client_id";
@@ -288,7 +288,7 @@ public class GithubAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_returnAuthenticationDetails_whenNoErrorOccurred() throws AuthenticationException {
+    void authenticate_returnAuthenticationDetails_whenNoErrorOccurred() throws AuthenticationException {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String clientId = "github_client_id";
@@ -366,7 +366,7 @@ public class GithubAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenRequestIsNull() {
+    void authenticate_throwAuthenticationException_whenRequestIsNull() {
         // Given
 
         // When
@@ -377,7 +377,7 @@ public class GithubAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenNoProviderGiven() {
+    void authenticate_throwAuthenticationException_whenNoProviderGiven() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
 
@@ -390,7 +390,7 @@ public class GithubAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenNoTokenGiven() {
+    void authenticate_throwAuthenticationException_whenNoTokenGiven() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String provider = "provider";
@@ -405,7 +405,7 @@ public class GithubAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenProviderIsNotEnabled() {
+    void authenticate_throwAuthenticationException_whenProviderIsNotEnabled() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "github_token";
@@ -422,7 +422,7 @@ public class GithubAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenExceptionThrownWhileCheckingToken() {
+    void authenticate_throwAuthenticationException_whenExceptionThrownWhileCheckingToken() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "github_token";
@@ -445,7 +445,7 @@ public class GithubAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenTokenCheckingApiCallReturnsAnErrorStatus() {
+    void authenticate_throwAuthenticationException_whenTokenCheckingApiCallReturnsAnErrorStatus() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "github_token";
@@ -471,7 +471,7 @@ public class GithubAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_returnAuthenticationDetails_whenValidTokenGiven() throws AuthenticationException {
+    void authenticate_returnAuthenticationDetails_whenValidTokenGiven() throws AuthenticationException {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "github_token";

@@ -26,10 +26,10 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-public class AuthenticationProviderConfigurationDTOTest {
+class AuthenticationProviderConfigurationDTOTest {
 
     @Test
-    public void getLoginUri_returnLoginUri_whenInstanceOfGithubAuthenticationProviderConfigurationDTO() {
+    void getLoginUri_returnLoginUri_whenInstanceOfGithubAuthenticationProviderConfigurationDTO() {
         // Given
         GithubAuthenticationProviderConfigurationDTO provider = new GithubAuthenticationProviderConfigurationDTO(true, "my-client-id");
 
@@ -41,7 +41,7 @@ public class AuthenticationProviderConfigurationDTOTest {
     }
 
     @Test
-    public void getLoginUri_returnLoginUri_whenInstanceOfGoogleAuthenticationProviderConfigurationDTOAndFrontBaseUrlDoesNotEndWithSlash() {
+    void getLoginUri_returnLoginUri_whenInstanceOfGoogleAuthenticationProviderConfigurationDTOAndFrontBaseUrlDoesNotEndWithSlash() {
         // Given
         GoogleAuthenticationProviderConfigurationDTO provider = new GoogleAuthenticationProviderConfigurationDTO(true, "my-client-id", "http://my-front-base-url.org");
 
@@ -60,7 +60,7 @@ public class AuthenticationProviderConfigurationDTOTest {
     }
 
     @Test
-    public void getLoginUri_returnLoginUri_whenInstanceOfGoogleAuthenticationProviderConfigurationDTOAndFrontBaseUrlEndsWithSlash() {
+    void getLoginUri_returnLoginUri_whenInstanceOfGoogleAuthenticationProviderConfigurationDTOAndFrontBaseUrlEndsWithSlash() {
         // Given
         GoogleAuthenticationProviderConfigurationDTO provider = new GoogleAuthenticationProviderConfigurationDTO(true, "my-client-id", "http://my-front-base-url.org/");
 
@@ -79,7 +79,7 @@ public class AuthenticationProviderConfigurationDTOTest {
     }
 
     @Test
-    public void getLoginUri_returnLoginUri_whenInstanceOfCustomAuthenticationProviderConfigurationDTO() {
+    void getLoginUri_returnLoginUri_whenInstanceOfCustomAuthenticationProviderConfigurationDTO() {
         // Given
         String displayedName = "My Company Name";
         String customLoginUrl = "http://my-custom-login-url.com";
@@ -93,7 +93,7 @@ public class AuthenticationProviderConfigurationDTOTest {
     }
 
     @Test
-    public void getDisplay_returnDisplayedName_whenInstanceOfCustomAuthenticationProviderConfigurationDTOAndDisplayedNameGiven() {
+    void getDisplay_returnDisplayedName_whenInstanceOfCustomAuthenticationProviderConfigurationDTOAndDisplayedNameGiven() {
         // Given
         String displayedName = "My Company Name";
         String customLoginUrl = "http://my-custom-login-url.com";
@@ -107,7 +107,7 @@ public class AuthenticationProviderConfigurationDTOTest {
     }
 
     @Test
-    public void getDisplay_returnDisplayedNameAsCustom_whenInstanceOfCustomAuthenticationProviderConfigurationDTOAndNoDisplayedNameGiven() {
+    void getDisplay_returnDisplayedNameAsCustom_whenInstanceOfCustomAuthenticationProviderConfigurationDTOAndNoDisplayedNameGiven() {
         // Given
         String customLoginUrl = "http://my-custom-login-url.com";
         CustomAuthenticationProviderConfigurationDTO provider = new CustomAuthenticationProviderConfigurationDTO(true, Optional.empty(), customLoginUrl);

@@ -31,10 +31,10 @@ import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-public class AuthenticationCustomValueConfigurationTest {
+class AuthenticationCustomValueConfigurationTest {
 
     @Test
-    public void getRequest_returnRequestWithNoHeaderAndNoBody_whenNoneGiven() {
+    void getRequest_returnRequestWithNoHeaderAndNoBody_whenNoneGiven() {
         // Given
         AuthenticationCustomValueConfiguration customValueConfiguration = new AuthenticationCustomValueConfiguration()
                 .withHeaderValues(null)
@@ -50,7 +50,7 @@ public class AuthenticationCustomValueConfigurationTest {
     }
 
     @Test
-    public void getRequest_returnRequestWithHeaderAndBody_whenBothGivenButNoParameters() {
+    void getRequest_returnRequestWithHeaderAndBody_whenBothGivenButNoParameters() {
         // Given
         String rawHeader = "header_attribute1,header_value1|header_attribute2,header_value2|header_attribute3";
         String rawBody = "body_attribute1,body_value1|body_attribute2,body_value2";
@@ -75,7 +75,7 @@ public class AuthenticationCustomValueConfigurationTest {
     }
 
     @Test
-    public void getRequest_returnRequestWithHeaderAndBody_whenBothGivenWithParameters() {
+    void getRequest_returnRequestWithHeaderAndBody_whenBothGivenWithParameters() {
         // Given
         String rawHeader = "header_attribute1,{{header_parameter1}}|header_attribute2,{{header_parameter2}} {{header_parameter3}} and some string|header_attribute3";
         String rawBody = "body_attribute1,body_value1|body_attribute2,some value {{body_parameter1}}";
@@ -108,7 +108,7 @@ public class AuthenticationCustomValueConfigurationTest {
     }
 
     @Test
-    public void getHttpMethod_getGETMethod_whenMethodBlank() {
+    void getHttpMethod_getGETMethod_whenMethodBlank() {
         // Given
         AuthenticationCustomValueConfiguration customUserConfiguration = new AuthenticationCustomValueConfiguration()
                 .withMethod(null);
@@ -121,7 +121,7 @@ public class AuthenticationCustomValueConfigurationTest {
     }
 
     @Test
-    public void getHttpMethod_getGETMethod_whenMethodIsGet() {
+    void getHttpMethod_getGETMethod_whenMethodIsGet() {
         // Given
         AuthenticationCustomValueConfiguration customUserConfiguration = new AuthenticationCustomValueConfiguration()
                 .withMethod("get");
@@ -134,7 +134,7 @@ public class AuthenticationCustomValueConfigurationTest {
     }
 
     @Test
-    public void getHttpMethod_getGETMethod_whenMethodIsNeitherGetNorPost() {
+    void getHttpMethod_getGETMethod_whenMethodIsNeitherGetNorPost() {
         // Given
         AuthenticationCustomValueConfiguration customUserConfiguration = new AuthenticationCustomValueConfiguration()
                 .withMethod("neither-get-nor-post");
@@ -147,7 +147,7 @@ public class AuthenticationCustomValueConfigurationTest {
     }
 
     @Test
-    public void getHttpMethod_getPostMethod_whenMethodIsPost() {
+    void getHttpMethod_getPostMethod_whenMethodIsPost() {
         // Given
         AuthenticationCustomValueConfiguration customUserConfiguration = new AuthenticationCustomValueConfiguration()
                 .withMethod("post");
