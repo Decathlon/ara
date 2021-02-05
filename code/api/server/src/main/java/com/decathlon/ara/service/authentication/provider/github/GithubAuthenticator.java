@@ -78,8 +78,7 @@ public class GithubAuthenticator extends ProviderAuthenticator<GithubToken, Gith
 
         String tokenBaseUrl = "https://github.com/login/oauth/access_token";
         String tokenParameters = String.format("client_id=%s&scope=%s&client_secret=%s&code=%s", clientId, scope, clientSecret, code);
-        String tokenFinalUrl = String.format("%s?%s", tokenBaseUrl, tokenParameters);
-        return tokenFinalUrl;
+        return String.format("%s?%s", tokenBaseUrl, tokenParameters);
     }
 
     @Override
@@ -91,8 +90,7 @@ public class GithubAuthenticator extends ProviderAuthenticator<GithubToken, Gith
     protected HttpEntity<GithubToken> getTokenRequest(UserAuthenticationRequestDTO request) {
         HttpHeaders tokenHeader = new HttpHeaders();
         tokenHeader.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-        HttpEntity<GithubToken> tokenRequest = new HttpEntity<>(tokenHeader);
-        return tokenRequest;
+        return new HttpEntity<>(tokenHeader);
     }
 
     @Override
@@ -111,8 +109,7 @@ public class GithubAuthenticator extends ProviderAuthenticator<GithubToken, Gith
         HttpHeaders userHeader = new HttpHeaders();
         String authorization = String.format("token %s", accessToken);
         userHeader.set("Authorization", authorization);
-        HttpEntity<GithubUser> userRequest = new HttpEntity<>(userHeader);
-        return userRequest;
+        return new HttpEntity<>(userHeader);
     }
 
     @Override
@@ -140,8 +137,7 @@ public class GithubAuthenticator extends ProviderAuthenticator<GithubToken, Gith
         HttpHeaders header = new HttpHeaders();
         String authorization = String.format("token %s", token);
         header.set("Authorization", authorization);
-        HttpEntity<Object> request = new HttpEntity<>(header);
-        return request;
+        return new HttpEntity<>(header);
     }
 
     @Override

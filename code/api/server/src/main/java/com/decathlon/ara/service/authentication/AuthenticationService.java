@@ -94,8 +94,7 @@ public class AuthenticationService {
     public ResponseEntity<AppAuthenticationDetailsDTO> authenticate(AppAuthenticationRequestDTO request) throws AuthenticationException {
         Pair<Authenticator, AuthenticationProviderDetailsDTO> authenticatorAndProviderDetails = getAuthenticatorAndProviderDetails(request);
         Authenticator authenticator = authenticatorAndProviderDetails.getFirst();
-        ResponseEntity<AppAuthenticationDetailsDTO> authenticationResponse = authenticator.authenticate(request);
-        return authenticationResponse;
+        return authenticator.authenticate(request);
     }
 
     /**
@@ -110,12 +109,11 @@ public class AuthenticationService {
         }
         String providerName = request.getProvider();
         AuthenticationConfigurationDTO authenticationConfiguration = getAuthenticationConfiguration();
-        Pair<Authenticator, AuthenticationProviderDetailsDTO> authenticatorAndProviderDetails = authenticationStrategy
+        return authenticationStrategy
                 .getAuthenticatorAndProviderDetails(providerName, authenticationConfiguration.getProviders())
                 .orElseThrow(() ->
                         new AuthenticationException(String.format("The provider given (%s) is not supported", providerName))
                 );
-        return authenticatorAndProviderDetails;
     }
 
     /**

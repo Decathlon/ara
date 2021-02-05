@@ -117,14 +117,13 @@ public class JwtTokenAuthenticationService {
         if (StringUtils.isBlank(secret)) {
             throw new AuthenticationConfigurationNotFoundException("Authentication failed: ARA cannot generate a JWT token because no secret found in the configuration file");
         }
-        String token = Jwts.builder()
+        return Jwts.builder()
                 .setClaims(new HashMap<>())
                 .setSubject(subject)
                 .setIssuedAt(now)
                 .setExpiration(expirationDate)
                 .signWith(SignatureAlgorithm.HS512, secret)
                 .compact();
-        return token;
     }
 
     /**
@@ -163,8 +162,7 @@ public class JwtTokenAuthenticationService {
      * Delete the authentication cookie
      */
     public HttpHeaders deleteAuthenticationCookie() {
-        HttpHeaders responseHeaders = createCookieHeaderFromJwt(Optional.empty());
-        return responseHeaders;
+        return createCookieHeaderFromJwt(Optional.empty());
     }
 
     /**
@@ -185,13 +183,12 @@ public class JwtTokenAuthenticationService {
             }
         }
         Cookie[] cookies = request.getCookies() != null ? request.getCookies() : new Cookie[0];
-        Optional<Authentication> authentication = Arrays.stream(cookies)
+        return Arrays.stream(cookies)
                 .filter(cookie -> tokenCookieName.equals(cookie.getName()))
                 .map(Cookie::getValue)
                 .map(JwtAuthentication::new)
                 .map(Authentication.class::cast)
                 .findFirst();
-        return authentication;
     }
 
     private class JwtAuthentication implements Authentication {
