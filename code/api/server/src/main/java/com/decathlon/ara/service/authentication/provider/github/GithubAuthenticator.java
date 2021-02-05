@@ -31,19 +31,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
 import java.util.Optional;
 
 @Slf4j
 @Service
 public class GithubAuthenticator extends ProviderAuthenticator<GithubToken, GithubUser, AuthenticationGithubConfiguration> {
-
-    private final AuthenticationGithubConfiguration githubConfiguration;
 
     @Autowired
     public GithubAuthenticator(
@@ -51,25 +46,19 @@ public class GithubAuthenticator extends ProviderAuthenticator<GithubToken, Gith
             AuthenticationGithubConfiguration githubConfiguration,
             RestTemplate restTemplate
     ) {
-        super(GithubToken.class, GithubUser.class, AuthenticationGithubConfiguration.class, jwtTokenAuthenticationService, restTemplate);
-        this.githubConfiguration = githubConfiguration;
-    }
-
-    @Override
-    protected AuthenticationGithubConfiguration getAuthenticatorConfiguration() {
-        return githubConfiguration;
+        super(jwtTokenAuthenticationService, restTemplate, githubConfiguration);
     }
 
     @Override
     protected String getTokenUri(UserAuthenticationRequestDTO request) throws AuthenticationConfigurationNotFoundException {
-        String clientSecret = githubConfiguration.getClientSecret();
+        String clientSecret = configuration.getClientSecret();
         if (StringUtils.isBlank(clientSecret)) {
             String errorMessage = "Github client secret not found";
             log.error(errorMessage);
             throw new AuthenticationConfigurationNotFoundException(errorMessage);
         }
 
-        String clientId = githubConfiguration.getClientId();
+        String clientId = configuration.getClientId();
         if (StringUtils.isBlank(clientId)) {
             throw new AuthenticationConfigurationNotFoundException("The Github token cannot be fetched without a client id");
         }
@@ -82,25 +71,8 @@ public class GithubAuthenticator extends ProviderAuthenticator<GithubToken, Gith
     }
 
     @Override
-    protected HttpMethod getTokenMethod() {
-        return HttpMethod.POST;
-    }
-
-    @Override
-    protected HttpEntity<GithubToken> getTokenRequest(UserAuthenticationRequestDTO request) {
-        HttpHeaders tokenHeader = new HttpHeaders();
-        tokenHeader.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-        return new HttpEntity<>(tokenHeader);
-    }
-
-    @Override
     protected String getUserUri() {
         return "https://api.github.com/user";
-    }
-
-    @Override
-    protected HttpMethod getUserMethod() {
-        return HttpMethod.GET;
     }
 
     @Override
@@ -125,11 +97,6 @@ public class GithubAuthenticator extends ProviderAuthenticator<GithubToken, Gith
     @Override
     protected String getTokenValidationUri(String token) {
         return "https://api.github.com";
-    }
-
-    @Override
-    protected HttpMethod getTokenValidationMethod() {
-        return HttpMethod.GET;
     }
 
     @Override

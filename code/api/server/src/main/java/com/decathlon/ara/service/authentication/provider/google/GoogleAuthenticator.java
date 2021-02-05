@@ -34,19 +34,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
 import java.util.Optional;
 
 @Slf4j
 @Service
 public class GoogleAuthenticator extends ProviderAuthenticator<GoogleToken, GoogleUser, AuthenticationGoogleConfiguration> {
-
-    private final AuthenticationGoogleConfiguration googleConfiguration;
 
     private final AraConfiguration araConfiguration;
 
@@ -57,13 +52,13 @@ public class GoogleAuthenticator extends ProviderAuthenticator<GoogleToken, Goog
             RestTemplate restTemplate,
             AraConfiguration araConfiguration
     ) {
-        super(GoogleToken.class, GoogleUser.class, AuthenticationGoogleConfiguration.class, jwtTokenAuthenticationService, restTemplate);
-        this.googleConfiguration = googleConfiguration;
+        super(jwtTokenAuthenticationService, restTemplate, googleConfiguration);
         this.araConfiguration = araConfiguration;
     }
 
     /**
      * Get Google redirect uri
+     *
      * @return redirect uri
      * @throws AuthenticationConfigurationNotFoundException thrown if no client base url found
      */
@@ -82,14 +77,14 @@ public class GoogleAuthenticator extends ProviderAuthenticator<GoogleToken, Goog
     protected String getTokenUri(UserAuthenticationRequestDTO request) throws AuthenticationTokenNotFetchedException, AuthenticationConfigurationNotFoundException {
         String redirectUri = getRedirectUri();
 
-        String clientSecret = googleConfiguration.getClientSecret();
+        String clientSecret = configuration.getClientSecret();
         if (StringUtils.isBlank(clientSecret)) {
             String errorMessage = "Google client secret not found";
             log.error(errorMessage);
             throw new AuthenticationConfigurationNotFoundException(errorMessage);
         }
 
-        String clientId = googleConfiguration.getClientId();
+        String clientId = configuration.getClientId();
         if (StringUtils.isBlank(clientId)) {
             throw new AuthenticationConfigurationNotFoundException("The Google token cannot be fetched without a client id");
         }
@@ -112,25 +107,8 @@ public class GoogleAuthenticator extends ProviderAuthenticator<GoogleToken, Goog
     }
 
     @Override
-    protected HttpMethod getTokenMethod() {
-        return HttpMethod.POST;
-    }
-
-    @Override
-    protected HttpEntity getTokenRequest(UserAuthenticationRequestDTO request) {
-        HttpHeaders tokenHeader = new HttpHeaders();
-        tokenHeader.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-        return new HttpEntity<>(tokenHeader);
-    }
-
-    @Override
     protected String getUserUri() {
         return "https://www.googleapis.com/oauth2/v3/userinfo";
-    }
-
-    @Override
-    protected HttpMethod getUserMethod() {
-        return HttpMethod.GET;
     }
 
     @Override
@@ -153,11 +131,6 @@ public class GoogleAuthenticator extends ProviderAuthenticator<GoogleToken, Goog
     }
 
     @Override
-    protected AuthenticationGoogleConfiguration getAuthenticatorConfiguration() {
-        return googleConfiguration;
-    }
-
-    @Override
     protected GoogleUser getUser(GoogleToken token) throws AuthenticationUserNotFetchedException, AuthenticationConfigurationNotFoundException {
         GoogleUser user = super.getUser(token);
 
@@ -174,11 +147,6 @@ public class GoogleAuthenticator extends ProviderAuthenticator<GoogleToken, Goog
     @Override
     protected String getTokenValidationUri(String token) {
         return String.format("https://oauth2.googleapis.com/tokeninfo?access_token=%s", token);
-    }
-
-    @Override
-    protected HttpMethod getTokenValidationMethod() {
-        return HttpMethod.GET;
     }
 
     @Override

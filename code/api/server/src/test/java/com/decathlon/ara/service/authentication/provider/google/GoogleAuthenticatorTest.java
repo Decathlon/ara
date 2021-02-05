@@ -37,6 +37,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -65,27 +66,6 @@ class GoogleAuthenticatorTest {
 
     @InjectMocks
     private GoogleAuthenticator authenticator;
-
-    @Data
-    @AllArgsConstructor
-    private class DummyGoogleVerificationTokenContainingVerifiedEmailFieldAsString {
-
-        private String email_verified;
-    }
-
-    @Data
-    @AllArgsConstructor
-    private class DummyGoogleVerificationTokenContainingVerifiedEmailFieldAsBoolean {
-
-        private Boolean email_verified;
-    }
-
-    @Data
-    @AllArgsConstructor
-    private class DummyGoogleVerificationTokenNotContainingVerifiedEmailField {
-
-        private String does_not_contain_email_verified_field;
-    }
 
     @Test
     void authenticate_throwAuthenticationException_whenProviderNotEnabled() {
@@ -241,7 +221,8 @@ class GoogleAuthenticatorTest {
                                 "code=google_code",
                         HttpMethod.POST,
                         tokenRequest,
-                        GoogleToken.class
+                        new ParameterizedTypeReference<GoogleToken>() {
+                        }
                 )
         ).thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.FORBIDDEN);
@@ -293,13 +274,15 @@ class GoogleAuthenticatorTest {
                                 "code=google_code",
                         HttpMethod.POST,
                         tokenRequest,
-                        GoogleToken.class
+                        new ParameterizedTypeReference<GoogleToken>() {
+                        }
                 )
         ).thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.OK);
         when(response.getBody()).thenReturn(token);
         when(token.getAccessToken()).thenReturn(accessToken);
-        when(restTemplate.exchange("https://www.googleapis.com/oauth2/v3/userinfo", HttpMethod.GET, userRequest, GoogleUser.class))
+        when(restTemplate.exchange("https://www.googleapis.com/oauth2/v3/userinfo", HttpMethod.GET, userRequest, new ParameterizedTypeReference<GoogleUser>() {
+        }))
                 .thenThrow(new RestClientException("User API call error"));
 
         // Then
@@ -351,13 +334,15 @@ class GoogleAuthenticatorTest {
                                 "code=google_code",
                         HttpMethod.POST,
                         tokenRequest,
-                        GoogleToken.class
+                        new ParameterizedTypeReference<GoogleToken>() {
+                        }
                 )
         ).thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.OK);
         when(response.getBody()).thenReturn(token);
         when(token.getAccessToken()).thenReturn(accessToken);
-        when(restTemplate.exchange("https://www.googleapis.com/oauth2/v3/userinfo", HttpMethod.GET, userRequest, GoogleUser.class))
+        when(restTemplate.exchange("https://www.googleapis.com/oauth2/v3/userinfo", HttpMethod.GET, userRequest, new ParameterizedTypeReference<GoogleUser>() {
+        }))
                 .thenReturn(userResponseEntity);
         when(userResponseEntity.getStatusCode()).thenReturn(HttpStatus.BAD_REQUEST);
 
@@ -412,13 +397,15 @@ class GoogleAuthenticatorTest {
                                 "code=google_code",
                         HttpMethod.POST,
                         tokenRequest,
-                        GoogleToken.class
+                        new ParameterizedTypeReference<GoogleToken>() {
+                        }
                 )
         ).thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.OK);
         when(response.getBody()).thenReturn(token);
         when(token.getAccessToken()).thenReturn(accessToken);
-        when(restTemplate.exchange("https://www.googleapis.com/oauth2/v3/userinfo", HttpMethod.GET, userRequest, GoogleUser.class))
+        when(restTemplate.exchange("https://www.googleapis.com/oauth2/v3/userinfo", HttpMethod.GET, userRequest, new ParameterizedTypeReference<GoogleUser>() {
+        }))
                 .thenReturn(userResponseEntity);
         when(userResponseEntity.getStatusCode()).thenReturn(HttpStatus.OK);
         when(userResponseEntity.getBody()).thenReturn(user);
@@ -479,13 +466,15 @@ class GoogleAuthenticatorTest {
                                 "code=google_code",
                         HttpMethod.POST,
                         tokenRequest,
-                        GoogleToken.class
+                        new ParameterizedTypeReference<GoogleToken>() {
+                        }
                 )
         ).thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.OK);
         when(response.getBody()).thenReturn(token);
         when(token.getAccessToken()).thenReturn(accessToken);
-        when(restTemplate.exchange("https://www.googleapis.com/oauth2/v3/userinfo", HttpMethod.GET, userRequest, GoogleUser.class))
+        when(restTemplate.exchange("https://www.googleapis.com/oauth2/v3/userinfo", HttpMethod.GET, userRequest, new ParameterizedTypeReference<GoogleUser>() {
+        }))
                 .thenReturn(userResponseEntity);
         when(userResponseEntity.getStatusCode()).thenReturn(HttpStatus.OK);
         when(userResponseEntity.getBody()).thenReturn(user);
@@ -767,5 +756,26 @@ class GoogleAuthenticatorTest {
         AppAuthenticationDetailsDTO authenticationDetails = authenticationResponse.getBody();
         assertThat(authenticationDetails).isNotNull();
         assertThat(authenticationDetails.getAccessToken()).isEqualTo(jwt);
+    }
+
+    @Data
+    @AllArgsConstructor
+    private class DummyGoogleVerificationTokenContainingVerifiedEmailFieldAsString {
+
+        private String email_verified;
+    }
+
+    @Data
+    @AllArgsConstructor
+    private class DummyGoogleVerificationTokenContainingVerifiedEmailFieldAsBoolean {
+
+        private Boolean email_verified;
+    }
+
+    @Data
+    @AllArgsConstructor
+    private class DummyGoogleVerificationTokenNotContainingVerifiedEmailField {
+
+        private String does_not_contain_email_verified_field;
     }
 }

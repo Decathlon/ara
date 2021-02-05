@@ -45,15 +45,11 @@ import java.util.Optional;
 @AllArgsConstructor
 public abstract class Authenticator<T extends AuthenticatorToken, U extends AuthenticatorUser, C extends AuthenticationProviderConfiguration> {
 
-    protected Class<T> tokenType;
-
-    protected Class<U> userType;
-
-    protected Class<C> configurationType;
-
     protected JwtTokenAuthenticationService jwtTokenAuthenticationService;
 
     protected RestTemplate restTemplate;
+
+    protected C configuration;
 
     /**
      * Authenticate an user and return the authentication details if successfully authenticated
@@ -73,7 +69,6 @@ public abstract class Authenticator<T extends AuthenticatorToken, U extends Auth
         if (StringUtils.isBlank(code)) {
             throw new AuthenticationTokenNotFetchedException("The token cannot be fetched without a code");
         }
-        C configuration = getAuthenticatorConfiguration();
         if (!configuration.isEnabled()) {
             throw new AuthenticationException(String.format("You cannot authenticate with this provider (%s) because it is not enabled", provider));
         }
@@ -89,12 +84,6 @@ public abstract class Authenticator<T extends AuthenticatorToken, U extends Auth
 
         return ResponseEntity.ok().headers(headers).body(authenticationDetails);
     }
-
-    /**
-     * Get the authenticator authentication
-     * @return the authenticator authentication
-     */
-    protected abstract C getAuthenticatorConfiguration();
 
     /**
      * Get token from a request
@@ -127,7 +116,9 @@ public abstract class Authenticator<T extends AuthenticatorToken, U extends Auth
      * Get the token http method
      * @return the token http method
      */
-    protected abstract HttpMethod getTokenMethod();
+    protected HttpMethod getTokenMethod() {
+        return HttpMethod.POST;
+    }
 
     /**
      * Get the token request given to call the api
@@ -147,7 +138,9 @@ public abstract class Authenticator<T extends AuthenticatorToken, U extends Auth
      * Get the user http method
      * @return the user http method
      */
-    protected abstract HttpMethod getUserMethod();
+    protected HttpMethod getUserMethod() {
+        return HttpMethod.GET;
+    }
 
     /**
      * Get the user request given to call the api
@@ -184,7 +177,6 @@ public abstract class Authenticator<T extends AuthenticatorToken, U extends Auth
             throw new AuthenticationException("Authentication failed because no token found in the request");
         }
 
-        C configuration = getAuthenticatorConfiguration();
         if (!configuration.isEnabled()) {
             throw new AuthenticationException(String.format("You cannot authenticate with this provider (%s) because it is not enabled", provider));
         }
@@ -273,7 +265,9 @@ public abstract class Authenticator<T extends AuthenticatorToken, U extends Auth
      * Get the token validation http method
      * @return the token validation http method
      */
-    protected abstract HttpMethod getTokenValidationMethod();
+    protected HttpMethod getTokenValidationMethod() {
+        return HttpMethod.GET;
+    }
 
     /**
      * Get the token validation http request

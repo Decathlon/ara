@@ -25,23 +25,21 @@ import com.decathlon.ara.service.authentication.exception.AuthenticationUserNotF
 import com.decathlon.ara.service.dto.authentication.provider.AuthenticatorToken;
 import com.decathlon.ara.service.dto.authentication.provider.AuthenticatorUser;
 import com.decathlon.ara.service.dto.authentication.request.UserAuthenticationRequestDTO;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.Arrays;
 
 public abstract class ProviderAuthenticator<T extends AuthenticatorToken, U extends AuthenticatorUser, C extends AuthenticationProviderConfiguration> extends Authenticator<T, U, C> {
 
     public ProviderAuthenticator(
-            Class<T> tokenType,
-            Class<U> userType,
-            Class<C> configurationType,
             JwtTokenAuthenticationService jwtTokenAuthenticationService,
-            RestTemplate restTemplate
+            RestTemplate restTemplate,
+            C configuration
     ) {
-        super(tokenType, userType, configurationType, jwtTokenAuthenticationService, restTemplate);
+        super(jwtTokenAuthenticationService, restTemplate, configuration);
     }
 
     @Override
@@ -52,7 +50,8 @@ public abstract class ProviderAuthenticator<T extends AuthenticatorToken, U exte
 
         ResponseEntity<T> tokenResponse;
         try {
-            tokenResponse = restTemplate.exchange(tokenUri, tokenMethod, tokenRequest, tokenType);
+            tokenResponse = restTemplate.exchange(tokenUri, tokenMethod, tokenRequest, new ParameterizedTypeReference<T>() {
+            });
         } catch (RestClientException exception) {
             String errorMessage = String.format("Token not fetched because an error occurred while calling the API (%s)", tokenUri);
             throw new AuthenticationTokenNotFetchedException(errorMessage, exception);
@@ -67,7 +66,12 @@ public abstract class ProviderAuthenticator<T extends AuthenticatorToken, U exte
     }
 
     @Override
-    protected abstract HttpEntity<T> getTokenRequest(UserAuthenticationRequestDTO request);
+    protected HttpEntity<T> getTokenRequest(UserAuthenticationRequestDTO request) {
+        HttpHeaders tokenHeader = new HttpHeaders();
+        tokenHeader.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        HttpEntity<T> tokenRequest = new HttpEntity<>(tokenHeader);
+        return tokenRequest;
+    }
 
     @Override
     protected U getUser(T token) throws AuthenticationUserNotFetchedException, AuthenticationConfigurationNotFoundException {
@@ -77,7 +81,8 @@ public abstract class ProviderAuthenticator<T extends AuthenticatorToken, U exte
         ResponseEntity<U> userResponse;
 
         try {
-            userResponse = restTemplate.exchange(userUri, userMethod, userRequest, userType);
+            userResponse = restTemplate.exchange(userUri, userMethod, userRequest, new ParameterizedTypeReference<U>() {
+            });
         } catch (RestClientException exception) {
             String errorMessage = String.format("User not fetched because an error occurred while calling the API (%s)", userUri);
             throw new AuthenticationUserNotFetchedException(errorMessage, exception);

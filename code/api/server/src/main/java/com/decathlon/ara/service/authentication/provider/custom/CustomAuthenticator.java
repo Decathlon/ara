@@ -63,8 +63,6 @@ public class CustomAuthenticator extends Authenticator<CustomToken, CustomUser, 
 
     private final AuthenticationCustomTokenValidationConfiguration tokenValidationConfiguration;
 
-    private final AuthenticationCustomConfiguration customConfiguration;
-
     @Autowired
     public CustomAuthenticator(
             JwtTokenAuthenticationService jwtTokenAuthenticationService,
@@ -74,16 +72,10 @@ public class CustomAuthenticator extends Authenticator<CustomToken, CustomUser, 
             AuthenticationCustomTokenValidationConfiguration tokenValidationConfiguration,
             AuthenticationCustomConfiguration customConfiguration
     ) {
-        super(CustomToken.class, CustomUser.class, AuthenticationCustomConfiguration.class, jwtTokenAuthenticationService, restTemplate);
+        super(jwtTokenAuthenticationService, restTemplate, customConfiguration);
         this.tokenConfiguration = tokenConfiguration;
         this.userConfiguration = userConfiguration;
         this.tokenValidationConfiguration = tokenValidationConfiguration;
-        this.customConfiguration = customConfiguration;
-    }
-
-    @Override
-    protected AuthenticationCustomConfiguration getAuthenticatorConfiguration() {
-        return customConfiguration;
     }
 
     @Override

@@ -34,6 +34,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -141,7 +142,8 @@ class GithubAuthenticatorTest {
                         "https://github.com/login/oauth/access_token?client_id=github_client_id&scope=user:email%20read:user&client_secret=github_secret&code=github_code",
                         HttpMethod.POST,
                         tokenRequest,
-                        GithubToken.class
+                        new ParameterizedTypeReference<GithubToken>() {
+                        }
                 )
         ).thenThrow(new RestClientException("Token API call error"));
 
@@ -177,7 +179,8 @@ class GithubAuthenticatorTest {
                         "https://github.com/login/oauth/access_token?client_id=github_client_id&scope=user:email%20read:user&client_secret=github_secret&code=github_code",
                         HttpMethod.POST,
                         tokenRequest,
-                        GithubToken.class
+                        new ParameterizedTypeReference<GithubToken>() {
+                        }
                 )
         ).thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.UNAUTHORIZED);
@@ -222,13 +225,15 @@ class GithubAuthenticatorTest {
                         "https://github.com/login/oauth/access_token?client_id=github_client_id&scope=user:email%20read:user&client_secret=github_secret&code=github_code",
                         HttpMethod.POST,
                         tokenRequest,
-                        GithubToken.class
+                        new ParameterizedTypeReference<GithubToken>() {
+                        }
                 )
         ).thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.OK);
         when(response.getBody()).thenReturn(token);
         when(token.getAccessToken()).thenReturn(accessToken);
-        when(restTemplate.exchange("https://api.github.com/user", HttpMethod.GET, userRequest, GithubUser.class))
+        when(restTemplate.exchange("https://api.github.com/user", HttpMethod.GET, userRequest, new ParameterizedTypeReference<GithubUser>() {
+        }))
                 .thenThrow(new RestClientException("User API call error"));
 
         // Then
@@ -272,13 +277,15 @@ class GithubAuthenticatorTest {
                         "https://github.com/login/oauth/access_token?client_id=github_client_id&scope=user:email%20read:user&client_secret=github_secret&code=github_code",
                         HttpMethod.POST,
                         tokenRequest,
-                        GithubToken.class
+                        new ParameterizedTypeReference<GithubToken>() {
+                        }
                 )
         ).thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.OK);
         when(response.getBody()).thenReturn(token);
         when(token.getAccessToken()).thenReturn(accessToken);
-        when(restTemplate.exchange("https://api.github.com/user", HttpMethod.GET, userRequest, GithubUser.class))
+        when(restTemplate.exchange("https://api.github.com/user", HttpMethod.GET, userRequest, new ParameterizedTypeReference<GithubUser>() {
+        }))
                 .thenReturn(userResponseEntity);
         when(userResponseEntity.getStatusCode()).thenReturn(HttpStatus.BAD_REQUEST);
 
@@ -328,13 +335,15 @@ class GithubAuthenticatorTest {
                         "https://github.com/login/oauth/access_token?client_id=github_client_id&scope=user:email%20read:user&client_secret=github_secret&code=github_code",
                         HttpMethod.POST,
                         tokenRequest,
-                        GithubToken.class
+                        new ParameterizedTypeReference<GithubToken>() {
+                        }
                 )
         ).thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.OK);
         when(response.getBody()).thenReturn(token);
         when(token.getAccessToken()).thenReturn(accessToken);
-        when(restTemplate.exchange("https://api.github.com/user", HttpMethod.GET, userRequest, GithubUser.class))
+        when(restTemplate.exchange("https://api.github.com/user", HttpMethod.GET, userRequest, new ParameterizedTypeReference<GithubUser>() {
+        }))
                 .thenReturn(userResponseEntity);
         when(userResponseEntity.getStatusCode()).thenReturn(HttpStatus.OK);
         when(userResponseEntity.getBody()).thenReturn(user);
@@ -436,7 +445,8 @@ class GithubAuthenticatorTest {
         when(request.getProvider()).thenReturn(provider);
         when(request.getToken()).thenReturn(token);
         when(githubConfiguration.isEnabled()).thenReturn(true);
-        when(restTemplate.exchange("https://api.github.com", HttpMethod.GET, requestEntity, Object.class))
+        when(restTemplate.exchange("https://api.github.com", HttpMethod.GET, requestEntity, new ParameterizedTypeReference() {
+        }))
                 .thenThrow(new RestClientException("Token checking API call error"));
 
         // Then
@@ -461,7 +471,8 @@ class GithubAuthenticatorTest {
         when(request.getProvider()).thenReturn(provider);
         when(request.getToken()).thenReturn(token);
         when(githubConfiguration.isEnabled()).thenReturn(true);
-        when(restTemplate.exchange("https://api.github.com", HttpMethod.GET, requestEntity, Object.class))
+        when(restTemplate.exchange("https://api.github.com", HttpMethod.GET, requestEntity, new ParameterizedTypeReference() {
+        }))
                 .thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.BAD_REQUEST);
 
@@ -491,7 +502,8 @@ class GithubAuthenticatorTest {
         when(request.getProvider()).thenReturn(provider);
         when(request.getToken()).thenReturn(token);
         when(githubConfiguration.isEnabled()).thenReturn(true);
-        when(restTemplate.exchange("https://api.github.com", HttpMethod.GET, requestEntity, Object.class))
+        when(restTemplate.exchange("https://api.github.com", HttpMethod.GET, requestEntity, new ParameterizedTypeReference() {
+        }))
                 .thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.OK);
         when(response.getBody()).thenReturn(null);
