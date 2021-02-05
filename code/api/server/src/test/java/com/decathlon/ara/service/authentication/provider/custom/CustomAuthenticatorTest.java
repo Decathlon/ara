@@ -57,7 +57,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class CustomAuthenticatorTest {
+class CustomAuthenticatorTest {
 
     @Mock
     private AuthenticationCustomTokenConfiguration tokenConfiguration;
@@ -129,7 +129,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenNoRequestGiven() {
+    void authenticate_throwAuthenticationException_whenNoRequestGiven() {
         // Given
 
         // When
@@ -140,7 +140,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenNoProviderGiven() {
+    void authenticate_throwAuthenticationException_whenNoProviderGiven() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
 
@@ -153,7 +153,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationTokenNotFetchedException_whenNoCodeGiven() {
+    void authenticate_throwAuthenticationTokenNotFetchedException_whenNoCodeGiven() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
 
@@ -167,7 +167,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenProviderIsNotEnabled() {
+    void authenticate_throwAuthenticationException_whenProviderIsNotEnabled() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
 
@@ -182,7 +182,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationConfigurationNotFoundException_whenTokenConfigurationUriNotFound() {
+    void authenticate_throwAuthenticationConfigurationNotFoundException_whenTokenConfigurationUriNotFound() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
 
@@ -199,7 +199,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationConfigurationNotFoundException_whenTokenConfigurationFieldsNotFound() {
+    void authenticate_throwAuthenticationConfigurationNotFoundException_whenTokenConfigurationFieldsNotFound() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
 
@@ -218,7 +218,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationTokenNotFetchedException_whenTokenAPICallThrowException() {
+    void authenticate_throwAuthenticationTokenNotFetchedException_whenTokenAPICallThrowException() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
@@ -244,7 +244,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationTokenNotFetchedException_whenTokenAPICallReturnsAnErrorStatus() {
+    void authenticate_throwAuthenticationTokenNotFetchedException_whenTokenAPICallReturnsAnErrorStatus() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
@@ -273,7 +273,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationConfigurationNotFoundException_whenUserConfigurationURINotFound() {
+    void authenticate_throwAuthenticationConfigurationNotFoundException_whenUserConfigurationURINotFound() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
@@ -304,7 +304,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationConfigurationNotFoundException_whenUserConfigurationFieldsNotFound() {
+    void authenticate_throwAuthenticationConfigurationNotFoundException_whenUserConfigurationFieldsNotFound() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
@@ -338,7 +338,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationUserNotFetchedException_whenUserAPICallThrowException() {
+    void authenticate_throwAuthenticationUserNotFetchedException_whenUserAPICallThrowException() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
@@ -381,7 +381,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationUserNotFetchedException_whenUserAPICallReturnsAnErrorStatus() {
+    void authenticate_throwAuthenticationUserNotFetchedException_whenUserAPICallReturnsAnErrorStatus() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
@@ -427,7 +427,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_returnFullyFilledAuthenticationDetails_whenAllFieldsGivenAndFound() throws AuthenticationException {
+    void authenticate_returnFullyFilledAuthenticationDetails_whenAllFieldsGivenAndFound() throws AuthenticationException {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
@@ -528,7 +528,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_returnFullyFilledAuthenticationDetails_whenAllFieldsGivenAndFoundAndIdsAreIntegers() throws AuthenticationException {
+    void authenticate_returnFullyFilledAuthenticationDetails_whenAllFieldsGivenAndFoundAndIdsAreIntegers() throws AuthenticationException {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
@@ -629,7 +629,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_returnFullyFilledAuthenticationDetails_whenAllFieldsGivenAndFoundAndTokenExpirationAsStringButCorrectIntegerRepresentation() throws AuthenticationException {
+    void authenticate_returnFullyFilledAuthenticationDetails_whenAllFieldsGivenAndFoundAndTokenExpirationAsStringButCorrectIntegerRepresentation() throws AuthenticationException {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
@@ -730,7 +730,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_returnFullyFilledAuthenticationDetails_whenAllFieldsGivenAndFoundAndTokenExpirationAsStringButNotAnIntegerRepresentation() throws AuthenticationException {
+    void authenticate_returnFullyFilledAuthenticationDetails_whenAllFieldsGivenAndFoundAndTokenExpirationAsStringButNotAnIntegerRepresentation() throws AuthenticationException {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         AuthenticationCustomTokenFieldsConfiguration tokenFieldsConfiguration = mock(AuthenticationCustomTokenFieldsConfiguration.class);
@@ -831,7 +831,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenRequestIsNull() {
+    void authenticate_throwAuthenticationException_whenRequestIsNull() {
         // Given
 
         // When
@@ -842,7 +842,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenNoProviderIsGiven() {
+    void authenticate_throwAuthenticationException_whenNoProviderIsGiven() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
 
@@ -855,7 +855,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenNoTokenGiven() {
+    void authenticate_throwAuthenticationException_whenNoTokenGiven() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String provider = "provider";
@@ -870,7 +870,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenProviderNotEnabled() {
+    void authenticate_throwAuthenticationException_whenProviderNotEnabled() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";
@@ -887,7 +887,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationConfigurationNotFoundException_whenNoTokenValidationUriFound() {
+    void authenticate_throwAuthenticationConfigurationNotFoundException_whenNoTokenValidationUriFound() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";
@@ -905,7 +905,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenExceptionThrownWhileCheckingToken() {
+    void authenticate_throwAuthenticationException_whenExceptionThrownWhileCheckingToken() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";
@@ -934,7 +934,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenTokenCheckingApiCallReturnsAnErrorStatus() {
+    void authenticate_throwAuthenticationException_whenTokenCheckingApiCallReturnsAnErrorStatus() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";
@@ -965,7 +965,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_returnAuthenticationDetails_whenNoTokenValidationFieldFound() throws AuthenticationException {
+    void authenticate_returnAuthenticationDetails_whenNoTokenValidationFieldFound() throws AuthenticationException {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";
@@ -1006,7 +1006,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_returnAuthenticationDetails_whenNoTokenValidationFieldNameFound() throws AuthenticationException {
+    void authenticate_returnAuthenticationDetails_whenNoTokenValidationFieldNameFound() throws AuthenticationException {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";
@@ -1050,7 +1050,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenTokenValidationFieldNameFoundButNotFoundInResponse() {
+    void authenticate_throwAuthenticationException_whenTokenValidationFieldNameFoundButNotFoundInResponse() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";
@@ -1088,7 +1088,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenNoTokenValidationExpectedValueAndFieldNotABoolean() {
+    void authenticate_throwAuthenticationException_whenNoTokenValidationExpectedValueAndFieldNotABoolean() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";
@@ -1129,7 +1129,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenNoTokenValidationExpectedValueAndFieldIsBooleanAndIsFalse() {
+    void authenticate_throwAuthenticationException_whenNoTokenValidationExpectedValueAndFieldIsBooleanAndIsFalse() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";
@@ -1171,7 +1171,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_returnAuthenticationDetails_whenNoTokenValidationExpectedValueAndFieldIsBooleanAndIsTrue() throws AuthenticationException {
+    void authenticate_returnAuthenticationDetails_whenNoTokenValidationExpectedValueAndFieldIsBooleanAndIsTrue() throws AuthenticationException {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";
@@ -1221,7 +1221,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenNoTokenValidationExpectedValueAndFieldIsStringAndIsConsideredFalse() {
+    void authenticate_throwAuthenticationException_whenNoTokenValidationExpectedValueAndFieldIsStringAndIsConsideredFalse() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";
@@ -1263,7 +1263,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_returnAuthenticationDetails_whenNoTokenValidationExpectedValueAndFieldIsStringAndIsConsideredTrue() throws AuthenticationException {
+    void authenticate_returnAuthenticationDetails_whenNoTokenValidationExpectedValueAndFieldIsStringAndIsConsideredTrue() throws AuthenticationException {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";
@@ -1313,7 +1313,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenTokenValidationExpectedValueAndFieldIsNonBooleanAndValuesAreNotEqual() {
+    void authenticate_throwAuthenticationException_whenTokenValidationExpectedValueAndFieldIsNonBooleanAndValuesAreNotEqual() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";
@@ -1355,7 +1355,7 @@ public class CustomAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_returnAuthenticationDetails_whenTokenValidationExpectedValueAndFieldIsNonBooleanAndValuesAreEqual() throws AuthenticationException {
+    void authenticate_returnAuthenticationDetails_whenTokenValidationExpectedValueAndFieldIsNonBooleanAndValuesAreEqual() throws AuthenticationException {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "custom_token";

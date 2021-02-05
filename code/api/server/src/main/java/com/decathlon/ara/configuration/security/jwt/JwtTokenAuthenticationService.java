@@ -63,7 +63,7 @@ public class JwtTokenAuthenticationService {
     public HttpHeaders createAuthenticationResponseCookieHeader(Optional<Integer> authenticationTokenExpirationInSeconds) throws AuthenticationException {
         HttpHeaders responseHeaders = new HttpHeaders();
 
-        Boolean authenticationIsEnabled = authenticationConfiguration.isEnabled();
+        boolean authenticationIsEnabled = authenticationConfiguration.isEnabled();
         if (authenticationIsEnabled) {
             Long ageInSeconds = getJWTTokenExpirationInSecond(authenticationTokenExpirationInSeconds);
             String jwt = generateToken(ageInSeconds);
@@ -177,7 +177,7 @@ public class JwtTokenAuthenticationService {
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.isNotBlank(bearerToken)) {
             String[] headerRawValue = bearerToken.split("\\s+");
-            Boolean requestContainsBearerInHeader = headerRawValue.length == 2 &&  "Bearer".equals(headerRawValue[0]);
+            boolean requestContainsBearerInHeader = headerRawValue.length == 2 &&  "Bearer".equals(headerRawValue[0]);
             if (requestContainsBearerInHeader) {
                 String jwt = headerRawValue[1];
                 JwtAuthentication authentication = new JwtAuthentication(jwt);

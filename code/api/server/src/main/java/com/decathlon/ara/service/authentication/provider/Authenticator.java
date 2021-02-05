@@ -190,7 +190,7 @@ public abstract class Authenticator<T extends AuthenticatorToken, U extends Auth
         }
 
         Pair<Boolean, Optional<Integer>> validTokenPair = isAValidToken(accessToken);
-        Boolean isAValidToken = validTokenPair.getFirst();
+        boolean isAValidToken = validTokenPair.getFirst();
         if (isAValidToken) {
             Optional<Integer> tokenAge = validTokenPair.getSecond();
             Long tokenAgeValue = jwtTokenAuthenticationService.getJWTTokenExpirationInSecond(tokenAge);

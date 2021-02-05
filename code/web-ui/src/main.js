@@ -102,7 +102,7 @@ const manageLoginRedirection = async function (to, from, next) {
       return next('login')
     }
   }
-  const requireLogin = config.authentication.enabled
+  const requireLogin = !loggedIn && config.authentication.enabled
 
   const canAccess = isPublic || loggedIn || !requireLogin
   if (!canAccess) {
@@ -136,8 +136,8 @@ const manageLoginRedirection = async function (to, from, next) {
   }
 }
 
-router.beforeEach((to, from, next) => {
-  manageLoginRedirection(to, from, next)
+router.beforeEach(async (to, from, next) => {
+  await manageLoginRedirection(to, from, next)
 
   iView.LoadingBar.start()
   util.title(to.meta.title)

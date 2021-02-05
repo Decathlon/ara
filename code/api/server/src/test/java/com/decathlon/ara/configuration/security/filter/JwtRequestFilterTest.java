@@ -38,7 +38,7 @@ import java.util.Optional;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class JwtRequestFilterTest {
+class JwtRequestFilterTest {
 
     @Mock
     private JwtTokenAuthenticationService tokenAuthenticationService;
@@ -47,7 +47,7 @@ public class JwtRequestFilterTest {
     private JwtRequestFilter requestFilter;
 
     @Test
-    public void doFilterInternal_doNotSetAuthentication_whenNoAuthenticationExtractedFromRequest() throws IOException, ServletException {
+    void doFilterInternal_doNotSetAuthentication_whenNoAuthenticationExtractedFromRequest() throws IOException, ServletException {
         // Given
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
@@ -66,7 +66,7 @@ public class JwtRequestFilterTest {
     }
 
     @Test
-    public void doFilterInternal_setAuthentication_whenAuthenticationExtractedFromRequest() throws IOException, ServletException {
+    void doFilterInternal_setAuthentication_whenAuthenticationExtractedFromRequest() throws IOException, ServletException {
         // Given
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);

@@ -49,7 +49,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class GoogleAuthenticatorTest {
+class GoogleAuthenticatorTest {
 
     @Mock
     private AuthenticationGoogleConfiguration googleConfiguration;
@@ -88,7 +88,7 @@ public class GoogleAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenProviderNotEnabled() {
+    void authenticate_throwAuthenticationException_whenProviderNotEnabled() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String code = "google_code";
@@ -106,7 +106,7 @@ public class GoogleAuthenticatorTest {
 
     // User
     @Test
-    public void authenticate_throwAuthenticationConfigurationNotFoundException_whenClientBaseUrlNull() {
+    void authenticate_throwAuthenticationConfigurationNotFoundException_whenClientBaseUrlNull() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String code = "google_code";
@@ -124,7 +124,7 @@ public class GoogleAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationConfigurationNotFoundException_whenClientSecretNotFound() {
+    void authenticate_throwAuthenticationConfigurationNotFoundException_whenClientSecretNotFound() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String code = "google_code";
@@ -144,7 +144,7 @@ public class GoogleAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationConfigurationNotFoundException_whenClientIdNotFound() {
+    void authenticate_throwAuthenticationConfigurationNotFoundException_whenClientIdNotFound() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String code = "google_code";
@@ -167,7 +167,7 @@ public class GoogleAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationTokenNotFetchedException_whenTokenAPICallThrowException() {
+    void authenticate_throwAuthenticationTokenNotFetchedException_whenTokenAPICallThrowException() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String clientId = "google_client_id";
@@ -208,7 +208,7 @@ public class GoogleAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationTokenNotFetchedException_whenTokenAPICallReturnsAnErrorStatus() {
+    void authenticate_throwAuthenticationTokenNotFetchedException_whenTokenAPICallReturnsAnErrorStatus() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String clientId = "google_client_id";
@@ -252,7 +252,7 @@ public class GoogleAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationUserNotFetchedException_whenUserAPICallThrowException() {
+    void authenticate_throwAuthenticationUserNotFetchedException_whenUserAPICallThrowException() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String clientId = "google_client_id";
@@ -308,7 +308,7 @@ public class GoogleAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationUserNotFetchedException_whenUserAPICallReturnsAnErrorStatus() {
+    void authenticate_throwAuthenticationUserNotFetchedException_whenUserAPICallReturnsAnErrorStatus() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String clientId = "google_client_id";
@@ -367,7 +367,7 @@ public class GoogleAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationUserNotFetchedException_whenUserEmailIsNotVerified() {
+    void authenticate_throwAuthenticationUserNotFetchedException_whenUserEmailIsNotVerified() {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String clientId = "google_client_id";
@@ -430,7 +430,7 @@ public class GoogleAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_returnAuthenticationDetails_whenNoErrorOccurred() throws AuthenticationException {
+    void authenticate_returnAuthenticationDetails_whenNoErrorOccurred() throws AuthenticationException {
         // Given
         UserAuthenticationRequestDTO request = mock(UserAuthenticationRequestDTO.class);
         String clientId = "google_client_id";
@@ -519,7 +519,7 @@ public class GoogleAuthenticatorTest {
 
     // Application
     @Test
-    public void authenticate_throwAuthenticationException_whenRequestIsNull() {
+    void authenticate_throwAuthenticationException_whenRequestIsNull() {
         // Given
 
         // When
@@ -530,7 +530,7 @@ public class GoogleAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenNoProviderGiven() {
+    void authenticate_throwAuthenticationException_whenNoProviderGiven() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
 
@@ -543,7 +543,7 @@ public class GoogleAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenNoTokenGiven() {
+    void authenticate_throwAuthenticationException_whenNoTokenGiven() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String provider = "provider";
@@ -558,7 +558,7 @@ public class GoogleAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenProviderIsNotEnabled() {
+    void authenticate_throwAuthenticationException_whenProviderIsNotEnabled() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "token";
@@ -575,7 +575,7 @@ public class GoogleAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenExceptionThrownWhileCheckingToken() {
+    void authenticate_throwAuthenticationException_whenExceptionThrownWhileCheckingToken() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "token";
@@ -594,7 +594,7 @@ public class GoogleAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenTokenCheckingApiCallReturnsAnErrorStatus() {
+    void authenticate_throwAuthenticationException_whenTokenCheckingApiCallReturnsAnErrorStatus() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "token";
@@ -616,7 +616,7 @@ public class GoogleAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenEmailVerifiedFieldNotFound() {
+    void authenticate_throwAuthenticationException_whenEmailVerifiedFieldNotFound() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "token";
@@ -639,7 +639,7 @@ public class GoogleAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenEmailVerifiedFieldFoundButWasNull() {
+    void authenticate_throwAuthenticationException_whenEmailVerifiedFieldFoundButWasNull() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "token";
@@ -662,7 +662,7 @@ public class GoogleAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenEmailVerifiedFieldFoundButCannotBeCastToBoolean() {
+    void authenticate_throwAuthenticationException_whenEmailVerifiedFieldFoundButCannotBeCastToBoolean() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "token";
@@ -685,7 +685,7 @@ public class GoogleAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenEmailVerifiedFieldFoundButWasFalse() {
+    void authenticate_throwAuthenticationException_whenEmailVerifiedFieldFoundButWasFalse() {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "token";
@@ -708,7 +708,7 @@ public class GoogleAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_returnAuthenticationDetails_whenEmailVerifiedIsAStringAndValidTokenGiven() throws AuthenticationException {
+    void authenticate_returnAuthenticationDetails_whenEmailVerifiedIsAStringAndValidTokenGiven() throws AuthenticationException {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "token";
@@ -739,7 +739,7 @@ public class GoogleAuthenticatorTest {
     }
 
     @Test
-    public void authenticate_returnAuthenticationDetails_whenEmailVerifiedIsABooleanAndValidTokenGiven() throws AuthenticationException {
+    void authenticate_returnAuthenticationDetails_whenEmailVerifiedIsABooleanAndValidTokenGiven() throws AuthenticationException {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "token";

@@ -55,7 +55,7 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        Boolean authenticationIsDisabled = !authenticationConfiguration.isEnabled();
+        boolean authenticationIsDisabled = !authenticationConfiguration.isEnabled();
         if (authenticationIsDisabled) {
             log.warn("ARA is starting without any authentication");
             web.ignoring().antMatchers("**");

@@ -39,7 +39,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class JwtTokenAuthenticationServiceTest {
+class JwtTokenAuthenticationServiceTest {
 
     @Mock
     private AuthenticationConfiguration authenticationConfiguration;
@@ -51,7 +51,7 @@ public class JwtTokenAuthenticationServiceTest {
     private JwtTokenAuthenticationService tokenAuthenticationService;
 
     @Test
-    public void createAuthenticationResponseCookieHeader_returnEmptyHeader_whenAuthenticationIsNotEnabled() throws AuthenticationException {
+    void createAuthenticationResponseCookieHeader_returnEmptyHeader_whenAuthenticationIsNotEnabled() throws AuthenticationException {
         // Given
 
         // When
@@ -64,7 +64,7 @@ public class JwtTokenAuthenticationServiceTest {
     }
 
     @Test
-    public void createAuthenticationResponseCookieHeader_throwAuthenticationException_whenTokenExpirationNotFound() {
+    void createAuthenticationResponseCookieHeader_throwAuthenticationException_whenTokenExpirationNotFound() {
         // Given
 
         // When
@@ -77,7 +77,7 @@ public class JwtTokenAuthenticationServiceTest {
     }
 
     @Test
-    public void createAuthenticationResponseCookieHeader_throwAuthenticationConfigurationNotFoundException_whenTokenSecretNotFound() {
+    void createAuthenticationResponseCookieHeader_throwAuthenticationConfigurationNotFoundException_whenTokenSecretNotFound() {
         // Given
         Long tokenExpirationInMilliseconds = 3600000L;
 
@@ -92,7 +92,7 @@ public class JwtTokenAuthenticationServiceTest {
     }
 
     @Test
-    public void createAuthenticationResponseCookieHeader_returnHeaderContainingCookie_whenNoError() throws AuthenticationException {
+    void createAuthenticationResponseCookieHeader_returnHeaderContainingCookie_whenNoError() throws AuthenticationException {
         // Given
         Long tokenExpirationInSeconds = 3600L;
 
@@ -119,7 +119,7 @@ public class JwtTokenAuthenticationServiceTest {
     }
 
     @Test
-    public void deleteAuthenticationCookie_returnHeaderContainingEmptyCookie_whenIsUsingHttps() {
+    void deleteAuthenticationCookie_returnHeaderContainingEmptyCookie_whenIsUsingHttps() {
         // Given
 
         // When
@@ -141,7 +141,7 @@ public class JwtTokenAuthenticationServiceTest {
     }
 
     @Test
-    public void deleteAuthenticationCookie_returnHeaderContainingEmptyCookie_whenIsNotUsingHttps() {
+    void deleteAuthenticationCookie_returnHeaderContainingEmptyCookie_whenIsNotUsingHttps() {
         // Given
 
         // When
@@ -165,7 +165,7 @@ public class JwtTokenAuthenticationServiceTest {
     }
 
     @Test
-    public void getAuthenticationFromRequest_returnEmptyAuthentication_whenHeaderAuthorizationNotFoundAndCookieNull() {
+    void getAuthenticationFromRequest_returnEmptyAuthentication_whenHeaderAuthorizationNotFoundAndCookieNull() {
         // Given
         HttpServletRequest request = mock(HttpServletRequest.class);
 
@@ -181,7 +181,7 @@ public class JwtTokenAuthenticationServiceTest {
     }
 
     @Test
-    public void getAuthenticationFromRequest_returnEmptyAuthentication_whenHeaderAuthorizationDoesNotContainBearerAndCookieNull() {
+    void getAuthenticationFromRequest_returnEmptyAuthentication_whenHeaderAuthorizationDoesNotContainBearerAndCookieNull() {
         // Given
         HttpServletRequest request = mock(HttpServletRequest.class);
 
@@ -199,7 +199,7 @@ public class JwtTokenAuthenticationServiceTest {
     }
 
     @Test
-    public void getAuthenticationFromRequest_returnEmptyAuthentication_whenHeaderAuthorizationContainsOnlyTheBearerAndCookieNull() {
+    void getAuthenticationFromRequest_returnEmptyAuthentication_whenHeaderAuthorizationContainsOnlyTheBearerAndCookieNull() {
         // Given
         HttpServletRequest request = mock(HttpServletRequest.class);
 
@@ -217,7 +217,7 @@ public class JwtTokenAuthenticationServiceTest {
     }
 
     @Test
-    public void getAuthenticationFromRequest_returnEmptyAuthentication_whenHeaderAuthorizationNotFoundAndCookiesEmpty() {
+    void getAuthenticationFromRequest_returnEmptyAuthentication_whenHeaderAuthorizationNotFoundAndCookiesEmpty() {
         // Given
         HttpServletRequest request = mock(HttpServletRequest.class);
 
@@ -235,7 +235,7 @@ public class JwtTokenAuthenticationServiceTest {
     }
 
     @Test
-    public void getAuthenticationFromRequest_returnEmptyAuthentication_whenHeaderAuthorizationNotFoundAndCookieNameNotFound() {
+    void getAuthenticationFromRequest_returnEmptyAuthentication_whenHeaderAuthorizationNotFoundAndCookieNameNotFound() {
         // Given
         HttpServletRequest request = mock(HttpServletRequest.class);
 
@@ -263,7 +263,7 @@ public class JwtTokenAuthenticationServiceTest {
     }
 
     @Test
-    public void getAuthenticationFromRequest_returnAuthentication_whenHeaderAuthorizationBearerFound() {
+    void getAuthenticationFromRequest_returnAuthentication_whenHeaderAuthorizationBearerFound() {
         // Given
         HttpServletRequest request = mock(HttpServletRequest.class);
 
@@ -280,7 +280,7 @@ public class JwtTokenAuthenticationServiceTest {
     }
 
     @Test
-    public void getAuthenticationFromRequest_returnAuthentication_whenHeaderAuthorizationNotFoundButCookieFound() {
+    void getAuthenticationFromRequest_returnAuthentication_whenHeaderAuthorizationNotFoundButCookieFound() {
         // Given
         HttpServletRequest request = mock(HttpServletRequest.class);
 
@@ -306,7 +306,7 @@ public class JwtTokenAuthenticationServiceTest {
     }
 
     @Test
-    public void getJWTTokenExpiration_throwAuthenticationException_whenTokenExpirationConfigurationNotFoundAndAuthenticationTokenExpirationHasNoValue() {
+    void getJWTTokenExpiration_throwAuthenticationException_whenTokenExpirationConfigurationNotFoundAndAuthenticationTokenExpirationHasNoValue() {
         // Given
 
         // When
@@ -318,7 +318,7 @@ public class JwtTokenAuthenticationServiceTest {
     }
 
     @Test
-    public void getJWTTokenExpiration_throwAuthenticationException_whenConfigurationTokenExpirationZeroAndAuthenticationTokenExpirationHasNoValue() {
+    void getJWTTokenExpiration_throwAuthenticationException_whenConfigurationTokenExpirationZeroAndAuthenticationTokenExpirationHasNoValue() {
         // Given
 
         // When
@@ -330,7 +330,7 @@ public class JwtTokenAuthenticationServiceTest {
     }
 
     @Test
-    public void getJWTTokenExpiration_throwAuthenticationException_whenConfigurationTokenExpirationZeroAndAuthenticationTokenExpirationZero() {
+    void getJWTTokenExpiration_throwAuthenticationException_whenConfigurationTokenExpirationZeroAndAuthenticationTokenExpirationZero() {
         // Given
 
         // When
@@ -342,7 +342,7 @@ public class JwtTokenAuthenticationServiceTest {
     }
 
     @Test
-    public void getJWTTokenExpiration_returnConfigurationExpiration_whenConfigurationTokenExpirationGreaterThanZeroAndAuthenticationTokenExpirationZero() throws AuthenticationException {
+    void getJWTTokenExpiration_returnConfigurationExpiration_whenConfigurationTokenExpirationGreaterThanZeroAndAuthenticationTokenExpirationZero() throws AuthenticationException {
         // Given
         Long configurationExpiration = 3600L;
 
@@ -355,7 +355,7 @@ public class JwtTokenAuthenticationServiceTest {
     }
 
     @Test
-    public void getJWTTokenExpiration_returnAuthenticationTokenExpiration_whenTokenExpirationConfigurationNotFoundAndAuthenticationTokenExpirationGreaterThanZero() throws AuthenticationException {
+    void getJWTTokenExpiration_returnAuthenticationTokenExpiration_whenTokenExpirationConfigurationNotFoundAndAuthenticationTokenExpirationGreaterThanZero() throws AuthenticationException {
         // Given
         Integer authenticationTokenExpiration = 3600;
 
@@ -368,7 +368,7 @@ public class JwtTokenAuthenticationServiceTest {
     }
 
     @Test
-    public void getJWTTokenExpiration_returnConfigurationExpiration_whenTokenExpirationConfigurationLowerThanAuthenticationTokenExpiration() throws AuthenticationException {
+    void getJWTTokenExpiration_returnConfigurationExpiration_whenTokenExpirationConfigurationLowerThanAuthenticationTokenExpiration() throws AuthenticationException {
         // Given
         Integer authenticationTokenExpiration = 3600;
         Long configurationExpiration = 1800L;
@@ -382,7 +382,7 @@ public class JwtTokenAuthenticationServiceTest {
     }
 
     @Test
-    public void getJWTTokenExpiration_returnAuthenticationTokenExpiration_whenTokenExpirationConfigurationGreaterThanAuthenticationTokenExpiration() throws AuthenticationException {
+    void getJWTTokenExpiration_returnAuthenticationTokenExpiration_whenTokenExpirationConfigurationGreaterThanAuthenticationTokenExpiration() throws AuthenticationException {
         // Given
         Integer authenticationTokenExpiration = 1800;
         Long configurationExpiration = 3600L;

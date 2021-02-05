@@ -48,7 +48,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AuthenticationServiceTest {
+class AuthenticationServiceTest {
 
     @Mock
     private AuthenticationStrategy authenticationStrategy;
@@ -72,7 +72,7 @@ public class AuthenticationServiceTest {
     private AuthenticationService authenticationService;
 
     @Test
-    public void authenticate_throwAuthenticationException_whenUserRequestIsNull() {
+    void authenticate_throwAuthenticationException_whenUserRequestIsNull() {
         // Given
 
         // When
@@ -83,7 +83,7 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenNoUserAuthenticatorFound() {
+    void authenticate_throwAuthenticationException_whenNoUserAuthenticatorFound() {
         // Given
         UserAuthenticationRequestDTO authenticationRequest = mock(UserAuthenticationRequestDTO.class);
 
@@ -103,7 +103,7 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    public void authenticate_returnUserAuthenticationResponse_whenAuthenticatorFound() throws AuthenticationException {
+    void authenticate_returnUserAuthenticationResponse_whenAuthenticatorFound() throws AuthenticationException {
         // Given
         UserAuthenticationRequestDTO authenticationRequest = mock(UserAuthenticationRequestDTO.class);
 
@@ -131,7 +131,7 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenAppRequestIsNull() {
+    void authenticate_throwAuthenticationException_whenAppRequestIsNull() {
         // Given
 
         // When
@@ -142,7 +142,7 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    public void authenticate_throwAuthenticationException_whenNoAppAuthenticatorFound() {
+    void authenticate_throwAuthenticationException_whenNoAppAuthenticatorFound() {
         // Given
         AppAuthenticationRequestDTO authenticationRequest = mock(AppAuthenticationRequestDTO.class);
 
@@ -162,7 +162,7 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    public void authenticate_returnAppAuthenticationDetails_whenAuthenticatorFound() throws AuthenticationException {
+    void authenticate_returnAppAuthenticationDetails_whenAuthenticatorFound() throws AuthenticationException {
         // Given
         AppAuthenticationRequestDTO authenticationRequest = mock(AppAuthenticationRequestDTO.class);
 
@@ -189,7 +189,7 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    public void getAuthenticationConfiguration_returnClientConfiguration_whenNoProviderConfigurationMissing() {
+    void getAuthenticationConfiguration_returnClientConfiguration_whenNoProviderConfigurationMissing() {
         // Given
         String googleClientId = "google-client-id";
         String clientBaseUrl = "http://my-front-base-url.org";

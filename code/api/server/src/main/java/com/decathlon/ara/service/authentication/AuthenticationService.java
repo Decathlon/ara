@@ -78,7 +78,10 @@ public class AuthenticationService {
         Authenticator authenticator = authenticatorAndProviderDetails.getFirst();
         AuthenticationProviderDetailsDTO providerDetailsDTO = authenticatorAndProviderDetails.getSecond();
         ResponseEntity<UserAuthenticationDetailsDTO> authenticationResponse = authenticator.authenticate(request);
-        authenticationResponse.getBody().setProvider(providerDetailsDTO);
+        UserAuthenticationDetailsDTO authenticationResponseBody = authenticationResponse.getBody();
+        if (authenticationResponseBody != null) {
+            authenticationResponseBody.setProvider(providerDetailsDTO);
+        }
         return authenticationResponse;
     }
 

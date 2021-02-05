@@ -24,10 +24,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-public class AuthenticationJwtTokenConfigurationTest {
+class AuthenticationJwtTokenConfigurationTest {
 
     @Test
-    public void getAccessTokenExpirationInMillisecond_returnZero_whenAccessTokenExpirationIsNull() {
+    void getAccessTokenExpirationInMillisecond_returnZero_whenAccessTokenExpirationIsNull() {
         // Given
         AuthenticationJwtTokenConfiguration tokenConfiguration = new AuthenticationJwtTokenConfiguration();
         tokenConfiguration.setAccessTokenExpirationInSecond(null);
@@ -40,7 +40,7 @@ public class AuthenticationJwtTokenConfigurationTest {
     }
 
     @Test
-    public void getAccessTokenExpirationInMillisecond_returnAccessTokenExpirationInSecond_whenAccessTokenExpirationIsNotNull() {
+    void getAccessTokenExpirationInMillisecond_returnAccessTokenExpirationInSecond_whenAccessTokenExpirationIsNotNull() {
         // Given
         AuthenticationJwtTokenConfiguration tokenConfiguration = new AuthenticationJwtTokenConfiguration();
         tokenConfiguration.setAccessTokenExpirationInSecond(60L);
@@ -53,7 +53,7 @@ public class AuthenticationJwtTokenConfigurationTest {
     }
 
     @Test
-    public void isUsingHttps_returnFalse_whenUsingHttpsIsNull() {
+    void isUsingHttps_returnFalse_whenUsingHttpsIsNull() {
         // Given
         AuthenticationJwtTokenConfiguration tokenConfiguration = new AuthenticationJwtTokenConfiguration();
         tokenConfiguration.setUsingHttps(null);
@@ -66,7 +66,7 @@ public class AuthenticationJwtTokenConfigurationTest {
     }
 
     @Test
-    public void isUsingHttps_returnUsingHttps_whenUsingHttpsIsNotNull() {
+    void isUsingHttps_returnUsingHttps_whenUsingHttpsIsNotNull() {
         // Given
         AuthenticationJwtTokenConfiguration tokenConfiguration = new AuthenticationJwtTokenConfiguration();
         tokenConfiguration.setUsingHttps(true);

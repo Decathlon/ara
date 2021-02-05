@@ -1,6 +1,6 @@
 <template>
   <div @click="goToGoogleOAuthPage()">
-    <i :class="'fa fa-' + provider.icon + ' fa-fw'"></i><span>{{provider.display}}</span>
+    <em :class="'fa fa-' + provider.icon + ' fa-fw'"></em><span>{{provider.display}}</span>
   </div>
 </template>
 
@@ -23,7 +23,3 @@ export default {
   }
 }
 </script>
-
-<style>
-
-</style>

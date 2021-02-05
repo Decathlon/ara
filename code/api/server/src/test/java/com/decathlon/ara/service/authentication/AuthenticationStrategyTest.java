@@ -40,7 +40,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class AuthenticationStrategyTest {
+class AuthenticationStrategyTest {
 
     @Mock
     private CustomAuthenticator customAuthenticator;
@@ -55,7 +55,7 @@ public class AuthenticationStrategyTest {
     private AuthenticationStrategy authenticationStrategy;
 
     @Test
-    public void getAuthenticatorAndProviderDetails_returnEmptyOptional_whenNameIsBlank() {
+    void getAuthenticatorAndProviderDetails_returnEmptyOptional_whenNameIsBlank() {
         // Given
         AuthenticationProvidersConfigurationDTO providersConfiguration = mock(AuthenticationProvidersConfigurationDTO.class);
 
@@ -69,7 +69,7 @@ public class AuthenticationStrategyTest {
     }
 
     @Test
-    public void getAuthenticatorAndProviderDetails_returnEmptyOptional_whenProviderIsNull() {
+    void getAuthenticatorAndProviderDetails_returnEmptyOptional_whenProviderIsNull() {
         // Given
         String providerName = "any_provider_name";
 
@@ -83,7 +83,7 @@ public class AuthenticationStrategyTest {
     }
 
     @Test
-    public void getAuthenticatorAndProviderDetails_returnCustomAuthenticator_whenCustomProviderNameGiven() {
+    void getAuthenticatorAndProviderDetails_returnCustomAuthenticator_whenCustomProviderNameGiven() {
         // Given
         String providerName = "custom";
         AuthenticationProvidersConfigurationDTO providersConfiguration = mock(AuthenticationProvidersConfigurationDTO.class);
@@ -106,7 +106,7 @@ public class AuthenticationStrategyTest {
     }
 
     @Test
-    public void getAuthenticatorAndProviderDetails_returnGithubAuthenticator_whenGithubProviderNameGiven() {
+    void getAuthenticatorAndProviderDetails_returnGithubAuthenticator_whenGithubProviderNameGiven() {
         // Given
         String providerName = "github";
         AuthenticationProvidersConfigurationDTO providersConfiguration = mock(AuthenticationProvidersConfigurationDTO.class);
@@ -129,7 +129,7 @@ public class AuthenticationStrategyTest {
     }
 
     @Test
-    public void getAuthenticatorAndProviderDetails_returnGoogleAuthenticator_whenGoogleProviderNameGiven() {
+    void getAuthenticatorAndProviderDetails_returnGoogleAuthenticator_whenGoogleProviderNameGiven() {
         // Given
         String providerName = "google";
         AuthenticationProvidersConfigurationDTO providersConfiguration = mock(AuthenticationProvidersConfigurationDTO.class);
@@ -152,7 +152,7 @@ public class AuthenticationStrategyTest {
     }
 
     @Test
-    public void getAuthenticatorAndProviderDetails_returnEmptyOptional_whenUnknownProviderNameGiven() {
+    void getAuthenticatorAndProviderDetails_returnEmptyOptional_whenUnknownProviderNameGiven() {
         // Given
         String providerName = "<unknown-provider-name>";
         AuthenticationProvidersConfigurationDTO providersConfiguration = mock(AuthenticationProvidersConfigurationDTO.class);
