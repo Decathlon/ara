@@ -94,6 +94,13 @@
             <version>0.9.1</version>
         </dependency>
 
+        <!-- Configuration -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!-- Inject getters/setters for POJO beans -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -284,6 +291,14 @@
             <plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-configuration-processor</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
 			</plugin>
 
             <plugin>
