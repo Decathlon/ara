@@ -25,7 +25,6 @@ import io.jsonwebtoken.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -39,6 +38,8 @@ import org.springframework.stereotype.Service;
 import javax.security.auth.Subject;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.*;
 
 @Slf4j
@@ -106,9 +107,11 @@ public class JwtTokenAuthenticationService {
      * @throws AuthenticationConfigurationNotFoundException thrown if the secret was not found in the configuration
      */
     public String generateToken(Long tokenAgeInSeconds) throws AuthenticationConfigurationNotFoundException {
-        Integer min = 10;
-        Integer max = 30;
-        String subject = RandomStringUtils.randomAscii(min, max);
+        SecureRandom random = new SecureRandom();
+        byte[] bytes = new byte[20];
+        random.nextBytes(bytes);
+
+        String subject = new String(bytes, StandardCharsets.UTF_8);
         Date now = new Date();
         Long tokenExpiration = tokenAgeInSeconds * 1000;
         Long duration = now.getTime() + tokenExpiration;
