@@ -2,7 +2,7 @@
   <div class="main-container">
     <div class="login-box">
       <div class="login-title">
-        <img src="../assets/favicon.png" width="32" height="32"/>
+        <img src="../assets/favicon.png" width="32" height="32" alt="ARA logo"/>
         <span>Login to ARA</span>
       </div>
       <div class="signin-selection" v-if="configuration.isComplete">

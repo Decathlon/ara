@@ -49,10 +49,10 @@
             <Avatar v-if="user && user.picture" :src="user.picture" size="large" />
             <Avatar v-else icon="md-person" style="color: #0082c3;background-color: white" size="large"/>
             <div slot="content">
-              <p v-if="provider && provider.name">Connected via <b>{{provider.name}}</b></p>
-              <p v-if="user && user.login">> Login: <b>{{user.login}}</b></p>
-              <p v-if="user && user.name">> Name: <b>{{user.name}}</b></p>
-              <p v-if="user && user.email">> Email: <b>{{user.email}}</b></p>
+              <p v-if="provider && provider.name">Connected via <strong>{{provider.name}}</strong></p>
+              <p v-if="user && user.login">> Login: <strong>{{user.login}}</strong></p>
+              <p v-if="user && user.name">> Name: <strong>{{user.name}}</strong></p>
+              <p v-if="user && user.email">> Email: <strong>{{user.email}}</strong></p>
             </div>
           </Tooltip>
         </span>
