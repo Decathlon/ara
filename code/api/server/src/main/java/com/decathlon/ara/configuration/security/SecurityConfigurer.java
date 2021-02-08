@@ -31,15 +31,13 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Slf4j
 @EnableWebSecurity
 @Configuration
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
-
-    @Value("${security.enable-csrf:false}")
-    private boolean csrfEnabled;
 
     private final String[] SWAGGER_RESOURCES = {
             "/v3/api-docs/**",
@@ -71,6 +69,10 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
         http
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
+            .csrf()
+            .ignoringAntMatchers("/auth/login")
+            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+        .and()
             .authorizeRequests()
                 .antMatchers("/actuator/**").permitAll()
                 .antMatchers("/auth/**").permitAll()
@@ -78,9 +80,5 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
         .and()
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
-
-        if(!csrfEnabled) {
-            http.csrf().disable();
-        }
     }
 }
