@@ -113,6 +113,8 @@ spec:
             items:
               - key: "application-auth.properties"
                 path: "application-auth.properties"
+              - key: "application-custom.properties"
+                path: "application-custom.properties"
       {{- if .Values.api.volumes }}
 {{ toYaml .Values.api.volumes | indent 6 }}
       {{- end}}

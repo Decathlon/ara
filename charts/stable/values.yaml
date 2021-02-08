@@ -27,6 +27,7 @@ api:
     # Used to redirect on the app by email service among others
     appUrl: ara.test
     authProperties: ""
+    customProperties: ""
     # sideCarContainer:
     # volumes:
 

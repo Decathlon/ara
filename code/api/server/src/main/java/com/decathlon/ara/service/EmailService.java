@@ -19,6 +19,7 @@ package com.decathlon.ara.service;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Optional;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import lombok.NonNull;
@@ -42,8 +43,7 @@ public class EmailService {
     @NonNull
     private final TemplateEngine templateEngine;
 
-    @NonNull
-    private final JavaMailSender emailSender;
+    private final Optional<JavaMailSender> emailSender;
 
     /**
      * Send an HTML mail message.
@@ -56,8 +56,9 @@ public class EmailService {
      * @param inlineResources the optional (can be null and can be empty) map of inline resources (images...) to be used by the template (the key is the name to use in the template: eg. key="signature.png" to use it as "&lt;img src="cid:signature.png"/&gt;" in the template)
      */
     public void sendHtmlMessage(String from, String to, String subject, String templateName, Map<String, Object> variables, Map<String, Resource> inlineResources) {
+        var emailSenderInit = emailSender.orElseThrow(() -> new RuntimeException("No Spring mail been configured"));
         try {
-            MimeMessage message = emailSender.createMimeMessage();
+            MimeMessage message = emailSenderInit.createMimeMessage();
 
             MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
             helper.setFrom(from);
@@ -66,7 +67,7 @@ public class EmailService {
             helper.setText(buildHtmlContent(templateName, variables), true);
             addInlineResources(inlineResources, helper);
 
-            emailSender.send(message);
+            emailSenderInit.send(message);
         } catch (MessagingException e) {
             log.error("Cannot send email", e);
         }

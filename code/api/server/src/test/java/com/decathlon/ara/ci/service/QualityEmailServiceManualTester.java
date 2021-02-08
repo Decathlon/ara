@@ -107,7 +107,7 @@ public class QualityEmailServiceManualTester {
                     "in the 'to' system property, eg. with the VM argument -D" + "to=me@company.com");
         }
 
-        EmailService emailService = new EmailService(templateEngine, emailSender);
+        EmailService emailService = new EmailService(templateEngine, Optional.of(emailSender));
 
         cut = new QualityEmailService(araConfiguration, executionHistoryService, teamRepository, emailService, projectRepository, settingService);
 
