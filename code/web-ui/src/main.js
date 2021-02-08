@@ -34,6 +34,7 @@ import { AuthenticationService } from './service/authentication.service'
 import configurationPlugin from '@/config'
 import { config } from './config'
 import api from './libs/api'
+import VueCookies from 'vue-cookies'
 
 Vue.use(Vue2Filters)
 Vue.use(VueResource)
@@ -41,6 +42,12 @@ Vue.use(VueRouter)
 Vue.use(iView, { locale })
 Vue.use(VueVirtualScroller)
 Vue.use(configurationPlugin)
+Vue.use(VueCookies)
+
+Vue.http.interceptors.push((request, next) => {
+  request.headers.set('X-XSRF-TOKEN', Vue.$cookies.get(['XSRF-TOKEN']))
+  next()
+})
 
 Vue.http.interceptors.push(function (request, next) {
   next(function (response) {
@@ -146,7 +153,7 @@ router.beforeEach(async (to, from, next) => {
   next()
 })
 
-router.afterEach((to, from, next) => {
+router.afterEach(() => {
   iView.LoadingBar.finish()
   window.scrollTo(0, 0)
 })
