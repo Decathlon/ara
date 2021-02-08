@@ -63,11 +63,7 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
         if (authenticationIsDisabled) {
             log.warn("ARA is starting without any authentication");
             web.ignoring().antMatchers("**");
-            return;
         }
-        web.ignoring()
-                .antMatchers("/auth/**")
-                .antMatchers(SWAGGER_RESOURCES);
     }
 
     @Override
@@ -76,7 +72,10 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
             .authorizeRequests()
-            .anyRequest().authenticated()
+                .antMatchers("/actuator/**").permitAll()
+                .antMatchers("/auth/**").permitAll()
+                .antMatchers(SWAGGER_RESOURCES).permitAll()
+                .anyRequest().authenticated()
         .and()
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
