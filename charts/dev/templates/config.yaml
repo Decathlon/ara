@@ -16,3 +16,7 @@ data:
   liquibase_active: {{ .Values.database.liquibaseActive | quote }}
   app_url: {{ .Values.api.appUrl }}
   api_url: {{ printf "%s-api.%s.svc.cluster.local:%.0f" .Chart.Name .Release.Namespace .Values.api.port }}
+  application-auth.properties: |
+{{ .Values.api.authProperties | indent 4 }}
+  application-custom.properties: |
+{{ .Values.api.customProperties | indent 4 }}
