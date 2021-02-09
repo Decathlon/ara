@@ -18,11 +18,14 @@
 package com.decathlon.ara.service.authentication;
 
 import com.decathlon.ara.configuration.AraConfiguration;
+import com.decathlon.ara.configuration.authentication.provider.AuthenticationProviderConfiguration;
 import com.decathlon.ara.configuration.authentication.provider.custom.AuthenticationCustomConfiguration;
 import com.decathlon.ara.configuration.authentication.provider.github.AuthenticationGithubConfiguration;
 import com.decathlon.ara.configuration.authentication.provider.google.AuthenticationGoogleConfiguration;
 import com.decathlon.ara.service.authentication.exception.AuthenticationException;
 import com.decathlon.ara.service.authentication.provider.Authenticator;
+import com.decathlon.ara.service.dto.authentication.provider.AuthenticatorToken;
+import com.decathlon.ara.service.dto.authentication.provider.AuthenticatorUser;
 import com.decathlon.ara.service.dto.authentication.request.AppAuthenticationRequestDTO;
 import com.decathlon.ara.service.dto.authentication.request.AuthenticationRequestDTO;
 import com.decathlon.ara.service.dto.authentication.request.UserAuthenticationRequestDTO;
@@ -74,8 +77,8 @@ public class AuthenticationService {
      * @throws AuthenticationException thrown if the authentication has failed
      */
     public ResponseEntity<UserAuthenticationDetailsDTO> authenticate(UserAuthenticationRequestDTO request) throws AuthenticationException {
-        Pair<Authenticator, AuthenticationProviderDetailsDTO> authenticatorAndProviderDetails = getAuthenticatorAndProviderDetails(request);
-        Authenticator authenticator = authenticatorAndProviderDetails.getFirst();
+        Pair<Authenticator<AuthenticatorToken, AuthenticatorUser, AuthenticationProviderConfiguration>, AuthenticationProviderDetailsDTO> authenticatorAndProviderDetails = getAuthenticatorAndProviderDetails(request);
+        Authenticator<AuthenticatorToken, AuthenticatorUser, AuthenticationProviderConfiguration> authenticator = authenticatorAndProviderDetails.getFirst();
         AuthenticationProviderDetailsDTO providerDetailsDTO = authenticatorAndProviderDetails.getSecond();
         ResponseEntity<UserAuthenticationDetailsDTO> authenticationResponse = authenticator.authenticate(request);
         UserAuthenticationDetailsDTO authenticationResponseBody = authenticationResponse.getBody();
@@ -92,8 +95,8 @@ public class AuthenticationService {
      * @throws AuthenticationException thrown if the authentication has failed
      */
     public ResponseEntity<AppAuthenticationDetailsDTO> authenticate(AppAuthenticationRequestDTO request) throws AuthenticationException {
-        Pair<Authenticator, AuthenticationProviderDetailsDTO> authenticatorAndProviderDetails = getAuthenticatorAndProviderDetails(request);
-        Authenticator authenticator = authenticatorAndProviderDetails.getFirst();
+        Pair<Authenticator<AuthenticatorToken, AuthenticatorUser, AuthenticationProviderConfiguration>, AuthenticationProviderDetailsDTO> authenticatorAndProviderDetails = getAuthenticatorAndProviderDetails(request);
+        Authenticator<AuthenticatorToken, AuthenticatorUser, AuthenticationProviderConfiguration> authenticator = authenticatorAndProviderDetails.getFirst();
         return authenticator.authenticate(request);
     }
 
@@ -103,7 +106,7 @@ public class AuthenticationService {
      * @return the authenticator and its provider details
      * @throws AuthenticationException if no match found
      */
-    private Pair<Authenticator, AuthenticationProviderDetailsDTO> getAuthenticatorAndProviderDetails(AuthenticationRequestDTO request) throws AuthenticationException {
+    private Pair<Authenticator<AuthenticatorToken, AuthenticatorUser, AuthenticationProviderConfiguration>, AuthenticationProviderDetailsDTO> getAuthenticatorAndProviderDetails(AuthenticationRequestDTO request) throws AuthenticationException {
         if (request == null) {
             throw new AuthenticationException("Could not authenticate because the request was null");
         }

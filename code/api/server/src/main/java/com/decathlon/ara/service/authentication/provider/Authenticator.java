@@ -134,7 +134,7 @@ public abstract class Authenticator<T extends AuthenticatorToken, U extends Auth
      * @param request the authentication request
      * @return the token api request
      */
-    protected abstract HttpEntity getTokenRequest(UserAuthenticationRequestDTO request);
+    protected abstract HttpEntity<? extends Object> getTokenRequest(UserAuthenticationRequestDTO request);
 
     /**
      * Get the uri to call to fetch the user
@@ -154,7 +154,7 @@ public abstract class Authenticator<T extends AuthenticatorToken, U extends Auth
      * @param token the token previously fetched
      * @return the user api request
      */
-    protected abstract HttpEntity getUserRequest(T token);
+    protected abstract HttpEntity<? extends Object> getUserRequest(T token);
 
     /**
      * Convert an user returned by the oauth provider api into an ARA user
@@ -210,7 +210,7 @@ public abstract class Authenticator<T extends AuthenticatorToken, U extends Auth
     protected Pair<Boolean, Optional<Integer>> isAValidToken(String token) throws AuthenticationException {
         String url = getTokenValidationUri(token);
         HttpMethod method = getTokenValidationMethod();
-        HttpEntity request = getTokenValidationRequest(token);
+        HttpEntity<Object> request = getTokenValidationRequest(token);
 
         ResponseEntity<Object> response;
         try {
@@ -280,7 +280,7 @@ public abstract class Authenticator<T extends AuthenticatorToken, U extends Auth
      * @param token the token to check
      * @return the http request
      */
-    protected abstract HttpEntity getTokenValidationRequest(String token);
+    protected abstract HttpEntity<Object> getTokenValidationRequest(String token);
 
     /**
      * After calling the token verification api, it may be required to check a value in the returned object.

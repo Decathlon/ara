@@ -17,10 +17,13 @@
 
 package com.decathlon.ara.service.authentication;
 
+import com.decathlon.ara.configuration.authentication.provider.AuthenticationProviderConfiguration;
 import com.decathlon.ara.service.authentication.provider.Authenticator;
 import com.decathlon.ara.service.authentication.provider.custom.CustomAuthenticator;
 import com.decathlon.ara.service.authentication.provider.github.GithubAuthenticator;
 import com.decathlon.ara.service.authentication.provider.google.GoogleAuthenticator;
+import com.decathlon.ara.service.dto.authentication.provider.AuthenticatorToken;
+import com.decathlon.ara.service.dto.authentication.provider.AuthenticatorUser;
 import com.decathlon.ara.service.dto.authentication.response.configuration.provider.AuthenticationProvidersConfigurationDTO;
 import com.decathlon.ara.service.dto.authentication.response.configuration.provider.CustomAuthenticationProviderConfigurationDTO;
 import com.decathlon.ara.service.dto.authentication.response.configuration.provider.GithubAuthenticationProviderConfigurationDTO;
@@ -62,7 +65,7 @@ class AuthenticationStrategyTest {
         // When
 
         // Then
-        Optional<Pair<Authenticator, AuthenticationProviderDetailsDTO>> authenticatorAndProviderDetails = authenticationStrategy.getAuthenticatorAndProviderDetails(null, providersConfiguration);
+        Optional<Pair<Authenticator<AuthenticatorToken, AuthenticatorUser, AuthenticationProviderConfiguration>, AuthenticationProviderDetailsDTO>> authenticatorAndProviderDetails = authenticationStrategy.getAuthenticatorAndProviderDetails(null, providersConfiguration);
         assertThat(authenticatorAndProviderDetails)
                 .isNotNull()
                 .isEmpty();
@@ -76,7 +79,7 @@ class AuthenticationStrategyTest {
         // When
 
         // Then
-        Optional<Pair<Authenticator, AuthenticationProviderDetailsDTO>> authenticatorAndProviderDetails = authenticationStrategy.getAuthenticatorAndProviderDetails(providerName, null);
+        Optional<Pair<Authenticator<AuthenticatorToken, AuthenticatorUser, AuthenticationProviderConfiguration>, AuthenticationProviderDetailsDTO>> authenticatorAndProviderDetails = authenticationStrategy.getAuthenticatorAndProviderDetails(providerName, null);
         assertThat(authenticatorAndProviderDetails)
                 .isNotNull()
                 .isEmpty();
@@ -97,7 +100,7 @@ class AuthenticationStrategyTest {
         when(providersConfiguration.getGithub()).thenReturn(githubConfiguration);
 
         // Then
-        Optional<Pair<Authenticator, AuthenticationProviderDetailsDTO>> authenticatorAndProviderDetails = authenticationStrategy.getAuthenticatorAndProviderDetails(providerName, providersConfiguration);
+        Optional<Pair<Authenticator<AuthenticatorToken, AuthenticatorUser, AuthenticationProviderConfiguration>, AuthenticationProviderDetailsDTO>> authenticatorAndProviderDetails = authenticationStrategy.getAuthenticatorAndProviderDetails(providerName, providersConfiguration);
         assertThat(authenticatorAndProviderDetails)
                 .isNotNull()
                 .isNotEmpty();
@@ -120,7 +123,7 @@ class AuthenticationStrategyTest {
         when(providersConfiguration.getGithub()).thenReturn(githubConfiguration);
 
         // Then
-        Optional<Pair<Authenticator, AuthenticationProviderDetailsDTO>> authenticatorAndProviderDetails = authenticationStrategy.getAuthenticatorAndProviderDetails(providerName, providersConfiguration);
+        Optional<Pair<Authenticator<AuthenticatorToken, AuthenticatorUser, AuthenticationProviderConfiguration>, AuthenticationProviderDetailsDTO>> authenticatorAndProviderDetails = authenticationStrategy.getAuthenticatorAndProviderDetails(providerName, providersConfiguration);
         assertThat(authenticatorAndProviderDetails)
                 .isNotNull()
                 .isNotEmpty();
@@ -143,7 +146,7 @@ class AuthenticationStrategyTest {
         when(providersConfiguration.getGithub()).thenReturn(githubConfiguration);
 
         // Then
-        Optional<Pair<Authenticator, AuthenticationProviderDetailsDTO>> authenticatorAndProviderDetails = authenticationStrategy.getAuthenticatorAndProviderDetails(providerName, providersConfiguration);
+        Optional<Pair<Authenticator<AuthenticatorToken, AuthenticatorUser, AuthenticationProviderConfiguration>, AuthenticationProviderDetailsDTO>> authenticatorAndProviderDetails = authenticationStrategy.getAuthenticatorAndProviderDetails(providerName, providersConfiguration);
         assertThat(authenticatorAndProviderDetails)
                 .isNotNull()
                 .isNotEmpty();
@@ -166,7 +169,7 @@ class AuthenticationStrategyTest {
         when(providersConfiguration.getGithub()).thenReturn(githubConfiguration);
 
         // Then
-        Optional<Pair<Authenticator, AuthenticationProviderDetailsDTO>> authenticatorAndProviderDetails = authenticationStrategy.getAuthenticatorAndProviderDetails(providerName, providersConfiguration);
+        Optional<Pair<Authenticator<AuthenticatorToken, AuthenticatorUser, AuthenticationProviderConfiguration>, AuthenticationProviderDetailsDTO>> authenticatorAndProviderDetails = authenticationStrategy.getAuthenticatorAndProviderDetails(providerName, providersConfiguration);
         assertThat(authenticatorAndProviderDetails)
                 .isNotNull()
                 .isEmpty();

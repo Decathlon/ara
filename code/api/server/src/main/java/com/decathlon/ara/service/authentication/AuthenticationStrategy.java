@@ -17,10 +17,13 @@
 
 package com.decathlon.ara.service.authentication;
 
+import com.decathlon.ara.configuration.authentication.provider.AuthenticationProviderConfiguration;
 import com.decathlon.ara.service.authentication.provider.Authenticator;
 import com.decathlon.ara.service.authentication.provider.custom.CustomAuthenticator;
 import com.decathlon.ara.service.authentication.provider.github.GithubAuthenticator;
 import com.decathlon.ara.service.authentication.provider.google.GoogleAuthenticator;
+import com.decathlon.ara.service.dto.authentication.provider.AuthenticatorToken;
+import com.decathlon.ara.service.dto.authentication.provider.AuthenticatorUser;
 import com.decathlon.ara.service.dto.authentication.response.configuration.provider.*;
 import com.decathlon.ara.service.dto.authentication.response.user.AuthenticationProviderDetailsDTO;
 import lombok.NonNull;
@@ -57,7 +60,7 @@ public class AuthenticationStrategy {
      * @param providersConfiguration the provider configuration
      * @return the matching authenticator and provider details, if any
      */
-    public Optional<Pair<Authenticator, AuthenticationProviderDetailsDTO>> getAuthenticatorAndProviderDetails(
+    public Optional<Pair<Authenticator<AuthenticatorToken, AuthenticatorUser, AuthenticationProviderConfiguration>, AuthenticationProviderDetailsDTO>> getAuthenticatorAndProviderDetails(
             String providerName,
             AuthenticationProvidersConfigurationDTO providersConfiguration
     ) {
@@ -73,13 +76,13 @@ public class AuthenticationStrategy {
         AuthenticationProviderDetailsDTO githubProviderDetails = getProviderDetails(githubConfiguration);
         AuthenticationProviderDetailsDTO googleProviderDetails = getProviderDetails(googleConfiguration);
 
-        Map<String, Pair<Authenticator, AuthenticationProviderDetailsDTO>> authenticatorAndProviderDetailsByProviderName = Map.ofEntries(
+        Map<String, Pair> authenticatorAndProviderDetailsByProviderName = Map.ofEntries(
                 entry("custom", Pair.of(customAuthenticator, customProviderDetails)),
                 entry("github", Pair.of(githubAuthenticator, githubProviderDetails)),
                 entry("google", Pair.of(googleAuthenticator, googleProviderDetails))
         );
 
-        Pair<Authenticator, AuthenticationProviderDetailsDTO> authenticatorAndProviderDetails = authenticatorAndProviderDetailsByProviderName.get(providerName.toLowerCase());
+        Pair<Authenticator<AuthenticatorToken, AuthenticatorUser, AuthenticationProviderConfiguration>, AuthenticationProviderDetailsDTO> authenticatorAndProviderDetails = authenticatorAndProviderDetailsByProviderName.get(providerName.toLowerCase());
         return Optional.ofNullable(authenticatorAndProviderDetails);
     }
 
