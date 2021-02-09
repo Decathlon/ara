@@ -6,8 +6,33 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
+  pre_job_web_ui:
+    # continue-on-error: true # Uncomment once integration is finished
+    runs-on: ubuntu-latest
+    # Map a step output to a job output
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@v3.3.0
+        with:
+          github_token: ${{ github.token }}
+          paths: '["code/web-ui/**"]'
+  pre_job_api:
+    # continue-on-error: true # Uncomment once integration is finished
+    runs-on: ubuntu-latest
+    # Map a step output to a job output
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@v3.3.0
+        with:
+          github_token: ${{ github.token }}
+          paths: '["code/api/**"]'
   sonarcloud-web-ui:
     name: SonarCloud Web UI
+    if: ${{ needs.pre_job_web_ui.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -25,6 +50,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   sonarcloud-api:
     name: SonarCloud API
+    if: ${{ needs.pre_job_api.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

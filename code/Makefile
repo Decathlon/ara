@@ -130,7 +130,7 @@ update-all-version: update-chart-version update-maven-version update-front-versi
 
 update-chart-version:
 	@echo '-- Update Helm Chart version --'
-	@sed -i'.old' 's/^version:.*$\/version: $(VERSION)/' ../charts/stable/Chart.yaml
+	@sed -i'.old' 's/^version:.*$\/version: $(VERSION)-rc.1/' ../charts/dev/Chart.yaml
 
 update-maven-version:
 	@echo '-- Update Maven version --'
