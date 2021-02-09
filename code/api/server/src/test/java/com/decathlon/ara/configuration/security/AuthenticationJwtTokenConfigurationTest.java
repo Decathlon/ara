@@ -36,7 +36,7 @@ class AuthenticationJwtTokenConfigurationTest {
 
         // Then
         Long expirationInMillisecond = tokenConfiguration.getAccessTokenExpirationInMillisecond();
-        assertThat(expirationInMillisecond).isEqualTo(0L);
+        assertThat(expirationInMillisecond).isZero();
     }
 
     @Test

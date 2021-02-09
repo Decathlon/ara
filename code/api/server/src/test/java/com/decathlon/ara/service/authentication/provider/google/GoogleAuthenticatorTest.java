@@ -34,6 +34,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -638,8 +641,10 @@ class GoogleAuthenticatorTest {
                 .isInstanceOf(AuthenticationException.class);
     }
 
-    @Test
-    void authenticate_throwAuthenticationException_whenEmailVerifiedFieldFoundButWasNull() {
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {"not_a_boolean_value", "false"})
+    void authenticate_throwAuthenticationException_whenEmailNotVerified(String emailVerified) {
         // Given
         AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
         String token = "token";
@@ -654,53 +659,7 @@ class GoogleAuthenticatorTest {
         when(restTemplate.exchange("https://oauth2.googleapis.com/tokeninfo?access_token=token", HttpMethod.GET, null, Object.class))
                 .thenReturn(response);
         when(response.getStatusCode()).thenReturn(HttpStatus.OK);
-        when(response.getBody()).thenReturn(new DummyGoogleVerificationTokenContainingVerifiedEmailFieldAsString(null));
-
-        // Then
-        assertThatThrownBy(() -> authenticator.authenticate(request))
-                .isInstanceOf(AuthenticationException.class);
-    }
-
-    @Test
-    void authenticate_throwAuthenticationException_whenEmailVerifiedFieldFoundButCannotBeCastToBoolean() {
-        // Given
-        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
-        String token = "token";
-        String provider = "provider";
-
-        ResponseEntity response = mock(ResponseEntity.class);
-
-        // When
-        when(request.getProvider()).thenReturn(provider);
-        when(request.getToken()).thenReturn(token);
-        when(googleConfiguration.isEnabled()).thenReturn(true);
-        when(restTemplate.exchange("https://oauth2.googleapis.com/tokeninfo?access_token=token", HttpMethod.GET, null, Object.class))
-                .thenReturn(response);
-        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
-        when(response.getBody()).thenReturn(new DummyGoogleVerificationTokenContainingVerifiedEmailFieldAsString("not_a_boolean_value"));
-
-        // Then
-        assertThatThrownBy(() -> authenticator.authenticate(request))
-                .isInstanceOf(AuthenticationException.class);
-    }
-
-    @Test
-    void authenticate_throwAuthenticationException_whenEmailVerifiedFieldFoundButWasFalse() {
-        // Given
-        AppAuthenticationRequestDTO request = mock(AppAuthenticationRequestDTO.class);
-        String token = "token";
-        String provider = "provider";
-
-        ResponseEntity response = mock(ResponseEntity.class);
-
-        // When
-        when(request.getProvider()).thenReturn(provider);
-        when(request.getToken()).thenReturn(token);
-        when(googleConfiguration.isEnabled()).thenReturn(true);
-        when(restTemplate.exchange("https://oauth2.googleapis.com/tokeninfo?access_token=token", HttpMethod.GET, null, Object.class))
-                .thenReturn(response);
-        when(response.getStatusCode()).thenReturn(HttpStatus.OK);
-        when(response.getBody()).thenReturn(new DummyGoogleVerificationTokenContainingVerifiedEmailFieldAsString("false"));
+        when(response.getBody()).thenReturn(new DummyGoogleVerificationTokenContainingVerifiedEmailFieldAsString(emailVerified));
 
         // Then
         assertThatThrownBy(() -> authenticator.authenticate(request))
