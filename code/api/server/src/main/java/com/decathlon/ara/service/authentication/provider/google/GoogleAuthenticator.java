@@ -163,7 +163,7 @@ public class GoogleAuthenticator extends ProviderAuthenticator<GoogleToken, Goog
 
         boolean userEmailIsNotVerified = user.getVerifiedEmail() != null && !user.getVerifiedEmail();
         if (userEmailIsNotVerified) {
-            String errorMessage = String.format("The authentication has failed because this Google user account is not verified. Please login with a verified account.");
+            String errorMessage = "The authentication has failed because this Google user account is not verified. Please login with a verified account.";
             log.error(errorMessage);
             throw new AuthenticationUserNotFetchedException(errorMessage);
         }
