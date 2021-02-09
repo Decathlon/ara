@@ -114,7 +114,7 @@ jobs:
           git commit -am "chore: auto-commit chart ${VERSION}"
           git push origin HEAD:${PR_BRANCH_NAME}
         env:
-          PR_BRANCH_NAME: '${{github.payload.pull_request.head.ref}}'
+          PR_BRANCH_NAME: '${{github.event.pull_request.head.ref}}'
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.0.0
         env:
