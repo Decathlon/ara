@@ -52,7 +52,7 @@ fi
 
 java $JAVAOPS \
         -Djava.security.egd=file:/dev/./urandom \
-        -Dspring.profiles.active=db-$DATABASE_TYPE \
+        -Dspring.profiles.active=db-$DATABASE_TYPE,custom \
         $DATABASE_PARAMS \
         -Dara.clientBaseUrl="$CLIENT_URL" \
         -jar app.jar

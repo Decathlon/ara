@@ -11,7 +11,7 @@ var MiniCssExtractPlugin = require('mini-css-extract-plugin')
 var OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
 
 var env = process.env.NODE_ENV === 'testing'
-  ? require('../config/test.env')
+  ? process.env
   : config.build.env
 
 var webpackConfig = merge(baseWebpackConfig, {
@@ -49,7 +49,7 @@ var webpackConfig = merge(baseWebpackConfig, {
   plugins: [
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
     new webpack.DefinePlugin({
-      'process.env': env
+      'process.env': JSON.stringify(env)
     }),
     // extract css into its own file
     new MiniCssExtractPlugin({

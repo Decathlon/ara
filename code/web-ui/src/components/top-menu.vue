@@ -44,16 +44,33 @@
       </div>
 
       <div id="helps">
+        <span v-if="isLoggedIn" style="margin-right: 10px" class="user-avatar">
+          <Tooltip placement="bottom">
+            <Avatar v-if="user && user.picture" :src="user.picture" size="large" />
+            <Avatar v-else icon="md-person" style="color: #0082c3;background-color: white" size="large"/>
+            <div slot="content">
+              <p v-if="provider && provider.name">Connected via <strong>{{provider.name}}</strong></p>
+              <p v-if="user && user.login">> Login: <strong>{{user.login}}</strong></p>
+              <p v-if="user && user.name">> Name: <strong>{{user.name}}</strong></p>
+              <p v-if="user && user.email">> Email: <strong>{{user.email}}</strong></p>
+            </div>
+          </Tooltip>
+        </span>
         <span>V{{ appVersion }}</span>
         <!-- Keep the same width as logo+select: this is to center the menu when space is available -->
         <Tooltip content="How to use ARA?" placement="bottom-end" :transfer="true">
           <a :href="'https://github.com/decathlon/ara/blob/master/doc/user/main/UserDocumentation.adoc'"
              target="_blank"><Icon type="md-help-circle" size="24" style="padding: 0;"/></a>
-        </Tooltip><!-- No space between items
-     --><Tooltip content="What's new in ARA?" placement="bottom-end" :transfer="false">
+        </Tooltip><!-- No space between items -->
+        <Tooltip content="What's new in ARA?" placement="bottom-end" :transfer="false">
           <a :href="'https://github.com/Decathlon/ara/releases/tag/ara-' + appVersion"
              @click="setLatestChangelogVersion"
              target="_blank"><Badge dot :count="changelogCount"><Icon type="md-notifications" size="24"/></Badge></a>
+        </Tooltip>
+        <Tooltip v-if="isLoggedIn" content="Logout from ARA" placement="bottom-end">
+          <a @click="logout()">
+            <Icon type="md-exit" size="24"></Icon>
+          </a>
         </Tooltip>
       </div>
     </div>
@@ -69,6 +86,8 @@
   import projectsSelect from '../components/projects-select.vue'
 
   import constants from '../libs/constants.js'
+
+  import { AuthenticationService } from '../service/authentication.service'
 
   // Will contain the latest version when the user clicked to view the CHANGELOG:
   // a red badge will appear on the CHANGELOG icon when a new version will be available
@@ -91,11 +110,26 @@
       return {
         appVersion: undefined,
         latestChangelogVersion: this.getCookie(LATEST_CHANGELOG_VERSION_COOKIE_NAME),
-        projectCode: this.$route.params.projectCode || this.defaultProjectCode
+        projectCode: this.$route.params.projectCode || this.defaultProjectCode,
+        isLoggedIn: AuthenticationService.isAlreadyLoggedIn()
       }
     },
 
     computed: {
+      provider () {
+        const authenticationDetails = this.getAuthenticationDetails()
+        if (authenticationDetails) {
+          return authenticationDetails.provider
+        }
+      },
+
+      user () {
+        const authenticationDetails = this.getAuthenticationDetails()
+        if (authenticationDetails) {
+          return authenticationDetails.user
+        }
+      },
+
       ...mapState('projects', [
         'projects',
         'defaultProjectCode'
@@ -169,6 +203,14 @@
           this.latestChangelogVersion = this.appVersion
           this.setCookie(LATEST_CHANGELOG_VERSION_COOKIE_NAME, this.latestChangelogVersion)
         }
+      },
+
+      getAuthenticationDetails () {
+        return AuthenticationService.getDetails()
+      },
+
+      logout () {
+        AuthenticationService.logout()
       }
     },
 
@@ -206,7 +248,6 @@
   }
   #helps {
     flex: 0 1 auto;
-    width: 274px;
     text-align: right;
     line-height: calc(30px - 14px);
     font-size: 14px;
@@ -230,5 +271,9 @@
   #home-logo:hover,
   #helps a:hover {
     background-color: #2B85E4;
+  }
+
+  .user-avatar:hover {
+    cursor: pointer;
   }
 </style>

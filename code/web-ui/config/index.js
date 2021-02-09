@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 // see http://vuejs-templates.github.io/webpack for documentation.
 var path = require('path')
 
@@ -6,9 +8,17 @@ var araAPIPort = process.env.ARA_API_PORT || 8080
 
 var araAPIURL = 'http://' + araAPIHost + ':' + araAPIPort
 
+const environment = process.env
+
+const development = { ...environment }
+development.NODE_ENV = 'development'
+
+const production = { ...environment }
+production.NODE_ENV = 'production'
+
 module.exports = {
   build: {
-    env: require('./prod.env'),
+    env: production,
     index: path.resolve(__dirname, '../dist/index.html'),
     assetsRoot: path.resolve(__dirname, '../dist'),
     assetsSubDirectory: 'static',
@@ -27,7 +37,7 @@ module.exports = {
     bundleAnalyzerReport: process.env.npm_config_report
   },
   dev: {
-    env: require('./dev.env'),
+    env: development,
     port: 8081,
     autoOpenBrowser: true,
     assetsSubDirectory: 'static',
@@ -39,6 +49,10 @@ module.exports = {
     // just be aware of this issue when enabling this option.
     cssSourceMap: false,
     proxyTable: {
+      '/auth': {
+        target: araAPIURL,
+        changeOrigin: true
+      },
       '/api': {
         target: araAPIURL,
         changeOrigin: true
