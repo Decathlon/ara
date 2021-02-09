@@ -53,7 +53,7 @@ public class JwtTokenAuthenticationService {
     @NonNull
     private final AuthenticationJwtTokenConfiguration tokenConfiguration;
 
-    private final String tokenCookieName = "ara-access-token";
+    private static final String tokenCookieName = "ara-access-token";
 
     /**
      * Create a header containing an authentication cookie, if the authentication is enabled
