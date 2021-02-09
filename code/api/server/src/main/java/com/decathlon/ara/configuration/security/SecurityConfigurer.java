@@ -66,14 +66,10 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
+        http.csrf().disable()//NOSONAR
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
-            .csrf()
-            .ignoringAntMatchers("/auth/login")
-            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-        .and()
-            .authorizeRequests()
+            .authorizeRequests()//NOSONAR
                 .antMatchers("/actuator/**").permitAll()
                 .antMatchers("/auth/**").permitAll()
                 .antMatchers(SWAGGER_RESOURCES).permitAll()

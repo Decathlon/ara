@@ -44,11 +44,6 @@ Vue.use(VueVirtualScroller)
 Vue.use(configurationPlugin)
 Vue.use(VueCookies)
 
-Vue.http.interceptors.push((request, next) => {
-  request.headers.set('X-XSRF-TOKEN', Vue.$cookies.get(['XSRF-TOKEN']))
-  next()
-})
-
 Vue.http.interceptors.push(function (request, next) {
   next(function (response) {
     const status = response.status
