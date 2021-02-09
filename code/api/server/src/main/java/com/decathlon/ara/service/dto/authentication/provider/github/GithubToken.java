@@ -24,9 +24,9 @@ import lombok.EqualsAndHashCode;
 
 import java.util.Optional;
 
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode
 @Data
-public class GithubToken extends AuthenticatorToken {
+public class GithubToken implements AuthenticatorToken {
 
     @JsonProperty("access_token")
     private String accessToken;

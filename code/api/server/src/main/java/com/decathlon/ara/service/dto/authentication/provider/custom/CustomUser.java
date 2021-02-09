@@ -20,12 +20,12 @@ package com.decathlon.ara.service.dto.authentication.provider.custom;
 import com.decathlon.ara.service.dto.authentication.provider.AuthenticatorUser;
 import lombok.*;
 
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode
 @Data
 @With
 @NoArgsConstructor
 @AllArgsConstructor
-public class CustomUser extends AuthenticatorUser {
+public class CustomUser implements AuthenticatorUser {
 
     private String id;
 

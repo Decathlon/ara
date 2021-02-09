@@ -23,12 +23,12 @@ import lombok.*;
 import java.sql.Timestamp;
 import java.util.Optional;
 
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode
 @Data
 @With
 @NoArgsConstructor
 @AllArgsConstructor
-public class CustomToken extends AuthenticatorToken {
+public class CustomToken implements AuthenticatorToken {
 
     private String id;
 

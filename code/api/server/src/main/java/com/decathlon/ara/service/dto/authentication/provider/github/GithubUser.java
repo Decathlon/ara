@@ -22,9 +22,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode
 @Data
-public class GithubUser extends AuthenticatorUser {
+public class GithubUser implements AuthenticatorUser {
 
     private Integer id;
 

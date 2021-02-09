@@ -17,5 +17,5 @@
 
 package com.decathlon.ara.service.dto.authentication.provider;
 
-public abstract class AuthenticatorUser {
+public interface AuthenticatorUser {
 }
