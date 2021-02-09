@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'charts/**'
+      - 'charts/stable/**'
 
 jobs:
   release:
@@ -13,16 +13,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Configure Git
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-      - name: Stable chart
-        run: |
-          ./.github/helm-chart-stable.sh
-          VERSION=$(cat charts/stable/Chart.yaml | grep version | sed -e 's/version: //')
-          git commit -am "chore: auto-commit chart ${VERSION}"
-          git push
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.0.0
         env:
