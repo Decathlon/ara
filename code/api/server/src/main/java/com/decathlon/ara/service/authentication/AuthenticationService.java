@@ -121,14 +121,14 @@ public class AuthenticationService {
      * @return the provider authentication configuration
      */
     public AuthenticationConfigurationDTO getAuthenticationConfiguration() {
-        GoogleAuthenticationProviderConfigurationDTO googleConfiguration = getGoogleConfiguration();
-        GithubAuthenticationProviderConfigurationDTO githubConfiguration = getGithubConfiguration();
-        CustomAuthenticationProviderConfigurationDTO customConfiguration = getCustomConfiguration();
+        GoogleAuthenticationProviderConfigurationDTO google = getGoogleConfiguration();
+        GithubAuthenticationProviderConfigurationDTO github = getGithubConfiguration();
+        CustomAuthenticationProviderConfigurationDTO custom = getCustomConfiguration();
 
         AuthenticationProvidersConfigurationDTO providers = new AuthenticationProvidersConfigurationDTO()
-                .withGoogle(googleConfiguration)
-                .withGithub(githubConfiguration)
-                .withCustom(customConfiguration);
+                .withGoogle(google)
+                .withGithub(github)
+                .withCustom(custom);
         return new AuthenticationConfigurationDTO(providers);
     }
 
