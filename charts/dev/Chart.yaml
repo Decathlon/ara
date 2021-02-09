@@ -10,6 +10,7 @@ keywords:
 - ara
 - analyser
 - tests aggregator
+- regression monitoring
 icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
 sources:
 - https://github.com/Decathlon/ara
