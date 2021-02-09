@@ -22,9 +22,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode
 @Data
-public class GoogleUser extends AuthenticatorUser {
+public class GoogleUser implements AuthenticatorUser {
 
     @JsonProperty("sub")
     private String accountId;

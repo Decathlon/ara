@@ -22,7 +22,7 @@ import lombok.Data;
 @Data
 public abstract class AuthenticationProviderConfigurationDTO {
 
-    public AuthenticationProviderConfigurationDTO(Boolean enabled, String name, String displayedName, String icon, String... parameters) {
+    protected AuthenticationProviderConfigurationDTO(Boolean enabled, String name, String displayedName, String icon, String... parameters) {
         this.enabled = enabled;
         this.name = name;
         this.display = displayedName;

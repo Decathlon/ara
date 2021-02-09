@@ -34,7 +34,7 @@ import org.springframework.web.client.RestTemplate;
 
 public abstract class ProviderAuthenticator<T extends AuthenticatorToken, U extends AuthenticatorUser, C extends AuthenticationProviderConfiguration> extends Authenticator<T, U, C> {
 
-    public ProviderAuthenticator(
+    protected ProviderAuthenticator(
             Class<T> tokenType,
             Class<U> userType,
             Class<C> configurationType,

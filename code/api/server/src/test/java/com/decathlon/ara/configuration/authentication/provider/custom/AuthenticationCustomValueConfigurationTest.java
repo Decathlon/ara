@@ -19,6 +19,9 @@ package com.decathlon.ara.configuration.authentication.provider.custom;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -107,37 +110,13 @@ class AuthenticationCustomValueConfigurationTest {
         assertThat(request.getBody().get("body_attribute2")).isEqualTo(Arrays.asList("some value custom_value4"));
     }
 
-    @Test
-    void getHttpMethod_getGETMethod_whenMethodBlank() {
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {"get", "neither-get-nor-post"})
+    void getHttpMethod_getGETMethod_whenMethodNotPost(String method) {
         // Given
         AuthenticationCustomValueConfiguration customUserConfiguration = new AuthenticationCustomValueConfiguration()
-                .withMethod(null);
-
-        // When
-
-        // Then
-        HttpMethod httpMethod = customUserConfiguration.getHttpMethod();
-        assertThat(httpMethod).isEqualTo(HttpMethod.GET);
-    }
-
-    @Test
-    void getHttpMethod_getGETMethod_whenMethodIsGet() {
-        // Given
-        AuthenticationCustomValueConfiguration customUserConfiguration = new AuthenticationCustomValueConfiguration()
-                .withMethod("get");
-
-        // When
-
-        // Then
-        HttpMethod httpMethod = customUserConfiguration.getHttpMethod();
-        assertThat(httpMethod).isEqualTo(HttpMethod.GET);
-    }
-
-    @Test
-    void getHttpMethod_getGETMethod_whenMethodIsNeitherGetNorPost() {
-        // Given
-        AuthenticationCustomValueConfiguration customUserConfiguration = new AuthenticationCustomValueConfiguration()
-                .withMethod("neither-get-nor-post");
+                .withMethod(method);
 
         // When
 

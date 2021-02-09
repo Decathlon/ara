@@ -23,7 +23,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -31,7 +30,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Slf4j
 @EnableWebSecurity
@@ -39,7 +37,7 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
 
-    private final String[] SWAGGER_RESOURCES = {
+    private final String[] swaggerResources = {
             "/v3/api-docs/**",
             "/configuration/ui",
             "/swagger-resources/**",
@@ -72,7 +70,7 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
             .authorizeRequests()//NOSONAR
                 .antMatchers("/actuator/**").permitAll()
                 .antMatchers("/auth/**").permitAll()
-                .antMatchers(SWAGGER_RESOURCES).permitAll()
+                .antMatchers(swaggerResources).permitAll()
                 .anyRequest().authenticated()
         .and()
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);

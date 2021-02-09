@@ -59,8 +59,7 @@ class JwtTokenAuthenticationServiceTest {
 
         // Then
         HttpHeaders header = tokenAuthenticationService.createAuthenticationResponseCookieHeader(Optional.empty());
-        assertThat(header).isNotNull();
-        assertThat(header).isEmpty();
+        assertThat(header).isNotNull().isEmpty();
     }
 
     @Test
@@ -106,8 +105,7 @@ class JwtTokenAuthenticationServiceTest {
 
         // Then
         HttpHeaders header = tokenAuthenticationService.createAuthenticationResponseCookieHeader(Optional.empty());
-        assertThat(header).isNotNull();
-        assertThat(header).isNotEmpty();
+        assertThat(header).isNotNull().isNotEmpty();
         assertThat(header.get(HttpHeaders.SET_COOKIE).get(0))
                 .contains(
                         "Path=/;",
@@ -127,8 +125,7 @@ class JwtTokenAuthenticationServiceTest {
 
         // Then
         HttpHeaders header = tokenAuthenticationService.deleteAuthenticationCookie();
-        assertThat(header).isNotNull();
-        assertThat(header).isNotEmpty();
+        assertThat(header).isNotNull().isNotEmpty();
         assertThat(header.get(HttpHeaders.SET_COOKIE).get(0))
                 .contains(
                         "ara-access-token=;",
@@ -149,8 +146,7 @@ class JwtTokenAuthenticationServiceTest {
 
         // Then
         HttpHeaders header = tokenAuthenticationService.deleteAuthenticationCookie();
-        assertThat(header).isNotNull();
-        assertThat(header).isNotEmpty();
+        assertThat(header).isNotNull().isNotEmpty();
         assertThat(header.get(HttpHeaders.SET_COOKIE).get(0))
                 .contains(
                         "ara-access-token=;",

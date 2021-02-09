@@ -53,7 +53,7 @@ public class JwtTokenAuthenticationService {
     @NonNull
     private final AuthenticationJwtTokenConfiguration tokenConfiguration;
 
-    private final String tokenCookieName = "ara-access-token";
+    private static final String TOKEN_COOKIE_NAME = "ara-access-token";
 
     /**
      * Create a header containing an authentication cookie, if the authentication is enabled
@@ -88,7 +88,7 @@ public class JwtTokenAuthenticationService {
             cookieValue = cookieValueAndAge.getFirst();
             cookieAge = cookieValueAndAge.getSecond();
         }
-        HttpCookie cookie = ResponseCookie.from(tokenCookieName, cookieValue)
+        HttpCookie cookie = ResponseCookie.from(TOKEN_COOKIE_NAME, cookieValue)
                 .maxAge(cookieAge)
                 .httpOnly(true)
                 .secure(tokenConfiguration.isUsingHttps())
@@ -187,7 +187,7 @@ public class JwtTokenAuthenticationService {
         }
         Cookie[] cookies = request.getCookies() != null ? request.getCookies() : new Cookie[0];
         return Arrays.stream(cookies)
-                .filter(cookie -> tokenCookieName.equals(cookie.getName()))
+                .filter(cookie -> TOKEN_COOKIE_NAME.equals(cookie.getName()))
                 .map(Cookie::getValue)
                 .map(JwtAuthentication::new)
                 .map(Authentication.class::cast)
@@ -221,7 +221,7 @@ public class JwtTokenAuthenticationService {
 
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {
-            return null;
+            return new ArrayList<>();
         }
 
         @Override
@@ -245,8 +245,8 @@ public class JwtTokenAuthenticationService {
         }
 
         @Override
-        public void setAuthenticated(boolean b) throws IllegalArgumentException {
-
+        public void setAuthenticated(boolean b) throws UnsupportedOperationException {
+            // custom class: no need to set authenticated field
         }
 
         @Override
