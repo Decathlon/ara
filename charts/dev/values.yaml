@@ -27,6 +27,11 @@ api:
     # Used to redirect on the app by email service among others
     appUrl: ara.test
     authProperties: ""
+    # Use an existing secret
+    authPropertiesExistingSecret:
+        enabled: false
+        # secretName: nameofsecret
+        # propertiesKey: application-auth.properties
     customProperties: ""
     # sideCarContainer:
     # volumes:
