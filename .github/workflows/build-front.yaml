@@ -52,12 +52,13 @@ jobs:
               VERSION=edge
             elif [[ $VERSION == release-* ]]; then
               RELEASE=${VERSION#release-}
-              VERSION=$(cat charts/stable/Chart.yaml | grep version | sed -e 's/version: //')
+              DEV_VERSION=$(cat charts/dev/Chart.yaml | grep version | sed -e 's/version: //')
+              VERSION=$(echo "$DEV_VERSION" | sed -e 's/-rc.*//')
               if [ ! "$VERSION" = "$RELEASE" ]; then
-                >&2 echo "Chart Version ($VERSION) and Release Version ($RELEASE) not equals"
+                >&2 echo "Chart dev Version ($VERSION) and Release Version ($RELEASE) not equals"
                 exit 1
               fi
-              VERSION=rc-${VERSION}.${GITHUB_SHA:0:7}
+              VERSION=${DEV_VERSION}.${GITHUB_SHA:0:7}
             fi
           elif [[ $GITHUB_REF == refs/pull/* ]]; then
             VERSION=pr-${{ github.event.number }}

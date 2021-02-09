@@ -18,6 +18,18 @@ jobs:
         with:
           github_token: ${{ github.token }}
           paths: '["charts/**"]'
+  pre_job_dev:
+    # continue-on-error: true # Uncomment once integration is finished
+    runs-on: ubuntu-latest
+    # Map a step output to a job output
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@v3.3.0
+        with:
+          github_token: ${{ github.token }}
+          paths: '["charts/dev/**"]'
   lint-chart:
     runs-on: ubuntu-latest
     if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
@@ -73,13 +85,36 @@ jobs:
           version: v3.4.0
       - name: Helm template
         run: |
-          mkdir helm-templates-stable
+          mkdir helm-templates-dev helm-templates-stable
+          helm template charts/dev --output-dir helm-templates-dev
           helm template charts/stable --output-dir helm-templates-stable
       - name: validate manifests
         uses: makocchi-git/actions-k8s-manifests-validate-kubeval@v1.0.1
         with:
-          files: helm-templates-stable
+          files: helm-templates-dev,helm-templates-stable
           openshift: true
           comment: true
           token: ${{ secrets.GITHUB_TOKEN }}
           version: ${{ matrix.k8s }}
+  rc-chart:
+    runs-on: ubuntu-latest
+    if: ${{ needs.pre_job_dev.outputs.should_skip != 'true' }}
+    needs:
+      - kubeval-chart
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Prepare dev chart
+        run: ./.github/helm-chart-dev.sh
+      - name: Commit dev chart
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          VERSION=$(cat charts/dev/Chart.yaml | grep version | sed -e 's/version: //')
+          git commit -am "chore: auto-commit chart ${VERSION}"
+          git push
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.0.0
+        env:
+          CR_TOKEN: '${{ secrets.CR_TOKEN }}'
+
