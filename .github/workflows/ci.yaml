@@ -104,6 +104,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
       - name: Prepare dev chart
         run: ./.github/helm-chart-dev.sh
       - name: Commit dev chart
@@ -112,9 +114,7 @@ jobs:
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
           VERSION=$(cat charts/dev/Chart.yaml | grep version | sed -e 's/version: //')
           git commit -am "chore: auto-commit chart ${VERSION}"
-          git push origin HEAD:${PR_BRANCH_NAME}
-        env:
-          PR_BRANCH_NAME: '${{github.event.pull_request.head.ref}}'
+          git push
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.0.0
         env:
