@@ -221,7 +221,7 @@ public class JwtTokenAuthenticationService {
 
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {
-            return null;
+            return new ArrayList<>();
         }
 
         @Override
@@ -245,7 +245,7 @@ public class JwtTokenAuthenticationService {
         }
 
         @Override
-        public void setAuthenticated(boolean b) throws IllegalArgumentException {
+        public void setAuthenticated(boolean b) throws UnsupportedOperationException {
 
         }
 
