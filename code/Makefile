@@ -19,7 +19,7 @@ DATE_WITH_TIME := $(shell /bin/date "+%Y%m%d%H%M%S")
 
 start: ## Start ARA
 	@echo '-- Start ARA --'
-	@export VERSION=$(VERSION); docker-compose up
+	@export VERSION=$(VERSION); docker-compose up -d
 
 stop: ## Stop ARA
 	@echo '-- Stop ARA --'
