@@ -107,17 +107,17 @@ spec:
 {{ toYaml .Values.api.sideCarContainer | indent 6 }}
       {{- end}}
       volumes:
-        - name: config
-          configMap:
-            name: {{ include "ara.configmap.name" . }}
-            items:
-              - key: "application-custom.properties"
-                path: "application-custom.properties"
-          secret:
-            secretName: {{ include "ara.api.secret.name" .}}
-            items:
-              - key: {{ include "ara.api.secret.propertieskey" . }}
-                path: "application-auth.properties"
+      - name: config
+        configMap:
+          name: {{ include "ara.configmap.name" . }}
+          items:
+            - key: "application-custom.properties"
+              path: "application-custom.properties"
+        secret:
+          secretName: {{ include "ara.api.secret.name" . }}
+          items:
+            - key: {{ include "ara.api.secret.propertieskey" . }}
+              path: "application-auth.properties"
       {{- if .Values.api.volumes }}
 {{ toYaml .Values.api.volumes | indent 6 }}
       {{- end}}
