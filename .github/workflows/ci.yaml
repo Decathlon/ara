@@ -106,6 +106,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.0.0
         env:
