@@ -28,10 +28,11 @@ api:
     appUrl: ara.test
     authProperties: ""
     # Use an existing secret
-    authPropertiesExistingSecret:
+    propertiesExistingSecret:
         enabled: false
         # secretName: nameofsecret
-        # propertiesKey: application-auth.properties
+        # authPropertiesKey: application-auth.properties
+        # customPropertiesKey: application-custom.properties
     customProperties: ""
     # sideCarContainer:
     # volumes:

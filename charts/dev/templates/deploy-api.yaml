@@ -108,16 +108,13 @@ spec:
       {{- end}}
       volumes:
       - name: config
-        configMap:
-          name: {{ include "ara.configmap.name" . }}
-          items:
-            - key: "application-custom.properties"
-              path: "application-custom.properties"
         secret:
           secretName: {{ include "ara.api.secret.name" . }}
           items:
-            - key: {{ include "ara.api.secret.propertieskey" . }}
+            - key: {{ include "ara.api.secret.authpropertieskey" . }}
               path: "application-auth.properties"
+            - key: {{ include "ara.api.secret.custompropertieskey" . }}
+              path: "application-custom.properties"
       {{- if .Values.api.volumes }}
 {{ toYaml .Values.api.volumes | indent 6 }}
       {{- end}}
