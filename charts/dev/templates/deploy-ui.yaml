@@ -43,7 +43,7 @@ spec:
           name: http-port
         readinessProbe:
           httpGet:
-            path: /api/projects
+            path: /static/version/about.json
             port: {{ .Values.ui.port }}
           initialDelaySeconds: 40
           timeoutSeconds: 2
