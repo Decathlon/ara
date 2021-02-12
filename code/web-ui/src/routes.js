@@ -14,7 +14,10 @@
  * limitations under the License.                                             *
  *                                                                            *
  ******************************************************************************/
-export default [
+
+import Login from './views/login.vue'
+
+const routes = [
   // Home page and other URLs without any project code
   {
     path: '/', // Home page
@@ -250,12 +253,38 @@ export default [
   },
 
   // Not found page
-  { path: '/not-found',
+  {
+    path: '/not-found',
     name: 'not-found',
     meta: {
       title: 'Page not found...'
     },
     component: (resolve) => require(['./views/not-found.vue'], resolve)
   },
-  { path: '*', redirect: '/not-found' }
+  { path: '*', redirect: '/not-found' },
+
+  // Login
+  {
+    path: '/login',
+    name: 'login',
+    meta: {
+      title: 'ARA Login',
+      public: true,
+      onlyWhenLoggedOut: true
+    },
+    component: Login
+  },
+  {
+    path: '/login/:provider',
+    name: 'authentication',
+    meta: {
+      title: 'Authentication in progress, please wait...',
+      public: true,
+      onlyWhenLoggedOut: true
+    },
+    component: Login
+  }
+
 ]
+
+export default routes

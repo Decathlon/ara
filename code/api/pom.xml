@@ -28,7 +28,7 @@
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-parent</artifactId>
     <packaging>pom</packaging>
-    <version>7.2.5</version>
+    <version>8.0.0</version>
 
     <name>ARA API</name>
     <description>
@@ -61,6 +61,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.6</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -137,7 +138,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.4</version>
+                <version>3.2.0</version>
                 <configuration>
                     <quiet>true</quiet>
                     <locale>en</locale>
@@ -161,7 +162,7 @@
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
-                <version>5.2.4</version>
+                <version>6.1.0</version>
                 <reportSets>
                     <reportSet>
                         <reports>
