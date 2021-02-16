@@ -38,6 +38,39 @@ Secret name for database.
 {{- end -}}
 
 {{/*
+Secret name for api.
+*/}}
+{{- define "ara.api.secret.name" -}}
+{{- if .Values.api.propertiesExistingSecret.enabled -}}
+{{ .Values.api.propertiesExistingSecret.secretName }}
+{{- else -}}
+{{ printf "%s-%s" .Release.Name "api"  }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Secret auth properties key for api.
+*/}}
+{{- define "ara.api.secret.authpropertieskey" -}}
+{{- if .Values.api.propertiesExistingSecret.enabled -}}
+{{ .Values.api.propertiesExistingSecret.authPropertiesKey }}
+{{- else -}}
+application-auth.properties
+{{- end -}}
+{{- end -}}
+
+{{/*
+Secret custom properties key for api.
+*/}}
+{{- define "ara.api.secret.custompropertieskey" -}}
+{{- if .Values.api.propertiesExistingSecret.enabled -}}
+{{ .Values.api.propertiesExistingSecret.customPropertiesKey }}
+{{- else -}}
+application-custom.properties
+{{- end -}}
+{{- end -}}
+
+{{/*
 Secret username key for database.
 */}}
 {{- define "ara.database.secret.usernamekey" -}}
