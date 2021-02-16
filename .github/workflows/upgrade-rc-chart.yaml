@@ -1,4 +1,4 @@
-name: Upgrade dev Charts
+name: Upgrade rc Charts
 
 on:
   pull_request:
@@ -17,7 +17,7 @@ jobs:
         uses: fkirc/skip-duplicate-actions@v3.3.0
         with:
           github_token: ${{ github.token }}
-          paths: '["charts/dev/**"]'
+          paths: '["charts/stable/**"]'
   update-version:
     runs-on: ubuntu-latest
     if: ${{ needs.pre_job_dev.outputs.should_skip != 'true' }}
@@ -29,20 +29,20 @@ jobs:
       - name: Check chart version
         run : |
           RELEASE=${TARGET_BRANCH#release/}
-          DEV_VERSION=$(cat charts/dev/Chart.yaml | grep version | sed -e 's/version: //')
-          VERSION=$(echo "$DEV_VERSION" | sed -e 's/-rc.*//')
+          CHART_VERSION=$(cat charts/stable/Chart.yaml | grep version | sed -e 's/version: //')
+          VERSION=$(echo "$CHART_VERSION" | sed -e 's/-rc.*//')
           if [ ! "$VERSION" = "$RELEASE" ]; then
-            >&2 echo "Chart dev Version ($VERSION) and Release Version ($RELEASE) not equals"
+            >&2 echo "Chart stable Version ($VERSION) and Release Version ($RELEASE) not equals"
             exit 1
           fi
         env:
           TARGET_BRANCH: '${{ github.event.pull_request.base.ref }}'
-      - name: Prepare dev chart
-        run: ./.github/helm-chart-dev.sh
-      - name: Commit dev chart
+      - name: Prepare rc chart
+        run: ./.github/helm-chart-rc.sh
+      - name: Commit rc chart
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          VERSION=$(cat charts/dev/Chart.yaml | grep version | sed -e 's/version: //')
+          VERSION=$(cat charts/stable/Chart.yaml | grep version | sed -e 's/version: //')
           git commit -am "chore: auto-commit chart ${VERSION}"
           git push

@@ -18,24 +18,23 @@ jobs:
         with:
           github_token: ${{ github.token }}
           paths: '["charts/**"]'
-  pre_job_dev:
-    # continue-on-error: true # Uncomment once integration is finished
-    runs-on: ubuntu-latest
-    # Map a step output to a job output
-    outputs:
-      should_skip: ${{ steps.skip_check.outputs.should_skip }}
-    steps:
-      - id: skip_check
-        uses: fkirc/skip-duplicate-actions@v3.3.0
-        with:
-          github_token: ${{ github.token }}
-          paths: '["charts/dev/**"]'
   lint-chart:
     runs-on: ubuntu-latest
     if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    outputs:
+      rc: ${{ steps.check_rc.outputs.rc }}
     steps:
       - name: Checkout
         uses: actions/checkout@v1
+      - name: Check if rc
+        id: check_rc
+        run: |
+          CHART_VERSION=$(cat charts/stable/Chart.yaml | grep version | sed -e 's/version: //')
+          if [[ $CHART_VERSION == *-rc* ]]; then
+            echo ::set-output name=rc::true
+          else
+            echo ::set-output name=rc::false
+          fi
       - name: Set up Helm
         uses: azure/setup-helm@v1
         with:
@@ -85,8 +84,7 @@ jobs:
           version: v3.4.0
       - name: Helm template
         run: |
-          mkdir helm-templates-dev helm-templates-stable
-          helm template charts/dev --output-dir helm-templates-dev
+          mkdir helm-templates-stable
           helm template charts/stable --output-dir helm-templates-stable
       - name: validate manifests
         uses: makocchi-git/actions-k8s-manifests-validate-kubeval@v1.0.1
@@ -98,7 +96,7 @@ jobs:
           version: ${{ matrix.k8s }}
   rc-chart:
     runs-on: ubuntu-latest
-    if: ${{ needs.pre_job_dev.outputs.should_skip != 'true' }}
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.lint-chart.outputs.rc == 'true' }}
     needs:
       - kubeval-chart
     steps:
@@ -113,7 +111,5 @@ jobs:
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.1.0
-        with:
-          charts_dir: "charts/dev"
         env:
           CR_TOKEN: '${{ secrets.CR_TOKEN }}'
