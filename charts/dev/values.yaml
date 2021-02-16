@@ -24,7 +24,7 @@ api:
         #  cpu: 100m
         #  memory: 128Mi
     port: 8080
-    # Used to redirect on the app by email service among others
+    # Base url used to redirect on the app by email service among others
     appUrl: ara.test
     authProperties: ""
     # Use an existing secret
