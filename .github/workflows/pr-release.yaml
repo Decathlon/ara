@@ -20,6 +20,8 @@ jobs:
           VERSION=$(echo "$DEV_VERSION" | sed -e 's/-rc.*//')
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=rc::${DEV_VERSION}
+      - name: Upgrade stable with dev
+        run: ./.github/helm-chart-stable.sh
       - name: Create PR with changes
         id: cpr
         uses: peter-evans/create-pull-request@v3
