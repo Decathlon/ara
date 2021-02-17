@@ -30,8 +30,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -66,6 +68,26 @@ public class FileProcessorService {
     }
 
     /**
+     * Transform a file into an object
+     * @param rawFile the file to transform
+     * @param objectClass the class of the object to map
+     * @param <T> the type of the object to map
+     * @return the mapped object
+     */
+    private <T> Optional<T> getMappedObjectFromRawFile(File rawFile, Class<T> objectClass) {
+        if (rawFile == null || !rawFile.isFile() || objectClass == null) {
+            return Optional.empty();
+        }
+        T mappedObject = null;
+        try {
+            mappedObject = objectMapper.readValue(rawFile, objectClass);
+        } catch (IOException e) {
+            log.info("Unable to process the file {}", rawFile.getAbsolutePath(), e);
+        }
+        return Optional.ofNullable(mappedObject);
+    }
+
+    /**
      * Create a mapped object list from a file (if found and processed correctly)
      * @param parentDirectory the directory containing the file to get the mapped object list from
      * @param pathToFile the relative path to this file from the parent directory
@@ -85,6 +107,30 @@ public class FileProcessorService {
             log.info("Cannot download file in {}", matchingFile.get().getPath(), e);
             return new ArrayList<>();
         }
+    }
+
+    /**
+     * Create mapped objects from files contained in a given folder
+     * @param parentDirectory the directory containing the folder to get the mapped objects from
+     * @param pathToDirectory the relative path to this folder from the parent directory
+     * @param objectClass the class of the objects to map
+     * @param <T> the type of the objects to map
+     * @return the mapped objects
+     */
+    public <T> List<T> getMappedObjectsFromDirectory(File parentDirectory, String pathToDirectory, Class<T> objectClass) {
+        final Optional<File> matchingDirectory = getMatchingDirectory(parentDirectory, pathToDirectory);
+        if (!matchingDirectory.isPresent()) {
+            log.info("The directory {} was not found", pathToDirectory);
+            return new ArrayList<>();
+        }
+
+        final File directory = matchingDirectory.get();
+        final File[] allFilesFromDirectory = directory.listFiles();
+        return Arrays.stream(allFilesFromDirectory)
+                .map(file -> getMappedObjectFromRawFile(file, objectClass))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
     }
 
     /**
