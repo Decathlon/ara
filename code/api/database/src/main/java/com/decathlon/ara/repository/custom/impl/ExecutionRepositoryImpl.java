@@ -30,18 +30,17 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.nullsFirst;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.Comparator.*;
 
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -105,7 +104,7 @@ public class ExecutionRepositoryImpl implements ExecutionRepositoryCustom {
     private JPAQuery<Tuple> getLatestFingerprints(long projectId) {
         QExecution execution = QExecution.execution;
         return jpaQueryFactory
-                .select(execution.cycleDefinition.id,
+                .selectDistinct(execution.cycleDefinition.id,
                         execution.testDateTime.max())
                 .from(execution)
                 .where(execution.cycleDefinition.projectId.eq(Long.valueOf(projectId)))
