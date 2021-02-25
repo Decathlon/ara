@@ -89,7 +89,7 @@ jobs:
       - name: validate manifests
         uses: makocchi-git/actions-k8s-manifests-validate-kubeval@v1.0.1
         with:
-          files: helm-templates-dev,helm-templates-stable
+          files: helm-templates-stable
           openshift: true
           comment: true
           token: ${{ secrets.GITHUB_TOKEN }}
