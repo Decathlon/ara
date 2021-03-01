@@ -44,7 +44,7 @@ import java.util.TreeSet;
 // Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
 @EqualsAndHashCode(of = { "cycleDefinition", "testDateTime" })
 @Table(uniqueConstraints={
-        @UniqueConstraint(columnNames = {"cycleDefinition", "testDateTime"})
+        @UniqueConstraint(columnNames = {"cycle_definition_id", "test_date_time"})
 })
 public class Execution {
 

@@ -192,16 +192,23 @@
 
     <profiles>
         <profile>
+            <id>db-h2</id>
+            <properties>
+                <diffChangeLogFile>src/main/resources/db/changelog/changes/h2/to-be-changed.yaml</diffChangeLogFile>
+                <liquibasePropertyFile>src/main/resources/liquibase-h2.properties</liquibasePropertyFile>
+            </properties>
+        </profile>
+        <profile>
             <id>db-mysql</id>
             <properties>
-                <diffChangeLogFile>src/main/resources/changelog/changes/mysql/to-be-changed.yaml</diffChangeLogFile>
+                <diffChangeLogFile>src/main/resources/db/changelog/changes/mysql/to-be-changed.yaml</diffChangeLogFile>
                 <liquibasePropertyFile>src/main/resources/liquibase-mysql.properties</liquibasePropertyFile>
             </properties>
         </profile>
         <profile>
             <id>db-postgresql</id>
             <properties>
-                <diffChangeLogFile>src/main/resources/changelog/changes/postgresql/to-be-changed.yaml</diffChangeLogFile>
+                <diffChangeLogFile>src/main/resources/db/changelog/changes/postgresql/to-be-changed.yaml</diffChangeLogFile>
                 <liquibasePropertyFile>src/main/resources/liquibase-postgresql.properties</liquibasePropertyFile>
             </properties>
         </profile>
