@@ -116,13 +116,12 @@ class GenericScenariosIndexerTest {
 
         when(genericReport1.getCode()).thenReturn("feature_id1");
         when(genericReport1.getComment()).thenReturn("some comment");
-        when(genericReport1.getName()).thenReturn("scenario_name1");
+        when(genericReport1.getFunctionalitiesName()).thenReturn("scenario_name1");
         when(genericReport1.getServerName()).thenReturn("server_name1");
         when(genericReport1.getSeverity()).thenReturn("sanity_check");
         when(genericReport1.getStartDate()).thenReturn(Date.from(LocalDateTime.of(2020, Month.MARCH, 3, 12, 5, 35, 10).atZone(ZoneId.systemDefault()).toInstant()));
-        when(genericReport1.getTags()).thenReturn(Arrays.asList("tag11", "tag12", "tag13"));
+        when(genericReport1.getTagsAsString()).thenReturn("tags1");
         when(genericReport1.getDescription()).thenReturn(genericDescription1);
-        when(genericReport1.getCartography()).thenReturn(Arrays.asList(35l, 56l, 28l));
         when(genericDescription1.getStepsContent()).thenReturn("content1");
         when(genericDescription1.getStartLineNumber()).thenReturn(12);
         when(genericReport1.getDisplay()).thenReturn(genericDisplay1);
@@ -132,7 +131,7 @@ class GenericScenariosIndexerTest {
         when(genericReport1.getFeature()).thenReturn(genericFeature1);
         when(genericFeature1.getName()).thenReturn("feature_name1");
         when(genericFeature1.getFileName()).thenReturn("feature_file1");
-        when(genericFeature1.getTags()).thenReturn(Arrays.asList("feature_tag11", "feature_tag12", "feature_tag13"));
+        when(genericFeature1.getTagsAsString()).thenReturn("feature_tags1");
         when(genericReport1.getLogs()).thenReturn(genericLogs1);
         when(genericLogs1.getDiffReportUrl()).thenReturn("http://your-company.com/diff_report1");
         when(genericLogs1.getErrorStacktraceUrl()).thenReturn("http://your-company.com/stack-trace1");
@@ -160,13 +159,12 @@ class GenericScenariosIndexerTest {
 
         when(genericReport2.getCode()).thenReturn("feature_id2");
         when(genericReport2.getComment()).thenReturn("another comment");
-        when(genericReport2.getName()).thenReturn("scenario_name2");
+        when(genericReport2.getFunctionalitiesName()).thenReturn("scenario_name2");
         when(genericReport2.getServerName()).thenReturn("server_name2");
         when(genericReport2.getSeverity()).thenReturn("high");
         when(genericReport2.getStartDate()).thenReturn(Date.from(LocalDateTime.of(2019, Month.JUNE, 5, 9, 8, 12, 12).atZone(ZoneId.systemDefault()).toInstant()));
-        when(genericReport2.getTags()).thenReturn(Arrays.asList("tag21"));
+        when(genericReport2.getTagsAsString()).thenReturn("tags2");
         when(genericReport2.getDescription()).thenReturn(genericDescription2);
-        when(genericReport2.getCartography()).thenReturn(null);
         when(genericDescription2.getStepsContent()).thenReturn("content2");
         when(genericDescription2.getStartLineNumber()).thenReturn(21);
         when(genericReport2.getDisplay()).thenReturn(genericDisplay2);
@@ -176,7 +174,7 @@ class GenericScenariosIndexerTest {
         when(genericReport2.getFeature()).thenReturn(genericFeature2);
         when(genericFeature2.getName()).thenReturn("feature_name2");
         when(genericFeature2.getFileName()).thenReturn("feature_file2");
-        when(genericFeature2.getTags()).thenReturn(Arrays.asList("feature_tag21", "feature_tag22"));
+        when(genericFeature2.getTagsAsString()).thenReturn("feature_tags2");
         when(genericReport2.getLogs()).thenReturn(genericLogs2);
         when(genericLogs2.getDiffReportUrl()).thenReturn("http://your-company.com/diff_report2");
         when(genericLogs2.getErrorStacktraceUrl()).thenReturn("http://your-company.com/stack-trace2");
@@ -219,10 +217,10 @@ class GenericScenariosIndexerTest {
                                 runId,
                                 "feature_file1",
                                 "feature_name1",
-                                "@feature_tag11 @feature_tag12 @feature_tag13",
-                                "@tag11 @tag12 @tag13",
+                                "feature_tags1",
+                                "tags1",
                                 "sanity_check",
-                                "Functionality 35, 56, 28: scenario_name1",
+                                "scenario_name1",
                                 12,
                                 "feature_id1",
                                 "content1",
@@ -241,8 +239,8 @@ class GenericScenariosIndexerTest {
                                 runId,
                                 "feature_file2",
                                 "feature_name2",
-                                "@feature_tag21 @feature_tag22",
-                                "@tag21",
+                                "feature_tags2",
+                                "tags2",
                                 "high",
                                 "scenario_name2",
                                 21,

@@ -83,14 +83,8 @@ public class GenericScenariosIndexer implements ScenariosIndexer {
             executedScenario.setSeverity(genericReport.getSeverity());
             executedScenario.setStartDateTime(genericReport.getStartDate());
             executedScenario.setSeleniumNode(genericReport.getComment());
-
-            String functionalitiesName = getFunctionalitiesName(genericReport.getCartography(), genericReport.getName());
-            executedScenario.setName(functionalitiesName);
-
-            String tags = convertTagsToString(genericReport.getTags());
-            executedScenario.setTags(tags);
-
-            GenericExecutedScenarioDescription description = genericReport.getDescription();
+            executedScenario.setName(genericReport.getFunctionalitiesName());
+            executedScenario.setTags(genericReport.getTagsAsString());
 
             List<GenericExecutedScenarioError> genericErrors = genericReport.getErrors();
             if (!CollectionUtils.isEmpty(genericErrors)) {
@@ -102,6 +96,7 @@ public class GenericScenariosIndexer implements ScenariosIndexer {
                 executedScenario.addErrors(errors);
             }
 
+            GenericExecutedScenarioDescription description = genericReport.getDescription();
             if (description != null) {
                 executedScenario.setContent(description.getStepsContent());
                 executedScenario.setLine(description.getStartLineNumber());
@@ -116,10 +111,9 @@ public class GenericScenariosIndexer implements ScenariosIndexer {
 
             GenericExecutedScenarioFeature feature = genericReport.getFeature();
             if (feature != null) {
-                String featureTags = convertTagsToString(feature.getTags());
                 executedScenario.setFeatureName(feature.getName());
                 executedScenario.setFeatureFile(feature.getFileName());
-                executedScenario.setFeatureTags(featureTags);
+                executedScenario.setFeatureTags(feature.getTagsAsString());
             }
 
             GenericExecutedScenarioLogs logs = genericReport.getLogs();
@@ -153,38 +147,5 @@ public class GenericScenariosIndexer implements ScenariosIndexer {
             error.setException(genericError.getStackTrace());
         }
         return Optional.ofNullable(error);
-    }
-
-    /**
-     * Convert tags into a string. If no tags, then return an empty string
-     * @param tags the tags to convert
-     * @return the string representation of the tags
-     */
-    private String convertTagsToString(List<String> tags) {
-        if (CollectionUtils.isEmpty(tags)) {
-            return "";
-        }
-        return tags
-                .stream()
-                .map(tag -> String.format("@%s", tag))
-                .collect(Collectors.joining(" "));
-    }
-
-    /**
-     * Get functionalities name
-     * @param cartography the functionality ids
-     * @param name the name
-     * @return the functionalities name
-     */
-    private String getFunctionalitiesName(List<Long> cartography, String name) {
-        String cartographyAsString = "";
-        if (!CollectionUtils.isEmpty(cartography)) {
-            String cartographyIdsAsString = cartography
-                    .stream()
-                    .map(String::valueOf)
-                    .collect(Collectors.joining(", "));
-            cartographyAsString = String.format("Functionality %s: ", cartographyIdsAsString);
-        }
-        return String.format("%s%s", cartographyAsString, name);
     }
 }

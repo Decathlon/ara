@@ -17,6 +17,7 @@
 
 package com.decathlon.ara.scenario.generic.bean.feature;
 
+import com.decathlon.ara.scenario.generic.bean.GenericExecutedScenarioReport;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -33,4 +34,12 @@ public class GenericExecutedScenarioFeature {
     private String fileName;
 
     private List<String> tags;
+
+    /**
+     * Get tags representation as string
+     * @return tags representation as string
+     */
+    public String getTagsAsString() {
+        return GenericExecutedScenarioReport.convertTagsToString(tags);
+    }
 }

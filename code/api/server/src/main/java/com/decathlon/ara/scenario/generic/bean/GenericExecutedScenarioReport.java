@@ -26,9 +26,15 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -46,6 +52,8 @@ public class GenericExecutedScenarioReport {
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     private Date startDate;
 
+    private boolean ignored;
+
     private List<GenericExecutedScenarioError> errors;
 
     private List<Long> cartography;
@@ -62,4 +70,90 @@ public class GenericExecutedScenarioReport {
     private String serverName;
 
     private String comment;
+
+    /**
+     * Get functionalities name
+     * @return the functionalities name
+     */
+    public String getFunctionalitiesName() {
+        String cartographyAsString = "";
+        if (!CollectionUtils.isEmpty(cartography)) {
+            String cartographyIdsAsString = cartography
+                    .stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(", "));
+            cartographyAsString = String.format("Functionality %s", cartographyIdsAsString);
+        }
+        String separator = "";
+        if (StringUtils.isNotBlank(cartographyAsString) && StringUtils.isNotBlank(name)) {
+            separator = ": ";
+        }
+        return String.format("%s%s%s", cartographyAsString, separator, StringUtils.isBlank(name) ? "" : name);
+    }
+
+    /**
+     * Convert tags into a string. If no tags, then return an empty string
+     * @param tags the tags to convert
+     * @return the string representation of the tags
+     */
+    public static String convertTagsToString(List<String> tags) {
+        if (CollectionUtils.isEmpty(tags)) {
+            return "";
+        }
+        return tags
+                .stream()
+                .map(tag -> String.format("@%s", tag))
+                .collect(Collectors.joining(" "));
+    }
+
+    /**
+     * Get tags representation as string
+     * @return tags representation as string
+     */
+    public String getTagsAsString() {
+        return convertTagsToString(tags);
+    }
+
+    /**
+     * Get country codes as string from tags and feature tags
+     * @return country codes as string
+     */
+    public String getCountryCodesAsString() {
+        List<String> countryCodes = getCountryCodes();
+        if (CollectionUtils.isEmpty(countryCodes)) {
+            return "all";
+        }
+        return countryCodes.stream().collect(Collectors.joining(","));
+    }
+
+    /**
+     * Get country codes from tags and feature tags
+     * @return country codes
+     */
+    public List<String> getCountryCodes() {
+        List<String> countryCodesFromTags = getCountryCodesFromTags(tags);
+        List<String> countryCodesFromFeatureTags = feature != null ?
+                getCountryCodesFromTags(feature.getTags()) :
+                new ArrayList<>();
+        return Stream.of(countryCodesFromTags, countryCodesFromFeatureTags)
+                .flatMap(Collection::stream)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get country codes from tags
+     * @param tags the tags to get the country codes from
+     * @return country codes
+     */
+    private static List<String> getCountryCodesFromTags(List<String> tags) {
+        if (CollectionUtils.isEmpty(tags)) {
+            return new ArrayList<>();
+        }
+        return tags.stream()
+                .filter(tag -> tag.startsWith("country-"))
+                .map(tag -> tag.substring("country-".length()))
+                .distinct()
+                .collect(Collectors.toList());
+    }
 }
