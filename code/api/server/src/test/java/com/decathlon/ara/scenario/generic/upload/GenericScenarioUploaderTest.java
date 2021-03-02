@@ -43,7 +43,91 @@ class GenericScenarioUploaderTest {
     private GenericScenarioUploader genericScenarioUploader;
 
     @Test
-    void convertGenericReportToScenario_returnScenario() {
+    void convertGenericReportToScenario_returnScenario_whenReportIsNull() {
+        // Given
+        Source source = mock(Source.class);
+
+        // When
+
+        // Then
+        Scenario scenario = genericScenarioUploader.convertGenericReportToScenario(null, source);
+        assertThat(scenario)
+                .extracting(
+                        "source",
+                        "ignored",
+                        "severity",
+                        "name",
+                        "tags",
+                        "countryCodes",
+                        "featureFile",
+                        "featureName",
+                        "featureTags",
+                        "content",
+                        "line"
+                )
+                .contains(
+                        source,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                );
+    }
+
+    @Test
+    void convertGenericReportToScenario_returnScenario_whenReportIsNotNullButFeatureAndDescriptionAreNull() {
+        // Given
+        Source source = mock(Source.class);
+        GenericExecutedScenarioReport report = mock(GenericExecutedScenarioReport.class);
+
+        // When
+        when(report.isIgnored()).thenReturn(true);
+        when(report.getSeverity()).thenReturn("high");
+        when(report.getFunctionalitiesName()).thenReturn("functionality names");
+        when(report.getTagsAsString()).thenReturn("tag1 tag2 tag3");
+        when(report.getCountryCodesAsString()).thenReturn("fr,be,nl");
+        when(report.getFeature()).thenReturn(null);
+        when(report.getDescription()).thenReturn(null);
+
+        // Then
+        Scenario scenario = genericScenarioUploader.convertGenericReportToScenario(report, source);
+        assertThat(scenario)
+                .extracting(
+                        "source",
+                        "ignored",
+                        "severity",
+                        "name",
+                        "tags",
+                        "countryCodes",
+                        "featureFile",
+                        "featureName",
+                        "featureTags",
+                        "content",
+                        "line"
+                )
+                .contains(
+                        source,
+                        true,
+                        "high",
+                        "functionality names",
+                        "tag1 tag2 tag3",
+                        "fr,be,nl",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                );
+    }
+
+    @Test
+    void convertGenericReportToScenario_returnScenario_whenReportAndFeatureAndDescriptionAreNotNull() {
         // Given
         Source source = mock(Source.class);
         GenericExecutedScenarioReport report = mock(GenericExecutedScenarioReport.class);
@@ -68,6 +152,7 @@ class GenericScenarioUploaderTest {
         Scenario scenario = genericScenarioUploader.convertGenericReportToScenario(report, source);
         assertThat(scenario)
                 .extracting(
+                        "source",
                         "ignored",
                         "severity",
                         "name",
@@ -80,6 +165,7 @@ class GenericScenarioUploaderTest {
                         "line"
                 )
                 .contains(
+                        source,
                         true,
                         "high",
                         "functionality names",
