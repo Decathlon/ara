@@ -30,7 +30,7 @@ nbdist/
 .nb-gradle/
 
 # H2 db
-ara.*.db
+ara*.db
 
 # Build
 server/src/main/resources/static/api/version/about.json
