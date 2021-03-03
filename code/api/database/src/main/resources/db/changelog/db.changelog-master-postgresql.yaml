@@ -3,3 +3,7 @@ databaseChangeLog:
       file: classpath*:db/changelog/changes/postgresql/20210105152218-postgresql_migration.yaml
   - include:
       file: classpath*:db/changelog/changes/postgresql/20210129111909-INCREASE_JOB_URL_SIZE.yaml
+  - include:
+      file: classpath*:db/changelog/changes/postgresql/20210225103650-REMOVE_DUPLICATES.sql
+  - include:
+      file: classpath*:db/changelog/changes/postgresql/20210301110642-ADD_UNIQUE_CONSTRAINTS.yaml

@@ -43,6 +43,9 @@ import java.util.TreeSet;
 @Entity
 // Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
 @EqualsAndHashCode(of = { "cycleDefinition", "testDateTime" })
+@Table(uniqueConstraints={
+        @UniqueConstraint(columnNames = {"cycle_definition_id", "test_date_time"})
+})
 public class Execution {
 
     @Id
@@ -91,7 +94,7 @@ public class Execution {
     /**
      * The URL of the Continuous Integration job, visible in the client GUI to access logs of the job.
      */
-    @Column(length = 512)
+    @Column(length = 512, unique = true)
     private String jobUrl;
 
     /**

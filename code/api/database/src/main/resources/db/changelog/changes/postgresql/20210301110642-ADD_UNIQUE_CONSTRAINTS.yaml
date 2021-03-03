@@ -1,0 +1,18 @@
+databaseChangeLog:
+- changeSet:
+    id: 1614593254135-1
+    author: '? (generated)'
+    changes:
+    - addUniqueConstraint:
+        columnNames: job_url
+        constraintName: uk_lf72jkijc9ry9s3aa7pbdwd3c
+        tableName: execution
+- changeSet:
+    id: 1614593254135-2
+    author: '? (generated)'
+    changes:
+    - addUniqueConstraint:
+        columnNames: cycle_definition_id, test_date_time
+        constraintName: UKt4jtnjbb0174aqe0gakcu6lpj
+        tableName: execution
+

@@ -12,6 +12,7 @@ WEB_UI_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-web-ui:${VERSION}
 
 DIFF_LABEL = "to-be-changed"
 DATE_WITH_TIME := $(shell /bin/date "+%Y%m%d%H%M%S")
+BASE?=h2
 
 #####################################
 ##           QUICK START           ##
@@ -93,12 +94,10 @@ build-api: ## Build ara-api
 
 # CREATE LIQUIBASE DIFF
 
-liquibase-diff: build-api ## Create a liquibase diff file -- DIFF_LABEL required
-	@$(MAKE) liquibase-all-bases-diff -j2 -k
-
-liquibase-all-bases-diff: liquibase-diff-mysql liquibase-diff-postgresql
-
-liquibase-diff-%: up-migration-% ## Create a liquibase diff file -- DIFF_LABEL required
+liquibase-diff: build-api up-migration ## Create a liquibase diff file -- DIFF_LABEL required, BASE to specify database
+ifeq ($(BASE),h2)
+	@$(MAKE) stop-migration-stack
+endif
 	@docker container run -it --net=host --rm \
 		--user $(shell id -u):$(shell id -g) \
 		-v $${HOME}/.m2:/var/maven/.m2:rw \
@@ -106,20 +105,20 @@ liquibase-diff-%: up-migration-% ## Create a liquibase diff file -- DIFF_LABEL r
 		-v $(shell pwd):$(shell pwd):rw \
 		-w $(shell pwd) \
 		maven:alpine \
-		mvn -Pdb-$* -Duser.home=/var/maven -f api/pom.xml -pl database liquibase:diff -DdiffChangeLogFile=api/database/src/main/resources/db/changelog/changes/$*/${DATE_WITH_TIME}-${DIFF_LABEL}.yaml
-	@echo "  - include:" >> api/database/src/main/resources/db/changelog/db.changelog-master-$*.yaml
-	@echo "      file: classpath*:db/changelog/changes/$*/$(DATE_WITH_TIME)-$(DIFF_LABEL).yaml" >> api/database/src/main/resources/db/changelog/db.changelog-master-$*.yaml
-	@$(MAKE) stop-migration-stack-$*
+		mvn -Pdb-$(BASE) -Duser.home=/var/maven -f api/pom.xml -pl database liquibase:diff -DdiffChangeLogFile=api/database/src/main/resources/db/changelog/changes/$(BASE)/${DATE_WITH_TIME}-${DIFF_LABEL}.yaml
+	@echo "  - include:" >> api/database/src/main/resources/db/changelog/db.changelog-master-$(BASE).yaml
+	@echo "      file: classpath*:db/changelog/changes/$(BASE)/$(DATE_WITH_TIME)-$(DIFF_LABEL).yaml" >> api/database/src/main/resources/db/changelog/db.changelog-master-$(BASE).yaml
+	@$(MAKE) stop-migration-stack
 
-up-migration-%:
+up-migration:
 	@echo '-- Up migration stack --'
-	@docker-compose -f api/migration-$*.yaml up -d ara-api
-	@docker-compose -f api/migration-$*.yaml up -d ara-mig-api
-	@docker-compose -f api/migration-$*.yaml run waiter-api
-	@docker-compose -f api/migration-$*.yaml run waiter-mig-api
+	@docker-compose -f api/migration-$(BASE).yaml up -d ara-api
+	@docker-compose -f api/migration-$(BASE).yaml up -d ara-mig-api
+	@docker-compose -f api/migration-$(BASE).yaml run waiter-api
+	@docker-compose -f api/migration-$(BASE).yaml run waiter-mig-api
 
-stop-migration-stack-%:
-	@docker-compose -f api/migration-$*.yaml down
+stop-migration-stack:
+	@docker-compose -f api/migration-$(BASE).yaml down
 
 # UPDATE ARA VERSION
 

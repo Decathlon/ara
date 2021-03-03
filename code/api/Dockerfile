@@ -41,9 +41,10 @@ ENV CLIENT_URL=http://ara-web-ui
 #Create base app folder
 WORKDIR $APP_HOME
 #Create folder to save configuration files and application logs
-RUN mkdir config log
+RUN mkdir config log data
 VOLUME $APP_HOME/log
 VOLUME $APP_HOME/config
+VOLUME $APP_HOME/data
 
 #Copy executable jar file from the builder image
 COPY --from=builder /build/server/target/ara-server.jar app.jar

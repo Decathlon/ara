@@ -1,0 +1,52 @@
+# Please Note that this file IS NOT PRODUCTION READY.
+# It's only dedicated to local test & try
+
+version: '3.5'
+
+services:
+  ara-api:
+    image: docker.io/decathlon/ara-api
+    restart: always
+    environment:
+      - DATABASE_TYPE=h2
+      - DATABASE_HOST=file
+      - DATABASE_NAME=/app/data/ara-db;AUTO_SERVER=TRUE
+      - DATABASE_USER=sa
+      - DATABASE_PASSWORD=
+      - CLIENT_URL="http://localhost:80/"
+    networks:
+      - api_net
+    volumes:
+      - ./db_h2:/app/data
+  ara-mig-api:
+    image: docker.io/decathlon/ara-api
+    restart: always
+    environment:
+      - DATABASE_TYPE=h2
+      - DATABASE_HOST=file
+      - DATABASE_NAME=/app/data/ara-db-mig;AUTO_SERVER=TRUE
+      - DATABASE_USER=sa
+      - DATABASE_PASSWORD=
+      - LIQUIBASE_ACTIVE=false
+      - HBM2DDL=update
+      - CLIENT_URL="http://localhost:80/"
+    networks:
+      - api_net
+    volumes:
+      - ./db_h2_mig:/app/data
+  waiter-api:
+    image: aligor/wait-for-url
+    command: ["--url", "http://ara-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
+    networks:
+      - api_net
+    depends_on:
+      - ara-api
+  waiter-mig-api:
+    image: aligor/wait-for-url
+    command: ["--url", "http://ara-mig-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
+    networks:
+      - api_net
+    depends_on:
+      - ara-mig-api
+networks:
+  api_net:

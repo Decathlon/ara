@@ -1,0 +1,317 @@
+databaseChangeLog:
+- changeSet:
+    id: 1614592997762-1
+    author: '? (generated)'
+    changes:
+    - addUniqueConstraint:
+        columnNames: job_url
+        constraintName: UK_lf72jkijc9ry9s3aa7pbdwd3c
+        tableName: execution
+- changeSet:
+    id: 1614592997762-2
+    author: '? (generated)'
+    changes:
+    - addUniqueConstraint:
+        columnNames: cycle_definition_id, test_date_time
+        constraintName: UKt4jtnjbb0174aqe0gakcu6lpj
+        tableName: execution
+- changeSet:
+    id: 1614592997762-3
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: type_id
+        baseTableName: problem_pattern
+        constraintName: FK38mpcmm4yrd45j8acvhb4hpbj
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: type
+        validate: true
+- changeSet:
+    id: 1614592997762-4
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: source_id
+        baseTableName: type
+        constraintName: FK420i11bbyj0gxc6ukecynerb0
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: source
+        validate: true
+- changeSet:
+    id: 1614592997762-5
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: project_id
+        baseTableName: communication
+        constraintName: FK5t8uwtv8vxpxkji11v5bl338e
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: project
+        validate: true
+- changeSet:
+    id: 1614592997762-6
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: country_id
+        baseTableName: country_deployment
+        constraintName: FK7huof3ay98nqnd2qo1tpha9jr
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: country
+        validate: true
+- changeSet:
+    id: 1614592997762-7
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: error_id
+        baseTableName: problem_occurrence
+        constraintName: FK7lub23f9xbi92jqumgrjts9tk
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: error
+        validate: true
+- changeSet:
+    id: 1614592997762-8
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: executed_scenario_id
+        baseTableName: error
+        constraintName: FK84lin3r56t0fr1ebbfdp7jyco
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: executed_scenario
+        validate: true
+- changeSet:
+    id: 1614592997762-9
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: execution_id
+        baseTableName: run
+        constraintName: FK8smfl4y1xptsycam7l2t0im88
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: execution
+        validate: true
+- changeSet:
+    id: 1614592997762-10
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: cycle_definition_id
+        baseTableName: execution
+        constraintName: FK9ima3x6oi0lhaq4y7t6uxpk42
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: cycle_definition
+        validate: true
+- changeSet:
+    id: 1614592997762-11
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: run_id
+        baseTableName: executed_scenario
+        constraintName: FK9klaki5wrqxytpd8mc0rhme2q
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: run
+        validate: true
+- changeSet:
+    id: 1614592997762-12
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: functionality_id
+        baseTableName: functionality_coverage
+        constraintName: FK9svcjqg009nq3occpvd7sfx5k
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: functionality
+        validate: true
+- changeSet:
+    id: 1614592997762-13
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: problem_id
+        baseTableName: problem_pattern
+        constraintName: FKbeunicbf28ol04ycus2ufc306
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: problem
+        validate: true
+- changeSet:
+    id: 1614592997762-14
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: country_id
+        baseTableName: run
+        constraintName: FKi98yyj4el7fl24gpwngrg5462
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: country
+        validate: true
+- changeSet:
+    id: 1614592997762-15
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: type_id
+        baseTableName: run
+        constraintName: FKj1gpmjyluw5u1lw3fn1x0r6pr
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: type
+        validate: true
+- changeSet:
+    id: 1614592997762-16
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: problem_pattern_id
+        baseTableName: problem_occurrence
+        constraintName: FKm3twuhvstqk2icoycegrcmu69
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: problem_pattern
+        validate: true
+- changeSet:
+    id: 1614592997762-17
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: root_cause_id
+        baseTableName: problem
+        constraintName: FKmou64hw0xh3mdspog4s9si9gv
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: root_cause
+        validate: true
+- changeSet:
+    id: 1614592997762-18
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: execution_id
+        baseTableName: country_deployment
+        constraintName: FKocj9121ua7k7mlefbpv2yn0a7
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: execution
+        validate: true
+- changeSet:
+    id: 1614592997762-19
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: scenario_id
+        baseTableName: functionality_coverage
+        constraintName: FKpcol94n02a8mv94ls64ao6p
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: scenario
+        validate: true
+- changeSet:
+    id: 1614592997762-20
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: blamed_team_id
+        baseTableName: problem
+        constraintName: FKpjf9330s0digv54qmyjnx2p8y
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: team
+        validate: true
+- changeSet:
+    id: 1614592997762-21
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: country_id
+        baseTableName: problem_pattern
+        constraintName: FKs01euft4h2f624wmm2tc2yjc9
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: country
+        validate: true
+- changeSet:
+    id: 1614592997762-22
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: source_id
+        baseTableName: scenario
+        constraintName: FKt6q9f0vta0y064s3fi4usfd5k
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: id
+        referencedTableName: source
+        validate: true
