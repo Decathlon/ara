@@ -315,11 +315,3 @@ databaseChangeLog:
         referencedColumnNames: id
         referencedTableName: source
         validate: true
-- changeSet:
-    id: 1614592997762-23
-    author: '? (generated)'
-    changes:
-    - dropIndex:
-        indexName: FKbkthi8mbwaru241u7dqrbaxuh
-        tableName: execution
-
