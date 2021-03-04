@@ -1,17 +1,10 @@
-name: build web-ui
+name: build api
 
 on:
-  schedule:
-    - cron: '0 10 * * *' # everyday at 10am
   push:
     branches:
       - 'main'
-      - 'release/*.*.*'
-    tags:
-      - 'ara-*.*.*'
   pull_request:
-    branches-ignore:
-      - 'main'
 
 jobs:
   pre_job:
@@ -25,9 +18,9 @@ jobs:
         uses: fkirc/skip-duplicate-actions@master
         with:
           github_token: ${{ github.token }}
-          paths: '["code/web-ui/**"]'
+          paths: '["code/api/**"]'
           skip_after_successful_duplicate: false
-  build-web-ui:
+  build-api:
     needs: pre_job
     if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
@@ -35,33 +28,34 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v2
+      - 
+        name: Install xmllint
+        run: sudo apt-get install libxml2-utils
       -
         name: Prepare
         id: prep
         run: |
-          DOCKER_IMAGE=decathlon/ara-web-ui
+          DOCKER_IMAGE=decathlon/ara-api
           VERSION=noop
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            VERSION=nightly
-          elif [[ $GITHUB_REF == refs/tags/* ]]; then
-            GITHUB_TAG=${GITHUB_REF#refs/tags/}
-            VERSION=${GITHUB_TAG#ara-}
-          elif [[ $GITHUB_REF == refs/heads/* ]]; then
-            VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
-            if [ "${{ github.event.repository.default_branch }}" = "$VERSION" ]; then
-              VERSION=edge
-            elif [[ $VERSION == release-* ]]; then
-              RELEASE=${VERSION#release-}
-              CHART_VERSION=$(cat charts/stable/Chart.yaml | grep version | sed -e 's/version: //')
-              VERSION=$(echo "$CHART_VERSION" | sed -e 's/-rc.*//')
-              if [ ! "$VERSION" = "$RELEASE" ]; then
-                >&2 echo "Chart stable Version ($VERSION) and Release Version ($RELEASE) not equals"
-                exit 1
-              fi
-              VERSION=${CHART_VERSION}.${GITHUB_SHA:0:7}
+          API_VERSION=$(xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' code/api/pom.xml)
+          PUSH=false
+          if [[ $GITHUB_REF == refs/heads/* ]]; then
+            PUSH=true
+            BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
+            if [ "${{ github.event.repository.default_branch }}" = "$BRANCH_NAME" ]; then
+              VERSION=${API_VERSION}
+            else
+              VERSION=${API_VERSION}-${BRANCH_NAME}
             fi
           elif [[ $GITHUB_REF == refs/pull/* ]]; then
-            VERSION=pr-${{ github.event.number }}
+            BRANCH_NAME=$(echo ${{ github.event.pull_request.head.ref }} | sed -r 's#/+#-#g')
+            if [[ $BRANCH_NAME == release-* ]]; then
+              PUSH=true
+              RELEASE=${BRANCH_NAME#release-}
+              VERSION=${API_VERSION}-rc${RELEASE}
+            else
+              VERSION=pr-${{ github.event.number }}
+            fi
           fi
           TAGS="${DOCKER_IMAGE}:${VERSION}"
           if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
@@ -71,13 +65,15 @@ jobs:
           fi
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=tags::${TAGS}
+          echo ::set-output name=push::${PUSH}
           echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-      - name: Create about.json
+      - 
+        name: Create about.json
         run: |
           SHA=${GITHUB_SHA:0:7}
-          VERSION=$(cat code/web-ui/package.json | jq -r '.version')
-          mkdir -p code/web-ui/static/version
-          jq -n --arg version $VERSION --arg sha $SHA -f code/web-ui/build/template/about.jq > code/web-ui/static/version/about.json
+          VERSION=$(xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' code/api/pom.xml)
+          mkdir -p code/api/server/src/main/resources/static/api/version
+          jq -n --arg version $VERSION --arg sha $SHA -f code/api/build/template/about.jq > code/api/server/src/main/resources/static/api/version/about.json
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -86,7 +82,7 @@ jobs:
         uses: docker/setup-buildx-action@v1
       -
         name: Login to DockerHub
-        if: github.event_name != 'pull_request'
+        if: ${{ steps.prep.outputs.push == 'true' }}
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -96,10 +92,10 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v2
         with:
-          context: ./code/web-ui
-          file: ./code/web-ui/Dockerfile
+          context: ./code/api
+          file: ./code/api/Dockerfile
           platforms: linux/amd64
-          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ steps.prep.outputs.push == 'true' }}
           tags: ${{ steps.prep.outputs.tags }}
           labels: |
             org.opencontainers.image.title=${{ github.event.repository.name }}
