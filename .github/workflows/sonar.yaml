@@ -6,7 +6,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
-  pre_job_web_ui:
+  pre_job:
     # continue-on-error: true # Uncomment once integration is finished
     runs-on: ubuntu-latest
     # Map a step output to a job output
@@ -17,40 +17,10 @@ jobs:
         uses: fkirc/skip-duplicate-actions@v3.3.0
         with:
           github_token: ${{ github.token }}
-          paths: '["code/web-ui/**"]'
-  pre_job_api:
-    # continue-on-error: true # Uncomment once integration is finished
-    runs-on: ubuntu-latest
-    # Map a step output to a job output
-    outputs:
-      should_skip: ${{ steps.skip_check.outputs.should_skip }}
-    steps:
-      - id: skip_check
-        uses: fkirc/skip-duplicate-actions@v3.3.0
-        with:
-          github_token: ${{ github.token }}
-          paths: '["code/api/**"]'
-  sonarcloud-web-ui:
-    name: SonarCloud Web UI
-    if: ${{ needs.pre_job_web_ui.outputs.should_skip != 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v1.5
-        with:
-          projectBaseDir: code/web-ui
-          args: >
-            -Dsonar.organization=decathlon
-            -Dsonar.projectKey=Decathlon_ara_web_ui
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  sonarcloud-api:
-    name: SonarCloud API
-    if: ${{ needs.pre_job_api.outputs.should_skip != 'true' }}
+          paths: '["code/**"]'
+  sonarcloud:
+    name: SonarCloud Analysis
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' || github.event_name != 'pull_request'}}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -63,11 +33,12 @@ jobs:
       - name: Analyze with SonarCloud
         run: |
           cd code/api
-          mvn -B verify sonar:sonar \
-                          -Dsonar.projectKey=Decathlon_ara_api \
-                          -Dsonar.organization=decathlon \
-                          -Dsonar.host.url=https://sonarcloud.io \
-                          -Dsonar.login=$SONAR_TOKEN
+          mvn -B verify
+          cd -
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v1.5
+        with:
+          projectBaseDir: code
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
