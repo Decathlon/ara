@@ -123,14 +123,9 @@ stop-migration-stack-%:
 
 # UPDATE ARA VERSION
 
-update-version: ## Update ARA version -- VERSION required
-	@$(MAKE) update-all-version -j3 -k
-
-update-all-version: update-chart-version update-maven-version update-front-version
-
 update-chart-version:
 	@echo '-- Update Helm Chart version --'
-	@sed -i'.old' 's/^version:.*$\/version: $(VERSION)-rc.0/' ../charts/stable/Chart.yaml
+	@sed -i'.old' 's/^version:.*$\/version: $(VERSION)/' ../charts/stable/Chart.yaml
 
 update-maven-version:
 	@echo '-- Update Maven version --'
