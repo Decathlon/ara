@@ -31,14 +31,11 @@ jobs:
         with:
           java-version: '14'
       - name: Analyze with SonarCloud
-        run: |
-          cd code/api
-          mvn -B verify
-          cd -
+        run: mvn -B -f code/api/pom.xml verify
+      - name: Setup sonar-scanner
+        uses: warchant/setup-sonar-scanner@v3
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v1.5
-        with:
-          projectBaseDir: code
+        run: sonar-scanner -Dsonar.projectBaseDir=code
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
