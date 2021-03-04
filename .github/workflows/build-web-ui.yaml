@@ -1,14 +1,10 @@
 name: build web-ui
 
 on:
-  schedule:
-    - cron: '0 10 * * *' # everyday at 10am
   push:
     branches:
       - 'main'
       - 'release/*.*.*'
-    tags:
-      - 'ara-*.*.*'
   pull_request:
     branches-ignore:
       - 'main'
@@ -41,24 +37,14 @@ jobs:
         run: |
           DOCKER_IMAGE=decathlon/ara-web-ui
           VERSION=noop
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            VERSION=nightly
-          elif [[ $GITHUB_REF == refs/tags/* ]]; then
-            GITHUB_TAG=${GITHUB_REF#refs/tags/}
-            VERSION=${GITHUB_TAG#ara-}
-          elif [[ $GITHUB_REF == refs/heads/* ]]; then
+          if [[ $GITHUB_REF == refs/heads/* ]]; then
             VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
+            WEB_UI_VERSION=$(cat code/web-ui/package.json | jq -r '.version')
             if [ "${{ github.event.repository.default_branch }}" = "$VERSION" ]; then
-              VERSION=edge
+              VERSION=${WEB_UI_VERSION}
             elif [[ $VERSION == release-* ]]; then
               RELEASE=${VERSION#release-}
-              CHART_VERSION=$(cat charts/stable/Chart.yaml | grep version | sed -e 's/version: //')
-              VERSION=$(echo "$CHART_VERSION" | sed -e 's/-rc.*//')
-              if [ ! "$VERSION" = "$RELEASE" ]; then
-                >&2 echo "Chart stable Version ($VERSION) and Release Version ($RELEASE) not equals"
-                exit 1
-              fi
-              VERSION=${CHART_VERSION}.${GITHUB_SHA:0:7}
+              VERSION=${WEB_UI_VERSION}-rc${RELEASE}.${GITHUB_SHA:0:7}
             fi
           elif [[ $GITHUB_REF == refs/pull/* ]]; then
             VERSION=pr-${{ github.event.number }}
@@ -72,7 +58,8 @@ jobs:
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=tags::${TAGS}
           echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-      - name: Create about.json
+      - 
+        name: Create about.json
         run: |
           SHA=${GITHUB_SHA:0:7}
           VERSION=$(cat code/web-ui/package.json | jq -r '.version')
