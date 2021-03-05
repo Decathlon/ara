@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ara.configmap.name" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "ara.name" . }}
+    helm.sh/chart: {{ include "ara.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.Version }}
+    app.kubernetes.io/component: configuration
+data:
+  database_host: {{ include "ara.db.host" . | quote }}
+  database_type: {{ .Values.database.type }}
+  database_options: {{ .Values.database.options | quote }}
+  liquibase_active: {{ .Values.database.liquibaseActive | quote }}
+  app_url: {{ .Values.api.appUrl }}
+  api_url: {{ printf "%s-api.%s.svc.cluster.local:%.0f" .Chart.Name .Release.Namespace .Values.api.port }}
+  application-custom.properties: |
+{{ .Values.api.customProperties | indent 4 }}
+
+{{- if not .Values.api.propertiesExistingSecret.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "ara.api.secret.name" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "ara.name" . }}
+    helm.sh/chart: {{ include "ara.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.Version }}
+    app.kubernetes.io/component: api-secret
+type: Opaque
+stringData:
+  {{ template "ara.api.secret.authpropertieskey" }}: |
+{{ .Values.api.authProperties | indent 4 }}
+  {{ template "ara.api.secret.custompropertieskey" }}: |
+{{ .Values.api.customProperties | indent 4 }}
+{{- end }}

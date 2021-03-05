@@ -1,3 +1,6 @@
 .secrets
 .m2
+
+.scannerwork
+
 *.versionsBackup
