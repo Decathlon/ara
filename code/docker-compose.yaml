@@ -16,7 +16,7 @@ services:
     ports:
       - 8432:5432
   ara-api:
-    image: "decathlon/ara-api:${VERSION:-latest}"
+    image: "decathlon/ara-api:${API_VERSION:-latest}"
     restart: always
     environment:
       - DATABASE_TYPE=postgresql
@@ -29,7 +29,7 @@ services:
       - web_net
       - db_net
   ara-web-ui:
-    image: "decathlon/ara-web-ui:${VERSION:-latest}"
+    image: "decathlon/ara-web-ui:${WEB_UI_VERSION:-latest}"
     restart: always
     environment:
       - API_URL=ara-api:8080
