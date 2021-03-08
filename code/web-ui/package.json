@@ -1,6 +1,6 @@
 {
   "name": "ara-client",
-  "version": "8.0.1",
+  "version": "8.0.2",
   "description": "Agile Regression Analyzer front app",
   "author": "Decathlon <developers@decathlon.com>",
   "private": true,
