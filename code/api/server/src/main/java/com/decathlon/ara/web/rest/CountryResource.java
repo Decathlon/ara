@@ -17,7 +17,7 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.codahale.metrics.annotation.Timed;
+
 import com.decathlon.ara.service.CountryService;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.dto.country.CountryDTO;
@@ -72,7 +72,6 @@ public class CountryResource {
      * Request) if an entity with the same code or name already exists
      */
     @PostMapping("")
-    @Timed
     public ResponseEntity<CountryDTO> create(@PathVariable String projectCode, @Valid @RequestBody CountryDTO dtoToCreate) {
         try {
             CountryDTO createdDto = service.create(projectService.toId(projectCode), dtoToCreate);
@@ -95,7 +94,6 @@ public class CountryResource {
      * valid, or with status 500 (Internal Server Error) if the entity couldn't be inserted nor updated
      */
     @PutMapping("/{code}")
-    @Timed
     public ResponseEntity<CountryDTO> createOrUpdate(@PathVariable String projectCode, @PathVariable String code, @Valid @RequestBody CountryDTO dtoToInsertOrUpdate) {
         dtoToInsertOrUpdate.setCode(code); // HTTP PUT requires the URL to be the URL of the entity
         try {
@@ -118,7 +116,6 @@ public class CountryResource {
      * @return the ResponseEntity with status 200 (OK) and the list of entities in body
      */
     @GetMapping("")
-    @Timed
     public ResponseEntity<List<CountryDTO>> getAll(@PathVariable String projectCode) {
         try {
             return ResponseEntity.ok().body(service.findAll(projectService.toId(projectCode)));
@@ -135,7 +132,6 @@ public class CountryResource {
      * @return the ResponseEntity with status 200 (OK)
      */
     @DeleteMapping("/{code}")
-    @Timed
     public ResponseEntity<Void> delete(@PathVariable String projectCode, @PathVariable String code) {
         try {
             service.delete(projectService.toId(projectCode), code);

@@ -17,7 +17,7 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.codahale.metrics.annotation.Timed;
+
 import com.decathlon.ara.service.ProblemPatternService;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
@@ -70,7 +70,6 @@ public class ProblemPatternResource {
      * @return the ResponseEntity with status 200 (OK) and the deleted problem, if the pattern was the only one inside its problem
      */
     @DeleteMapping("/{id:[0-9]+}")
-    @Timed
     public ResponseEntity<DeletePatternDTO> delete(@PathVariable String projectCode, @PathVariable long id) {
         try {
             return ResponseEntity.ok()
@@ -90,7 +89,6 @@ public class ProblemPatternResource {
      * @return the ResponseEntity with status 200 (OK) and with body containing a page of errors of the problem pattern
      */
     @GetMapping("/{id:[0-9]+}/errors")
-    @Timed
     public ResponseEntity<Page<ErrorWithExecutedScenarioAndRunAndExecutionDTO>> getProblemPatternErrors(
             @PathVariable String projectCode, @PathVariable long id, Pageable pageable) {
         try {
@@ -111,7 +109,6 @@ public class ProblemPatternResource {
      * valid, or with status 500 (Internal Server Error) if the entity couldn't be updated
      */
     @PutMapping("/{id:[0-9]+}")
-    @Timed
     public ResponseEntity<ProblemPatternDTO> update(@PathVariable String projectCode, @PathVariable long id, @Valid @RequestBody ProblemPatternDTO dtoToUpdate) {
         dtoToUpdate.setId(Long.valueOf(id)); // HTTP PUT requires the URL to be the URL of the entity
         try {

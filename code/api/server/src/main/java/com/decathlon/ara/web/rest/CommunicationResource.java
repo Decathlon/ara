@@ -17,7 +17,7 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.codahale.metrics.annotation.Timed;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.exception.NotFoundException;
@@ -61,7 +61,6 @@ public class CommunicationResource {
      * @return the ResponseEntity with status 200 (OK) and the list of entities in body
      */
     @GetMapping("")
-    @Timed
     public ResponseEntity<List<CommunicationDTO>> getAll(@PathVariable String projectCode) {
         try {
             return ResponseEntity.ok().body(service.findAll(projectService.toId(projectCode)));
@@ -71,7 +70,6 @@ public class CommunicationResource {
     }
 
     @GetMapping("/{code}")
-    @Timed
     public ResponseEntity<CommunicationDTO> getOneByCode(@PathVariable String projectCode, @PathVariable String code) {
         try {
             return ResponseEntity.ok().body(service.findOneByCode(projectService.toId(projectCode), code));
@@ -81,7 +79,6 @@ public class CommunicationResource {
     }
 
     @PutMapping("/{code}")
-    @Timed
     public ResponseEntity<CommunicationDTO> update(@PathVariable String projectCode,
                                                    @PathVariable String code,
                                                    @Valid @RequestBody CommunicationDTO dtoToUpdate) {

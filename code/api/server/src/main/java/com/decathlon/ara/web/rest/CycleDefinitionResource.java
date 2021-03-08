@@ -17,7 +17,7 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.codahale.metrics.annotation.Timed;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.dto.cycledefinition.CycleDefinitionDTO;
@@ -69,7 +69,6 @@ public class CycleDefinitionResource {
      * already an ID
      */
     @PostMapping("")
-    @Timed
     public ResponseEntity<CycleDefinitionDTO> create(@PathVariable String projectCode, @Valid @RequestBody CycleDefinitionDTO dtoToCreate) {
 
         if (dtoToCreate.getId() != null) {
@@ -97,7 +96,6 @@ public class CycleDefinitionResource {
      * valid, or with status 500 (Internal Server Error) if the entity couldn't be updated
      */
     @PutMapping("/{id:[0-9]+}")
-    @Timed
     public ResponseEntity<CycleDefinitionDTO> update(@PathVariable String projectCode, @PathVariable Long id, @Valid @RequestBody CycleDefinitionDTO dtoToUpdate) {
         dtoToUpdate.setId(id); // HTTP PUT requires the URL to be the URL of the entity
         try {
@@ -117,7 +115,6 @@ public class CycleDefinitionResource {
      * @return the ResponseEntity with status 200 (OK) and the list of entities in body
      */
     @GetMapping("")
-    @Timed
     public ResponseEntity<List<CycleDefinitionDTO>> getAll(@PathVariable String projectCode) {
         try {
             return ResponseEntity.ok().body(service.findAll(projectService.toId(projectCode)));
@@ -134,7 +131,6 @@ public class CycleDefinitionResource {
      * @return the ResponseEntity with status 200 (OK)
      */
     @DeleteMapping("/{id:[0-9]+}")
-    @Timed
     public ResponseEntity<Void> delete(@PathVariable String projectCode, @PathVariable long id) {
         try {
             service.delete(projectService.toId(projectCode), id);

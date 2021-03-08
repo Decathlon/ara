@@ -17,7 +17,7 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.codahale.metrics.annotation.Timed;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.ProblemService;
 import com.decathlon.ara.service.ProjectService;
@@ -67,7 +67,6 @@ public class ProblemResource {
      * already an ID
      */
     @PostMapping("")
-    @Timed
     public ResponseEntity<ProblemWithPatternsDTO> create(@PathVariable String projectCode, @Valid @RequestBody ProblemWithPatternsDTO dtoToCreate) {
         if (dtoToCreate.getId() != null) {
             return ResponseEntity.badRequest().headers(HeaderUtil.idMustBeEmpty(NAME)).build();
@@ -91,7 +90,6 @@ public class ProblemResource {
      * @return the ResponseEntity with status 200 (OK) and with body the entity, or with status 404 (Not Found)
      */
     @GetMapping("/{id:[0-9]+}")
-    @Timed
     public ResponseEntity<ProblemWithPatternsAndAggregateTDO> getOne(@PathVariable String projectCode, @PathVariable long id) {
         try {
             return ResponseEntity.ok().body(service.findOneWithPatterns(projectService.toId(projectCode), id));
@@ -109,7 +107,6 @@ public class ProblemResource {
      * @return the ResponseEntity with status 200 (OK) and with body containing a page of errors of the problem
      */
     @GetMapping("/{id:[0-9]+}/errors")
-    @Timed
     public ResponseEntity<Page<ErrorWithExecutedScenarioAndRunAndExecutionDTO>> getProblemErrors(@PathVariable String projectCode, @PathVariable long id, Pageable pageable) {
         try {
             Long projectId = projectService.toId(projectCode);
@@ -128,7 +125,6 @@ public class ProblemResource {
      * @return the ResponseEntity with status 200 (OK)
      */
     @DeleteMapping("/{id:[0-9]+}")
-    @Timed
     public ResponseEntity<Void> delete(@PathVariable String projectCode, @PathVariable long id) {
         try {
             service.delete(projectService.toId(projectCode), id);
@@ -147,7 +143,6 @@ public class ProblemResource {
      * @return the ResponseEntity with status 200 (OK) and with body containing a page of open problems
      */
     @PostMapping("/filter")
-    @Timed
     public ResponseEntity<Page<ProblemWithAggregateDTO>> getMatchingOnes(@PathVariable String projectCode, @RequestBody ProblemFilterDTO filter, Pageable pageable) {
         try {
             return ResponseEntity.ok().body(service.findMatchingProblems(projectService.toId(projectCode), filter, pageable));
@@ -165,7 +160,6 @@ public class ProblemResource {
      * @return the ResponseEntity with status 200 (OK) and with body containing the saved problem pattern
      */
     @PostMapping("/{id:[0-9]+}/append-pattern")
-    @Timed
     public ResponseEntity<ProblemPatternDTO> appendPattern(@PathVariable String projectCode, @PathVariable long id, @Valid @RequestBody ProblemPatternDTO newPatternDto) {
         try {
             ProblemPatternDTO savedPattern = service.appendPattern(projectService.toId(projectCode), id, newPatternDto);
@@ -188,7 +182,6 @@ public class ProblemResource {
      * valid, or with status 500 (Internal Server Error) if the entity couldn't be updated
      */
     @PutMapping("/{id:[0-9]+}")
-    @Timed
     public ResponseEntity<ProblemDTO> updateProperties(@PathVariable String projectCode, @PathVariable long id, @Valid @RequestBody ProblemDTO dtoToUpdate) {
         dtoToUpdate.setId(Long.valueOf(id)); // HTTP PUT requires the URL to be the URL of the entity
         try {
@@ -211,7 +204,6 @@ public class ProblemResource {
      * @return the destination problem, and the source problem if the source problem has been removed (because it now has no pattern)
      */
     @PostMapping("/{destinationProblemId:[0-9]+}/pick-up-pattern/{sourcePatternId:[0-9]+}")
-    @Timed
     public ResponseEntity<PickUpPatternDTO> pickUpPattern(@PathVariable String projectCode, @PathVariable long destinationProblemId, @PathVariable long sourcePatternId) {
         try {
             return ResponseEntity.ok().body(service.pickUpPattern(projectService.toId(projectCode), destinationProblemId, sourcePatternId));
@@ -230,7 +222,6 @@ public class ProblemResource {
      * valid, or with status 500 (Internal Server Error) if the entity couldn't be updated
      */
     @PutMapping("/{id:[0-9]+}/close/{rootCauseId:[0-9]+}")
-    @Timed
     public ResponseEntity<ProblemDTO> close(@PathVariable String projectCode, @PathVariable long id, @PathVariable long rootCauseId) {
         try {
             return ResponseEntity.ok().body(service.close(projectService.toId(projectCode), id, rootCauseId));
@@ -248,7 +239,6 @@ public class ProblemResource {
      * valid, or with status 500 (Internal Server Error) if the entity couldn't be updated
      */
     @PutMapping("/{id:[0-9]+}/reopen")
-    @Timed
     public ResponseEntity<ProblemDTO> reopen(@PathVariable String projectCode, @PathVariable long id) {
         try {
             return ResponseEntity.ok().body(service.reopen(projectService.toId(projectCode), id));
@@ -270,7 +260,6 @@ public class ProblemResource {
      * status 502 if the defect tracking system cannot be reached or returned an error
      */
     @PutMapping("/{id:[0-9]+}/refresh-defect-status")
-    @Timed
     public ResponseEntity<ProblemDTO> refreshDefectStatus(@PathVariable String projectCode, @PathVariable long id) {
         try {
             return ResponseEntity.ok().body(service.refreshDefectStatus(projectService.toId(projectCode), id));
@@ -287,7 +276,6 @@ public class ProblemResource {
      * @return a 404 error if the project does not exist
      */
     @PostMapping("/recompute-first-and-last-seen-date-times")
-    @Timed
     public ResponseEntity<Void> recomputeFirstAndLastSeenDateTimes(@PathVariable String projectCode) {
         try {
             service.recomputeFirstAndLastSeenDateTimes(projectService.toId(projectCode));

@@ -17,7 +17,7 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.codahale.metrics.annotation.Timed;
+
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotUniqueException;
@@ -63,7 +63,7 @@ public class ProjectResource {
      * already an ID
      */
     @PostMapping("")
-    @Timed
+
     public ResponseEntity<ProjectDTO> create(@Valid @RequestBody ProjectDTO dtoToCreate) {
         if (dtoToCreate.getId() != null) {
             return ResponseEntity.badRequest().headers(HeaderUtil.idMustBeEmpty(NAME)).build();
@@ -88,7 +88,6 @@ public class ProjectResource {
      * valid, or with status 500 (Internal Server Error) if the entity couldn't be updated
      */
     @PutMapping("/{id:[0-9]+}")
-    @Timed
     public ResponseEntity<ProjectDTO> update(@PathVariable Long id, @Valid @RequestBody ProjectDTO dtoToUpdate) {
         dtoToUpdate.setId(id); // HTTP PUT requires the URL to be the URL of the entity
         try {
@@ -107,7 +106,6 @@ public class ProjectResource {
      * @return the ResponseEntity with status 200 (OK) and the list of entities in body
      */
     @GetMapping("")
-    @Timed
     public List<ProjectDTO> getAll() {
         return service.findAll();
     }

@@ -17,7 +17,7 @@
 
 package com.decathlon.ara.scenario.cucumber.resource;
 
-import com.codahale.metrics.annotation.Timed;
+
 import com.decathlon.ara.scenario.cucumber.upload.CucumberScenarioUploader;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.exception.BadRequestException;
@@ -56,7 +56,6 @@ public class CucumberResource {
      * @return OK on success, INTERNAL_SERVER_ERROR on processing error
      */
     @PostMapping("scenarios/upload/{sourceCode}")
-    @Timed
     public ResponseEntity<Void> uploadScenarios(@PathVariable String projectCode, @PathVariable String sourceCode, @Valid @RequestBody String json) {
         try {
             cucumberScenarioUploader.uploadCucumber(projectService.toId(projectCode), sourceCode, json);
