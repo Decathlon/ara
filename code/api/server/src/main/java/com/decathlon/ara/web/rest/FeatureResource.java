@@ -24,7 +24,6 @@ import com.decathlon.ara.service.dto.feature.FeatureDTO;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
 import com.decathlon.ara.web.rest.util.RestConstants;
-import io.micrometer.core.annotation.Timed;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
