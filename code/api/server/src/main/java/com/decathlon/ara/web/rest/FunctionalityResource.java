@@ -17,7 +17,7 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.codahale.metrics.annotation.Timed;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.coverage.CoverageService;
 import com.decathlon.ara.service.FunctionalityService;
@@ -89,7 +89,6 @@ public class FunctionalityResource {
      * @return the ResponseEntity with status 200 (OK) and the tree of entities in body
      */
     @GetMapping("")
-    @Timed
     public ResponseEntity<List<FunctionalityWithChildrenDTO>> getAll(@PathVariable String projectCode) {
         try {
             return ResponseEntity.ok().body(service.findAllAsTree(projectService.toId(projectCode)));
@@ -108,7 +107,6 @@ public class FunctionalityResource {
      * valid, or with status 500 (Internal Server Error) if the entity couldn't be updated
      */
     @PutMapping("/{id:[0-9]+}")
-    @Timed
     public ResponseEntity<FunctionalityDTO> updateProperties(@PathVariable String projectCode, @PathVariable Long id, @Valid @RequestBody FunctionalityDTO dtoToUpdate) {
         dtoToUpdate.setId(id); // HTTP PUT requires the URL to be the URL of the entity
         try {
@@ -136,7 +134,6 @@ public class FunctionalityResource {
      * already an ID
      */
     @PostMapping("")
-    @Timed
     public ResponseEntity<FunctionalityDTO> create(@PathVariable String projectCode, @Valid @RequestBody NewFunctionalityDTO newDto) {
         if (newDto.getFunctionality().getId() != null) {
             return ResponseEntity.badRequest().headers(HeaderUtil.idMustBeEmpty(NAME)).build();
@@ -160,7 +157,6 @@ public class FunctionalityResource {
      * @return the ResponseEntity with status 200 (OK)
      */
     @DeleteMapping("/{id:[0-9]+}")
-    @Timed
     public ResponseEntity<Void> delete(@PathVariable String projectCode, @PathVariable Long id) {
         try {
             service.delete(projectService.toId(projectCode), id);
@@ -171,7 +167,6 @@ public class FunctionalityResource {
     }
 
     @DeleteMapping
-    @Timed
     public ResponseEntity<List<FunctionalityWithChildrenDTO>> deleteList(
             @PathVariable String projectCode,
             @RequestParam("id") List<Long> ids
@@ -192,7 +187,6 @@ public class FunctionalityResource {
      * @return the ResponseEntity with status 200 (OK)
      */
     @PostMapping("/move")
-    @Timed
     public ResponseEntity<FunctionalityDTO> move(@PathVariable String projectCode, @Valid @RequestBody MoveFunctionalityDTO moveRequest) {
         try {
             FunctionalityDTO updatedDto = service.move(projectService.toId(projectCode), moveRequest);
@@ -212,7 +206,6 @@ public class FunctionalityResource {
      * @return the ResponseEntity with status 200 (OK)
      */
     @PostMapping("/move/list")
-    @Timed
     public ResponseEntity<List<FunctionalityWithChildrenDTO>> moveList(@PathVariable String projectCode, @Valid @RequestBody MoveFunctionalitiesDTO moveRequest) {
         try {
             List<FunctionalityWithChildrenDTO> updatedTree = service.moveList(projectService.toId(projectCode), moveRequest);
@@ -230,7 +223,6 @@ public class FunctionalityResource {
      * @return the ResponseEntity with status 200 (OK) and the list of scenarios covering the functionality, status 404 if the entity is not found, or 400 if requesting scenarios of a folder
      */
     @GetMapping("/{id:[0-9]+}/scenarios")
-    @Timed
     public ResponseEntity<List<ScenarioDTO>> getScenarios(@PathVariable String projectCode, @PathVariable long id) {
         try {
             return ResponseEntity.ok().body(service.findScenarios(projectService.toId(projectCode), id));
@@ -240,7 +232,6 @@ public class FunctionalityResource {
     }
 
     @GetMapping("/coverage")
-    @Timed
     public ResponseEntity<CoverageDTO> getCoverage(@PathVariable String projectCode) {
         try {
             return ResponseEntity.ok().body(coverageService.computeCoverage(projectService.toId(projectCode)));
@@ -256,7 +247,6 @@ public class FunctionalityResource {
      * @return the JSON of all the exporters available.
      */
     @RequestMapping(method= RequestMethod.OPTIONS, path="/export")
-    @Timed
     public ResponseEntity<List<ExporterInfoDTO>> getExportOptions(@PathVariable String projectCode) {
         return ResponseEntity.ok().body(service.listAvailableExporters());
     }
@@ -270,7 +260,6 @@ public class FunctionalityResource {
      * @return a streamable byte array which represents the exported functionalities for download.
      */
     @GetMapping("/export")
-    @Timed
     public ResponseEntity<Resource> export(@PathVariable String projectCode, @RequestParam List<Long> functionalities, @RequestParam String exportType, @RequestParam Map<String,String> additionalParams) {
         try {
             // Remove the already known params catched by the global mapping
@@ -294,7 +283,6 @@ public class FunctionalityResource {
      * @return 200 OK if the import finished in success.
      */
     @PostMapping("/import")
-    @Timed
     public ResponseEntity<Resource> importFunctionalities(@PathVariable String projectCode, @RequestParam("functionalities") MultipartFile jsonFunctionalities) {
         try {
             service.importJSONFunctionalities(projectCode, new String(jsonFunctionalities.getBytes(), StandardCharsets.UTF_8));

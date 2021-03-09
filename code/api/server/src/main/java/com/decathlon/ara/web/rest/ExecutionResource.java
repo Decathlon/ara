@@ -17,7 +17,7 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.codahale.metrics.annotation.Timed;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.domain.enumeration.QualityStatus;
 import com.decathlon.ara.service.ExecutionHistoryService;
@@ -72,7 +72,6 @@ public class ExecutionResource {
      * @return the ResponseEntity with status 200 (OK) and with body containing a page of entities
      */
     @GetMapping("")
-    @Timed
     public ResponseEntity<Page<ExecutionWithHandlingCountsDTO>> getPage(@PathVariable String projectCode, Pageable pageable) {
         try {
             return ResponseEntity.ok().body(service.findAll(projectService.toId(projectCode), pageable));
@@ -89,7 +88,6 @@ public class ExecutionResource {
      * @return the ResponseEntity with status 200 (OK) and with body the teamDTO, or with status 404 (Not Found)
      */
     @GetMapping("/{id:[0-9]+}")
-    @Timed
     public ResponseEntity<ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO> getOne(@PathVariable String projectCode, @PathVariable long id) {
         ExecutionCriteriaDTO criteria = new ExecutionCriteriaDTO();
         criteria.setWithSucceed(false);
@@ -108,7 +106,6 @@ public class ExecutionResource {
      * @return the ResponseEntity with status 200 (OK) and with body the teamDTO, or with status 404 (Not Found)
      */
     @GetMapping("/{id:[0-9]+}/with-successes")
-    @Timed
     public ResponseEntity<ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO> getOneWithSuccesses(@PathVariable String projectCode, @PathVariable long id) {
         ExecutionCriteriaDTO criteria = new ExecutionCriteriaDTO();
         criteria.setWithSucceed(true);
@@ -129,7 +126,6 @@ public class ExecutionResource {
      * valid, or with status 500 (Internal Server Error) if the entity couldn't be updated
      */
     @PutMapping("/{id:[0-9]+}/discard")
-    @Timed
     public ResponseEntity<ExecutionDTO> discard(@PathVariable String projectCode, @PathVariable long id, @RequestBody String discardReason) {
         try {
             return ResponseEntity.ok().body(service.discard(projectService.toId(projectCode), id, discardReason));
@@ -147,7 +143,6 @@ public class ExecutionResource {
      * valid, or with status 500 (Internal Server Error) if the entity couldn't be updated
      */
     @PutMapping("/{id:[0-9]+}/un-discard")
-    @Timed
     public ResponseEntity<ExecutionDTO> unDiscard(@PathVariable String projectCode, @PathVariable long id) {
         try {
             return ResponseEntity.ok().body(service.unDiscard(projectService.toId(projectCode), id));
@@ -157,7 +152,6 @@ public class ExecutionResource {
     }
 
     @GetMapping("/latest")
-    @Timed
     public ResponseEntity<List<ExecutionHistoryPointDTO>> getLatestExecutionHistories(@PathVariable String projectCode) {
         try {
             return ResponseEntity.ok().body(executionHistoryService.getLatestExecutionHistories(projectService.toId(projectCode)));
@@ -167,7 +161,6 @@ public class ExecutionResource {
     }
 
     @GetMapping("/{id:[0-9]+}/history")
-    @Timed
     public ResponseEntity<ExecutionHistoryPointDTO> getExecutionHistory(@PathVariable String projectCode, @PathVariable long id) {
         try {
             return ResponseEntity.ok().body(executionHistoryService.getExecution(projectService.toId(projectCode), id));
@@ -188,7 +181,6 @@ public class ExecutionResource {
      * @return a 404 error if the project does not exist
      */
     @PostMapping("/request-completion")
-    @Timed
     public ResponseEntity<Void> requestCompletion(@PathVariable String projectCode, @RequestParam String jobUrl) {
         try {
             service.requestCompletion(projectService.toId(projectCode), jobUrl);
@@ -211,7 +203,6 @@ public class ExecutionResource {
      * definitive quality status of the execution is known
      */
     @GetMapping("/quality-status")
-    @Timed
     public ResponseEntity<String> getQualityStatus(@PathVariable String projectCode, @RequestParam String jobUrl) {
         try {
             return ResponseEntity.ok().body(service.getQualityStatus(projectService.toId(projectCode), jobUrl));
@@ -227,7 +218,6 @@ public class ExecutionResource {
      * @return The ResponseEntity with status 200 (OK) and the list of entities in body
      */
     @GetMapping("/latest-eligible-versions")
-    @Timed
     public ResponseEntity<List<ExecutionDTO>> getLatestEligibleVersions(@PathVariable String projectCode) {
         try {
             return ResponseEntity.ok().body(service.getLatestEligibleVersions(projectService.toId(projectCode)));

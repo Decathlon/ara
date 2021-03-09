@@ -5,14 +5,11 @@
 DOCKER_REGISTRY?=docker.io
 # Forks may use name/ara for their tests
 IMAGE_NAME?=decathlon/ara
-VERSION?=latest
+API_VERSION?=latest
+WEB_UI_VERSION?=latest
 
-API_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-api:${VERSION}
-WEB_UI_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-web-ui:${VERSION}
-
-DIFF_LABEL = "to-be-changed"
-DATE_WITH_TIME := $(shell /bin/date "+%Y%m%d%H%M%S")
-BASE?=h2
+API_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-api:${API_VERSION}
+WEB_UI_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-web-ui:${WEB_UI_VERSION}
 
 #####################################
 ##           QUICK START           ##
@@ -20,30 +17,22 @@ BASE?=h2
 
 start: ## Start ARA
 	@echo '-- Start ARA --'
-	@export VERSION=$(VERSION); docker-compose up -d
+	@export API_VERSION=$(API_VERSION); export WEB_UI_VERSION=$(WEB_UI_VERSION); docker-compose up -d
 
 stop: ## Stop ARA
 	@echo '-- Stop ARA --'
-	@export VERSION=$(VERSION); docker-compose down
+	@export API_VERSION=$(API_VERSION); export WEB_UI_VERSION=$(WEB_UI_VERSION); docker-compose down
 
 
 # RUN BY MODULE
 
-run-db: ## Run database
-	@echo '-- Run database --'
-	@export VERSION=$(VERSION); docker-compose up ara-db
+run-%: ## Run module
+	@echo '-- Run $* --'
+	@export API_VERSION=$(API_VERSION); export WEB_UI_VERSION=$(WEB_UI_VERSION); docker-compose up $(OPT) ara-$*
 
-run-api: ## Run api
-	@echo '-- Run ara-api --'
-	@export VERSION=$(VERSION); docker-compose up ara-api
-
-run-web-ui: ## Run web-ui
-	@echo '-- Run ara-web-ui --'
-	@export VERSION=$(VERSION); docker-compose up ara-web-ui
-
-start-db: ## Start database in background
-	@echo '-- Start database in background --'
-	@export VERSION=$(VERSION); docker-compose up -d ara-db
+stop-%: ## Stop module
+	@echo '-- Stop $* --'
+	@docker-compose up $(OPT) ara-$*
 
 #####################################
 ##            BUILD APP            ##
@@ -52,7 +41,7 @@ start-db: ## Start database in background
 build: ## Build ARA in parallel
 	@$(MAKE) build-full -j2 -k
 
-build-full: build-api build-web-ui ## Build ARA
+build-full: build-api build-web-ui
 
 about-web-ui:
 	@mkdir -p web-ui/static/version
@@ -84,7 +73,7 @@ about-api:
     								  -f about.jq > \
     								  api/server/src/main/resources/static/api/version/about.json
 
-build-api: ## Build ara-api
+build-api: about-api ## Build ara-api
 	@echo '-- Build ${API_IMAGE} --'
 	@docker build -t ${API_IMAGE} api
 
@@ -93,6 +82,9 @@ build-api: ## Build ara-api
 #####################################
 
 # CREATE LIQUIBASE DIFF
+DIFF_LABEL = "to-be-changed"
+DATE_WITH_TIME := $(shell /bin/date "+%Y%m%d%H%M%S")
+BASE?=h2
 
 liquibase-diff: build-api up-migration ## Create a liquibase diff file -- DIFF_LABEL required, BASE to specify database
 ifeq ($(BASE),h2)
@@ -122,38 +114,53 @@ stop-migration-stack:
 
 # UPDATE ARA VERSION
 
-update-chart-version:
-	@echo '-- Update Helm Chart version --'
-	@sed -i'.old' 's/^version:.*$\/version: $(VERSION)/' ../charts/stable/Chart.yaml
+get-versions: ## Give ARA version
+	@echo -n 'chart stable: '
+	@$(MAKE) get-chart-version TARGET_CHART=stable
+	@echo -n 'chart candidate: '
+	@$(MAKE) get-chart-version TARGET_CHART=candidate
+	@echo -n 'api: '
+	@$(MAKE) get-api-version
+	@echo -n 'web-ui: '
+	@$(MAKE) get-web-ui-version
 
-update-maven-version:
+TARGET_CHART?=stable
+get-chart-version:
+	@echo $$(cat ../charts/$(TARGET_CHART)/Chart.yaml | grep version | sed -e 's/version: //')
+
+update-chart-version: ## Update chart version
+	@echo '-- Update Helm Chart version --'
+	@sed -i'.old' 's/^version:.*$\/version: $(VERSION)/' ../charts/$(TARGET_CHART)/Chart.yaml
+
+get-api-version:
+	@$(MAKE) -C api get-version
+
+update-api-version: ## Update api version
 	@echo '-- Update Maven version --'
 	@mvn --batch-mode -f api/pom.xml -s api/settings.xml release:update-versions -DautoVersionSubmodules=true -DdevelopmentVersion=$(VERSION)-SNAPSHOT
 	@mvn --batch-mode -f api/pom.xml -s api/settings.xml versions:set -DremoveSnapshot -DprocessAllModules
 
-update-front-version:
+get-web-ui-version:
+	@$(MAKE) -C web-ui get-version
+
+update-web-ui-version: ## Update web-ui version
 	@echo '-- Update Web-UI version --'
 	@npm --prefix web-ui version $(VERSION)
-
-commit-version:
-	@echo '-- Commit new version --'
-	@git add -A && git commit -m "⬆️  Upgrade to $(VERSION)" && git push
-
 
 #####################################
 ##            HELM PART            ##
 #####################################
 
-helm-tempate: ## Helm template
+helm-tempate:
 	@helm template ../charts/stable --debug
 
-helm-install: ## Helm install ara-local
+helm-install:
 	@helm install --create-namespace --namespace ara ara-local ../charts/stable
 
-helm-upgrade: ## Helm upgrade ara-local
+helm-upgrade:
 	@helm upgrade --namespace ara ara-local ../charts/stable
 
-helm-uninstall: ## Helm uninstall ara-local
+helm-uninstall:
 	@helm uninstall --namespace ara ara-local
 
 .PHONY: help

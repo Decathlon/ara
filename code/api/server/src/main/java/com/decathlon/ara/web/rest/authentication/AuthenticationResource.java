@@ -17,7 +17,7 @@
 
 package com.decathlon.ara.web.rest.authentication;
 
-import com.codahale.metrics.annotation.Timed;
+
 import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationService;
 import com.decathlon.ara.service.authentication.AuthenticationService;
 import com.decathlon.ara.service.authentication.exception.AuthenticationException;
@@ -51,7 +51,6 @@ public class AuthenticationResource {
     private final JwtTokenAuthenticationService jwtTokenAuthenticationService;
 
     @PostMapping("/login")
-    @Timed
     public ResponseEntity<UserAuthenticationDetailsDTO> authenticate(@Valid @RequestBody UserAuthenticationRequestDTO request) {
         try {
             return authenticationService.authenticate(request);
@@ -62,14 +61,12 @@ public class AuthenticationResource {
     }
 
     @PostMapping("/logout")
-    @Timed
     public ResponseEntity<Void> logout() {
         HttpHeaders headers = jwtTokenAuthenticationService.deleteAuthenticationCookie();
         return ResponseEntity.ok().headers(headers).build();
     }
 
     @PostMapping
-    @Timed
     public ResponseEntity<AppAuthenticationDetailsDTO> authenticate(@Valid @RequestBody AppAuthenticationRequestDTO request) {
         try {
             return authenticationService.authenticate(request);
@@ -80,7 +77,6 @@ public class AuthenticationResource {
     }
 
     @GetMapping("/configuration")
-    @Timed
     public ResponseEntity<AuthenticationConfigurationDTO> getAuthenticationConfiguration() {
         AuthenticationConfigurationDTO configuration = authenticationService.getAuthenticationConfiguration();
         return ResponseEntity.ok(configuration);

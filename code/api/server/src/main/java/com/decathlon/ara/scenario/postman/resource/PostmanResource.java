@@ -17,7 +17,7 @@
 
 package com.decathlon.ara.scenario.postman.resource;
 
-import com.codahale.metrics.annotation.Timed;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.scenario.postman.upload.PostmanScenarioUploader;
 import com.decathlon.ara.service.ProjectService;
@@ -54,7 +54,6 @@ public class PostmanResource {
     private final PostmanScenarioUploader postmanScenarioUploader;
 
     @PostMapping("scenarios/upload/{sourceCode}")
-    @Timed
     public ResponseEntity<Void> uploadScenarios(@PathVariable String projectCode,
                                                 @PathVariable String sourceCode,
                                                 @RequestParam("file") MultipartFile file) {

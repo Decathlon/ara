@@ -17,7 +17,7 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.codahale.metrics.annotation.Timed;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.domain.enumeration.Technology;
@@ -77,7 +77,6 @@ public class SettingResource {
      *                             format, or unmet business rules
      */
     @PutMapping("/{code:.+}")
-    @Timed
     public List<SettingGroupDTO> update(@PathVariable String projectCode,
                                         @PathVariable String code,
                                         @Valid @RequestBody SettingValueDTO settingValue) throws BadRequestException {
@@ -99,7 +98,6 @@ public class SettingResource {
      * @throws NotFoundException if the project is unknown
      */
     @GetMapping("")
-    @Timed
     public List<SettingGroupDTO> getAll(@PathVariable String projectCode) throws NotFoundException {
         return settingService.getTree(projectService.toId(projectCode));
     }
@@ -112,7 +110,6 @@ public class SettingResource {
      * @throws NotFoundException if the project is unknown
      */
     @GetMapping("/technology")
-    @Timed
     public List<TechnologySettingGroupDTO> getAllTechnologySettings(@PathVariable String projectCode) throws NotFoundException {
         return technologySettingService.getAllGroups(projectService.toId(projectCode));
     }
@@ -133,7 +130,6 @@ public class SettingResource {
      *                             format, or unmet business rules
      */
     @PutMapping("/{code:.+}/technology/{technology}")
-    @Timed
     public List<TechnologySettingGroupDTO> update(
             @PathVariable String projectCode,
             @PathVariable String code,

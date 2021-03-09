@@ -17,7 +17,7 @@
 
 package com.decathlon.ara.scenario.cypress.resource;
 
-import com.codahale.metrics.annotation.Timed;
+
 import com.decathlon.ara.scenario.cucumber.bean.Feature;
 import com.decathlon.ara.scenario.cypress.upload.CypressScenarioUploader;
 import com.decathlon.ara.service.ProjectService;
@@ -49,7 +49,6 @@ public class CypressResource {
     private final CypressScenarioUploader cypressScenarioUploader;
 
     @PostMapping("scenarios/upload/{sourceCode}")
-    @Timed
     public ResponseEntity<Void> uploadCucumberScenarios(@PathVariable String projectCode, @PathVariable String sourceCode, @RequestBody List<Feature> features) {
         try {
             cypressScenarioUploader.uploadScenarios(projectService.toId(projectCode), sourceCode, features);
