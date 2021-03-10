@@ -19,7 +19,7 @@ jobs:
         with:
           github_token: ${{ github.token }}
           paths: '["code/api/**"]'
-          skip_after_successful_duplicate: false
+          do_not_skip: '["push", "workflow_dispatch", "schedule"]'
   build-api:
     needs: pre_job
     if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
