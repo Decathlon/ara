@@ -51,8 +51,8 @@ about-web-ui:
 	 						-v $(shell pwd)/web-ui/build/template:/usr/src/app:ro \
                             -w /usr/src/app \
 	 						aligor/jq \
-							jq -n --arg version $$SHA \
-								  --arg sha $$WEB_VERSION \
+							jq -n --arg version $$WEB_VERSION \
+								  --arg sha $$SHA \
 								  -f about.jq > \
 								  web-ui/static/version/about.json
 
@@ -68,8 +68,8 @@ about-api:
     	 						-v $(shell pwd)/api/build/template:/usr/src/app:ro \
                                 -w /usr/src/app \
     	 						aligor/jq \
-    							jq -n --arg version $$SHA \
-    								  --arg sha $$API_VERSION \
+    							jq -n --arg version $$API_VERSION \
+    								  --arg sha $$SHA \
     								  -f about.jq > \
     								  api/server/src/main/resources/static/api/version/about.json
 

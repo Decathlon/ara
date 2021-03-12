@@ -24,6 +24,7 @@ services:
       - DATABASE_NAME=ara
       - DATABASE_USER=changeme
       - DATABASE_PASSWORD=changeme
+      - DISPLAYED_VERSION=DEV
       - CLIENT_URL="http://localhost:80/"
     networks:
       - web_net

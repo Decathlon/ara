@@ -76,6 +76,8 @@ spec:
             configMapKeyRef:
                 name: {{ include "ara.configmap.name" . }}
                 key: liquibase_active
+        - name: DISPLAYED_VERSION
+          value: "{{ .Chart.Version }}"
         volumeMounts:
           - name: config
             mountPath: "/app/config"
@@ -95,10 +97,10 @@ spec:
           httpGet:
             path: /actuator/health/liveness
             port: {{ .Values.api.port }}
-          initialDelaySeconds: 300
+          initialDelaySeconds: 100
           timeoutSeconds: 2
           periodSeconds: 8
-          failureThreshold: 3
+          failureThreshold: 1
         {{- if .Values.api.resources }}
         resources:
 {{ toYaml .Values.api.resources | indent 10 }}
