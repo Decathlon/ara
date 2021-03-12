@@ -59,7 +59,7 @@
         <Tooltip placement="bottom-end">
           <span>V{{ appVersion }}</span>
           <div slot="content">
-            <table>
+            <table aria-label="ARA versions">
               <tr v-if="webUIVersion">
                 <th scope="row" style="text-align: right;">WEB-UI: </th>
                 <td>{{ webUIVersion }}</td>

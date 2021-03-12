@@ -1,21 +1,13 @@
 package com.decathlon.ara;
 
 import lombok.Data;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.info.Info;
 import org.springframework.boot.actuate.info.InfoContributor;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.Collections;
 
 @Component
 @RequiredArgsConstructor
@@ -27,12 +19,6 @@ public class ActuatorInfoCustom implements InfoContributor {
     @Value("${ara.clientBaseUrl:}")
     private String clientUrl;
 
-    @Data
-    private static class AboutInfo {
-        String version;
-        String sha;
-    }
-
     @Override
     public void contribute(Info.Builder builder) {
         try {
@@ -41,5 +27,11 @@ public class ActuatorInfoCustom implements InfoContributor {
         } catch (Exception e) {
             log.warn("Info endpoint hit but a problem occurs when fetching web-ui info", e);
         }
+    }
+
+    @Data
+    private static class AboutInfo {
+        String version;
+        String sha;
     }
 }
