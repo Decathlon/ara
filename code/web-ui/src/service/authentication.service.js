@@ -5,11 +5,14 @@ import api from '../libs/api'
 
 const AUTHENTICATION_DETAILS = 'authentication_details'
 
+const LAST_URL_BEFORE_LOGOUT = 'last_url'
+
 const AuthenticationService = {
 
   login (authenticationDetails) {
     this.saveDetails(authenticationDetails)
-    router.push('/')
+    const url = this.getLastUrlBeforeLogout()
+    router.push(url)
   },
 
   isAlreadyLoggedIn () {
@@ -17,8 +20,19 @@ const AuthenticationService = {
   },
 
   logout () {
+    this.saveUrl()
     this.clearDetails()
     router.push('/login')
+  },
+
+  saveUrl () {
+    const currentUrl = window.location.pathname
+    localStorage.setItem(LAST_URL_BEFORE_LOGOUT, currentUrl)
+  },
+
+  getLastUrlBeforeLogout () {
+    const url = localStorage.getItem(LAST_URL_BEFORE_LOGOUT)
+    return url || '/'
   },
 
   deleteAuthenticationCookie () {
