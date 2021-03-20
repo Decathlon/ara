@@ -226,7 +226,7 @@
       },
 
       logout () {
-        AuthenticationService.logout()
+        AuthenticationService.logout(true)
       }
     },
 

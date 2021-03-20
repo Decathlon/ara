@@ -2,6 +2,7 @@ import router from '../main'
 import Vue from 'vue'
 import iView from 'iview'
 import api from '../libs/api'
+import { config } from '../config'
 
 const AUTHENTICATION_DETAILS = 'authentication_details'
 
@@ -19,9 +20,14 @@ const AuthenticationService = {
     return !!this.getDetails()
   },
 
-  logout () {
+  logout (manual) {
     this.saveUrl()
     this.clearDetails()
+    const providersUrls = config.getProviderUrls()
+    if (!manual && providersUrls.length === 1) {
+      window.location.href = providersUrls[0]
+      return
+    }
     router.push('/login')
   },
 
