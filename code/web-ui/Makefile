@@ -63,6 +63,10 @@ dkr-build: ## DEV - build web-ui with docker
 #####################################
 
 get-version:
+	@cat package.json | jq -r '.version'
+
+get-version-dkr:
+	@docker image pull aligor/jq > /dev/null 2>&1
 	@cat package.json | docker container run --rm -i aligor/jq jq -r '.version'
 
 .PHONY: help

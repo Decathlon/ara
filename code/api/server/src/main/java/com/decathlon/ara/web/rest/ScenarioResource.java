@@ -17,7 +17,7 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.codahale.metrics.annotation.Timed;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.scenario.common.service.ScenarioService;
@@ -80,7 +80,6 @@ public class ScenarioResource {
      */
     @Deprecated
     @PostMapping("/upload/{sourceCode}")
-    @Timed
     public ResponseEntity<Void> uploadCucumber(@PathVariable String projectCode, @PathVariable String sourceCode, @Valid @RequestBody String json) {
         log.warn("Beware! This resource (scenarios/upload/{sourceCode}) is deprecated.");
         log.warn("Please, call the new resource instead: cucumber/scenarios/upload/{sourceCode}");
@@ -95,7 +94,6 @@ public class ScenarioResource {
 
     @Deprecated
     @PostMapping("/upload-postman/{sourceCode}")
-    @Timed
     public ResponseEntity<Void> uploadPostman(@PathVariable String projectCode,
                                               @PathVariable String sourceCode,
                                               @RequestParam("file") MultipartFile file) {
@@ -126,7 +124,6 @@ public class ScenarioResource {
      * @return all scenarios that have no associated functionalities or have wrong or nonexistent functionality identifier
      */
     @GetMapping("/without-functionalities")
-    @Timed
     public ResponseEntity<List<ScenarioSummaryDTO>> getAllWithFunctionalityErrors(@PathVariable String projectCode) {
         try {
             return ResponseEntity.ok().body(scenarioService.findAllWithFunctionalityErrors(projectService.toId(projectCode)));
@@ -140,7 +137,6 @@ public class ScenarioResource {
      * @return for each source (API, Web...), a count of ignored&amp;total scenarios and a list of ignored scenarios by feature file
      */
     @GetMapping("/ignored")
-    @Timed
     public ResponseEntity<List<ScenarioIgnoreSourceDTO>> getIgnoredScenarioCounts(@PathVariable String projectCode) {
         try {
             return ResponseEntity.ok().body(scenarioService.getIgnoredScenarioCounts(projectService.toId(projectCode)));

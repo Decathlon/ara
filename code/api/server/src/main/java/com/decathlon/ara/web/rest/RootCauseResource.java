@@ -17,7 +17,7 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.codahale.metrics.annotation.Timed;
+
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.RootCauseService;
 import com.decathlon.ara.service.dto.rootcause.RootCauseDTO;
@@ -69,7 +69,6 @@ public class RootCauseResource {
      * already an ID
      */
     @PostMapping("")
-    @Timed
     public ResponseEntity<RootCauseDTO> create(@PathVariable String projectCode, @Valid @RequestBody RootCauseDTO dtoToCreate) {
         if (dtoToCreate.getId() != null) {
             return ResponseEntity.badRequest().headers(HeaderUtil.idMustBeEmpty(NAME)).build();
@@ -95,7 +94,6 @@ public class RootCauseResource {
      * valid, or with status 500 (Internal Server Error) if the entity couldn't be updated
      */
     @PutMapping("/{id:[0-9]+}")
-    @Timed
     public ResponseEntity<RootCauseDTO> update(@PathVariable String projectCode, @PathVariable Long id, @Valid @RequestBody RootCauseDTO dtoToUpdate) {
         dtoToUpdate.setId(id); // HTTP PUT requires the URL to be the URL of the entity
         try {
@@ -115,7 +113,6 @@ public class RootCauseResource {
      * @return the ResponseEntity with status 200 (OK) and the list of entities in body
      */
     @GetMapping("")
-    @Timed
     public ResponseEntity<List<RootCauseDTO>> getAll(@PathVariable String projectCode) {
         try {
             return ResponseEntity.ok().body(service.findAll(projectService.toId(projectCode)));
@@ -132,7 +129,6 @@ public class RootCauseResource {
      * @return the ResponseEntity with status 200 (OK)
      */
     @DeleteMapping("/{id:[0-9]+}")
-    @Timed
     public ResponseEntity<Void> delete(@PathVariable String projectCode, @PathVariable long id) {
         try {
             service.delete(projectService.toId(projectCode), id);

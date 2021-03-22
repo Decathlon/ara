@@ -1,0 +1,2 @@
+# metrics
+management.endpoints.web.exposure.include=health,info,metrics,threaddump
