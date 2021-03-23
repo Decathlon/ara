@@ -31,7 +31,7 @@ jobs:
         with:
           java-version: '14'
       - name: Analyze with SonarCloud
-        run: mvn -B -f code/api/pom.xml verify
+        run: mvn -B -f code/api/pom.xml clean install dependency:copy-dependencies
       - name: Setup sonar-scanner
         uses: warchant/setup-sonar-scanner@v3
       - name: SonarCloud Scan
