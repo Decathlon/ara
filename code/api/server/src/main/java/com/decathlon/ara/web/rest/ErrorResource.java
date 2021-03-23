@@ -17,7 +17,7 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.codahale.metrics.annotation.Timed;
+
 import com.decathlon.ara.service.ErrorService;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionAndProblemsDTO;
@@ -67,7 +67,6 @@ public class ErrorResource {
      * @return the ResponseEntity with status 200 (OK) and with body the entity, or with status 404 (Not Found)
      */
     @GetMapping("/{id:[0-9]+}")
-    @Timed
     public ResponseEntity<ErrorWithExecutedScenarioAndRunAndExecutionDTO> getOne(
             @PathVariable String projectCode, @PathVariable long id) {
         try {
@@ -86,7 +85,6 @@ public class ErrorResource {
      * @return the ResponseEntity with status 200 (OK) and with body all users
      */
     @PostMapping("/matching")
-    @Timed
     public ResponseEntity<Page<ErrorWithExecutedScenarioAndRunAndExecutionAndProblemsDTO>> getMatchingErrors(
             @PathVariable String projectCode, @RequestBody ProblemPatternDTO pattern, Pageable pageable) {
         try {
@@ -104,7 +102,6 @@ public class ErrorResource {
      * @return the ResponseEntity with status 200 (OK) and the list of distinct
      */
     @GetMapping("/distinct/{property:[a-zA-Z]+}")
-    @Timed
     public ResponseEntity<DistinctStatisticsDTO> getDistinct(@PathVariable String projectCode, @PathVariable String property) {
         try {
             return ResponseEntity.ok().body(service.findDistinctProperties(projectService.toId(projectCode), property));

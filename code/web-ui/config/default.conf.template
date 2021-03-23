@@ -13,8 +13,8 @@ server {
       proxy_pass http://${API_URL}/api;
     }
 
-    location /actuator/info {
-      proxy_pass http://${API_URL}/actuator/info;
+    location /actuator {
+      proxy_pass http://${API_URL}/actuator;
     }
 
     location / {

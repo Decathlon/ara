@@ -17,7 +17,7 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.codahale.metrics.annotation.Timed;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.scenario.common.service.ExecutedScenarioService;
 import com.decathlon.ara.service.ProjectService;
@@ -64,7 +64,6 @@ public class ExecutedScenarioResource {
      * @return history of the execution of a scenario by its cucumberId
      */
     @PostMapping("/history")
-    @Timed
     public ResponseEntity<List<ExecutedScenarioWithRunAndTeamIdsAndExecutionAndErrorsAndProblemsDTO>> getHistory(
             @PathVariable String projectCode, @Valid @RequestBody ExecutedScenarioHistoryInputDTO input) {
         try {
@@ -82,7 +81,6 @@ public class ExecutedScenarioResource {
      * @return the Executed scenario
      */
     @GetMapping("/{id:[0-9]+}")
-    @Timed
     public ResponseEntity<ExecutedScenarioDTO> getExecutedScenario(@PathVariable String projectCode, @PathVariable long id) {
         try {
             return ResponseEntity.ok().body(executedScenarioService.findOne(projectService.toId(projectCode), id));

@@ -17,7 +17,7 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.codahale.metrics.annotation.Timed;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.DemoService;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
@@ -57,7 +57,6 @@ public class DemoResource {
      * (Bad Request) if the demo project already exists
      */
     @PostMapping
-    @Timed
     public ResponseEntity<ProjectDTO> create() {
         try {
             final ProjectDTO project = service.create();
@@ -75,7 +74,6 @@ public class DemoResource {
      * @return the ResponseEntity with status 200 (OK) or 404 (Not Found) if the demo project does not exist
      */
     @DeleteMapping
-    @Timed
     public ResponseEntity<Void> delete() {
         try {
             service.delete();

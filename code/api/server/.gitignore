@@ -30,3 +30,4 @@ src/test/resources/dbunit/freshly-created-dataset-to-rename.xml
 # application.properties
 ## authentication
 /src/main/resources/application-auth.properties
+/src/main/resources/application-custom.properties

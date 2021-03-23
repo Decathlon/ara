@@ -68,7 +68,7 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
             .authorizeRequests()//NOSONAR
-                .antMatchers("/actuator/**").permitAll()
+                .antMatchers("/actuator/info", "/actuator/health/**").permitAll()
                 .antMatchers("/auth/**").permitAll()
                 .antMatchers(swaggerResources).permitAll()
                 .anyRequest().authenticated()

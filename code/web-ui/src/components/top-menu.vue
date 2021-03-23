@@ -56,7 +56,21 @@
             </div>
           </Tooltip>
         </span>
-        <span>V{{ appVersion }}</span>
+        <Tooltip placement="bottom-end">
+          <span>V{{ appVersion }}</span>
+          <div slot="content">
+            <table aria-label="ARA versions">
+              <tr v-if="webUIVersion">
+                <th scope="row" style="text-align: right;">WEB-UI: </th>
+                <td>{{ webUIVersion }}</td>
+              </tr>
+              <tr v-if="apiVersion">
+                <th scope="row" style="text-align: right;">API: </th>
+                <td>{{ apiVersion }}</td>
+              </tr>
+            </table>
+          </div>
+        </Tooltip>
         <!-- Keep the same width as logo+select: this is to center the menu when space is available -->
         <Tooltip content="How to use ARA?" placement="bottom-end" :transfer="true">
           <a :href="'https://github.com/decathlon/ara/blob/master/doc/user/main/UserDocumentation.adoc'"
@@ -131,6 +145,8 @@
       return {
         isMediaDisplayedOnSamePage: true,
         appVersion: undefined,
+        apiVersion: undefined,
+        webUIVersion: undefined,
         latestChangelogVersion: this.getCookie(LATEST_CHANGELOG_VERSION_COOKIE_NAME),
         projectCode: this.$route.params.projectCode || this.defaultProjectCode,
         isLoggedIn: AuthenticationService.isAlreadyLoggedIn()
@@ -250,6 +266,8 @@
         .get(api.paths.info(), api.REQUEST_OPTIONS)
         .then((response) => {
           this.appVersion = response.data.app.version
+          this.webUIVersion = response.data['web-ui'].version
+          this.apiVersion = response.data.api.version
           // If it is the first time the user opens ARA, make sure to remember the current version for future notification badge
           if (!this.latestChangelogVersion) {
             this.setLatestChangelogVersion()

@@ -28,7 +28,7 @@
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-database</artifactId>
-    <version>8.0.1</version>
+    <version>8.0.3</version>
 
     <name>ARA Database</name>
     <description>
@@ -39,6 +39,8 @@
     <properties>
         <java.version>14</java.version>
         <querydsl.version>4.3.1</querydsl.version>
+        <diffChangeLogFile>src/main/resources/db/changelog/changes/XX/to-be-changed.yaml</diffChangeLogFile>
+        <liquibasePropertyFile>src/main/resources/liquibase-XX.properties</liquibasePropertyFile>
     </properties>
 
     <dependencies>

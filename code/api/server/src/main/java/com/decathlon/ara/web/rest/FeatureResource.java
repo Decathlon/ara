@@ -24,7 +24,6 @@ import com.decathlon.ara.service.dto.feature.FeatureDTO;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
 import com.decathlon.ara.web.rest.util.RestConstants;
-import io.micrometer.core.annotation.Timed;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -69,7 +68,6 @@ public class FeatureResource {
      * @return the features available (minimum informations) in a HTTP 200 response.
      */
     @GetMapping("")
-    @Timed
     public ResponseEntity<List<FeatureDTO>> list() {
         return ResponseEntity.ok(this.featureService.listAll());
     }
@@ -82,7 +80,6 @@ public class FeatureResource {
      *  doesn't match an existing feature.
      */
     @GetMapping("/{code:[a-z_-]+}")
-    @Timed
     public ResponseEntity<DetailledFeatureDTO> describe(@PathVariable String code) {
         try {
             DetailledFeatureDTO detailledFeature = this.featureService.find(code);
@@ -99,7 +96,6 @@ public class FeatureResource {
      * @return the state of the feature and its code.
      */
     @GetMapping("/{code:[a-z_-]+}/state")
-    @Timed
     public ResponseEntity<FeatureDTO> stateOf(@PathVariable String code) {
         try {
             DetailledFeatureDTO detailledFeature = this.featureService.find(code);
@@ -118,7 +114,6 @@ public class FeatureResource {
      * doesn't match an existing feature.
      */
     @GetMapping("/{code:[a-z_-]+}/default")
-    @Timed
     public ResponseEntity<FeatureDTO> retrieveDefaultSetting(@PathVariable String code) {
         try {
             FeatureDTO feature = this.featureService.findDefaultOf(code);
@@ -141,7 +136,6 @@ public class FeatureResource {
      *  one feature code doesn't exists.
      */
     @PatchMapping("")
-    @Timed
     public ResponseEntity<List<FeatureDTO>> updateAll(@RequestBody List<FeatureDTO> featuresToUpdate) {
         try {
             this.featureService.update(featuresToUpdate);
@@ -163,7 +157,6 @@ public class FeatureResource {
      *  code doesn't match an existing feature.
      */
     @PatchMapping("/{code:[a-z_-]+}")
-    @Timed
     public ResponseEntity<DetailledFeatureDTO> update(@PathVariable String code, @RequestParam boolean enabled) {
         FeatureDTO wantedFeature = new FeatureDTO(code, enabled);
         try {
@@ -190,7 +183,6 @@ public class FeatureResource {
      *  one feature code doesn't exists.
      */
     @DeleteMapping("")
-    @Timed
     public ResponseEntity<List<FeatureDTO>> resetAll(@RequestBody List<String> featuresToReset) {
         try {
             this.featureService.reset(featuresToReset);
@@ -213,7 +205,6 @@ public class FeatureResource {
      *  code doesn't match an existing feature.
      */
     @DeleteMapping("/{code:[a-z_-]+}")
-    @Timed
     public ResponseEntity<DetailledFeatureDTO> reset(@PathVariable String code) {
         try {
             this.featureService.reset(Collections.singletonList(code));

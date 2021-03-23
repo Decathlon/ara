@@ -50,9 +50,15 @@ then
     DATABASE_PARAMS="${DATABASE_PARAMS}-Dspring.jpa.properties.hibernate.hbm2ddl.auto=$HBM2DDL "
 fi
 
+if [[ ! -z $DISPLAYED_VERSION ]]
+then
+  CUSTOM_PARAMS="${CUSTOM_PARAMS}-Dinfo.app.version=$DISPLAYED_VERSION "
+fi
+
 java $JAVAOPS \
         -Djava.security.egd=file:/dev/./urandom \
         -Dspring.profiles.active=db-$DATABASE_TYPE,custom \
         $DATABASE_PARAMS \
+        $CUSTOM_PARAMS \
         -Dara.clientBaseUrl="$CLIENT_URL" \
         -jar app.jar
