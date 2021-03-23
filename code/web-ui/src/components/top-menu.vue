@@ -225,8 +225,14 @@
         return AuthenticationService.getDetails()
       },
 
+      extractVersion (data, property) {
+        if (data?.hasOwnProperty(property)) {
+          return data[property].version
+        }
+      },
+
       logout () {
-        AuthenticationService.logout()
+        AuthenticationService.logout(true)
       }
     },
 
@@ -234,9 +240,10 @@
       Vue.http
         .get(api.paths.info(), api.REQUEST_OPTIONS)
         .then((response) => {
-          this.appVersion = response.data.app.version
-          this.webUIVersion = response.data['web-ui'].version
-          this.apiVersion = response.data.api.version
+          const data = response?.data
+          this.appVersion = this.extractVersion(data, 'app')
+          this.webUIVersion = this.extractVersion(data, 'web-ui')
+          this.apiVersion = this.extractVersion(data, 'api')
           // If it is the first time the user opens ARA, make sure to remember the current version for future notification badge
           if (!this.latestChangelogVersion) {
             this.setLatestChangelogVersion()

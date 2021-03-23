@@ -20,6 +20,8 @@ import util from './util'
 
 let api = {}
 
+const IGNORED_ERROR_STATUS_CODE = [401, 403]
+
 const API_PATH = '/api'
 const PROJECT_API_PATH = API_PATH + '/projects'
 
@@ -70,6 +72,11 @@ api.handleError = function (response, callBack) {
 
   // TODO 404 is sent back by Spring as:
   // {"timestamp":"2017-12-08T13:21:53.465Z","status":404,"error":"Not Found","message":"No message available","path":"/api/errors/distinct-properties"}
+
+  const accessDenied = IGNORED_ERROR_STATUS_CODE.includes(response?.status)
+  if (accessDenied) {
+    return
+  }
 
   let message = response.headers.map['x-ara-message']
   if (message) {
