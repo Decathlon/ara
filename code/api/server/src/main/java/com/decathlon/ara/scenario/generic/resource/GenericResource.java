@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.scenario.generic.resource;
 
-import com.codahale.metrics.annotation.Timed;
 import com.decathlon.ara.scenario.generic.bean.GenericExecutedScenarioReport;
 import com.decathlon.ara.scenario.generic.upload.GenericScenarioUploader;
 import com.decathlon.ara.service.ProjectService;
@@ -48,7 +47,6 @@ public class GenericResource {
     private final GenericScenarioUploader genericScenarioUploader;
 
     @PostMapping("scenarios/upload/{sourceCode}")
-    @Timed
     public ResponseEntity<Void> uploadGenericScenarios(
             @PathVariable String projectCode,
             @PathVariable String sourceCode,
