@@ -1,27 +1,21 @@
 package com.decathlon.ara.scenario.common.upload;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Arrays;
-import java.util.List;
-
-import javax.persistence.EntityManager;
-
+import com.decathlon.ara.domain.Scenario;
+import com.decathlon.ara.repository.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.decathlon.ara.domain.Scenario;
-import com.decathlon.ara.repository.CountryRepository;
-import com.decathlon.ara.repository.FunctionalityRepository;
-import com.decathlon.ara.repository.ScenarioRepository;
-import com.decathlon.ara.repository.SeverityRepository;
-import com.decathlon.ara.repository.SourceRepository;
+import javax.persistence.EntityManager;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-public class ScenarioUploaderTest {
+class ScenarioUploaderTest {
 
     @Mock
     private ScenarioRepository scenarioRepository;
@@ -45,7 +39,7 @@ public class ScenarioUploaderTest {
     private ScenarioUploader cut;
 
     @Test
-    public void assignWrongSeverityCode_ShouldComputeAWrongSeverityCode_WhenCalled() {
+    void assignWrongSeverityCode_ShouldComputeAWrongSeverityCode_WhenCalled() {
 
         //GIVEN
         final List<String> severityCodes = Arrays.asList("existing");
@@ -64,7 +58,7 @@ public class ScenarioUploaderTest {
 
     }
 
-    public void assignWrongCountryCodes_ShouldSetWrongCountryCodeToNull_WhenAllCountriesExist() {
+    void assignWrongCountryCodes_ShouldSetWrongCountryCodeToNull_WhenAllCountriesExist() {
 
         //GIVEN
         List<String> countryCodes = Arrays.asList("existing");
@@ -80,7 +74,7 @@ public class ScenarioUploaderTest {
 
     }
 
-    public void assignWrongCountryCodes_ShouldComputeWrongCountryCode_WhenCountriesDoNotExist() {
+    void assignWrongCountryCodes_ShouldComputeWrongCountryCode_WhenCountriesDoNotExist() {
 
         //GIVEN
         List<String> countryCodes = Arrays.asList("be", "cn", "de", "hk", "nl");
@@ -96,7 +90,7 @@ public class ScenarioUploaderTest {
     }
 
     @Test
-    public void assignWrongCountryCodes_ShouldAssignWrongCountryCodesOnlyToWrongOnes_WhenCalledWithSeveralScenarios() {
+    void assignWrongCountryCodes_ShouldAssignWrongCountryCodesOnlyToWrongOnes_WhenCalledWithSeveralScenarios() {
 
         //GIVEN
         List<String> countryCodes = Arrays.asList("be", "cn", "de", "hk", "nl");

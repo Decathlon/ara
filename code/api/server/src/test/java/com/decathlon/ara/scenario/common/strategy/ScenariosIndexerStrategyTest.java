@@ -17,24 +17,27 @@
 
 package com.decathlon.ara.scenario.common.strategy;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Optional;
-
+import com.decathlon.ara.domain.enumeration.Technology;
+import com.decathlon.ara.scenario.common.indexer.ScenariosIndexer;
+import com.decathlon.ara.scenario.cucumber.indexer.CucumberScenariosIndexer;
+import com.decathlon.ara.scenario.cypress.indexer.CypressScenariosIndexer;
+import com.decathlon.ara.scenario.generic.indexer.GenericScenariosIndexer;
+import com.decathlon.ara.scenario.postman.indexer.PostmanScenariosIndexer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.decathlon.ara.domain.enumeration.Technology;
-import com.decathlon.ara.scenario.common.indexer.ScenariosIndexer;
-import com.decathlon.ara.scenario.cucumber.indexer.CucumberScenariosIndexer;
-import com.decathlon.ara.scenario.cypress.indexer.CypressScenariosIndexer;
-import com.decathlon.ara.scenario.postman.indexer.PostmanScenariosIndexer;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-public class ScenariosIndexerStrategyTest {
+class ScenariosIndexerStrategyTest {
+
+    @Mock
+    private GenericScenariosIndexer genericScenariosIndexer;
 
     @Mock
     private PostmanScenariosIndexer postmanScenariosIndexer;
@@ -49,7 +52,7 @@ public class ScenariosIndexerStrategyTest {
     private ScenariosIndexerStrategy scenariosIndexerStrategy;
 
     @Test
-    public void getScenariosIndexer_returnEmpty_whenTechnologyIsNull(){
+    void getScenariosIndexer_returnEmpty_whenTechnologyIsNull(){
         // Given
 
         // When
@@ -60,7 +63,7 @@ public class ScenariosIndexerStrategyTest {
     }
 
     @Test
-    public void getScenariosIndexer_returnCucumberIndexer_whenTechnologyIsCucumber(){
+    void getScenariosIndexer_returnCucumberIndexer_whenTechnologyIsCucumber(){
         // Given
 
         // When
@@ -71,7 +74,7 @@ public class ScenariosIndexerStrategyTest {
     }
 
     @Test
-    public void getScenariosIndexer_returnPostmanIndexer_whenTechnologyIsPostman(){
+    void getScenariosIndexer_returnPostmanIndexer_whenTechnologyIsPostman(){
         // Given
 
         // When
@@ -82,7 +85,7 @@ public class ScenariosIndexerStrategyTest {
     }
 
     @Test
-    public void getScenariosIndexer_returnCypressIndexer_whenTechnologyIsCypress(){
+    void getScenariosIndexer_returnCypressIndexer_whenTechnologyIsCypress(){
         // Given
 
         // When
@@ -90,5 +93,16 @@ public class ScenariosIndexerStrategyTest {
         // Then
         Optional<ScenariosIndexer> scenariosIndexer = scenariosIndexerStrategy.getScenariosIndexer(Technology.CYPRESS);
         assertThat(scenariosIndexer).isEqualTo(Optional.of(cypressScenariosIndexer));
+    }
+
+    @Test
+    void getScenariosIndexer_returnGenericIndexer_whenTechnologyIsGeneric(){
+        // Given
+
+        // When
+
+        // Then
+        Optional<ScenariosIndexer> scenariosIndexer = scenariosIndexerStrategy.getScenariosIndexer(Technology.GENERIC);
+        assertThat(scenariosIndexer).isEqualTo(Optional.of(genericScenariosIndexer));
     }
 }
