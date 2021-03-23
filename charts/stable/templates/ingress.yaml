@@ -31,7 +31,7 @@ spec:
       - backend:
           serviceName: {{ printf "%s-%s" .Chart.Name "api" }}
           servicePort: http-port
-        path: /actuator/info
+        path: /actuator
       - backend:
           serviceName: {{ printf "%s-%s" .Chart.Name "api" }}
           servicePort: http-port
