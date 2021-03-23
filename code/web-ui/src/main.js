@@ -55,7 +55,7 @@ Vue.http.interceptors.push(function (request, next) {
         desc: 'It seems that your session has expired. Please login again to ARA',
         duration: 0
       })
-      AuthenticationService.logout()
+      AuthenticationService.logout(false)
     }
   })
 })
@@ -112,9 +112,7 @@ const manageLoginRedirection = async function (to, from, next) {
       title: 'Access denied',
       desc: 'You need to login first if you want to access this page.'
     })
-    return next({
-      path: '/login'
-    })
+    return goToLogin(next)
   }
 
   const loggedInButTryingToReachALoggedOutPage = loggedIn && onlyWhenLoggedOut
@@ -136,6 +134,17 @@ const manageLoginRedirection = async function (to, from, next) {
     })
     return next('/')
   }
+}
+
+const goToLogin = function (next) {
+  const providersUrls = config.getProviderUrls()
+  const onlyOneProvider = providersUrls.length === 1
+  if (onlyOneProvider) {
+    window.location.href = providersUrls[0]
+  }
+  return next({
+    path: '/login'
+  })
 }
 
 router.beforeEach(async (to, from, next) => {

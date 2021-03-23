@@ -1,0 +1,124 @@
+[#head]
+= Upload a generic execution report
+
+If Ara doesn't support a given adapter, you can still use it. Indeed, you will need to convert your generated report to a format that ARA can handle: the generic adapter.
+
+== Format
+
+* `code`: the scenario code
+* `name`: the scenario name
+* `ignored`: `true` iff the scenario is ignored
+* `start`: the scenario start date time
+* `cartography`: the feature ids covered by this scenario
+* `tags`: the scenario tags list
+* `severity`: the scenario severity
+* `server`: the server name that ran this scenario (_optional_)
+* `comment`: a comment about this scenario (_optional_)
+* `feature`: the feature description
+** `name`: the feature name
+** `file`: the feature file name
+** `tags`: the feature tags list, if any
+* `description`: the scenario description
+** `steps`: the scenario steps list. A step contains the following fields:
+*** `line`: the step line
+*** `status`: the step status
+**** `passed`: if the step passed
+**** `skipped`: if the step was skipped
+**** `failed`: if the step failed
+*** `value`: an _optional_ value
+*** `content`: the content of the step
+** `start_line`: the scenario start line
+* `errors`: the scenario errors list. An error contains the following fields:
+** `line_number`: the line where the error occurred
+** `trace`: the error stack trace
+** `scenario_line`: the scenario line
+** `scenario_line_description`: the scenario line description
+* `display`: the urls that contains any media displaying the scenario (_optional_)
+** `video`: the url of the video of the scenario
+** `image`: the url of the last scenario screenshot
+** `other`: the url of any other display of the scenario (e.g. html, etc.)
+* `logs`: the urls that contains the scenario logs (_optional_)
+** `error`: the url containing the scenario error stacktrace
+** `scenario`: the url containing the scenario itself
+** `diff_report`: the url containing the scenario diff report
+** `trace`: the url containing the scenario trace
+
+=== Example
+
+```json
+{
+    "code": "scenario-code",
+    "name": "The scenario name",
+    "ignored": false,
+    "feature": {
+        "name": "The feature name",
+        "file": "the_test_file.test",
+        "tags": ["country-fr", "country-us"]
+    },
+    "description": {
+        "steps": [
+            {
+                "line": 1,
+                "status": "passed",
+                "value": 15,
+                "content": "Starting the scenario"
+            },
+            {
+                "line": 2,
+                "status": "passed",
+                "value": 31,
+                "content": "Preparing to load user details"
+            },
+            {
+                "line": 3,
+                "status": "failed",
+                "value": 45,
+                "content": "Calling the user API"
+            },
+            {
+                "line": 4,
+                "status": "failed",
+                "content": "If you see this line, then an error occured because of the network"
+            },
+            {
+                "line": 5,
+                "status": "skipped",
+                "value": 67,
+                "content": "Loading user details"
+            }
+        ],
+        "start_line": 1
+    },
+    "start": "2019-06-10T13:38:10",
+    "errors": [
+        {
+            "line_number": 3,
+            "trace": "java.lang.NullPointerException: ...",
+            "scenario_line": "Scenario 1 played",
+            "scenario_line_description": "^Scenario %d played$"
+        },
+        {
+            "line_number": 4,
+            "trace": "java.lang.RuntimeException: ...",
+            "scenario_line": "Another line from scenario 1",
+            "scenario_line_description": "^Another line from scenario %d$"
+        }
+    ],
+    "cartography": [1, 2, 3],
+    "display": {
+        "video": "https://build.company.com/demo/develop/generic/video.mp4",
+        "image": "https://build.company.com/demo/develop/generic/image.png",
+        "other": "https://build.company.com/demo/develop/generic/log.html"
+    },
+    "logs": {
+        "error": "https://build.company.com/demo/develop/generic/error.html",
+        "scenario": "https://build.company.com/demo/develop/generic/scenario.html",
+        "diff_report": "https://build.company.com/demo/develop/generic/diff.html",
+        "trace": "https://build.company.com/demo/develop/generic/stack_trace.html"
+    },
+    "tags": ["severity-high"],
+    "severity": "high",
+    "server": "server_that_ran_the_tests",
+    "comment": "Some comment about this report"
+}
+```

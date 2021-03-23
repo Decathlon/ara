@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2019 by the ARA Contributors                                 *
+ * Copyright (C) 2020 by the ARA Contributors                                 *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -15,29 +15,25 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.domain.enumeration;
+package com.decathlon.ara.scenario.generic.bean.log;
 
-/**
- * Reporting technologies supported by ARA, for it to know how to index reports of a run.
- */
-public enum Technology {
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 
-    GENERIC,
+@Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class GenericExecutedScenarioLogs {
 
-    /**
-     * Cucumber job (no matter if it runs Selenium or other technologies like RestAssured or Karate): index its
-     * report.json result.
-     */
-    CUCUMBER,
+    @JsonProperty("error")
+    private String errorStacktraceUrl;
 
-    /**
-     * Job running one or more Postman collection(s) using Newman: parse all its reports/*.json reports.
-     */
-    POSTMAN,
+    @JsonProperty("scenario")
+    private String executedScenarioUrl;
 
-    /**
-     * Let ARA handle all the Cypress related report files
-     */
-    CYPRESS
+    @JsonProperty("diff_report")
+    private String diffReportUrl;
 
+    @JsonProperty("trace")
+    private String executionTraceUrl;
 }

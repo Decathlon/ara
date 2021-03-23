@@ -21,6 +21,12 @@ const config = {
         }
       }
     }
+  },
+  getProviderUrls: function () {
+    if (this.isComplete) {
+      return _(this.authentication.providers).filter('enabled').map('uri').value()
+    }
+    return []
   }
 }
 

@@ -3,6 +3,7 @@ package com.decathlon.ara.scenario.common.strategy;
 import com.decathlon.ara.domain.enumeration.Technology;
 import com.decathlon.ara.scenario.cucumber.indexer.CucumberScenariosIndexer;
 import com.decathlon.ara.scenario.cypress.indexer.CypressScenariosIndexer;
+import com.decathlon.ara.scenario.generic.indexer.GenericScenariosIndexer;
 import com.decathlon.ara.scenario.postman.indexer.PostmanScenariosIndexer;
 import com.decathlon.ara.scenario.common.indexer.ScenariosIndexer;
 import lombok.NonNull;
@@ -17,6 +18,9 @@ import java.util.Optional;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
 public class ScenariosIndexerStrategy {
+
+    @NonNull
+    private final GenericScenariosIndexer genericScenariosIndexer;
 
     @NonNull
     private final PostmanScenariosIndexer postmanScenariosIndexerService;
@@ -38,6 +42,8 @@ public class ScenariosIndexerStrategy {
             return Optional.empty();
         }
         switch (technology) {
+            case GENERIC:
+                return Optional.of(genericScenariosIndexer);
             case CUCUMBER:
                 return Optional.of(cucumberScenariosIndexerService);
             case POSTMAN:
