@@ -76,6 +76,26 @@
           <a :href="'https://github.com/decathlon/ara/blob/master/doc/user/main/UserDocumentation.adoc'"
              target="_blank"><Icon type="md-help-circle" size="24" style="padding: 0;"/></a>
         </Tooltip><!-- No space between items -->
+        <Dropdown trigger="click" placement="bottom-start">
+          <a><Icon type="md-settings" size="24"/></a>
+          <DropdownMenu slot="list">
+            <div class="parameters-box">
+              <div class="parameter-line">
+                <div class="parameter-title">Media display</div>
+                <div class="parameter-switch">
+                  <span>Open in <strong>{{ isMediaDisplayedOnSamePage ? "the same page" : "a new tab" }}</strong></span>
+                  <i-switch v-model="isMediaDisplayedOnSamePage" @on-change="saveMediaDisplayState"/>
+                </div>
+                <div class="parameter-description">
+                  <Alert closable>
+                    Sometimes videos and images can't be displayed in the same page (e.g. mixed content: Ara runs in a secure server (HTTPS) but media urls are not secure (HTTP)).
+                    You can fix this issue by switching off this option.
+                  </Alert>
+                </div>
+              </div>
+            </div>
+          </DropdownMenu>
+        </Dropdown>
         <Tooltip content="What's new in ARA?" placement="bottom-end" :transfer="false">
           <a :href="'https://github.com/Decathlon/ara/releases/tag/ara-' + appVersion"
              @click="setLatestChangelogVersion"
@@ -102,6 +122,7 @@
   import constants from '../libs/constants.js'
 
   import { AuthenticationService } from '../service/authentication.service'
+  import { LocalParameterService } from '../service/local-parameter.service'
 
   // Will contain the latest version when the user clicked to view the CHANGELOG:
   // a red badge will appear on the CHANGELOG icon when a new version will be available
@@ -122,6 +143,7 @@
 
     data () {
       return {
+        isMediaDisplayedOnSamePage: true,
         appVersion: undefined,
         apiVersion: undefined,
         webUIVersion: undefined,
@@ -170,6 +192,14 @@
     },
 
     methods: {
+      loadLocalParameters () {
+        this.isMediaDisplayedOnSamePage = LocalParameterService.isMediaDisplayedOnSamePage()
+      },
+
+      saveMediaDisplayState (displayOnSamePage) {
+        LocalParameterService.saveMediaDisplayValue(displayOnSamePage)
+      },
+
       projectSelection (projectCode) {
         this.projectCode = projectCode
       },
@@ -237,6 +267,7 @@
     },
 
     mounted () {
+      this.loadLocalParameters()
       Vue.http
         .get(api.paths.info(), api.REQUEST_OPTIONS)
         .then((response) => {
@@ -280,7 +311,7 @@
     white-space: nowrap;
   }
 
-  #helps span {
+  #helps > span {
     color: white;
   }
 
@@ -300,5 +331,36 @@
 
   .user-avatar:hover {
     cursor: pointer;
+  }
+
+  .parameters-box {
+    margin: 10px;
+    width: 300px;
+  }
+
+  .parameter-line {
+    margin-bottom: 5px;
+  }
+
+  .parameter-title {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+
+  .parameter-description {
+    margin-top: 10px;
+
+    text-align: start;
+    white-space: initial;
+    font-size: 12px;
+    font-style: italic;
+  }
+
+  .parameter-switch {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+    align-items: center;
   }
 </style>

@@ -98,6 +98,7 @@
   import exceptionUtil from '../libs/exception-util'
 
   import problemTagsComponent from '../components/problem-tags'
+  import { LocalParameterService } from '../service/local-parameter.service'
 
   export default {
     name: 'run-features',
@@ -139,11 +140,19 @@
       },
 
       showScreenshot (executedScenario) {
-        this.$refs.errorPopups.showScreenshot(executedScenario)
+        if (LocalParameterService.isMediaDisplayedOnSamePage()) {
+          this.$refs.errorPopups.showScreenshot(executedScenario)
+          return
+        }
+        window.open(executedScenario.screenshotUrl)
       },
 
       showVideo (executedScenario) {
-        this.$refs.errorPopups.showVideo(executedScenario)
+        if (LocalParameterService.isMediaDisplayedOnSamePage()) {
+          this.$refs.errorPopups.showVideo(executedScenario)
+          return
+        }
+        window.open(executedScenario.videoUrl)
       },
 
       showHistory (run, executedScenario) {
