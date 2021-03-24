@@ -311,7 +311,7 @@
     white-space: nowrap;
   }
 
-  #helps > span {
+  #helps span {
     color: white;
   }
 
