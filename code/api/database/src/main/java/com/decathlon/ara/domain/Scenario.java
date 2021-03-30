@@ -19,8 +19,12 @@ package com.decathlon.ara.domain;
 
 
 import lombok.*;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.util.Pair;
 
 import javax.persistence.*;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -121,4 +125,137 @@ public class Scenario implements Comparable<Scenario>, Serializable {
                 .thenComparing(lineComparator)).compare(this, other);
     }
 
+    /**
+     * Split the (raw) name into 2 parts:
+     *      - the name without functionality codes
+     *      - a list containing those functionality codes
+     * @return a pair
+     */
+    public Pair<String, List<String>> getNameWithoutCodesAndFunctionalityCodesFromScenarioName() {
+        return getNameWithoutCodesAndFunctionalityCodesFromScenarioName(name);
+    }
+
+    /**
+     * Split the (raw) name into 2 parts:
+     *      - the name without functionality codes
+     *      - a list containing those functionality codes
+     * @param scenarioName the (raw) scenario name
+     * @return a pair
+     */
+    public static Pair<String, List<String>> getNameWithoutCodesAndFunctionalityCodesFromScenarioName(String scenarioName) {
+        if (StringUtils.isBlank(scenarioName)) {
+            return Pair.of("", new ArrayList<>());
+        }
+
+        var splitScenarioName = scenarioName.split("\\s*:\\s*", 2);
+        if (splitScenarioName.length == 0) {
+            return Pair.of("", new ArrayList<>());
+        }
+
+        if (splitScenarioName.length == 1) {
+            var scenarioNameWithoutFeatures = splitScenarioName[0];
+            return Pair.of(scenarioNameWithoutFeatures, new ArrayList<>());
+        }
+
+        var scenarioNameWithoutFeatures = splitScenarioName[1];
+        var rawFeatures = splitScenarioName[0];
+        var featureCodes = getFeatureCodesFromRawFeatureString(rawFeatures)
+                .stream()
+                .filter(Scenario::isInteger)
+                .sorted(Comparator.comparingInt(Integer::parseInt))
+                .distinct()
+                .collect(Collectors.toList());
+        return Pair.of(scenarioNameWithoutFeatures, featureCodes);
+    }
+
+    /**
+     * Get feature codes from raw string
+     * @param rawFeatureString raw feature string
+     * @return the feature codes
+     */
+    private static List<String> getFeatureCodesFromRawFeatureString(String rawFeatureString) {
+        if (StringUtils.isBlank(rawFeatureString)) {
+            return new ArrayList<>();
+        }
+
+        var rawFeaturesSplit = rawFeatureString.split("(F|f)unctionalit(y|ies)\\s*");
+        if (rawFeaturesSplit.length != 2) {
+            return new ArrayList<>();
+        }
+
+        var rawFeatureCodes = rawFeaturesSplit[1].replaceAll("\\s+","");
+        var featureCodes = Arrays.stream(rawFeatureCodes.split(",|&")).collect(Collectors.toList());
+        return featureCodes;
+    }
+
+    /**
+     * Get the scenario steps
+     * @return the scenario steps
+     */
+    public List<ScenarioStep> getScenarioSteps() {
+        var splitContents = getSplitContents(content);
+        return splitContents.stream()
+                .map(splitLine -> new ScenarioStep()
+                        .withLine(Integer.valueOf(splitLine[0]))
+                        .withContent(splitLine[splitLine.length - 1])
+                )
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get raw content lines
+     * @param rawContent the raw content
+     * @return the raw content lines
+     */
+    public static List<String[]> getSplitContents(String rawContent) {
+        var rawLines = StringUtils.isNotBlank(rawContent) ? rawContent.split("\n") : new String[0];
+        return Arrays.stream(rawLines)
+                .map(rawLine -> rawLine.split("\\s*:\\s*"))
+                .filter(splitLine -> splitLine.length == 3 || splitLine.length == 4)
+                .filter(splitLine -> isInteger(splitLine[0]))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Check that the string is an integer
+     * @param integerAsString the string to check
+     * @return true, iff the string is an integer
+     */
+    private static boolean isInteger(String integerAsString) {
+        if (StringUtils.isBlank(integerAsString)) {
+            return false;
+        }
+
+        try {
+            Integer.parseInt(integerAsString);
+        } catch(NumberFormatException e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @With
+    public static class ScenarioStep {
+
+        protected int line;
+
+        protected String content;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ScenarioStep that = (ScenarioStep) o;
+            return line == that.line && Objects.equals(content, that.content);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(line, content);
+        }
+    }
 }

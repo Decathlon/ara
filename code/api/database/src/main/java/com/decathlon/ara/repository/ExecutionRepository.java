@@ -76,5 +76,9 @@ public interface ExecutionRepository extends JpaRepository<Execution, Long>, Exe
 
     boolean existsByCycleDefinitionId(Long id);
 
+    List<Execution> findAllByProjectId(Long projectId);
+
+    List<Execution> findAllByProjectIdAndTestDateTimeAfter(Long projectId, Date testDateTime);
+
     List<Execution> findByCycleDefinitionProjectIdAndTestDateTimeBefore(long projectId, Date startDate);
 }

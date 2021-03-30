@@ -18,12 +18,18 @@
 package com.decathlon.ara.domain;
 
 import com.decathlon.ara.domain.enumeration.Handling;
+import com.decathlon.ara.v2.domain.Feature;
+import com.decathlon.ara.v2.domain.ScenarioStep;
+import com.decathlon.ara.v2.domain.ScenarioVersion;
 import com.querydsl.core.annotations.QueryInit;
 import lombok.*;
 import org.hibernate.annotations.*;
+import org.springframework.data.util.Pair;
+import org.springframework.util.CollectionUtils;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.*;
 import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.*;
@@ -32,6 +38,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.Comparator.*;
 
@@ -180,6 +188,284 @@ public class ExecutedScenario implements Comparable<ExecutedScenario>, Serializa
                 .thenComparing(featureFileComparator)
                 .thenComparing(nameComparator)
                 .thenComparing(lineComparator)).compare(this, other);
+    }
+
+    /**
+     * Split the (raw) name into 2 parts:
+     *      - the name without functionality codes
+     *      - a list containing those functionality codes
+     * @return a pair
+     */
+    public Pair<String, List<String>> getNameWithoutCodesAndFunctionalityCodesFromScenarioName() {
+        return Scenario.getNameWithoutCodesAndFunctionalityCodesFromScenarioName(name);
+    }
+
+    /**
+     * Return true iff an executed scenario matches a legacy scenario and a source
+     * @param legacyScenario the legacy scenario
+     * @param legacySource the legacy source
+     * @return true iff an executed scenario matches a legacy scenario and a source
+     */
+    public boolean matchesScenario(Scenario legacyScenario, Source legacySource) {
+        final var scenarioName = legacyScenario.getNameWithoutCodesAndFunctionalityCodesFromScenarioName().getFirst();
+        final var executedScenarioName = getNameWithoutCodesAndFunctionalityCodesFromScenarioName().getFirst();
+
+        var sameFeatureFiles = Objects.equals(featureFile, legacyScenario.getFeatureFile());
+        var sameScenarioNames = Objects.equals(scenarioName, executedScenarioName);
+        var sameSources = Objects.equals(legacySource, legacyScenario.getSource());
+        return sameFeatureFiles && sameScenarioNames && sameSources;
+    }
+
+    /**
+     * Get stateless scenario steps, i.e. steps without value and state (line and content only)
+     * @return stateless scenario steps
+     */
+    public List<Scenario.ScenarioStep> getStatelessScenarioSteps() {
+        var splitContents = Scenario.getSplitContents(content);
+        return splitContents.stream()
+                .map(splitLine -> new Scenario.ScenarioStep()
+                        .withLine(Integer.valueOf(splitLine[0]))
+                        .withContent(splitLine[splitLine.length - 1])
+                )
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get executed scenario steps (i.e. contain value and state)
+     * @return executed scenario steps
+     */
+    public List<ExecutedScenarioStep> getExecutedScenarioSteps() {
+        var splitContents = Scenario.getSplitContents(content);
+        return splitContents.stream()
+                .map(splitLine -> new ExecutedScenarioStep(
+                        Integer.valueOf(splitLine[0]),
+                        splitLine[splitLine.length - 1],
+                        splitLine.length == 4 ? splitLine[2] : null,
+                        splitLine[1]
+                        )
+                )
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Return true iff 2 executed scenarios share the same functionality codes
+     * @param executedScenario the executed scenario to compare with
+     * @return true iff 2 executed scenarios share the same functionality codes
+     */
+    public boolean shareTheSameFunctionalityCodesAs(ExecutedScenario executedScenario) {
+        final var codes1 = getNameWithoutCodesAndFunctionalityCodesFromScenarioName().getSecond();
+        final var codes2 = executedScenario.getNameWithoutCodesAndFunctionalityCodesFromScenarioName().getSecond();
+
+        return codes1.equals(codes2);
+    }
+
+    /**
+     * Return true iff 2 executed scenarios share the same steps
+     * @param executedScenario the executed scenario to compare with
+     * @return true iff 2 executed scenarios share the same steps
+     */
+    public boolean shareTheSameStepsAs(ExecutedScenario executedScenario) {
+        var steps1 = getExecutedScenarioSteps();
+        var steps2 = executedScenario.getExecutedScenarioSteps();
+        return steps1.equals(steps2);
+    }
+
+    @Getter
+    public static class ExecutedScenarioStep extends Scenario.ScenarioStep {
+
+        private String value;
+
+        private String state;
+
+        public ExecutedScenarioStep(int line, String content, String value, String state) {
+            super(line, content);
+            this.value = value;
+            this.state = state;
+        }
+
+        public String getState() {
+            return state;
+        }
+
+        public Optional<String> getValue() {
+            return Optional.ofNullable(value);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            if (!super.equals(o)) return false;
+            ExecutedScenarioStep that = (ExecutedScenarioStep) o;
+            return Objects.equals(state, that.state);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(super.hashCode(), state);
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @With
+    public static class ExtendedExecutedScenario {
+        private ExecutedScenario legacyExecutedScenario;
+        private Source legacySource;
+        private String branchName;
+
+        /**
+         * Get a matching legacy scenario, if found
+         * @param allLegacyScenarios the legacy scenarios to browse
+         * @return a matching legacy scenario, if found
+         */
+        public Optional<com.decathlon.ara.domain.Scenario> getPotentialMatchingScenario(
+                List<com.decathlon.ara.domain.Scenario> allLegacyScenarios
+        ) {
+            return allLegacyScenarios.stream()
+                    .filter(scenario -> legacyExecutedScenario.matchesScenario(scenario, legacySource))
+                    .findFirst();
+        }
+
+        /**
+         * Get a matching migration scenario version, if found
+         * @param migrationScenarios the migrations scenarios to browse
+         * @return a matching migration scenario version, if found
+         */
+        public Optional<ScenarioVersion> getMatchingMigrationScenarioVersion(List<com.decathlon.ara.v2.domain.Scenario> migrationScenarios) {
+            if (CollectionUtils.isEmpty(migrationScenarios)) {
+                return Optional.empty();
+            }
+            var migrationScenario = migrationScenarios.stream()
+                    .filter(this::shareTheSameNameAsAScenario)
+                    .filter(this::shareTheSameTypeAsAScenario)
+                    .findFirst();
+            if (migrationScenario.isEmpty()) {
+                return Optional.empty();
+            }
+            return migrationScenario
+                    .get()
+                    .getVersions()
+                    .stream()
+                    .filter(this::shareTheSameFileNameAsAMigrationScenarioVersion)
+                    .filter(this::shareTheSameBranchAsAMigrationScenarioVersion)
+                    .filter(this::shareTheSameSeverityAsAMigrationScenarioVersion)
+                    .filter(this::shareExactlyTheSameFunctionalitiesAsAMigrationScenarioVersion)
+                    .filter(this::shareExactlyTheSameStepsAsAMigrationScenarioVersion)
+                    .findFirst();
+        }
+
+        /**
+         * Return true iff it shares the same name as the migration scenario
+         * @param migrationScenario the migration scenario
+         * @return true iff it shares the same name as the migration scenario
+         */
+        private boolean shareTheSameNameAsAScenario(
+                com.decathlon.ara.v2.domain.Scenario migrationScenario
+        ) {
+            var migrationScenarioName = migrationScenario.getName();
+            var pair = legacyExecutedScenario.getNameWithoutCodesAndFunctionalityCodesFromScenarioName();
+            var legacyScenarioName = pair.getFirst();
+            return Objects.equals(migrationScenarioName, legacyScenarioName);
+        }
+
+        /**
+         * Return true iff it shares the same type as the migration scenario
+         * @param migrationScenario the migration scenario
+         * @return true iff it shares the same type as the migration scenario
+         */
+        private boolean shareTheSameTypeAsAScenario(
+                com.decathlon.ara.v2.domain.Scenario migrationScenario
+        ) {
+            var scenarioType = migrationScenario.getType();
+            var scenarioTypeId = scenarioType.getId();
+            return Objects.equals(scenarioTypeId.getCode(), legacySource.getCode());
+        }
+
+        /**
+         * Return true iff it shares the same file name as the migration scenario version
+         * @param migrationScenarioVersion the migration scenario version
+         * @return true iff it shares the same file name as the migration scenario version
+         */
+        private boolean shareTheSameFileNameAsAMigrationScenarioVersion(ScenarioVersion migrationScenarioVersion) {
+            var migrationFileName = migrationScenarioVersion.getFileName();
+            var legacyFileName = legacyExecutedScenario.getFeatureName();
+            return Objects.equals(migrationFileName, legacyFileName);
+        }
+
+        /**
+         * Return true iff it shares the same branch name as the migration scenario version
+         * @param migrationScenarioVersion the migration scenario version
+         * @return true iff it shares the same branch name as the migration scenario version
+         */
+        private boolean shareTheSameBranchAsAMigrationScenarioVersion(ScenarioVersion migrationScenarioVersion) {
+            var migrationBranch = migrationScenarioVersion.getBranch();
+            var migrationBranchId = migrationBranch.getId();
+            var migrationBranchName = migrationBranchId.getCode();
+            var legacyBranchName = branchName;
+            return Objects.equals(migrationBranchName, legacyBranchName);
+        }
+
+        /**
+         * Return true iff it shares the same severity as the migration scenario version
+         * @param migrationScenarioVersion the migration scenario version
+         * @return true iff it shares the same severity as the migration scenario version
+         */
+        private boolean shareTheSameSeverityAsAMigrationScenarioVersion(ScenarioVersion migrationScenarioVersion) {
+            var migrationSeverity = migrationScenarioVersion.getSeverity();
+            var migrationSeverityId = migrationSeverity.getId();
+            var migrationSeverityCode = migrationSeverityId.getCode();
+            var legacySeverityCode = legacyExecutedScenario.getSeverity();
+            return Objects.equals(migrationSeverityCode, legacySeverityCode);
+        }
+
+        /**
+         * Return true iff it shares the same feature codes as the migration scenario version
+         * @param migrationScenarioVersion the migration scenario version
+         * @return true iff it shares the same feature codes as the migration scenario version
+         */
+        private boolean shareExactlyTheSameFunctionalitiesAsAMigrationScenarioVersion(ScenarioVersion migrationScenarioVersion) {
+            var migrationFeatureCodes = migrationScenarioVersion
+                    .getCoveredFeatures()
+                    .stream()
+                    .map(Feature::getCode)
+                    .sorted()
+                    .distinct()
+                    .collect(Collectors.toList());
+            var legacyFunctionalityCodes = legacyExecutedScenario
+                    .getNameWithoutCodesAndFunctionalityCodesFromScenarioName()
+                    .getSecond()
+                    .stream()
+                    .sorted()
+                    .distinct()
+                    .collect(Collectors.toList());
+            return Objects.equals(legacyFunctionalityCodes, migrationFeatureCodes);
+        }
+
+        /**
+         * Return true iff it shares the same steps as the migration scenario version
+         * @param migrationScenarioVersion the migration scenario version
+         * @return true iff it shares the same steps as the migration scenario version
+         */
+        private boolean shareExactlyTheSameStepsAsAMigrationScenarioVersion(ScenarioVersion migrationScenarioVersion) {
+            var migrationSteps = migrationScenarioVersion.getSteps();
+            var convertedLegacySteps = legacyExecutedScenario.getStatelessScenarioSteps()
+                    .stream()
+                    .map(legacyStep -> new ScenarioStep()
+                            .withLine(legacyStep.getLine())
+                            .withContent(legacyStep.getContent())
+                    )
+                    .collect(Collectors.toList());
+            return Objects.equals(migrationSteps, convertedLegacySteps);
+        }
+    }
+
+    public ExtendedExecutedScenario getExtendedExecutedScenario(String branchName, Source source) {
+        return new ExtendedExecutedScenario()
+                .withLegacyExecutedScenario(this)
+                .withBranchName(branchName)
+                .withLegacySource(source);
     }
 
 }

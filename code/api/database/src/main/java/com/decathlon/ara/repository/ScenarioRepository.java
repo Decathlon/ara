@@ -19,9 +19,10 @@ package com.decathlon.ara.repository;
 
 import com.decathlon.ara.domain.Scenario;
 import com.decathlon.ara.repository.custom.ScenarioRepositoryCustom;
-import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * Spring Data JPA repository for the Scenario entity.
@@ -30,6 +31,8 @@ import org.springframework.stereotype.Repository;
 public interface ScenarioRepository extends JpaRepository<Scenario, Long>, ScenarioRepositoryCustom {
 
     List<Scenario> findAllBySourceId(Long sourceId);
+
+    List<Scenario> findAllBySourceProjectId(Long projectId);
 
     boolean existsBySourceId(Long sourceId);
 
