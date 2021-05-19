@@ -1,6 +1,8 @@
 package com.decathlon.ara.web.rest;
 
 import com.decathlon.ara.service.ExecutionHistoryService;
+import com.decathlon.ara.service.ProjectService;
+import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.web.rest.util.RestConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -21,12 +23,14 @@ public class TemplateResource {
     static final String PATH = RestConstants.API_PATH + "/" + NAME + "s";
 
     private final ExecutionHistoryService executionHistoryService;
+    private final ProjectService projectService;
 
     @GetMapping("cycle-execution")
-    public String nrtCycle(@RequestParam long projectId,
+    public String nrtCycle(@RequestParam("project") String projectCode,
                            @RequestParam String branch,
                            @RequestParam String cycle,
-                           Model model) {
+                           Model model) throws NotFoundException {
+        var projectId = projectService.toId(projectCode);
         var latestExecutions = executionHistoryService.getLatestExecutionHistories(projectId);
         var execution = latestExecutions.stream().filter( e -> branch.equals(e.getBranch()) && cycle.equals(e.getName())).findFirst().get();
         model.addAttribute("execution", execution);
