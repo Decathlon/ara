@@ -10,7 +10,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 @Controller
 @RequestMapping(TemplateResource.PATH)
@@ -32,9 +31,9 @@ public class TemplateResource {
                            Model model) throws NotFoundException {
         var projectId = projectService.toId(projectCode);
         var latestExecutions = executionHistoryService.getLatestExecutionHistories(projectId);
-        var execution = latestExecutions.stream().filter( e -> branch.equals(e.getBranch()) && cycle.equals(e.getName())).findFirst().get();
+        var execution = latestExecutions.stream().filter(e -> branch.equals(e.getBranch()) && cycle.equals(e.getName())).findFirst().orElseThrow();
         model.addAttribute("execution", execution);
-        return "mail/html/cycle-execution";
+        return "cycle-execution";
     }
 
 }
