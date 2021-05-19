@@ -5,7 +5,7 @@ version: '3.5'
 
 services:
   ara-db:
-    image: "postgres:9.6"
+    image: "postgres:12"
     restart: always
     environment:
       - POSTGRES_DB=ara
@@ -14,7 +14,7 @@ services:
     networks:
       - db_net
     ports:
-      - 8432:5432
+      - 5432:5432
   ara-api:
     image: "decathlon/ara-api:${API_VERSION:-latest}"
     restart: always
