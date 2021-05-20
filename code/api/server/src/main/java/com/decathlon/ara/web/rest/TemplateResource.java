@@ -35,7 +35,10 @@ public class TemplateResource {
                            Model model) throws NotFoundException {
         var projectId = projectService.toId(projectCode);
         var latestExecutions = executionHistoryService.getLatestExecutionHistories(projectId);
-        var execution = latestExecutions.stream().filter(e -> branch.equals(e.getBranch()) && cycle.equals(e.getName())).findFirst()
+        var execution = latestExecutions.stream()
+                .filter(e -> branch.equals(e.getBranch()))
+                .filter(e -> cycle.equals(e.getName()))
+                .findFirst()
                 .orElseThrow(() -> new NotFoundException("The branch and cycle couple for this project does not exists: it has perhaps been removed.", Entities.CYCLE_DEFINITION));
         model.addAttribute("execution", execution);
         return "cycle-execution";
