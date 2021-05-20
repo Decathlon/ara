@@ -1,5 +1,6 @@
 package com.decathlon.ara.web.rest;
 
+import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.ExecutionHistoryService;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.exception.NotFoundException;
@@ -11,9 +12,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.transaction.Transactional;
+
 @Controller
 @RequestMapping(TemplateResource.PATH)
 @RequiredArgsConstructor
+@Transactional(Transactional.TxType.REQUIRED)
 public class TemplateResource {
     private static final String NAME = "template";
     /**
@@ -31,7 +35,8 @@ public class TemplateResource {
                            Model model) throws NotFoundException {
         var projectId = projectService.toId(projectCode);
         var latestExecutions = executionHistoryService.getLatestExecutionHistories(projectId);
-        var execution = latestExecutions.stream().filter(e -> branch.equals(e.getBranch()) && cycle.equals(e.getName())).findFirst().orElseThrow();
+        var execution = latestExecutions.stream().filter(e -> branch.equals(e.getBranch()) && cycle.equals(e.getName())).findFirst()
+                .orElseThrow(() -> new NotFoundException("The branch and cycle couple for this project does not exists: it has perhaps been removed.", Entities.CYCLE_DEFINITION));
         model.addAttribute("execution", execution);
         return "cycle-execution";
     }
