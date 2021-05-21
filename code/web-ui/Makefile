@@ -46,6 +46,22 @@ dkr-run: ## DEV - run web-ui with docker
 		node:$(NODE_VERSION) \
 		npm run dev
 
+dkr-shell: ## Start a shell in docker node container
+	@docker container run -it --rm --name ara-node-$(NODE_VERSION)  \
+			--network=host \
+			--user $(shell id -u):$(shell id -g) \
+			-v $${HOME}/.ara-web:/var/node:rw \
+			-e HOME=/var/node \
+			-e NPM_CONFIG_PREFIX=/var/node/.npm-global \
+			-e ARA_API_HOST=host.docker.internal \
+      -e ARA_API_PORT=8080 \
+			-v $(shell pwd):$(shell pwd):rw \
+      -w $(shell pwd) \
+      node:$(NODE_VERSION) \
+      /bin/sh
+
+
+
 dkr-build: ## DEV - build web-ui with docker
 	@docker network create ara-net > /dev/null 2>&1 || echo 'Network ara-net already created'
 	@docker container run -it --rm \

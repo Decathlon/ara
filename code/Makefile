@@ -32,7 +32,7 @@ run-%: ## Run module
 
 stop-%: ## Stop module
 	@echo '-- Stop $* --'
-	@docker-compose up $(OPT) ara-$*
+	@docker-compose stop $(OPT) ara-$*
 
 #####################################
 ##            BUILD APP            ##
