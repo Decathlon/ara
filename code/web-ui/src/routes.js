@@ -66,6 +66,16 @@ const routes = [
     component: (resolve) => require(['./views/executions.vue'], resolve)
   },
   {
+    path: '/projects/:projectCode/executions/framed/png',
+    name: 'executions-framed-png',
+    meta: {
+      title: 'Executions',
+      isFramed: true,
+      isPng: true
+    },
+    component: (resolve) => require(['./views/executions.vue'], resolve)
+  },
+  {
     path: '/projects/:projectCode/executions/raw',
     name: 'raw-executions',
     meta: {

@@ -15,7 +15,7 @@
   ~
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
-  <div>
+  <div id="latestExecutionsBlock">
     <div style="display: flex;">
       <div v-if="isFramed" style="flex: 0 0 auto;">
         <router-link :to="{ name: 'redirecter' }" id="home-logo" target="_blank">
@@ -70,6 +70,8 @@
 <script>
   import Vue from 'vue'
   import api from '../libs/api'
+  import { toPng } from 'html-to-image'
+  import download from 'downloadjs'
 
   import projectsSelect from '../components/projects-select.vue'
   import nrtCycle from '../components/nrt-cycle'
@@ -95,6 +97,9 @@
     computed: {
       isFramed () {
         return this.$route.matched.some(record => record.meta.isFramed)
+      },
+      isPng () {
+        return this.$route.matched.some(record => record.meta.isPng)
       }
     },
 
@@ -110,6 +115,15 @@
           }, (error) => {
             this.loadingExecutions = false
             api.handleError(error)
+          })
+      },
+
+      downloadPng () {
+        let node = document.getElementById('latestExecutionsBlock')
+        console.log(node)
+        toPng(node)
+          .then(function (dataUrl) {
+            download(dataUrl, 'latest-executions.png')
           })
       },
 
@@ -175,6 +189,9 @@
 
     mounted () {
       this.loadLatestExecutions()
+      if (this.isPng) {
+        setTimeout(() => this.downloadPng(), 2000)
+      }
     },
 
     watch: {
