@@ -1,5 +1,5 @@
 ################################################################################
-# Copyright (C) 2019 by the ARA Contributors
+# Copyright (C) 2021 by the ARA Contributors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,14 +14,17 @@
 # limitations under the License.
 #
 ################################################################################
+ara:
+  database:
+    # Default host for postgresql
+    host: localhost:5432
 
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
-spring.datasource.driver-class-name=org.postgresql.Driver
-spring.jpa.database=postgresql
-
-spring.liquibase.changeLog=classpath:/db/changelog/db.changelog-master-postgresql.yaml
-
-# Local URL
-spring.datasource.url=jdbc:postgresql://localhost:5432/ara
-spring.datasource.username=changeme
-spring.datasource.password=changeme
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${ara.database.host}/${ara.database.name}
+  jpa:
+    database: postgresql
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect

@@ -27,7 +27,7 @@ nbdist/
 # Temporary DbUnit file
 src/test/resources/dbunit/freshly-created-dataset-to-rename.xml
 
-# application.properties
+# Spring boot config
 ## authentication
-/src/main/resources/application-auth.properties
-/src/main/resources/application-custom.properties
+/src/main/resources/config-authentication.yaml
+/src/main/resources/config-custom.yaml

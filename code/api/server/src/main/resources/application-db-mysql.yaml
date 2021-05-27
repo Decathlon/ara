@@ -1,5 +1,5 @@
 ################################################################################
-# Copyright (C) 2019 by the ARA Contributors
+# Copyright (C) 2021 by the ARA Contributors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,9 +14,18 @@
 # limitations under the License.
 #
 ################################################################################
+ara:
+  database:
+    # Default host for mysql
+    host: localhost:3306
 
-# Development environment, to develop/run/test/debug on local machine with a local database
-
-spring.profiles.include=dev-db
-
-logging.level.com.decathlon=INFO
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${ara.database.host}/${ara.database.name}?sessionVariables=sql_mode='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION'
+  jpa:
+    database: mysql
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect

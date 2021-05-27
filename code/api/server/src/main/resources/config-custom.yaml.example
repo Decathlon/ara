@@ -1,5 +1,5 @@
 ################################################################################
-# Copyright (C) 2019 by the ARA Contributors
+# Copyright (C) 2021 by the ARA Contributors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,5 +15,30 @@
 #
 ################################################################################
 
-spring.h2.console.enabled=true
-spring.h2.console.path=/h2-console
+management:
+  metrics:
+    web:
+      server:
+        request:
+          autotime:
+            enabled: true
+    export:
+      influx:
+        enabled: false
+        db: changeme
+        user-name: changeme
+        password: changeme
+        uri: http://localhost:8086
+        step: 15s
+        auto-create-db: false
+
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,threaddump
+
+  endpoint:
+    health:
+      probes:
+        ## Auto configured in kubernetes env
+        enabled: true

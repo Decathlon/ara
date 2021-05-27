@@ -1,5 +1,5 @@
 ################################################################################
-# Copyright (C) 2019 by the ARA Contributors
+# Copyright (C) 2021 by the ARA Contributors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,13 +14,21 @@
 # limitations under the License.
 #
 ################################################################################
-
-## SQL Logging
-spring.jpa.show-sql=false
-spring.jpa.properties.hibernate.format_sql=false
-logging.level.org.hibernate.SQL=ERROR
-logging.level.org.hibernate.type.descriptor.sql=INFO
-
-# In dev we use hibernate DDL and not liquibase
-spring.liquibase.enabled=false
-spring.jpa.properties.hibernate.hbm2ddl.auto=update
+ara:
+  database:
+    # Default in memory database for h2
+    # set it to ./db-file-name to use h2 file
+    host: mem
+spring:
+  h2:
+    console:
+      enabled: true
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:${ara.database.host}:${ara.database.name};DB_CLOSE_ON_EXIT=FALSE
+  jpa:
+    database: h2
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        globally_quoted_identifiers: false

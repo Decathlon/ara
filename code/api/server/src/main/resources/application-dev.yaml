@@ -1,5 +1,5 @@
 ################################################################################
-# Copyright (C) 2019 by the ARA Contributors
+# Copyright (C) 2021 by the ARA Contributors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,13 +15,24 @@
 #
 ################################################################################
 
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-spring.jpa.database=mysql
-spring.jpa.database-platform=org.hibernate.dialect.MySQL5InnoDBDialect
-
-spring.liquibase.changeLog=classpath:/db/changelog/db.changelog-master-mysql.yaml
-
-# Local URL
-spring.datasource.url=jdbc:mysql://localhost:3306/ara
-spring.datasource.username=changeme
-spring.datasource.password=changeme
+logging:
+  level:
+    com:
+      decathlon: INFO
+    org:
+      hibernate:
+        SQL: ERROR
+        type:
+          descriptor:
+            sql: INFO
+spring:
+  # In dev we use hibernate DDL and not liquibase
+  jpa:
+    properties:
+      hibernate:
+        format_sql: false
+        hbm2ddl:
+          auto: update
+    show-sql: false
+  liquibase:
+    enabled: false
