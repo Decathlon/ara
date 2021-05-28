@@ -19,7 +19,7 @@
 # and available as "app.version" JSON-path at /actuator/info
 info:
   app:
-    version: @project.version@
+    version: version
   api:
     version: @project.version@
 spring:

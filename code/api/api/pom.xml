@@ -27,25 +27,21 @@
 	</parent>
 
     <groupId>com.decathlon.ara</groupId>
-    <artifactId>ara-server</artifactId>
+    <artifactId>ara-api</artifactId>
     <version>8.2.0</version>
 
-    <name>ARA Server</name>
+    <name>ARA API</name>
     <description>
         Agile Regression Analyzer - Server:
         This module is responsible for the server part of the project.
     </description>
 
     <properties>
-        <java.version>11</java.version>
-
+        <java.version>16</java.version>
         <ara.default.database>h2</ara.default.database>
         <spring.profiles.active></spring.profiles.active>
-
-        <mapstruct.version>1.3.1.Final</mapstruct.version>
-
+        <mapstruct.version>1.4.2.Final</mapstruct.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
     </properties>
 
     <dependencies>
@@ -277,6 +273,9 @@
                             <artifactId>spring-boot-configuration-processor</artifactId>
                         </exclude>
                     </excludes>
+                    <image>
+                        <name>docker.io/decathlon/${project.artifactId}:${project.version}</name>
+                    </image>
                 </configuration>
 			</plugin>
 
@@ -324,7 +323,7 @@
             <plugin>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok-maven-plugin</artifactId>
-                <version>1.18.12.0</version>
+                <version>${lombok.version}.0</version>
                 <executions>
                     <execution>
                         <id>delombok</id>

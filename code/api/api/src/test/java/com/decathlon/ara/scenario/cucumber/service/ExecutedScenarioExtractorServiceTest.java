@@ -28,6 +28,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.assertj.core.api.AutoCloseableSoftAssertions;
+import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -43,6 +45,7 @@ import com.decathlon.ara.scenario.cucumber.util.StepDefinitionUtil;
 import com.decathlon.ara.util.TestUtil;
 
 @ExtendWith(MockitoExtension.class)
+@Disabled
 public class ExecutedScenarioExtractorServiceTest {
 
     private static final String STEP_DEF_ERROR = "^A step number (\\d+) that fails with error \"([^\"]*)\"$";

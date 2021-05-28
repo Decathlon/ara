@@ -1,18 +1,16 @@
 package com.decathlon.ara.cartography;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.decathlon.ara.domain.enumeration.FunctionalityType;
+import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
-import com.decathlon.ara.domain.enumeration.FunctionalityType;
-import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 @SpringBootTest
 @ActiveProfiles("db-h2")
@@ -56,7 +54,7 @@ public class AraExporterTest {
         // Given
         final AraCartographyMapper mapper = new AraCartographyMapper();
         final List<FunctionalityDTO> functionalities = new ArrayList<>();
-        for (int i=0; i < 10; i++) {
+        for (int i = 0; i < 10; i++) {
             functionalities.add(this.create_dummy_functionality(i));
         }
         final byte[] expected = mapper.asString(functionalities).getBytes(StandardCharsets.UTF_8);
