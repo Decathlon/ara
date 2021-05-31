@@ -10,8 +10,8 @@ JAVA_VERSION=16
 
 # WITH JAVA MAVEN
 
-mvn-install: ## DEV - install project
-	@./mvnw -Dmaven.test.skip=true clean install
+mvn-install: ## Install project
+	@./mvnw clean install
 
 mvn-run: ## DEV - run api
 	@./mvnw -Pdev spring-boot:run -pl api
@@ -50,7 +50,7 @@ mvn-build-image: ## Build image with maven
 ifdef $(FULL_IMAGE)
 	@echo 'Building with specfic image name: $(FULL_IMAGE)'
 endif
-	@./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=$(FULL_IMAGE) -pl api
+	@./mvnw spring-boot:build-image -Dmaven.test.skip=true -Dspring-boot.build-image.imageName=$(FULL_IMAGE) -pl api
 
 #####################################
 ##              UTILS              ##
