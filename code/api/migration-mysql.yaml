@@ -32,12 +32,11 @@ services:
     image: docker.io/decathlon/ara-api
     restart: always
     environment:
-      - DATABASE_TYPE=mysql
-      - DATABASE_HOST=ara-db-source:3306
-      - DATABASE_NAME=ara
-      - DATABASE_USER=root
-      - DATABASE_PASSWORD=to_change
-      - CLIENT_URL="http://localhost:80/"
+      - ARA_DATABASE_TARGET=mysql
+      - ARA_DATABASE_HOST=ara-db-source:3306
+      - ARA_DATABASE_NAME=ara
+      - ARA_DATABASE_USERNAME=changeme
+      - ARA_DATABASE_PASSWORD=changeme
     networks:
       - db_net
       - api_net
@@ -47,14 +46,13 @@ services:
     image: docker.io/decathlon/ara-api
     restart: always
     environment:
-      - DATABASE_TYPE=mysql
-      - DATABASE_HOST=ara-db-target:3306
-      - DATABASE_NAME=ara
-      - DATABASE_USER=root
-      - DATABASE_PASSWORD=to_change
-      - LIQUIBASE_ACTIVE=false
-      - HBM2DDL=create-drop
-      - CLIENT_URL="http://localhost:80/"
+      - ARA_DATABASE_TARGET=mysql
+      - ARA_DATABASE_HOST=ara-db-target:3306
+      - ARA_DATABASE_NAME=ara
+      - ARA_DATABASE_USERNAME=changeme
+      - ARA_DATABASE_PASSWORD=changeme
+      - ARA_DATABASE_LIQUIBASE_ENABLED=false
+      - ARA_DATABASE_HBM2DDL=create-drop
     networks:
       - db_net
       - api_net
