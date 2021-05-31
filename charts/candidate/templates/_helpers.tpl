@@ -41,32 +41,32 @@ Secret name for database.
 Secret name for api.
 */}}
 {{- define "ara.api.secret.name" -}}
-{{- if .Values.api.propertiesExistingSecret.enabled -}}
-{{ .Values.api.propertiesExistingSecret.secretName }}
+{{- if .Values.api.configExistingSecret.enabled -}}
+{{ .Values.api.configExistingSecret.secretName }}
 {{- else -}}
 {{ printf "%s-%s" .Release.Name "api"  }}
 {{- end -}}
 {{- end -}}
 
 {{/*
-Secret auth properties key for api.
+Secret auth config key for api.
 */}}
-{{- define "ara.api.secret.authpropertieskey" -}}
-{{- if .Values.api.propertiesExistingSecret.enabled -}}
-{{ .Values.api.propertiesExistingSecret.authPropertiesKey }}
+{{- define "ara.api.secret.authconfigkey" -}}
+{{- if .Values.api.configExistingSecret.enabled -}}
+{{ .Values.api.configExistingSecret.authConfigKey }}
 {{- else -}}
-application-auth.properties
+config-authentication.yaml
 {{- end -}}
 {{- end -}}
 
 {{/*
-Secret custom properties key for api.
+Secret custom config key for api.
 */}}
-{{- define "ara.api.secret.custompropertieskey" -}}
-{{- if .Values.api.propertiesExistingSecret.enabled -}}
-{{ .Values.api.propertiesExistingSecret.customPropertiesKey }}
+{{- define "ara.api.secret.customconfigkey" -}}
+{{- if .Values.api.configExistingSecret.enabled -}}
+{{ .Values.api.configExistingSecret.customConfigKey }}
 {{- else -}}
-application-custom.properties
+config-custom.yaml
 {{- end -}}
 {{- end -}}
 

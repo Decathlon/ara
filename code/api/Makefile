@@ -50,7 +50,7 @@ mvn-build-image: ## Build image with maven
 ifdef $(FULL_IMAGE)
 	@echo 'Building with specfic image name: $(FULL_IMAGE)'
 endif
-	@./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=$(FULL_IMAGE) -pl api -am
+	@./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=$(FULL_IMAGE) -pl api
 
 #####################################
 ##              UTILS              ##

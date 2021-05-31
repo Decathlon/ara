@@ -108,10 +108,10 @@ spec:
         secret:
           secretName: {{ include "ara.api.secret.name" . }}
           items:
-            - key: {{ include "ara.api.secret.authpropertieskey" . }}
-              path: "application-auth.properties"
-            - key: {{ include "ara.api.secret.custompropertieskey" . }}
-              path: "application-custom.properties"
+            - key: {{ include "ara.api.secret.authconfigkey" . }}
+              path: "config-authentication.yaml"
+            - key: {{ include "ara.api.secret.customconfigkey" . }}
+              path: "config-custom.yaml"
       {{- if .Values.api.volumes }}
 {{ toYaml .Values.api.volumes | indent 6 }}
       {{- end}}

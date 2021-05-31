@@ -27,7 +27,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ara-server</artifactId>
+            <artifactId>ara-api</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
