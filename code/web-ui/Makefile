@@ -30,16 +30,13 @@ dkr-install: ## DEV - install project with docker
 		npm install
 
 dkr-run: ## DEV - run web-ui with docker
-	@docker network create ara-net > /dev/null 2>&1 || echo 'Network ara-net already created'
 	@docker container run -it --name ara-web-ui --rm \
-        --network="ara-net" \
-        --net-alias="ara-web-ui" \
+        --network="host" \
 				--user $(shell id -u):$(shell id -g) \
-        -p 8081:8081 \
         -v $${HOME}/.ara-web:/var/node:rw \
         -e HOME=/var/node \
         -e NPM_CONFIG_PREFIX=/var/node/.npm-global \
-        -e ARA_API_HOST=ara-api \
+        -e ARA_API_HOST=host.docker.internal \
         -e ARA_API_PORT=8080 \
 				-v $(shell pwd):$(shell pwd):rw \
 				-w $(shell pwd) \
@@ -60,10 +57,7 @@ dkr-shell: ## Start a shell in docker node container
       node:$(NODE_VERSION) \
       /bin/sh
 
-
-
 dkr-build: ## DEV - build web-ui with docker
-	@docker network create ara-net > /dev/null 2>&1 || echo 'Network ara-net already created'
 	@docker container run -it --rm \
    				--user $(shell id -u):$(shell id -g) \
            -v $${HOME}/.ara-web:/var/node:rw \
@@ -75,15 +69,25 @@ dkr-build: ## DEV - build web-ui with docker
 		npm run build
 
 #####################################
+##             PACKAGE             ##
+#####################################
+
+dkr-build-image:
+	@mkdir -p static/version
+	@SHA=$(shell git rev-parse --short HEAD) && \
+	 WEB_VERSION=$(shell cat package.json | jq -r '.version') && \
+	 jq -n	--arg version $$WEB_VERSION \
+					--arg sha $$SHA \
+					-f build/template/about.jq > \
+					static/version/about.json
+	@docker build -t $(FULL_IMAGE) .
+
+#####################################
 ##              UTILS              ##
 #####################################
 
 get-version:
 	@cat package.json | jq -r '.version'
-
-get-version-dkr:
-	@docker image pull aligor/jq > /dev/null 2>&1
-	@cat package.json | docker container run --rm -i aligor/jq jq -r '.version'
 
 .PHONY: help
 help:

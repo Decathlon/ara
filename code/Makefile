@@ -5,15 +5,20 @@
 DOCKER_REGISTRY?=docker.io
 # Forks may use name/ara for their tests
 IMAGE_NAME?=decathlon/ara
-API_VERSION?=latest
-WEB_UI_VERSION?=latest
+API_VERSION?=$(shell make -s -C api get-version)$(SUFFIX)
+WEB_UI_VERSION?=$(shell make -s -C web-ui get-version)$(SUFFIX)
 
-API_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-api:${API_VERSION}
-WEB_UI_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-web-ui:${WEB_UI_VERSION}
+API_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-api
+WEB_UI_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-web-ui
+
+PUBLISH?=FALSE
 
 #####################################
 ##           QUICK START           ##
 #####################################
+
+debug:
+	echo $(API_VERSION)
 
 start: ## Start ARA
 	@echo '-- Start ARA --'
@@ -43,39 +48,17 @@ build: ## Build ARA in parallel
 
 build-full: build-api build-web-ui
 
-about-web-ui:
-	@mkdir -p web-ui/static/version
-	@SHA=$(shell git rev-parse --short HEAD) && \
-	 WEB_VERSION=$(shell cat web-ui/package.json | docker container run --rm -i aligor/jq jq -r '.version') && \
-	 docker container run --rm -i \
-	 						-v $(shell pwd)/web-ui/build/template:/usr/src/app:ro \
-                            -w /usr/src/app \
-	 						aligor/jq \
-							jq -n --arg version $$WEB_VERSION \
-								  --arg sha $$SHA \
-								  -f about.jq > \
-								  web-ui/static/version/about.json
+build-web-ui: ## Build ara-web-ui
+	@echo '-- Build WEB-UI image --'
+	@$(eval FULL_IMAGE = $(WEB_UI_IMAGE):$(WEB_UI_VERSION))
+	$(MAKE) -C web-ui dkr-build-image FULL_IMAGE=$(FULL_IMAGE)
+	@./tools/docker-tags-version.sh "$(WEB_UI_IMAGE)" "$(WEB_UI_VERSION)" "$(PUBLISH)"
 
-build-web-ui: about-web-ui ## Build ara-web-ui
-	@echo '-- Build ${WEB_UI_IMAGE} --'
-	@docker build -t ${WEB_UI_IMAGE} web-ui
-
-about-api:
-	@mkdir -p api/server/src/main/resources/static/api/version
-	@SHA=$(shell git rev-parse --short HEAD) && \
-	 API_VERSION=$(shell xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' api/pom.xml) && \
-	 docker container run --rm -i \
-    	 						-v $(shell pwd)/api/build/template:/usr/src/app:ro \
-                                -w /usr/src/app \
-    	 						aligor/jq \
-    							jq -n --arg version $$API_VERSION \
-    								  --arg sha $$SHA \
-    								  -f about.jq > \
-    								  api/server/src/main/resources/static/api/version/about.json
-
-build-api: about-api ## Build ara-api
-	@echo '-- Build ${API_IMAGE} --'
-	@docker build -t ${API_IMAGE} api
+build-api: ## Build ara-api
+	@echo '-- Build API image --'
+	@$(eval FULL_IMAGE = $(API_IMAGE):$(API_VERSION))
+	$(MAKE) -C api mvn-build-image FULL_IMAGE=$(FULL_IMAGE)
+	@./tools/docker-tags-version.sh "$(API_IMAGE)" "$(API_VERSION)" "$(PUBLISH)"
 
 #####################################
 ##             UPDATER             ##

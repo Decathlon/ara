@@ -12,7 +12,6 @@ metadata:
 data:
   database_host: {{ include "ara.db.host" . | quote }}
   database_type: {{ .Values.database.type }}
-  database_options: {{ .Values.database.options | quote }}
   liquibase_active: {{ .Values.database.liquibaseActive | quote }}
   app_url: {{ .Values.api.appUrl }}
   api_url: {{ printf "%s-api.%s.svc.cluster.local:%.0f" .Chart.Name .Release.Namespace .Values.api.port }}

@@ -32,48 +32,31 @@ jobs:
         name: Install xmllint
         run: sudo apt-get install libxml2-utils
       -
+        name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: '16'
+      -
         name: Prepare
         id: prep
         run: |
-          DOCKER_IMAGE=decathlon/ara-api
-          VERSION=noop
-          API_VERSION=$(xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' code/api/pom.xml)
-          PUSH=false
+          PUSH=FALSE
           if [[ $GITHUB_REF == refs/heads/* ]]; then
-            PUSH=true
             BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
             if [ "${{ github.event.repository.default_branch }}" = "$BRANCH_NAME" ]; then
-              VERSION=${API_VERSION}
-            else
-              VERSION=${API_VERSION}-${BRANCH_NAME}
+              PUSH=TRUE
             fi
           elif [[ $GITHUB_REF == refs/pull/* ]]; then
             BRANCH_NAME=$(echo ${{ github.event.pull_request.head.ref }} | sed -r 's#/+#-#g')
             if [[ $BRANCH_NAME == release-* ]]; then
-              PUSH=true
-              RELEASE=${BRANCH_NAME#release-}
-              VERSION=${API_VERSION}-rc${RELEASE}
+              PUSH=TRUE
+              SUFFIX=rc
             else
-              VERSION=pr-${{ github.event.number }}
+              SUFFIX=pr-${{ github.event.number }}
             fi
           fi
-          TAGS="${DOCKER_IMAGE}:${VERSION}"
-          if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-            MINOR=${VERSION%.*}
-            MAJOR=${MINOR%.*}
-            TAGS="$TAGS,${DOCKER_IMAGE}:${MINOR},${DOCKER_IMAGE}:${MAJOR},${DOCKER_IMAGE}:latest"
-          fi
-          echo ::set-output name=version::${VERSION}
-          echo ::set-output name=tags::${TAGS}
           echo ::set-output name=push::${PUSH}
-          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-      - 
-        name: Create about.json
-        run: |
-          SHA=${GITHUB_SHA:0:7}
-          VERSION=$(xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' code/api/pom.xml)
-          mkdir -p code/api/server/src/main/resources/static/api/version
-          jq -n --arg version $VERSION --arg sha $SHA -f code/api/build/template/about.jq > code/api/server/src/main/resources/static/api/version/about.json
+          echo ::set-output name=suffix::${SUFFIX}
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -89,20 +72,6 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
         name: Build and push
-        id: docker_build
-        uses: docker/build-push-action@v2
-        with:
-          context: ./code/api
-          file: ./code/api/Dockerfile
-          platforms: linux/amd64
-          push: ${{ steps.prep.outputs.push == 'true' }}
-          tags: ${{ steps.prep.outputs.tags }}
-          labels: |
-            org.opencontainers.image.title=${{ github.event.repository.name }}
-            org.opencontainers.image.description=${{ github.event.repository.description }}
-            org.opencontainers.image.url=${{ github.event.repository.html_url }}
-            org.opencontainers.image.source=${{ github.event.repository.clone_url }}
-            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
-            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
-            org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
+        run: |
+          cd code
+          make build-api SUFFIX=${{ steps.prep.outputs.suffix }} PUBLISH=${{ steps.prep.outputs.push }}

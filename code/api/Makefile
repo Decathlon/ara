@@ -27,7 +27,7 @@ dkr-install: ## DEV - install project with docker
 				-v $(shell pwd):$(shell pwd):rw \
 				-w $(shell pwd) \
 		openjdk:$(JAVA_VERSION) \
-		mvn -Dmaven.test.skip=true clean install
+		./mvnw -Dmaven.test.skip=true clean install
 
 dkr-run: ## DEV - run api with docker
 	@docker container run -it --name ara-api --rm \
@@ -40,14 +40,17 @@ dkr-run: ## DEV - run api with docker
 				-v $(shell pwd):$(shell pwd):rw \
 				-w $(shell pwd) \
 		openjdk:$(JAVA_VERSION) \
-		mvn -Pdev spring-boot:run -pl api
+		./mvnw -Pdev spring-boot:run -pl api
 
 #####################################
 ##             PACKAGE             ##
 #####################################
 
 mvn-build-image: ## Build image with maven
-	@./mvnw spring-boot:build-image -pl api -am
+ifdef $(FULL_IMAGE)
+	@echo 'Building with specfic image name: $(FULL_IMAGE)'
+endif
+	@./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=$(FULL_IMAGE) -pl api -am
 
 #####################################
 ##              UTILS              ##
