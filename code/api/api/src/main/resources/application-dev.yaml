@@ -1,0 +1,38 @@
+################################################################################
+# Copyright (C) 2021 by the ARA Contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# 	 http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+################################################################################
+
+logging:
+  level:
+    com:
+      decathlon: INFO
+    org:
+      hibernate:
+        SQL: ERROR
+        type:
+          descriptor:
+            sql: INFO
+spring:
+  # In dev we use hibernate DDL and not liquibase
+  jpa:
+    properties:
+      hibernate:
+        format_sql: false
+        hbm2ddl:
+          auto: update
+    show-sql: false
+  liquibase:
+    enabled: false

@@ -7,7 +7,12 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>com.decathlon.ara</groupId>
     <artifactId>jacoco-aggregation</artifactId>
+    <packaging>pom</packaging>
+    <version>8.2.0</version>
+
+    <name>Jacoco Report Aggregation</name>
 
     <dependencies>
         <dependency>
@@ -22,7 +27,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ara-server</artifactId>
+            <artifactId>ara-api</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

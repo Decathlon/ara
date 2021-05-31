@@ -6,6 +6,7 @@ target/
 *.ntvs*
 *.njsproj
 *.sln
+!.mvn/wrapper/maven-wrapper.jar
 
 ### STS ###
 .apt_generated
@@ -31,6 +32,3 @@ nbdist/
 
 # H2 db
 ara*.db
-
-# Build
-server/src/main/resources/static/api/version/about.json

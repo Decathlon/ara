@@ -29,7 +29,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
-          java-version: '14'
+          java-version: '16'
       - name: Analyze with SonarCloud
         run: mvn -B -f code/api/pom.xml clean install dependency:copy-dependencies
       - name: Setup sonar-scanner

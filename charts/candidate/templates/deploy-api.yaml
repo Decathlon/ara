@@ -36,47 +36,42 @@ spec:
         env:
         - name: SERVER_PORT
           value: "{{ .Values.api.port }}"
-        - name: DATABASE_TYPE
+        - name: ARA_DATABASE_TARGET
           valueFrom:
             configMapKeyRef:
               name: {{ include "ara.configmap.name" . }}
               key: database_type
-        - name: DATABASE_HOST
+        - name: ARA_DATABASE_HOST
           valueFrom:
             configMapKeyRef:
               name: {{ include "ara.configmap.name" . }}
               key: database_host
-        - name: DATABASE_CUSTOM_OPTIONS
-          valueFrom:
-            configMapKeyRef:
-              name: {{ include "ara.configmap.name" . }}
-              key: database_options
-        - name: DATABASE_NAME
+        - name: ARA_DATABASE_NAME
           valueFrom:
             secretKeyRef:
               name:  {{ include "ara.database.secret.name" . }}
               key: {{ include "ara.database.secret.databasenamekey" . }}
-        - name: DATABASE_USER
+        - name: ARA_DATABASE_USERNAME
           valueFrom:
             secretKeyRef:
               name:  {{ include "ara.database.secret.name" . }}
               key: {{ include "ara.database.secret.usernamekey" . }}
-        - name: DATABASE_PASSWORD
+        - name: ARA_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ include "ara.database.secret.name" .}}
               key: {{ include "ara.database.secret.passwordkey" . }}
-        - name: CLIENT_URL
+        - name: ARA_CLIENTBASEURL
           valueFrom:
             configMapKeyRef:
               name: {{ include "ara.configmap.name" . }}
               key: app_url
-        - name: LIQUIBASE_ACTIVE
+        - name: ARA_DATABASE_LIQUIBASE_ENABLED
           valueFrom:
             configMapKeyRef:
                 name: {{ include "ara.configmap.name" . }}
                 key: liquibase_active
-        - name: DISPLAYED_VERSION
+        - name: INFO_APP_VERSION
           value: "{{ .Chart.Version }}"
         volumeMounts:
           - name: config
@@ -113,10 +108,10 @@ spec:
         secret:
           secretName: {{ include "ara.api.secret.name" . }}
           items:
-            - key: {{ include "ara.api.secret.authpropertieskey" . }}
-              path: "application-auth.properties"
-            - key: {{ include "ara.api.secret.custompropertieskey" . }}
-              path: "application-custom.properties"
+            - key: {{ include "ara.api.secret.authconfigkey" . }}
+              path: "config-authentication.yaml"
+            - key: {{ include "ara.api.secret.customconfigkey" . }}
+              path: "config-custom.yaml"
       {{- if .Values.api.volumes }}
 {{ toYaml .Values.api.volumes | indent 6 }}
       {{- end}}

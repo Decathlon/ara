@@ -8,12 +8,9 @@ services:
     image: docker.io/decathlon/ara-api
     restart: always
     environment:
-      - DATABASE_TYPE=h2
-      - DATABASE_HOST=file
-      - DATABASE_NAME=/app/data/ara-db;AUTO_SERVER=TRUE
-      - DATABASE_USER=sa
-      - DATABASE_PASSWORD=
-      - CLIENT_URL="http://localhost:80/"
+      - ARA_DATABASE_TARGET=h2
+      - ARA_DATABASE_HOST=file
+      - ARA_DATABASE_NAME=/app/data/ara-db;AUTO_SERVER=TRUE
     networks:
       - api_net
     volumes:
@@ -22,14 +19,11 @@ services:
     image: docker.io/decathlon/ara-api
     restart: always
     environment:
-      - DATABASE_TYPE=h2
-      - DATABASE_HOST=file
-      - DATABASE_NAME=/app/data/ara-db-mig;AUTO_SERVER=TRUE
-      - DATABASE_USER=sa
-      - DATABASE_PASSWORD=
-      - LIQUIBASE_ACTIVE=false
-      - HBM2DDL=update
-      - CLIENT_URL="http://localhost:80/"
+      - ARA_DATABASE_TARGET=h2
+      - ARA_DATABASE_HOST=file
+      - ARA_DATABASE_NAME=/app/data/ara-db-mig;AUTO_SERVER=TRUE
+      - ARA_DATABASE_LIQUIBASE_ENABLED=false
+      - ARA_DATABASE_HBM2DDL=update
     networks:
       - api_net
     volumes:

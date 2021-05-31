@@ -19,13 +19,13 @@ services:
     image: "decathlon/ara-api:${API_VERSION:-latest}"
     restart: always
     environment:
-      - DATABASE_TYPE=postgresql
-      - DATABASE_HOST=ara-db:5432
-      - DATABASE_NAME=ara
-      - DATABASE_USER=changeme
-      - DATABASE_PASSWORD=changeme
-      - DISPLAYED_VERSION=DEV
-      - CLIENT_URL="http://localhost:80/"
+      - ARA_DATABASE_TARGET=postgresql
+      - ARA_DATABASE_HOST=ara-db:5432
+      - ARA_DATABASE_NAME=ara
+      - ARA_DATABASE_USERNAME=changeme
+      - ARA_DATABASE_PASSWORD=changeme
+      - INFO_APP_VERSION=DEV
+      - ARA_CLIENTBASEURL=localhost:8081
     networks:
       - web_net
       - db_net

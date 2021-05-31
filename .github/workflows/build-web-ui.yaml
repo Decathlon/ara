@@ -28,49 +28,26 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v2
-      -
-        name: Prepare
+      - name: Prepare
         id: prep
         run: |
-          DOCKER_IMAGE=decathlon/ara-web-ui
-          VERSION=noop
-          WEB_UI_VERSION=$(cat code/web-ui/package.json | jq -r '.version')
-          PUSH=false
+          PUSH=FALSE
           if [[ $GITHUB_REF == refs/heads/* ]]; then
-            PUSH=true
             BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
             if [ "${{ github.event.repository.default_branch }}" = "$BRANCH_NAME" ]; then
-              VERSION=${WEB_UI_VERSION}
-            else
-              VERSION=${WEB_UI_VERSION}-${BRANCH_NAME}
+              PUSH=TRUE
             fi
           elif [[ $GITHUB_REF == refs/pull/* ]]; then
             BRANCH_NAME=$(echo ${{ github.event.pull_request.head.ref }} | sed -r 's#/+#-#g')
             if [[ $BRANCH_NAME == release-* ]]; then
-              PUSH=true
-              RELEASE=${BRANCH_NAME#release-}
-              VERSION=${WEB_UI_VERSION}-rc${RELEASE}
+              PUSH=TRUE
+              SUFFIX=rc
             else
-              VERSION=pr-${{ github.event.number }}
+              SUFFIX=pr-${{ github.event.number }}
             fi
           fi
-          TAGS="${DOCKER_IMAGE}:${VERSION}"
-          if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-            MINOR=${VERSION%.*}
-            MAJOR=${MINOR%.*}
-            TAGS="$TAGS,${DOCKER_IMAGE}:${MINOR},${DOCKER_IMAGE}:${MAJOR},${DOCKER_IMAGE}:latest"
-          fi
-          echo ::set-output name=version::${VERSION}
-          echo ::set-output name=tags::${TAGS}
           echo ::set-output name=push::${PUSH}
-          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-      - 
-        name: Create about.json
-        run: |
-          SHA=${GITHUB_SHA:0:7}
-          VERSION=$(cat code/web-ui/package.json | jq -r '.version')
-          mkdir -p code/web-ui/static/version
-          jq -n --arg version $VERSION --arg sha $SHA -f code/web-ui/build/template/about.jq > code/web-ui/static/version/about.json
+          echo ::set-output name=suffix::${SUFFIX}
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -84,22 +61,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      -
-        name: Build and push
-        id: docker_build
-        uses: docker/build-push-action@v2
-        with:
-          context: ./code/web-ui
-          file: ./code/web-ui/Dockerfile
-          platforms: linux/amd64
-          push: ${{ steps.prep.outputs.push == 'true' }}
-          tags: ${{ steps.prep.outputs.tags }}
-          labels: |
-            org.opencontainers.image.title=${{ github.event.repository.name }}
-            org.opencontainers.image.description=${{ github.event.repository.description }}
-            org.opencontainers.image.url=${{ github.event.repository.html_url }}
-            org.opencontainers.image.source=${{ github.event.repository.clone_url }}
-            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
-            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
-            org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
+      - name: Build and push
+        run: |
+          cd code
+          make build-web-ui SUFFIX=${{ steps.prep.outputs.suffix }} PUBLISH=${{ steps.prep.outputs.push }}

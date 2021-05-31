@@ -30,7 +30,7 @@
     <packaging>pom</packaging>
     <version>8.2.0</version>
 
-    <name>ARA API</name>
+    <name>ARA Parent</name>
     <description>
         Agile Regression Analyzer (or ARA for short) is a tool that helps you avoid regressions in your projects.
         It's open-source, so you can contribute ! For more details, go to https://github.com/Decathlon/ara.
@@ -44,7 +44,7 @@
         <module>lib</module>
         <module>generated-cucumber-report</module>
         <module>database</module>
-        <module>server</module>
+        <module>api</module>
         <module>jacoco-aggregation</module>
     </modules>
 

@@ -1,0 +1,88 @@
+################################################################################
+# Copyright (C) 2021 by the ARA Contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# 	 http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+################################################################################
+
+# Injected at build from pom.xml thanks to resource filtering enabled by Spring Boot,
+# and available as "app.version" JSON-path at /actuator/info
+info:
+  app:
+    version: version
+  api:
+    version: @project.version@
+spring:
+  profiles:
+    include: @spring.profiles.active@
+  config:
+    import: config-database.yaml,optional:config-custom.yaml,optional:config-authentication.yaml
+  jackson:
+    date-format: "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"
+    default-property-inclusion: NON_NULL
+  thymeleaf:
+    # HTML5 is deprecated
+    mode: HTML
+    # Postman collections can be very huge!
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+  mail:
+    #host: please-configure-spring.mail.host
+
+springdoc:
+  packagesToScan: com.decathlon.ara
+  pathsToMatch: /api/**
+
+#
+# Sensible default values, optionally customizable by clients
+#
+
+# Disabled by default (and executed after/every day)
+ara:
+  maxExecutionDaysToKeep: 14
+  minExecutionsToKeepPerCycle: 20
+
+  # Enabled every minutes, starting 40 seconds after startup to be EXACTLY BETWEEN two execution indexing schedules
+  defectSyncSchedulingDelayInMilliseconds: 60000
+  defectSyncSchedulingInitialDelayInMilliseconds: 40000
+
+  # Screenshots and HTTP logs are stored to files by default
+  adapter:
+    asset:
+      name: file
+  fileHomeFolder: /opt/ara/data/assets
+  fileHttpAccess: http://localhost:8080
+  fileScreenshotSubFolder: /screenshots
+  fileHttpLogsSubFolder: /http-logs
+
+    #
+    # Mandatory fields that need to be configured by clients
+    # (only providing them here for the Spring context to load for integration tests)
+    #
+
+  # Feature Flipping
+  features:
+    jira-adapter: true
+    xprt-mprt-crtg: true
+
+  # Local front
+  clientBaseUrl: http://localhost:8081/
+
+management:
+  # Metrics
+  metrics:
+    export:
+      influx:
+        enabled: false

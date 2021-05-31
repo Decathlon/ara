@@ -1,0 +1,72 @@
+################################################################################
+# Copyright (C) 2021 by the ARA Contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# 	 http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+################################################################################
+ara:
+  database:
+    name: ara
+    # Default database
+    target: @ara.default.database@
+    # Default credentials
+    username: changeme
+    password: changeme
+    # Database structure
+    # Managed by liquibase by default
+    liquibase:
+      enabled: true
+    hbm2ddl: none
+
+
+
+spring:
+  h2:
+    console:
+      enabled: false
+  liquibase:
+    enabled: ${ara.database.liquibase.enabled}
+    change-log: classpath:/db/changelog/db.changelog-master-${ara.database.target}.yaml
+  profiles:
+    active: db-${ara.database.target}
+  datasource:
+    username: ${ara.database.username}
+    password: ${ara.database.password}
+  jpa:
+    open-in-view: false
+    hibernate:
+      use-new-id-generator-mappings: true
+
+    properties:
+      current_session_context_class: thread
+      javax:
+        persistence:
+          sharedCache:
+            mode: ALL
+      net:
+        sf:
+          ehcache:
+            configurationResourceName: ehcache.xml
+      hibernate:
+        hbm2ddl:
+          # Managed by liquidbase
+          auto: ${ara.database.hbm2ddl}
+        temp:
+          # Boost Spring context startup time by 6 seconds
+          use_jdbc_metadata_defaults: false
+        cache:
+          region:
+            factory_class: org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory
+        globally_quoted_identifiers: true
+        query:
+          substitutions: true 1, false 0
