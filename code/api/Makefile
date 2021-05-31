@@ -11,10 +11,10 @@ JAVA_VERSION=16
 # WITH JAVA MAVEN
 
 mvn-install: ## DEV - install project
-	@mvn -Dmaven.test.skip=true clean install
+	@./mvnw -Dmaven.test.skip=true clean install
 
 mvn-run: ## DEV - run api
-	@mvn -Pdev spring-boot:run -pl api
+	@./mvnw -Pdev spring-boot:run -pl api
 
 # WITH DOCKER
 
