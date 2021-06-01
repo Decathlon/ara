@@ -28,7 +28,7 @@
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-database</artifactId>
-    <version>9.0.0</version>
+    <version>9.0.1</version>
 
     <name>ARA Database</name>
     <description>
@@ -212,6 +212,12 @@
             <properties>
                 <diffChangeLogFile>src/main/resources/db/changelog/changes/postgresql/to-be-changed.yaml</diffChangeLogFile>
                 <liquibasePropertyFile>src/main/resources/liquibase-postgresql.properties</liquibasePropertyFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
             </properties>
         </profile>
     </profiles>

@@ -3,11 +3,9 @@ FROM node:12 as builder
 
 WORKDIR /usr/src/app
 
-COPY package.json .
-
-RUN npm install
-
 COPY . ./
+
+RUN npm ci
 
 RUN npm run build
 

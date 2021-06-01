@@ -27,7 +27,7 @@
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-lib</artifactId>
-    <version>9.0.0</version>
+    <version>9.0.1</version>
 
     <properties>
         <java.version>16</java.version>
@@ -119,7 +119,7 @@
                 <executions>
                     <execution>
                         <id>delombok</id>
-                        <phase>generate-sources</phase>
+                        <phase>${lombok.phase}</phase>
                         <goals>
                             <goal>delombok</goal>
                         </goals>
@@ -152,15 +152,26 @@
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
+                        <phase>${jacoco.phase}</phase>
                     </execution>
                     <execution>
                         <id>report</id>
                         <goals>
                             <goal>report</goal>
                         </goals>
+                        <phase>${jacoco.phase}</phase>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
+    
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
+            </properties>
+        </profile>
+    </profiles>
 </project>
