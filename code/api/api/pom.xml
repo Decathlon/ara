@@ -28,7 +28,7 @@
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-api</artifactId>
-    <version>8.2.0</version>
+    <version>9.0.0</version>
 
     <name>ARA API</name>
     <description>
@@ -39,7 +39,7 @@
     <properties>
         <java.version>16</java.version>
         <ara.default.database>h2</ara.default.database>
-        <spring.profiles.active></spring.profiles.active>
+        <spring.profiles.active />
         <mapstruct.version>1.4.2.Final</mapstruct.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>

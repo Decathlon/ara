@@ -127,8 +127,8 @@ get-api-version:
 
 update-api-version: ## Update api version
 	@echo '-- Update Maven version --'
-	@mvn --batch-mode -f api/pom.xml -s api/settings.xml release:update-versions -DautoVersionSubmodules=true -DdevelopmentVersion=$(VERSION)-SNAPSHOT
-	@mvn --batch-mode -f api/pom.xml -s api/settings.xml versions:set -DremoveSnapshot -DprocessAllModules
+	@mvn --batch-mode -f api/pom.xml release:update-versions -DautoVersionSubmodules=true -DdevelopmentVersion=$(VERSION)-SNAPSHOT
+	@mvn --batch-mode -f api/pom.xml versions:set -DremoveSnapshot -DprocessAllModules
 
 get-web-ui-version:
 	@$(MAKE) -C web-ui get-version
@@ -141,14 +141,14 @@ update-web-ui-version: ## Update web-ui version
 ##            HELM PART            ##
 #####################################
 
-helm-tempate:
-	@helm template ../charts/stable --debug
+helm-template:
+	@helm template ../charts/$(TARGET_CHART) --debug
 
 helm-install:
-	@helm install --create-namespace --namespace ara ara-local ../charts/stable
+	@helm install --create-namespace --namespace ara ara-local ../charts/$(TARGET_CHART)
 
 helm-upgrade:
-	@helm upgrade --namespace ara ara-local ../charts/stable
+	@helm upgrade --namespace ara ara-local ../charts/$(TARGET_CHART)
 
 helm-uninstall:
 	@helm uninstall --namespace ara ara-local
