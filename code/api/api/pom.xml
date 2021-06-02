@@ -28,7 +28,7 @@
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-api</artifactId>
-    <version>9.0.0</version>
+    <version>9.0.1</version>
 
     <name>ARA API</name>
     <description>
@@ -327,7 +327,7 @@
                 <executions>
                     <execution>
                         <id>delombok</id>
-                        <phase>generate-sources</phase>
+                        <phase>${lombok.phase}</phase>
                         <goals>
                             <goal>delombok</goal>
                         </goals>
@@ -360,12 +360,14 @@
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
+                        <phase>${jacoco.phase}</phase>
                     </execution>
                     <execution>
                         <id>report</id>
                         <goals>
                             <goal>report</goal>
                         </goals>
+                        <phase>${jacoco.phase}</phase>
                     </execution>
                 </executions>
             </plugin>
@@ -374,17 +376,20 @@
 
     <profiles>
         <profile>
-            <id>dev</id>
-            <properties>
-                <spring.profiles.active>dev</spring.profiles.active>
-            </properties>
-        </profile>
-        <profile>
             <id>int</id>
             <properties>
                 <ara.default.database>postgresql</ara.default.database>
             </properties>
         </profile>
+
+        <profile>
+            <id>dev</id>
+            <properties>
+                <spring.profiles.active>dev</spring.profiles.active>
+                <maven.test.skip>true</maven.test.skip>
+            </properties>
+        </profile>
+
     </profiles>
 
 </project>
