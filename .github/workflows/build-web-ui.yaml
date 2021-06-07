@@ -15,10 +15,11 @@ jobs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
       - id: skip_check
-        uses: fkirc/skip-duplicate-actions@master
+        uses: fkirc/skip-duplicate-actions@v3.4.0
         with:
           github_token: ${{ github.token }}
           paths: '["code/web-ui/**"]'
+          cancel_others: 'true'
           do_not_skip: '["push", "workflow_dispatch", "schedule"]'
   build-web-ui:
     needs: pre_job
