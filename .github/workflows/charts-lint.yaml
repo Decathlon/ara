@@ -14,10 +14,11 @@ jobs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
       - id: skip_check
-        uses: fkirc/skip-duplicate-actions@v3.3.0
+        uses: fkirc/skip-duplicate-actions@v3.4.0
         with:
           github_token: ${{ github.token }}
           paths: '["charts/**"]'
+          cancel_others: 'true'
   lint-chart:
     runs-on: ubuntu-latest
     if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
