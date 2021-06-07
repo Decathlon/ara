@@ -107,6 +107,7 @@ public class Scenario implements Comparable<Scenario> {
     private int line;
 
     @Lob
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.TextType")
     private String content;
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "scenarios")

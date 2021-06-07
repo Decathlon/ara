@@ -103,6 +103,7 @@ public class Functionality implements Comparable<Functionality> {
     private CoverageLevel lazyLoadedCoverageLevel;
 
     @Lob
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.TextType")
     private String comment;
 
     @Column(name = "creation_date_time")

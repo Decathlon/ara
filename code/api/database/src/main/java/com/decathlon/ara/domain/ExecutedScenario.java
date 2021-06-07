@@ -102,6 +102,7 @@ public class ExecutedScenario implements Comparable<ExecutedScenario> {
     private int line;
 
     @Lob
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.TextType")
     private String content;
 
     @Column(name = "start_date_time")

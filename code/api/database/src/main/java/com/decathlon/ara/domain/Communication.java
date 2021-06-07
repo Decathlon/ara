@@ -83,6 +83,7 @@ public class Communication implements Comparable<Communication> {
     private CommunicationType type;
 
     @Lob
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.TextType")
     private String message;
 
     // 2/2 for @EqualsAndHashCode to work: used for entities created outside of JPA

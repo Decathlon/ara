@@ -125,6 +125,7 @@ public class ProblemPattern {
      * Matches the beginning of {@link Error#exception}, optionally containing '%' for LIKE-matching.
      */
     @Lob
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.TextType")
     private String exception;
 
     /**
