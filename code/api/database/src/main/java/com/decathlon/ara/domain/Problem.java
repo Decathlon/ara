@@ -74,6 +74,7 @@ public class Problem implements Comparable<Problem> {
     private String name;
 
     @Lob
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.TextType")
     private String comment;
 
     /**
