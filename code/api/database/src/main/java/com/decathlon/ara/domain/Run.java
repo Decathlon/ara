@@ -22,20 +22,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Set;
 import java.util.TreeSet;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -60,6 +48,7 @@ import static java.util.Comparator.nullsFirst;
 @Entity
 // Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
 @EqualsAndHashCode(of = { "executionId", "country", "type" })
+@Table(indexes = @Index(columnList = "execution_id"))
 public class Run implements Comparable<Run> {
 
     public static final String SEVERITY_TAGS_SEPARATOR = ",";

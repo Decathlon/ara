@@ -5,7 +5,7 @@ version: '3.5'
 
 services:
   ara-db-source:
-    image: "postgres:9.6"
+    image: "postgres:12"
     restart: always
     ports:
       - 6432:5432
@@ -16,7 +16,7 @@ services:
     networks:
       - db_net
   ara-db-target:
-    image: "postgres:9.6"
+    image: "postgres:12"
     restart: always
     ports:
       - 5432:5432

@@ -38,6 +38,7 @@ import static java.util.Comparator.*;
 @Entity
 // Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
 @EqualsAndHashCode(of = { "executedScenarioId", "stepLine" })
+@Table(indexes = @Index(columnList = "executed_scenario_id"))
 public class Error implements Comparable<Error> {
 
     public static final String PROBLEM_PATTERNS_COLLECTION_CACHE = "com.decathlon.ara.domain.Error.problemPatterns";

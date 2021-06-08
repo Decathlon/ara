@@ -7,3 +7,5 @@ databaseChangeLog:
       file: classpath*:db/changelog/changes/postgresql/20210225103650-REMOVE_DUPLICATES.sql
   - include:
       file: classpath*:db/changelog/changes/postgresql/20210301110642-ADD_UNIQUE_CONSTRAINTS.yaml
+  - include:
+      file: classpath*:db/changelog/changes/postgresql/20210608163625-create_index.yaml

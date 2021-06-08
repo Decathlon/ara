@@ -25,14 +25,3 @@ logging:
         type:
           descriptor:
             sql: INFO
-spring:
-  # In dev we use hibernate DDL and not liquibase
-  jpa:
-    properties:
-      hibernate:
-        format_sql: false
-        hbm2ddl:
-          auto: update
-    show-sql: false
-  liquibase:
-    enabled: false
