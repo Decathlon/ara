@@ -1,21 +1,19 @@
-version: 1
-update_configs:
-  - package_manager: "java:maven"
-    directory: "/code/api"
-    update_schedule: "daily"
-    target_branch: "main"
-    default_reviewers:
-      - "decathlon/ara"
-    default_assignees:
-      - "JulienBarlet"
-      - "dktsni"
+version: 2
+updates:
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
 
-  - package_manager: "javascript"
+  # Maintain dependencies for npm
+  - package-ecosystem: "npm"
     directory: "/code/web-ui"
-    update_schedule: "live"
-    target_branch: "main"
-    default_reviewers:
-      - "decathlon/ara"
-    default_assignees:
-      - "JulienBarlet"
-      - "dktsni"
+    schedule:
+      interval: "daily"
+
+  # Maintain dependencies for maven
+  - package-ecosystem: "maven"
+    directory: "/code/api"
+    schedule:
+      interval: "daily"

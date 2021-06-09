@@ -27,12 +27,16 @@
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-lib</artifactId>
-    <version>9.0.3</version>
+    <version>9.0.4</version>
 
     <properties>
         <java.version>16</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <cucumber.version>1.2.5</cucumber.version>
+
+        <jacoco.phase.agent>initialize</jacoco.phase.agent>
+        <jacoco.phase.report>verify</jacoco.phase.report>
+        <delombok.phase>generate-sources</delombok.phase>
     </properties>
 
     <name>ARA Libraries</name>
@@ -119,7 +123,7 @@
                 <executions>
                     <execution>
                         <id>delombok</id>
-                        <phase>${lombok.phase}</phase>
+                        <phase>${delombok.phase}</phase>
                         <goals>
                             <goal>delombok</goal>
                         </goals>
@@ -152,14 +156,14 @@
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
-                        <phase>${jacoco.phase}</phase>
+                        <phase>${jacoco.phase.agent}</phase>
                     </execution>
                     <execution>
                         <id>report</id>
                         <goals>
                             <goal>report</goal>
                         </goals>
-                        <phase>${jacoco.phase}</phase>
+                        <phase>${jacoco.phase.report}</phase>
                     </execution>
                 </executions>
             </plugin>
@@ -170,7 +174,14 @@
         <profile>
             <id>dev</id>
             <properties>
+                <!-- skip javadoc, tests, jacoco, lombok for dev profile -->
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <!-- skip tests, but need to define it on each sub module-->
                 <maven.test.skip>true</maven.test.skip>
+                <!-- no jacoco for dev profile -->
+                <jacoco.phase>none</jacoco.phase>
+                <!-- skip some lombok stuff for dev profile -->
+                <delombok.phase>none</delombok.phase>
             </properties>
         </profile>
     </profiles>

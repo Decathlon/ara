@@ -1,10 +1,23 @@
-name: Sonar analysis
+name: Quality analysis
 on:
   push:
     branches:
       - main
   pull_request:
     types: [opened, synchronize, reopened]
+    branches:
+      - main
+  schedule:
+    #        ┌───────────── minute (0 - 59)
+    #        │  ┌───────────── hour (0 - 23)
+    #        │  │ ┌───────────── day of the month (1 - 31)
+    #        │  │ │ ┌───────────── month (1 - 12 or JAN-DEC)
+    #        │  │ │ │ ┌───────────── day of the week (0 - 6 or SUN-SAT)
+    #        │  │ │ │ │
+    #        │  │ │ │ │
+    #        │  │ │ │ │
+    #        *  * * * *
+    - cron: '30 1 * * 0'
 jobs:
   pre_job:
     # continue-on-error: true # Uncomment once integration is finished
@@ -20,9 +33,10 @@ jobs:
           paths: '["code/**"]'
           cancel_others: 'true'
           do_not_skip: '["push", "workflow_dispatch", "schedule"]'
-  sonarcloud:
+  sonar:
     name: SonarCloud Analysis
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    needs: pre_job
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' && github.event_name != 'schedule' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -32,7 +46,7 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: '16'
-      - name: Analyze with SonarCloud
+      - name: Build api
         run: mvn -B -f code/api/pom.xml clean install dependency:copy-dependencies
       - name: Install xmllint
         run: sudo apt-get install libxml2-utils
@@ -47,8 +61,33 @@ jobs:
           echo ::set-output name=projectVersion::${PROJECT_VERSION}
       - name: Setup sonar-scanner
         uses: warchant/setup-sonar-scanner@v3
-      - name: SonarCloud Scan
+      - name: Perform SonarCloud Analysis
         run: sonar-scanner -Dsonar.projectBaseDir=code -Dsonar.projectVersion=${{ steps.getVersion.outputs.projectVersion }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  codeQL:
+    name: CodeQL Analysis
+    needs: pre_job
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          # We must fetch at least the immediate parents so that if this is
+          # a pull request then we can checkout the head.
+          fetch-depth: 2
+      # If this run was triggered by a pull request event, then checkout
+      # the head of the pull request instead of the merge commit.
+      - run: git checkout HEAD^2
+        if: ${{ github.event_name == 'pull_request' }}
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: '16'
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+      - name: Build api
+        run: mvn -B -f code/api/pom.xml clean install
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1

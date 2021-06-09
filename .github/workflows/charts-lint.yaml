@@ -21,6 +21,7 @@ jobs:
           cancel_others: 'true'
   lint-chart:
     runs-on: ubuntu-latest
+    needs: pre_job
     if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
     steps:
       - name: Checkout
