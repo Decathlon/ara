@@ -28,7 +28,7 @@
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-parent</artifactId>
     <packaging>pom</packaging>
-    <version>9.0.3</version>
+    <version>9.0.4</version>
 
     <name>ARA Parent</name>
     <description>
@@ -38,9 +38,6 @@
 
     <properties>
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/jacoco-aggregation/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-        <jacoco.phase />
-        <jacoco.aggregation.phase>verify</jacoco.aggregation.phase>
-        <lombok.phase>generate-sources</lombok.phase>
     </properties>
 
     <modules>
@@ -50,23 +47,6 @@
         <module>api</module>
         <module>jacoco-aggregation</module>
     </modules>
-
-    <profiles>
-        <profile>
-            <id>dev</id>
-            <properties>
-                <!-- skip javadoc, tests, jacoco, lombock for dev profile -->
-                <maven.javadoc.skip>true</maven.javadoc.skip>
-                <!-- skip tests, but need to define it on each sub module-->
-                <maven.test.skip>true</maven.test.skip>
-                <!-- no jacoco for dev profile -->
-                <jacoco.phase>none</jacoco.phase>
-                <jacoco.aggregation.phase>none</jacoco.aggregation.phase>
-                <!-- skip some lombok stuf for dev profile -->
-                <lombok.phase>none</lombok.phase>
-            </properties>
-        </profile>
-    </profiles>
 
     <build>
         <plugins>

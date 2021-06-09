@@ -3,16 +3,20 @@
     <parent>
         <artifactId>ara-parent</artifactId>
         <groupId>com.decathlon.ara</groupId>
-        <version>9.0.3</version>
+        <version>9.0.4</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>jacoco-aggregation</artifactId>
     <packaging>pom</packaging>
-    <version>9.0.3</version>
+    <version>9.0.4</version>
 
     <name>Jacoco Report Aggregation</name>
+
+    <properties>
+        <jacoco.aggregation.phase>verify</jacoco.aggregation.phase>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -49,5 +53,14 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <jacoco.aggregation.phase>none</jacoco.aggregation.phase>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>

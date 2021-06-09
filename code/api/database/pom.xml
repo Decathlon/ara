@@ -28,7 +28,7 @@
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-database</artifactId>
-    <version>9.0.3</version>
+    <version>9.0.4</version>
 
     <name>ARA Database</name>
     <description>
@@ -41,6 +41,8 @@
         <querydsl.version>4.3.1</querydsl.version>
         <diffChangeLogFile>src/main/resources/db/changelog/changes/XX/to-be-changed.yaml</diffChangeLogFile>
         <liquibasePropertyFile>src/main/resources/liquibase-XX.properties</liquibasePropertyFile>
+
+        <delombok.phase>generate-sources</delombok.phase>
     </properties>
 
     <dependencies>
@@ -139,7 +141,7 @@
                 <executions>
                     <execution>
                         <id>delombok</id>
-                        <phase>generate-sources</phase>
+                        <phase>${delombok.phase}</phase>
                         <goals>
                             <goal>delombok</goal>
                         </goals>
@@ -217,7 +219,12 @@
         <profile>
             <id>dev</id>
             <properties>
+                <!-- skip javadoc, tests, jacoco, lombok for dev profile -->
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <!-- skip tests, but need to define it on each sub module-->
                 <maven.test.skip>true</maven.test.skip>
+                <!-- skip some lombok stuff for dev profile -->
+                <delombok.phase>none</delombok.phase>
             </properties>
         </profile>
     </profiles>
