@@ -34,10 +34,21 @@ jobs:
           java-version: '16'
       - name: Analyze with SonarCloud
         run: mvn -B -f code/api/pom.xml clean install dependency:copy-dependencies
+      - name: Install xmllint
+        run: sudo apt-get install libxml2-utils
+      - name: Get project version
+        id: getVersion
+        run: |
+          pushd code
+          API_VERSION=$(make -s get-api-version)
+          WEB_UI_VERSION=$(make -s get-web-ui-version)
+          popd
+          PROJECT_VERSION="${API_VERSION}-${WEB_UI_VERSION}"
+          echo ::set-output name=projectVersion::${PROJECT_VERSION}
       - name: Setup sonar-scanner
         uses: warchant/setup-sonar-scanner@v3
       - name: SonarCloud Scan
-        run: sonar-scanner -Dsonar.projectBaseDir=code
+        run: sonar-scanner -Dsonar.projectBaseDir=code -Dsonar.projectVersion=${{ steps.getVersion.outputs.projectVersion }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
