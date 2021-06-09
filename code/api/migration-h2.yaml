@@ -4,7 +4,7 @@
 version: '3.5'
 
 services:
-  ara-api:
+  ara-h2-api:
     image: docker.io/decathlon/ara-api
     restart: always
     environment:
@@ -15,7 +15,7 @@ services:
       - api_net
     volumes:
       - ./db_h2:/app/data
-  ara-mig-api:
+  ara-h2-mig-api:
     image: docker.io/decathlon/ara-api
     restart: always
     environment:
@@ -28,19 +28,19 @@ services:
       - api_net
     volumes:
       - ./db_h2_mig:/app/data
-  waiter-api:
+  waiter-h2-api:
     image: aligor/wait-for-url
-    command: ["--url", "http://ara-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
+    command: ["--url", "http://ara-h2-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
     networks:
       - api_net
     depends_on:
-      - ara-api
-  waiter-mig-api:
+      - ara-h2-api
+  waiter-h2-mig-api:
     image: aligor/wait-for-url
-    command: ["--url", "http://ara-mig-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
+    command: ["--url", "http://ara-h2-mig-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
     networks:
       - api_net
     depends_on:
-      - ara-mig-api
+      - ara-h2-mig-api
 networks:
   api_net:

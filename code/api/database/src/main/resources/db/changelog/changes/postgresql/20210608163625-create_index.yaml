@@ -1,0 +1,42 @@
+databaseChangeLog:
+- changeSet:
+    id: 1623163171608-1
+    author: '? (generated)'
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: executed_scenario_id
+        indexName: idxgm513iswgw0vvxprx664dw64k
+        tableName: error
+- changeSet:
+    id: 1623163171608-2
+    author: '? (generated)'
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: run_id
+        indexName: idxdsm886bk7omd9c2k67v3eyqf
+        tableName: executed_scenario
+- changeSet:
+    id: 1623163171608-3
+    author: '? (generated)'
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: error_id
+        indexName: idxgom365xdjsepb9rc36xcuafur
+        tableName: problem_occurrence
+- changeSet:
+    id: 1623163171608-4
+    author: '? (generated)'
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: execution_id
+        indexName: idxm1cfnu80wq0ga18gbtkqj4rtb
+        tableName: run
+

@@ -28,34 +28,34 @@ Please note the following :
 === I've got a Windows PC !
 
 1. Open a Powershell Command Prompt
-2. Run the command `Invoke-WebRequest -OutFile docker-compose.yml https://raw.githubusercontent.com/Decathlon/ara/main/code/docker-compose.yaml`
-3. Run the command `docker-compose up`
+2. Run the command `Invoke-WebRequest -OutFile docker compose.yml https://raw.githubusercontent.com/Decathlon/ara/main/code/docker compose.yaml`
+3. Run the command `docker compose up`
 4. Open up a browser on `http://localhost:8081`
 5. Enjoy !
-6. To stop it, in the command line, just do a `docker-compose down` in the same directory as the `docker-compose.yaml`
-7. To restart it, in the command line do a `docker-compose up` in the same directory as the `docker-compose.yaml`
+6. To stop it, in the command line, just do a `docker compose down` in the same directory as the `docker compose.yaml`
+7. To restart it, in the command line do a `docker compose up` in the same directory as the `docker compose.yaml`
 
 
 === I've got a Mac !
 
 1. Open a Terminal
-2. Run the command `wget https://raw.githubusercontent.com/Decathlon/ara/main/code/docker-compose.yaml`
-3. Run the command `docker-compose up`
+2. Run the command `wget https://raw.githubusercontent.com/Decathlon/ara/main/code/docker compose.yaml`
+3. Run the command `docker compose up`
 4. Open up a browser on `http://localhost:8081`
 5. Enjoy !
-6. To stop it, in the command line, just do a `docker-compose down` in the same directory as the `docker-compose.yaml`
-7. To restart it, in the command line do a `docker-compose up` in the same directory as the `docker-compose.yaml`
+6. To stop it, in the command line, just do a `docker compose down` in the same directory as the `docker compose.yaml`
+7. To restart it, in the command line do a `docker compose up` in the same directory as the `docker compose.yaml`
 
 
 === I've got a GNU/Linux PC !
 
 1. Open a Terminal
-2. Run the command `wget https://raw.githubusercontent.com/Decathlon/ara/main/code/docker-compose.yaml`
-3. Run the command `docker-compose up`
+2. Run the command `wget https://raw.githubusercontent.com/Decathlon/ara/main/code/docker compose.yaml`
+3. Run the command `docker compose up`
 4. Open up a browser on `http://localhost:8081`
 5. Enjoy !
-6. To stop it, in the command line, just do a `docker-compose down` in the same directory as the `docker-compose.yaml`
-7. To restart it, in the command line do a `docker-compose up` in the same directory as the `docker-compose.yaml`
+6. To stop it, in the command line, just do a `docker compose down` in the same directory as the `docker compose.yaml`
+7. To restart it, in the command line do a `docker compose up` in the same directory as the `docker compose.yaml`
 
 == How to install it on my Infrastructure
 
@@ -84,5 +84,5 @@ to learn how the project is structured and how to develop new features in ARA an
 To start a development environment:
 ----
 > cd code
-> docker-compose -f docker-compose.dev.yml up
+> docker compose -f docker compose.dev.yml up
 ----

@@ -4,7 +4,7 @@
 version: '3.5'
 
 services:
-  ara-db-source:
+  ara-mysql-db-source:
     image: "mysql:5.7"
     restart: always
     ports:
@@ -16,7 +16,7 @@ services:
       - MYSQL_ROOT_PASSWORD=to_change
     networks:
       - db_net
-  ara-db-target:
+  ara-mysql-db-target:
     image: "mysql:5.7"
     restart: always
     ports:
@@ -28,12 +28,12 @@ services:
       - MYSQL_ROOT_PASSWORD=to_change
     networks:
       - db_net
-  ara-api:
+  ara-mysql-api:
     image: docker.io/decathlon/ara-api
     restart: always
     environment:
       - ARA_DATABASE_TARGET=mysql
-      - ARA_DATABASE_HOST=ara-db-source:3306
+      - ARA_DATABASE_HOST=ara-mysql-db-source:3306
       - ARA_DATABASE_NAME=ara
       - ARA_DATABASE_USERNAME=changeme
       - ARA_DATABASE_PASSWORD=changeme
@@ -41,13 +41,13 @@ services:
       - db_net
       - api_net
     depends_on:
-      - ara-db-source
-  ara-mig-api:
+      - ara-mysql-db-source
+  ara-mysql-mig-api:
     image: docker.io/decathlon/ara-api
     restart: always
     environment:
       - ARA_DATABASE_TARGET=mysql
-      - ARA_DATABASE_HOST=ara-db-target:3306
+      - ARA_DATABASE_HOST=ara-mysql-db-target:3306
       - ARA_DATABASE_NAME=ara
       - ARA_DATABASE_USERNAME=changeme
       - ARA_DATABASE_PASSWORD=changeme
@@ -57,21 +57,21 @@ services:
       - db_net
       - api_net
     depends_on:
-      - ara-db-target
-  waiter-api:
+      - ara-mysql-db-target
+  waiter-mysql-api:
     image: aligor/wait-for-url
-    command: ["--url", "http://ara-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
+    command: ["--url", "http://ara-mysql-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
     networks:
       - api_net
     depends_on:
-      - ara-api
-  waiter-mig-api:
+      - ara-mysql-api
+  waiter-mysql-mig-api:
     image: aligor/wait-for-url
-    command: ["--url", "http://ara-mig-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
+    command: ["--url", "http://ara-mysql-mig-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
     networks:
       - api_net
     depends_on:
-      - ara-mig-api
+      - ara-mysql-mig-api
 networks:
   db_net:
   api_net:

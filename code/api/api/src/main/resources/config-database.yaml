@@ -38,7 +38,7 @@ spring:
     enabled: ${ara.database.liquibase.enabled}
     change-log: classpath:/db/changelog/db.changelog-master-${ara.database.target}.yaml
   profiles:
-    active: db-${ara.database.target}
+    include: db-${ara.database.target}
   datasource:
     username: ${ara.database.username}
     password: ${ara.database.password}
@@ -67,6 +67,21 @@ spring:
         cache:
           region:
             factory_class: org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory
-        globally_quoted_identifiers: true
+        globally_quoted_identifiers: false
         query:
           substitutions: true 1, false 0
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  # In dev we use hibernate DDL and not liquibase
+  jpa:
+    properties:
+      hibernate:
+        format_sql: false
+        hbm2ddl:
+          auto: create-drop
+    show-sql: false
+  liquibase:
+    enabled: false
