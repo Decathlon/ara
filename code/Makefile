@@ -22,22 +22,22 @@ debug:
 
 start: ## Start ARA
 	@echo '-- Start ARA --'
-	@export API_VERSION=$(API_VERSION); export WEB_UI_VERSION=$(WEB_UI_VERSION); docker-compose up -d
+	@export API_VERSION=$(API_VERSION); export WEB_UI_VERSION=$(WEB_UI_VERSION); docker compose up -d
 
 stop: ## Stop ARA
 	@echo '-- Stop ARA --'
-	@export API_VERSION=$(API_VERSION); export WEB_UI_VERSION=$(WEB_UI_VERSION); docker-compose down
+	@export API_VERSION=$(API_VERSION); export WEB_UI_VERSION=$(WEB_UI_VERSION); docker compose down
 
 
 # RUN BY MODULE
 
 run-%: ## Run module
 	@echo '-- Run $* --'
-	@export API_VERSION=$(API_VERSION); export WEB_UI_VERSION=$(WEB_UI_VERSION); docker-compose up $(OPT) ara-$*
+	@export API_VERSION=$(API_VERSION); export WEB_UI_VERSION=$(WEB_UI_VERSION); docker compose up $(OPT) ara-$*
 
 stop-%: ## Stop module
 	@echo '-- Stop $* --'
-	@docker-compose stop $(OPT) ara-$*
+	@docker compose stop $(OPT) ara-$*
 
 #####################################
 ##            BUILD APP            ##
@@ -88,13 +88,13 @@ endif
 
 up-migration:
 	@echo '-- Up migration stack --'
-	@docker-compose -f api/migration-$(BASE).yaml up -d ara-api
-	@docker-compose -f api/migration-$(BASE).yaml up -d ara-mig-api
-	@docker-compose -f api/migration-$(BASE).yaml run waiter-api
-	@docker-compose -f api/migration-$(BASE).yaml run waiter-mig-api
+	@docker compose -f api/migration-$(BASE).yaml up -d ara-$(BASE)-api
+	@docker compose -f api/migration-$(BASE).yaml up -d ara-$(BASE)-mig-api
+	@docker compose -f api/migration-$(BASE).yaml run waiter-$(BASE)-api
+	@docker compose -f api/migration-$(BASE).yaml run waiter-$(BASE)-mig-api
 
 stop-migration-stack:
-	@docker-compose -f api/migration-$(BASE).yaml down
+	@docker compose -f api/migration-$(BASE).yaml down
 
 # UPDATE ARA VERSION
 

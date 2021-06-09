@@ -4,7 +4,7 @@
 version: '3.5'
 
 services:
-  ara-db-source:
+  ara-postgresql-db-source:
     image: "postgres:12"
     restart: always
     ports:
@@ -15,7 +15,7 @@ services:
       - POSTGRES_PASSWORD=changeme
     networks:
       - db_net
-  ara-db-target:
+  ara-postgresql-db-target:
     image: "postgres:12"
     restart: always
     ports:
@@ -31,7 +31,7 @@ services:
     restart: always
     environment:
       - ARA_DATABASE_TARGET=postgresql
-      - ARA_DATABASE_HOST=ara-db-source:5432
+      - ARA_DATABASE_HOST=ara-postgresql-db-source:5432
       - ARA_DATABASE_NAME=ara
       - ARA_DATABASE_USERNAME=changeme
       - ARA_DATABASE_PASSWORD=changeme
@@ -39,13 +39,13 @@ services:
       - db_net
       - api_net
     depends_on:
-      - ara-db-source
+      - ara-postgresql-db-source
   ara-mig-api:
     image: docker.io/decathlon/ara-api
     restart: always
     environment:
       - ARA_DATABASE_TARGET=postgresql
-      - ARA_DATABASE_HOST=ara-db-target:5432
+      - ARA_DATABASE_HOST=ara-postgresql-db-target:5432
       - ARA_DATABASE_NAME=ara
       - ARA_DATABASE_USERNAME=changeme
       - ARA_DATABASE_PASSWORD=changeme
@@ -55,21 +55,21 @@ services:
       - db_net
       - api_net
     depends_on:
-      - ara-db-target
+      - ara-postgresql-db-target
   waiter-api:
     image: aligor/wait-for-url
-    command: ["--url", "http://ara-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
+    command: ["--url", "http://ara-postgresql-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
     networks:
       - api_net
     depends_on:
-      - ara-api
+      - ara-postgresql-api
   waiter-mig-api:
     image: aligor/wait-for-url
-    command: ["--url", "http://ara-mig-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
+    command: ["--url", "http://ara-postgresql-mig-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
     networks:
       - api_net
     depends_on:
-      - ara-mig-api
+      - ara-postgresql-mig-api
 networks:
   db_net:
   api_net:
