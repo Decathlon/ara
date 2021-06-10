@@ -8,8 +8,11 @@ IMAGE_NAME?=decathlon/ara
 API_VERSION?=$(shell make -s -C api get-version)$(SUFFIX)
 WEB_UI_VERSION?=$(shell make -s -C web-ui get-version)$(SUFFIX)
 
-API_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-api
-WEB_UI_IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}-web-ui
+API_SHORT_IMAGE=${IMAGE_NAME}-api
+API_IMAGE=${DOCKER_REGISTRY}/${API_SHORT_IMAGE}
+
+WEB_UI_SHORT_IMAGE=${IMAGE_NAME}-web-ui
+WEB_UI_IMAGE=${DOCKER_REGISTRY}/${WEB_UI_SHORT_IMAGE}
 
 PUBLISH?=FALSE
 
@@ -60,6 +63,15 @@ build-api: ## Build ara-api
 	$(MAKE) -C api mvn-install
 	$(MAKE) -C api mvn-build-image FULL_IMAGE=$(FULL_IMAGE)
 	@./tools/docker-tags-version.sh "$(API_IMAGE)" "$(API_VERSION)" "$(PUBLISH)"
+
+check-web-ui-image:
+	@$(MAKE) check-image CHECK_IMAGE=$(WEB_UI_SHORT_IMAGE) CHECK_TAG=$(WEB_UI_VERSION)
+
+check-api-image:
+	@$(MAKE) check-image CHECK_IMAGE=$(API_SHORT_IMAGE) CHECK_TAG=$(API_VERSION)
+
+check-image:
+	@curl --silent -f -L https://hub.docker.com/v2/repositories/$(CHECK_IMAGE)/tags/$(CHECK_TAG)/ > /dev/null && echo true || echo false
 
 #####################################
 ##             UPDATER             ##

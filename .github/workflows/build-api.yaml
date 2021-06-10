@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  pre_job:
+  code_api_change:
     # continue-on-error: true # Uncomment once integration is finished
     runs-on: ubuntu-latest
     # Map a step output to a job output
@@ -22,10 +22,31 @@ jobs:
           github_token: ${{ github.token }}
           paths: '["code/api/**"]'
           cancel_others: 'true'
-          do_not_skip: '["push", "workflow_dispatch", "schedule"]'
+          do_not_skip: '["push", "workflow_dispatch"]'
+  docker_image:
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install xmllint
+        run: sudo apt-get install libxml2-utils
+      - id: skip_check
+        run: |
+          if [[ $GITHUB_REF == refs/pull/* ]]; then
+            API_EXISTS=false
+          else
+            pushd code
+            API_EXISTS=$(make -s check-api-image)
+            popd
+          fi
+          echo ::set-output name=should_skip::${API_EXISTS}
   build-api:
-    needs: pre_job
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    needs:
+      - code_api_change
+      - docker_image
+    if: ${{ needs.code_api_change.outputs.should_skip != 'true' && needs.docker_image.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
     steps:
       -
