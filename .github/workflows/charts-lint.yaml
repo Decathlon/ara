@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  pre_job:
+  chart_change:
     # continue-on-error: true # Uncomment once integration is finished
     runs-on: ubuntu-latest
     # Map a step output to a job output
@@ -21,8 +21,8 @@ jobs:
           cancel_others: 'true'
   lint-chart:
     runs-on: ubuntu-latest
-    needs: pre_job
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    needs: chart_change
+    if: ${{ needs.chart_change.outputs.should_skip != 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v1

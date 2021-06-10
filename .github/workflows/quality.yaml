@@ -19,7 +19,7 @@ on:
     #        *  * * * *
     - cron: '30 1 * * 0'
 jobs:
-  pre_job:
+  code_change:
     # continue-on-error: true # Uncomment once integration is finished
     runs-on: ubuntu-latest
     # Map a step output to a job output
@@ -35,8 +35,8 @@ jobs:
           do_not_skip: '["push", "workflow_dispatch", "schedule"]'
   sonar:
     name: SonarCloud Analysis
-    needs: pre_job
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' && github.event_name != 'schedule' }}
+    needs: code_change
+    if: ${{ needs.code_change.outputs.should_skip != 'true' && github.event_name != 'schedule' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -68,8 +68,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   codeQL:
     name: CodeQL Analysis
-    needs: pre_job
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    needs: code_change
+    if: ${{ needs.code_change.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

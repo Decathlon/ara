@@ -3,17 +3,20 @@ updates:
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
+    target-branch: "main"
     schedule:
       interval: "daily"
 
   # Maintain dependencies for npm
   - package-ecosystem: "npm"
     directory: "/code/web-ui"
+    target-branch: "main"
     schedule:
       interval: "daily"
 
   # Maintain dependencies for maven
   - package-ecosystem: "maven"
     directory: "/code/api"
+    target-branch: "main"
     schedule:
       interval: "daily"
