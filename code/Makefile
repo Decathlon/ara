@@ -124,7 +124,7 @@ TARGET_CHART?=stable
 get-chart-version:
 	@echo $$(cat ../charts/$(TARGET_CHART)/Chart.yaml | grep version | sed -e 's/version: //')
 
-update-chart-version: ## Update chart version
+update-chart-version: ## Update chart version. VERSION required TARGET_CHART optional default stable
 	@echo '-- Update Helm Chart version --'
 	@sed -i'.old' 's/^version:.*$\/version: $(VERSION)/' ../charts/$(TARGET_CHART)/Chart.yaml
 
@@ -137,7 +137,7 @@ copy-candidate-to-stable: ## Copy Candidate chart to Stable chart
 get-api-version:
 	@$(MAKE) -C api get-version
 
-update-api-version: ## Update api version
+update-api-version: ## Update api version. VERSION required
 	@echo '-- Update Maven version --'
 	@mvn --batch-mode -f api/pom.xml release:update-versions -DautoVersionSubmodules=true -DdevelopmentVersion=$(VERSION)-SNAPSHOT
 	@mvn --batch-mode -f api/pom.xml versions:set -DremoveSnapshot -DprocessAllModules
@@ -145,7 +145,7 @@ update-api-version: ## Update api version
 get-web-ui-version:
 	@$(MAKE) -C web-ui get-version
 
-update-web-ui-version: ## Update web-ui version
+update-web-ui-version: ## Update web-ui version. VERSION required
 	@echo '-- Update Web-UI version --'
 	@npm --prefix web-ui version $(VERSION)
 

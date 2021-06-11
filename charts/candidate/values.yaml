@@ -8,7 +8,7 @@ api:
     image:
         registry: docker.io
         repository: decathlon/ara-api
-        tag: 9.0.3
+        tag: 9.0.4
         imagePullPolicy: IfNotPresent
     replicas: 1
     annotations: {}
@@ -31,8 +31,8 @@ api:
     configExistingSecret:
         enabled: false
         # secretName: nameofsecret
-        # authConfigKey: application-auth.yaml
-        # customConfigKey: application-custom.yaml
+        # authConfigKey: config-authentication.yaml
+        # customConfigKey: config-custom.yaml
     customConfig: ""
     # sideCarContainer:
     # volumes:
@@ -44,7 +44,7 @@ ui:
     image:
         registry: docker.io
         repository: decathlon/ara-web-ui
-        tag: 8.6.0
+        tag: 8.6.2
         imagePullPolicy: IfNotPresent
     replicas: 1
     annotations: {}

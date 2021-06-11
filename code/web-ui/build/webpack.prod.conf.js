@@ -10,10 +10,6 @@ var FaviconsWebpackPlugin = require('favicons-webpack-plugin')
 var MiniCssExtractPlugin = require('mini-css-extract-plugin')
 var OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
 
-var env = process.env.NODE_ENV === 'testing'
-  ? process.env
-  : config.build.env
-
 var webpackConfig = merge(baseWebpackConfig, {
   module: {
     rules: utils.styleLoaders({
@@ -49,7 +45,7 @@ var webpackConfig = merge(baseWebpackConfig, {
   plugins: [
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
     new webpack.DefinePlugin({
-      'process.env': JSON.stringify(env)
+      'process.env': JSON.stringify(config.build.env)
     }),
     // extract css into its own file
     new MiniCssExtractPlugin({
@@ -66,9 +62,7 @@ var webpackConfig = merge(baseWebpackConfig, {
     // you can customize output by editing /index.html
     // see https://github.com/ampedandwired/html-webpack-plugin
     new HtmlWebpackPlugin({
-      filename: process.env.NODE_ENV === 'testing'
-        ? 'index.html'
-        : config.build.index,
+      filename: config.build.index,
       template: 'index.html',
       inject: true,
       minify: {

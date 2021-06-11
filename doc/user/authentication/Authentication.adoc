@@ -158,8 +158,8 @@ TIP: To do so, disable every provider
 
 To configure the authentication, you'll need to:
 
-. Create the file `code/api/server/src/main/resources/application-auth.properties`. Note that this file is ignored, preventing you from submitting your credentials by mistake
-. Copy the example file (`code/api/server/src/main/resources/application-auth.properties.example`) content in the newly created file
+. Create the file `code/api/server/src/main/resources/config-authentication.yaml`. Note that this file is ignored, preventing you from submitting your credentials by mistake
+. Copy the example file (`code/api/server/src/main/resources/config-authentication.yaml.example`) content in the newly created file
 . Replace the values with your real credentials. Each field is described below
 
 TIP: You can also pass the values as parameters (*highly recommended* on production environment, especially for sensitive data related to authentication!).
