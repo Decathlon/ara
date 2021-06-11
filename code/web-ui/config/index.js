@@ -1,5 +1,3 @@
-require('dotenv').config()
-
 // see http://vuejs-templates.github.io/webpack for documentation.
 var path = require('path')
 
@@ -8,13 +6,8 @@ var araAPIPort = process.env.ARA_API_PORT || 8080
 
 var araAPIURL = 'http://' + araAPIHost + ':' + araAPIPort
 
-const environment = process.env
-
-const development = { ...environment }
-development.NODE_ENV = 'development'
-
-const production = { ...environment }
-production.NODE_ENV = 'production'
+const development = { NODE_ENV: 'development' }
+const production = { NODE_ENV: 'production' }
 
 module.exports = {
   build: {

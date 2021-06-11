@@ -25,7 +25,9 @@ jobs:
     if: ${{ needs.chart_change.outputs.should_skip != 'true' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Set up Helm
         uses: azure/setup-helm@v1
         with:
@@ -34,7 +36,7 @@ jobs:
         with:
           python-version: 3.7
       - name: Set up chart-testing
-        uses: helm/chart-testing-action@v2.0.1
+        uses: helm/chart-testing-action@v2.1.0
       - name: Run chart-testing (list-changed)
         id: list-changed
         run: |
