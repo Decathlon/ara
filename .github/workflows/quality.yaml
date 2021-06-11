@@ -45,6 +45,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v2.1.0
         with:
+          distribution: 'adopt'
           java-version: '16'
       - name: Build api
         run: mvn -B -f code/api/pom.xml clean install dependency:copy-dependencies
@@ -76,6 +77,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v2.1.0
         with:
+          distribution: 'adopt'
           java-version: '16'
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v1
