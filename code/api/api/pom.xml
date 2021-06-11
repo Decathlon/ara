@@ -395,7 +395,8 @@
                 <!-- skip tests, but need to define it on each sub module-->
                 <maven.test.skip>true</maven.test.skip>
                 <!-- no jacoco for dev profile -->
-                <jacoco.phase>none</jacoco.phase>
+                <jacoco.phase.agent>none</jacoco.phase.agent>
+                <jacoco.phase.report>none</jacoco.phase.report>
                 <!-- skip some lombok stuff for dev profile -->
                 <delombok.phase>none</delombok.phase>
             </properties>
