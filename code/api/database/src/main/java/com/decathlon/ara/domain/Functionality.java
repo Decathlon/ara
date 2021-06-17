@@ -21,8 +21,6 @@ import com.decathlon.ara.domain.enumeration.CoverageLevel;
 import com.decathlon.ara.domain.enumeration.FunctionalitySeverity;
 import com.decathlon.ara.domain.enumeration.FunctionalityType;
 import lombok.*;
-import lombok.With;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.SortNatural;
 
 import javax.persistence.*;
@@ -46,8 +44,8 @@ public class Functionality implements Comparable<Functionality> {
     public static final String COUNTRY_CODES_SEPARATOR = ",";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
-    @GenericGenerator(name = "native", strategy = "native")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "functionality_id")
+    @SequenceGenerator(name = "functionality_id", sequenceName = "functionality_id", allocationSize = 1)
     private Long id;
 
     private Long projectId;

@@ -19,30 +19,20 @@ package com.decathlon.ara.domain;
 
 import com.decathlon.ara.domain.enumeration.Handling;
 import com.querydsl.core.annotations.QueryInit;
+import lombok.*;
+import org.hibernate.annotations.*;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Index;
+import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Set;
 import java.util.TreeSet;
-import javax.persistence.*;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.With;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-import org.hibernate.annotations.SortNatural;
-
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.nullsFirst;
+import static java.util.Comparator.*;
 
 @Data
 @NoArgsConstructor
@@ -57,8 +47,8 @@ public class ExecutedScenario implements Comparable<ExecutedScenario> {
     public static final int CUCUMBER_ID_MAX_SIZE = 640;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
-    @GenericGenerator(name = "native", strategy = "native")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "executed_scenario_id")
+    @SequenceGenerator(name = "executed_scenario_id", sequenceName = "executed_scenario_id", allocationSize = 1)
     private Long id;
 
     // 1/2 for @EqualsAndHashCode to work: used when an entity is fetched by JPA
