@@ -27,7 +27,7 @@
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-generated-cucumber-report</artifactId>
-    <version>10.1.2</version>
+    <version>11.0.0</version>
 
     <name>ARA Cucumber</name>
     <description>
@@ -36,7 +36,6 @@
     </description>
 
     <properties>
-        <java.version>14</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <cucumberfork.version>1.2.4</cucumberfork.version>
         <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>

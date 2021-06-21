@@ -38,35 +38,36 @@ Secret name for database.
 {{- end -}}
 
 {{/*
-Secret name for api.
+Secret name for api/gw
 */}}
-{{- define "ara.api.secret.name" -}}
-{{- if .Values.api.configExistingSecret.enabled -}}
-{{ .Values.api.configExistingSecret.secretName }}
+{{- define "ara.app.secret.name" -}}
+{{- if .Values.app.configExistingSecret.enabled -}}
+{{ .Values.app.configExistingSecret.secretName }}
 {{- else -}}
-{{ printf "%s-%s-%s" .Release.Name .Chart.Name "api"  }}
+{{ printf "%s-%s-%s" .Release.Name .Chart.Name "app"  }}
 {{- end -}}
 {{- end -}}
 
 {{/*
-Secret auth config key for api.
-*/}}
-{{- define "ara.api.secret.authconfigkey" -}}
-{{- if .Values.api.configExistingSecret.enabled -}}
-{{ .Values.api.configExistingSecret.authConfigKey }}
-{{- else -}}
-config-authentication.yaml
-{{- end -}}
-{{- end -}}
-
-{{/*
-Secret custom config key for api.
+custom config key from app secret for api.
 */}}
 {{- define "ara.api.secret.customconfigkey" -}}
-{{- if .Values.api.configExistingSecret.enabled -}}
+{{- if .Values.app.configExistingSecret.enabled -}}
 {{ .Values.api.configExistingSecret.customConfigKey }}
 {{- else -}}
 config-custom.yaml
+{{- end -}}
+{{- end -}}
+
+
+{{/*
+custom config key from app secret for api.
+*/}}
+{{- define "ara.gw.secret.gatewayauthentkey" -}}
+{{- if .Values.app.configExistingSecret.enabled -}}
+{{ .Values.gw.configExistingSecret.gatewayauthentkey }}
+{{- else -}}
+authent.yml
 {{- end -}}
 {{- end -}}
 

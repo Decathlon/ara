@@ -95,6 +95,33 @@ npm run dev
 
 WEB-UI is available at `localhost:8081`, you can check this url http://localhost:8081 to observe the web-ui is up.
 
+== Start all with docker
+
+```bash
+# Most of time
+./code/bin/up.sh
+# Rarely, when the clean maven target is needed ( takes more time )
+./code/bin/up-with-clean.sh
+```
+
+Wait a few minutes.
+The app is accessible through: http://localhost
+By default, oauth2 is disabled, but your browser should ask you to login, available dev credentials are:
+
+* user/user
+* admin/admin
+
+
+
+This way, Front(viewjs)/Back(Spring) are runing  in dev mode so you may be able to do your code modifications and see it immediately.
+Sometimes, Spring live reloading is capricious. In this case, restart it:
+```bash
+cd code
+docker-compose -f docker-compose.dev.yml restart ( ara-api | ara-gw )
+```
+
+
+
 == Available for developer
 
 We have made some tools for developer with `make` command.
@@ -104,6 +131,7 @@ You can find `Makefile` in this directories:
 * `code`: for general usage
 * `code/api`: for api usage
 * `code/web-ui`: for web-ui usage
+* `code/gateway`: for web-ui usage
 
 You can check available command by running:
 
@@ -137,3 +165,27 @@ make update-version VERSION=X.Y.Z
 ```
 
 It will update maven version and stable helm chart.
+
+=== Update ARA version
+
+In `code` folder.
+
+You can update ARA version with this command:
+
+```bash
+make update-version VERSION=X.Y.Z
+```
+
+It will update maven version and stable helm chart.
+
+=== Unable/Disable the GW (docker-compose based on)
+
+The aim of the gateway is to manage the authentication.
+By default, in dev mode, the gateway is disabled and the back will recognize you as ??
+
+To enable it in dev, look at docker-compose.dev.yaml in the ara-gw service:
+
+* add the `authent` profile
+```yaml
+    command: ['/bin/bash', '-c', 'mvn spring-boot:run -X -Dspring-boot.run.jvmArguments="-Dspring.profiles.active=dev,authent"']
+```

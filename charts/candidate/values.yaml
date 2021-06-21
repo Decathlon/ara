@@ -1,6 +1,14 @@
 # Override default app name
 # nameOverride:
 
+
+##
+app:
+    # Use an existing secret
+    configExistingSecret:
+        # secretName: nameofsecret # secret file containing keys used both by api and gw
+        enabled: false
+
 ##
 ## API Configuration
 ##
@@ -8,7 +16,7 @@ api:
     image:
         registry: docker.io
         repository: decathlon/ara-api
-        tag: 10.1.2
+        tag: 11.0.0
         imagePullPolicy: IfNotPresent
     loggingMode:
         - logging-console
@@ -30,17 +38,31 @@ api:
         port: 9090
     # Base url used to redirect on the app by email service among others
     appUrl: ara.test
-    authConfig: ""
     # Use an existing secret
-    configExistingSecret:
-        enabled: false
-        # secretName: nameofsecret
-        # authConfigKey: config-authentication.yaml
+    # configExistingSecret:
         # customConfigKey: config-custom.yaml
     customConfig: ""
     # sideCarContainer:
     # volumes:
 
+gw:
+    image:
+        registry: docker.io
+        repository: decathlon/ara-gw
+        tag: 1.0.0
+        imagePullPolicy: IfNotPresent
+    loggingMode:
+        - logging-console
+    replicas: 1
+    annotations: {}
+    resources: {}
+    port:
+        source: 80
+        target: 8080
+    # configExistingSecret:
+        # gatewayauthentkey: authent.yml
+    profiles: "dev"
+    authentConf: ""
 ##
 ## UI Configuration
 ##
@@ -48,7 +70,7 @@ ui:
     image:
         registry: docker.io
         repository: decathlon/ara-web-ui
-        tag: 9.0.0
+        tag: 9.1.0
         imagePullPolicy: IfNotPresent
     replicas: 1
     annotations: {}
@@ -63,7 +85,8 @@ ui:
         # requests:
         #  cpu: 100m
         #  memory: 128Mi
-    port: 80
+    port: 8080
+
 
 ##
 ## Postgresql Database Configuration

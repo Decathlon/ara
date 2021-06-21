@@ -28,7 +28,7 @@
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-parent</artifactId>
     <packaging>pom</packaging>
-    <version>10.1.2</version>
+    <version>11.0.0</version>
 
     <name>ARA Parent</name>
     <description>
@@ -127,6 +127,12 @@
             <properties>
                 <picUrl>https://avatars2.githubusercontent.com/u/47111054?s=100</picUrl>
             </properties>
+        </developer>
+        <developer>
+            <id>regislegrand</id>
+            <name>Regis Legrand</name>
+            <email>regis.legrand.partner@decathlon.com</email>
+            <organization>RLD-IT</organization>
         </developer>
     </developers>
 

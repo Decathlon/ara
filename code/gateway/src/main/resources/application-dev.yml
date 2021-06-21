@@ -1,0 +1,28 @@
+---
+
+logging:
+  level:
+    reactor:
+      netty: INFO
+    org:
+      springframework:
+        cloud:
+          gateway: TRACE
+    com:
+      decathlon:
+        ara: DEBUG
+
+spring:
+  cloud:
+    gateway:
+      httpclient:
+        wiretap: true
+      httpserver:
+        wiretap: true
+
+# Authent disabled by default in dev
+# Use an env var to override if needed
+feature-flipping:
+  authent:
+    oauth:
+      enabled: false

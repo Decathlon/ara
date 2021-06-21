@@ -26,20 +26,22 @@ spring:
   profiles:
     include: @spring.profiles.active@,${ara.logging.mode}
   config:
-    import: config-database.yaml,optional:config-custom.yaml,optional:config-authentication.yaml
+    import: config-database.yaml,optional:config-custom.yaml
   jackson:
     date-format: "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"
     default-property-inclusion: NON_NULL
   thymeleaf:
-    # HTML5 is deprecated
-    mode: HTML
-    # Postman collections can be very huge!
+   # HTML5 is deprecated
+   mode: HTML
+   # Postman collections can be very huge!
   servlet:
     multipart:
       max-file-size: 100MB
       max-request-size: 100MB
   mail:
-    #host: please-configure-spring.mail.host
+  #host: please-configure-spring.mail.host
+
+
 
 springdoc:
   packagesToScan: com.decathlon.ara
@@ -75,7 +77,7 @@ ara:
     # (only providing them here for the Spring context to load for integration tests)
     #
 
-  # Feature Flipping
+  # Feature Flipping <= Review this thing to put it in feature-flipping file ...
   features:
     jira-adapter: true
     xprt-mprt-crtg: true

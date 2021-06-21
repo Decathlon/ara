@@ -1,24 +1,8 @@
 // see http://vuejs-templates.github.io/webpack for documentation.
 var path = require('path')
 
-var araAPIHost = process.env.ARA_API_HOST || 'localhost'
-var araAPIPort = process.env.ARA_API_PORT || 8080
-var araManagementPort = process.env.ARA_MANAGEMENT_PORT || 9090
-
-var araAPIURL = 'http://' + araAPIHost + ':' + araAPIPort
-var araManagementURL = 'http://' + araAPIHost + ':' + araManagementPort
-
-var PACKAGE = require('../package.json')
-var version = PACKAGE.version
-
-const development = {
-  NODE_ENV: 'development',
-  VERSION: version
-}
-const production = {
-  NODE_ENV: 'production',
-  VERSION: version
-}
+const development = { NODE_ENV: 'development' }
+const production = { NODE_ENV: 'production' }
 
 module.exports = {
   build: {
@@ -42,7 +26,7 @@ module.exports = {
   },
   dev: {
     env: development,
-    port: 8081,
+    port: 8080,
     autoOpenBrowser: true,
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
@@ -51,24 +35,6 @@ module.exports = {
     // (https://github.com/webpack/css-loader#sourcemaps)
     // In our experience, they generally work as expected,
     // just be aware of this issue when enabling this option.
-    cssSourceMap: false,
-    proxyTable: {
-      '/auth': {
-        target: araAPIURL,
-        changeOrigin: true
-      },
-      '/api': {
-        target: araAPIURL,
-        changeOrigin: true
-      },
-      '/actuator': {
-        target: araManagementURL,
-        changeOrigin: true
-      },
-      '/demo-files': {
-        target: araAPIURL,
-        changeOrigin: true
-      }
-    }
+    cssSourceMap: false
   }
 }

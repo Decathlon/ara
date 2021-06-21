@@ -1,21 +1,9 @@
 server {
-    listen       80;
+    listen       8080;
     server_name  localhost;
 
     #charset koi8-r;
     #access_log  /var/log/nginx/host.access.log  main;
-
-    location /auth {
-      proxy_pass http://${ARA_API_HOST}:${ARA_API_PORT}/auth;
-    }
-
-    location /api {
-      proxy_pass http://${ARA_API_HOST}:${ARA_API_PORT}/api;
-    }
-
-    location /actuator {
-      proxy_pass http://${ARA_API_HOST}:${ARA_MANAGEMENT_PORT}/actuator;
-    }
 
     location / {
         root   /usr/share/nginx/html;
@@ -32,26 +20,4 @@ server {
         root   /usr/share/nginx/html;
     }
 
-    # proxy the PHP scripts to Apache listening on 127.0.0.1:80
-    #
-    #location ~ \.php$ {
-    #    proxy_pass   http://127.0.0.1;
-    #}
-
-    # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
-    #
-    #location ~ \.php$ {
-    #    root           html;
-    #    fastcgi_pass   127.0.0.1:9000;
-    #    fastcgi_index  index.php;
-    #    fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;
-    #    include        fastcgi_params;
-    #}
-
-    # deny access to .htaccess files, if Apache's document root
-    # concurs with nginx's one
-    #
-    #location ~ /\.ht {
-    #    deny  all;
-    #}
 }

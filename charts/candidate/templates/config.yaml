@@ -17,14 +17,17 @@ data:
   app_url: {{ .Values.api.appUrl }}
   api_host: {{ printf "%s-%s-api.%s.svc.cluster.local" .Release.Name .Chart.Name .Release.Namespace }}
   api_port: {{ printf "%.0f" .Values.api.port | quote }}
+  ui_host: {{ printf "%s-%s-ui.%s.svc.cluster.local" .Release.Name .Chart.Name .Release.Namespace }}
+  ui_port: {{ printf "%.0f" .Values.ui.port | quote }}
   api_management_port: {{ printf "%.0f" .Values.api.management.port | quote }}
+  gw_profiles: {{ printf "%s" .Values.gw.profiles | quote }}
 
-{{- if not .Values.api.configExistingSecret.enabled }}
+{{- if not .Values.app.configExistingSecret.enabled }}
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "ara.api.secret.name" . }}
+  name: {{ include "ara.app.secret.name" . }}
   labels:
     app.kubernetes.io/name: {{ include "ara.name" . }}
     helm.sh/chart: {{ include "ara.chart" . }}
@@ -34,8 +37,7 @@ metadata:
     app.kubernetes.io/component: api-secret
 type: Opaque
 stringData:
-  {{ template "ara.api.secret.authconfigkey" }}: |
-{{ toYaml .Values.api.authConfig | indent 4 }}
+  {{ template "ara.gw.secret.gatewayauthentkey" }}: {{ toYaml .Values.gw.authentConf | indent 4 }}
   {{ template "ara.api.secret.customconfigkey" }}: |
 {{ toYaml .Values.api.customConfig | indent 4 }}
 {{- end }}

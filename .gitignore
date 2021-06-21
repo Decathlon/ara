@@ -34,3 +34,9 @@ node_modules/
 *dependency-reduced-pom.xml
 client/*.vscode
 *.old
+
+### Local docker env ###
+.env
+
+### charts custom values / for dev only ###
+charts/local-values.yaml

@@ -1,0 +1,27 @@
+---
+
+# Example of Oauth with open id
+
+spring:
+  security:
+    oauth2:
+      # >> the authorization_code conf
+      client:
+        registration:
+          provider_name:
+            client-name: provider name
+            client-id: "${secrets.client-id}"
+            client-secret: "${secrets.client-secret}"
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: openid, profile
+        provider:
+          provider_name:
+            issuer-uri: https://your-issuer-uri
+
+      # Client Credentials flow conf ( openid only, not implemented by all providers)
+      resourceserver:
+        jwt:
+          issuer-uri: https://your-issuer-uri
+          jwk-set-uri: https://your-issuer-uri/ext/JWKS
+

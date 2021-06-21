@@ -5,14 +5,18 @@
 DOCKER_REGISTRY?=docker.io
 # Forks may use name/ara for their tests
 IMAGE_NAME?=decathlon/ara
-API_VERSION?=$(shell make -s -C api get-version)$(SUFFIX)
-WEB_UI_VERSION?=$(shell make -s -C web-ui get-version)$(SUFFIX)
+export API_VERSION?=$(shell make -s -C api get-version)$(SUFFIX)
+export WEB_UI_VERSION?=$(shell make -s -C web-ui get-version)$(SUFFIX)
+export GW_VERSION?=$(shell make -s -C gateway get-version)$(SUFFIX)
 
 API_SHORT_IMAGE=${IMAGE_NAME}-api
 API_IMAGE=${DOCKER_REGISTRY}/${API_SHORT_IMAGE}
 
 WEB_UI_SHORT_IMAGE=${IMAGE_NAME}-web-ui
 WEB_UI_IMAGE=${DOCKER_REGISTRY}/${WEB_UI_SHORT_IMAGE}
+
+GW_SHORT_IMAGE=${IMAGE_NAME}-gw
+GW_IMAGE=${DOCKER_REGISTRY}/${GW_SHORT_IMAGE}
 
 PUBLISH?=FALSE
 
@@ -23,20 +27,21 @@ PUBLISH?=FALSE
 debug:
 	echo $(API_VERSION)
 
-start: ## Start ARA
+## Start ARA
+start:
 	@echo '-- Start ARA --'
-	@export API_VERSION=$(API_VERSION); export WEB_UI_VERSION=$(WEB_UI_VERSION); docker compose up -d
+	@docker compose up -d
 
 stop: ## Stop ARA
 	@echo '-- Stop ARA --'
-	@export API_VERSION=$(API_VERSION); export WEB_UI_VERSION=$(WEB_UI_VERSION); docker compose down
+	@docker compose down
 
 
 # RUN BY MODULE
 
 run-%: ## Run module
 	@echo '-- Run $* --'
-	@export API_VERSION=$(API_VERSION); export WEB_UI_VERSION=$(WEB_UI_VERSION); docker compose up $(OPT) ara-$*
+	@docker compose up $(OPT) ara-$*
 
 stop-%: ## Stop module
 	@echo '-- Stop $* --'
@@ -49,25 +54,33 @@ stop-%: ## Stop module
 build: ## Build ARA in parallel
 	@$(MAKE) build-full -j2 -k
 
-build-full: build-api build-web-ui
+build-full: build-api build-web-ui build-gw
 
 build-web-ui: ## Build ara-web-ui
 	@echo '-- Build WEB-UI image --'
 	@$(eval FULL_IMAGE = $(WEB_UI_IMAGE):$(WEB_UI_VERSION))
 	$(MAKE) -C web-ui dkr-build-image FULL_IMAGE=$(FULL_IMAGE)
-	@./tools/docker-tags-version.sh "$(WEB_UI_IMAGE)" "$(WEB_UI_VERSION)" "$(PUBLISH)"
+	@./bin/docker-tags-version.sh "$(WEB_UI_IMAGE)" "$(WEB_UI_VERSION)" "$(PUBLISH)"
 
 build-api: ## Build ara-api
 	@echo '-- Build API image --'
 	@$(eval FULL_IMAGE = $(API_IMAGE):$(API_VERSION))
+	$(MAKE) -C api mvn-install
 	$(MAKE) -C api mvn-build-image FULL_IMAGE=$(FULL_IMAGE)
-	@./tools/docker-tags-version.sh "$(API_IMAGE)" "$(API_VERSION)" "$(PUBLISH)"
+	@./bin/docker-tags-version.sh "$(API_IMAGE)" "$(API_VERSION)" "$(PUBLISH)"
+
+build-gw: ## Build the ara gateway
+	@echo '-- Build GATEWAY image'
+	$(MAKE) -C gateway mvn-build-image FULL_IMAGE=$(GW_IMAGE):$(GW_VERSION)
 
 check-web-ui-image:
 	@$(MAKE) check-image CHECK_IMAGE=$(WEB_UI_SHORT_IMAGE) CHECK_TAG=$(WEB_UI_VERSION)
 
 check-api-image:
 	@$(MAKE) check-image CHECK_IMAGE=$(API_SHORT_IMAGE) CHECK_TAG=$(API_VERSION)
+
+check-gw-image:
+	@$(MAKE) check-image CHECK_IMAGE=$(GW_SHORT_IMAGE) CHECK_TAG=$(GW_VERSION)
 
 check-image:
 	@curl --silent -f -L https://hub.docker.com/v2/repositories/$(CHECK_IMAGE)/tags/$(CHECK_TAG)/ > /dev/null && echo true || echo false
@@ -118,6 +131,8 @@ get-versions: ## Give ARA version
 	@$(MAKE) get-api-version
 	@echo -n 'web-ui: '
 	@$(MAKE) get-web-ui-version
+	@echo -n 'gateway: '
+	@$(MAKE) get-gw-version
 
 TARGET_CHART?=stable
 get-chart-version:
@@ -151,18 +166,29 @@ update-web-ui-version: ## Update web-ui version. VERSION required
 	@echo '-- Update Web-UI version --'
 	@npm --prefix web-ui version $(VERSION)
 
+get-gw-version:
+	@$(MAKE) -C gateway get-version
+
+update-gw-version: ## Update web-ui version. VERSION required
+	@echo '-- Update Web-UI version --'
+	@mvn --batch-mode -f gateway/pom.xml release:update-versions -DautoVersionSubmodules=true -DdevelopmentVersion=$(VERSION)-SNAPSHOT
+	@mvn --batch-mode -f gateway/pom.xml versions:set -DremoveSnapshot -DprocessAllModules
+
 #####################################
 ##            HELM PART            ##
 #####################################
 
 helm-template:
-	@helm template ../charts/$(TARGET_CHART) --debug
+	@test "$(WITH_LOCAL_VALUES)" = "true" && eval "CMD_LOCAL_VALUES='-f ../charts/local-values.yaml'" 
+	helm template $${CMD_LOCAL_VALUES} ../charts/$(TARGET_CHART) --debug
 
 helm-install:
-	@helm install --create-namespace --namespace ara ara-local ../charts/$(TARGET_CHART)
+	@test "$(WITH_LOCAL_VALUES)" = "true" && eval "CMD_LOCAL_VALUES='-f ../charts/local-values.yaml'" 
+	helm install $${CMD_LOCAL_VALUES} --create-namespace --namespace ara ara-local ../charts/$(TARGET_CHART)
 
 helm-upgrade:
-	@helm upgrade --namespace ara ara-local ../charts/$(TARGET_CHART)
+	@test "$(WITH_LOCAL_VALUES)" = "true" && eval "CMD_LOCAL_VALUES='-f ../charts/local-values.yaml'" 
+	@helm upgrade $${CMD_LOCAL_VALUES} --namespace ara ara-local ../charts/$(TARGET_CHART)
 
 helm-uninstall:
 	@helm uninstall --namespace ara ara-local

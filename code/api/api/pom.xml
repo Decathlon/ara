@@ -28,7 +28,7 @@
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-api</artifactId>
-    <version>10.1.2</version>
+    <version>11.0.0</version>
 
     <name>ARA API</name>
     <description>
@@ -38,6 +38,9 @@
 
     <properties>
         <java.version>16</java.version>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+  		<maven.compiler.target>${java.version}</maven.compiler.target>
+
         <ara.default.database>h2</ara.default.database>
         <spring.profiles.active>default</spring.profiles.active>
         <mapstruct.version>1.4.2.Final</mapstruct.version>
@@ -101,11 +104,6 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt</artifactId>
-            <version>0.9.1</version>
         </dependency>
 
         <!-- Configuration -->
@@ -199,9 +197,9 @@
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
         <dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-thymeleaf</artifactId>
-		</dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
 
         <!-- Parse structured embeddings from Cucumber reports -->
         <dependency>
@@ -315,8 +313,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>

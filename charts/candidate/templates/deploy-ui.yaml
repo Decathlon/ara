@@ -32,22 +32,6 @@ spec:
       - name: {{ $name }}
         image: "{{ .Values.ui.image.registry }}/{{ .Values.ui.image.repository }}:{{ default .Chart.Version .Values.ui.image.tag }}"
         imagePullPolicy: {{ .Values.ui.image.imagePullPolicy }}
-        env:
-        - name: ARA_API_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: {{ include "ara.configmap.name" . }}
-              key: api_host
-        - name: ARA_API_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: {{ include "ara.configmap.name" . }}
-              key: api_port
-        - name: ARA_MANAGEMENT_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: {{ include "ara.configmap.name" . }}
-              key: api_management_port
         ports:
         - containerPort: {{ .Values.ui.port }}
           name: http-port
@@ -70,12 +54,7 @@ kind: Service
 metadata:
   name: {{ $name }}
 spec:
-  {{- if .Values.loadBalancer.enabled }}
-  type: LoadBalancer
-  {{- if .Values.loadBalancer.loadBalancerIP }}
-  loadBalancerIP: {{ .Values.loadBalancer.loadBalancerIP }}
-  {{- end }}
-  {{- end }}
+  type: ClusterIP
   ports:
   - protocol: TCP
     port: {{ .Values.ui.port }}

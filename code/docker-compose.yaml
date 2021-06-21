@@ -32,12 +32,16 @@ services:
   ara-web-ui:
     image: "decathlon/ara-web-ui:${WEB_UI_VERSION:-latest}"
     restart: always
+    networks:
+      - web_net
+  ara-gw:
+    image: "decathlon/ara-gw:${GW_VERSION:-latest}"
     environment:
-      - ARA_API_HOST=ara-api
-      - ARA_API_PORT=8080
-      - ARA_MANAGEMENT_PORT=9090
+      - FEATURE_FLIPPING_AUTHENT_OAUTH_ENABLED=false
+    volumes:
+      - "${SECRETS_PATH}:/app/config:ro"
     ports:
-      - 8081:80
+      - 80:8080
     networks:
       - web_net
 networks:

@@ -1,0 +1,80 @@
+---
+
+# Logs
+
+logging:
+  level:
+    reactor:
+      netty: INFO
+
+---
+
+# actuator
+
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      base-path: /actuatorgw
+      exposure:
+        include: health, info
+
+---
+
+# >>> DEFAULT VALUES
+# These default values can be overriden with the following env vars:
+# ARA_API_HOST / ARA_API_PORT / ARA_API_MANAGEMENTPORT / ARA_UI_HOST / ARA_UI_PORT
+ara:
+  api:
+    host: ara-api
+    port: 8080
+    managementport: 9090
+  ui:
+    host: ara-web-ui
+    port: 8080
+
+
+# <<< END DEFAULT VALUES
+
+---
+
+# Routes
+
+spring:
+  cloud:
+    # >> A proxy for ARA
+    gateway:
+      routes:
+        - id: back
+          uri: "http://${ara.api.host}:${ara.api.port}"
+          predicates:
+            - Path=/api/**,/demo-files/**
+          filters:
+           - AddUsernameHeader=
+           - RemoveRequestHeader=Cookie
+        - id: backmanagement
+          uri: "http://${ara.api.host}:${ara.api.managementport}"
+          predicates:
+            - Path=/actuator/**
+        - id: front
+          uri: "http://${ara.ui.host}:${ara.ui.port}"
+          predicates:
+            - Path=/**
+
+---
+
+# Feature flipping
+
+feature-flipping:
+  authent:
+    oauth:
+      enabled: true
+      features:
+        authorization-code: true
+        client-credentials: true
+
+    user-token:
+      enable: true
+
+

@@ -21,21 +21,13 @@ spec:
     http:
       paths:
       - backend:
-          serviceName: {{ printf "%s-%s-%s" .Release.Name .Chart.Name "ui" }}
+          serviceName: {{ printf "%s-%s-%s" .Release.Name .Chart.Name "gw" }}
           servicePort: http-port
         path: /
       - backend:
           serviceName: {{ printf "%s-%s-%s" .Release.Name .Chart.Name "api" }}
-          servicePort: http
-        path: /api
-      - backend:
-          serviceName: {{ printf "%s-%s-%s" .Release.Name .Chart.Name "api" }}
           servicePort: management
         path: /actuator
-      - backend:
-          serviceName: {{ printf "%s-%s-%s" .Release.Name .Chart.Name "api" }}
-          servicePort: http
-        path: /auth
 {{- if .Values.ingress.tls }}
   tls:
 {{ toYaml .Values.ingress.tls | indent 4 }}

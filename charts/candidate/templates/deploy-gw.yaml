@@ -1,0 +1,113 @@
+{{- $name := printf "%s-%s-%s" .Release.Name .Chart.Name "gw" -}}
+{{- $defaultImage := printf "%s:%s" "decathlon/ara-gw" .Chart.Version -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  labels:
+    app.kubernetes.io/name: {{ include "ara.name" . }}
+    helm.sh/chart: {{ include "ara.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.Version }}
+    app.kubernetes.io/component: {{ $name }}
+  {{- if .Values.gw.annotations }}
+  annotations:
+{{ toYaml .Values.gw.annotations | indent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.gw.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "ara.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: {{ $name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "ara.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: {{ $name }}
+    spec:
+      containers:
+      - name: {{ $name }}
+        image: "{{ .Values.gw.image.registry }}/{{ .Values.gw.image.repository }}:{{ default .Chart.Version .Values.gw.image.tag }}"
+        imagePullPolicy: {{ .Values.gw.image.imagePullPolicy }}
+        env:
+        - name: ARA_UI_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "ara.configmap.name" . }}
+              key: ui_host
+        - name: ARA_UI_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "ara.configmap.name" . }}
+              key: ui_port
+        - name: ARA_API_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "ara.configmap.name" . }}
+              key: api_host
+        - name: ARA_API_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "ara.configmap.name" . }}
+              key: api_port
+        - name: ARA_API_MANAGEMENTPORT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "ara.configmap.name" . }}
+              key: api_management_port
+        - name: SPRING_PROFILES_INCLUDE
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "ara.configmap.name" . }}
+              key: gw_profiles
+        volumeMounts:
+          - name: config
+            mountPath: "/config"
+            readOnly: true
+        readinessProbe:
+          httpGet:
+            path: /actuatorgw/health/readiness
+            port: 8081
+          initialDelaySeconds: 40
+          timeoutSeconds: 2
+          periodSeconds: 3
+          failureThreshold: 2
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8081
+          initialDelaySeconds: 100
+          timeoutSeconds: 2
+          periodSeconds: 8
+          failureThreshold: 1
+      volumes:
+      - name: config
+        secret:
+          secretName: {{ include "ara.app.secret.name" . }}
+          items:
+            - key: {{ include "ara.gw.secret.gatewayauthentkey" . }}
+              path: "authent.yml"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
+spec:
+  {{- if .Values.loadBalancer.enabled }}
+  type: LoadBalancer
+  {{- if .Values.loadBalancer.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.loadBalancer.loadBalancerIP }}
+  {{- end }}
+  {{- end }}
+  ports:
+  - name: http
+    port: {{ .Values.gw.port.source }}
+    targetPort: {{ .Values.gw.port.target }}
+  selector:
+    app.kubernetes.io/name: {{ include "ara.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: {{ $name }}
