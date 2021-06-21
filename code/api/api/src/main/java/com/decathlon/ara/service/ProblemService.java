@@ -508,7 +508,7 @@ public class ProblemService {
         }
 
         List<ProblemPattern> problemPatterns = problem.getPatterns();
-        Page<Error> errors = errorRepository.findDistinctByProblemPatternsInOrderByExecutedScenarioRunExecutionTestDateTimeDesc(problemPatterns, pageable);
+        Page<Error> errors = errorRepository.findDistinctByProblemPatternsIn(problemPatterns, pageable);
         if (errors == null) {
             return null;
         }

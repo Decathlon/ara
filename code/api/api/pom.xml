@@ -28,7 +28,7 @@
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-api</artifactId>
-    <version>9.0.5</version>
+    <version>9.0.6</version>
 
     <name>ARA API</name>
     <description>
