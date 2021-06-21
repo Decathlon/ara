@@ -17,29 +17,16 @@
 
 package com.decathlon.ara.domain;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.With;
-import org.hibernate.annotations.GenericGenerator;
+import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.nullsFirst;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+import static java.util.Comparator.*;
 
 @Data
 @NoArgsConstructor
@@ -51,8 +38,8 @@ import static java.util.Comparator.nullsFirst;
 public class Project implements Comparable<Project> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
-    @GenericGenerator(name = "native", strategy = "native")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "project_id")
+    @SequenceGenerator(name = "project_id", sequenceName = "project_id", allocationSize = 1)
     private Long id;
 
     @Column(length = 32)

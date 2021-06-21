@@ -18,25 +18,12 @@
 package com.decathlon.ara.domain;
 
 import com.decathlon.ara.domain.enumeration.Technology;
+import lombok.*;
+
+import javax.persistence.*;
 import java.util.Comparator;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.With;
-import org.hibernate.annotations.GenericGenerator;
-
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.nullsFirst;
+import static java.util.Comparator.*;
 
 @Data
 @NoArgsConstructor
@@ -48,8 +35,8 @@ import static java.util.Comparator.nullsFirst;
 public class Source implements Comparable<Source> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
-    @GenericGenerator(name = "native", strategy = "native")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "source_id")
+    @SequenceGenerator(name = "source_id", sequenceName = "source_id", allocationSize = 1)
     private Long id;
 
     private long projectId;

@@ -45,8 +45,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Disabled
 @SpringBootTest
 @DatabaseSetup({"/dbunit/full-small-fake-dataset.xml"})
-@TestPropertySource(
-        locations = "classpath:application-db-h2.properties")
+@TestPropertySource(properties = {
+        "ara.database.target=h2"
+})
 public class ErrorRepositoryIT {
 
     @Autowired

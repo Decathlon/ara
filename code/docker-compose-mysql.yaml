@@ -1,0 +1,49 @@
+# Please Note that this file IS NOT PRODUCTION READY.
+# It's only dedicated to local test & try
+
+version: '3.5'
+
+services:
+  ara-mysql-db:
+    image: "mysql:8"
+    restart: always
+    environment:
+      - MYSQL_DATABASE=ara
+      - MYSQL_USER=changeme
+      - MYSQL_PASSWORD=changeme
+      - MYSQL_ROOT_PASSWORD=to_change
+    networks:
+      - db_net
+    ports:
+      - 3306:3306
+  ara-mysql-api:
+    image: "decathlon/ara-api:${API_VERSION:-latest}"
+    restart: always
+    environment:
+      - ARA_DATABASE_TARGET=mysql
+      - ARA_DATABASE_HOST=ara-mysql-db:3306
+      - ARA_DATABASE_NAME=ara
+      - ARA_DATABASE_USERNAME=changeme
+      - ARA_DATABASE_PASSWORD=changeme
+      - INFO_APP_VERSION=DEV
+      - ARA_CLIENTBASEURL=localhost:8081
+    networks:
+      - web_net
+      - db_net
+  ara-mysql-web-ui:
+    image: "decathlon/ara-web-ui:${WEB_UI_VERSION:-latest}"
+    restart: always
+    environment:
+      - API_URL=ara-mysql-api:8080
+    ports:
+      - 8081:80
+    networks:
+      - web_net
+networks:
+  web_net:
+  db_net:
+
+# validate: validate the schema, makes no changes to the database.
+# update: update the schema.
+# create: creates the schema, destroying previous data.
+# create-drop: drop the schema when the SessionFactory is closed explicitly, typically when the application is stopped.

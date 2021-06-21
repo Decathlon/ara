@@ -18,28 +18,18 @@
 package com.decathlon.ara.domain;
 
 import com.decathlon.ara.domain.enumeration.JobStatus;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Set;
-import java.util.TreeSet;
-import javax.persistence.*;
-
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.With;
-import org.hibernate.annotations.GenericGenerator;
+import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.SortNatural;
 
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.nullsFirst;
+import javax.persistence.*;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Set;
+import java.util.TreeSet;
+
+import static java.util.Comparator.*;
 
 @Data
 @NoArgsConstructor
@@ -54,8 +44,8 @@ public class Run implements Comparable<Run> {
     public static final String SEVERITY_TAGS_SEPARATOR = ",";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
-    @GenericGenerator(name = "native", strategy = "native")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "run_id")
+    @SequenceGenerator(name = "run_id", sequenceName = "run_id", allocationSize = 1)
     private Long id;
 
     // 1/2 for @EqualsAndHashCode to work: used when an entity is fetched by JPA
