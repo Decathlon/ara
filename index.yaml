@@ -2,11 +2,32 @@ apiVersion: v1
 entries:
   ara:
   - apiVersion: v2
+    created: "2021-06-21T07:50:44.832590796Z"
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
+    digest: 848ce1fe4397f9fd9476961332477bc76a53911fe08001d28675d2d8896806b4
+    home: https://github.com/Decathlon/ara
+    icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
+    keywords:
+    - ara
+    - analyser
+    - tests aggregator
+    - regression monitoring
+    maintainers:
+    - email: thomas.gruson@protonmail.com
+      name: Thomgrus
+    name: ara
+    sources:
+    - https://github.com/Decathlon/ara
+    urls:
+    - https://github.com/Decathlon/ara/releases/download/ara-9.0.2-rc.4/ara-9.0.2-rc.4.tgz
+    version: 9.0.2-rc.4
+  - apiVersion: v2
     created: "2021-06-11T14:46:59.200637898Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: 5ebf1b328729527f0a3a2117e5217e8168fdb60c2744ad500fe97f0058e2ee95
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -26,10 +47,9 @@ entries:
     version: 9.0.2-rc.3
   - apiVersion: v2
     created: "2021-06-09T07:27:41.707613642Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: f60700ba524f863c3064d3fdd5e4aa97b0fd3b2d377c182969d5c701c1ac563b
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -49,10 +69,9 @@ entries:
     version: 9.0.2-rc.2
   - apiVersion: v2
     created: "2021-06-07T12:41:29.159501009Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: e2aa1c6d7710ceef7c0e864144ce9122813c99b4f2ee5a67e2121c73b839c948
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -72,10 +91,9 @@ entries:
     version: 9.0.2-rc.1
   - apiVersion: v2
     created: "2021-06-07T09:14:22.054521634Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: 32c564d849c4e0be79670bbe8ea57ccdd54880aa0a821a323b865dcfdda6e7b8
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -95,10 +113,9 @@ entries:
     version: 9.0.1-rc.1
   - apiVersion: v2
     created: "2021-05-31T14:24:59.826979698Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: 6fb3b4c0dd8e21f49cf732583382a773904ce10684ade406b3bcbd293525e10d
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -118,10 +135,9 @@ entries:
     version: 9.0.0-rc.1
   - apiVersion: v2
     created: "2021-05-21T07:33:10.783269268Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: 80e6a96e83fb7bdc48e52fc5a03c275697bc8a41f03ba6579c0f89794c8ecdfc
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -141,10 +157,9 @@ entries:
     version: 8.2.0-rc.1
   - apiVersion: v2
     created: "2021-03-23T14:55:33.045129438Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: 1ff662df77f7ff95bbca57dc6a6abf158183c10472073196e5f26b9df21fc448
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -164,10 +179,9 @@ entries:
     version: 8.1.0
   - apiVersion: v2
     created: "2021-03-12T13:00:28.65727555Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: 245ffca02078de945526a75324e007c87817d79c3800c1f2dfd6921df05ea63e
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -187,10 +201,9 @@ entries:
     version: 8.0.2-rc.2
   - apiVersion: v2
     created: "2021-03-10T07:58:47.724905587Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: a8aecf2f09527fd5e18c67266bf80f8fe6fdfe887470c32a76f0423d137e3a51
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -210,10 +223,9 @@ entries:
     version: 8.0.2-rc.1
   - apiVersion: v2
     created: "2021-03-09T14:36:34.450594543Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: 929ad410224b63e69591f042cb07f96cd34477d5e8adb45bf2c590bc159b4a03
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -233,10 +245,9 @@ entries:
     version: 8.0.2-rc.0
   - apiVersion: v2
     created: "2021-03-03T15:38:26.999541371Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: 3a1c4b5e0bef02f93a2917d65ad2473d76c4bce850e7ffd130df61c99aa06648
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -256,10 +267,9 @@ entries:
     version: 8.0.1
   - apiVersion: v2
     created: "2021-03-02T08:49:22.047030154Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: 0d079221fa996801301252cbe71e6e930668d9f05868bd5d13d2525125a440f2
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -279,10 +289,9 @@ entries:
     version: 8.0.1-rc.2
   - apiVersion: v2
     created: "2021-02-16T15:44:46.822768892Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: 7aa2fb20140a92cdcfebaae4a3cba91537e0ca7e255578224ad13aa984b94c6f
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -302,10 +311,9 @@ entries:
     version: 8.0.0
   - apiVersion: v2
     created: "2021-02-11T10:13:16.750326864Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: 8ca71b706ee191337eaf9f5465d2c67ea2f6b9ab12983fb900a5d418c2e4abbc
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -325,10 +333,9 @@ entries:
     version: 8.0.0-rc.5
   - apiVersion: v2
     created: "2021-02-10T15:44:59.078387521Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: 0c5e80886754fa243642bfd4a0b1fec4a500fa279449612bed78c6a2b209c57d
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -348,10 +355,9 @@ entries:
     version: 8.0.0-rc.4
   - apiVersion: v2
     created: "2021-02-10T14:54:51.231492017Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: c7a9004eedae20cd63046b9c0cd2d7aff009c12831287e7e08d551635ee0aec7
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -371,10 +377,9 @@ entries:
     version: 8.0.0-rc.3
   - apiVersion: v2
     created: "2021-02-10T14:25:37.052958901Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: ef3a5800f6b5d3464242ec5accb6d5efb71d782df835581ab9c4606eb8492a26
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -394,10 +399,9 @@ entries:
     version: 8.0.0-rc.2
   - apiVersion: v2
     created: "2021-02-10T08:46:03.457401571Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: 80aa0566a7fd81d1f97235ab26941af884e051eec0129cf4e0efb5989370f16c
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -417,10 +421,9 @@ entries:
     version: 8.0.0-rc.1
   - apiVersion: v2
     created: "2021-02-02T08:11:35.750316141Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: 619a5e33ecf08488b14ce3f86470466c9c3bfaf9ec751d4e73e98ba4d3c50dea
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -439,10 +442,9 @@ entries:
     version: 7.2.5
   - apiVersion: v2
     created: "2021-01-18T14:22:23.746876184Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: bf615eeebb44f8f7a34e30367284fdbe85b3e5c4e392337e6c378190a554d1b4
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -461,10 +463,9 @@ entries:
     version: 7.2.4
   - apiVersion: v2
     created: "2021-01-14T13:14:13.150064537Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: de33b03dfed64ed91fe418432f3843fc2854ed58fea4693ca2e81df5ae3c1671
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -483,10 +484,9 @@ entries:
     version: 7.2.3
   - apiVersion: v2
     created: "2020-10-30T17:09:57.51413756Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: 0019b018c3acdea4338196d6241dfa6317c83c5350ae43ea19e3fc7f5250eb13
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -505,10 +505,9 @@ entries:
     version: 7.2.0
   - apiVersion: v2
     created: "2020-10-30T15:36:04.30359108Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: 1bed503f03998668dada1b7b8ce2efe6ae87d6ab67ea403cce0e5584f1b1a312
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -527,10 +526,9 @@ entries:
     version: 7.1.6
   - apiVersion: v2
     created: "2020-10-30T14:02:06.764339138Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: 65fb3c2324adc82ffc89cc1fdcb4522cacde98f68d9474535901fa4396bb7cef
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -549,10 +547,9 @@ entries:
     version: 7.1.5
   - apiVersion: v2
     created: "2020-10-30T09:20:28.817345517Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: b5c8f482c61a6ec26a0e53789f107996b4b741c1fbf935fe6c4da58eecba8ed0
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -571,10 +568,9 @@ entries:
     version: 7.1.4
   - apiVersion: v2
     created: "2020-10-12T12:42:03.631187959Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: 41e991f733546a3f0f80014d1a9540cef665003096a8aba4ed0fa79c989d5cdd
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -593,10 +589,9 @@ entries:
     version: 7.1.3
   - apiVersion: v2
     created: "2020-10-09T14:27:24.196739457Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: ede36cb8979586444449f66cc4b8642916efb63fbe5b897b5b92693340b7e776
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -615,10 +610,9 @@ entries:
     version: 7.1.2
   - apiVersion: v2
     created: "2020-10-09T12:49:06.953436559Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: b14e5a4c9cff1c120b91dc28fda096baca8e75015d450395744ca5645adb3f6b
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -637,10 +631,9 @@ entries:
     version: 7.0.5
   - apiVersion: v2
     created: "2020-10-01T08:53:52.10088859Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: eef343a8c85df3c29d25ee360b1dcb4cd446864ff8b5e1f18eedfdf74bc3db26
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -659,10 +652,9 @@ entries:
     version: 7.0.4
   - apiVersion: v2
     created: "2020-09-30T15:37:30.327057738Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: 20f4701b532ea2df943749a8ed488c9a6d3ab6c4ca801b362804a20938b42324
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -681,10 +673,9 @@ entries:
     version: 7.0.3
   - apiVersion: v2
     created: "2020-09-30T15:05:13.450031376Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: f2f815b5deca8f494655add164c9ebbd9dd91f23c5ec7c8d958110004603fb2a
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -703,10 +694,9 @@ entries:
     version: 7.0.2
   - apiVersion: v2
     created: "2020-09-30T14:52:03.683559079Z"
-    description: |
-      ARA helps you to fight against regressions by letting it preanalyze your non-regression tests runs,
-      tracks and follows problems, keep their history, and even break your CI build if quality isn't
-      met.
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
     digest: c1bf02fd3749bd6fe33df6b7f52f4979284fdab74148347f07bc74193af6d981
     home: https://github.com/Decathlon/ara
     icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
@@ -723,4 +713,4 @@ entries:
     urls:
     - https://github.com/Decathlon/ara/releases/download/ara-7.0.1/ara-7.0.1.tgz
     version: 7.0.1
-generated: "2020-09-30T14:52:03.549902346Z"
+generated: "2021-06-21T07:50:44.832980809Z"
