@@ -8,7 +8,7 @@ api:
     image:
         registry: docker.io
         repository: decathlon/ara-api
-        tag: 8.1.0
+        tag: 9.0.7
         imagePullPolicy: IfNotPresent
     replicas: 1
     annotations: {}
@@ -26,14 +26,14 @@ api:
     port: 8080
     # Base url used to redirect on the app by email service among others
     appUrl: ara.test
-    authProperties: ""
+    authConfig: ""
     # Use an existing secret
-    propertiesExistingSecret:
+    configExistingSecret:
         enabled: false
         # secretName: nameofsecret
-        # authPropertiesKey: application-auth.properties
-        # customPropertiesKey: application-custom.properties
-    customProperties: ""
+        # authConfigKey: config-authentication.yaml
+        # customConfigKey: config-custom.yaml
+    customConfig: ""
     # sideCarContainer:
     # volumes:
 
@@ -44,7 +44,7 @@ ui:
     image:
         registry: docker.io
         repository: decathlon/ara-web-ui
-        tag: 8.3.0
+        tag: 8.6.2
         imagePullPolicy: IfNotPresent
     replicas: 1
     annotations: {}
