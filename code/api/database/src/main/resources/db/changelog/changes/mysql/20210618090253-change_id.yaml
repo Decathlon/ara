@@ -1,0 +1,232 @@
+databaseChangeLog:
+- changeSet:
+    id: 1623999997860-1
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: next_val
+            type: BIGINT
+        tableName: communication_id
+    - sql:
+          sql: Insert into communication_id(next_val) select IFNULL(max(id), 0) as next_val from communication;
+- changeSet:
+    id: 1623999997860-2
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: next_val
+            type: BIGINT
+        tableName: country_deployment_id
+    - sql:
+          sql: Insert into country_deployment_id(next_val) select IFNULL(max(id), 0) as next_val from country_deployment;
+- changeSet:
+    id: 1623999997860-3
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: next_val
+            type: BIGINT
+        tableName: country_id
+    - sql:
+          sql: Insert into country_id(next_val) select IFNULL(max(id), 0) as next_val from country;
+- changeSet:
+    id: 1623999997860-4
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: next_val
+            type: BIGINT
+        tableName: cycle_definition_id
+    - sql:
+          sql: Insert into cycle_definition_id(next_val) select IFNULL(max(id), 0) as next_val from cycle_definition;
+- changeSet:
+    id: 1623999997860-5
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: next_val
+            type: BIGINT
+        tableName: error_id
+    - sql:
+          sql: Insert into error_id(next_val) select IFNULL(max(id), 0) as next_val from error;
+- changeSet:
+    id: 1623999997860-6
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: next_val
+            type: BIGINT
+        tableName: executed_scenario_id
+    - sql:
+          sql: Insert into executed_scenario_id(next_val) select IFNULL(max(id), 0) as next_val from executed_scenario;
+- changeSet:
+    id: 1623999997860-8
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: next_val
+            type: BIGINT
+        tableName: execution_id
+    - sql:
+          sql: Insert into execution_id(next_val) select IFNULL(max(id), 0) as next_val from execution;
+- changeSet:
+    id: 1623999997860-9
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: next_val
+            type: BIGINT
+        tableName: functionality_id
+    - sql:
+          sql: Insert into functionality_id(next_val) select IFNULL(max(id), 0) as next_val from functionality;
+- changeSet:
+    id: 1623999997860-10
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: next_val
+            type: BIGINT
+        tableName: problem_id
+    - sql:
+          sql: Insert into problem_id(next_val) select IFNULL(max(id), 0) as next_val from problem;
+- changeSet:
+    id: 1623999997860-11
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: next_val
+            type: BIGINT
+        tableName: problem_pattern_id
+    - sql:
+          sql: Insert into problem_pattern_id(next_val) select IFNULL(max(id), 0) as next_val from problem_pattern;
+- changeSet:
+    id: 1623999997860-12
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: next_val
+            type: BIGINT
+        tableName: project_id
+    - sql:
+          sql: Insert into project_id(next_val) select IFNULL(max(id), 0) as next_val from project;
+- changeSet:
+    id: 1623999997860-13
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: next_val
+            type: BIGINT
+        tableName: root_cause_id
+    - sql:
+          sql: Insert into root_cause_id(next_val) select IFNULL(max(id), 0) as next_val from root_cause;
+- changeSet:
+    id: 1623999997860-14
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: next_val
+            type: BIGINT
+        tableName: run_id
+    - sql:
+          sql: Insert into run_id(next_val) select IFNULL(max(id), 0) as next_val from run;
+- changeSet:
+    id: 1623999997860-15
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: next_val
+            type: BIGINT
+        tableName: scenario_id
+    - sql:
+          sql: Insert into scenario_id(next_val) select IFNULL(max(id), 0) as next_val from scenario;
+- changeSet:
+    id: 1623999997860-16
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: next_val
+            type: BIGINT
+        tableName: setting_id
+    - sql:
+          sql: Insert into setting_id(next_val) select IFNULL(max(id), 0) as next_val from setting;
+- changeSet:
+    id: 1623999997860-17
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: next_val
+            type: BIGINT
+        tableName: severity_id
+- changeSet:
+    id: 1623999997860-18
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: next_val
+            type: BIGINT
+        tableName: source_id
+- changeSet:
+    id: 1623999997860-19
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: next_val
+            type: BIGINT
+        tableName: team_id
+- changeSet:
+    id: 1623999997860-20
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: next_val
+            type: BIGINT
+        tableName: technology_setting_id
+- changeSet:
+    id: 1623999997860-21
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: next_val
+            type: BIGINT
+        tableName: type_id
+

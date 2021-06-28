@@ -17,26 +17,12 @@
 
 package com.decathlon.ara.domain;
 
+import lombok.*;
+
+import javax.persistence.*;
 import java.util.Comparator;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.With;
-import org.hibernate.annotations.GenericGenerator;
-
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.nullsFirst;
+import static java.util.Comparator.*;
 
 @Data
 @NoArgsConstructor
@@ -48,8 +34,8 @@ import static java.util.Comparator.nullsFirst;
 public class Type implements Comparable<Type> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
-    @GenericGenerator(name = "native", strategy = "native")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "type_id")
+    @SequenceGenerator(name = "type_id", sequenceName = "type_id", allocationSize = 1)
     private Long id;
 
     private long projectId;

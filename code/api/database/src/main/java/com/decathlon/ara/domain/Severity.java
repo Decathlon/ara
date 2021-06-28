@@ -17,23 +17,12 @@
 
 package com.decathlon.ara.domain;
 
+import lombok.*;
+
+import javax.persistence.*;
 import java.util.Comparator;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.With;
-import org.hibernate.annotations.GenericGenerator;
-
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.nullsFirst;
+import static java.util.Comparator.*;
 
 @Data
 @NoArgsConstructor
@@ -52,8 +41,8 @@ public class Severity implements Comparable<Severity> {
     public static final Severity ALL = new Severity(Long.valueOf(-1), -1, "*", Integer.MAX_VALUE, GLOBAL_NAME, GLOBAL_NAME, GLOBAL_NAME, false);
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
-    @GenericGenerator(name = "native", strategy = "native")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "severity_id")
+    @SequenceGenerator(name = "severity_id", sequenceName = "severity_id", allocationSize = 1)
     private Long id;
 
     private long projectId;

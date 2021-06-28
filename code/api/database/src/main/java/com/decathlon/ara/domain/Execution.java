@@ -21,12 +21,7 @@ import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
 import com.decathlon.ara.domain.enumeration.JobStatus;
 import com.decathlon.ara.domain.enumeration.QualityStatus;
 import com.decathlon.ara.domain.enumeration.Result;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.With;
-import org.hibernate.annotations.GenericGenerator;
+import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.SortNatural;
@@ -49,8 +44,8 @@ import java.util.TreeSet;
 public class Execution {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
-    @GenericGenerator(name = "native", strategy = "native")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "execution_id")
+    @SequenceGenerator(name = "execution_id", sequenceName = "execution_id", allocationSize = 1)
     private Long id;
 
     @Column(length = 16)
