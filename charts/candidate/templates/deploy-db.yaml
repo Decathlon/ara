@@ -1,5 +1,5 @@
 {{- if and (not .Values.database.external) (not .Values.database.embedded) }}
-{{- $name := printf "%s-%s" .Chart.Name "db" -}}
+{{- $name := printf "%s-%s-%s" .Release.Name .Chart.Name "db" -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -27,25 +27,20 @@ spec:
     spec:
       containers:
       - name: {{ $name }}
-        image: "mysql:5.7"
+        image: "postgres:12"
         imagePullPolicy: IfNotPresent
         env:
-        - name: MYSQL_DATABASE
+        - name: POSTGRES_DB
           valueFrom:
             secretKeyRef:
               name: {{ include "ara.database.secret.name" . }}
               key: {{ include "ara.database.secret.databasenamekey" . }}
-        - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ include "ara.database.secret.name" . }}-root
-              key: root-password
-        - name: MYSQL_USER
+        - name: POSTGRES_USER
           valueFrom:
             secretKeyRef:
               name: {{ include "ara.database.secret.name" . }}
               key: {{ include "ara.database.secret.usernamekey" . }}
-        - name: MYSQL_PASSWORD
+        - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ include "ara.database.secret.name" . }}

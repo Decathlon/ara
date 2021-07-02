@@ -81,6 +81,10 @@ ara:
   clientBaseUrl: http://localhost:8081/
 
 management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
   # Metrics
   metrics:
     export:

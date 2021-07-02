@@ -1,4 +1,4 @@
-{{- $name := printf "%s-%s" .Chart.Name "ui" -}}
+{{- $name := printf "%s-%s-%s" .Release.Name .Chart.Name "ui" -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

@@ -14,7 +14,7 @@ data:
   database_type: {{ .Values.database.type }}
   liquibase_active: {{ .Values.database.liquibaseActive | quote }}
   app_url: {{ .Values.api.appUrl }}
-  api_url: {{ printf "%s-api.%s.svc.cluster.local:%.0f" .Chart.Name .Release.Namespace .Values.api.port }}
+  api_url: {{ printf "%s-%s-api.%s.svc.cluster.local:%.0f" .Release.Name .Chart.Name .Release.Namespace .Values.api.port }}
 
 {{- if not .Values.api.configExistingSecret.enabled }}
 ---
