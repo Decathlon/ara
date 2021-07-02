@@ -1,5 +1,5 @@
 {{- if .Values.ingress.enabled }}
-{{- $name := printf "%s-%s" .Chart.Name "ingress" -}}
+{{- $name := printf "%s-%s-%s" .Release.Name .Chart.Name "ingress" -}}
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
@@ -21,19 +21,19 @@ spec:
     http:
       paths:
       - backend:
-          serviceName: {{ printf "%s-%s" .Chart.Name "ui" }}
+          serviceName: {{ printf "%s-%s-%s" .Release.Name .Chart.Name "ui" }}
           servicePort: http-port
         path: /
       - backend:
-          serviceName: {{ printf "%s-%s" .Chart.Name "api" }}
+          serviceName: {{ printf "%s-%s-%s" .Release.Name .Chart.Name "api" }}
           servicePort: http-port
         path: /api
       - backend:
-          serviceName: {{ printf "%s-%s" .Chart.Name "api" }}
+          serviceName: {{ printf "%s-%s-%s" .Release.Name .Chart.Name "api" }}
           servicePort: http-port
         path: /actuator
       - backend:
-          serviceName: {{ printf "%s-%s" .Chart.Name "api" }}
+          serviceName: {{ printf "%s-%s-%s" .Release.Name .Chart.Name "api" }}
           servicePort: http-port
         path: /auth
 {{- if .Values.ingress.tls }}

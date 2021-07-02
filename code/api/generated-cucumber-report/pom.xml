@@ -27,7 +27,7 @@
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-generated-cucumber-report</artifactId>
-    <version>9.0.7</version>
+    <version>9.0.8</version>
 
     <name>ARA Cucumber</name>
     <description>

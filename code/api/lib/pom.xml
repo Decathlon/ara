@@ -27,7 +27,7 @@
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-lib</artifactId>
-    <version>9.0.7</version>
+    <version>9.0.8</version>
 
     <properties>
         <java.version>16</java.version>
