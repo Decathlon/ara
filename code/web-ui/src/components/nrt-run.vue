@@ -22,7 +22,7 @@
 
     <Row type="flex" :gutter="4" justify="space-around">
       <i-col span="4" style="padding-top: 6px;">
-        <a 
+        <a
           :data-nrt=" $route.name + '_CartRowTitle_' + run.country.code + '_' + run.type.code + '_' + execution.id "
           :style="'display: block; color: #657180;' + (haveQualities ? '' : ' cursor: text;')" v-on:click="open = !open">
           <Icon type="md-arrow-dropright" size="16" v-if="haveQualities" :class="open ? 'arrow open' : 'arrow'" style="width: 4px; position: relative; left: -5px;" />
@@ -47,7 +47,7 @@
             <span v-else-if="countryDeployment.status === 'RUNNING'">
               <nrt-progress-bar :small="true" :estimatedDuration="countryDeployment.estimatedDuration" :startDateTime="countryDeployment.startDateTime" style="padding-right: 17px;">
                 Deploying on <strong>{{countryDeployment.platform}}</strong>...
-                <a v-if="countryDeployment.jobUrl" :href="countryDeployment.jobUrl + 'console'" target="_blank">
+                <a v-if="countryDeployment.jobUrl" :href="sanitizeARAUrl(countryDeployment.jobUrl + 'console')" target="_blank">
                   <Button icon="md-open" size="small" style="margin-left: 8px;">SHOW LOGS</Button>
                 </a>
               </nrt-progress-bar>
@@ -57,7 +57,7 @@
             <span v-else style="color: #ED3F14;">
               The country <strong>{{countryDeployment.country.displayName}}</strong> did not deploy on <strong>{{countryDeployment.platform}}</strong>
               <job-status-result :job="countryDeployment"/>
-              <a v-if="countryDeployment.jobUrl" :href="countryDeployment.jobUrl + 'console'" target="_blank">
+              <a v-if="countryDeployment.jobUrl" :href="sanitizeARAUrl(countryDeployment.jobUrl + 'console')" target="_blank">
                 <Button icon="md-open" size="small" style="margin-left: 8px;">SHOW LOGS</Button>
               </a>
             </span>
@@ -74,7 +74,7 @@
             <span v-else-if="run.status === 'RUNNING'">
               <nrt-progress-bar :small="true" :estimatedDuration="run.estimatedDuration" :startDateTime="run.startDateTime" style="padding-right: 17px;">
                 Testing...
-                <a v-if="run.jobUrl" :href="run.jobUrl + 'console'" target="_blank">
+                <a v-if="run.jobUrl" :href="sanitizeARAUrl(run.jobUrl + 'console')" target="_blank">
                   <Button icon="md-open" size="small" style="margin-left: 8px;">SHOW LOGS</Button>
                 </a>
               </nrt-progress-bar>
@@ -83,7 +83,7 @@
             <!-- Run failed... -->
             <span v-else style="color: #ED3F14;">
               No result (test failed to launch, initialize or report)
-              <a v-if="run.jobUrl" :href="run.jobUrl + 'console'" target="_blank">
+              <a v-if="run.jobUrl" :href="sanitizeARAUrl(run.jobUrl + 'console')" target="_blank">
                 <Button icon="md-open" size="small" style="margin-left: 8px;">SHOW LOGS</Button>
               </a>
             </span>
@@ -141,6 +141,12 @@
     data () {
       return {
         open: false
+      }
+    },
+
+    methods: {
+      sanitizeARAUrl (url) {
+        return this.$sanitizeUrl(url)
       }
     },
 

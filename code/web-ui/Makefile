@@ -3,6 +3,7 @@
 #####################################
 
 NODE_VERSION=12
+FULL_IMAGE?=decathlon/ara-web-ui
 
 #####################################
 ##             DEVELOP             ##
@@ -31,7 +32,7 @@ dkr-install: ## DEV - install project with docker
 
 dkr-run: ## DEV - run web-ui with docker
 	@docker container run -it --name ara-web-ui --rm \
-        --network="host" \
+        -p 8081:8081 \
 				--user $(shell id -u):$(shell id -g) \
         -v $${HOME}/.ara-web:/var/node:rw \
         -e HOME=/var/node \
@@ -45,7 +46,7 @@ dkr-run: ## DEV - run web-ui with docker
 
 dkr-shell: ## Start a shell in docker node container
 	@docker container run -it --rm --name ara-node-$(NODE_VERSION)  \
-			--network=host \
+			-p 8081:8081 \
 			--user $(shell id -u):$(shell id -g) \
 			-v $${HOME}/.ara-web:/var/node:rw \
 			-e HOME=/var/node \
@@ -73,13 +74,6 @@ dkr-build: ## DEV - build web-ui with docker
 #####################################
 
 dkr-build-image:
-	@mkdir -p static/version
-	@SHA=$(shell git rev-parse --short HEAD) && \
-	 WEB_VERSION=$(shell cat package.json | jq -r '.version') && \
-	 jq -n	--arg version $$WEB_VERSION \
-					--arg sha $$SHA \
-					-f build/template/about.jq > \
-					static/version/about.json
 	@docker build -t $(FULL_IMAGE) .
 
 #####################################

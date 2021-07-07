@@ -50,7 +50,7 @@
             <td>{{execution.version}}</td>
             <td>{{util.formatDate(execution.buildDateTime)}}</td>
             <td>{{util.formatDate(execution.testDateTime)}}</td>
-            <td><a :href="execution.jobUrl" target="_blank"><Icon type="md-open" /> JOB</a></td>
+            <td><a :href="sanitizeARAUrl(execution.jobUrl)" target="_blank"><Icon type="md-open" /> JOB</a></td>
             <td style="white-space: nowrap;">
               <Icon v-if="execution.status === 'RUNNING'" type="ios-loading" size="16" class="animated-spin-icon" style="margin-right: 4px;"/>
               {{execution.status}}
@@ -135,6 +135,10 @@
     },
 
     methods: {
+      sanitizeARAUrl (url) {
+        return this.$sanitizeUrl(url)
+      },
+
       loadExecutions () {
         let url = api.pageUrl(api.paths.executions(this), this.executionsPaging)
         this.loadingExecutions = true

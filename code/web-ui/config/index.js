@@ -6,8 +6,17 @@ var araAPIPort = process.env.ARA_API_PORT || 8080
 
 var araAPIURL = 'http://' + araAPIHost + ':' + araAPIPort
 
-const development = { NODE_ENV: 'development' }
-const production = { NODE_ENV: 'production' }
+var PACKAGE = require('../package.json')
+var version = PACKAGE.version
+
+const development = {
+  NODE_ENV: 'development',
+  VERSION: version
+}
+const production = {
+  NODE_ENV: 'production',
+  VERSION: version
+}
 
 module.exports = {
   build: {

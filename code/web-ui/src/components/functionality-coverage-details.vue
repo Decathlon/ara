@@ -28,7 +28,7 @@
             <span class="tags">{{scenario.tags}}</span>
             <strong>{{scenario.name}}</strong>
             <span :class="'severityStyle' + (!scenario.severity || scenario.severity === '_' ? ' none' : '')">{{prettySeverity(scenario.severity)}}</span>
-            <a :href="editUrl(scenario, source)" target="_blank" style="margin-left: 8px;">
+            <a :href="sanitizeARAUrl(editUrl(scenario, source))" target="_blank" style="margin-left: 8px;">
               <Icon type="md-open"/> EDIT SCENARIO
             </a>
             <pre><code :style="'display: table; min-width: 100%; padding: 0;'" v-html="scenarioUtil.formattedScenario(scenario, null, true)"></code></pre>
@@ -99,6 +99,10 @@
     },
 
     methods: {
+      sanitizeARAUrl (url) {
+        return this.$sanitizeUrl(url)
+      },
+
       prettySeverity (severityCode) {
         return util.prettySeverity(severityCode, this)
       },
