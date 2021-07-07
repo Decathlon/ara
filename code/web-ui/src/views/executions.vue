@@ -18,7 +18,7 @@
   <div id="latestExecutionsBlock">
     <div style="display: flex;">
       <div v-if="isFramed" style="flex: 0 0 auto;">
-        <router-link :to="{ name: 'redirecter' }" id="home-logo" target="_blank">
+        <router-link :to="{ name: 'redirecter' }" id="home-logo" rel="noopener" target="_blank">
           <Tooltip placement="bottom-start" :transfer="true">
             <div slot="content">
               ARA - AGILE REGRESSION ANALYZER<br>

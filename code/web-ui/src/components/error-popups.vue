@@ -19,7 +19,7 @@
     <Modal v-model="screenshotIsVisible" :title="'Screenshot' + (executedScenario ? ' for scenario: ' + executedScenario.name : '')" :width="900" style="text-align: center;" class="noFooter">
       <div v-if="executedScenario && currentPopup === 'screenshot'">
         <div style="height: 0px; display: inline-block; float: left; position: relative; top: -58px; left: 8px;">
-          <a :href="executedScenario.screenshotUrl" target="_blank">
+          <a :href="sanitizeARAUrl(executedScenario.screenshotUrl)" rel="noopener" target="_blank">
             <Button><Icon type="md-open"/> SHOW FULLSCREEN</Button>
           </a>
         </div>
@@ -32,7 +32,7 @@
     <Modal v-model="videoIsVisible" :title="'Video' + (executedScenario ? ' for scenario: ' + executedScenario.name : '')" :width="900" style="text-align: center;" class="noFooter">
       <div v-if="executedScenario && currentPopup === 'video'">
         <div style="height: 0px; display: inline-block; float: left; position: relative; top: -58px; left: 2px;">
-          <a :href="executedScenario.videoUrl" target="_blank">
+          <a :href="sanitizeARAUrl(executedScenario.videoUrl)" rel="noopener" target="_blank">
             <Button><Icon type="md-open"/> SHOW FULLSCREEN</Button>
           </a>
         </div>
@@ -101,6 +101,9 @@
     },
 
     methods: {
+      sanitizeARAUrl (url) {
+        return this.$sanitizeUrl(url)
+      },
       prettySeverity (severityCode) {
         return util.prettySeverity(severityCode, this)
       },

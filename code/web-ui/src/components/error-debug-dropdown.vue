@@ -40,37 +40,37 @@
         This scenario used selenium node {{executedScenario.seleniumNode}}
       </DropdownItem>
 
-      <a v-if="executedScenario.diffReportUrl" :href="executedScenario.diffReportUrl" target="_blank">
+      <a v-if="executedScenario.diffReportUrl" :href="sanitizeARAUrl(executedScenario.diffReportUrl)" rel="noopener" target="_blank">
         <DropdownItem>
           <Icon type="md-open"/> SHOW DIFF REPORT
         </DropdownItem>
       </a>
 
-      <a v-if="executedScenario.logsUrl" :href="executedScenario.logsUrl" target="_blank">
+      <a v-if="executedScenario.logsUrl" :href="sanitizeARAUrl(executedScenario.logsUrl)" rel="noopener" target="_blank">
         <DropdownItem>
           <Icon type="md-open"/> SHOW LOGS
         </DropdownItem>
       </a>
 
-      <a v-if="executedScenario.httpRequestsUrl" :href="executedScenario.httpRequestsUrl" target="_blank">
+      <a v-if="executedScenario.httpRequestsUrl" :href="sanitizeARAUrl(executedScenario.httpRequestsUrl)" rel="noopener" target="_blank">
         <DropdownItem>
           <Icon type="md-open"/> SHOW HTTP REQUESTS
         </DropdownItem>
       </a>
 
-      <a v-if="executedScenario.javaScriptErrorsUrl" :href="executedScenario.javaScriptErrorsUrl" target="_blank">
+      <a v-if="executedScenario.javaScriptErrorsUrl" :href="sanitizeARAUrl(executedScenario.javaScriptErrorsUrl)" rel="noopener" target="_blank">
         <DropdownItem>
           <Icon type="md-open"/> SHOW JAVASCRIPT ERRORS
         </DropdownItem>
       </a>
 
-      <a v-if="executedScenario.cucumberReportUrl" :href="executedScenario.cucumberReportUrl" target="_blank">
+      <a v-if="executedScenario.cucumberReportUrl" :href="sanitizeARAUrl(executedScenario.cucumberReportUrl)" rel="noopener" target="_blank">
         <DropdownItem>
           <Icon type="md-open"/> SHOW CUCUMBER REPORT
         </DropdownItem>
       </a>
 
-      <a :href="editUrl" target="_blank">
+      <a :href="sanitizeARAUrl(editUrl)" rel="noopener" target="_blank">
         <DropdownItem>
           <Icon type="md-open"/> EDIT SCENARIO
         </DropdownItem>
@@ -107,6 +107,9 @@
     methods: {
       goToErrorsPage (errorId) {
         this.$router.push({ name: 'error', params: { id: errorId } })
+      },
+      sanitizeARAUrl (url) {
+        return this.$sanitizeUrl(url)
       }
     }
   }

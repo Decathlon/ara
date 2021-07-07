@@ -36,6 +36,8 @@ import { config } from './config'
 import api from './libs/api'
 import VueCookies from 'vue-cookies'
 
+import { sanitizeUrl } from '@braintree/sanitize-url'
+
 Vue.use(Vue2Filters)
 Vue.use(VueResource)
 Vue.use(VueRouter)
@@ -161,6 +163,8 @@ router.afterEach(() => {
   iView.LoadingBar.finish()
   window.scrollTo(0, 0)
 })
+
+Vue.prototype.$sanitizeUrl = sanitizeUrl
 
 /* eslint-disable no-new */
 new Vue({

@@ -42,7 +42,7 @@
                                     </th:block>
                                     <span th:if="${countryDeployment.status}" th:class="${countryDeployment.status}">([[${#strings.toLowerCase(countryDeployment.status)}]])</span>
                                     <span th:if="${countryDeployment.result}" th:class="${countryDeployment.result}">([[${#strings.toLowerCase(countryDeployment.result)}]])</span>
-                                    <a th:if="${countryDeployment.jobUrl}" th:href="${countryDeployment.jobUrl + 'console'}" target="_blank" style="text-decoration: none;">
+                                    <a th:if="${countryDeployment.jobUrl}" th:href="${countryDeployment.jobUrl + 'console'}" rel="noopener" target="_blank" style="text-decoration: none;">
                                         <span class="Button" style="margin-left: 8px;">SHOW LOGS</span>
                                     </a>
                                 </div>
@@ -51,7 +51,7 @@
                                     <span th:if="${run.status.name() == 'DONE'}" style="color: #ED3F14;">
                                         No result (test failed to launch, initialize or report)
                                     </span>
-                                    <a th:if="${run.jobUrl}" th:href="${run.jobUrl + 'console'}" target="_blank" style="text-decoration: none;">
+                                    <a th:if="${run.jobUrl}" th:href="${run.jobUrl + 'console'}" rel="noopener" target="_blank" style="text-decoration: none;">
                                         <span class="Button" style="margin-left: 8px;">SHOW LOGS</span>
                                     </a>
                                 </div>
