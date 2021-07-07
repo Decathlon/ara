@@ -47,7 +47,7 @@
             <span v-else-if="countryDeployment.status === 'RUNNING'">
               <nrt-progress-bar :small="true" :estimatedDuration="countryDeployment.estimatedDuration" :startDateTime="countryDeployment.startDateTime" style="padding-right: 17px;">
                 Deploying on <strong>{{countryDeployment.platform}}</strong>...
-                <a v-if="countryDeployment.jobUrl" :href="sanitizeARAUrl(countryDeployment.jobUrl + 'console')" target="_blank">
+                <a v-if="countryDeployment.jobUrl" :href="sanitizeARAUrl(countryDeployment.jobUrl + 'console')" rel="noopener" target="_blank">
                   <Button icon="md-open" size="small" style="margin-left: 8px;">SHOW LOGS</Button>
                 </a>
               </nrt-progress-bar>
@@ -57,7 +57,7 @@
             <span v-else style="color: #ED3F14;">
               The country <strong>{{countryDeployment.country.displayName}}</strong> did not deploy on <strong>{{countryDeployment.platform}}</strong>
               <job-status-result :job="countryDeployment"/>
-              <a v-if="countryDeployment.jobUrl" :href="sanitizeARAUrl(countryDeployment.jobUrl + 'console')" target="_blank">
+              <a v-if="countryDeployment.jobUrl" :href="sanitizeARAUrl(countryDeployment.jobUrl + 'console')" rel="noopener" target="_blank">
                 <Button icon="md-open" size="small" style="margin-left: 8px;">SHOW LOGS</Button>
               </a>
             </span>
@@ -74,7 +74,7 @@
             <span v-else-if="run.status === 'RUNNING'">
               <nrt-progress-bar :small="true" :estimatedDuration="run.estimatedDuration" :startDateTime="run.startDateTime" style="padding-right: 17px;">
                 Testing...
-                <a v-if="run.jobUrl" :href="sanitizeARAUrl(run.jobUrl + 'console')" target="_blank">
+                <a v-if="run.jobUrl" :href="sanitizeARAUrl(run.jobUrl + 'console')" rel="noopener" target="_blank">
                   <Button icon="md-open" size="small" style="margin-left: 8px;">SHOW LOGS</Button>
                 </a>
               </nrt-progress-bar>
@@ -83,7 +83,7 @@
             <!-- Run failed... -->
             <span v-else style="color: #ED3F14;">
               No result (test failed to launch, initialize or report)
-              <a v-if="run.jobUrl" :href="sanitizeARAUrl(run.jobUrl + 'console')" target="_blank">
+              <a v-if="run.jobUrl" :href="sanitizeARAUrl(run.jobUrl + 'console')" rel="noopener" target="_blank">
                 <Button icon="md-open" size="small" style="margin-left: 8px;">SHOW LOGS</Button>
               </a>
             </span>

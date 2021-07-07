@@ -19,7 +19,7 @@
     <h2 style="margin-top: 0;">
       PROBLEM
       <problem-tag :problem="problem"/>
-      <a v-if="problem.defectUrl && problem.defectExistence !== 'NONEXISTENT'" :href="sanitizeARAUrl(problem.defectUrl)" target="_blank">
+      <a v-if="problem.defectUrl && problem.defectExistence !== 'NONEXISTENT'" :href="sanitizeARAUrl(problem.defectUrl)" rel="noopener" target="_blank">
         <Button icon="md-open" type="info">GO TO WORK ITEM #{{problem.defectId}}</Button>
       </a>
       <Button type="primary" icon="md-clipboard" @click="copyDescriptionToClipboard">COPY DESCRIPTION TO CLIPBOARD</Button>

@@ -40,31 +40,31 @@
         This scenario used selenium node {{executedScenario.seleniumNode}}
       </DropdownItem>
 
-      <a v-if="executedScenario.diffReportUrl" :href="sanitizeARAUrl(executedScenario.diffReportUrl)" target="_blank">
+      <a v-if="executedScenario.diffReportUrl" :href="sanitizeARAUrl(executedScenario.diffReportUrl)" rel="noopener" target="_blank">
         <DropdownItem>
           <Icon type="md-open"/> SHOW DIFF REPORT
         </DropdownItem>
       </a>
 
-      <a v-if="executedScenario.logsUrl" :href="sanitizeARAUrl(executedScenario.logsUrl)" target="_blank">
+      <a v-if="executedScenario.logsUrl" :href="sanitizeARAUrl(executedScenario.logsUrl)" rel="noopener" target="_blank">
         <DropdownItem>
           <Icon type="md-open"/> SHOW LOGS
         </DropdownItem>
       </a>
 
-      <a v-if="executedScenario.httpRequestsUrl" :href="sanitizeARAUrl(executedScenario.httpRequestsUrl)" target="_blank">
+      <a v-if="executedScenario.httpRequestsUrl" :href="sanitizeARAUrl(executedScenario.httpRequestsUrl)" rel="noopener" target="_blank">
         <DropdownItem>
           <Icon type="md-open"/> SHOW HTTP REQUESTS
         </DropdownItem>
       </a>
 
-      <a v-if="executedScenario.javaScriptErrorsUrl" :href="sanitizeARAUrl(executedScenario.javaScriptErrorsUrl)" target="_blank">
+      <a v-if="executedScenario.javaScriptErrorsUrl" :href="sanitizeARAUrl(executedScenario.javaScriptErrorsUrl)" rel="noopener" target="_blank">
         <DropdownItem>
           <Icon type="md-open"/> SHOW JAVASCRIPT ERRORS
         </DropdownItem>
       </a>
 
-      <a v-if="executedScenario.cucumberReportUrl" :href="sanitizeARAUrl(executedScenario.cucumberReportUrl)" target="_blank">
+      <a v-if="executedScenario.cucumberReportUrl" :href="sanitizeARAUrl(executedScenario.cucumberReportUrl)" rel="noopener" target="_blank">
         <DropdownItem>
           <Icon type="md-open"/> SHOW CUCUMBER REPORT
         </DropdownItem>
