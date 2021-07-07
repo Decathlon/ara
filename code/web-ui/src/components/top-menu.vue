@@ -97,7 +97,7 @@
           </DropdownMenu>
         </Dropdown>
         <Tooltip content="What's new in ARA?" placement="bottom-end" :transfer="false">
-          <a :href="sanitizeARAUrl('https://github.com/Decathlon/ara/releases/tag/ara-' + appVersion)"
+          <a :href="$sanitizeUrl('https://github.com/Decathlon/ara/releases/tag/ara-' + appVersion)"
              @click="setLatestChangelogVersion"
              rel="noopener" target="_blank"><Badge dot :count="changelogCount"><Icon type="md-notifications" size="24"/></Badge></a>
         </Tooltip>
@@ -192,11 +192,6 @@
     },
 
     methods: {
-      sanitizeARAUrl (url) {
-        console.log(this)
-        return this.$sanitizeUrl(url)
-      },
-
       loadLocalParameters () {
         this.isMediaDisplayedOnSamePage = LocalParameterService.isMediaDisplayedOnSamePage()
       },

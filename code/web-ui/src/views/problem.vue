@@ -19,7 +19,7 @@
     <h2 style="margin-top: 0;">
       PROBLEM
       <problem-tag :problem="problem"/>
-      <a v-if="problem.defectUrl && problem.defectExistence !== 'NONEXISTENT'" :href="sanitizeARAUrl(problem.defectUrl)" rel="noopener" target="_blank">
+      <a v-if="problem.defectUrl && problem.defectExistence !== 'NONEXISTENT'" :href="$sanitizeUrl(problem.defectUrl)" rel="noopener" target="_blank">
         <Button icon="md-open" type="info">GO TO WORK ITEM #{{problem.defectId}}</Button>
       </a>
       <Button type="primary" icon="md-clipboard" @click="copyDescriptionToClipboard">COPY DESCRIPTION TO CLIPBOARD</Button>
@@ -242,10 +242,6 @@ If you updated the work-item a few seconds ago, you may want to speed up the ARA
     },
 
     methods: {
-      sanitizeARAUrl (url) {
-        return this.$sanitizeUrl(url)
-      },
-
       loadProblem (skipMatchingErrorsReloading) {
         this.loadingProblem = true
         Vue.http

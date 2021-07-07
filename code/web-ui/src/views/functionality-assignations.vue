@@ -103,7 +103,7 @@
                 'a',
                 {
                   attrs: {
-                    href: url,
+                    href: this.$sanitizeUrl(url),
                     target: 'blank'
                   },
                   style: {

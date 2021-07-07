@@ -70,7 +70,7 @@
           <strong :data-nrt=" 'executions_IgnoredScenariosDetailsFeature_' + feature.name " style="display: block; margin-top: 6px;">
             {{feature.name}}
             <span style="color: lightgray">({{feature.scenarios.length}})</span>
-            <a :data-nrt=" 'executions_IgnoredScenariosDetailsEditScenarios_' + feature.name " :href="sanitizeARAUrl(editUrl(feature))" rel="noopener" target="_blank" style="margin-left: 8px; font-weight: normal;">
+            <a :data-nrt=" 'executions_IgnoredScenariosDetailsEditScenarios_' + feature.name " :href="$sanitizeUrl(editUrl(feature))" rel="noopener" target="_blank" style="margin-left: 8px; font-weight: normal;">
               <Icon type="md-open"/> EDIT SCENARIOS
             </a>
           </strong>
@@ -109,9 +109,6 @@
     },
 
     methods: {
-      sanitizeARAUrl (url) {
-        return this.$sanitizeUrl(url)
-      },
       loadIgnoredScenarios () {
         this.loadingIgnoredScenarios = true
         Vue.http

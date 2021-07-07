@@ -53,7 +53,7 @@
   <div v-else style="color: #ED3F14;">
     NO DATA
     <job-status-result :job="execution"/>
-    <a :href="sanitizeARAUrl(execution.jobUrl + 'console')" rel="noopener" target="_blank">
+    <a :href="$sanitizeUrl(execution.jobUrl + 'console')" rel="noopener" target="_blank">
       <Button icon="md-open" size="small" style="margin-left: 8px;">SHOW LOGS</Button>
     </a>
   </div>
@@ -74,9 +74,6 @@
     },
 
     methods: {
-      sanitizeARAUrl (url) {
-        return this.$sanitizeUrl(url)
-      },
       routerLink (severityCode, counts) {
         return {
           name: 'execution',

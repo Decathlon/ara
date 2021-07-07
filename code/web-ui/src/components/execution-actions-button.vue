@@ -42,7 +42,7 @@
           JOB REPORTS
         </DropdownItem>
 
-        <a :href="execution.jobUrl ? (sanitizeARAUrl(execution.jobUrl + 'console')) : null" rel="noopener" target="_blank">
+        <a :href="execution.jobUrl ? ($sanitizeUrl(execution.jobUrl + 'console')) : null" rel="noopener" target="_blank">
           <DropdownItem
               :disabled="!execution.jobUrl"
               :data-nrt=" $route.name + '_ActionsAndJobReportsButton_' + 'Execution_' + execution.id ">
@@ -52,7 +52,7 @@
           </DropdownItem>
         </a>
         <div v-for="countryDeployment in execution.countryDeployments" :key="countryDeployment.id">
-          <a :href="countryDeployment.jobUrl ? (sanitizeARAUrl(countryDeployment.jobUrl + 'console')) : null" rel="noopener" target="_blank">
+          <a :href="countryDeployment.jobUrl ? ($sanitizeUrl(countryDeployment.jobUrl + 'console')) : null" rel="noopener" target="_blank">
             <DropdownItem
                 :disabled="!countryDeployment.jobUrl"
                 :data-nrt=" $route.name + '_ActionsAndJobReportsButton_' + countryDeployment.country.code + '_Deployment_' + + execution.id "
@@ -63,7 +63,7 @@
             </DropdownItem>
           </a>
           <a v-for="run in execution.runs" :key="run.id" v-if="run.country.code === countryDeployment.country.code"
-              :href="run.jobUrl ? (sanitizeARAUrl(run.jobUrl + 'cucumber-html-reports/overview-features.html')) : null"
+              :href="run.jobUrl ? ($sanitizeUrl(run.jobUrl + 'cucumber-html-reports/overview-features.html')) : null"
               rel="noopener" target="_blank">
             <DropdownItem
                 :disabled="!run.jobUrl"
@@ -122,10 +122,6 @@
     },
 
     methods: {
-      sanitizeARAUrl (url) {
-        return this.$sanitizeUrl(url)
-      },
-
       discard (execution) {
         this.discardReason = execution.discardReason
         this.executionToDiscard = execution
