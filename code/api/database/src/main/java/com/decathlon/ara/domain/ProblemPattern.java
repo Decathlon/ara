@@ -36,6 +36,7 @@ public class ProblemPattern {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "problem_pattern_id")
+    @SequenceGenerator(name = "problem_pattern_id", sequenceName = "problem_pattern_id", allocationSize = 1)
     private Long id;
 
     // 1/2 for @EqualsAndHashCode to work: used when an entity is fetched by JPA
