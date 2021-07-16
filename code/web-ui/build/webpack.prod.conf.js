@@ -8,7 +8,7 @@ var CopyWebpackPlugin = require('copy-webpack-plugin')
 var HtmlWebpackPlugin = require('html-webpack-plugin')
 var FaviconsWebpackPlugin = require('favicons-webpack-plugin')
 var MiniCssExtractPlugin = require('mini-css-extract-plugin')
-var OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
+var CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 
 var webpackConfig = merge(baseWebpackConfig, {
   module: {
@@ -17,7 +17,7 @@ var webpackConfig = merge(baseWebpackConfig, {
       extract: true
     })
   },
-  devtool: config.build.productionSourceMap ? '#source-map' : false,
+  devtool: config.build.productionSourceMap ? 'source-map' : false,
   output: {
     path: config.build.assetsRoot,
     filename: utils.assetsPath('js/[name].[chunkhash].js'),
@@ -25,9 +25,12 @@ var webpackConfig = merge(baseWebpackConfig, {
   },
   optimization: {
     minimize: true,
+    minimizer: [
+      new CssMinimizerPlugin()
+    ],
     splitChunks: {
       cacheGroups: {
-        vendors: {
+        defaultVendors: {
           test(module, count) {
             // any required modules inside node_modules are extracted to vendor
             return (
@@ -50,13 +53,6 @@ var webpackConfig = merge(baseWebpackConfig, {
     // extract css into its own file
     new MiniCssExtractPlugin({
       filename: utils.assetsPath('css/[name].[contenthash].css')
-    }),
-    // Compress extracted CSS. We are using this plugin so that possible
-    // duplicated CSS from different components can be deduped.
-    new OptimizeCSSPlugin({
-      cssProcessorOptions: {
-        safe: true
-      }
     }),
     // generate dist index.html with correct asset hash for caching.
     // you can customize output by editing /index.html
@@ -101,13 +97,17 @@ var webpackConfig = merge(baseWebpackConfig, {
     }),
     */
     // copy custom static assets
-    new CopyWebpackPlugin([
-      {
-        from: path.resolve(__dirname, '../static'),
-        to: config.build.assetsSubDirectory,
-        ignore: ['.*']
-      }
-    ])
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, '../static'),
+          to: config.build.assetsSubDirectory,
+          globOptions: {
+            dot: false
+          }
+        }
+      ]
+    })
   ]
 })
 
