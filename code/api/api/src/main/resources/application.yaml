@@ -44,6 +44,7 @@ spring:
 springdoc:
   packagesToScan: com.decathlon.ara
   pathsToMatch: /api/**
+  use-management-port: true
 
 #
 # Sensible default values, optionally customizable by clients
@@ -81,10 +82,12 @@ ara:
   clientBaseUrl: http://localhost:8081/
 
 management:
+  server:
+    port: 9090
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health, info, openapi, swaggerui
   # Metrics
   metrics:
     export:

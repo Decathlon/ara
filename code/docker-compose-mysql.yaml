@@ -34,7 +34,9 @@ services:
     image: "decathlon/ara-web-ui:${WEB_UI_VERSION:-latest}"
     restart: always
     environment:
-      - API_URL=ara-mysql-api:8080
+      - ARA_API_HOST=ara-mysql-api
+      - ARA_API_PORT=8080
+      - ARA_MANAGEMENT_PORT=9090
     ports:
       - 8081:80
     networks:

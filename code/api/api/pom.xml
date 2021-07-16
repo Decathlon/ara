@@ -28,7 +28,7 @@
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-api</artifactId>
-    <version>9.0.9</version>
+    <version>10.0.0</version>
 
     <name>ARA API</name>
     <description>
@@ -41,6 +41,7 @@
         <ara.default.database>h2</ara.default.database>
         <spring.profiles.active />
         <mapstruct.version>1.4.2.Final</mapstruct.version>
+        <springdoc.version>1.5.9</springdoc.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <jacoco.phase.agent>initialize</jacoco.phase.agent>
@@ -176,8 +177,13 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.4.5</version>
+            <version>${springdoc.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-security</artifactId>
+            <version>${springdoc.version}</version>
+         </dependency>
 
         <!-- Mail Sending & Templating -->
         <dependency>
