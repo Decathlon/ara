@@ -26,15 +26,15 @@ spec:
         path: /
       - backend:
           serviceName: {{ printf "%s-%s-%s" .Release.Name .Chart.Name "api" }}
-          servicePort: http-port
+          servicePort: http
         path: /api
       - backend:
           serviceName: {{ printf "%s-%s-%s" .Release.Name .Chart.Name "api" }}
-          servicePort: http-port
+          servicePort: management
         path: /actuator
       - backend:
           serviceName: {{ printf "%s-%s-%s" .Release.Name .Chart.Name "api" }}
-          servicePort: http-port
+          servicePort: http
         path: /auth
 {{- if .Values.ingress.tls }}
   tls:

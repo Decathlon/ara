@@ -3,8 +3,10 @@ var path = require('path')
 
 var araAPIHost = process.env.ARA_API_HOST || 'localhost'
 var araAPIPort = process.env.ARA_API_PORT || 8080
+var araManagementPort = process.env.ARA_MANAGEMENT_PORT || 9090
 
 var araAPIURL = 'http://' + araAPIHost + ':' + araAPIPort
+var araManagementURL = 'http://' + araAPIHost + ':' + araManagementPort
 
 var PACKAGE = require('../package.json')
 var version = PACKAGE.version
@@ -60,7 +62,7 @@ module.exports = {
         changeOrigin: true
       },
       '/actuator': {
-        target: araAPIURL,
+        target: araManagementURL,
         changeOrigin: true
       },
       '/demo-files': {

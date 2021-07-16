@@ -6,15 +6,15 @@ server {
     #access_log  /var/log/nginx/host.access.log  main;
 
     location /auth {
-      proxy_pass http://${API_URL}/auth;
+      proxy_pass http://${ARA_API_HOST}:${ARA_API_PORT}/auth;
     }
 
     location /api {
-      proxy_pass http://${API_URL}/api;
+      proxy_pass http://${ARA_API_HOST}:${ARA_API_PORT}/api;
     }
 
     location /actuator {
-      proxy_pass http://${API_URL}/actuator;
+      proxy_pass http://${ARA_API_HOST}:${ARA_MANAGEMENT_PORT}/actuator;
     }
 
     location / {

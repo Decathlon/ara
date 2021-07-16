@@ -37,16 +37,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
 
-    private final String[] swaggerResources = {
-            "/v3/api-docs/**",
-            "/configuration/ui",
-            "/swagger-resources/**",
-            "/configuration/security",
-            "/swagger-ui.html",
-            "/swagger-ui/**",
-            "/webjars/**"
-    };
-
     @NonNull
     private AuthenticationConfiguration authenticationConfiguration;
 
@@ -69,8 +59,8 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
         .and()
             .authorizeRequests()//NOSONAR
                 .antMatchers("/actuator/info", "/actuator/health/**").permitAll()
+                .antMatchers("/actuator/swaggerui/**", "/actuator/swagger-ui/**", "/actuator/openapi/**").permitAll()
                 .antMatchers("/auth/**").permitAll()
-                .antMatchers(swaggerResources).permitAll()
                 .anyRequest().authenticated()
         .and()
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);

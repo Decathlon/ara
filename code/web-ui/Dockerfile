@@ -13,7 +13,9 @@ RUN npm run build
 
 FROM nginx:1.19
 
-ENV API_URL localhost
+ENV ARA_API_HOST localhost
+ENV ARA_API_PORT 8080
+ENV ARA_MANAGEMENT_PORT 9090
 
 COPY --from=builder /usr/src/app/dist /usr/share/nginx/html
 COPY config/default.conf.template /etc/nginx/templates/default.conf.template

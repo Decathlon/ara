@@ -8,7 +8,7 @@ api:
     image:
         registry: docker.io
         repository: decathlon/ara-api
-        tag: 9.0.9
+        tag: 10.0.0
         imagePullPolicy: IfNotPresent
     replicas: 1
     annotations: {}
@@ -24,6 +24,8 @@ api:
         #  cpu: 100m
         #  memory: 128Mi
     port: 8080
+    management:
+        port: 9090
     # Base url used to redirect on the app by email service among others
     appUrl: ara.test
     authConfig: ""
@@ -44,7 +46,7 @@ ui:
     image:
         registry: docker.io
         repository: decathlon/ara-web-ui
-        tag: 8.7.0
+        tag: 9.0.0
         imagePullPolicy: IfNotPresent
     replicas: 1
     annotations: {}
