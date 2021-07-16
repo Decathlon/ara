@@ -28,7 +28,7 @@
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-database</artifactId>
-    <version>9.0.9</version>
+    <version>10.0.0</version>
 
     <name>ARA Database</name>
     <description>
@@ -177,7 +177,7 @@
                     <dependency>
                         <groupId>org.liquibase.ext</groupId>
                         <artifactId>liquibase-hibernate5</artifactId>
-                        <version>3.9.0</version>
+                        <version>4.4.0</version>
                     </dependency>
                     <dependency>
                         <groupId>org.springframework.boot</groupId>
