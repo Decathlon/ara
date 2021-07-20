@@ -23,7 +23,7 @@ Create chart name and version as used by the chart label.
 Create configmap name.
 */}}
 {{- define "ara.configmap.name" -}}
-{{ printf "%s-%s" .Release.Name "configmap"  }}
+{{ printf "%s-%s-%s" .Release.Name .Chart.Name "configmap"  }}
 {{- end -}}
 
 {{/*
@@ -33,7 +33,7 @@ Secret name for database.
 {{- if .Values.database.existingSecret.enabled -}}
 {{ .Values.database.existingSecret.secretName }}
 {{- else -}}
-{{ printf "%s-%s" .Release.Name "db"  }}
+{{ printf "%s-%s-%s" .Release.Name .Chart.Name "db"  }}
 {{- end -}}
 {{- end -}}
 
@@ -44,7 +44,7 @@ Secret name for api.
 {{- if .Values.api.configExistingSecret.enabled -}}
 {{ .Values.api.configExistingSecret.secretName }}
 {{- else -}}
-{{ printf "%s-%s" .Release.Name "api"  }}
+{{ printf "%s-%s-%s" .Release.Name .Chart.Name "api"  }}
 {{- end -}}
 {{- end -}}
 
@@ -110,7 +110,7 @@ Define host url
 {{- if .Values.database.embedded -}}
 mem
 {{- else if not .Values.database.host -}}
-{{ printf "%s-db.%s.svc.cluster.local:3306" .Chart.Name .Release.Namespace }}
+{{ printf "%s-%s-db.%s.svc.cluster.local:3306" .Release.Name .Chart.Name .Release.Namespace }}
 {{- else -}}
 {{ .Values.database.host }}
 {{- end -}}
