@@ -39,6 +39,7 @@
         <java.version>14</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <cucumberfork.version>1.2.4</cucumberfork.version>
+        <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
     </properties>
 
     <dependencies>

@@ -16,6 +16,7 @@
 
     <properties>
         <jacoco.aggregation.phase>verify</jacoco.aggregation.phase>
+        <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
     </properties>
 
     <dependencies>

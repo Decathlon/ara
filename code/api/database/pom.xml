@@ -43,6 +43,7 @@
         <liquibasePropertyFile>src/main/resources/liquibase-XX.properties</liquibasePropertyFile>
 
         <delombok.phase>generate-sources</delombok.phase>
+        <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
     </properties>
 
     <dependencies>
