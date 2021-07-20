@@ -60,7 +60,6 @@ build-web-ui: ## Build ara-web-ui
 build-api: ## Build ara-api
 	@echo '-- Build API image --'
 	@$(eval FULL_IMAGE = $(API_IMAGE):$(API_VERSION))
-	$(MAKE) -C api mvn-install
 	$(MAKE) -C api mvn-build-image FULL_IMAGE=$(FULL_IMAGE)
 	@./tools/docker-tags-version.sh "$(API_IMAGE)" "$(API_VERSION)" "$(PUBLISH)"
 

@@ -37,6 +37,7 @@
         <jacoco.phase.agent>initialize</jacoco.phase.agent>
         <jacoco.phase.report>verify</jacoco.phase.report>
         <delombok.phase>generate-sources</delombok.phase>
+        <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
     </properties>
 
     <name>ARA Libraries</name>
