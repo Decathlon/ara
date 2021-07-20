@@ -127,12 +127,15 @@ get-chart-version:
 update-chart-version: ## Update chart version. VERSION required TARGET_CHART optional default stable
 	@echo '-- Update Helm Chart version --'
 	@sed -i'.old' 's/^version:.*$\/version: $(VERSION)/' ../charts/$(TARGET_CHART)/Chart.yaml
+	@$(MAKE) get-chart-version TARGET_CHART=$(TARGET_CHART)
 
 copy-candidate-to-stable: ## Copy Candidate chart to Stable chart
 	@echo -n 'Copy '
 	@$(MAKE) get-chart-version TARGET_CHART=candidate
 	@echo '... to stable chart'
 	@rm -rf ../charts/stable && cp -r ../charts/candidate ../charts/stable
+	@$(eval CHART_VERSION=$(shell make get-chart-version TARGET_CHART=candidate | sed -e 's/-rc.*//'))
+	@$(MAKE) update-chart-version VERSION=$(CHART_VERSION) TARGET_CHART=stable
 
 get-api-version:
 	@$(MAKE) -C api get-version
