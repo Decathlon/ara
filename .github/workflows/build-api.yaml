@@ -5,8 +5,20 @@ on:
     branches:
       - 'main'
   pull_request:
+    types: [opened, synchronize, reopened]
     branches:
       - main
+  schedule:
+    #        ┌───────────── minute (0 - 59)
+    #        │  ┌───────────── hour (0 - 23)
+    #        │  │ ┌───────────── day of the month (1 - 31)
+    #        │  │ │ ┌───────────── month (1 - 12 or JAN-DEC)
+    #        │  │ │ │ ┌───────────── day of the week (0 - 6 or SUN-SAT)
+    #        │  │ │ │ │
+    #        │  │ │ │ │
+    #        │  │ │ │ │
+    #        *  * * * *
+    - cron: '30 1 * * 0'
 
 jobs:
   code_api_change:
@@ -22,17 +34,55 @@ jobs:
           github_token: ${{ github.token }}
           paths: '["code/api/**"]'
           cancel_others: 'true'
-          do_not_skip: '["push", "workflow_dispatch"]'
-  docker_image:
+          do_not_skip: '["push", "workflow_dispatch", "schedule"]'
+  build-api:
+    needs:
+      - code_api_change
+    if: ${{ needs.code_api_change.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
-    outputs:
-      should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
-      - name: Checkout
+      -
+        name: Checkout
         uses: actions/checkout@v2
-      - name: Install xmllint
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      -
+        name: Set up JDK
+        uses: actions/setup-java@v2.1.0
+        with:
+          distribution: 'adopt'
+          java-version: '16'
+      - 
+        name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+        with:
+          lanquages: java
+          config-file: ./.github/codeql/codeql-api-config.yml
+      - 
+        name: Cache SonarCloud packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - 
+        name: Cache Maven packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - 
+        name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -f code/api -B clean install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+      - 
+        name: Install xmllint
         run: sudo apt-get install libxml2-utils
-      - id: skip_check
+      - 
+        id: skip_check
         run: |
           if [[ $GITHUB_REF == refs/pull/* ]]; then
             API_EXISTS=false
@@ -41,29 +91,11 @@ jobs:
             API_EXISTS=$(make -s check-api-image)
             popd
           fi
-          echo ::set-output name=should_skip::${API_EXISTS}
-  build-api:
-    needs:
-      - code_api_change
-      - docker_image
-    if: ${{ needs.code_api_change.outputs.should_skip != 'true' && needs.docker_image.outputs.should_skip != 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v2
-      - 
-        name: Install xmllint
-        run: sudo apt-get install libxml2-utils
-      -
-        name: Set up JDK
-        uses: actions/setup-java@v2.1.0
-        with:
-          distribution: 'adopt'
-          java-version: '16'
+          echo ::set-output name=docker_skip::${API_EXISTS}
       -
         name: Prepare
         id: prep
+        if: ${{ steps.skip_check.outputs.docker_skip != 'true' }}
         run: |
           PUSH=FALSE
           if [[ $GITHUB_REF == refs/heads/* ]]; then
@@ -84,19 +116,28 @@ jobs:
           echo ::set-output name=suffix::${SUFFIX}
       -
         name: Set up QEMU
+        if: ${{ steps.skip_check.outputs.docker_skip != 'true' }}
         uses: docker/setup-qemu-action@v1
       -
         name: Set up Docker Buildx
+        if: ${{ steps.skip_check.outputs.docker_skip != 'true' }}
         uses: docker/setup-buildx-action@v1
       -
         name: Login to DockerHub
-        if: ${{ steps.prep.outputs.push == 'true' }}
+        if: ${{ steps.skip_check.outputs.docker_skip != 'true' && steps.prep.outputs.push == 'true' }}
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
         name: Build and push
+        if: ${{ steps.skip_check.outputs.docker_skip != 'true' }}
         run: |
-          cd code
+          pushd code
           make build-api SUFFIX=${{ steps.prep.outputs.suffix }} PUBLISH=${{ steps.prep.outputs.push }}
+          popd
+      - 
+        name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1
+        with:
+          category: "ara_api"

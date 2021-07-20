@@ -1,0 +1,4 @@
+name: "CodeQL api config"
+
+paths:
+  - code/api
