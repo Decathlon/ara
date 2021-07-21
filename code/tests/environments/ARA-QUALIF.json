@@ -1,0 +1,29 @@
+{
+	"id": "5e4be84d-c263-4028-bd2b-b2f0f389cdee",
+	"name": "ARA-QUALIF",
+	"values": [
+		{
+			"key": "base_url",
+			"value": "ara.build-factory-qualification.decathlon.io",
+			"enabled": true
+		},
+		{
+			"key": "fedId_token",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "fedId_access_token",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "ARA_access_token",
+			"value": "",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2021-07-20T11:43:28.789Z",
+	"_postman_exported_using": "Postman/8.8.0"
+}
