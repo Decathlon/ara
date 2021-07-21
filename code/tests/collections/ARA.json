@@ -55,16 +55,10 @@
 									]
 								},
 								"url": {
-									"raw": "https://idpdecathlon.oxylane.com/as/token.oauth2",
+									"raw": "https://{{base_url_fed}}",
 									"protocol": "https",
 									"host": [
-										"idpdecathlon",
-										"oxylane",
-										"com"
-									],
-									"path": [
-										"as",
-										"token.oauth2"
+										"{{base_url_fed}}"
 									]
 								}
 							},
@@ -138,7 +132,7 @@
 											"\r",
 											"// CHECK DATA in the response\r",
 											"pm.test(\"Are there any projects in ARA?\", function () {\r",
-											"    pm.expect(jsonData[0]).not.null;\r",
+											"    pm.expect(jsonData.length).to.be.gt(0);\r",
 											"});"
 										],
 										"type": "text/javascript"
@@ -167,18 +161,14 @@
 									}
 								},
 								"url": {
-									"raw": "https://ara.build-factory-qualification.decathlon.io/api/projects/ara",
+									"raw": "https://{{base_url}}/api/projects",
 									"protocol": "https",
 									"host": [
-										"ara",
-										"build-factory-qualification",
-										"decathlon",
-										"io"
+										"{{base_url}}"
 									],
 									"path": [
 										"api",
-										"projects",
-										"ara"
+										"projects"
 									]
 								}
 							},
@@ -190,13 +180,27 @@
 					"name": "Functionality 2608: Manage the display of the last execution",
 					"item": [
 						{
-							"name": "WIP: Display the last execution",
+							"name": "@severity-sanity-check: Display the last execution",
 							"event": [
 								{
 									"listen": "test",
 									"script": {
 										"exec": [
-											""
+											"const jsonData = pm.response.json();\r",
+											"\r",
+											"// Check json structure : Is a json with a body ?\r",
+											"pm.test(\"Is the answer (format & status) correct?\", function () {\r",
+											"     pm.response.to.be.ok; \r",
+											"     pm.response.to.be.withBody;\r",
+											"     pm.response.to.be.json; \r",
+											"});\r",
+											"\r",
+											"// CHECK DATA in the response\r",
+											"pm.test(\"Are there any executions in ARA for the Cube-back project?\", function () {\r",
+											"    pm.expect(jsonData.length).to.be.gt(0);\r",
+											"});\r",
+											"\r",
+											"pm.globals.set(\"latest_execution_ID\", jsonData[0].id);"
 										],
 										"type": "text/javascript"
 									}
@@ -224,13 +228,10 @@
 									}
 								},
 								"url": {
-									"raw": "https://ara.build-factory-qualification.decathlon.io/api/projects/{{projectCode}}/executions/latest",
+									"raw": "https://{{base_url}}/api/projects/{{projectCode}}/executions/latest",
 									"protocol": "https",
 									"host": [
-										"ara",
-										"build-factory-qualification",
-										"decathlon",
-										"io"
+										"{{base_url}}"
 									],
 									"path": [
 										"api",
@@ -238,6 +239,1477 @@
 										"{{projectCode}}",
 										"executions",
 										"latest"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Functionality 2365: Manage the display of an execution by ID",
+					"item": [
+						{
+							"name": "@severity-sanity-check: Display an execution according to its ID Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();\r",
+											"\r",
+											"// Check json structure : Is a json with a body ?\r",
+											"pm.test(\"Is the answer (format & status) correct?\", function () {\r",
+											"     pm.response.to.be.ok; \r",
+											"     pm.response.to.be.withBody;\r",
+											"     pm.response.to.be.json; \r",
+											"});\r",
+											"\r",
+											"// CHECK DATA in the response\r",
+											"pm.test(\"the ID search does return an execution?\", function () {\r",
+											"    pm.expect(jsonData.id).to.eq(pm.globals.get(\"latest_execution_ID\"));\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ARA_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{base_url}}/api/projects/{{projectCode}}/executions/{{latest_execution_ID}}",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"projects",
+										"{{projectCode}}",
+										"executions",
+										"{{latest_execution_ID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Functionality 2366: Manage the discard execution",
+					"item": [
+						{
+							"name": "@severity-medium: Discard an execution",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();\r",
+											"\r",
+											"// Check json structure : Is a json with a body ?\r",
+											"pm.test(\"Is the answer (format & status) correct?\", function () {\r",
+											"     pm.response.to.be.ok; \r",
+											"     pm.response.to.be.withBody;\r",
+											"     pm.response.to.be.json; \r",
+											"});\r",
+											"\r",
+											"// CHECK DATA in the response\r",
+											"pm.test(\"The execution is discarded?\", function () {\r",
+											"    pm.expect(jsonData.acceptance).to.eq(\"DISCARDED\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"The discarded reason is setting up?\", function () {\r",
+											"    pm.expect(jsonData.discardReason).to.eq(\"NRT Postman - Discard execution\");\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ARA_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "NRT Postman - Discard execution"
+								},
+								"url": {
+									"raw": "https://{{base_url}}/api/projects/{{projectCode}}/executions/{{latest_execution_ID}}/discard",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"projects",
+										"{{projectCode}}",
+										"executions",
+										"{{latest_execution_ID}}",
+										"discard"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "@severity-medium: Un-Discard an execution",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();\r",
+											"\r",
+											"// Check json structure : Is a json with a body ?\r",
+											"pm.test(\"Is the answer (format & status) correct?\", function () {\r",
+											"     pm.response.to.be.ok; \r",
+											"     pm.response.to.be.withBody;\r",
+											"     pm.response.to.be.json; \r",
+											"});\r",
+											"\r",
+											"// CHECK DATA in the response\r",
+											"pm.test(\"The execution is un discarded?\", function () {\r",
+											"    pm.expect(jsonData.acceptance).to.not.eq(\"DISCARDED\");\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ARA_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "https://{{base_url}}/api/projects/{{projectCode}}/executions/{{latest_execution_ID}}/un-discard",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"projects",
+										"{{projectCode}}",
+										"executions",
+										"{{latest_execution_ID}}",
+										"un-discard"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Functionality 2457: Manage the display of the coverage",
+					"item": [
+						{
+							"name": "@severity-high: Display the functionality coverage (global level)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();\r",
+											"\r",
+											"// Check json structure : Is a json with a body ?\r",
+											"pm.test(\"Is the answer (format & status) correct?\", function () {\r",
+											"     pm.response.to.be.ok; \r",
+											"     pm.response.to.be.withBody;\r",
+											"     pm.response.to.be.json; \r",
+											"});\r",
+											"\r",
+											"// CHECK DATA in the response\r",
+											"pm.test(\"Coverage for all teams is shown ?\", function () {\r",
+											"    pm.expect(jsonData.axes[0].points[0].name).to.eq(\"All\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"The coverage is displayed for the severity high?\", function () {\r",
+											"    pm.expect(jsonData.axes[1].points[1].id).to.eq(\"HIGH\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"The coverage is displayed for the severity medium?\", function () {\r",
+											"    pm.expect(jsonData.axes[1].points[2].id).to.eq(\"MEDIUM\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"The coverage is displayed for the severity low?\", function () {\r",
+											"    pm.expect(jsonData.axes[1].points[3].id).to.eq(\"LOW\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"The coverage is displayed for each teams?\", function () {\r",
+											"    pm.expect(jsonData.axes[2].length).to.not.null;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"The coverage value is not null?\", function () {\r",
+											"    pm.expect(jsonData.values[0].length).to.not.null;\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ARA_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{base_url}}/api/projects/{{projectCode}}/functionalities/coverage",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"projects",
+										"{{projectCode}}",
+										"functionalities",
+										"coverage"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Functionality 2463: Manage the display of functionalities",
+					"item": [
+						{
+							"name": "@severity-sanity-check: Display the functionalities",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();\r",
+											"\r",
+											"// Check json structure : Is a json with a body ?\r",
+											"pm.test(\"Is the answer (format & status) correct?\", function () {\r",
+											"     pm.response.to.be.ok; \r",
+											"     pm.response.to.be.withBody;\r",
+											"     pm.response.to.be.json; \r",
+											"});\r",
+											"\r",
+											"// CHECK DATA in the response\r",
+											"pm.test(\"There is any functionalities to shown ?\", function () {\r",
+											"    pm.expect(jsonData[0].length).to.not.null;\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ARA_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{base_url}}/api/projects/{{projectCode}}/functionalities",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"projects",
+										"{{projectCode}}",
+										"functionalities"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Functionality 2483: Manage the creation of a functionality",
+					"item": [
+						{
+							"name": "@severity-sanity-check: Create a new functionality",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();\r",
+											"\r",
+											"// Check json structure : Is a json with a body ?\r",
+											"pm.test(\"Is the answer (format & status) correct?\", function () {\r",
+											"     pm.response.to.be.success\r",
+											"     pm.response.to.be.withBody;\r",
+											"     pm.response.to.be.json; \r",
+											"});\r",
+											"\r",
+											"// CHECK DATA in the response\r",
+											"pm.test(\"Functionality is created?\", function () {\r",
+											"    pm.expect(jsonData.id).to.not.null;\r",
+											"});\r",
+											"\r",
+											"pm.globals.set(\"functionality_ID\", jsonData.id);\r",
+											"\r",
+											"pm.test(\"The type is functionality?\", function () {\r",
+											"    pm.expect(jsonData.type).to.eq(\"FUNCTIONALITY\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"The functionality have a name?\", function () {\r",
+											"    pm.expect(jsonData.name).to.eq(\"TNR Postman - Test add a new functionality\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"There is a country code for the functionality?\", function () {\r",
+											"    pm.expect(jsonData.countryCodes).to.eq(\"fr\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"There is a teamId?\", function () {\r",
+											"    pm.expect(jsonData.teamId).to.eq(4);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ARA_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"functionality\":\r\n    {\r\n        \"type\":\"FUNCTIONALITY\",\r\n        \"countryCodes\":\"fr\",\r\n        \"started\":false,\r\n        \"notAutomated\":false,\r\n        \"teamId\":4,\r\n        \"severity\":\"HIGH\",\r\n        \"name\":\"TNR Postman - Test add a new functionality\",\r\n        \"children\":null\r\n    },\r\n        \"referenceId\":1447,\r\n        \"relativePosition\":\"ABOVE\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{base_url}}/api/projects/{{projectCode}}/functionalities",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"projects",
+										"{{projectCode}}",
+										"functionalities"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Functionality 2480: Manage the edition of a functionality",
+					"item": [
+						{
+							"name": "@severity-high: Udpdate a functionality",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();\r",
+											"\r",
+											"// Check json structure : Is a json with a body ?\r",
+											"pm.test(\"Is the answer (format & status) correct?\", function () {\r",
+											"     pm.response.to.be.success\r",
+											"     pm.response.to.be.withBody;\r",
+											"     pm.response.to.be.json; \r",
+											"});\r",
+											"\r",
+											"// CHECK DATA in the response\r",
+											"pm.test(\"Functionality is created?\", function () {\r",
+											"    pm.expect(jsonData.id).to.not.null;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"The type is functionality?\", function () {\r",
+											"    pm.expect(jsonData.type).to.eq(\"FUNCTIONALITY\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"The functionality have a name?\", function () {\r",
+											"    pm.expect(jsonData.name).to.eq(\"TNR Postman - Test add a new functionality\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"There is a country code for the functionality?\", function () {\r",
+											"    pm.expect(jsonData.countryCodes).to.eq(\"fr\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"There is a teamId?\", function () {\r",
+											"    pm.expect(jsonData.teamId).to.eq(4);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Started is checked?\", function () {\r",
+											"    pm.expect(jsonData.started).to.true;\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ARA_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"type\":\"FUNCTIONALITY\",\r\n    \"name\":\"TNR Postman - Test add a new functionality\",\r\n    \"countryCodes\":\"fr\",\r\n    \"teamId\":4,\r\n    \"severity\":\"HIGH\",\r\n    \"started\":true,\r\n    \"coveredScenarios\":0,\r\n    \"ignoredScenarios\":0,\r\n    \"children\":null,\r\n    \"notAutomatable\":false\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{base_url}}/api/projects/{{projectCode}}/functionalities/{{functionality_ID}}",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"projects",
+										"{{projectCode}}",
+										"functionalities",
+										"{{functionality_ID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Functionality 2609: Manage the deletion of a functionality",
+					"item": [
+						{
+							"name": "@severity-high: Delete a functionality",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"The functionality \" + pm.globals.get(\"functionality_ID\") + \" is deleted?\", function () {\r",
+											"     pm.response.to.be.ok\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ARA_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{base_url}}/api/projects/{{projectCode}}/functionalities/{{functionality_ID}}",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"projects",
+										"{{projectCode}}",
+										"functionalities",
+										"{{functionality_ID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Functionality 2405: Manage the display of problems",
+					"item": [
+						{
+							"name": "@severity-high: Display problems",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();\r",
+											"\r",
+											"// Check json structure : Is a json with a body ?\r",
+											"pm.test(\"Is the answer (format & status) correct?\", function () {\r",
+											"     pm.response.to.be.ok; \r",
+											"     pm.response.to.be.withBody;\r",
+											"     pm.response.to.be.json; \r",
+											"});\r",
+											"\r",
+											"// CHECK DATA in the response\r",
+											"pm.test(\"There is any problems to shown ?\", function () {\r",
+											"    pm.expect(jsonData.content.length).to.not.null;\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ARA_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"status\":null,\"blamedTeamId\":null,\"name\":null,\"defectId\":null,\"defectExistence\":null,\"rootCauseId\":null}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{base_url}}/api/projects/{{projectCode}}/problems/filter",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"projects",
+										"{{projectCode}}",
+										"problems",
+										"filter"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Functionality 2452: Manage problem creation",
+					"item": [
+						{
+							"name": "@severity-high: Create a new problem",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();\r",
+											"\r",
+											"// Check json structure : Is a json with a body ?\r",
+											"pm.test(\"Is the answer (format & status) correct?\", function () {\r",
+											"     pm.response.to.be.withBody;\r",
+											"     pm.response.to.be.json; \r",
+											"});\r",
+											"\r",
+											"// CHECK DATA in the response\r",
+											"pm.test(\"The problem is created?\", function () {\r",
+											"    pm.expect(jsonData.id).to.not.null;\r",
+											"});\r",
+											"\r",
+											"pm.globals.set(\"problem_ID\", jsonData.id);\r",
+											"\r",
+											"pm.test(\"The name of the problem is setting up?\", function () {\r",
+											"    pm.expect(jsonData.name).to.eq(\"Test TNR API Postman\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"The status of the problem is OPEN?\", function () {\r",
+											"    pm.expect(jsonData.status).to.eq(\"OPEN\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"A team is assigned to the problem?\", function () {\r",
+											"    pm.expect(jsonData.blamedTeam.id).to.not.null;\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ARA_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\":\"Test TNR API Postman\",\r\n    \"blamedTeam\":{\"id\":4},\r\n    \"rootCause\":null\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{base_url}}/api/projects/{{projectCode}}/problems",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"projects",
+										"{{projectCode}}",
+										"problems"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Functionality 2417: Manage the closure of a problem",
+					"item": [
+						{
+							"name": "@severity-high: Close a problem",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();\r",
+											"\r",
+											"// Check json structure : Is a json with a body ?\r",
+											"pm.test(\"Is the answer (format & status) correct?\", function () {\r",
+											"     pm.response.to.be.success;\r",
+											"     pm.response.to.be.withBody;\r",
+											"     pm.response.to.be.json; \r",
+											"});\r",
+											"\r",
+											"// CHECK DATA in the response\r",
+											"pm.test(\"The problem is created?\", function () {\r",
+											"    pm.expect(jsonData.id).to.not.null;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"The name of the problem is setting up?\", function () {\r",
+											"    pm.expect(jsonData.name).to.eq(\"Test TNR API Postman\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"The status of the problem is CLOSED?\", function () {\r",
+											"    pm.expect(jsonData.status).to.eq(\"CLOSED\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"The root cause of the problem is shown?\", function () {\r",
+											"    pm.expect(jsonData.rootCause.name).to.eq(\"TNR GTN\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"A team is assigned to the problem?\", function () {\r",
+											"    pm.expect(jsonData.blamedTeam.id).to.not.null;\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ARA_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\":\"Test TNR API Postman\",\r\n    \"blamedTeam\":{\"id\":4},\r\n    \"rootCause\":null\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{base_url}}/api/projects/{{projectCode}}/problems/{{problem_ID}}/close/{{rootCauseID}}",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"projects",
+										"{{projectCode}}",
+										"problems",
+										"{{problem_ID}}",
+										"close",
+										"{{rootCauseID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Functionality 2429: Manage the reopening of a problem",
+					"item": [
+						{
+							"name": "@severity-high: Reopen a problem",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();\r",
+											"\r",
+											"// Check json structure : Is a json with a body ?\r",
+											"pm.test(\"Is the answer (format & status) correct?\", function () {\r",
+											"     pm.response.to.be.success;\r",
+											"     pm.response.to.be.withBody;\r",
+											"     pm.response.to.be.json; \r",
+											"});\r",
+											"\r",
+											"// CHECK DATA in the response\r",
+											"pm.test(\"The problem is created?\", function () {\r",
+											"    pm.expect(jsonData.id).to.not.null;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"The name of the problem is setting up?\", function () {\r",
+											"    pm.expect(jsonData.name).to.eq(\"Test TNR API Postman\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"The status of the problem is OPEN?\", function () {\r",
+											"    pm.expect(jsonData.status).to.eq(\"OPEN\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"A team is assigned to the problem?\", function () {\r",
+											"    pm.expect(jsonData.blamedTeam.id).to.not.null;\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ARA_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\":\"Test TNR API Postman\",\r\n    \"blamedTeam\":{\"id\":4},\r\n    \"rootCause\":null\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{base_url}}/api/projects/{{projectCode}}/problems/{{problem_ID}}/reopen",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"projects",
+										"{{projectCode}}",
+										"problems",
+										"{{problem_ID}}",
+										"reopen"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Functionality 2419: Manage the deletion of a problem",
+					"item": [
+						{
+							"name": "@severity-high: Delete a problem",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Check json structure : Is a json with a body ?\r",
+											"pm.test(\"The problem is deleted?\", function () {\r",
+											"     pm.response.to.be.success;\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ARA_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{base_url}}/api/projects/{{projectCode}}/problems/{{problem_ID}}",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"projects",
+										"{{projectCode}}",
+										"problems",
+										"{{problem_ID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Functionality 2528: Manage the display of all the root causes",
+					"item": [
+						{
+							"name": "@severity-medium: Display the root causes",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();\r",
+											"\r",
+											"// Check json structure : Is a json with a body ?\r",
+											"pm.test(\"Is the answer (format & status) correct?\", function () {\r",
+											"     pm.response.to.be.success;\r",
+											"     pm.response.to.be.withBody;\r",
+											"     pm.response.to.be.json; \r",
+											"});\r",
+											"\r",
+											"// CHECK DATA in the response\r",
+											"pm.test(\"The list of root causes is displayed?\", function () {\r",
+											"    pm.expect(jsonData.id).to.not.null;\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ARA_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{base_url}}/api/projects/{{projectCode}}/root-causes",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"projects",
+										"{{projectCode}}",
+										"root-causes"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Functionality 2529: Manage the creation of a new root cause",
+					"item": [
+						{
+							"name": "@severity-medium: Create a new root cause",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();\r",
+											"\r",
+											"// Check json structure : Is a json with a body ?\r",
+											"pm.test(\"Is the answer (format & status) correct?\", function () {\r",
+											"     pm.response.to.be.success;\r",
+											"     pm.response.to.be.withBody;\r",
+											"     pm.response.to.be.json; \r",
+											"});\r",
+											"\r",
+											"// CHECK DATA in the response\r",
+											"pm.test(\"The root cause is created?\", function () {\r",
+											"    pm.expect(jsonData.id).to.not.null;\r",
+											"});\r",
+											"\r",
+											"pm.globals.set(\"rootCause_ID\", jsonData.id);\r",
+											"\r",
+											"pm.test(\"The root cause have a name?\", function () {\r",
+											"    pm.expect(jsonData.name).to.eq(\"TEST TNR API POSTMAN\");\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ARA_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"TEST TNR API POSTMAN\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{base_url}}/api/projects/{{projectCode}}/root-causes",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"projects",
+										"{{projectCode}}",
+										"root-causes"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Functionality 2530: Manage the edition of a root cause",
+					"item": [
+						{
+							"name": "@severity-medium: Edit a root cause",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();\r",
+											"\r",
+											"// Check json structure : Is a json with a body ?\r",
+											"pm.test(\"Is the answer (format & status) correct?\", function () {\r",
+											"     pm.response.to.be.success;\r",
+											"     pm.response.to.be.withBody;\r",
+											"     pm.response.to.be.json; \r",
+											"});\r",
+											"\r",
+											"// CHECK DATA in the response\r",
+											"pm.test(\"The root cause is created?\", function () {\r",
+											"    pm.expect(jsonData.id).to.not.null;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"The root cause have a name?\", function () {\r",
+											"    pm.expect(jsonData.name).to.eq(\"EDIT TEST TNR API POSTMAN\");\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ARA_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"EDIT TEST TNR API POSTMAN\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{base_url}}/api/projects/{{projectCode}}/root-causes/{{rootCause_ID}}",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"projects",
+										"{{projectCode}}",
+										"root-causes",
+										"{{rootCause_ID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Functionality 2531: Manage the deletion of a root cause",
+					"item": [
+						{
+							"name": "@severity-medium: Delete a root cause",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Check json structure : Is a json with a body ?\r",
+											"pm.test(\"The problem is deleted?\", function () {\r",
+											"     pm.response.to.be.success;\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ARA_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{base_url}}/api/projects/{{projectCode}}/root-causes/{{rootCause_ID}}",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"projects",
+										"{{projectCode}}",
+										"root-causes",
+										"{{rootCause_ID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Functionality 2554: Manage the display of settings",
+					"item": [
+						{
+							"name": "@severity-high: Display settings",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();\r",
+											"\r",
+											"// Check json structure : Is a json with a body ?\r",
+											"pm.test(\"Is the answer (format & status) correct?\", function () {\r",
+											"     pm.response.to.be.success;\r",
+											"     pm.response.to.be.withBody;\r",
+											"     pm.response.to.be.json; \r",
+											"});\r",
+											"\r",
+											"// CHECK DATA in the response\r",
+											"pm.test(\"The list of settings is displayed?\", function () {\r",
+											"    pm.expect(jsonData[0]).to.not.null;\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ARA_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{base_url}}/api/projects/{{projectCode}}/settings",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"projects",
+										"{{projectCode}}",
+										"settings"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "@severity-high: Display technology setting",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();\r",
+											"\r",
+											"// Check json structure : Is a json with a body ?\r",
+											"pm.test(\"Is the answer (format & status) correct?\", function () {\r",
+											"     pm.response.to.be.success;\r",
+											"     pm.response.to.be.withBody;\r",
+											"     pm.response.to.be.json; \r",
+											"});\r",
+											"\r",
+											"// CHECK DATA in the response\r",
+											"pm.test(\"The generic setting is displayed?\", function () {\r",
+											"    pm.expect(jsonData[0].name).to.eq(\"Generic\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"The cucumber setting is displayed?\", function () {\r",
+											"    pm.expect(jsonData[1].name).to.eq(\"Cucumber\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"The postman setting is displayed?\", function () {\r",
+											"    pm.expect(jsonData[2].name).to.eq(\"Postman\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"The cypress setting is displayed?\", function () {\r",
+											"    pm.expect(jsonData[3].name).to.eq(\"Cypress\");\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ARA_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{base_url}}/api/projects/{{projectCode}}/settings/technology",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"projects",
+										"{{projectCode}}",
+										"settings",
+										"technology"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Functionality 2554: Manage the display of settings Copy",
+					"item": [
+						{
+							"name": "@severity-high: Display settings",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();\r",
+											"\r",
+											"// Check json structure : Is a json with a body ?\r",
+											"pm.test(\"Is the answer (format & status) correct?\", function () {\r",
+											"     pm.response.to.be.success;\r",
+											"     pm.response.to.be.withBody;\r",
+											"     pm.response.to.be.json; \r",
+											"});\r",
+											"\r",
+											"// CHECK DATA in the response\r",
+											"pm.test(\"The list of settings is displayed?\", function () {\r",
+											"    pm.expect(jsonData[0]).to.not.null;\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ARA_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{base_url}}/api/projects/{{projectCode}}/settings",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"projects",
+										"{{projectCode}}",
+										"settings"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "@severity-high: Display technology setting",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();\r",
+											"\r",
+											"// Check json structure : Is a json with a body ?\r",
+											"pm.test(\"Is the answer (format & status) correct?\", function () {\r",
+											"     pm.response.to.be.success;\r",
+											"     pm.response.to.be.withBody;\r",
+											"     pm.response.to.be.json; \r",
+											"});\r",
+											"\r",
+											"// CHECK DATA in the response\r",
+											"pm.test(\"The generic setting is displayed?\", function () {\r",
+											"    pm.expect(jsonData[0].name).to.eq(\"Generic\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"The cucumber setting is displayed?\", function () {\r",
+											"    pm.expect(jsonData[1].name).to.eq(\"Cucumber\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"The postman setting is displayed?\", function () {\r",
+											"    pm.expect(jsonData[2].name).to.eq(\"Postman\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"The cypress setting is displayed?\", function () {\r",
+											"    pm.expect(jsonData[3].name).to.eq(\"Cypress\");\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ARA_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{base_url}}/api/projects/{{projectCode}}/settings/technology",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"projects",
+										"{{projectCode}}",
+										"settings",
+										"technology"
 									]
 								}
 							},
@@ -272,6 +1744,10 @@
 		{
 			"key": "projectCode",
 			"value": "cube-back"
+		},
+		{
+			"key": "rootCauseID",
+			"value": "103"
 		}
 	]
 }
