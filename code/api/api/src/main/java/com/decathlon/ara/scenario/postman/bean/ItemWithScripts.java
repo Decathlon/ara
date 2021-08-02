@@ -62,6 +62,10 @@ public class ItemWithScripts {
     @JsonProperty("_postman_isSubFolder")
     private boolean isSubFolder;
 
+    public boolean isFolder() {
+        return children != null && children.length > 0;
+    }
+
     @JsonProperty("event")
     private Event[] events;
 
