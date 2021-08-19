@@ -85,8 +85,17 @@ public class ScenarioUploader {
     }
 
     public void removeScenarioAssociationSafely(Scenario scenario) {
-        while (!scenario.getFunctionalities().isEmpty()) {
-            scenario.removeFunctionality(scenario.getFunctionalities().stream().findFirst().get());
+        var scenarioFunctionalities = scenario.getFunctionalities();
+        while (!scenarioFunctionalities.isEmpty()) {
+            var initialSize = scenarioFunctionalities.size();
+            scenarioFunctionalities.stream()
+                    .findFirst()
+                    .ifPresent(scenario::removeFunctionality);
+            if (scenarioFunctionalities.size() >= initialSize) {
+                // Check implementation of removeFunctionality decrease the size of functionalities set
+                throw new IllegalStateException(
+                        "Error during scenario-functionality link deletion: prevent infinite loop");
+            }
         }
     }
 
