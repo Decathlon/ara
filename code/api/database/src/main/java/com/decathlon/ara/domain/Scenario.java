@@ -97,6 +97,16 @@ public class Scenario implements Comparable<Scenario> {
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "scenarios")
     private Set<Functionality> functionalities = new HashSet<>();
 
+    public void addFunctionality(Functionality functionality) {
+        this.functionalities.add(functionality);
+        functionality.getScenarios().add(this);
+    }
+
+    public void removeFunctionality(Functionality functionality) {
+        this.functionalities.remove(functionality);
+        functionality.getScenarios().remove(this);
+    }
+
     @Override
     public int compareTo(Scenario other) {
         // Keep business key in sync with @EqualsAndHashCode

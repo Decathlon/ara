@@ -58,7 +58,10 @@ public class ScenarioUploader {
         }
 
         // Remove the previous scenarios from the same source => the database will remove the associations between functionalities and these scenarios
-        scenarioRepository.deleteAll(scenarioRepository.findAllBySourceId(source.getId()));
+        var allScenarios = scenarioRepository.findAllBySourceId(source.getId());
+        allScenarios.forEach(this::removeScenarioAssociationSafely);
+        scenarioRepository.deleteAll(allScenarios);
+
         // Let Hibernate make the DELETE SQL statements now, because we will add the same scenarios below: don't mess with old and new instances
         entityManager.flush();
         entityManager.clear();
@@ -79,6 +82,12 @@ public class ScenarioUploader {
         assignCoverage(functionalities, newScenarios);
         computeAggregates(functionalities);
         functionalityRepository.saveAll(functionalities);
+    }
+
+    public void removeScenarioAssociationSafely(Scenario scenario) {
+        while (!scenario.getFunctionalities().isEmpty()) {
+            scenario.removeFunctionality(scenario.getFunctionalities().stream().findFirst().get());
+        }
     }
 
     @FunctionalInterface
