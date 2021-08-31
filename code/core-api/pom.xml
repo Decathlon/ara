@@ -15,6 +15,8 @@
     <description>Demo project for Spring Boot</description>
     <properties>
         <java.version>16</java.version>
+        <ara.default.database>h2</ara.default.database>
+        <spring.profiles.active />
         <sonar.projectName>ARA core-api</sonar.projectName>
         <sonar.projectKey>decathlon_ara_core-api</sonar.projectKey>
         <sonar.organization>decathlon</sonar.organization>
@@ -24,6 +26,8 @@
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.jacoco.reportPath>${project.build.directory}/jacoco.exec</sonar.jacoco.reportPath>
         <sonar.language>java</sonar.language>
+        <jacoco.phase.agent>test-compile</jacoco.phase.agent>
+        <jacoco.phase.report>verify</jacoco.phase.report>
     </properties>
     <dependencies>
         <dependency>
@@ -39,11 +43,24 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
+        <!-- Swagger -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>1.5.10</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
             <optional>true</optional>
+        </dependency>
+
+        <!-- BDD -->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
@@ -55,6 +72,7 @@
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
@@ -73,6 +91,13 @@
     </dependencies>
 
     <build>
+        <finalName>${project.artifactId}</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -100,14 +125,14 @@
                 <executions>
                     <execution>
                         <id>jacoco-initialize</id>
+                        <phase>${jacoco.phase.agent}</phase>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
-                        <phase>test-compile</phase>
                     </execution>
                     <execution>
                         <id>jacoco-site</id>
-                        <phase>verify</phase>
+                        <phase>${jacoco.phase.report}</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
@@ -116,5 +141,19 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <spring.profiles.active>dev</spring.profiles.active>
+                <!-- skip tests, but need to define it on each sub module-->
+                <maven.test.skip>true</maven.test.skip>
+                <!-- no jacoco for dev profile -->
+                <jacoco.phase.agent>none</jacoco.phase.agent>
+                <jacoco.phase.report>none</jacoco.phase.report>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>

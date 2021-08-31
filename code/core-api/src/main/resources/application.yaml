@@ -1,3 +1,22 @@
 info:
     app:
         name: ARA core-api
+    api:
+        version: @project.version@
+spring:
+    profiles:
+        include: @spring.profiles.active@
+    config:
+        import: config-database.yaml,optional:config-custom.yaml,optional:config-authentication.yaml
+springdoc:
+    packagesToScan: com.decathlon.ara
+    pathsToMatch: /api/**
+    use-management-port: true
+management:
+    server:
+        port: 9090
+    endpoints:
+        web:
+            exposure:
+                include: health, info, openapi, swaggerui
+
