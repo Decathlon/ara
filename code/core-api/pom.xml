@@ -16,7 +16,7 @@
     <properties>
         <java.version>16</java.version>
         <ara.default.database>h2</ara.default.database>
-        <spring.profiles.active>logging-console</spring.profiles.active>
+        <spring.profiles.active>default</spring.profiles.active>
         <sonar.projectName>ARA core-api</sonar.projectName>
         <sonar.projectKey>decathlon_ara_core-api</sonar.projectKey>
         <sonar.organization>decathlon</sonar.organization>
@@ -153,7 +153,7 @@
         <profile>
             <id>dev</id>
             <properties>
-                <spring.profiles.active>dev,logging-console</spring.profiles.active>
+                <spring.profiles.active>dev</spring.profiles.active>
                 <!-- skip tests, but need to define it on each sub module-->
                 <maven.test.skip>true</maven.test.skip>
                 <!-- no jacoco for dev profile -->

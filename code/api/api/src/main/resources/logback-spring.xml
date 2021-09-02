@@ -14,7 +14,7 @@
             <appender-ref ref="STACKDRIVER"/>
         </root>
     </springProfile>
-    <springProfile name="logging-console | default">
+    <springProfile name="logging-console">
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
         </root>
