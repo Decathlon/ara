@@ -8,8 +8,10 @@ api:
     image:
         registry: docker.io
         repository: decathlon/ara-api
-        tag: 10.1.0
+        tag: 10.1.1
         imagePullPolicy: IfNotPresent
+    loggingMode:
+        - logging-console
     replicas: 1
     annotations: {}
     resources: {}

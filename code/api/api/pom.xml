@@ -28,7 +28,7 @@
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-api</artifactId>
-    <version>10.1.0</version>
+    <version>10.1.1</version>
 
     <name>ARA API</name>
     <description>
@@ -39,7 +39,7 @@
     <properties>
         <java.version>16</java.version>
         <ara.default.database>h2</ara.default.database>
-        <spring.profiles.active>logging-console</spring.profiles.active>
+        <spring.profiles.active>default</spring.profiles.active>
         <mapstruct.version>1.4.2.Final</mapstruct.version>
         <springdoc.version>1.5.9</springdoc.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -396,7 +396,7 @@
         <profile>
             <id>dev</id>
             <properties>
-                <spring.profiles.active>dev,logging-console</spring.profiles.active>
+                <spring.profiles.active>dev</spring.profiles.active>
                 <!-- skip javadoc, tests, jacoco, lombok for dev profile -->
                 <maven.javadoc.skip>true</maven.javadoc.skip>
                 <!-- skip tests, but need to define it on each sub module-->

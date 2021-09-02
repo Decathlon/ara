@@ -3,9 +3,12 @@ info:
         name: ARA core-api
     api:
         version: @project.version@
+ara:
+    logging:
+        mode: logging-console
 spring:
     profiles:
-        include: @spring.profiles.active@
+        include: @spring.profiles.active@,${ara.logging.mode}
     config:
         import: config-database.yaml,optional:config-custom.yaml,optional:config-authentication.yaml
 springdoc:
