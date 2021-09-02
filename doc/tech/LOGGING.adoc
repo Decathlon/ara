@@ -2,8 +2,8 @@
 
 == API
 
-You can use different logging manage by spring profiles:
+You can use many logging management systems using different Spring profiles:
 
-* console with `logging-console` profile
-* json with `logging-json` profile
-* gcp stackdriver with `logging-api` profile
+* console with `logging-console`
+* json with `logging-json`
+* gcp stackdriver with `logging-api`
