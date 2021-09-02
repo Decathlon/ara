@@ -22,9 +22,6 @@ info:
     version: version
   api:
     version: @project.version@
-ara:
-  logging:
-    mode: logging-console
 spring:
   profiles:
     include: @spring.profiles.active@,${ara.logging.mode}
@@ -55,6 +52,8 @@ springdoc:
 
 # Disabled by default (and executed after/every day)
 ara:
+  logging:
+    mode: logging-console
   maxExecutionDaysToKeep: 14
   minExecutionsToKeepPerCycle: 20
 
