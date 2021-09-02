@@ -1,0 +1,22 @@
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+
+    <springProfile name="logging-json">
+        <include resource="org/springframework/cloud/gcp/logging/logback-json-appender.xml"/>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE_JSON"/>
+        </root>
+    </springProfile>
+    <springProfile name="logging-api">
+        <include resource="org/springframework/cloud/gcp/logging/logback-appender.xml"/>
+        <root level="INFO">
+            <appender-ref ref="STACKDRIVER"/>
+        </root>
+    </springProfile>
+    <springProfile name="logging-console | default">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+</configuration>

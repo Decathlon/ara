@@ -16,7 +16,7 @@
     <properties>
         <java.version>16</java.version>
         <ara.default.database>h2</ara.default.database>
-        <spring.profiles.active />
+        <spring.profiles.active>logging-console</spring.profiles.active>
         <sonar.projectName>ARA core-api</sonar.projectName>
         <sonar.projectKey>decathlon_ara_core-api</sonar.projectKey>
         <sonar.organization>decathlon</sonar.organization>
@@ -71,6 +71,13 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
+        </dependency>
+
+        <!-- LOGS -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-gcp-starter-logging</artifactId>
+            <version>1.2.8.RELEASE</version>
         </dependency>
 
         <dependency>
@@ -146,7 +153,7 @@
         <profile>
             <id>dev</id>
             <properties>
-                <spring.profiles.active>dev</spring.profiles.active>
+                <spring.profiles.active>dev,logging-console</spring.profiles.active>
                 <!-- skip tests, but need to define it on each sub module-->
                 <maven.test.skip>true</maven.test.skip>
                 <!-- no jacoco for dev profile -->
