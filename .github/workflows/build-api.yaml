@@ -60,14 +60,14 @@ jobs:
           config-file: ./.github/codeql/codeql-api-config.yml
       - 
         name: Cache SonarCloud packages
-        uses: actions/cache@v1
+        uses: actions/cache@v2.1.6
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
       - 
         name: Cache Maven packages
-        uses: actions/cache@v1
+        uses: actions/cache@v2.1.6
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
