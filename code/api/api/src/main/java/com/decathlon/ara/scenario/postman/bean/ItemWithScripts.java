@@ -63,7 +63,7 @@ public class ItemWithScripts {
     private boolean isSubFolder;
 
     public boolean isFolder() {
-        return children != null && children.length > 0;
+        return (children != null && children.length > 0) || request == null;
     }
 
     @JsonProperty("event")
