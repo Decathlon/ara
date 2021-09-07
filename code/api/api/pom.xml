@@ -237,7 +237,7 @@
         <dependency>
             <groupId>com.atlassian.jira</groupId>
             <artifactId>jira-api</artifactId>
-            <version>7.0.0</version>
+            <version>1000.30.0</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
