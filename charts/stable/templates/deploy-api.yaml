@@ -79,6 +79,11 @@ spec:
             configMapKeyRef:
                 name: {{ include "ara.configmap.name" . }}
                 key: liquibase_active
+        - name: ARA_LOGGING_MODE
+          valueFrom:
+            configMapKeyRef:
+                name: {{ include "ara.configmap.name" . }}
+                key: logging_mode
         - name: SPRING_CONFIG_IMPORT
           value: optional:file:/app/config/config-custom.yaml,optional:file:/app/config/config-authentication.yaml
         - name: INFO_APP_VERSION
