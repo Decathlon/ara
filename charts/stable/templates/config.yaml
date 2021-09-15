@@ -13,6 +13,7 @@ data:
   database_host: {{ include "ara.db.host" . | quote }}
   database_type: {{ .Values.database.type }}
   liquibase_active: {{ .Values.database.liquibaseActive | quote }}
+  logging_mode: {{ include "ara.api.loggingmode" . | quote }}
   app_url: {{ .Values.api.appUrl }}
   api_host: {{ printf "%s-%s-api.%s.svc.cluster.local" .Release.Name .Chart.Name .Release.Namespace }}
   api_port: {{ printf "%.0f" .Values.api.port | quote }}
