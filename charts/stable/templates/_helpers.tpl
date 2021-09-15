@@ -115,3 +115,10 @@ mem
 {{ .Values.database.host }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Define logging mode
+*/}}
+{{- define "ara.api.loggingmode" -}}
+{{- join "," .Values.api.loggingMode }}
+{{- end -}}
