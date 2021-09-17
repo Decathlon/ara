@@ -21,7 +21,7 @@
         <Icon type="md-menu"/>
       </Button>
       <DropdownMenu slot="list" style="text-transform: initial;" title="">
-        <DropdownItem 
+        <DropdownItem
             :disabled="true"
             :data-nrt=" $route.name + '_ActionsAndJobReportsButton_' + 'Actions_' + execution.id "
             style="font-weight: bold;">
@@ -30,11 +30,11 @@
         </DropdownItem>
 
         <DropdownItem><div @click="discard(execution)"><Icon type="md-flag"/> {{execution.discardReason ? 'CHANGE DISCARD REASON' : 'DISCARD EXECUTION'}}</div></DropdownItem>
-        <DropdownItem 
+        <DropdownItem
             :data-nrt=" $route.name + '_ActionsAndJobReportsButton_' + 'UndiscardExecution_' + execution.id "
             v-if="execution.discardReason"><div @click="unDiscard(execution.id)"><Icon type="md-checkmark"/> UN-DISCARD EXECUTION</div></DropdownItem>
 
-        <DropdownItem 
+        <DropdownItem
             :disabled="true"
             :data-nrt=" $route.name + '_ActionsAndJobReportsButton_' + 'JobReports_' + execution.id "
             style="border-top: 1px solid #DDDEE1; font-weight: bold;">
@@ -42,8 +42,8 @@
           JOB REPORTS
         </DropdownItem>
 
-        <a :href="execution.jobUrl ? (execution.jobUrl + 'console') : null" target="_blank">
-          <DropdownItem 
+        <a :href="execution.jobUrl ? ($sanitizeUrl(execution.jobUrl + 'console')) : null" rel="noopener" target="_blank">
+          <DropdownItem
               :disabled="!execution.jobUrl"
               :data-nrt=" $route.name + '_ActionsAndJobReportsButton_' + 'Execution_' + execution.id ">
             <Icon type="md-open"/>
@@ -52,9 +52,9 @@
           </DropdownItem>
         </a>
         <div v-for="countryDeployment in execution.countryDeployments" :key="countryDeployment.id">
-          <a :href="countryDeployment.jobUrl ? (countryDeployment.jobUrl + 'console') : null" target="_blank">
-            <DropdownItem 
-                :disabled="!countryDeployment.jobUrl" 
+          <a :href="countryDeployment.jobUrl ? ($sanitizeUrl(countryDeployment.jobUrl + 'console')) : null" rel="noopener" target="_blank">
+            <DropdownItem
+                :disabled="!countryDeployment.jobUrl"
                 :data-nrt=" $route.name + '_ActionsAndJobReportsButton_' + countryDeployment.country.code + '_Deployment_' + + execution.id "
                 style="border-top: 1px dashed #DDDEE1;">
               <Icon type="md-open"/>
@@ -63,9 +63,9 @@
             </DropdownItem>
           </a>
           <a v-for="run in execution.runs" :key="run.id" v-if="run.country.code === countryDeployment.country.code"
-              :href="run.jobUrl ? (run.jobUrl + 'cucumber-html-reports/overview-features.html') : null"
-              target="_blank">
-            <DropdownItem 
+              :href="run.jobUrl ? ($sanitizeUrl(run.jobUrl + 'cucumber-html-reports/overview-features.html')) : null"
+              rel="noopener" target="_blank">
+            <DropdownItem
                 :disabled="!run.jobUrl"
                 :data-nrt=" $route.name + '_ActionsAndJobReportsButton_' + countryDeployment.country.code + '_' + run.type.code + '_' + execution.id ">
               <Icon type="md-open"/>

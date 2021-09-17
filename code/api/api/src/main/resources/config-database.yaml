@@ -44,9 +44,6 @@ spring:
     password: ${ara.database.password}
   jpa:
     open-in-view: false
-    hibernate:
-      use-new-id-generator-mappings: true
-
     properties:
       current_session_context_class: thread
       javax:

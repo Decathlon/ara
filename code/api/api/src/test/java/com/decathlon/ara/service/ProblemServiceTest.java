@@ -360,11 +360,11 @@ public class ProblemServiceTest {
         // WHEN
         when(problemRepository.findByProjectIdAndId(1, 2)).thenReturn(problem);
         when(problem.getPatterns()).thenReturn(Arrays.asList(problemPattern1, problemPattern2, problemPattern3));
-        when(errorRepository.findDistinctByProblemPatternsInOrderByExecutedScenarioRunExecutionTestDateTimeDesc(anyList(), any(Pageable.class))).thenReturn(null);
+        when(errorRepository.findDistinctByProblemPatternsInOrderByIdDesc(anyList(), any(Pageable.class))).thenReturn(null);
 
         // THEN
         Page<ErrorWithExecutedScenarioAndRunAndExecutionDTO> errors = cut.getProblemErrors(1, 2, pageable);
-        verify(errorRepository).findDistinctByProblemPatternsInOrderByExecutedScenarioRunExecutionTestDateTimeDesc(Arrays.asList(problemPattern1, problemPattern2, problemPattern3), pageable);
+        verify(errorRepository).findDistinctByProblemPatternsInOrderByIdDesc(Arrays.asList(problemPattern1, problemPattern2, problemPattern3), pageable);
         assertThat(errors).isNull();
     }
 
@@ -383,12 +383,12 @@ public class ProblemServiceTest {
         // WHEN
         when(problemRepository.findByProjectIdAndId(1, 2)).thenReturn(problem);
         when(problem.getPatterns()).thenReturn(Arrays.asList(problemPattern1, problemPattern2, problemPattern3));
-        when(errorRepository.findDistinctByProblemPatternsInOrderByExecutedScenarioRunExecutionTestDateTimeDesc(anyList(), any(Pageable.class))).thenReturn(errorPage);
+        when(errorRepository.findDistinctByProblemPatternsInOrderByIdDesc(anyList(), any(Pageable.class))).thenReturn(errorPage);
         when(errorPage.map(any(Function.class))).thenReturn(convertedErrorPage);
 
         // THEN
         Page<ErrorWithExecutedScenarioAndRunAndExecutionDTO> errors = cut.getProblemErrors(1, 2, pageable);
-        verify(errorRepository).findDistinctByProblemPatternsInOrderByExecutedScenarioRunExecutionTestDateTimeDesc(Arrays.asList(problemPattern1, problemPattern2, problemPattern3), pageable);
+        verify(errorRepository).findDistinctByProblemPatternsInOrderByIdDesc(Arrays.asList(problemPattern1, problemPattern2, problemPattern3), pageable);
         assertThat(errors).isEqualTo(convertedErrorPage);
     }
 

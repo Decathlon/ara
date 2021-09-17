@@ -43,7 +43,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -53,6 +52,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -432,8 +432,8 @@ public class RtcDefectAdapter implements DefectAdapter {
             if (connection instanceof HttpsURLConnection) {
                 try {
                     // Install the all-trusting trust manager
-                    final SSLContext sslContext = SSLContext.getInstance("SSL");
-                    final TrustManager[] trustManagers = { new UnquestioningTrustManager() };
+                    final SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+                    final var trustManagers = new SimpleTrustManager[]{new SimpleTrustManager()};
                     sslContext.init(null, trustManagers, null);
                     HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
                     ((HttpsURLConnection) connection).setSSLSocketFactory(sslContext.getSocketFactory());
@@ -446,7 +446,7 @@ public class RtcDefectAdapter implements DefectAdapter {
 
     }
 
-    private static class UnquestioningTrustManager implements X509TrustManager {
+    private static class SimpleTrustManager implements X509TrustManager {
 
         @Override
         public java.security.cert.X509Certificate[] getAcceptedIssuers() {
@@ -454,13 +454,21 @@ public class RtcDefectAdapter implements DefectAdapter {
         }
 
         @Override
-        public void checkClientTrusted(X509Certificate[] certs, String authType) {
-            // No questions asked
+        public void checkClientTrusted(X509Certificate[] certs, String authType) throws CertificateException {
+            try {
+                certs[0].checkValidity();
+            } catch (Exception e) {
+                throw new CertificateException("Certificate not valid or trusted.");
+            }
         }
 
         @Override
-        public void checkServerTrusted(X509Certificate[] certs, String authType) {
-            // No questions asked
+        public void checkServerTrusted(X509Certificate[] certs, String authType) throws CertificateException {
+            try {
+                certs[0].checkValidity();
+            } catch (Exception e) {
+                throw new CertificateException("Certificate not valid or trusted.");
+            }
         }
 
     }

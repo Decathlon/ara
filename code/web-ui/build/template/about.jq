@@ -1,4 +1,0 @@
-{
-  version: $version,
-  sha: $sha
-}

@@ -22,13 +22,13 @@
     <parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.4.5</version>
+		<version>2.5.1</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-api</artifactId>
-    <version>9.0.4</version>
+    <version>10.1.2</version>
 
     <name>ARA API</name>
     <description>
@@ -39,13 +39,15 @@
     <properties>
         <java.version>16</java.version>
         <ara.default.database>h2</ara.default.database>
-        <spring.profiles.active />
+        <spring.profiles.active>default</spring.profiles.active>
         <mapstruct.version>1.4.2.Final</mapstruct.version>
+        <springdoc.version>1.5.9</springdoc.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <jacoco.phase.agent>initialize</jacoco.phase.agent>
         <jacoco.phase.report>verify</jacoco.phase.report>
         <delombok.phase>generate-sources</delombok.phase>
+        <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
     </properties>
 
     <dependencies>
@@ -63,6 +65,13 @@
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-influx</artifactId>
+        </dependency>
+
+        <!-- LOGS -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-gcp-starter-logging</artifactId>
+            <version>1.2.8.RELEASE</version>
         </dependency>
 
         <!-- Tests and development -->
@@ -176,8 +185,13 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.4.5</version>
+            <version>${springdoc.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-security</artifactId>
+            <version>${springdoc.version}</version>
+         </dependency>
 
         <!-- Mail Sending & Templating -->
         <dependency>
@@ -380,13 +394,6 @@
 
     <profiles>
         <profile>
-            <id>int</id>
-            <properties>
-                <ara.default.database>postgresql</ara.default.database>
-            </properties>
-        </profile>
-
-        <profile>
             <id>dev</id>
             <properties>
                 <spring.profiles.active>dev</spring.profiles.active>
@@ -399,6 +406,13 @@
                 <jacoco.phase.report>none</jacoco.phase.report>
                 <!-- skip some lombok stuff for dev profile -->
                 <delombok.phase>none</delombok.phase>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>int</id>
+            <properties>
+                <ara.default.database>postgresql</ara.default.database>
             </properties>
         </profile>
 

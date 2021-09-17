@@ -17,6 +17,12 @@
 
 package com.decathlon.ara.service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,11 +30,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * This service provide operation to easily manipulate Archives files (for now only ZIP files).
@@ -70,6 +71,10 @@ public class ArchiveService {
             ZipEntry entry = zis.getNextEntry();
             while (null != entry) {
                 File target = new File(destination, entry.getName());
+                String canonicalPath = target.getCanonicalPath();
+                if (!canonicalPath.startsWith(destination.getCanonicalPath())) {
+                    throw new IOException("Entry is outside of the target directory");
+                }
                 log.debug("Unzipping : {}", target.getAbsolutePath());
                 if (!entry.isDirectory()) {
                     this.writeEntry(zis, target);

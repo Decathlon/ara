@@ -1,0 +1,4 @@
+name: "CodeQL web-ui config"
+
+paths:
+  - code/web-ui

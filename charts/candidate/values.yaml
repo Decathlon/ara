@@ -8,8 +8,10 @@ api:
     image:
         registry: docker.io
         repository: decathlon/ara-api
-        tag: 9.0.4
+        tag: 10.1.2
         imagePullPolicy: IfNotPresent
+    loggingMode:
+        - logging-console
     replicas: 1
     annotations: {}
     resources: {}
@@ -24,6 +26,8 @@ api:
         #  cpu: 100m
         #  memory: 128Mi
     port: 8080
+    management:
+        port: 9090
     # Base url used to redirect on the app by email service among others
     appUrl: ara.test
     authConfig: ""
@@ -44,7 +48,7 @@ ui:
     image:
         registry: docker.io
         repository: decathlon/ara-web-ui
-        tag: 8.6.2
+        tag: 9.0.0
         imagePullPolicy: IfNotPresent
     replicas: 1
     annotations: {}
@@ -66,9 +70,9 @@ ui:
 ##
 database:
     embedded: true
-    # type mysql is suported when embedded is false
+    # type postgresql is suported when embedded is false
     type: h2
-    # When embedded is false you can provide default cluster database or external database:
+    # When embedded is false you can provide default cluster database (postgresql) or external database:
     external: false
     # When external is true you can set the host of database
     # host:

@@ -40,8 +40,9 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
     DependencyInjectionTestExecutionListener.class,
     DbUnitTestExecutionListener.class
 })
-@TestPropertySource(
-		locations = "classpath:application-db-h2.properties")
+@TestPropertySource(properties = {
+        "ara.database.target=h2"
+})
 public class ExecutedScenarioRepositoryIT {
 
     @Autowired

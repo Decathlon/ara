@@ -1,0 +1,308 @@
+databaseChangeLog:
+- changeSet:
+    id: 1623999583436-1
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        cacheSize: 1
+        cycle: false
+        dataType: bigint
+        incrementBy: 1
+        maxValue: 9223372036854775807
+        minValue: 1
+        sequenceName: communication_id
+        startValue: 1
+    - sql:
+          sql: select setval('communication_id', (select max(id)+1 from communication), false)
+- changeSet:
+    id: 1623999583436-2
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        cacheSize: 1
+        cycle: false
+        dataType: bigint
+        incrementBy: 1
+        maxValue: 9223372036854775807
+        minValue: 1
+        sequenceName: country_deployment_id
+        startValue: 1
+    - sql:
+          sql: select setval('country_deployment_id', (select max(id)+1 from country_deployment), false)
+- changeSet:
+    id: 1623999583436-3
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        cacheSize: 1
+        cycle: false
+        dataType: bigint
+        incrementBy: 1
+        maxValue: 9223372036854775807
+        minValue: 1
+        sequenceName: country_id
+        startValue: 1
+    - sql:
+          sql: select setval('country_id', (select max(id)+1 from country), false)
+- changeSet:
+    id: 1623999583436-4
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        cacheSize: 1
+        cycle: false
+        dataType: bigint
+        incrementBy: 1
+        maxValue: 9223372036854775807
+        minValue: 1
+        sequenceName: cycle_definition_id
+        startValue: 1
+    - sql:
+          sql: select setval('cycle_definition_id', (select max(id)+1 from cycle_definition), false)
+- changeSet:
+    id: 1623999583436-5
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        cacheSize: 1
+        cycle: false
+        dataType: bigint
+        incrementBy: 1
+        maxValue: 9223372036854775807
+        minValue: 1
+        sequenceName: error_id
+        startValue: 1
+    - sql:
+          sql: select setval('error_id', (select max(id)+1 from error), false)
+- changeSet:
+    id: 1623999583436-6
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        cacheSize: 1
+        cycle: false
+        dataType: bigint
+        incrementBy: 1
+        maxValue: 9223372036854775807
+        minValue: 1
+        sequenceName: executed_scenario_id
+        startValue: 1
+    - sql:
+          sql: select setval('executed_scenario_id', (select max(id)+1 from executed_scenario), false)
+- changeSet:
+    id: 1623999583436-8
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        cacheSize: 1
+        cycle: false
+        dataType: bigint
+        incrementBy: 1
+        maxValue: 9223372036854775807
+        minValue: 1
+        sequenceName: execution_id
+        startValue: 1
+    - sql:
+          sql: select setval('execution_id', (select max(id)+1 from execution), false)
+- changeSet:
+    id: 1623999583436-9
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        cacheSize: 1
+        cycle: false
+        dataType: bigint
+        incrementBy: 1
+        maxValue: 9223372036854775807
+        minValue: 1
+        sequenceName: functionality_id
+        startValue: 1
+    - sql:
+          sql: select setval('functionality_id', (select max(id)+1 from functionality), false)
+- changeSet:
+    id: 1623999583436-10
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        cacheSize: 1
+        cycle: false
+        dataType: bigint
+        incrementBy: 1
+        maxValue: 9223372036854775807
+        minValue: 1
+        sequenceName: problem_id
+        startValue: 1
+    - sql:
+          sql: select setval('problem_id', (select max(id)+1 from problem), false)
+- changeSet:
+    id: 1623999583436-11
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        cacheSize: 1
+        cycle: false
+        dataType: bigint
+        incrementBy: 50
+        maxValue: 9223372036854775807
+        minValue: 1
+        sequenceName: problem_pattern_id
+        startValue: 1
+    - sql:
+          sql: select setval('problem_pattern_id', (select max(id)+1 from problem_pattern), false)
+- changeSet:
+    id: 1623999583436-12
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        cacheSize: 1
+        cycle: false
+        dataType: bigint
+        incrementBy: 1
+        maxValue: 9223372036854775807
+        minValue: 1
+        sequenceName: project_id
+        startValue: 1
+    - sql:
+          sql: select setval('project_id', (select max(id)+1 from project), false)
+- changeSet:
+    id: 1623999583436-13
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        cacheSize: 1
+        cycle: false
+        dataType: bigint
+        incrementBy: 1
+        maxValue: 9223372036854775807
+        minValue: 1
+        sequenceName: root_cause_id
+        startValue: 1
+    - sql:
+          sql: select setval('root_cause_id', (select max(id)+1 from root_cause), false)
+- changeSet:
+    id: 1623999583436-14
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        cacheSize: 1
+        cycle: false
+        dataType: bigint
+        incrementBy: 1
+        maxValue: 9223372036854775807
+        minValue: 1
+        sequenceName: run_id
+        startValue: 1
+    - sql:
+          sql: select setval('run_id', (select max(id)+1 from run), false)
+- changeSet:
+    id: 1623999583436-15
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        cacheSize: 1
+        cycle: false
+        dataType: bigint
+        incrementBy: 1
+        maxValue: 9223372036854775807
+        minValue: 1
+        sequenceName: scenario_id
+        startValue: 1
+    - sql:
+          sql: select setval('scenario_id', (select max(id)+1 from scenario), false)
+- changeSet:
+    id: 1623999583436-16
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        cacheSize: 1
+        cycle: false
+        dataType: bigint
+        incrementBy: 1
+        maxValue: 9223372036854775807
+        minValue: 1
+        sequenceName: setting_id
+        startValue: 1
+    - sql:
+          sql: select setval('setting_id', (select max(id)+1 from setting), false)
+- changeSet:
+    id: 1623999583436-17
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        cacheSize: 1
+        cycle: false
+        dataType: bigint
+        incrementBy: 1
+        maxValue: 9223372036854775807
+        minValue: 1
+        sequenceName: severity_id
+        startValue: 1
+    - sql:
+          sql: select setval('severity_id', (select max(id)+1 from severity), false)
+- changeSet:
+    id: 1623999583436-18
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        cacheSize: 1
+        cycle: false
+        dataType: bigint
+        incrementBy: 1
+        maxValue: 9223372036854775807
+        minValue: 1
+        sequenceName: source_id
+        startValue: 1
+    - sql:
+          sql: select setval('source_id', (select max(id)+1 from source), false)
+- changeSet:
+    id: 1623999583436-19
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        cacheSize: 1
+        cycle: false
+        dataType: bigint
+        incrementBy: 1
+        maxValue: 9223372036854775807
+        minValue: 1
+        sequenceName: team_id
+        startValue: 1
+    - sql:
+          sql: select setval('team_id', (select max(id)+1 from team), false)
+- changeSet:
+    id: 1623999583436-20
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        cacheSize: 1
+        cycle: false
+        dataType: bigint
+        incrementBy: 1
+        maxValue: 9223372036854775807
+        minValue: 1
+        sequenceName: technology_setting_id
+        startValue: 1
+    - sql:
+          sql: select setval('technology_setting_id', (select max(id)+1 from technology_setting), false)
+- changeSet:
+    id: 1623999583436-21
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        cacheSize: 1
+        cycle: false
+        dataType: bigint
+        incrementBy: 1
+        maxValue: 9223372036854775807
+        minValue: 1
+        sequenceName: type_id
+        startValue: 1
+    - sql:
+          sql: select setval('type_id', (select max(id)+1 from type), false)
+- changeSet:
+    id: 1623999583436-22
+    author: '? (generated)'
+    changes:
+    - dropSequence:
+        sequenceName: native
+

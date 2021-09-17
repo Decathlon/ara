@@ -60,7 +60,6 @@ build-web-ui: ## Build ara-web-ui
 build-api: ## Build ara-api
 	@echo '-- Build API image --'
 	@$(eval FULL_IMAGE = $(API_IMAGE):$(API_VERSION))
-	$(MAKE) -C api mvn-install
 	$(MAKE) -C api mvn-build-image FULL_IMAGE=$(FULL_IMAGE)
 	@./tools/docker-tags-version.sh "$(API_IMAGE)" "$(API_VERSION)" "$(PUBLISH)"
 
@@ -127,12 +126,15 @@ get-chart-version:
 update-chart-version: ## Update chart version. VERSION required TARGET_CHART optional default stable
 	@echo '-- Update Helm Chart version --'
 	@sed -i'.old' 's/^version:.*$\/version: $(VERSION)/' ../charts/$(TARGET_CHART)/Chart.yaml
+	@$(MAKE) get-chart-version TARGET_CHART=$(TARGET_CHART)
 
 copy-candidate-to-stable: ## Copy Candidate chart to Stable chart
 	@echo -n 'Copy '
 	@$(MAKE) get-chart-version TARGET_CHART=candidate
 	@echo '... to stable chart'
 	@rm -rf ../charts/stable && cp -r ../charts/candidate ../charts/stable
+	@$(eval CHART_VERSION=$(shell make get-chart-version TARGET_CHART=candidate | sed -e 's/-rc.*//'))
+	@$(MAKE) update-chart-version VERSION=$(CHART_VERSION) TARGET_CHART=stable
 
 get-api-version:
 	@$(MAKE) -C api get-version

@@ -1,0 +1,11 @@
+databaseChangeLog:
+- changeSet:
+    id: 1626357607294-1
+    author: '? (generated)'
+    changes:
+    - alterSequence:
+        incrementBy: 1
+        sequenceName: problem_pattern_id
+    - sql:
+        sql: select setval('problem_pattern_id', (select max(id)+1 from problem_pattern), false)
+

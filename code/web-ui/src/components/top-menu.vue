@@ -73,8 +73,8 @@
         </Tooltip>
         <!-- Keep the same width as logo+select: this is to center the menu when space is available -->
         <Tooltip content="How to use ARA?" placement="bottom-end" :transfer="true">
-          <a :href="'https://github.com/decathlon/ara/blob/master/doc/user/main/UserDocumentation.adoc'"
-             target="_blank"><Icon type="md-help-circle" size="24" style="padding: 0;"/></a>
+          <a href="https://github.com/decathlon/ara/blob/master/doc/user/main/UserDocumentation.adoc"
+             rel="noopener" target="_blank"><Icon type="md-help-circle" size="24" style="padding: 0;"/></a>
         </Tooltip><!-- No space between items -->
         <Dropdown trigger="click" placement="bottom-start">
           <a><Icon type="md-settings" size="24"/></a>
@@ -97,9 +97,9 @@
           </DropdownMenu>
         </Dropdown>
         <Tooltip content="What's new in ARA?" placement="bottom-end" :transfer="false">
-          <a :href="'https://github.com/Decathlon/ara/releases/tag/ara-' + appVersion"
+          <a :href="$sanitizeUrl('https://github.com/Decathlon/ara/releases/tag/ara-' + appVersion)"
              @click="setLatestChangelogVersion"
-             target="_blank"><Badge dot :count="changelogCount"><Icon type="md-notifications" size="24"/></Badge></a>
+             rel="noopener" target="_blank"><Badge dot :count="changelogCount"><Icon type="md-notifications" size="24"/></Badge></a>
         </Tooltip>
         <Tooltip v-if="isLoggedIn" content="Logout from ARA" placement="bottom-end">
           <a @click="logout()">
@@ -146,7 +146,7 @@
         isMediaDisplayedOnSamePage: true,
         appVersion: undefined,
         apiVersion: undefined,
-        webUIVersion: undefined,
+        webUIVersion: process.env.VERSION,
         latestChangelogVersion: this.getCookie(LATEST_CHANGELOG_VERSION_COOKIE_NAME),
         projectCode: this.$route.params.projectCode || this.defaultProjectCode,
         isLoggedIn: AuthenticationService.isAlreadyLoggedIn()
@@ -273,7 +273,6 @@
         .then((response) => {
           const data = response?.data
           this.appVersion = this.extractVersion(data, 'app')
-          this.webUIVersion = this.extractVersion(data, 'web-ui')
           this.apiVersion = this.extractVersion(data, 'api')
           // If it is the first time the user opens ARA, make sure to remember the current version for future notification badge
           if (!this.latestChangelogVersion) {

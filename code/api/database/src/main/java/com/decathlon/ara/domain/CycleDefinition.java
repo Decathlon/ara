@@ -17,17 +17,9 @@
 
 package com.decathlon.ara.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.With;
-import org.hibernate.annotations.GenericGenerator;
+import lombok.*;
+
+import javax.persistence.*;
 
 @Data
 @NoArgsConstructor
@@ -39,8 +31,8 @@ import org.hibernate.annotations.GenericGenerator;
 public class CycleDefinition {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
-    @GenericGenerator(name = "native", strategy = "native")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cycle_definition_id")
+    @SequenceGenerator(name = "cycle_definition_id", sequenceName = "cycle_definition_id", allocationSize = 1)
     private Long id;
 
     private long projectId;

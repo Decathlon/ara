@@ -1,0 +1,25 @@
+# Please Note that this file IS NOT PRODUCTION READY.
+# It's only dedicated to local test & try
+
+version: '3.5'
+
+services:
+  ara-mysql-db:
+    image: "mysql:8"
+    restart: always
+    environment:
+      - MYSQL_DATABASE=ara
+      - MYSQL_USER=changeme
+      - MYSQL_PASSWORD=changeme
+      - MYSQL_ROOT_PASSWORD=to_change
+    ports:
+      - 3306:3306
+  ara-postgresql-db:
+    image: "postgres:12"
+    restart: always
+    environment:
+      - POSTGRES_DB=ara
+      - POSTGRES_USER=changeme
+      - POSTGRES_PASSWORD=changeme
+    ports:
+      - 5432:5432

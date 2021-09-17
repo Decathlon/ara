@@ -24,7 +24,7 @@ info:
     version: @project.version@
 spring:
   profiles:
-    include: @spring.profiles.active@
+    include: @spring.profiles.active@,${ara.logging.mode}
   config:
     import: config-database.yaml,optional:config-custom.yaml,optional:config-authentication.yaml
   jackson:
@@ -44,6 +44,7 @@ spring:
 springdoc:
   packagesToScan: com.decathlon.ara
   pathsToMatch: /api/**
+  use-management-port: true
 
 #
 # Sensible default values, optionally customizable by clients
@@ -51,6 +52,8 @@ springdoc:
 
 # Disabled by default (and executed after/every day)
 ara:
+  logging:
+    mode: logging-console
   maxExecutionDaysToKeep: 14
   minExecutionsToKeepPerCycle: 20
 
@@ -81,6 +84,12 @@ ara:
   clientBaseUrl: http://localhost:8081/
 
 management:
+  server:
+    port: 9090
+  endpoints:
+    web:
+      exposure:
+        include: health, info, openapi, swaggerui
   # Metrics
   metrics:
     export:

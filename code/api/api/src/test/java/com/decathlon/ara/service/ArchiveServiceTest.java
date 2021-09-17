@@ -17,14 +17,6 @@
 
 package com.decathlon.ara.service;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Date;
-
 import org.apache.commons.io.FileUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -33,6 +25,14 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Date;
 
 @ExtendWith(MockitoExtension.class)
 public class ArchiveServiceTest {
@@ -46,7 +46,7 @@ public class ArchiveServiceTest {
     public void unzip_ShouldUnzipTheGivenZip() throws IOException, URISyntaxException {
         // GIVEN
         File targetDir = new File(System.getProperty("java.io.tmpdir"),
-                "ara-unzip_ShouldUnzipTheGivenZip_" + String.valueOf(new Date().getTime()));
+                "ara-unzip_ShouldUnzipTheGivenZip_" + new Date().getTime());
         File folderTargetDir = new File(targetDir, "folder");
         File subfolderTargetDir = new File(folderTargetDir, "sub-folder");
         String zipName = "files-in-folders.zip";
@@ -70,7 +70,7 @@ public class ArchiveServiceTest {
     @Test
     public void unzip_ShouldNotSendIOException_IfZipFileEmpty() throws IOException {
         File targetDir = new File(System.getProperty("java.io.tmpdir"),
-                "ara-unzip_ShouldSendIOException_IfZipFileEmpty-" + String.valueOf(new Date().getTime()));
+                "ara-unzip_ShouldSendIOException_IfZipFileEmpty-" + new Date().getTime());
         MultipartFile zipFile = new MockMultipartFile("zip", "not-exisiting.zip", ZIP_TYPE, new byte[0]);
 
         // WHEN
