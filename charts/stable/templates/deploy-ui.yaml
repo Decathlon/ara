@@ -1,4 +1,4 @@
-{{- $name := printf "%s-%s" .Chart.Name "ui" -}}
+{{- $name := printf "%s-%s-%s" .Release.Name .Chart.Name "ui" -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -33,11 +33,21 @@ spec:
         image: "{{ .Values.ui.image.registry }}/{{ .Values.ui.image.repository }}:{{ default .Chart.Version .Values.ui.image.tag }}"
         imagePullPolicy: {{ .Values.ui.image.imagePullPolicy }}
         env:
-        - name: API_URL
+        - name: ARA_API_HOST
           valueFrom:
             configMapKeyRef:
               name: {{ include "ara.configmap.name" . }}
-              key: api_url
+              key: api_host
+        - name: ARA_API_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "ara.configmap.name" . }}
+              key: api_port
+        - name: ARA_MANAGEMENT_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "ara.configmap.name" . }}
+              key: api_management_port
         ports:
         - containerPort: {{ .Values.ui.port }}
           name: http-port

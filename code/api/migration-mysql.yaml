@@ -5,7 +5,7 @@ version: '3.5'
 
 services:
   ara-mysql-db-source:
-    image: "mysql:5.7"
+    image: "mysql:8"
     restart: always
     ports:
       - 4306:3306
@@ -17,7 +17,7 @@ services:
     networks:
       - db_net
   ara-mysql-db-target:
-    image: "mysql:5.7"
+    image: "mysql:8"
     restart: always
     ports:
       - 3306:3306

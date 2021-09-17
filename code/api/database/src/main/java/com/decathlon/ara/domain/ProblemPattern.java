@@ -17,19 +17,11 @@
 
 package com.decathlon.ara.domain;
 
+import lombok.*;
+
+import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.*;
-
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.With;
-import org.hibernate.annotations.GenericGenerator;
 
 @Data
 @NoArgsConstructor
@@ -43,8 +35,8 @@ import org.hibernate.annotations.GenericGenerator;
 public class ProblemPattern {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
-    @GenericGenerator(name = "native", strategy = "native")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "problem_pattern_id")
+    @SequenceGenerator(name = "problem_pattern_id", sequenceName = "problem_pattern_id", allocationSize = 1)
     private Long id;
 
     // 1/2 for @EqualsAndHashCode to work: used when an entity is fetched by JPA

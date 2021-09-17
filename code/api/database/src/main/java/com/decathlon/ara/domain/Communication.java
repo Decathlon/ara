@@ -18,31 +18,12 @@
 package com.decathlon.ara.domain;
 
 import com.decathlon.ara.domain.enumeration.CommunicationType;
-import java.util.Comparator;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.With;
-import org.hibernate.annotations.GenericGenerator;
+import lombok.*;
 
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.nullsFirst;
+import javax.persistence.*;
+import java.util.Comparator;
+
+import static java.util.Comparator.*;
 
 @Data
 @NoArgsConstructor
@@ -58,8 +39,8 @@ public class Communication implements Comparable<Communication> {
     public static final String HOW_TO_ADD_SCENARIO = "how" + "to-add-scenario";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
-    @GenericGenerator(name = "native", strategy = "native")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "communication_id")
+    @SequenceGenerator(name = "communication_id", sequenceName = "communication_id", allocationSize = 1)
     private Long id;
 
     // 1/2 for @EqualsAndHashCode to work: used when an entity is fetched by JPA

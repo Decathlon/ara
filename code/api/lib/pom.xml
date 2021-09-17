@@ -21,13 +21,13 @@
     <parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.4.5</version>
+		<version>2.5.1</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-lib</artifactId>
-    <version>9.0.4</version>
+    <version>10.1.2</version>
 
     <properties>
         <java.version>16</java.version>
@@ -37,6 +37,7 @@
         <jacoco.phase.agent>initialize</jacoco.phase.agent>
         <jacoco.phase.report>verify</jacoco.phase.report>
         <delombok.phase>generate-sources</delombok.phase>
+        <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
     </properties>
 
     <name>ARA Libraries</name>

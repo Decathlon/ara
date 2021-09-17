@@ -18,12 +18,7 @@
 package com.decathlon.ara.domain;
 
 import com.decathlon.ara.domain.enumeration.Technology;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.With;
-import org.hibernate.annotations.GenericGenerator;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.Comparator;
@@ -39,8 +34,8 @@ import static java.util.Comparator.*;
 public class TechnologySetting implements Comparable<TechnologySetting> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
-    @GenericGenerator(name = "native", strategy = "native")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "technology_setting_id")
+    @SequenceGenerator(name = "technology_setting_id", sequenceName = "technology_setting_id", allocationSize = 1)
     private Long id;
 
     private Long projectId;

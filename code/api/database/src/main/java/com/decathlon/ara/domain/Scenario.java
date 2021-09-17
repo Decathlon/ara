@@ -18,30 +18,14 @@
 package com.decathlon.ara.domain;
 
 
+import lombok.*;
+
+import javax.persistence.*;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.With;
-import org.hibernate.annotations.GenericGenerator;
-
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.nullsFirst;
+import static java.util.Comparator.*;
 
 @Data
 @NoArgsConstructor
@@ -55,8 +39,8 @@ public class Scenario implements Comparable<Scenario> {
     public static final String COUNTRY_CODES_SEPARATOR = ",";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
-    @GenericGenerator(name = "native", strategy = "native")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "scenario_id")
+    @SequenceGenerator(name = "scenario_id", sequenceName = "scenario_id", allocationSize = 1)
     private Long id;
 
     /**
@@ -112,6 +96,16 @@ public class Scenario implements Comparable<Scenario> {
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "scenarios")
     private Set<Functionality> functionalities = new HashSet<>();
+
+    public void addFunctionality(Functionality functionality) {
+        this.functionalities.add(functionality);
+        functionality.getScenarios().add(this);
+    }
+
+    public void removeFunctionality(Functionality functionality) {
+        this.functionalities.remove(functionality);
+        functionality.getScenarios().remove(this);
+    }
 
     @Override
     public int compareTo(Scenario other) {

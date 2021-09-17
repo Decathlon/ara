@@ -1,4 +1,4 @@
-{{- $name := printf "%s-%s" .Chart.Name "api" -}}
+{{- $name := printf "%s-%s-%s" .Release.Name .Chart.Name "api" -}}
 {{- $defaultImage := printf "%s:%s" "decathlon/ara-api" .Chart.Version -}}
 apiVersion: apps/v1
 kind: Deployment
@@ -35,48 +35,58 @@ spec:
         imagePullPolicy: {{ .Values.api.image.imagePullPolicy }}
         env:
         - name: SERVER_PORT
-          value: "{{ .Values.api.port }}"
-        - name: DATABASE_TYPE
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "ara.configmap.name" . }}
+              key: api_port
+        - name: MANAGEMENT_SERVER_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "ara.configmap.name" . }}
+              key: api_management_port
+        - name: ARA_DATABASE_TARGET
           valueFrom:
             configMapKeyRef:
               name: {{ include "ara.configmap.name" . }}
               key: database_type
-        - name: DATABASE_HOST
+        - name: ARA_DATABASE_HOST
           valueFrom:
             configMapKeyRef:
               name: {{ include "ara.configmap.name" . }}
               key: database_host
-        - name: DATABASE_CUSTOM_OPTIONS
-          valueFrom:
-            configMapKeyRef:
-              name: {{ include "ara.configmap.name" . }}
-              key: database_options
-        - name: DATABASE_NAME
+        - name: ARA_DATABASE_NAME
           valueFrom:
             secretKeyRef:
               name:  {{ include "ara.database.secret.name" . }}
               key: {{ include "ara.database.secret.databasenamekey" . }}
-        - name: DATABASE_USER
+        - name: ARA_DATABASE_USERNAME
           valueFrom:
             secretKeyRef:
               name:  {{ include "ara.database.secret.name" . }}
               key: {{ include "ara.database.secret.usernamekey" . }}
-        - name: DATABASE_PASSWORD
+        - name: ARA_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ include "ara.database.secret.name" .}}
               key: {{ include "ara.database.secret.passwordkey" . }}
-        - name: CLIENT_URL
+        - name: ARA_CLIENTBASEURL
           valueFrom:
             configMapKeyRef:
               name: {{ include "ara.configmap.name" . }}
               key: app_url
-        - name: LIQUIBASE_ACTIVE
+        - name: ARA_DATABASE_LIQUIBASE_ENABLED
           valueFrom:
             configMapKeyRef:
                 name: {{ include "ara.configmap.name" . }}
                 key: liquibase_active
-        - name: DISPLAYED_VERSION
+        - name: ARA_LOGGING_MODE
+          valueFrom:
+            configMapKeyRef:
+                name: {{ include "ara.configmap.name" . }}
+                key: logging_mode
+        - name: SPRING_CONFIG_IMPORT
+          value: optional:file:/app/config/config-custom.yaml,optional:file:/app/config/config-authentication.yaml
+        - name: INFO_APP_VERSION
           value: "{{ .Chart.Version }}"
         volumeMounts:
           - name: config
@@ -85,10 +95,12 @@ spec:
         ports:
         - containerPort: {{ .Values.api.port }}
           name: http-port
+        - containerPort: {{ .Values.api.management.port }}
+          name: management-port
         readinessProbe:
           httpGet:
             path: /actuator/health/readiness
-            port: {{ .Values.api.port }}
+            port: {{ .Values.api.management.port }}
           initialDelaySeconds: 40
           timeoutSeconds: 2
           periodSeconds: 3
@@ -96,7 +108,7 @@ spec:
         livenessProbe:
           httpGet:
             path: /actuator/health/liveness
-            port: {{ .Values.api.port }}
+            port: {{ .Values.api.management.port }}
           initialDelaySeconds: 100
           timeoutSeconds: 2
           periodSeconds: 8
@@ -113,10 +125,10 @@ spec:
         secret:
           secretName: {{ include "ara.api.secret.name" . }}
           items:
-            - key: {{ include "ara.api.secret.authpropertieskey" . }}
-              path: "application-auth.properties"
-            - key: {{ include "ara.api.secret.custompropertieskey" . }}
-              path: "application-custom.properties"
+            - key: {{ include "ara.api.secret.authconfigkey" . }}
+              path: "config-authentication.yaml"
+            - key: {{ include "ara.api.secret.customconfigkey" . }}
+              path: "config-custom.yaml"
       {{- if .Values.api.volumes }}
 {{ toYaml .Values.api.volumes | indent 6 }}
       {{- end}}
@@ -128,8 +140,12 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: {{ .Values.api.port }}
+  - name: http
+    port: {{ .Values.api.port }}
     targetPort: http-port
+  - name: management
+    port: {{ .Values.api.management.port }}
+    targetPort: management-port
   selector:
     app.kubernetes.io/name: {{ include "ara.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

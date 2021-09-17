@@ -70,7 +70,7 @@
                         NO DATA
                         <span th:if="${execution.status}" th:class="${execution.status}">([[${#strings.toLowerCase(execution.status)}]])</span>
                         <span th:if="${execution.result}" th:class="${execution.result}">([[${#strings.toLowerCase(execution.result)}]])</span>
-                        <a th:href="${execution.jobUrl + 'console'}" target="_blank" style="text-decoration: none;">
+                        <a th:href="${execution.jobUrl + 'console'}" rel="noopener" target="_blank" style="text-decoration: none;">
                             <span class="Button" style="margin-left: 8px;">SHOW LOGS</span>
                         </a>
                     </div>

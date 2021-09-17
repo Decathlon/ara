@@ -53,7 +53,7 @@
   <div v-else style="color: #ED3F14;">
     NO DATA
     <job-status-result :job="execution"/>
-    <a :href="execution.jobUrl + 'console'" target="_blank">
+    <a :href="$sanitizeUrl(execution.jobUrl + 'console')" rel="noopener" target="_blank">
       <Button icon="md-open" size="small" style="margin-left: 8px;">SHOW LOGS</Button>
     </a>
   </div>

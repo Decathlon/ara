@@ -124,7 +124,7 @@ public class PostmanScenarioIndexerService {
      * @param parentAssertions the assertions of the parent items of this Postman item (deepest items' assertions come
      *                         first)
      * @param parentFolders    the complete path of the parent-folders of the given items in the Postman collection file
-     * @return scenarios describing all the given Postman requests (leafs in the tree): featureFile and featureName are
+     * @return scenarios describing all the given Postman requests (leaves in the tree): featureFile and featureName are
      * NOT initialized
      */
     List<Scenario> collectItemScenarios(ItemWithScripts[] items, Source source, AtomicInteger requestPosition, String parentSeverity, List<Assertion> parentAssertions, String... parentFolders) {
@@ -132,7 +132,7 @@ public class PostmanScenarioIndexerService {
         if (items != null) {
             for (ItemWithScripts item : items) {
                 boolean isRootFolder = (parentFolders.length == 0);
-                boolean isFolder = isRootFolder || item.isSubFolder();
+                boolean isFolder = isRootFolder || item.isSubFolder() || item.isFolder();
 
                 // Compute item severity (deepest items' severity override severity of previous ones)
                 String severity = postmanService.getSeverity(ArrayUtils.addAll(parentFolders, item.getName()));

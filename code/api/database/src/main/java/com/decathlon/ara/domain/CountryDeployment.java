@@ -19,33 +19,13 @@ package com.decathlon.ara.domain;
 
 import com.decathlon.ara.domain.enumeration.JobStatus;
 import com.decathlon.ara.domain.enumeration.Result;
+import lombok.*;
+
+import javax.persistence.*;
 import java.util.Comparator;
 import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.With;
-import org.hibernate.annotations.GenericGenerator;
 
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.nullsFirst;
+import static java.util.Comparator.*;
 
 @Data
 @NoArgsConstructor
@@ -57,8 +37,8 @@ import static java.util.Comparator.nullsFirst;
 public class CountryDeployment implements Comparable<CountryDeployment> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
-    @GenericGenerator(name = "native", strategy = "native")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "country_deployment_id")
+    @SequenceGenerator(name = "country_deployment_id", sequenceName = "country_deployment_id", allocationSize = 1)
     private Long id;
 
     // 1/2 for @EqualsAndHashCode to work: used when an entity is fetched by JPA

@@ -1,0 +1,9 @@
+= Logging
+
+== API
+
+You can use many logging management systems using different value related to spring profiles for the environement variable `ARA_LOGGING_MODE`:
+
+* console with `logging-console`
+* json with `logging-json`
+* gcp stackdriver with `logging-api`

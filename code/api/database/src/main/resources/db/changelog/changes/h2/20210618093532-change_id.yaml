@@ -1,0 +1,162 @@
+databaseChangeLog:
+- changeSet:
+    id: 1624001902688-1
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        sequenceName: COMMUNICATION_ID
+    - sql:
+          sql: alter sequence COMMUNICATION_ID restart with (select max(id)+1 from COMMUNICATION)
+- changeSet:
+    id: 1624001902688-2
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        sequenceName: COUNTRY_DEPLOYMENT_ID
+    - sql:
+          sql: alter sequence COUNTRY_DEPLOYMENT_ID restart with (select max(id)+1 from COUNTRY_DEPLOYMENT)
+- changeSet:
+    id: 1624001902688-3
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        sequenceName: COUNTRY_ID
+    - sql:
+          sql: alter sequence COUNTRY_ID restart with (select max(id)+1 from COUNTRY)
+- changeSet:
+    id: 1624001902688-4
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        sequenceName: CYCLE_DEFINITION_ID
+    - sql:
+          sql: alter sequence CYCLE_DEFINITION_ID restart with (select max(id)+1 from CYCLE_DEFINITION)
+- changeSet:
+    id: 1624001902688-5
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        sequenceName: ERROR_ID
+    - sql:
+          sql: alter sequence ERROR_ID restart with (select max(id)+1 from ERROR)
+- changeSet:
+    id: 1624001902688-6
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        sequenceName: EXECUTED_SCENARIO_ID
+    - sql:
+          sql: alter sequence EXECUTED_SCENARIO_ID restart with (select max(id)+1 from EXECUTED_SCENARIO)
+- changeSet:
+    id: 1624001902688-8
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        sequenceName: EXECUTION_ID
+    - sql:
+          sql: alter sequence EXECUTION_ID restart with (select max(id)+1 from EXECUTION)
+- changeSet:
+    id: 1624001902688-9
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        sequenceName: FUNCTIONALITY_ID
+    - sql:
+          sql: alter sequence FUNCTIONALITY_ID restart with (select max(id)+1 from FUNCTIONALITY)
+- changeSet:
+    id: 1624001902688-10
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        sequenceName: PROBLEM_ID
+    - sql:
+          sql: alter sequence PROBLEM_ID restart with (select max(id)+1 from PROBLEM)
+- changeSet:
+    id: 1624001902688-11
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        sequenceName: PROBLEM_PATTERN_ID
+    - sql:
+          sql: alter sequence PROBLEM_PATTERN_ID restart with (select max(id)+1 from PROBLEM_PATTERN)
+- changeSet:
+    id: 1624001902688-12
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        sequenceName: PROJECT_ID
+    - sql:
+          sql: alter sequence PROJECT_ID restart with (select max(id)+1 from PROJECT)
+- changeSet:
+    id: 1624001902688-13
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        sequenceName: ROOT_CAUSE_ID
+    - sql:
+          sql: alter sequence ROOT_CAUSE_ID restart with (select max(id)+1 from ROOT_CAUSE)
+- changeSet:
+    id: 1624001902688-14
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        sequenceName: RUN_ID
+    - sql:
+          sql: alter sequence RUN_ID restart with (select max(id)+1 from RUN)
+- changeSet:
+    id: 1624001902688-15
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        sequenceName: SCENARIO_ID
+    - sql:
+          sql: alter sequence SCENARIO_ID restart with (select max(id)+1 from SCENARIO)
+- changeSet:
+    id: 1624001902688-16
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        sequenceName: SETTING_ID
+    - sql:
+          sql: alter sequence SETTING_ID restart with (select max(id)+1 from SETTING)
+- changeSet:
+    id: 1624001902688-17
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        sequenceName: SEVERITY_ID
+    - sql:
+          sql: alter sequence SEVERITY_ID restart with (select max(id)+1 from SEVERITY)
+- changeSet:
+    id: 1624001902688-18
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        sequenceName: SOURCE_ID
+    - sql:
+          sql: alter sequence SOURCE_ID restart with (select max(id)+1 from SOURCE)
+- changeSet:
+    id: 1624001902688-19
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        sequenceName: TEAM_ID
+    - sql:
+          sql: alter sequence TEAM_ID restart with (select max(id)+1 from TEAM)
+- changeSet:
+    id: 1624001902688-20
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        sequenceName: TECHNOLOGY_SETTING_ID
+    - sql:
+          sql: alter sequence TECHNOLOGY_SETTING_ID restart with (select max(id)+1 from TECHNOLOGY_SETTING)
+- changeSet:
+    id: 1624001902688-21
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        sequenceName: TYPE_ID
+    - sql:
+          sql: alter sequence TYPE_ID restart with (select max(id)+1 from TYPE)
+

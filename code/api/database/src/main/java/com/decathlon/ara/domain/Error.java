@@ -19,10 +19,8 @@ package com.decathlon.ara.domain;
 
 import com.querydsl.core.annotations.QueryInit;
 import lombok.*;
-import lombok.With;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.Comparator;
@@ -44,8 +42,8 @@ public class Error implements Comparable<Error> {
     public static final String PROBLEM_PATTERNS_COLLECTION_CACHE = "com.decathlon.ara.domain.Error.problemPatterns";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
-    @GenericGenerator(name = "native", strategy = "native")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "error_id")
+    @SequenceGenerator(name = "error_id", sequenceName = "error_id", allocationSize = 1)
     private Long id;
 
     // 1/2 for @EqualsAndHashCode to work: used when an entity is fetched by JPA
