@@ -61,7 +61,7 @@ public class FileProcessorService {
         try {
             mappedObject = objectMapper.readValue(matchingFile.get(), objectClass);
         } catch (IOException e) {
-            log.info("Unable to process the file {}", matchingFile.get().getAbsolutePath(), e);
+            log.warn("Unable to process the file {}", matchingFile.get().getAbsolutePath(), e);
         }
 
         return Optional.ofNullable(mappedObject);
@@ -82,7 +82,7 @@ public class FileProcessorService {
         try {
             mappedObject = objectMapper.readValue(rawFile, objectClass);
         } catch (IOException e) {
-            log.info("Unable to process the file {}", rawFile.getAbsolutePath(), e);
+            log.warn("Unable to process the file {}", rawFile.getAbsolutePath(), e);
         }
         return Optional.ofNullable(mappedObject);
     }
@@ -98,13 +98,13 @@ public class FileProcessorService {
     public <T> List<T> getMappedObjectListFromFile(File parentDirectory, String pathToFile, Class<T> objectClass) {
         Optional<File> matchingFile = getMatchingSimpleFile(parentDirectory, pathToFile);
         if (!matchingFile.isPresent()) {
-            log.info("The file {} was not found", pathToFile);
+            log.warn("The file {} was not found", pathToFile);
             return new ArrayList<>();
         }
         try (InputStream input = new FileInputStream(matchingFile.get())) {
             return objectMapper.readValue(input, objectMapper.getTypeFactory().constructCollectionType(List.class, objectClass));
         } catch (IOException e) {
-            log.info("Cannot download file in {}", matchingFile.get().getPath(), e);
+            log.warn("Cannot download file in {}", matchingFile.get().getPath(), e);
             return new ArrayList<>();
         }
     }
@@ -120,7 +120,7 @@ public class FileProcessorService {
     public <T> List<T> getMappedObjectsFromDirectory(File parentDirectory, String pathToDirectory, Class<T> objectClass) {
         final Optional<File> matchingDirectory = getMatchingDirectory(parentDirectory, pathToDirectory);
         if (!matchingDirectory.isPresent()) {
-            log.info("The directory {} was not found", pathToDirectory);
+            log.warn("The directory {} was not found", pathToDirectory);
             return new ArrayList<>();
         }
 
@@ -177,7 +177,7 @@ public class FileProcessorService {
         File matchingFile = new File(absoluteFilePath);
 
         if (!matchingFile.exists()) {
-            log.error("File {} not found", absoluteFilePath);
+            log.warn("File {} not found", absoluteFilePath);
             return Optional.empty();
         }
 

@@ -73,7 +73,7 @@ public class SshAssetService implements AssetService {
 
             return araConfiguration.getSshHttpAccess() + subFolder + "/" + fileName;
         } catch (SshException e) {
-            log.error("Screenshot upload failed: {}", e.getMessage(), e);
+            log.warn("SCENARIO|cucumber|Screenshot upload failed: {}", e.getMessage(), e);
             return null;
         }
     }
@@ -103,7 +103,7 @@ public class SshAssetService implements AssetService {
 
             return araConfiguration.getSshHttpAccess() + subFolder + "/" + fileName;
         } catch (SshException e) {
-            log.error("HTTP log upload failed: {}", e.getMessage(), e);
+            log.error("SCENARIO|cucumber|HTTP log upload failed: {}", e.getMessage(), e);
             return null;
         }
     }

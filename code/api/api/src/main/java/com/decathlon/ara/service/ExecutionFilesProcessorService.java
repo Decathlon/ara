@@ -108,7 +108,7 @@ public class ExecutionFilesProcessorService {
         String buildInformationFilePath = settingService.get(projectId, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH);
         Optional<Build> build = getBuildFromFile(rawExecutionFile, buildInformationFilePath);
         if (!build.isPresent()) {
-            log.info("The build information file ({}) in [{}] couldn't be processed", buildInformationFilePath, rawExecutionFile.getAbsolutePath());
+            log.warn("EXECUTION|The build information file ({}) in [{}] couldn't be processed", buildInformationFilePath, rawExecutionFile.getAbsolutePath());
             return Optional.empty();
         }
 
@@ -126,11 +126,11 @@ public class ExecutionFilesProcessorService {
         Optional<CycleDef> cycleDef = fileProcessorService.getMappedObjectFromFile(rawExecutionFile, cycleDefinitionFilePath, CycleDef.class);
         if (!cycleDef.isPresent()) {
             if (JobStatus.DONE.equals(execution.get().getStatus()) || completionRequest.isPresent()) {
-                log.info("Cycle-run's cycle-definition JSON not found in done job (cycle deeply broken): indexing it as failed");
+                log.warn("EXECUTION|Cycle-run's cycle-definition JSON not found in done job (cycle deeply broken): indexing it as failed");
                 execution.get().setBlockingValidation(false);
                 return execution;
             }
-            log.info("Cycle-run's cycle-definition JSON not found (too soon?): not indexing it yet");
+            log.warn("EXECUTION|Cycle-run's cycle-definition JSON not found (too soon?): not indexing it yet");
             return Optional.empty();
         }
         execution.get().setBlockingValidation(cycleDef.get().isBlockingValidation());
@@ -182,7 +182,7 @@ public class ExecutionFilesProcessorService {
                 build.getLink());
         if (previousExecution.isPresent()) {
             if (JobStatus.DONE.equals(previousExecution.get().getStatus())) {
-                log.info("Cycle-run is already DONE (requested to be indexed several times?): no further indexing");
+                log.warn("EXECUTION|Cycle-run is already DONE (requested to be indexed several times?): no further indexing");
                 return Optional.empty();
             }
             Long executionId = previousExecution.get().getId();
@@ -270,7 +270,7 @@ public class ExecutionFilesProcessorService {
         final File[] countryJobDirectories = Arrays.stream(allExecutionFolderContents).filter(File::isDirectory).toArray(File[]::new);
 
         if (countryJobDirectories == null || countryJobDirectories.length == 0) {
-            log.info("The folder {} doesn't contain any country", rawExecutionFile.getAbsolutePath());
+            log.warn("EXECUTION|The folder {} doesn't contain any country", rawExecutionFile.getAbsolutePath());
         }
 
         final List<Country> allCountries = countryRepository.findAllByProjectIdOrderByCode(projectId);
@@ -288,7 +288,7 @@ public class ExecutionFilesProcessorService {
                 final Optional<Country> country = getCountryFromCodeAndCountries(countryCode, allCountries);
 
                 if (!country.isPresent()) {
-                    log.info("The country {} is not known. Please check your database", countryCode);
+                    log.warn("EXECUTION|The country {} is unknown. Please check your database", countryCode);
                     continue;
                 }
 
@@ -305,7 +305,7 @@ public class ExecutionFilesProcessorService {
                 } else {
                     countryDeployment = getUnavailableCountryDeployment(country.get(), platformName);
                     allCountryJobFolderContents = new File[0];
-                    log.info("Although the country {} is defined in the cycle definition file, no matching folder was found. Please check the execution zip again", countryCode);
+                    log.warn("EXECUTION|Although the country {} is defined in the cycle definition file, no matching folder was found. Please check the execution zip again", countryCode);
                 }
 
                 countryDeployments.add(countryDeployment);
@@ -317,7 +317,7 @@ public class ExecutionFilesProcessorService {
                     final Optional<Type> type = getTypeFromCodeAndTypes(typeCode, allTypes);
 
                     if (!type.isPresent()) {
-                        log.info("The type {} is unknown. It maybe needs to inserted into the ARA database", typeCode);
+                        log.warn("EXECUTION|The type {} is unknown. It maybe needs to inserted into the ARA database", typeCode);
                         continue;
                     }
 
@@ -330,7 +330,7 @@ public class ExecutionFilesProcessorService {
                         if (!typeJobFolder.isPresent()) {
                             Run run = getUnavailableRun(country.get(), type.get(), platformName, rule);
                             runs.add(run);
-                            log.info("The type {} was not found in the execution zip", typeCode);
+                            log.warn("EXECUTION|The type {} was not found in the execution zip", typeCode);
                             continue;
                         }
 

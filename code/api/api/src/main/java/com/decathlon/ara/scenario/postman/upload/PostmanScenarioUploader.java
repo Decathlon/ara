@@ -34,13 +34,15 @@ public class PostmanScenarioUploader {
      * @throws BadRequestException if the source cannot be found, the source code is not using POSTMAN technology, or something goes wrong while parsing the collection contents
      */
     public void uploadPostman(long projectId, String sourceCode, File zipFile) throws BadRequestException {
+        log.info("SCENARIO|postman|Beginning postman scenarios ({}) upload", sourceCode);
         uploader.processUploadedContent(projectId, sourceCode, Technology.POSTMAN, source -> {
             try {
                 return postmanScenarioIndexerService.extractScenarios(source, zipFile);
             } catch (IOException e) {
-                log.error("Cannot parse uploaded Postman collections ZIP", e);
+                log.error("SCENARIO|postman|Cannot parse uploaded Postman collections ZIP for source {}", sourceCode, e);
                 throw new BadRequestException("Cannot parse uploaded Postman collections ZIP", Entities.SCENARIO, "cannot_parse_zip");
             }
         });
+        log.info("SCENARIO|postman|Postman scenarios ({}) upload complete", sourceCode);
     }
 }

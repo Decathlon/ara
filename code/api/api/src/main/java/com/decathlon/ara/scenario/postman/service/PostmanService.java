@@ -148,9 +148,10 @@ public class PostmanService {
      */
     public void parse(JsonParser parser, NewmanParsingResult result) throws IOException {
         if (!parser.isClosed() && parser.nextToken() == JsonToken.START_OBJECT) {
-            log.debug("[json] JSON stream contains a root object: parsing the Newman report");
+            log.trace("SCENARIO|postman|JSON stream contains a root object: parsing the Newman report");
             parseRootObject(parser, result);
         } else {
+            log.warn("SCENARIO|postman|JSON stream does not contain a root object: no Newman report to parse");
             throw new IOException("JSON stream does not contain a root object: no Newman report to parse");
         }
     }
@@ -173,15 +174,15 @@ public class PostmanService {
             final String fieldName = parser.getCurrentName();
 
             if (startingObject && "collection".equals(fieldName)) {
-                log.debug("[json:$] found collection: parsing it");
+                log.trace("SCENARIO|postman|[json:$] found collection: parsing it");
                 result.setCollection(objectMapper.readValue(parser, Collection.class));
 
             } else if (startingObject && "run".equals(fieldName)) {
-                log.debug("[json:$] found run: parsing it");
+                log.trace("SCENARIO|postman|[json:$] found run: parsing it");
                 parseRun(parser, result);
 
             } else if (jsonToken != JsonToken.FIELD_NAME) {
-                log.debug("[json:$] unmapped {} (last field name: {})", jsonToken, fieldName);
+                log.trace("SCENARIO|postman|[json:$] unmapped {} (last field name: {})", jsonToken, fieldName);
                 parser.skipChildren();
             }
         }
@@ -206,17 +207,17 @@ public class PostmanService {
             final String fieldName = parser.getCurrentName();
 
             if (startingArray && "executions".equals(fieldName)) {
-                log.debug("[json:$.run] found executions: parsing it");
+                log.trace("SCENARIO|postman|[json:$.run] found executions: parsing it");
                 List<Execution> executions = new ArrayList<>();
                 result.setExecutions(executions);
                 parseExecutions(parser, executions);
 
             } else if (startingArray && "failures".equals(fieldName)) {
-                log.debug("[json:$.run] found failures: parsing it");
+                log.trace("SCENARIO|postman|[json:$.run] found failures: parsing it");
                 result.setFailures(Arrays.asList(objectMapper.readValue(parser, Failure[].class)));
 
             } else if (jsonToken != JsonToken.FIELD_NAME) {
-                log.debug("[json:$.run] unmapped {} (last field name: {})", jsonToken, fieldName);
+                log.trace("SCENARIO|postman|[json:$.run] unmapped {} (last field name: {})", jsonToken, fieldName);
                 parser.skipChildren();
             }
         }
@@ -237,7 +238,7 @@ public class PostmanService {
             }
 
             if (jsonToken == JsonToken.START_OBJECT) {
-                log.debug("[json:$.run.executions] found execution: parsing it");
+                log.trace("SCENARIO|postman|[json:$.run.executions] found execution: parsing it");
                 Execution execution = objectMapper.readValue(parser, Execution.class);
                 executions.add(execution); // Add BEFORE saving to file: if write fails (no space left), the "half-"file can be deleted
                 saveExecutionStreamToFile(execution);
@@ -391,7 +392,7 @@ public class PostmanService {
             if (newmanScenario.isPresent()) {
                 newmanScenario.get().setExecution(execution);
             } else {
-                log.error("Execution {} has no matching item in the Postman collection", itemId);
+                log.warn("SCENARIO|postman|Execution {} has no matching item in the Postman collection", itemId);
             }
         }
     }
@@ -421,7 +422,7 @@ public class PostmanService {
             if (newmanScenario.isPresent()) {
                 newmanScenario.get().getFailures().add(failure);
             } else {
-                log.error("Failure {} has no matching item in the Postman collection", failure.getSource().getId());
+                log.warn("SCENARIO|postman|Failure {} has no matching item in the Postman collection", failure.getSource().getId());
             }
         }
     }
@@ -700,7 +701,7 @@ public class PostmanService {
                 try {
                     Files.delete(Paths.get(tempFile.getPath()));
                 } catch (IOException e) {
-                    log.error("Cannot delete temporary file {}", tempFile, e);
+                    log.warn("SCENARIO|postman|Cannot delete temporary file {}", tempFile, e);
                 }
                 stream.setTempFile(null);
             }
@@ -844,13 +845,13 @@ public class PostmanService {
                 html.append("<pre>").append(escapeHtml(body.getRaw())).append("</pre>\n");
                 break;
             case "file":
-                log.error("File upload was used in a collection, while its collection export is absent in Postman.");
+                log.warn("SCENARIO|postman|File upload was used in a collection, while its collection export is absent in Postman.");
                 html.append(ERROR_PARAGRAPH +
                         "Postman does not export the files to upload, so it has not been sent..." +
                         PARAGRAPH_AND_LINE_END);
                 break;
             default:
-                log.error("Used new/unknown request body mode {}", body.getMode());
+                log.warn("SCENARIO|postman|Used new/unknown request body mode {}", body.getMode());
                 html.append(ERROR_PARAGRAPH + "Used new (unknown to ARA) request body mode ")
                         .append(body.getMode())
                         .append(PARAGRAPH_AND_LINE_END);
@@ -872,7 +873,7 @@ public class PostmanService {
                 fileContent = FileUtils.readFileToString(stream.getTempFile(), StandardCharsets.UTF_8);
                 fileContent = prettyPrint(fileContent, contentType);
             } catch (IOException e) {
-                log.error("Cannot read temporary file {}", stream.getTempFile(), e);
+                log.warn("SCENARIO|postman|Cannot read temporary file {}", stream.getTempFile(), e);
                 fileContent = "Error in ARA while reading the content of the response received by Newman:\n" +
                         ExceptionUtils.getStackTrace(e);
             }
@@ -928,7 +929,7 @@ public class PostmanService {
                     try {
                         return ZonedDateTime.parse(value, DateTimeFormatter.RFC_1123_DATE_TIME).toInstant();
                     } catch (DateTimeParseException e) {
-                        log.error("Cannot parse date from response header in Newman report: {}", value, e);
+                        log.warn("SCENARIO|postman|Cannot parse date from response header in Newman report: {}", value, e);
                         return null;
                     }
                 });

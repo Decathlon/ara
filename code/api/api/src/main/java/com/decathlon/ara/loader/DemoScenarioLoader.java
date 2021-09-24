@@ -71,7 +71,7 @@ public class DemoScenarioLoader {
         try {
             postmanScenariosZip = getPostmanScenariosZip(functionalityIds);
         } catch (IOException e) {
-            log.error("Cannot generate the ZIP of Postman scenarios: doing without functionality coverage for them", e);
+            log.warn("DEMO|postman|Cannot generate the ZIP of Postman scenarios: doing without functionality coverage for them", e);
             return;
         }
 
@@ -125,7 +125,7 @@ public class DemoScenarioLoader {
         try (final InputStream stream = getClass().getClassLoader().getResourceAsStream(name)) {
             return IOUtils.toString(stream, StandardCharsets.UTF_8);
         } catch (IOException | NullPointerException e) {
-            log.error("Cannot read demo resource file in classpath: {}", name, e);
+            log.error("DEMO|Cannot read demo resource file in classpath: {}", name, e);
             throw new NotGonnaHappenException("Demo file should exist and be valid in classpath: " + name);
         }
     }

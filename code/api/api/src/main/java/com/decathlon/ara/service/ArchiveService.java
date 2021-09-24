@@ -75,7 +75,7 @@ public class ArchiveService {
                 if (!canonicalPath.startsWith(destination.getCanonicalPath())) {
                     throw new IOException("Entry is outside of the target directory");
                 }
-                log.debug("Unzipping : {}", target.getAbsolutePath());
+                log.trace("Unzipping : {}", target.getAbsolutePath());
                 if (!entry.isDirectory()) {
                     this.writeEntry(zis, target);
                 }

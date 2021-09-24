@@ -118,7 +118,7 @@ class GithubRestClient {
         } else if (200 == responseCode) {
             return this.githubMapper.jsonToIssue(this.getContentOf(response));
         } else {
-            String msg = "Error while requesting issue " + issueId + " on repo " + repoPath + " : " + responseCode;
+            String msg = "DEFECT|github|Error while requesting issue " + issueId + " on repo " + repoPath + " : " + responseCode;
             log.warn(msg);
             throw new IOException(msg);
         }
@@ -170,7 +170,7 @@ class GithubRestClient {
         if (200 == responseCode) {
             result.addAll(this.githubMapper.jsonToIssueList(this.getContentOf(response)));
         } else if (404 != responseCode) {
-            String msg = "Error while retrieving issues updated since " + date + " on repo " + repoPath + " : " + responseCode;
+            String msg = "DEFECT|github|Error while retrieving issues updated since " + date + " on repo " + repoPath + " : " + responseCode;
             log.warn(msg);
             throw new IOException(msg);
         }
