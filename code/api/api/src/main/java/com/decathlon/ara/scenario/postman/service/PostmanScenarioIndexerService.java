@@ -76,13 +76,14 @@ public class PostmanScenarioIndexerService {
         final FileSystem zip = FileSystems.newFileSystem(zipFile.toPath(), this.getClass().getClassLoader());
 
         for (Path jsonFilePath : listJsonFilePaths(zip)) {
+            log.trace("SCENARIO|postman|Processing the file {}", jsonFilePath.toString());
             try {
                 InputStream input = Files.newInputStream(jsonFilePath);
                 final CollectionWithScripts collection = objectMapper.readValue(input, CollectionWithScripts.class);
                 final String pathToStore = jsonFilePath.toString().substring(1); // Remove leading slash
                 scenarios.addAll(collectCollectionScenarios(collection, source, pathToStore));
             } catch (IOException e) {
-                log.error("The file {} was ignored...", jsonFilePath, e);
+                log.warn("SCENARIO|postman|The file {} was ignored...", jsonFilePath, e);
             }
         }
 

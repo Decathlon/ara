@@ -395,14 +395,14 @@ public class ExecutionService {
             CycleDefinition cycleDefinition
     ) {
         Thread processExecutionDirectoriesThread = new Thread(() -> {
-            log.info("Processing execution files in a new thread");
+            log.info("EXECUTION|Processing execution files in a new thread");
             for (final File executionDirectory : executionDirectories) {
                 try {
                     processSpecificDirectory(cycleDefinition, executionDirectory);
                 } catch (Exception e) {
-                    log.error("A problem occurred while indexing this execution [{}]", executionDirectory.getPath(), e);
+                    log.warn("EXECUTION|A problem occurred while indexing this execution [{}]", executionDirectory.getPath(), e);
                 } finally {
-                    log.info("Cleaning the incoming folder: {}", executionDirectory.getAbsolutePath());
+                    log.info("EXECUTION|Cleaning the incoming folder: {}", executionDirectory.getAbsolutePath());
                     cleanExecutionFiles(projectId, executionDirectory);
                 }
             }
@@ -411,7 +411,7 @@ public class ExecutionService {
     }
 
     public void processSpecificDirectory(CycleDefinition cycleDefinition, File executionDirectory) {
-        log.info("Received new execution report in {}", executionDirectory.getAbsolutePath());
+        log.info("EXECUTION|Received new execution report in {}", executionDirectory.getAbsolutePath());
 
         PlannedIndexation plannedIndexation = new PlannedIndexation()
                 .withCycleDefinition(cycleDefinition)
@@ -427,7 +427,7 @@ public class ExecutionService {
 
     List<File> retrieveAllExecutionDirectories(File file, String buildInformationFilePath) {
         if (ArrayUtils.isEmpty(file.list())) {
-            log.warn("No entries found in the zip file {}", file.getAbsolutePath());
+            log.warn("EXECUTION|No entries found in the zip file {}", file.getAbsolutePath());
             return new ArrayList<>();
         }
 
@@ -461,7 +461,7 @@ public class ExecutionService {
             try {
                 FileUtils.deleteDirectory(executionDirectory);
             } catch (IOException e) {
-                log.error("The directory [{}] wasn't deleted due to an error", executionDirectory.getAbsolutePath(), e);
+                log.warn("EXECUTION|The directory [{}] wasn't deleted due to an error", executionDirectory.getAbsolutePath(), e);
             }
         }
     }

@@ -243,21 +243,20 @@ public class ExecutionResource {
                                        @RequestParam("cycle") String cycle,
                                        @RequestParam("zip") MultipartFile zipFile) {
         ResponseEntity<Void> result = ResponseEntity.status(HttpStatus.ACCEPTED).build();
-        log.info("Receiving new zip report for project {}...", projectCode);
+        log.info("EXECUTION|Receiving new zip report for project {}...", projectCode);
         try {
             long projectId = projectService.toId(projectCode);
             service.uploadExecutionReport(projectId, projectCode, branch, cycle, zipFile);
         } catch (NotFoundException | IllegalArgumentException e) {
-            log.error("Some parameters may not be correct");
-            log.error("Please check your logs, or the stacktrace below:", e);
+            log.error("EXECUTION|Some parameters may not be correct");
             result = ResponseUtil.handle(new BadRequestException(e.getMessage(), Entities.EXECUTION, VALIDATION_ERRROR));
         } catch (IOException ex) {
-            log.error("Unable to index the uploaded execution.", ex);
+            log.error("EXECUTION|Unable to index the uploaded execution.", ex);
             result = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 
-        log.info("Freeing the /upload resource...");
-        log.info("ARA is still uploading executions");
+        log.trace("EXECUTION|Freeing the /upload resource...");
+        log.info("EXECUTION|ARA is still uploading executions");
         return result;
     }
 

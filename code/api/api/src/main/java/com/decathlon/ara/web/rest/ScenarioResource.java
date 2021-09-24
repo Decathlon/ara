@@ -81,13 +81,13 @@ public class ScenarioResource {
     @Deprecated
     @PostMapping("/upload/{sourceCode}")
     public ResponseEntity<Void> uploadCucumber(@PathVariable String projectCode, @PathVariable String sourceCode, @Valid @RequestBody String json) {
-        log.warn("Beware! This resource (scenarios/upload/{sourceCode}) is deprecated.");
-        log.warn("Please, call the new resource instead: cucumber/scenarios/upload/{sourceCode}");
+        log.warn("/!\\ Beware! This resource (/api/projects/{}/scenarios/upload/{}) is deprecated /!\\", projectCode, sourceCode);
+        log.warn("Please, call the new resource instead: /api/projects/{}/cucumber/scenarios/upload/{}", projectCode, sourceCode);
         try {
             cucumberScenarioUploader.uploadCucumber(projectService.toId(projectCode), sourceCode, json);
             return ResponseEntity.ok().build();
         } catch (BadRequestException e) {
-            log.error("Failed to upload Cucumber scenarios for source code {}", sourceCode, e);
+            log.error("SCENARIO|cucumber|Failed to upload Cucumber scenarios for project {} and source code {}", projectCode, sourceCode, e);
             return ResponseUtil.handle(e);
         }
     }
@@ -97,8 +97,8 @@ public class ScenarioResource {
     public ResponseEntity<Void> uploadPostman(@PathVariable String projectCode,
                                               @PathVariable String sourceCode,
                                               @RequestParam("file") MultipartFile file) {
-        log.warn("Beware! This resource (scenarios/upload-postman/{sourceCode}) is deprecated.");
-        log.warn("Please, call the new resource instead: postman/scenarios/upload/{sourceCode}");
+        log.warn("/!\\ Beware! This resource (/api/projects/{}/scenarios/upload-postman/{}) is deprecated /!\\", projectCode, sourceCode);
+        log.warn("Please, call the new resource instead: /api/projects/{}/postman/scenarios/upload/{}", projectCode, sourceCode);
         File tempZipFile = null;
         try {
             tempZipFile = File.createTempFile("ara_scenario_upload_", ".zip");
@@ -107,10 +107,10 @@ public class ScenarioResource {
             postmanScenarioUploader.uploadPostman(projectService.toId(projectCode), sourceCode, tempZipFile);
             return ResponseEntity.ok().build();
         } catch (BadRequestException e) {
-            log.error("Failed to upload ZIP file containing Postman requests for source code {}", sourceCode, e);
+            log.error("SCENARIO|postman|Failed to upload ZIP file containing Postman requests for project {} and source code {}", projectCode, sourceCode, e);
             return ResponseUtil.handle(e);
         } catch (IOException e) {
-            log.error("Failed to upload ZIP file containing Postman requests for source code {}", sourceCode, e);
+            log.error("SCENARIO|postman|Failed to upload ZIP file containing Postman requests for project {} and source code {}", projectCode, sourceCode, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .headers(HeaderUtil.exception(Entities.SCENARIO, e))
                     .build();

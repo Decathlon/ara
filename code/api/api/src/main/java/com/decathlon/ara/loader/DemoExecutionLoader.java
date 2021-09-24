@@ -223,7 +223,7 @@ public class DemoExecutionLoader {
             this.executionService.processSpecificDirectory(cycleDefinition, executionDirectory);
             // ^ Deletion of executionDirectory is made by this call
         } catch (IOException e) {
-            log.error("Cannot import executions: " + e.getMessage(), e);
+            log.error("DEMO|Cannot import executions: " + e.getMessage(), e);
         } finally {
             // executionDirectory has been deleted, but not its containing temporary directory yet
             FileUtils.deleteQuietly(tempDirectory);
@@ -383,7 +383,7 @@ public class DemoExecutionLoader {
         } catch (IOException e) {
             // Cannot rethrow the exception, as the method is called in a lambda, and it's better to have the execution
             // imported, even without the right functionalities, instead of nothing
-            log.error("Cannot replace functionality ID placeholders in file " + filePath, e);
+            log.error("DEMO|Cannot replace functionality ID placeholders in file " + filePath, e);
         }
     }
 

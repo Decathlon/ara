@@ -18,12 +18,7 @@
 package com.decathlon.ara.repository.custom.impl;
 
 import com.decathlon.ara.domain.Error;
-import com.decathlon.ara.domain.Problem;
-import com.decathlon.ara.domain.ProblemPattern;
-import com.decathlon.ara.domain.QError;
-import com.decathlon.ara.domain.QProblem;
-import com.decathlon.ara.domain.QProblemPattern;
-import com.decathlon.ara.domain.SProblemOccurrence;
+import com.decathlon.ara.domain.*;
 import com.decathlon.ara.repository.ErrorRepository;
 import com.decathlon.ara.repository.ProblemPatternRepository;
 import com.decathlon.ara.repository.custom.ErrorRepositoryCustom;
@@ -35,14 +30,6 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.dml.SQLInsertClause;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +38,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+
+import javax.persistence.EntityManager;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -220,7 +211,7 @@ public class ErrorRepositoryImpl implements ErrorRepositoryCustom {
 
         long insertedRows = (insert.getBatchCount() > 0 ? insert.execute() : 0);
 
-        log.info("Inserted {} problemOccurrences", Long.valueOf(insertedRows));
+        log.info("PROBLEM|error|Inserted {} problemOccurrences", Long.valueOf(insertedRows));
     }
 
     @Override
@@ -275,7 +266,7 @@ public class ErrorRepositoryImpl implements ErrorRepositoryCustom {
 
         long insertedRows = (insert.getBatchCount() > 0 ? insert.execute() : 0);
 
-        log.info("Inserted {} problemOccurrences", Long.valueOf(insertedRows));
+        log.info("PROBLEM|error|Inserted {} problemOccurrences", Long.valueOf(insertedRows));
 
         return updatedProblems;
     }

@@ -136,8 +136,7 @@ public class DemoService {
             try {
                 FileUtils.deleteDirectory(new File(projectExecutionsFolder));
             } catch (IOException e) {
-                log.error("Cannot delete the temporary directory for the demo project's executions: " +
-                        projectExecutionsFolder, e);
+                log.warn("DEMO|execution|Cannot delete the temporary directory {} for the demo project's executions", projectExecutionsFolder, e);
             }
         }
     }

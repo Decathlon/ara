@@ -87,8 +87,7 @@ public class SquashExporter extends Exporter {
             workbook.close();
             return outputStream.toByteArray();
         } catch (IOException ex) {
-            log.error("Unable to write the Squash export : {}", ex.getMessage());
-            log.debug("Full exception of the Squash export failure", ex);
+            log.error("FEATURE|squash|export|Unable to write the Squash export", ex);
         }
         return new byte[0];
     }

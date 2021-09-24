@@ -114,9 +114,9 @@ public class TechnologySettingService {
                 return Arrays.asList(availableSettings);
             }
         } catch (ClassNotFoundException e) {
-            log.error("The class {} was not found", enumName, e);
+            log.warn("SETTING|technology|The class {} was not found", enumName, e);
         } catch (ClassCastException e) {
-            log.error("The class {} should be an instance of {}", enumName, AvailableTechnologySettings.class.getName(), e);
+            log.warn("SETTING|technology|The class {} should be an instance of {}", enumName, AvailableTechnologySettings.class.getName(), e);
         }
         return availableTechnologySettings;
     }
