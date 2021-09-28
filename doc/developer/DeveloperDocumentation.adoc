@@ -178,14 +178,12 @@ make update-version VERSION=X.Y.Z
 
 It will update maven version and stable helm chart.
 
-=== Unable/Disable the GW (docker-compose based on)
+=== Unable/Disable the GW (docker-compose.dev.yml based on)
 
 The aim of the gateway is to manage the authentication.
-By default, in dev mode, the gateway is disabled and the back will recognize you as ??
+By default, in dev mode, the gateway is disabled, and basic authentication is activated ( accepted credentials are user/user or admin/admin )
 
-To enable it in dev, look at docker-compose.dev.yaml in the ara-gw service:
-
-* add the `authent` profile
+To enable oauth, fill the SPRING_PROFILES_INCLUDE appropriately in docker-compose.dev.yml, for example:
 ```yaml
-    command: ['/bin/bash', '-c', 'mvn spring-boot:run -X -Dspring-boot.run.jvmArguments="-Dspring.profiles.active=dev,authent"']
+      - SPRING_PROFILES_INCLUDE=dev,oauth 
 ```

@@ -26,7 +26,7 @@ spring:
   profiles:
     include: @spring.profiles.active@,${ara.logging.mode}
   config:
-    import: config-database.yaml,optional:config-custom.yaml
+    import: config-database.yaml,oauth.yml,optional:/config/config-custom.yaml
   jackson:
     date-format: "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"
     default-property-inclusion: NON_NULL
@@ -40,8 +40,6 @@ spring:
       max-request-size: 100MB
   mail:
   #host: please-configure-spring.mail.host
-
-
 
 springdoc:
   packagesToScan: com.decathlon.ara
@@ -97,3 +95,4 @@ management:
     export:
       influx:
         enabled: false
+

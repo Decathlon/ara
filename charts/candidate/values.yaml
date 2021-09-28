@@ -57,11 +57,11 @@ gw:
     annotations: {}
     resources: {}
     port:
-        source: 80
+        source: 8080
         target: 8080
     # configExistingSecret:
         # gatewayauthentkey: authent.yml
-    profiles: "dev"
+    profiles: "none"
     authentConf: ""
 ##
 ## UI Configuration

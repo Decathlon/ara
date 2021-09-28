@@ -7,6 +7,7 @@ services:
     volumes:
       - ./api:/app
       - m2_home:/root/.m2
+      - "${CONF_PATH:-../../ara-conf}/oauth-clientcredentials.yml:/config/config-custom.yaml:ro"
     command: ['/bin/bash', '-c', 'mvn -Pdev ${OPTIONAL_CLEAN} install && mvn -Pdev spring-boot:run -pl api']
 #    ports:
 #      - 8080:8080
@@ -25,9 +26,13 @@ services:
       - ./gateway:/app
       - m2_home:/root/.m2
       - "${CONF_PATH:-../../ara-conf}:/config:ro"
-    command: ['/bin/bash', '-c', 'mvn spring-boot:run -X -P dev -Dspring-boot.run.jvmArguments="-Dspring.profiles.active=dev,authent"']
     ports:
-      - 80:8080
+      - 8080:8080
+    environment:
+      #  By default dev profile is active (through -Pdev), you can customize them if you wish
+      #- SPRING_PROFILES_ACTIVE=none
+      - SPRING_CONFIG_IMPORT=file:/config/oauth-clientcredentials.yml,file:/config/oauth-authorizationcode.yml
+    command: ['/bin/bash', '-c', 'mvn -Pdev ${OPTIONAL_CLEAN} install && mvn spring-boot:run -X -Pdev']
 
 
 volumes: 

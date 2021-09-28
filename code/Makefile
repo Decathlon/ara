@@ -178,17 +178,24 @@ update-gw-version: ## Update web-ui version. VERSION required
 ##            HELM PART            ##
 #####################################
 
-helm-template:
-	@test "$(WITH_LOCAL_VALUES)" = "true" && eval "CMD_LOCAL_VALUES='-f ../charts/local-values.yaml'" 
-	helm template $${CMD_LOCAL_VALUES} ../charts/$(TARGET_CHART) --debug
+# Helm template
+# examples:
+# make helm-install => templates from the stable chart
+# make helm-install TARGET_CHART=candidate => templates from the candidate chart
+# make helm-install LOCAL_VALUES=true TARGET_CHART=candidate => templates from the candidate chart and use custom values
+helm-template : 
+	$(eval CMD_LOCAL_VALUES := $(shell test "$(LOCAL_VALUES)" = "true" && echo "-f ../charts/local-values.yaml"))
+	helm template $(CMD_LOCAL_VALUES) ../charts/$(TARGET_CHART) --debug
 
-helm-install:
-	@test "$(WITH_LOCAL_VALUES)" = "true" && eval "CMD_LOCAL_VALUES='-f ../charts/local-values.yaml'" 
-	helm install $${CMD_LOCAL_VALUES} --create-namespace --namespace ara ara-local ../charts/$(TARGET_CHART)
+# Helm install ( same options as template )
+helm-install: 
+	$(eval CMD_LOCAL_VALUES := $(shell test "$(LOCAL_VALUES)" = "true" && echo "-f ../charts/local-values.yaml"))
+	helm install $(CMD_LOCAL_VALUES) --create-namespace --namespace ara ara-local ../charts/$(TARGET_CHART)
 
+# Helm upgrade ( same options as template )
 helm-upgrade:
-	@test "$(WITH_LOCAL_VALUES)" = "true" && eval "CMD_LOCAL_VALUES='-f ../charts/local-values.yaml'" 
-	@helm upgrade $${CMD_LOCAL_VALUES} --namespace ara ara-local ../charts/$(TARGET_CHART)
+	$(eval CMD_LOCAL_VALUES := $(shell test "$(LOCAL_VALUES)" = "true" && echo "-f ../charts/local-values.yaml"))
+	helm upgrade $(CMD_LOCAL_VALUES) --namespace ara ara-local ../charts/$(TARGET_CHART)
 
 helm-uninstall:
 	@helm uninstall --namespace ara ara-local

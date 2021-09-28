@@ -45,14 +45,19 @@
         <spring.profiles.active>default</spring.profiles.active>
         <mapstruct.version>1.4.2.Final</mapstruct.version>
         <springdoc.version>1.5.9</springdoc.version>
+        <spring-cloud.version>2.2.5.RELEASE</spring-cloud.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <jacoco.phase.agent>initialize</jacoco.phase.agent>
         <jacoco.phase.report>verify</jacoco.phase.report>
         <delombok.phase>generate-sources</delombok.phase>
         <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
+
+
     </properties>
 
+
+    <!-- Spring Cloud dependencies -->
     <dependencies>
         <!-- Web -->
         <dependency>
@@ -100,6 +105,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
+        <!-- oauth2 authentication : resource server - token feature -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>

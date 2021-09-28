@@ -7,7 +7,6 @@ logging:
     reactor:
       netty: INFO
 
----
 
 # actuator
 
@@ -23,8 +22,12 @@ management:
 ---
 
 # >>> DEFAULT VALUES
-# These default values can be overriden with the following env vars:
-# ARA_API_HOST / ARA_API_PORT / ARA_API_MANAGEMENTPORT / ARA_UI_HOST / ARA_UI_PORT
+# Remember values can be overriden by env vars (ARA_API_HOST, ... )
+
+spring:
+  profiles:
+    active: __profiles.from.maven__
+
 ara:
   api:
     host: ara-api
@@ -33,6 +36,7 @@ ara:
   ui:
     host: ara-web-ui
     port: 8080
+
 
 
 # <<< END DEFAULT VALUES
@@ -51,8 +55,7 @@ spring:
           predicates:
             - Path=/api/**,/demo-files/**
           filters:
-           - AddUsernameHeader=
-           - RemoveRequestHeader=Cookie
+           - TokenRelay=
         - id: backmanagement
           uri: "http://${ara.api.host}:${ara.api.managementport}"
           predicates:
@@ -63,18 +66,25 @@ spring:
             - Path=/**
 
 ---
+# oauth conf
+# override with stuff like
+#   file:/config/oauth-client-credentials,optional:file:/config/oauth-resourceserver.yml for example
+spring:
+  config:
+    import: oauth.yml
+
+---
 
 # Feature flipping
 
 feature-flipping:
   authent:
     oauth:
-      enabled: true
       features:
         authorization-code: true
         client-credentials: true
 
-    user-token:
-      enable: true
+#    user-token:
+#      enable: true
 
 

@@ -22,7 +22,7 @@ spec:
       paths:
       - backend:
           serviceName: {{ printf "%s-%s-%s" .Release.Name .Chart.Name "gw" }}
-          servicePort: http-port
+          servicePort: {{ .Values.gw.port.source }}
         path: /
       - backend:
           serviceName: {{ printf "%s-%s-%s" .Release.Name .Chart.Name "api" }}

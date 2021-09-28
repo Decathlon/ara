@@ -78,12 +78,16 @@ spec:
           failureThreshold: 2
         livenessProbe:
           httpGet:
-            path: /actuator/health/liveness
+            path: /actuatorgw/health/liveness
             port: 8081
           initialDelaySeconds: 100
           timeoutSeconds: 2
           periodSeconds: 8
           failureThreshold: 1
+        {{- if .Values.gw.resources }}
+        resources:
+{{ toYaml .Values.gw.resources | indent 10 }}
+        {{- end }}
       volumes:
       - name: config
         secret:
@@ -104,8 +108,7 @@ spec:
   {{- end }}
   {{- end }}
   ports:
-  - name: http
-    port: {{ .Values.gw.port.source }}
+  - port: {{ .Values.gw.port.source }}
     targetPort: {{ .Values.gw.port.target }}
   selector:
     app.kubernetes.io/name: {{ include "ara.name" . }}
