@@ -57,7 +57,7 @@
           </Tooltip>
         </span>
         <Tooltip placement="bottom-end">
-          <span>V{{ appVersion }}</span>
+          <span id="current-version">V{{ appVersion }}</span>
           <div slot="content">
             <table aria-label="ARA versions">
               <tr v-if="webUIVersion">
@@ -310,7 +310,7 @@
     white-space: nowrap;
   }
 
-  #helps span {
+  #current-version {
     color: white;
   }
 
