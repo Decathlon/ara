@@ -80,17 +80,34 @@
           <a><Icon type="md-settings" size="24"/></a>
           <DropdownMenu slot="list">
             <div class="parameters-box">
+              <div class="parameter-box-title">Executed Scenarios</div>
               <div class="parameter-line">
                 <div class="parameter-title">Media display</div>
                 <div class="parameter-switch">
-                  <span>Open in <strong>{{ isMediaDisplayedOnSamePage ? "the same page" : "a new tab" }}</strong></span>
+                  <Tooltip :transfer="true" placement="left">
+                    <span class="parameter-switch-description">Open in <strong>{{ isMediaDisplayedOnSamePage ? "the same page" : "a new tab" }}</strong></span>
+                    <div slot="content">
+                      <p>Sometimes videos and images can't be displayed in the same page</p>
+                      <p>(e.g. mixed content: Ara runs in a secure server (HTTPS) but media urls are not secure (HTTP)).</p>
+                      <p>You can fix this issue by switching off this option.</p>
+                    </div>
+                  </Tooltip>
                   <i-switch v-model="isMediaDisplayedOnSamePage" @on-change="saveMediaDisplayState"/>
                 </div>
-                <div class="parameter-description">
-                  <Alert closable>
-                    Sometimes videos and images can't be displayed in the same page (e.g. mixed content: Ara runs in a secure server (HTTPS) but media urls are not secure (HTTP)).
-                    You can fix this issue by switching off this option.
-                  </Alert>
+              </div>
+              <div class="parameter-line">
+                <div class="parameter-title">History</div>
+                <div class="parameter-switch">
+                  <Tooltip content="Change this if you want load fewer executed scenarios." :transfer="true" placement="left">
+                    <span class="parameter-switch-description">{{selectedHistoryDurationDescription}}<strong></strong></span>
+                  </Tooltip>
+                  <i-switch v-model="duration.applied" @on-change="updateExecutedScenariosHistoryDuration"/>
+                </div>
+                <div class="parameter-inputs" v-if="duration.applied">
+                  <InputNumber class="parameter-inputs-input" v-model="duration.value" controls-outside min="1" @on-change="updateExecutedScenariosHistoryDuration"></InputNumber>
+                  <Select v-model="duration.type" filterable @on-change="updateExecutedScenariosHistoryDuration">
+                    <Option v-for="durationType in duration.availableTypes" :value="durationType.value" :key="durationType.value">{{durationType.label + (duration.value > 1 ? 's' : '')}}</Option>
+                  </Select>
                 </div>
               </div>
             </div>
@@ -123,6 +140,7 @@
 
   import { AuthenticationService } from '../service/authentication.service'
   import { LocalParameterService } from '../service/local-parameter.service'
+  import _ from 'lodash'
 
   // Will contain the latest version when the user clicked to view the CHANGELOG:
   // a red badge will appear on the CHANGELOG icon when a new version will be available
@@ -144,6 +162,29 @@
     data () {
       return {
         isMediaDisplayedOnSamePage: true,
+        duration: {
+          applied: false,
+          value: 1,
+          type: '',
+          availableTypes: [
+            {
+              'value': 'DAY',
+              'label': 'day'
+            },
+            {
+              'value': 'WEEK',
+              'label': 'week'
+            },
+            {
+              'value': 'MONTH',
+              'label': 'month'
+            },
+            {
+              'value': 'YEAR',
+              'label': 'year'
+            }
+          ]
+        },
         appVersion: undefined,
         apiVersion: undefined,
         webUIVersion: process.env.VERSION,
@@ -154,6 +195,27 @@
     },
 
     computed: {
+      executedScenariosHistoryDurationIsApplied () {
+        return this.duration.applied && this.duration.value && this.duration.type
+      },
+
+      selectedHistoryDurationDescription () {
+        let finalDescription = 'Select'
+        let totalDurationDescription = 'all'
+        const durationType = this.duration.type
+        const durationValue = this.duration.value
+        if (this.executedScenariosHistoryDurationIsApplied) {
+          const plural = this.duration.value > 1 ? 's' : ''
+          const durationTypeDescription = _(this.duration.availableTypes)
+            .filter([ 'value', durationType ])
+            .map('label')
+            .first()
+          totalDurationDescription = `the last ${durationValue} ${durationTypeDescription}${plural}`
+        }
+        finalDescription += ` ${totalDurationDescription} history`
+        return finalDescription
+      },
+
       provider () {
         const authenticationDetails = this.getAuthenticationDetails()
         if (authenticationDetails) {
@@ -192,8 +254,30 @@
     },
 
     methods: {
+      loadExecutedScenariosHistoryDuration () {
+        const simplifiedDuration = LocalParameterService.getExecutedScenariosHistoryDuration()
+        this.duration.applied = !!simplifiedDuration
+        if (simplifiedDuration) {
+          this.duration.value = simplifiedDuration.value
+          this.duration.type = simplifiedDuration.type
+        }
+      },
+
+      updateExecutedScenariosHistoryDuration () {
+        if (this.executedScenariosHistoryDurationIsApplied) {
+          const simplifiedDuration = {
+            value: this.duration.value,
+            type: this.duration.type
+          }
+          LocalParameterService.saveExecutedScenariosHistoryDuration(simplifiedDuration)
+          return
+        }
+        LocalParameterService.clearExecutedScenariosHistoryDuration()
+      },
+
       loadLocalParameters () {
         this.isMediaDisplayedOnSamePage = LocalParameterService.isMediaDisplayedOnSamePage()
+        this.loadExecutedScenariosHistoryDuration()
       },
 
       saveMediaDisplayState (displayOnSamePage) {
@@ -332,28 +416,35 @@
     cursor: pointer;
   }
 
+  .parameter-box-title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 15px;
+    margin-bottom: 10px;
+    border-bottom: 1px lightgrey solid;
+    padding-bottom: 5px;
+  }
+
   .parameters-box {
+    display: flex;
+    flex-direction: column;
     margin: 10px;
     width: 300px;
   }
 
   .parameter-line {
+    display: flex;
+    flex-direction: column;
     margin-bottom: 5px;
   }
 
   .parameter-title {
     text-align: center;
     font-weight: bold;
-    margin-bottom: 5px;
-  }
-
-  .parameter-description {
-    margin-top: 10px;
-
-    text-align: start;
-    white-space: initial;
-    font-size: 12px;
-    font-style: italic;
+    margin-bottom: 25px;
+    background-color: rgb(0, 130, 195);
+    color: white;
+    padding: 5px 0px 5px 0px;
   }
 
   .parameter-switch {
@@ -361,5 +452,20 @@
     flex-flow: row wrap;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .parameter-switch-description {
+    cursor: pointer;
+  }
+
+  .parameter-inputs {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .parameter-inputs .parameter-inputs-input {
+    margin-right: 5px;
   }
 </style>

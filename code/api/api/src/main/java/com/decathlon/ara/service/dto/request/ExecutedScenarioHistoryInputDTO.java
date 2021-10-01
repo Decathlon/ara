@@ -22,6 +22,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
 
+import java.time.Period;
+import java.util.Optional;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -37,5 +40,41 @@ public class ExecutedScenarioHistoryInputDTO {
     private String countryCode;
 
     private String runTypeCode;
+
+    private ExecutedScenarioHistoryDuration duration;
+
+    public Optional<Period> getDuration() {
+        if (duration == null || duration.type == null || duration.value < 1) {
+            return Optional.empty();
+        }
+        Period period = Period.ZERO;
+        var durationType = duration.getType();
+        var durationValue = duration.getValue();
+        switch (durationType) {
+            case DAY:
+                period = Period.ofDays(durationValue);
+                break;
+            case WEEK:
+                period = Period.ofWeeks(durationValue);
+                break;
+            case MONTH:
+                period = Period.ofMonths(durationValue);
+                break;
+            case YEAR:
+                period = Period.ofYears(durationValue);
+                break;
+        }
+        return Optional.of(period);
+    }
+
+    @Data
+    private class ExecutedScenarioHistoryDuration {
+        private int value;
+        private ExecutedScenarioHistoryDurationType type;
+    }
+
+    private enum ExecutedScenarioHistoryDurationType {
+        DAY, WEEK, MONTH, YEAR
+    }
 
 }
