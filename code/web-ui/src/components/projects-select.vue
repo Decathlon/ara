@@ -23,8 +23,7 @@
           :placeholder="loaded ? 'Select Project' : ''">
     <Option v-for="project in projects" :value="project.code" :key="project.code"><Icon type="md-briefcase" style="visibility: hidden;"/> {{project.name}}</Option>
     <!-- After deleting the demo project, if no other project exists, `currentProjectCode` still exists but we should hide the menu anyway  -->
-    <Option v-if="currentProjectCode && projects && projects.length" style="border-top: 1px solid #DDDEE1;" value="manage-project"><Icon type="md-build"/> MANAGE PROJECT</Option>
-    <Option value="manage-projects"><Icon type="md-filing"/> MANAGE PROJECTS LIST</Option>
+    <Option value="manage-projects" style="border-top: 1px solid #DDDEE1;"><Icon type="md-filing"/> MANAGE PROJECTS LIST</Option>
   </Select>
 </template>
 

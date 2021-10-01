@@ -240,7 +240,8 @@
           { params: { projectCode: this.projectCode }, name: 'EXECUTIONS & ERRORS', routeName: 'executions' },
           { params: { projectCode: this.projectCode }, name: 'PROBLEMS', routeName: 'problems' },
           { params: { projectCode: this.projectCode }, name: 'FUNCTIONALITIES', routeName: 'functionalities' },
-          { params: { projectCode: this.projectCode }, name: 'SCENARIOS', routeName: 'scenario-writing-helps' }
+          { params: { projectCode: this.projectCode }, name: 'SCENARIOS', routeName: 'scenario-writing-helps' },
+          { params: { projectCode: this.projectCode }, name: 'SETTINGS', routeName: 'management' }
         ]
       },
 
