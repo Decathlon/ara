@@ -18,12 +18,11 @@
   <!-- Do not blink the placeholder during the few milliseconds the project list is loading: only show the placeholder when project list is loaded and there is no project -->
   <Select v-model="selectedOption"
           style="width: 200px;"
+          :disabled="!atLeastOneProject"
           :class="ghost ? 'ghost' : ''"
           @on-change="selectOption"
-          :placeholder="loaded ? 'Select Project' : ''">
+          :placeholder="loaded && atLeastOneProject ? 'Select Project' : 'No project to choose'">
     <Option v-for="project in projects" :value="project.code" :key="project.code"><Icon type="md-briefcase" style="visibility: hidden;"/> {{project.name}}</Option>
-    <!-- After deleting the demo project, if no other project exists, `currentProjectCode` still exists but we should hide the menu anyway  -->
-    <Option value="manage-projects" style="border-top: 1px solid #DDDEE1;"><Icon type="md-filing"/> MANAGE PROJECTS LIST</Option>
   </Select>
 </template>
 
@@ -60,6 +59,10 @@
     },
 
     computed: {
+      atLeastOneProject () {
+        return this.projects && this.projects.length > 0
+      },
+
       ...mapState('projects', [
         'projects',
         'loaded',
@@ -74,13 +77,7 @@
     methods: {
       selectOption (option) {
         if (option) {
-          if (option === 'manage-project') {
-            this.pushOrOpen({ name: 'management', params: { projectCode: this.currentProjectCode } })
-            this.$nextTick(() => { this.selectedOption = this.currentProjectCode })
-          } else if (option === 'manage-projects') {
-            this.pushOrOpen({ name: 'management-projects' })
-            this.$nextTick(() => { this.selectedOption = this.currentProjectCode })
-          } else if (option !== this.currentProjectCode) {
+          if (option !== this.currentProjectCode) {
             this.changeCurrentProject(option)
             if (this.$route.params.id) {
               // The screen was referring to an id of execution, error, problem...

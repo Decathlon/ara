@@ -30,14 +30,20 @@
               Fighting Against Regressions All Together
             </div>
             <img src="../assets/favicon-white.png" width="32" height="32"/></Tooltip></router-link><!-- No space between!
-     --><projects-select :ghost="true" v-on:projectSelection="projectSelection" style="flex: 1 0 auto; margin-right: 14px;"/>
+     --><projects-select :ghost="true" v-on:projectSelection="projectSelection" style="flex: 1 0 auto; margin-right: 10px;"/>
+        <router-link :to="{ name: 'management-projects' }" active-class="selected-project-management">
+          <Tooltip placement="bottom" content="Add or edit a project">
+            <div>
+              <Icon type="md-add" size="24" style="color: white;"/>
+            </div>
+          </Tooltip>
+        </router-link>
       </div>
 
       <div style="flex: 1 0 auto;">
         <!-- After deleting the demo project, if no other project exists, `projectCode` still exists but we should hide the menu anyway  -->
         <ul v-if="projectCode && projects && projects.length" class="ivu-menu ivu-menu-primary ivu-menu-horizontal">
-          <router-link v-for="link in links" :key="link.name" :to="to(link)"
-                      class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected">
+          <router-link v-for="link in links" :key="link.name" :to="to(link)" class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected">
             {{link.name}}
           </router-link>
         </ul>
@@ -98,7 +104,7 @@
               <div class="parameter-line">
                 <div class="parameter-title">History</div>
                 <div class="parameter-switch">
-                  <Tooltip content="Change this if you want load fewer executed scenarios." :transfer="true" placement="left">
+                  <Tooltip content="Change this if you want to load fewer executed scenarios." :transfer="true" placement="left">
                     <span class="parameter-switch-description">{{selectedHistoryDurationDescription}}<strong></strong></span>
                   </Tooltip>
                   <i-switch v-model="duration.applied" @on-change="updateExecutedScenariosHistoryDuration"/>
@@ -386,6 +392,12 @@
     float: none;
     display: inline-block;
   }
+
+  .selected-project-management div {
+    background-color: #135b95;
+    border-radius: 50%;
+  }
+
   #helps {
     flex: 0 1 auto;
     text-align: right;
