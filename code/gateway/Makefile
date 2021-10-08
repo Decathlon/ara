@@ -2,7 +2,7 @@
 ##            VARIABLES            ##
 #####################################
 
-JAVA_VERSION=16
+JAVA_VERSION=17
 
 #####################################
 ##             DEVELOP             ##
@@ -11,8 +11,7 @@ JAVA_VERSION=16
 # WITH JAVA MAVEN
 
 mvn-install: ## Install project
-	@echo "Not yet implemented, ensure its needed before"
-#	@./mvnw clean install
+	@./mvnw clean install
 
 mvn-run: ## DEV - run gw
 	@../bin/up-with-clean.sh
@@ -41,8 +40,12 @@ endif
 ##              UTILS              ##
 #####################################
 
-get-version:
+get-version: ## Get component version
 	@echo $$(xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' pom.xml)
+
+update-version: ## Update component version
+	@./mvnw --batch-mode release:update-versions -DautoVersionSubmodules=true -DdevelopmentVersion=$(VERSION)-SNAPSHOT
+	@./mvnw --batch-mode versions:set -DremoveSnapshot -DprocessAllModules
 
 .PHONY: help
 help:

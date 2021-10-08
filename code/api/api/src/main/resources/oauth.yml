@@ -1,8 +1,0 @@
----
-
-security:
-  oauth2:
-    resourceserver:
-      jwt:
-        jwk-set-uri: __value.to.set__
-

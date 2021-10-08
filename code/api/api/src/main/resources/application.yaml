@@ -26,7 +26,7 @@ spring:
   profiles:
     include: @spring.profiles.active@,${ara.logging.mode}
   config:
-    import: config-database.yaml,oauth.yml,optional:/config/config-custom.yaml
+    import: config-database.yaml,config-oauth.yml,optional:file:/app/config/config-custom.yaml
   jackson:
     date-format: "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"
     default-property-inclusion: NON_NULL
@@ -83,9 +83,11 @@ ara:
   # Local front
   clientBaseUrl: http://localhost:8081/
 
+server:
+  port: 8000
 management:
   server:
-    port: 9090
+    port: 8001
   endpoints:
     web:
       exposure:

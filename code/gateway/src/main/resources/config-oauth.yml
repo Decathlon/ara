@@ -1,0 +1,30 @@
+---
+
+# Oauth
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          ara-client-oidc:
+            provider: spring
+            client-id: ara-gw
+            client-secret: ara-gw
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: openid
+            client-name: ara-client-oidc
+          ara-client-authorization-code:
+            provider: spring
+            client-id: ara-gw
+            client-secret: ara-gw
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/authorized"
+            scope: ara.read
+            client-name: ara-client-authorization-code
+        provider:
+          spring:
+            issuer-uri: http://oauth2-dev-server:10000
+      resourceserver:
+        jwt:
+          issuer-uri: http://oauth2-dev-server:10000

@@ -56,8 +56,12 @@ endif
 ##              UTILS              ##
 #####################################
 
-get-version:
+get-version: ## Get component version
 	@echo $$(xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' pom.xml)
+
+update-version: ## Update component version
+	@./mvnw --batch-mode release:update-versions -DautoVersionSubmodules=true -DdevelopmentVersion=$(VERSION)-SNAPSHOT
+	@./mvnw --batch-mode versions:set -DremoveSnapshot -DprocessAllModules
 
 .PHONY: help
 help:

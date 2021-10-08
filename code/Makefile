@@ -8,6 +8,7 @@ IMAGE_NAME?=decathlon/ara
 export API_VERSION?=$(shell make -s -C api get-version)$(SUFFIX)
 export WEB_UI_VERSION?=$(shell make -s -C web-ui get-version)$(SUFFIX)
 export GW_VERSION?=$(shell make -s -C gateway get-version)$(SUFFIX)
+export OADS_VERSION?=$(shell make -s -C oauth2-dev-server get-version)$(SUFFIX)
 
 API_SHORT_IMAGE=${IMAGE_NAME}-api
 API_IMAGE=${DOCKER_REGISTRY}/${API_SHORT_IMAGE}
@@ -17,6 +18,9 @@ WEB_UI_IMAGE=${DOCKER_REGISTRY}/${WEB_UI_SHORT_IMAGE}
 
 GW_SHORT_IMAGE=${IMAGE_NAME}-gw
 GW_IMAGE=${DOCKER_REGISTRY}/${GW_SHORT_IMAGE}
+
+OADS_SHORT_IMAGE=${IMAGE_NAME}-oads
+OADS_IMAGE=${DOCKER_REGISTRY}/${OADS_SHORT_IMAGE}
 
 PUBLISH?=FALSE
 
@@ -52,9 +56,9 @@ stop-%: ## Stop module
 #####################################
 
 build: ## Build ARA in parallel
-	@$(MAKE) build-full -j2 -k
+	@$(MAKE) build-full -j4 -k
 
-build-full: build-api build-web-ui build-gw
+build-full: build-api build-web-ui build-gw build-oads
 
 build-web-ui: ## Build ara-web-ui
 	@echo '-- Build WEB-UI image --'
@@ -71,7 +75,17 @@ build-api: ## Build ara-api
 
 build-gw: ## Build the ara gateway
 	@echo '-- Build GATEWAY image'
-	$(MAKE) -C gateway mvn-build-image FULL_IMAGE=$(GW_IMAGE):$(GW_VERSION)
+	@$(eval FULL_IMAGE = $(GW_IMAGE):$(GW_VERSION))
+	$(MAKE) -C gateway mvn-install
+	$(MAKE) -C gateway mvn-build-image FULL_IMAGE=$(FULL_IMAGE)
+	@./bin/docker-tags-version.sh "$(GW_IMAGE)" "$(GW_VERSION)" "$(PUBLISH)"
+
+build-oads: ## Build the ara oauth2-dev-server
+	@echo '-- Build OADS image'
+	@$(eval FULL_IMAGE = $(OADS_IMAGE):$(OADS_VERSION))
+	$(MAKE) -C oauth2-dev-server mvn-install
+	$(MAKE) -C oauth2-dev-server mvn-build-image FULL_IMAGE=$(FULL_IMAGE)
+	@./bin/docker-tags-version.sh "$(OADS_IMAGE)" "$(OADS_VERSION)" "$(PUBLISH)"
 
 check-web-ui-image:
 	@$(MAKE) check-image CHECK_IMAGE=$(WEB_UI_SHORT_IMAGE) CHECK_TAG=$(WEB_UI_VERSION)
@@ -81,6 +95,9 @@ check-api-image:
 
 check-gw-image:
 	@$(MAKE) check-image CHECK_IMAGE=$(GW_SHORT_IMAGE) CHECK_TAG=$(GW_VERSION)
+
+check-oads-image:
+	@$(MAKE) check-image CHECK_IMAGE=$(OADS_SHORT_IMAGE) CHECK_TAG=$(OADS_VERSION)
 
 check-image:
 	@curl --silent -f -L https://hub.docker.com/v2/repositories/$(CHECK_IMAGE)/tags/$(CHECK_TAG)/ > /dev/null && echo true || echo false
@@ -132,7 +149,9 @@ get-versions: ## Give ARA version
 	@echo -n 'web-ui: '
 	@$(MAKE) get-web-ui-version
 	@echo -n 'gateway: '
-	@$(MAKE) get-gw-version
+	@$(MAKE) get-gateway-version
+	@echo -n 'oads: '
+	@$(MAKE) get-oauth2-dev-server-version
 
 TARGET_CHART?=stable
 get-chart-version:
@@ -151,28 +170,12 @@ copy-candidate-to-stable: ## Copy Candidate chart to Stable chart
 	@$(eval CHART_VERSION=$(shell make get-chart-version TARGET_CHART=candidate | sed -e 's/-rc.*//'))
 	@$(MAKE) update-chart-version VERSION=$(CHART_VERSION) TARGET_CHART=stable
 
-get-api-version:
-	@$(MAKE) -C api get-version
+get-%-version: ## Get module version
+	@$(MAKE) -C $* get-version
 
-update-api-version: ## Update api version. VERSION required
-	@echo '-- Update Maven version --'
-	@mvn --batch-mode -f api/pom.xml release:update-versions -DautoVersionSubmodules=true -DdevelopmentVersion=$(VERSION)-SNAPSHOT
-	@mvn --batch-mode -f api/pom.xml versions:set -DremoveSnapshot -DprocessAllModules
-
-get-web-ui-version:
-	@$(MAKE) -C web-ui get-version
-
-update-web-ui-version: ## Update web-ui version. VERSION required
-	@echo '-- Update Web-UI version --'
-	@npm --prefix web-ui version $(VERSION)
-
-get-gw-version:
-	@$(MAKE) -C gateway get-version
-
-update-gw-version: ## Update web-ui version. VERSION required
-	@echo '-- Update Web-UI version --'
-	@mvn --batch-mode -f gateway/pom.xml release:update-versions -DautoVersionSubmodules=true -DdevelopmentVersion=$(VERSION)-SNAPSHOT
-	@mvn --batch-mode -f gateway/pom.xml versions:set -DremoveSnapshot -DprocessAllModules
+update-%-version: ## Update module version. VERSION required
+	@echo '-- Update $* version --'
+	@$(MAKE) -C $* update-version VERSION=$(VERSION)
 
 #####################################
 ##            HELM PART            ##
@@ -183,7 +186,7 @@ update-gw-version: ## Update web-ui version. VERSION required
 # make helm-install => templates from the stable chart
 # make helm-install TARGET_CHART=candidate => templates from the candidate chart
 # make helm-install LOCAL_VALUES=true TARGET_CHART=candidate => templates from the candidate chart and use custom values
-helm-template : 
+helm-template: 
 	$(eval CMD_LOCAL_VALUES := $(shell test "$(LOCAL_VALUES)" = "true" && echo "-f ../charts/local-values.yaml"))
 	helm template $(CMD_LOCAL_VALUES) ../charts/$(TARGET_CHART) --debug
 

@@ -13,7 +13,8 @@ RUN npm run build
 
 FROM nginx:1.19
 
+ENV PORT 7000
+EXPOSE 7000
+
 COPY --from=builder /usr/src/app/dist /usr/share/nginx/html
 COPY config/default.conf.template /etc/nginx/templates/default.conf.template
-
-EXPOSE 8080

@@ -9,10 +9,11 @@ logging:
 
 
 # actuator
-
+server:
+  port: 9000
 management:
   server:
-    port: 8081
+    port: 9001
   endpoints:
     web:
       base-path: /actuatorgw
@@ -30,12 +31,12 @@ spring:
 
 ara:
   api:
-    host: ara-api
-    port: 8080
-    managementport: 9090
+    host: localhost
+    port: 8000
+    managementport: 8001
   ui:
-    host: ara-web-ui
-    port: 8080
+    host: localhost
+    port: 7000
 
 
 
@@ -71,7 +72,7 @@ spring:
 #   file:/config/oauth-client-credentials,optional:file:/config/oauth-resourceserver.yml for example
 spring:
   config:
-    import: oauth.yml
+    import: config-oauth.yml,optional:file:/app/config/config-custom.yml
 
 ---
 
