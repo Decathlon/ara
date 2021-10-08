@@ -17,13 +17,7 @@
 
 package com.decathlon.ara.repository.custom.impl;
 
-import com.decathlon.ara.domain.ExecutedScenario;
-import com.decathlon.ara.domain.QError;
-import com.decathlon.ara.domain.QExecutedScenario;
-import com.decathlon.ara.domain.QExecution;
-import com.decathlon.ara.domain.QProblem;
-import com.decathlon.ara.domain.QProblemPattern;
-import com.decathlon.ara.domain.QRun;
+import com.decathlon.ara.domain.*;
 import com.decathlon.ara.domain.enumeration.ProblemStatus;
 import com.decathlon.ara.domain.projection.ExecutedScenarioWithErrorAndProblemJoin;
 import com.decathlon.ara.repository.custom.ExecutedScenarioRepositoryCustom;
@@ -33,13 +27,20 @@ import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.util.List;
-import java.util.Set;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.sql.Date;
+import java.time.LocalDateTime;
+import java.time.Period;
+import java.time.ZoneId;
+import java.time.chrono.ChronoZonedDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -49,7 +50,7 @@ public class ExecutedScenarioRepositoryImpl implements ExecutedScenarioRepositor
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public List<ExecutedScenario> findHistory(long projectId, String cucumberId, String branch, String cycleName, String countryCode, String runTypeCode) {
+    public List<ExecutedScenario> findHistory(long projectId, String cucumberId, String branch, String cycleName, String countryCode, String runTypeCode, Optional<Period> duration) {
         final QExecutedScenario scenario = QExecutedScenario.executedScenario;
 
         JPAQuery<ExecutedScenario> query = jpaQueryFactory.select(scenario)
@@ -71,6 +72,16 @@ public class ExecutedScenarioRepositoryImpl implements ExecutedScenarioRepositor
 
         if (StringUtils.isNotEmpty(runTypeCode)) {
             query = query.where(scenario.run.type.code.eq(runTypeCode));
+        }
+
+        var today = LocalDateTime.now();
+        var startDate = duration
+                .map(today::minus)
+                .map(localDateTime -> localDateTime.atZone(ZoneId.systemDefault()))
+                .map(ChronoZonedDateTime::toInstant)
+                .map(Date::from);
+        if (startDate.isPresent()) {
+            query = query.where(scenario.run.execution.testDateTime.after(startDate.get()));
         }
 
         return query

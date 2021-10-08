@@ -19,12 +19,15 @@ package com.decathlon.ara.repository.custom;
 
 import com.decathlon.ara.domain.ExecutedScenario;
 import com.decathlon.ara.domain.projection.ExecutedScenarioWithErrorAndProblemJoin;
+
+import java.time.Period;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface ExecutedScenarioRepositoryCustom {
 
-    List<ExecutedScenario> findHistory(long projectId, String cucumberId, String branch, String cycleName, String countryCode, String runTypeCode);
+    List<ExecutedScenario> findHistory(long projectId, String cucumberId, String branch, String cycleName, String countryCode, String runTypeCode, Optional<Period> duration);
 
     /**
      * @param runIds the IDs of the Runs where to find ExecutedScenarios

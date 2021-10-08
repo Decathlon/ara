@@ -87,7 +87,9 @@ public class ExecutedScenarioService {
                 input.getBranch(),
                 input.getCycleName(),
                 input.getCountryCode(),
-                input.getRunTypeCode());
+                input.getRunTypeCode(),
+                input.getDuration()
+        );
 
         final List<ExecutedScenarioWithRunAndTeamIdsAndExecutionAndErrorsAndProblemsDTO> dtoList =
                 executedScenarioWithRunAndTeamIdsAndExecutionAndErrorsAndProblemsMapper.toDto(executedScenarios);
