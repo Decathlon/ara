@@ -1,4 +1,4 @@
-name: build gateway
+name: build oauth2-dev-server
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  code_gw_change:
+  code_app_change:
     # continue-on-error: true # Uncomment once integration is finished
     runs-on: ubuntu-latest
     # Map a step output to a job output
@@ -20,7 +20,7 @@ jobs:
         uses: fkirc/skip-duplicate-actions@v3.4.0
         with:
           github_token: ${{ github.token }}
-          paths: '["code/gateway/**"]'
+          paths: '["code/oauth2-dev-server/**"]'
           cancel_others: 'true'
           do_not_skip: '["push", "workflow_dispatch"]'
   docker_image:
@@ -35,18 +35,18 @@ jobs:
       - id: skip_check
         run: |
           if [[ $GITHUB_REF == refs/pull/* ]]; then
-            GW_EXISTS=false
+            APP_EXISTS=false
           else
             pushd code
-            GW_EXISTS=$(make -s check-gw-image)
+            APP_EXISTS=$(make -s check-oads-image)
             popd
           fi
-          echo ::set-output name=should_skip::${GW_EXISTS}
-  build-gw:
+          echo ::set-output name=should_skip::${APP_EXISTS}
+  build-app:
     needs:
-      - code_gw_change
+      - code_app_change
       - docker_image
-    if: ${{ needs.code_gw_change.outputs.should_skip != 'true' && needs.docker_image.outputs.should_skip != 'true' }}
+    if: ${{ needs.code_app_change.outputs.should_skip != 'true' && needs.docker_image.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
     steps:
       -
@@ -59,7 +59,7 @@ jobs:
         name: Set up JDK
         uses: actions/setup-java@v1
         with:
-          java-version: '16'
+          java-version: '17'
       - 
         name: Cache SonarCloud packages
         uses: actions/cache@v1
@@ -75,11 +75,8 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - 
-        name: Build and analyze
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -f code/gateway -B clean install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+        name: Build
+        run: mvn -f code/oauth2-dev-server -B clean install
       -
         name: Prepare
         id: prep
@@ -118,4 +115,4 @@ jobs:
         name: Build and push
         run: |
           cd code
-          make build-gw SUFFIX=${{ steps.prep.outputs.suffix }} PUBLISH=${{ steps.prep.outputs.push }}
+          make build-oads SUFFIX=${{ steps.prep.outputs.suffix }} PUBLISH=${{ steps.prep.outputs.push }}
