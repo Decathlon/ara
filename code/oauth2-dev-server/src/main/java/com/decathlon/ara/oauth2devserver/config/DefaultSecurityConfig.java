@@ -25,24 +25,23 @@ public class DefaultSecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
+    public UserDetailsService userDetailsService() {
         var uds = new InMemoryUserDetailsManager();
 
-        var user = User.withUsername("user").password(passwordEncoder.encode("user"))
-                .roles("USER").build();
+        var user = User.withDefaultPasswordEncoder()
+                                    .username("user")
+                                    .password("user")
+                                    .roles("USER").build();
 
-        var admin = User.withUsername("admin").password(passwordEncoder.encode("admin"))
+        var admin = User.withDefaultPasswordEncoder()
+                .username("admin")
+                .password("admin")
                 .roles("ADMIN").build();
 
         uds.createUser(user);
         uds.createUser(admin);
 
         return uds;
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
 }

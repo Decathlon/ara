@@ -7,5 +7,5 @@ management:
     port: 10001
 
 client:
-  hostname: localhost
+  hostname: 127.0.0.1
   port: 9000
