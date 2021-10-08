@@ -1,13 +1,9 @@
 # Override default app name
 # nameOverride:
 
-
-##
-app:
-    # Use an existing secret
-    configExistingSecret:
-        # secretName: nameofsecret # secret file containing keys used both by api and gw
-        enabled: false
+# app:
+    # configSecret:
+        # secretName: nameofsecret
 
 ##
 ## API Configuration
@@ -33,14 +29,14 @@ api:
         # requests:
         #  cpu: 100m
         #  memory: 128Mi
-    port: 8080
+    port: 8000
     management:
-        port: 9090
+        port: 8001
     # Base url used to redirect on the app by email service among others
     appUrl: ara.test
-    # Use an existing secret
-    # configExistingSecret:
-        # customConfigKey: config-custom.yaml
+    # Use an existing secret require app.configSecret.secretName
+    configSecret:
+        customConfigKey: config-api.yaml
     customConfig: ""
     # sideCarContainer:
     # volumes:
@@ -56,13 +52,13 @@ gw:
     replicas: 1
     annotations: {}
     resources: {}
-    port:
-        source: 8080
-        target: 8080
-    # configExistingSecret:
-        # gatewayauthentkey: authent.yml
-    profiles: "none"
-    authentConf: ""
+    port: 9000
+    management:
+        port: 9001
+    # Use an existing secret require app.configSecret.secretName
+    configSecret:
+        customConfigKey: config-gw.yaml
+    customConfig: ""
 ##
 ## UI Configuration
 ##
@@ -85,52 +81,32 @@ ui:
         # requests:
         #  cpu: 100m
         #  memory: 128Mi
-    port: 8080
+    port: 7000
 
 
 ##
 ## Postgresql Database Configuration
 ##
 database:
-    embedded: true
-    # type postgresql is suported when embedded is false
+    # embedded / cluster / external
+    mode: embedded
+    # h2 (embedded required) / postgresql
     type: h2
-    # When embedded is false you can provide default cluster database (postgresql) or external database:
-    external: false
-    # When external is true you can set the host of database
-    # host:
     # Active liquibase update
     liquibaseActive: true
+    secretConfig:
+        # Use an existing secret
+        # secretName: nameofsecret
+        hostKey: host
+        databaseNameKey: name
+        usernameKey: username
+        passwordKey: password
+    # Ignored when cluster mode is set
+    host: mem
     # Name of the database
     name: ara
-    options: ''
-    # Set if no existing secret
     username: ara
     password: changeme
-    # Use an existing secret
-    existingSecret:
-        enabled: false
-        # secretName: nameofsecret
-        # usernameKey: username
-        # passwordKey: password
-        # databaseNameKey: database
-
-##
-## Internal DB Configuration
-##
-db:
-    resources: {}
-        # We usually recommend not to specify default resources and to leave this as a conscious
-        # choice for the user. This also increases chances charts run on environments with little
-        # resources, such as Minikube. If you do want to specify resources, uncomment the following
-        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-        # limits:
-        #  cpu: 100m
-        #  memory: 128Mi
-        # requests:
-        #  cpu: 100m
-        #  memory: 128Mi
-    port: 3306
 
 ## Allowing use of ingress controllers
 ## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/

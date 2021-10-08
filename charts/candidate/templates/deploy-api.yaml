@@ -51,24 +51,24 @@ spec:
               key: database_type
         - name: ARA_DATABASE_HOST
           valueFrom:
-            configMapKeyRef:
-              name: {{ include "ara.configmap.name" . }}
-              key: database_host
+            secretKeyRef:
+              name: {{ include "ara.database.secret.name" . }}
+              key: {{ .Values.database.secretConfig.hostKey }}
         - name: ARA_DATABASE_NAME
           valueFrom:
             secretKeyRef:
               name:  {{ include "ara.database.secret.name" . }}
-              key: {{ include "ara.database.secret.databasenamekey" . }}
+              key: {{ .Values.database.secretConfig.databaseNameKey }}
         - name: ARA_DATABASE_USERNAME
           valueFrom:
             secretKeyRef:
               name:  {{ include "ara.database.secret.name" . }}
-              key: {{ include "ara.database.secret.usernamekey" . }}
+              key: {{ .Values.database.secretConfig.usernameKey }}
         - name: ARA_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ include "ara.database.secret.name" .}}
-              key: {{ include "ara.database.secret.passwordkey" . }}
+              key: {{ .Values.database.secretConfig.passwordKey }}
         - name: ARA_CLIENTBASEURL
           valueFrom:
             configMapKeyRef:
@@ -123,7 +123,7 @@ spec:
         secret:
           secretName: {{ include "ara.app.secret.name" . }}
           items:
-            - key: {{ include "ara.api.secret.customconfigkey" . }}
+            - key: {{ .Values.api.configSecret.customConfigKey }}
               path: "config-custom.yaml"
       {{- if .Values.api.volumes }}
 {{ toYaml .Values.api.volumes | indent 6 }}

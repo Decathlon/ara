@@ -10,7 +10,6 @@ metadata:
     app.kubernetes.io/version: {{ .Chart.Version }}
     app.kubernetes.io/component: configuration
 data:
-  database_host: {{ include "ara.db.host" . | quote }}
   database_type: {{ .Values.database.type }}
   liquibase_active: {{ .Values.database.liquibaseActive | quote }}
   logging_mode: {{ include "ara.api.loggingmode" . | quote }}
@@ -20,9 +19,8 @@ data:
   ui_host: {{ printf "%s-%s-ui.%s.svc.cluster.local" .Release.Name .Chart.Name .Release.Namespace }}
   ui_port: {{ printf "%.0f" .Values.ui.port | quote }}
   api_management_port: {{ printf "%.0f" .Values.api.management.port | quote }}
-  gw_profiles: {{ printf "%s" .Values.gw.profiles | quote }}
 
-{{- if not .Values.app.configExistingSecret.enabled }}
+{{- if not .Values.app.configSecret.secretName }}
 ---
 apiVersion: v1
 kind: Secret
@@ -34,10 +32,11 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/version: {{ .Chart.Version }}
-    app.kubernetes.io/component: api-secret
+    app.kubernetes.io/component: app-secret
 type: Opaque
 stringData:
-  {{ template "ara.gw.secret.gatewayauthentkey" }}: {{ toYaml .Values.gw.authentConf | indent 4 }}
-  {{ template "ara.api.secret.customconfigkey" }}: |
+  {{ .Values.gw.configSecret.customConfigKey }}: |
+{{ toYaml .Values.gw.customConfig | indent 4 }}
+  {{ .Values.api.configSecret.customConfigKey }}: |
 {{ toYaml .Values.api.customConfig | indent 4 }}
 {{- end }}

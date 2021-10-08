@@ -22,12 +22,8 @@ spec:
       paths:
       - backend:
           serviceName: {{ printf "%s-%s-%s" .Release.Name .Chart.Name "gw" }}
-          servicePort: {{ .Values.gw.port.source }}
+          servicePort: http
         path: /
-      - backend:
-          serviceName: {{ printf "%s-%s-%s" .Release.Name .Chart.Name "api" }}
-          servicePort: management
-        path: /actuator
 {{- if .Values.ingress.tls }}
   tls:
 {{ toYaml .Values.ingress.tls | indent 4 }}

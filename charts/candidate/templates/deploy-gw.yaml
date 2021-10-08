@@ -59,19 +59,17 @@ spec:
             configMapKeyRef:
               name: {{ include "ara.configmap.name" . }}
               key: api_management_port
-        - name: SPRING_PROFILES_INCLUDE
-          valueFrom:
-            configMapKeyRef:
-              name: {{ include "ara.configmap.name" . }}
-              key: gw_profiles
         volumeMounts:
           - name: config
-            mountPath: "/config"
+            mountPath: "/app/config"
             readOnly: true
+        ports:
+        - containerPort: {{ .Values.gw.port }}
+          name: http-port
         readinessProbe:
           httpGet:
             path: /actuatorgw/health/readiness
-            port: 8081
+            port: {{ .Values.gw.management.port }}
           initialDelaySeconds: 40
           timeoutSeconds: 2
           periodSeconds: 3
@@ -79,7 +77,7 @@ spec:
         livenessProbe:
           httpGet:
             path: /actuatorgw/health/liveness
-            port: 8081
+            port: {{ .Values.gw.management.port }}
           initialDelaySeconds: 100
           timeoutSeconds: 2
           periodSeconds: 8
@@ -93,8 +91,8 @@ spec:
         secret:
           secretName: {{ include "ara.app.secret.name" . }}
           items:
-            - key: {{ include "ara.gw.secret.gatewayauthentkey" . }}
-              path: "authent.yml"
+            - key: {{ .Values.gw.configSecret.customConfigKey }}
+              path: "config-custom.yml"
 ---
 apiVersion: v1
 kind: Service
@@ -108,8 +106,9 @@ spec:
   {{- end }}
   {{- end }}
   ports:
-  - port: {{ .Values.gw.port.source }}
-    targetPort: {{ .Values.gw.port.target }}
+  - name: http
+    port: {{ .Values.gw.port }}
+    targetPort: http-port
   selector:
     app.kubernetes.io/name: {{ include "ara.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

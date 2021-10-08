@@ -32,12 +32,18 @@ spec:
       - name: {{ $name }}
         image: "{{ .Values.ui.image.registry }}/{{ .Values.ui.image.repository }}:{{ default .Chart.Version .Values.ui.image.tag }}"
         imagePullPolicy: {{ .Values.ui.image.imagePullPolicy }}
+        env:
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "ara.configmap.name" . }}
+              key: ui_port
         ports:
         - containerPort: {{ .Values.ui.port }}
           name: http-port
         readinessProbe:
           httpGet:
-            path: /static/version/about.json
+            path: /assets/manifest.json
             port: {{ .Values.ui.port }}
           initialDelaySeconds: 40
           timeoutSeconds: 2
