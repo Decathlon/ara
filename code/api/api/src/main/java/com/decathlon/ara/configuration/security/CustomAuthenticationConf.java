@@ -14,6 +14,7 @@ public class CustomAuthenticationConf {
     DefaultSecurityFilterChain enableResourceServer(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
+                .antMatchers("/actuator/**").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
