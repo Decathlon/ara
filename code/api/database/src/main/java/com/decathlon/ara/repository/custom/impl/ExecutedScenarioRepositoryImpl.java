@@ -37,6 +37,7 @@ import java.sql.Date;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.ZoneId;
+import java.time.chrono.ChronoZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -76,7 +77,9 @@ public class ExecutedScenarioRepositoryImpl implements ExecutedScenarioRepositor
         var today = LocalDateTime.now();
         var startDate = duration
                 .map(today::minus)
-                .map(localDateTime -> Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()));
+                .map(localDateTime -> localDateTime.atZone(ZoneId.systemDefault()))
+                .map(ChronoZonedDateTime::toInstant)
+                .map(Date::from);
         if (startDate.isPresent()) {
             query = query.where(scenario.run.execution.testDateTime.after(startDate.get()));
         }

@@ -47,7 +47,7 @@ public class ExecutedScenarioHistoryInputDTO {
         if (duration == null || duration.type == null || duration.value < 1) {
             return Optional.empty();
         }
-        Period period = Period.ZERO;
+        Period period;
         var durationType = duration.getType();
         var durationValue = duration.getValue();
         switch (durationType) {
@@ -63,6 +63,8 @@ public class ExecutedScenarioHistoryInputDTO {
             case YEAR:
                 period = Period.ofYears(durationValue);
                 break;
+            default:
+                period = Period.ZERO;
         }
         return Optional.of(period);
     }
