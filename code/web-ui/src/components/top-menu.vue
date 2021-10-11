@@ -82,7 +82,7 @@
           <a href="https://github.com/decathlon/ara/blob/master/doc/user/main/UserDocumentation.adoc"
              rel="noopener" target="_blank"><Icon type="md-help-circle" size="24" style="padding: 0;"/></a>
         </Tooltip><!-- No space between items -->
-        <Dropdown trigger="click" placement="bottom-start">
+        <Dropdown trigger="click" placement="bottom-end">
           <a><Icon type="md-settings" size="24"/></a>
           <DropdownMenu slot="list">
             <div class="parameters-box">
@@ -111,7 +111,7 @@
                 </div>
                 <div class="parameter-inputs" v-if="duration.applied">
                   <InputNumber class="parameter-inputs-input" v-model="duration.value" controls-outside min="1" @on-change="updateExecutedScenariosHistoryDuration"></InputNumber>
-                  <Select v-model="duration.type" filterable @on-change="updateExecutedScenariosHistoryDuration">
+                  <Select v-model="duration.type" filterable @on-change="updateExecutedScenariosHistoryDuration" :transfer="true">
                     <Option v-for="durationType in duration.availableTypes" :value="durationType.value" :key="durationType.value">{{durationType.label + (duration.value > 1 ? 's' : '')}}</Option>
                   </Select>
                 </div>
