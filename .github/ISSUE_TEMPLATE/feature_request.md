@@ -7,6 +7,9 @@ assignees: ''
 
 ---
 
+**Epic**
+The link to the epic, if any: epic x (#xx)
+
 **What it's the actual situation on ARA ?**
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...] / We can't do ...
 
