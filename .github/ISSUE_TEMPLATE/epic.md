@@ -2,7 +2,7 @@
 name: Epic
 about: An epic is a collection of user stories. It can be used to gather features sharing the same goal (e.g. User login management, Migration, Purchase etc.). 
 title: Epic
-labels: Epic
+labels: epic
 assignees: ''
 
 ---
