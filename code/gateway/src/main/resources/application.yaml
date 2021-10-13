@@ -72,7 +72,7 @@ spring:
 #   file:/config/oauth-client-credentials,optional:file:/config/oauth-resourceserver.yml for example
 spring:
   config:
-    import: config-oauth.yml,optional:file:/app/config/config-custom.yml
+    import: config-oauth.yaml,optional:file:/app/config/config-custom.yaml
 
 ---
 

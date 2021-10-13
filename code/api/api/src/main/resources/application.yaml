@@ -26,7 +26,7 @@ spring:
   profiles:
     include: @spring.profiles.active@,${ara.logging.mode}
   config:
-    import: config-database.yaml,config-oauth.yml,optional:file:/app/config/config-custom.yaml
+    import: config-database.yaml,config-oauth.yaml,optional:file:/app/config/config-custom.yaml
   jackson:
     date-format: "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"
     default-property-inclusion: NON_NULL

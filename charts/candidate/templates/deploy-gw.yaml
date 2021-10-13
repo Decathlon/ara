@@ -92,7 +92,7 @@ spec:
           secretName: {{ include "ara.app.secret.name" . }}
           items:
             - key: {{ .Values.gw.configSecret.customConfigKey }}
-              path: "config-custom.yml"
+              path: "config-custom.yaml"
 ---
 apiVersion: v1
 kind: Service
