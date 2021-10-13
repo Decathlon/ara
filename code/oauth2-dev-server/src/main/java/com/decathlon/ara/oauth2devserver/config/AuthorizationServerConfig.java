@@ -79,7 +79,6 @@ public class AuthorizationServerConfig {
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .redirectUri(String.format("http://%s:%d/login/oauth2/code/ara-client-oidc", clientHostname, clientPort))
-                .redirectUri(String.format("http://%s:%d/authorized", clientHostname, clientPort))
                 .scope(OidcScopes.OPENID)
                 .scope("ara.read")
                 .build();

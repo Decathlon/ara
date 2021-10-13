@@ -1,12 +1,12 @@
 # Please Note that this file IS NOT PRODUCTION READY.
 # It's only dedicated to local test & try
 
-version: '3.5'
+version: '3'
 
 services:
   ara-db:
     image: "postgres:12"
-    restart: always
+    restart: unless-stopped
     environment:
       - POSTGRES_DB=ara
       - POSTGRES_USER=changeme
@@ -17,7 +17,7 @@ services:
       - 5432:5432
   ara-api:
     image: "decathlon/ara-api:${API_VERSION:-latest}"
-    restart: always
+    restart: unless-stopped
     environment:
       - ARA_DATABASE_TARGET=postgresql
       - ARA_DATABASE_HOST=ara-db:5432
@@ -31,17 +31,26 @@ services:
       - db_net
   ara-web-ui:
     image: "decathlon/ara-web-ui:${WEB_UI_VERSION:-latest}"
-    restart: always
+    restart: unless-stopped
     networks:
       - web_net
   ara-gw:
     image: "decathlon/ara-gw:${GW_VERSION:-latest}"
-    volumes:
-      - "${SECRETS_PATH}:/app/config:ro"
+    restart: unless-stopped
+    environment:
+      - ARA_API_HOST=ara-api
+      - ARA_UI_HOST=ara-web-ui
     ports:
-      - 8080:8080
+      - 9000:9000
     networks:
       - web_net
+  oauth2-dev-server:
+    image: "decathlon/ara-oads:${OADS_VERSION:-latest}"
+    restart: unless-stopped
+    networks:
+      - web_net
+    ports:
+      - 10000:10000
 networks:
   web_net:
   db_net:

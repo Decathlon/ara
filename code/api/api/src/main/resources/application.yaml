@@ -24,9 +24,9 @@ info:
     version: @project.version@
 spring:
   profiles:
-    include: @spring.profiles.active@,${ara.logging.mode}
+    include: @spring.profiles.active@,${ara.logging.mode},${ara.authentication.mode}
   config:
-    import: config-database.yaml,config-oauth.yaml,optional:file:/app/config/config-custom.yaml
+    import: config-database.yaml,optional:file:/app/config/config-custom.yaml
   jackson:
     date-format: "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"
     default-property-inclusion: NON_NULL
@@ -54,6 +54,8 @@ springdoc:
 ara:
   logging:
     mode: logging-console
+  authentication:
+    mode: oauth2-mock
   maxExecutionDaysToKeep: 14
   minExecutionsToKeepPerCycle: 20
 
