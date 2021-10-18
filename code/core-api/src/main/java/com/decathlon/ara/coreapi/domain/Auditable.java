@@ -24,12 +24,12 @@ public class Auditable<U> {
     private U createdBy;
 
     @CreatedDate
-    private LocalDateTime createdDate;
+    private LocalDateTime createdDatetime;
 
     @LastModifiedBy
     private U lastModifiedBy;
 
     @LastModifiedDate
-    private LocalDateTime lastModifiedDate;
+    private LocalDateTime lastModifiedDatetime;
 
 }
