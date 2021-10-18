@@ -7,7 +7,7 @@ import javax.persistence.Entity;
 
 @Data
 @Entity
-public class AraSeverity {
+public class AraDefaultSeverity {
     @EmbeddedId
     private CodeWithProjectId id;
 
