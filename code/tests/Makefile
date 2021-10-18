@@ -20,7 +20,7 @@ secrets-import: ## Import secrets from GCP
 
 test-karate: ## Run tests. You can specify TARGET_ENV to change tests env.
 	@echo '-- Run tests With env: $(TARGET_ENV) --'
-	@mvn test -DargLine="-Dkarate.env=$(TARGET_ENV) -Dkarate.config.dir=secrets"
+	-@mvn test -DargLine="-Dkarate.env=$(TARGET_ENV) -Dkarate.config.dir=secrets"
 	@open file:///$$PWD/target/karate-reports/karate-summary.html
 
 
