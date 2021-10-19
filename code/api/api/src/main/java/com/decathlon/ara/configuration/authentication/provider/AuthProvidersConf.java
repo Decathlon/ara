@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @Configuration
 @ConfigurationProperties("oauth2providers")
-public class AuthenticationDetailsConf {
+public class AuthProvidersConf {
 
 
     private List<Oauth2ProvidersInfos> conf;

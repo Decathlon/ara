@@ -17,27 +17,80 @@
 
 package com.decathlon.ara.service.authentication;
 
-import com.decathlon.ara.configuration.authentication.provider.AuthenticationDetailsConf;
+import com.decathlon.ara.configuration.authentication.provider.AuthProvidersConf;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static com.decathlon.ara.configuration.authentication.provider.AuthProvidersConf.Oauth2ProvidersInfos;
+
 @Slf4j
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AuthenticationService {
 
     @NonNull
-    private final AuthenticationDetailsConf authDetailsConf;
+    private final AuthProvidersConf authDetailsConf;
 
-    public List<AuthenticationDetailsConf.Oauth2ProvidersInfos> getProvidersInfos(){
-        return this.authDetailsConf.getConf();
+    @Value("${ara.loginStartingUrl}")
+    private String loginStartingUrl;
+
+    @Value("${ara.logoutProcessingUrl}")
+    private String logoutProcessingUrl;
+
+    @Autowired
+    public AuthenticationService(@NonNull AuthProvidersConf authDetailsConf) {
+        this.authDetailsConf = authDetailsConf;
+    }
+
+    public AuthenticationConf getAuthenticationConf(){
+        return new AuthenticationConf(
+                this.authDetailsConf.getConf(),
+                this.loginStartingUrl,
+                this.logoutProcessingUrl);
+    }
+
+
+    public static class AuthenticationConf {
+
+        private List<Oauth2ProvidersInfos> providers;
+        private String loginStartingUrl;
+        private  String logoutProcessingUrl;
+
+        public AuthenticationConf(List<Oauth2ProvidersInfos> providers, String loginStartingUrl, String logoutProcessingUrl) {
+            this.providers = providers;
+            this.loginStartingUrl = loginStartingUrl;
+            this.logoutProcessingUrl = logoutProcessingUrl;
+        }
+
+        public List<Oauth2ProvidersInfos> getProviders() {
+            return providers;
+        }
+
+        public void setProviders(List<Oauth2ProvidersInfos> providers) {
+            this.providers = providers;
+        }
+
+        public String getLoginStartingUrl() {
+            return loginStartingUrl;
+        }
+
+        public void setLoginStartingUrl(String loginStartingUrl) {
+            this.loginStartingUrl = loginStartingUrl;
+        }
+
+        public String getLogoutProcessingUrl() {
+            return logoutProcessingUrl;
+        }
+
+        public void setLogoutProcessingUrl(String logoutProcessingUrl) {
+            this.logoutProcessingUrl = logoutProcessingUrl;
+        }
     }
 
 }

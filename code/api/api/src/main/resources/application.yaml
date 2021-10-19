@@ -83,6 +83,14 @@ ara:
   # Local front
   clientBaseUrl: http://localhost:8081/
 
+  ### Urls customization:
+  # entrypoint to initialize oauth processing
+  loginStartingUrl: "/oauth/login"
+  # path to redirect to from auth server
+  loginProcessingUrl: "/oauth/logincomplete"
+  # logout entrypoint
+  logoutProcessingUrl: "/oauth/logout"
+
 management:
   server:
     port: 9090
@@ -95,3 +103,4 @@ management:
     export:
       influx:
         enabled: false
+

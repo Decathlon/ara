@@ -167,6 +167,7 @@
 
     data () {
       return {
+        configuration: this.$appConfig,
         isMediaDisplayedOnSamePage: true,
         duration: {
           applied: false,
@@ -353,7 +354,7 @@
       },
 
       logout () {
-        AuthenticationService.logout(true)
+        AuthenticationService.logout(this.configuration.authentication.logoutProcessingUrl)
       }
     },
 
