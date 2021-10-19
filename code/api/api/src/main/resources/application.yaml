@@ -81,7 +81,15 @@ ara:
     xprt-mprt-crtg: true
 
   # Local front
-  clientBaseUrl: http://localhost:7000/
+  clientBaseUrl: http://127.0.0.1:7000/
+
+  ### Urls customization:
+  # entrypoint to initialize oauth processing
+  loginStartingUrl: "/oauth/login"
+  # path to redirect to from auth server
+  loginProcessingUrl: "/oauth/logincomplete"
+  # logout entrypoint
+  logoutProcessingUrl: "/oauth/logout"
 
 server:
   port: 8000
@@ -97,3 +105,4 @@ management:
     export:
       influx:
         enabled: false
+

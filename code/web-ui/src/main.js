@@ -45,23 +45,6 @@ Vue.use(iView, { locale })
 Vue.use(VueVirtualScroller)
 Vue.use(configurationPlugin)
 Vue.use(VueCookies)
-/*
-Vue.http.interceptors.push(function (request, next) {
-  next(function (response) {
-    const status = response.status
-    const accessDenied = status === 401 || status === 403
-    const noLongerConnected = accessDenied && AuthenticationService.isAlreadyLoggedIn()
-    if (noLongerConnected) {
-      iView.Notice.open({
-        title: 'You were logged out from ARA...',
-        desc: 'It seems that your session has expired. Please login again to ARA',
-        duration: 0
-      })
-      AuthenticationService.logout(false)
-    }
-  })
-})
-*/
 iView.LoadingBar.config({
   color: '#FFEA28', // Yellowish
   height: 3
@@ -88,18 +71,19 @@ const manageLoginRedirection = async function (to, from, next) {
     return Vue.http.get(api.paths.authenticationConfiguration(), api.REQUEST_OPTIONS)
       .then(response => response.body)
       .then(content => {
-        const res = content.reduce(
-          (previous, current) => {
+        const res = {
+          loginStartingUrl: content.loginStartingUrl,
+          logoutProcessingUrl: content.logoutProcessingUrl,
+          providers: content.providers.reduce((previous, current) => {
             previous[current.providerType] = {
-              uri: `oauth2/authorization/${current.code}`,
+              uri: `${content.loginStartingUrl}/${current.code}`,
               display: current.displayName,
               icon: current.providerType === 'custom' ? 'building' : current.providerType,
               name: current.code
             }
             return previous
-          },
-          {}
-        )
+          }, {})
+        }
         console.debug(res)
         return res
       })
@@ -116,12 +100,12 @@ const manageLoginRedirection = async function (to, from, next) {
   }
 
   const loggedIn = await AuthenticationService.isAlreadyLoggedIn()
-  const needToDownloadConfig = !(loggedIn || config.isComplete)
-  console.info(`loggedIn? ${loggedIn} / needToDownloadConfig? ${needToDownloadConfig}`)
+  const needToDownloadConfig = !(config.isComplete)
+  console.debug(`loggedIn? ${loggedIn} / needToDownloadConfig? ${needToDownloadConfig}`)
   if (needToDownloadConfig) {
     try {
-      config.authentication.providers = await getOauthProviders()
-      console.info('Providers retrieved')
+      config.authentication = await getOauthProviders()
+      console.debug('Authent conf retrieved')
       config.downloadError = false
     } catch (err) {
       console.error(err)

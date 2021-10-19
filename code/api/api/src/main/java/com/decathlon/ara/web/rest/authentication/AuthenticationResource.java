@@ -18,8 +18,8 @@
 package com.decathlon.ara.web.rest.authentication;
 
 
-import com.decathlon.ara.configuration.authentication.provider.AuthenticationDetailsConf;
 import com.decathlon.ara.service.authentication.AuthenticationService;
+import static com.decathlon.ara.service.authentication.AuthenticationService.AuthenticationConf;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,9 +57,8 @@ public class AuthenticationResource {
     }
 
     @GetMapping("/configuration")
-    public List<AuthenticationDetailsConf.Oauth2ProvidersInfos> getAuthenticationConfiguration() {
-        List<AuthenticationDetailsConf.Oauth2ProvidersInfos> providersInfos = this.authenticationService.getProvidersInfos();
-        log.debug("providers null?" + (providersInfos == null) );
-        return providersInfos;
+    public AuthenticationConf getAuthenticationConfiguration() {
+        AuthenticationConf authenticationConf = this.authenticationService.getAuthenticationConf();
+        return authenticationConf;
     }
 }

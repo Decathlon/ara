@@ -24,8 +24,6 @@ const AuthenticationService = {
 
   updateAuthenticationStatus () {
     return Vue.http.get(api.paths.loggedStatus)
-      // .then(answer => answer.status)
-      // .then(status => status !== 401)
       .then(answer => answer.body)
       .then(body => {
         return body === true
@@ -42,10 +40,11 @@ const AuthenticationService = {
       })
   },
 
-  logout (manual) {
+  logout (url) {
     this.saveUrl()
     this.clearDetails()
-    window.location.href = '/logout'
+    // window.location.href = config.authentication.logoutProcessingUrl
+    window.location.href = url
   },
 
   saveUrl () {

@@ -58,16 +58,6 @@ module.exports = {
         target: araAPIURL,
         changeOrigin: true
       },
-      // spring specific
-      '/login': {
-        target: araAPIURL,
-        changeOrigin: true
-      },
-      // spring specific
-      '/logout': {
-        target: araAPIURL,
-        changeOrigin: true
-      },
       '/api': {
         target: araAPIURL,
         changeOrigin: true

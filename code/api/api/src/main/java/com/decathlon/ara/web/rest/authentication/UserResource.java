@@ -29,7 +29,6 @@ public class UserResource {
             @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient,
             @AuthenticationPrincipal OidcUser user
     ){
-        log.info(user.getIdToken().getTokenValue());
 
         return new AuthenticationUserDetailsDTO(
                 user.getClaimAsString("sub"),
