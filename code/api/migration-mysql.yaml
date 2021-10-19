@@ -60,14 +60,14 @@ services:
       - ara-mysql-db-target
   waiter-mysql-api:
     image: aligor/wait-for-url
-    command: ["--url", "http://ara-mysql-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
+    command: ["--url", "http://ara-mysql-api:8000/actuator/info", "--retries", "20", "--delay", "3000"]
     networks:
       - api_net
     depends_on:
       - ara-mysql-api
   waiter-mysql-mig-api:
     image: aligor/wait-for-url
-    command: ["--url", "http://ara-mysql-mig-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
+    command: ["--url", "http://ara-mysql-mig-api:8000/actuator/info", "--retries", "20", "--delay", "3000"]
     networks:
       - api_net
     depends_on:

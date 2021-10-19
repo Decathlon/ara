@@ -48,12 +48,17 @@ spec:
             configMapKeyRef:
               name: {{ include "ara.configmap.name" . }}
               key: api_management_port
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "ara.configmap.name" . }}
+              key: ui_port
         ports:
         - containerPort: {{ .Values.ui.port }}
           name: http-port
         readinessProbe:
           httpGet:
-            path: /static/version/about.json
+            path: /assets/manifest.json
             port: {{ .Values.ui.port }}
           initialDelaySeconds: 40
           timeoutSeconds: 2

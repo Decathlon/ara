@@ -2,7 +2,7 @@
 ##            VARIABLES            ##
 #####################################
 
-JAVA_VERSION=16
+JAVA_VERSION=17
 
 #####################################
 ##             DEVELOP             ##
@@ -14,7 +14,7 @@ mvn-install: ## Install project
 	@./mvnw clean install
 
 mvn-run: ## DEV - run api
-	@./mvnw -Pdev spring-boot:run -pl api
+	@./mvnw -Pdev spring-boot:run
 
 # WITH DOCKER
 
@@ -40,7 +40,7 @@ dkr-run: ## DEV - run api with docker
 				-v $(shell pwd):$(shell pwd):rw \
 				-w $(shell pwd) \
 		openjdk:$(JAVA_VERSION) \
-		./mvnw -Pdev spring-boot:run -pl api
+		./mvnw -Pdev spring-boot:run
 
 #####################################
 ##             PACKAGE             ##
@@ -50,7 +50,7 @@ mvn-build-image: ## Build image with maven
 ifdef $(FULL_IMAGE)
 	@echo 'Building with specfic image name: $(FULL_IMAGE)'
 endif
-	@./mvnw spring-boot:build-image -Dmaven.test.skip=true -Dspring-boot.build-image.imageName=$(FULL_IMAGE) -pl api
+	@./mvnw spring-boot:build-image -Dmaven.test.skip=true -Dspring-boot.build-image.imageName=$(FULL_IMAGE)
 
 #####################################
 ##              UTILS              ##

@@ -10,7 +10,6 @@ metadata:
     app.kubernetes.io/version: {{ .Chart.Version }}
     app.kubernetes.io/component: configuration
 data:
-  database_host: {{ include "ara.db.host" . | quote }}
   database_type: {{ .Values.database.type }}
   liquibase_active: {{ .Values.database.liquibaseActive | quote }}
   logging_mode: {{ include "ara.api.loggingmode" . | quote }}
@@ -19,7 +18,7 @@ data:
   api_port: {{ printf "%.0f" .Values.api.port | quote }}
   api_management_port: {{ printf "%.0f" .Values.api.management.port | quote }}
 
-{{- if not .Values.api.configExistingSecret.enabled }}
+{{- if not .Values.app.configSecret.secretName }}
 ---
 apiVersion: v1
 kind: Secret
@@ -31,11 +30,9 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/version: {{ .Chart.Version }}
-    app.kubernetes.io/component: api-secret
+    app.kubernetes.io/component: app-secret
 type: Opaque
 stringData:
-  {{ template "ara.api.secret.authconfigkey" }}: |
-{{ toYaml .Values.api.authConfig | indent 4 }}
-  {{ template "ara.api.secret.customconfigkey" }}: |
+  {{ .Values.api.configSecret.customConfigKey }}: |
 {{ toYaml .Values.api.customConfig | indent 4 }}
 {{- end }}
