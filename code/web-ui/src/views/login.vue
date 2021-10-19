@@ -17,6 +17,7 @@
         Configuration not found, you can't login to ARA.
       </div>
     </div>
+    <!--Spin fix v-if="authenticating"/-->
   </div>
 </template>
 

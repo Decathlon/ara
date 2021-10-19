@@ -7,6 +7,7 @@ services:
     volumes:
       - ./api:/app
       - m2_home:/root/.m2
+    # - "${CONF_PATH:-../../ara-conf}/authent-fed.yaml:/config/config-custom.yaml:ro"
     networks:
       ara-dev: {}
     environment:
