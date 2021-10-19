@@ -15,18 +15,26 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication.request;
+package com.decathlon.ara.service.dto.authentication;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.With;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @With
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class UserAuthenticationRequestDTO extends AuthenticationRequestDTO {
+public class AuthenticationUserDetailsDTO {
 
-    private String code;
+    private String id;
+
+    private String name;
+
+    private String login;
+
+    private String email;
+
+    private String picture;
 }

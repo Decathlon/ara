@@ -1,34 +1,51 @@
-import router from '../main'
 import Vue from 'vue'
-import iView from 'iview'
 import api from '../libs/api'
-import { config } from '../config'
 
-const AUTHENTICATION_DETAILS = 'authentication_details'
+const USER_DETAILS = 'user_details'
+const PROVIDER_NAME = 'provider_name'
 
 const LAST_URL_BEFORE_LOGOUT = 'last_url'
 
+let isLogged = false
+
 const AuthenticationService = {
 
-  login (authenticationDetails) {
-    this.saveDetails(authenticationDetails)
-    const url = this.getLastUrlBeforeLogout()
-    router.push(url)
+  async isAlreadyLoggedIn () {
+    return new Promise((resolve) => {
+      if (isLogged) {
+        resolve(true)
+      } else {
+        this.updateAuthenticationStatus().then(() => {
+          resolve(isLogged)
+        })
+      }
+    })
   },
 
-  isAlreadyLoggedIn () {
-    return !!this.getDetails()
+  updateAuthenticationStatus () {
+    return Vue.http.get(api.paths.loggedStatus)
+      // .then(answer => answer.status)
+      // .then(status => status !== 401)
+      .then(answer => answer.body)
+      .then(body => {
+        return body === true
+      })
+      .then(logged => {
+        isLogged = logged
+        if (logged) {
+          return Vue.http.get(api.paths.userDetails)
+            .then(answer => answer.body)
+            .then(userData => this.saveUserDetails(userData))
+        }
+      }).catch((e) => {
+        isLogged = false
+      })
   },
 
   logout (manual) {
     this.saveUrl()
     this.clearDetails()
-    const providersUrls = config.getProviderUrls()
-    if (!manual && providersUrls.length === 1) {
-      window.location.href = providersUrls[0]
-      return
-    }
-    router.push('/login')
+    window.location.href = '/logout'
   },
 
   saveUrl () {
@@ -41,34 +58,23 @@ const AuthenticationService = {
     return url || '/'
   },
 
-  deleteAuthenticationCookie () {
-    const url = api.paths.logout()
-    Vue.http
-      .post(url)
-      .then(
-        () => {},
-        () => {
-          iView.Notice.open({
-            title: 'You were not logged out properly',
-            desc: 'An error occurred while logging out',
-            duration: 0
-          })
-        })
-  },
-
   getDetails () {
-    const stringifiedDetails = localStorage.getItem(AUTHENTICATION_DETAILS)
-    return JSON.parse(stringifiedDetails)
+    return {
+      user: JSON.parse(localStorage.getItem(USER_DETAILS)),
+      providerName: JSON.parse(localStorage.getItem(PROVIDER_NAME))
+    }
   },
 
-  saveDetails (authenticationDetails) {
-    const stringifiedDetails = JSON.stringify(authenticationDetails)
-    localStorage.setItem(AUTHENTICATION_DETAILS, stringifiedDetails)
+  saveUserDetails (authenticationDetails) {
+    localStorage.setItem(USER_DETAILS, JSON.stringify(authenticationDetails))
+  },
+
+  saveProviderName (providerName) {
+    localStorage.setItem(PROVIDER_NAME, JSON.stringify(providerName))
   },
 
   clearDetails () {
-    localStorage.removeItem(AUTHENTICATION_DETAILS)
-    this.deleteAuthenticationCookie()
+    localStorage.removeItem(USER_DETAILS)
   }
 
 }

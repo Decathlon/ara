@@ -39,7 +39,7 @@
     <properties>
         <java.version>16</java.version>
         <ara.default.database>h2</ara.default.database>
-        <spring.profiles.active>default</spring.profiles.active>
+        <profiles.from.maven>default</profiles.from.maven>
         <mapstruct.version>1.4.2.Final</mapstruct.version>
         <springdoc.version>1.5.9</springdoc.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -96,6 +96,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
@@ -396,7 +400,7 @@
         <profile>
             <id>dev</id>
             <properties>
-                <spring.profiles.active>dev</spring.profiles.active>
+                <profiles.from.maven>dev</profiles.from.maven>
                 <!-- skip javadoc, tests, jacoco, lombok for dev profile -->
                 <maven.javadoc.skip>true</maven.javadoc.skip>
                 <!-- skip tests, but need to define it on each sub module-->

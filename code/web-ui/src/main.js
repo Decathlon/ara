@@ -45,7 +45,7 @@ Vue.use(iView, { locale })
 Vue.use(VueVirtualScroller)
 Vue.use(configurationPlugin)
 Vue.use(VueCookies)
-
+/*
 Vue.http.interceptors.push(function (request, next) {
   next(function (response) {
     const status = response.status
@@ -61,7 +61,7 @@ Vue.http.interceptors.push(function (request, next) {
     }
   })
 })
-
+*/
 iView.LoadingBar.config({
   color: '#FFEA28', // Yellowish
   height: 3
@@ -78,43 +78,65 @@ const router = new VueRouter({
   routes: routes
 })
 
-const downloadConfig = async function () {
-  return Vue.http.get(api.paths.authenticationConfiguration(), api.REQUEST_OPTIONS)
+const deferNext = function (next, action, message) {
+  console.info(`calling next:${action} / message: ${message}`)
+  return next(action)
 }
 
 const manageLoginRedirection = async function (to, from, next) {
+  const getOauthProviders = async () => {
+    return Vue.http.get(api.paths.authenticationConfiguration(), api.REQUEST_OPTIONS)
+      .then(response => response.body)
+      .then(content => {
+        const res = content.reduce(
+          (previous, current) => {
+            previous[current.providerType] = {
+              uri: `oauth2/authorization/${current.code}`,
+              display: current.displayName,
+              icon: current.providerType === 'custom' ? 'building' : current.providerType,
+              name: current.code
+            }
+            return previous
+          },
+          {}
+        )
+        console.debug(res)
+        return res
+      })
+  }
+
   const isPublic = to.matched.some(record => record.meta.public)
   const onlyWhenLoggedOut = to.matched.some(record => record.meta.onlyWhenLoggedOut)
-  const goingToLoginPage = to.name === 'login'
 
+  if (isPublic) {
+    return deferNext(next, undefined, 'url is public')
+  }
   if (config.downloadError) {
-    if (goingToLoginPage) {
-      return next()
-    }
-    return next('login')
+    return deferNext(next, '/login', 'downloadError is defined')
   }
 
-  const loggedIn = AuthenticationService.isAlreadyLoggedIn()
+  const loggedIn = await AuthenticationService.isAlreadyLoggedIn()
   const needToDownloadConfig = !(loggedIn || config.isComplete)
+  console.info(`loggedIn? ${loggedIn} / needToDownloadConfig? ${needToDownloadConfig}`)
   if (needToDownloadConfig) {
     try {
-      const response = await downloadConfig()
-      config.authentication.providers = response.body.providers
+      config.authentication.providers = await getOauthProviders()
+      console.info('Providers retrieved')
       config.downloadError = false
     } catch (err) {
+      console.error(err)
       config.downloadError = true
-      return next('login')
+      return deferNext(next, '/login', 'error while retrieving providers')
     }
   }
-  const requireLogin = !loggedIn && config.authentication.enabled
 
-  const canAccess = isPublic || loggedIn || !requireLogin
-  if (!canAccess) {
+  const requireLogin = !loggedIn && config.authentication.enabled
+  if (!loggedIn) {
     iView.Notice.open({
       title: 'Access denied',
       desc: 'You need to login first if you want to access this page.'
     })
-    return goToLogin(next)
+    return deferNext(next, '/login', 'access denied')
   }
 
   const loggedInButTryingToReachALoggedOutPage = loggedIn && onlyWhenLoggedOut
@@ -136,17 +158,6 @@ const manageLoginRedirection = async function (to, from, next) {
     })
     return next('/')
   }
-}
-
-const goToLogin = function (next) {
-  const providersUrls = config.getProviderUrls()
-  const onlyOneProvider = providersUrls.length === 1
-  if (onlyOneProvider) {
-    window.location.href = providersUrls[0]
-  }
-  return next({
-    path: '/login'
-  })
 }
 
 router.beforeEach(async (to, from, next) => {

@@ -53,7 +53,18 @@ module.exports = {
     // just be aware of this issue when enabling this option.
     cssSourceMap: false,
     proxyTable: {
-      '/auth': {
+      // oauth management helper
+      '/oauth': {
+        target: araAPIURL,
+        changeOrigin: true
+      },
+      // spring specific
+      '/login': {
+        target: araAPIURL,
+        changeOrigin: true
+      },
+      // spring specific
+      '/logout': {
         target: araAPIURL,
         changeOrigin: true
       },

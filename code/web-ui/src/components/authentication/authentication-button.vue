@@ -5,18 +5,18 @@
 </template>
 
 <script>
+import { AuthenticationService } from '../../service/authentication.service'
 
 export default {
-  name: 'custom-authentication-button',
+  name: 'authentication-button',
 
-  data () {
-    return {
-      provider: this.$appConfig.authentication.providers.custom
-    }
+  props: {
+    provider: Object
   },
 
   methods: {
     goToAuthenticationURI () {
+      AuthenticationService.saveProviderName(this.provider.display)
       window.location.href = this.provider.uri
     }
   }
