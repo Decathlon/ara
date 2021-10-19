@@ -2,12 +2,15 @@ version: "3"
 
 services:
   back:
-    image: maven:3-adoptopenjdk-16
+    image: maven:3-openjdk-17
     working_dir: /app
     volumes:
       - ./api:/app
       - m2_home:/root/.m2
-    command: ['/bin/bash', '-c', 'mvn -Pdev install && mvn -Pdev spring-boot:run -pl api']
+      - "${CONF_PATH:-../../ara-conf}/authent-fed.yaml:/config/config-custom.yaml:ro"
+    environment:
+      - SPRING_CONFIG_IMPORT=file:/config/config-custom.yaml
+    command: ['/bin/bash', '-c', 'mvn -Pdev ${OPTIONAL_CLEAN} install && mvn -Pdev spring-boot:run -pl api']
     ports:
       - 8080:8080
   front:

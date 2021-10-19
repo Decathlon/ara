@@ -1,0 +1,5 @@
+
+spring:
+  config:
+    import: optional:config-custom.yaml
+
