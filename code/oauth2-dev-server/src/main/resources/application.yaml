@@ -1,5 +1,5 @@
 provider:
-  hostname: oauth2-dev-server
+  url: http://oauth2.dev.localhost:9000
 server:
   port: 9000
 management:

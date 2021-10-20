@@ -31,10 +31,8 @@ import java.util.UUID;
 @Configuration(proxyBeanMethods = false)
 public class AuthorizationServerConfig {
 
-    @Value("${provider.hostname}")
-    private String hostname;
-    @Value("${server.port}")
-    private int port;
+    @Value("${provider.url}")
+    private String providerUrl;
 
     @Value("${client.hostname}")
     private String clientHostname;
@@ -78,7 +76,7 @@ public class AuthorizationServerConfig {
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .redirectUri(String.format("http://%s:%d/login/oauth2/code/ara-client-oidc", clientHostname, clientPort))
+                .redirectUri(String.format("http://%s:%d/oauth/logincomplete/ara-client-oidc", clientHostname, clientPort))
                 .scope(OidcScopes.OPENID)
                 .scope("ara.read")
                 .build();
@@ -96,7 +94,7 @@ public class AuthorizationServerConfig {
     @Bean
     public ProviderSettings providerSettings() {
         return ProviderSettings.builder()
-                .issuer(String.format("http://%s:%d", hostname, port))
+                .issuer(providerUrl)
                 .build();
     }
 }

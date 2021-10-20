@@ -9,14 +9,6 @@ server {
       proxy_pass http://${ARA_API_HOST}:${ARA_API_PORT}/oauth;
     }
 
-    location /login {
-      proxy_pass http://${ARA_API_HOST}:${ARA_API_PORT}/login;
-    }
-
-    location /logout {
-      proxy_pass http://${ARA_API_HOST}:${ARA_API_PORT}/logout;
-    }
-
     location /api {
       proxy_pass http://${ARA_API_HOST}:${ARA_API_PORT}/api;
     }

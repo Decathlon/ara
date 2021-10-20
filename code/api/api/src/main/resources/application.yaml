@@ -24,7 +24,7 @@ info:
     version: @project.version@
 spring:
   profiles:
-    include: @profiles.from.maven@,${ara.logging.mode}
+    include: @profiles.from.maven@,${ara.oauth2.mode},${ara.logging.mode}
   config:
     import: config-database.yaml
   jackson:
@@ -54,6 +54,8 @@ springdoc:
 ara:
   logging:
     mode: logging-console
+  oauth2:
+    mode: oauth2-mock
   maxExecutionDaysToKeep: 14
   minExecutionsToKeepPerCycle: 20
 

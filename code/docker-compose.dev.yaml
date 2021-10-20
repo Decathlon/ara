@@ -7,28 +7,37 @@ services:
     volumes:
       - ./api:/app
       - m2_home:/root/.m2
+    networks:
+      ara-dev: {}
     environment:
       - INFO_APP_VERSION=DEV
-      - ARA_CLIENTBASEURL=localhost:7000
-    command: ['/bin/bash', '-c', 'mvn -Pdev ${OPTIONAL_CLEAN} install && mvn -Pdev spring-boot:run -pl api']
-    ports:
-      - 8080:8080
+    command: ['/bin/bash', '-c', 'mvn -Pdev ${OPTIONAL_CLEAN} spring-boot:run -pl api']
   front:
     image: node:12
     working_dir: /app
     volumes:
       - ./web-ui:/app
     command: ['/bin/bash','-c','npm install && npm run start']
+    networks:
+      ara-dev: {}
     ports:
       - 7000:7000
     environment:
       - ARA_API_HOST=back
-      - ARA_API_PORT=8000
-      - ARA_MANAGEMENT_PORT=8001
   oauth2-dev-server:
-    image: "decathlon/ara-oads:${OADS_VERSION:-latest}"
-    restart: unless-stopped
+    image: maven:3-openjdk-17
+    working_dir: /app
+    volumes:
+      - ./oauth2-dev-server:/app
+      - m2_home:/root/.m2
+    command: ['/bin/bash', '-c', 'mvn spring-boot:run']
+    networks:
+      ara-dev:
+        aliases:
+          - oauth2.dev.localhost
     ports:
-      - 9000:9000
+      - 9000:9000   
 volumes: 
   m2_home:
+networks:
+  ara-dev: {}

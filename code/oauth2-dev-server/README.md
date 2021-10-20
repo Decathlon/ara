@@ -16,7 +16,7 @@ You can run it with:
 ./mvnw spring-boot:run
 ```
 
-**AND** add to `/etc/hosts` (Linux OS) or to `/private/etc/hosts` (MacOS) `127.0.0.1 oauth2-dev-server`
+**AND** add to `/etc/hosts` (Linux OS) or to `/private/etc/hosts` (MacOS) `127.0.0.1 oauth2.dev.localhost`
 
 Use:
 

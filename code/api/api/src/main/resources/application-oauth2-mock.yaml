@@ -1,6 +1,26 @@
 spring:
   security:
     oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://oauth2-dev-server:9000
+      # >> the authorization_code conf
+      client:
+        registration:
+          ara-client-oidc:
+            provider: spring
+            client-name: ara-client-oidc
+            client-id: ara-client
+            client-secret: ara-client
+            authorization-grant-type: authorization_code
+            redirect-uri: "${ara.clientBaseUrl}/${ara.loginProcessingUrl}/{registrationId}"
+            scope: openid
+        provider:
+          spring:
+            issuer-uri: http://oauth2.dev.localhost:9000
+
+# Active providers
+# provider-type has to be one of custom / github / google
+# code refers to the provider key ( spring.security.oauth2.client.registration.<code>)
+oauth2providers:
+  conf:
+  - display-name: Spring
+    provider-type: custom
+    code: ara-client-oidc
