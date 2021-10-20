@@ -66,7 +66,7 @@ ara:
     asset:
       name: file
   fileHomeFolder: /opt/ara/data/assets
-  fileHttpAccess: http://localhost:8080
+  fileHttpAccess: http://localhost:8000
   fileScreenshotSubFolder: /screenshots
   fileHttpLogsSubFolder: /http-logs
 
@@ -81,7 +81,7 @@ ara:
     xprt-mprt-crtg: true
 
   # Local front
-  clientBaseUrl: http://localhost:8081/
+  clientBaseUrl: http://localhost:7000/
 
 server:
   port: 8000

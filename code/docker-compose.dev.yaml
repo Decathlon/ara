@@ -7,9 +7,9 @@ services:
     volumes:
       - ./api:/app
       - m2_home:/root/.m2
-      - "${CONF_PATH:-../../ara-conf}/authent-fed.yaml:/config/config-custom.yaml:ro"
     environment:
-      - SPRING_CONFIG_IMPORT=file:/config/config-custom.yaml
+      - INFO_APP_VERSION=DEV
+      - ARA_CLIENTBASEURL=localhost:7000
     command: ['/bin/bash', '-c', 'mvn -Pdev ${OPTIONAL_CLEAN} install && mvn -Pdev spring-boot:run -pl api']
     ports:
       - 8080:8080
@@ -20,9 +20,15 @@ services:
       - ./web-ui:/app
     command: ['/bin/bash','-c','npm install && npm run start']
     ports:
-      - 8081:8081
+      - 7000:7000
     environment:
-      - "ARA_API_HOST=back"
-
+      - ARA_API_HOST=back
+      - ARA_API_PORT=8000
+      - ARA_MANAGEMENT_PORT=8001
+  oauth2-dev-server:
+    image: "decathlon/ara-oads:${OADS_VERSION:-latest}"
+    restart: unless-stopped
+    ports:
+      - 9000:9000
 volumes: 
   m2_home:

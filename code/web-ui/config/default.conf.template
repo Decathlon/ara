@@ -5,8 +5,16 @@ server {
     #charset koi8-r;
     #access_log  /var/log/nginx/host.access.log  main;
 
-    location /auth {
-      proxy_pass http://${ARA_API_HOST}:${ARA_API_PORT}/auth;
+    location /oauth {
+      proxy_pass http://${ARA_API_HOST}:${ARA_API_PORT}/oauth;
+    }
+
+    location /login {
+      proxy_pass http://${ARA_API_HOST}:${ARA_API_PORT}/login;
+    }
+
+    location /logout {
+      proxy_pass http://${ARA_API_HOST}:${ARA_API_PORT}/logout;
     }
 
     location /api {

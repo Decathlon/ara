@@ -1,11 +1,11 @@
 provider:
   hostname: oauth2-dev-server
 server:
-  port: 10000
+  port: 9000
 management:
   server:
-    port: 10001
+    port: 9001
 
 client:
   hostname: 127.0.0.1
-  port: 9000
+  port: 7000

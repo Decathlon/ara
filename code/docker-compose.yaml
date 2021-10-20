@@ -25,7 +25,7 @@ services:
       - ARA_DATABASE_USERNAME=changeme
       - ARA_DATABASE_PASSWORD=changeme
       - INFO_APP_VERSION=DEV
-      - ARA_CLIENTBASEURL=localhost:8081
+      - ARA_CLIENTBASEURL=localhost:7000
     networks:
       - web_net
       - db_net
@@ -38,6 +38,8 @@ services:
       - ARA_MANAGEMENT_PORT=8001
     networks:
       - web_net
+    ports:
+      - 7000:7000
   oauth2-dev-server:
     image: "decathlon/ara-oads:${OADS_VERSION:-latest}"
     restart: unless-stopped
