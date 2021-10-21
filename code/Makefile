@@ -20,6 +20,8 @@ OADS_IMAGE=${DOCKER_REGISTRY}/${OADS_SHORT_IMAGE}
 
 PUBLISH?=FALSE
 
+TARGET_CHART?=stable
+
 #####################################
 ##           QUICK START           ##
 #####################################
@@ -135,7 +137,6 @@ get-versions: ## Give ARA version
 	@echo -n 'oads: '
 	@$(MAKE) get-oauth2-dev-server-version
 
-TARGET_CHART?=stable
 get-chart-version:
 	@echo $$(cat ../charts/$(TARGET_CHART)/Chart.yaml | grep version | sed -e 's/version: //')
 

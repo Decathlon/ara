@@ -1,10 +1,6 @@
 # Override default app name
 # nameOverride:
 
-# app:
-    # configSecret:
-        # secretName: nameofsecret
-
 ##
 ## API Configuration
 ##
@@ -33,9 +29,12 @@ api:
     management:
         port: 8001
     # Base url used to redirect on the app by email service among others
-    appUrl: ara.test
-    # Use an existing secret require app.configSecret.secretName
-    configSecret:
+    appUrl: http://localhost:7000/
+    authentication: oauth2-mock
+    secretConfig:
+        external: false
+        # Use an existing secret
+        # secretName: nameofsecret
         customConfigKey: config-api.yaml
     customConfig: ""
     # sideCarContainer:
@@ -76,6 +75,7 @@ database:
     # Active liquibase update
     liquibaseActive: true
     secretConfig:
+        external: false
         # Use an existing secret
         # secretName: nameofsecret
         hostKey: host

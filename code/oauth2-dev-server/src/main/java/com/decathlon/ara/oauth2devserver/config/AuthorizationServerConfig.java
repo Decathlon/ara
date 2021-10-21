@@ -34,10 +34,8 @@ public class AuthorizationServerConfig {
     @Value("${provider.url}")
     private String providerUrl;
 
-    @Value("${client.hostname}")
-    private String clientHostname;
-    @Value("${client.port}")
-    private int clientPort;
+    @Value("${client.url}")
+    private String clientUrl;
 
     private static RSAKey generateRsa() {
         KeyPair keyPair = generateRsaKey();
@@ -76,7 +74,7 @@ public class AuthorizationServerConfig {
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .redirectUri(String.format("http://%s:%d/oauth/logincomplete/ara-client-oidc", clientHostname, clientPort))
+                .redirectUri(String.format("%s/oauth/logincomplete/ara-client-oidc", clientUrl))
                 .scope(OidcScopes.OPENID)
                 .scope("ara.read")
                 .build();

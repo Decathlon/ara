@@ -30,7 +30,7 @@ Create configmap name.
 Secret name for database.
 */}}
 {{- define "ara.database.secret.name" -}}
-{{- if .Values.database.secretConfig.secretName -}}
+{{- if .Values.database.secretConfig.external -}}
 {{ .Values.database.secretConfig.secretName }}
 {{- else -}}
 {{ printf "%s-%s-%s" .Release.Name .Chart.Name "db"  }}
@@ -41,8 +41,8 @@ Secret name for database.
 Secret name for api.
 */}}
 {{- define "ara.api.secret.name" -}}
-{{- if .Values.api.configExistingSecret.enabled -}}
-{{ .Values.api.configExistingSecret.secretName }}
+{{- if .Values.api.secretConfig.external -}}
+{{ .Values.api.secretConfig.secretName }}
 {{- else -}}
 {{ printf "%s-%s-%s" .Release.Name .Chart.Name "api"  }}
 {{- end -}}

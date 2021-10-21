@@ -13,12 +13,14 @@ data:
   database_type: {{ .Values.database.type }}
   liquibase_active: {{ .Values.database.liquibaseActive | quote }}
   logging_mode: {{ include "ara.api.loggingmode" . | quote }}
+  oauth2_mode: {{ .Values.api.authentication }}
   app_url: {{ .Values.api.appUrl }}
+  ui_port: {{ printf "%.0f" .Values.ui.port | quote }}
   api_host: {{ printf "%s-%s-api.%s.svc.cluster.local" .Release.Name .Chart.Name .Release.Namespace }}
   api_port: {{ printf "%.0f" .Values.api.port | quote }}
   api_management_port: {{ printf "%.0f" .Values.api.management.port | quote }}
 
-{{- if not .Values.app.configSecret.secretName }}
+{{- if not .Values.api.secretConfig.external }}
 ---
 apiVersion: v1
 kind: Secret
@@ -30,9 +32,9 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/version: {{ .Chart.Version }}
-    app.kubernetes.io/component: app-secret
+    app.kubernetes.io/component: api-secret
 type: Opaque
 stringData:
-  {{ .Values.api.configSecret.customConfigKey }}: |
+  {{ .Values.api.secretConfig.customConfigKey }}: |
 {{ toYaml .Values.api.customConfig | indent 4 }}
 {{- end }}

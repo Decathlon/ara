@@ -7,5 +7,4 @@ management:
     port: 9001
 
 client:
-  hostname: 127.0.0.1
-  port: 7000
+  url: http://127.0.0.1:7000
