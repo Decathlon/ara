@@ -12,7 +12,7 @@ services:
       - POSTGRES_USER=changeme
       - POSTGRES_PASSWORD=changeme
     networks:
-      - db_net
+      db_net: {}
     ports:
       - 5432:5432
   ara-api:
@@ -25,33 +25,27 @@ services:
       - ARA_DATABASE_USERNAME=changeme
       - ARA_DATABASE_PASSWORD=changeme
       - INFO_APP_VERSION=DEV
-      - ARA_CLIENTBASEURL=localhost:7000
     networks:
-      - web_net
-      - db_net
+      web_net: {}
+      db_net: {}
   ara-web-ui:
     image: "decathlon/ara-web-ui:${WEB_UI_VERSION:-latest}"
     restart: unless-stopped
     environment:
       - ARA_API_HOST=ara-api
-      - ARA_API_PORT=8000
-      - ARA_MANAGEMENT_PORT=8001
     networks:
-      - web_net
+      web_net: {}
     ports:
       - 7000:7000
   oauth2-dev-server:
     image: "decathlon/ara-oads:${OADS_VERSION:-latest}"
     restart: unless-stopped
     networks:
-      - web_net
+      web_net:
+        aliases:
+          - oauth2.dev.localhost
     ports:
       - 9000:9000
 networks:
   web_net:
   db_net:
-
-# validate: validate the schema, makes no changes to the database.
-# update: update the schema.
-# create: creates the schema, destroying previous data.
-# create-drop: drop the schema when the SessionFactory is closed explicitly, typically when the application is stopped.
