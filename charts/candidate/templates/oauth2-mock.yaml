@@ -35,8 +35,6 @@ spec:
             configMapKeyRef:
               name: {{ include "ara.configmap.name" . }}
               key: app_url
-        - name: PROVIDER_URL
-          value: {{ printf "http://%s-%s-oauth2-mock.%s.svc.cluster.local:9000" .Release.Name .Chart.Name .Release.Namespace }}
         readinessProbe:
           httpGet:
             path: /actuator/health/readiness

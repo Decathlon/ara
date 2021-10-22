@@ -89,10 +89,6 @@ spec:
             configMapKeyRef:
                 name: {{ include "ara.configmap.name" . }}
                 key: oauth2_mode
-        {{- if eq .Values.api.authentication "oauth2-mock" }}
-        - name: SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_SPRING_ISSUER-URI
-          value: {{ printf "http://%s-%s-oauth2-mock.%s.svc.cluster.local:9000" .Release.Name .Chart.Name .Release.Namespace }}
-        {{- end }}
         - name: SPRING_CONFIG_IMPORT
           value: optional:file:/app/config/config-custom.yaml,optional:file:/app/config/config-authentication.yaml
         - name: INFO_APP_VERSION
