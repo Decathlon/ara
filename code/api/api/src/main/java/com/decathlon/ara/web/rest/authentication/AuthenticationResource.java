@@ -51,14 +51,11 @@ public class AuthenticationResource {
 
 
         log.debug("Is logged ?" + isAuthenticated);
-        log.debug("Is anonymous ?" + authentication.getName());
-        //return new ResponseEntity(isAuthenticated ? HttpStatus.OK : HttpStatus.UNAUTHORIZED);
         return isAuthenticated;
     }
 
     @GetMapping("/configuration")
     public AuthenticationConf getAuthenticationConfiguration() {
-        AuthenticationConf authenticationConf = this.authenticationService.getAuthenticationConf();
-        return authenticationConf;
+        return this.authenticationService.getAuthenticationConf();
     }
 }
