@@ -151,4 +151,11 @@ util.copyTextToClipboard = function (textToCopy) {
   })
 }
 
+// When conf changes between 2 versions, such as local storage
+// keys which are removed or indexed db definitions, this function
+// helps to keep the browser clean
+util.cleanFromPreviousVersion = function () {
+  localStorage.removeItem('last_url')
+}
+
 export default util

@@ -47,7 +47,7 @@ ui:
     image:
         registry: docker.io
         repository: decathlon/ara-web-ui
-        tag: 9.2.0
+        tag: 9.3.0
         imagePullPolicy: IfNotPresent
     replicas: 1
     annotations: {}

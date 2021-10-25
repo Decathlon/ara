@@ -354,7 +354,7 @@
       },
 
       logout () {
-        AuthenticationService.logout(this.configuration.authentication.logoutProcessingUrl)
+        AuthenticationService.logout()
       }
     },
 
