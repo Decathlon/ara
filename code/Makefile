@@ -168,10 +168,18 @@ helm-template:
 	@helm template ../charts/$(TARGET_CHART) --debug
 
 helm-install:
+ifeq ($(LOCAL_VALUES),true)
+	@helm install -f ../charts/local-values.yaml --create-namespace --namespace ara ara-local ../charts/$(TARGET_CHART)
+else
 	@helm install --create-namespace --namespace ara ara-local ../charts/$(TARGET_CHART)
+endif
 
 helm-upgrade:
+ifeq ($(LOCAL_VALUES),true)
+	@helm upgrade -f ../charts/local-values.yaml --namespace ara ara-local ../charts/$(TARGET_CHART)
+else
 	@helm upgrade --namespace ara ara-local ../charts/$(TARGET_CHART)
+endif
 
 helm-uninstall:
 	@helm uninstall --namespace ara ara-local
