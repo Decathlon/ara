@@ -45,23 +45,6 @@ Vue.use(iView, { locale })
 Vue.use(VueVirtualScroller)
 Vue.use(configurationPlugin)
 Vue.use(VueCookies)
-
-Vue.http.interceptors.push(function (request, next) {
-  next(function (response) {
-    const status = response.status
-    const accessDenied = status === 401 || status === 403
-    const noLongerConnected = accessDenied && AuthenticationService.isAlreadyLoggedIn()
-    if (noLongerConnected) {
-      iView.Notice.open({
-        title: 'You were logged out from ARA...',
-        desc: 'It seems that your session has expired. Please login again to ARA',
-        duration: 0
-      })
-      AuthenticationService.logout(false)
-    }
-  })
-})
-
 iView.LoadingBar.config({
   color: '#FFEA28', // Yellowish
   height: 3
@@ -78,43 +61,66 @@ const router = new VueRouter({
   routes: routes
 })
 
-const downloadConfig = async function () {
-  return Vue.http.get(api.paths.authenticationConfiguration(), api.REQUEST_OPTIONS)
+const deferNext = function (next, action, message) {
+  console.info(`calling next:${action} / message: ${message}`)
+  return next(action)
 }
 
 const manageLoginRedirection = async function (to, from, next) {
+  const getOauthProviders = async () => {
+    return Vue.http.get(api.paths.authenticationConfiguration(), api.REQUEST_OPTIONS)
+      .then(response => response.body)
+      .then(content => {
+        const res = {
+          loginStartingUrl: content.loginStartingUrl,
+          logoutProcessingUrl: content.logoutProcessingUrl,
+          providers: content.providers.reduce((previous, current) => {
+            previous[current.providerType] = {
+              uri: `${content.loginStartingUrl}/${current.code}`,
+              display: current.displayName,
+              icon: current.providerType === 'custom' ? 'building' : current.providerType,
+              name: current.code
+            }
+            return previous
+          }, {})
+        }
+        console.debug(res)
+        return res
+      })
+  }
+
   const isPublic = to.matched.some(record => record.meta.public)
   const onlyWhenLoggedOut = to.matched.some(record => record.meta.onlyWhenLoggedOut)
-  const goingToLoginPage = to.name === 'login'
 
+  if (isPublic) {
+    return deferNext(next, undefined, 'url is public')
+  }
   if (config.downloadError) {
-    if (goingToLoginPage) {
-      return next()
-    }
-    return next('login')
+    return deferNext(next, '/login', 'downloadError is defined')
   }
 
-  const loggedIn = AuthenticationService.isAlreadyLoggedIn()
-  const needToDownloadConfig = !(loggedIn || config.isComplete)
+  const loggedIn = await AuthenticationService.isAlreadyLoggedIn()
+  const needToDownloadConfig = !(config.isComplete)
+  console.debug(`loggedIn? ${loggedIn} / needToDownloadConfig? ${needToDownloadConfig}`)
   if (needToDownloadConfig) {
     try {
-      const response = await downloadConfig()
-      config.authentication.providers = response.body.providers
+      config.authentication = await getOauthProviders()
+      console.debug('Authent conf retrieved')
       config.downloadError = false
     } catch (err) {
+      console.error(err)
       config.downloadError = true
-      return next('login')
+      return deferNext(next, '/login', 'error while retrieving providers')
     }
   }
-  const requireLogin = !loggedIn && config.authentication.enabled
 
-  const canAccess = isPublic || loggedIn || !requireLogin
-  if (!canAccess) {
+  const requireLogin = !loggedIn && config.authentication.enabled
+  if (!loggedIn) {
     iView.Notice.open({
       title: 'Access denied',
       desc: 'You need to login first if you want to access this page.'
     })
-    return goToLogin(next)
+    return deferNext(next, '/login', 'access denied')
   }
 
   const loggedInButTryingToReachALoggedOutPage = loggedIn && onlyWhenLoggedOut
@@ -136,17 +142,6 @@ const manageLoginRedirection = async function (to, from, next) {
     })
     return next('/')
   }
-}
-
-const goToLogin = function (next) {
-  const providersUrls = config.getProviderUrls()
-  const onlyOneProvider = providersUrls.length === 1
-  if (onlyOneProvider) {
-    window.location.href = providersUrls[0]
-  }
-  return next({
-    path: '/login'
-  })
 }
 
 router.beforeEach(async (to, from, next) => {

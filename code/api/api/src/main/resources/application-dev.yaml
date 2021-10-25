@@ -18,8 +18,9 @@
 logging:
   level:
     com:
-      decathlon: INFO
+      decathlon: DEBUG
     org:
+      springframework: DEBUG
       hibernate:
         SQL: ERROR
         type:

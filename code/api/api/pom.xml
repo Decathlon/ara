@@ -22,13 +22,13 @@
     <parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.5.1</version>
+		<version>2.5.5</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>ara-api</artifactId>
-    <version>10.2.0</version>
+    <version>11.0.0</version>
 
     <name>ARA API</name>
     <description>
@@ -37,9 +37,11 @@
     </description>
 
     <properties>
-        <java.version>16</java.version>
+        <java.version>17</java.version>
+
         <ara.default.database>h2</ara.default.database>
-        <spring.profiles.active>default</spring.profiles.active>
+        <profiles.from.maven>default</profiles.from.maven>
+        <jacoco.version>0.8.7</jacoco.version>
         <mapstruct.version>1.4.2.Final</mapstruct.version>
         <springdoc.version>1.5.9</springdoc.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -96,6 +98,14 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
@@ -371,7 +381,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.6</version>
+                <version>${jacoco.version}</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -396,7 +406,7 @@
         <profile>
             <id>dev</id>
             <properties>
-                <spring.profiles.active>dev</spring.profiles.active>
+                <profiles.from.maven>dev</profiles.from.maven>
                 <!-- skip javadoc, tests, jacoco, lombok for dev profile -->
                 <maven.javadoc.skip>true</maven.javadoc.skip>
                 <!-- skip tests, but need to define it on each sub module-->

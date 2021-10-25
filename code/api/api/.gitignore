@@ -31,3 +31,4 @@ src/test/resources/dbunit/freshly-created-dataset-to-rename.xml
 ## authentication
 /src/main/resources/config-authentication.yaml
 /src/main/resources/config-custom.yaml
+/src/main/resources/application-oauth2.yaml

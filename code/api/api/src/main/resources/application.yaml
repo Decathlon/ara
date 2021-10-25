@@ -24,9 +24,9 @@ info:
     version: @project.version@
 spring:
   profiles:
-    include: @spring.profiles.active@,${ara.logging.mode}
+    include: @profiles.from.maven@,${ara.oauth2.mode},${ara.logging.mode}
   config:
-    import: config-database.yaml,optional:config-custom.yaml,optional:config-authentication.yaml
+    import: config-database.yaml
   jackson:
     date-format: "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"
     default-property-inclusion: NON_NULL
@@ -54,6 +54,8 @@ springdoc:
 ara:
   logging:
     mode: logging-console
+  oauth2:
+    mode: oauth2-mock
   maxExecutionDaysToKeep: 14
   minExecutionsToKeepPerCycle: 20
 
@@ -66,7 +68,7 @@ ara:
     asset:
       name: file
   fileHomeFolder: /opt/ara/data/assets
-  fileHttpAccess: http://localhost:8080
+  fileHttpAccess: http://localhost:8000
   fileScreenshotSubFolder: /screenshots
   fileHttpLogsSubFolder: /http-logs
 
@@ -81,11 +83,21 @@ ara:
     xprt-mprt-crtg: true
 
   # Local front
-  clientBaseUrl: http://localhost:8081/
+  clientBaseUrl: http://127.0.0.1:7000/
 
+  ### Urls customization:
+  # entrypoint to initialize oauth processing
+  loginStartingUrl: "/oauth/login"
+  # path to redirect to from auth server
+  loginProcessingUrl: "/oauth/logincomplete"
+  # logout entrypoint
+  logoutProcessingUrl: "/oauth/logout"
+
+server:
+  port: 8000
 management:
   server:
-    port: 9090
+    port: 8001
   endpoints:
     web:
       exposure:
@@ -95,3 +107,4 @@ management:
     export:
       influx:
         enabled: false
+

@@ -8,113 +8,53 @@
       <div class="signin-selection" v-if="configuration.isComplete">
         <div class="signin-title"><span>Sign in with</span></div>
         <div class="authentication-buttons-container">
-          <custom-authentication-button v-if="configuration.authentication.providers.custom.enabled" class="authentication-button"></custom-authentication-button>
-          <google-authentication v-if="configuration.authentication.providers.google.enabled" class="authentication-button"></google-authentication>
-          <github-authentication-button v-if="configuration.authentication.providers.github.enabled" class="authentication-button"></github-authentication-button>
+          <authentication-button v-if="isEnabled('custom')" :provider="getProvider('custom')" class="authentication-button"></authentication-button>
+          <authentication-button v-if="isEnabled('google')"  :provider="getProvider('google')" class="authentication-button"></authentication-button>
+          <authentication-button v-if="isEnabled('github')" :provider="getProvider('github')" class="authentication-button"></authentication-button>
         </div>
       </div>
       <div v-else-if="configuration.downloadError" class="configuration-not-loaded info-box">
         Configuration not found, you can't login to ARA.
       </div>
     </div>
-    <Spin fix v-if="authenticating"/>
   </div>
 </template>
 
 <script>
-import GoogleAuthentication from '../components/authentication/google-authentication-button'
-import GithubAuthenticationButton from '../components/authentication/github-authentication-button'
-import CustomAuthenticationButton from '../components/authentication/custom-authentication-button'
-
-import { AuthenticationService } from '../service/authentication.service'
-import api from '../libs/api'
-import Vue from 'vue'
+import AuthenticationButton from '../components/authentication/authentication-button'
 
 export default {
   name: 'login',
 
   components: {
-    CustomAuthenticationButton,
-    GithubAuthenticationButton,
-    GoogleAuthentication
+    AuthenticationButton
   },
 
   data () {
     return {
-      configuration: this.$appConfig,
-      authenticating: false
+      configuration: this.$appConfig
     }
   },
 
   methods: {
-    loginAs (user) {
-      AuthenticationService.login(user)
+    isEnabled (providerName) {
+      return this.getProvider(providerName) !== undefined
     },
 
-    authenticate () {
-      const providerName = this.$route.params.provider
-      const provider = this.$appConfig.getProvider(providerName)
-      const providerGivenIsUnknown = providerName && !provider
-      if (providerGivenIsUnknown) {
-        this.$Notice.open({
-          title: 'Unknown OAuth2 provider',
-          desc: `The provider <b>'${providerName}'</b> is not supported by ARA!`,
-          duration: 0
-        })
-        this.backToLogin()
-      }
-
-      if (provider) {
-        if (!provider.enabled) {
-          this.$Notice.open({
-            title: 'Authentication forbidden...',
-            desc: `You cannot authenticate to <b>${provider.display}</b> because it is not enabled.<br>Check your configuration files if you want to enable it.`,
-            duration: 0
-          })
-          this.backToLogin()
-          return
-        }
-        const code = this.$route.query.code
-        if (!code) {
-          this.$Notice.open({
-            title: 'Authentication code required...',
-            desc: `You need a code to authenticate to <b>${provider.display}</b>`,
-            duration: 0
-          })
-          this.backToLogin()
-          return
-        }
-        const url = api.paths.login()
-        const loginRequest = {
-          code: code,
-          provider: provider.name
-        }
-        this.authenticating = true
-        Vue.http
-          .post(url, loginRequest, api.REQUEST_OPTIONS)
-          .then(response => {
-            this.authenticating = false
-            const user = response.body
-            this.loginAs(user)
-          }, () => {
-            this.authenticating = false
-            this.$Notice.open({
-              title: 'Login attempt failed...',
-              desc: `You were not able to login to ARA through <b>${provider.display}</b>.<br>It may be linked to your configuration files.`,
-              duration: 0
-            })
-            this.backToLogin()
-          })
-      }
+    getProvider (providerName) {
+      return this.configuration.authentication.providers[providerName]
     },
 
-    backToLogin () {
-      this.$router.push({ name: 'login' })
+    tryAutoLogin () {
+      const activeProviders = ['custom', 'google', 'github'].filter((providerName) => this.isEnabled(providerName))
+      if (activeProviders.length === 1) {
+        window.location.href = this.getProvider(activeProviders[0]).uri
+      }
     }
   },
 
   mounted () {
-    this.authenticate()
+    this.tryAutoLogin()
   }
 }
 </script>

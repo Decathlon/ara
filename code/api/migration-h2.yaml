@@ -30,14 +30,14 @@ services:
       - ./db_h2_mig:/app/data
   waiter-h2-api:
     image: aligor/wait-for-url
-    command: ["--url", "http://ara-h2-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
+    command: ["--url", "http://ara-h2-api:8000/actuator/info", "--retries", "20", "--delay", "3000"]
     networks:
       - api_net
     depends_on:
       - ara-h2-api
   waiter-h2-mig-api:
     image: aligor/wait-for-url
-    command: ["--url", "http://ara-h2-mig-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
+    command: ["--url", "http://ara-h2-mig-api:8000/actuator/info", "--retries", "20", "--delay", "3000"]
     networks:
       - api_net
     depends_on:

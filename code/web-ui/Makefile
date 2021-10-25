@@ -80,8 +80,11 @@ dkr-build-image:
 ##              UTILS              ##
 #####################################
 
-get-version:
+get-version: ## Get component version
 	@cat package.json | jq -r '.version'
+
+update-version: ## Update component version
+	@npm version $(VERSION)
 
 .PHONY: help
 help:
