@@ -68,7 +68,7 @@ public class AuthorizationServerConfig {
 
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
-        RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
+        RegisteredClient registeredClientAC = RegisteredClient.withId(UUID.randomUUID().toString())
                 .clientId("ara-client")
                 .clientSecret("{noop}ara-client")
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
@@ -79,7 +79,17 @@ public class AuthorizationServerConfig {
                 .scope("ara.read")
                 .build();
 
-        return new InMemoryRegisteredClientRepository(registeredClient);
+        RegisteredClient registeredClientCC = RegisteredClient.withId(UUID.randomUUID().toString())
+                .clientId("other-client")
+                .clientSecret("{noop}other-client")
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .scope(OidcScopes.OPENID)
+                .scope("ara.read")
+                .build();
+
+        return new InMemoryRegisteredClientRepository(registeredClientAC, registeredClientCC);
     }
 
     @Bean

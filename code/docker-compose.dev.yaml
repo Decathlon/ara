@@ -11,6 +11,7 @@ services:
       ara-dev: {}
     environment:
       - INFO_APP_VERSION=DEV
+      - ARA_OAUTH2_MODE=oauth2-mock
     command: ['/bin/bash', '-c', 'mvn -Pdev ${OPTIONAL_CLEAN} spring-boot:run -pl api']
   front:
     image: node:12
@@ -36,7 +37,8 @@ services:
         aliases:
           - oauth2.dev.localhost
     ports:
-      - 9000:9000   
+      - 9000:9000
+      - 9001:9001
 volumes: 
   m2_home:
 networks:

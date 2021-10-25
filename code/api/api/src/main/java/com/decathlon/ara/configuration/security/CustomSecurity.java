@@ -1,6 +1,8 @@
 package com.decathlon.ara.configuration.security;
 
 import lombok.extern.slf4j.Slf4j;
+
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +25,11 @@ public class CustomSecurity {
     @Value("${ara.logoutProcessingUrl}")
     private String logoutProcessingUrl;
 
+    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri:}")
+    private String resourceIssuerUri;
+
+    @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri:}")
+    private String resourceJwkSetUri;
 
     @Bean
     public SecurityFilterChain configure(HttpSecurity http ) throws Exception {
@@ -44,9 +51,15 @@ public class CustomSecurity {
                 .loginPage(String.format("%s/%s", this.clientBaseUrl, "login")) // standard spring redirection for protected resources
                 .defaultSuccessUrl(redirectUrl, true) // once logged in, redirect to
                 .authorizationEndpoint().baseUri(this.loginStartingUrl); // entrypoint to initialize oauth processing
-
+        
+        if (isResourceServerConfiguration()) {
+            http.oauth2ResourceServer().jwt();
+        }
         return http.build();
     }
 
+    private boolean isResourceServerConfiguration() {
+        return Strings.isNotBlank(resourceIssuerUri) || Strings.isNotBlank(resourceJwkSetUri);
+    }
 
 }

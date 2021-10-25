@@ -15,6 +15,9 @@ spring:
         provider:
           spring:
             issuer-uri: http://oauth2.dev.localhost:9000
+      resourceserver:
+        jwt:
+          issuer-uri: http://oauth2.dev.localhost:9000
 
 # Active providers
 # provider-type has to be one of custom / github / google
