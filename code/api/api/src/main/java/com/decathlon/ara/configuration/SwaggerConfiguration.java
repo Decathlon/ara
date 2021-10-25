@@ -32,8 +32,7 @@ public class SwaggerConfiguration {
 
     @Bean
     public OpenAPI araOpenAPI() {
-        final String securitySchemeName = "ARA JWT authentication bearer";
-        OpenAPI openAPI = new OpenAPI()
+        return new OpenAPI()
                 .info(
                         new Info()
                                 .title("ARA API")
@@ -51,7 +50,6 @@ public class SwaggerConfiguration {
                                                 .url("http://www.apache.org/licenses/")
                                 )
                 );
-        return openAPI;
 
     }
 
