@@ -51,7 +51,7 @@ jobs:
         uses: actions/setup-java@v2.1.0
         with:
           distribution: 'adopt'
-          java-version: '16'
+          java-version: '17'
       - 
         name: Initialize CodeQL
         uses: github/codeql-action/init@v1
