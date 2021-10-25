@@ -37,6 +37,7 @@
     </description>
 
     <properties>
+        <sonar.projectName>ARA api</sonar.projectName>
         <sonar.projectKey>decathlon_ara_api</sonar.projectKey>
         <sonar.organization>decathlon</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
