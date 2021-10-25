@@ -23,14 +23,14 @@ Please note the following :
 
 * You'll need https://docs.docker.com/install/[Docker]
 * All the datas that you import in ARA won't be persisted.
-* The port 8081 must be available locally.
+* The port 7000 must be available locally.
 
 === I've got a Windows PC !
 
 1. Open a Powershell Command Prompt
 2. Run the command `Invoke-WebRequest -OutFile docker compose.yml https://raw.githubusercontent.com/Decathlon/ara/main/code/docker-compose.yaml`
 3. Run the command `docker compose up`
-4. Open up a browser on `http://localhost:8081`
+4. Open up a browser on `http://127.0.0.1:7000`
 5. Enjoy !
 6. To stop it, in the command line, just do a `docker compose down` in the same directory as the `docker compose.yaml`
 7. To restart it, in the command line do a `docker compose up` in the same directory as the `docker compose.yaml`
@@ -41,7 +41,7 @@ Please note the following :
 1. Open a Terminal
 2. Run the command `wget https://raw.githubusercontent.com/Decathlon/ara/main/code/docker-compose.yaml`
 3. Run the command `docker compose up`
-4. Open up a browser on `http://localhost:8081`
+4. Open up a browser on `http://127.0.0.1:7000`
 5. Enjoy !
 6. To stop it, in the command line, just do a `docker compose down` in the same directory as the `docker compose.yaml`
 7. To restart it, in the command line do a `docker compose up` in the same directory as the `docker compose.yaml`
@@ -52,7 +52,7 @@ Please note the following :
 1. Open a Terminal
 2. Run the command `wget https://raw.githubusercontent.com/Decathlon/ara/main/code/docker-compose.yaml`
 3. Run the command `docker compose up`
-4. Open up a browser on `http://localhost:8081`
+4. Open up a browser on `http://127.0.0.1:7000`
 5. Enjoy !
 6. To stop it, in the command line, just do a `docker compose down` in the same directory as the `docker compose.yaml`
 7. To restart it, in the command line do a `docker compose up` in the same directory as the `docker compose.yaml`
