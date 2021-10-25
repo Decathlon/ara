@@ -72,12 +72,32 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+      -
+        name: Add host binding
+        run: sudo echo "127.0.0.1 oauth2.dev.localhost" >> sudo tee -a /etc/hosts
+      -
+        name: Set up QEMU
+        if: ${{ steps.skip_check.outputs.docker_skip != 'true' }}
+        uses: docker/setup-qemu-action@v1
+      -
+        name: Set up Docker Buildx
+        if: ${{ steps.skip_check.outputs.docker_skip != 'true' }}
+        uses: docker/setup-buildx-action@v1
+      -
+        name: start oauth2-dev-server
+        run: docker-compose -f code/docker-compose.dev.yaml up -d oauth2-dev-server
+      -
+        name: check oauth2-dev-server is running
+        run: docker run --rm --network host aligor/wait-for-url --url http://oauth2.dev.localhost:9001/actuator/health
       - 
         name: Build and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn -f code/api -B clean install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+      -
+        name: stop oauth2-dev-server
+        run: docker-compose -f code/docker-compose.dev.yaml down
       - 
         name: Install xmllint
         run: sudo apt-get install libxml2-utils
@@ -114,14 +134,6 @@ jobs:
           fi
           echo ::set-output name=push::${PUSH}
           echo ::set-output name=suffix::${SUFFIX}
-      -
-        name: Set up QEMU
-        if: ${{ steps.skip_check.outputs.docker_skip != 'true' }}
-        uses: docker/setup-qemu-action@v1
-      -
-        name: Set up Docker Buildx
-        if: ${{ steps.skip_check.outputs.docker_skip != 'true' }}
-        uses: docker/setup-buildx-action@v1
       -
         name: Login to DockerHub
         if: ${{ steps.skip_check.outputs.docker_skip != 'true' && steps.prep.outputs.push == 'true' }}
