@@ -71,6 +71,7 @@ public class SettingProviderService {
     public List<SettingGroupDTO> getDefinitions(long projectId, Map<String, String> projectValues) {
         List<SettingGroupDTO> groups = new ArrayList<>();
         groups.add(getJobIndexingDefinitions());
+        groups.add(getExecutionPurgeDefinitions());
         groups.add(getEmailReportsDefinitions());
         groups.add(getDefectDefinitions(projectId, projectValues));
         return groups;
@@ -139,6 +140,30 @@ public class SettingProviderService {
                         "and you will have to manually delete the directories yourself or use a cron job."));
 
         return settings;
+    }
+
+    private SettingGroupDTO getExecutionPurgeDefinitions() {
+        var dayOption = new SettingOptionDTO("DAY", "day");
+        var weekOption = new SettingOptionDTO("WEEK", "week");
+        var monthOption = new SettingOptionDTO("MONTH", "month");
+        var yearOption = new SettingOptionDTO("YEAR", "year");
+        var options = List.of(dayOption, weekOption, monthOption, yearOption);
+        var durationValueSetting = new SettingDTO()
+                .withCode(Settings.EXECUTION_PURGE_DURATION_VALUE)
+                .withName("Duration value")
+                .withType(SettingType.INT)
+                .withRequired(true)
+                .withDefaultValue("-1")
+                .withHelp("Define how many unit. If -1 is selected, then no purge is applied. Also keep in mind that any negative number is equivalent to -1 (i.e. no purge).");
+        var durationTypeSetting = new SettingDTO()
+                .withCode(Settings.EXECUTION_PURGE_DURATION_TYPE)
+                .withName("Duration type")
+                .withType(SettingType.SELECT)
+                .withRequired(true)
+                .withOptions(options)
+                .withHelp("Define what kind of duration (i.e. day, week, month or year). If the duration unit value above is negative, just select any option.");
+        var settings = List.of(durationValueSetting, durationTypeSetting);
+        return new SettingGroupDTO("Execution purge", settings);
     }
 
     private String getDefaultExecutionsFolder() {

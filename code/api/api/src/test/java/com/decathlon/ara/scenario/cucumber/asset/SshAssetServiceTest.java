@@ -17,15 +17,9 @@
 
 package com.decathlon.ara.scenario.cucumber.asset;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
+import com.decathlon.ara.configuration.AraConfiguration;
+import com.decathlon.ara.scenario.cucumber.asset.ssh.SshClientHelper;
+import com.decathlon.ara.scenario.cucumber.asset.ssh.SshException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,9 +27,10 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.decathlon.ara.configuration.AraConfiguration;
-import com.decathlon.ara.scenario.cucumber.asset.ssh.SshClientHelper;
-import com.decathlon.ara.scenario.cucumber.asset.ssh.SshException;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class SshAssetServiceTest {

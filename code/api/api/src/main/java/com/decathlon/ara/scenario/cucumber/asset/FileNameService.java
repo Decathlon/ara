@@ -17,13 +17,14 @@
 
 package com.decathlon.ara.scenario.cucumber.asset;
 
-import com.decathlon.ara.ci.service.DateService;
-import java.text.SimpleDateFormat;
+import com.decathlon.ara.service.util.DateService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.text.SimpleDateFormat;
 
 import static com.decathlon.ara.lib.embed.producer.StructuredEmbeddingsBuilder.HUMAN_AND_MACHINE_READABLE_TIMESTAMP_PATTERN;
 
