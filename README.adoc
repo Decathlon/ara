@@ -1,11 +1,11 @@
 = image:code/web-ui/src/assets/favicon.png[Logo,64,64] ARA - Agile Regression Analyzer
-image:https://circleci.com/gh/Decathlon/ara.svg?style=svg["CircleCI", link="https://circleci.com/gh/Decathlon/ara"]
 
-ARA image by https://github.com/slaout[Sébastien Laout], licensed under https://creativecommons.org/licenses/by-nc-sa/4.0/[Creative Commons 4.0 Attributions license]
+image:https://github.com/Decathlon/ara/actions/workflows/build-api.yaml/badge.svg[API] image:https://github.com/Decathlon/ara/actions/workflows/build-web-ui.yaml/badge.svg[WEB-UI] image:https://github.com/Decathlon/ara/actions/workflows/charts-release.yaml/badge.svg[CHARTS]
+
+ARA icon by https://github.com/slaout[Sébastien Laout], licensed under https://creativecommons.org/licenses/by-nc-sa/4.0/[Creative Commons 4.0 Attributions license]
 [#img-by-nc-sa]
 [caption="Creative commons by-nc-sa logo: ",link=https://creativecommons.org/licenses/by-nc-sa/4.0/]
 image::https://mirrors.creativecommons.org/presskit/buttons/88x31/png/by-nc-sa.png[Creative commons by-nc-sa logo,83,31]
-
 
 == What is ARA?
 
@@ -23,7 +23,8 @@ Please note the following :
 
 * You'll need https://docs.docker.com/install/[Docker]
 * All the datas that you import in ARA won't be persisted.
-* The port 7000 must be available locally.
+* The port 7000, 9000, 5432 must be available locally.
+* Add to `/etc/hosts` (Linux OS) or to `/private/etc/hosts` (MacOS) `127.0.0.1 oauth2.dev.localhost`
 
 === I've got a Windows PC !
 
@@ -84,5 +85,6 @@ to learn how the project is structured and how to develop new features in ARA an
 To start a development environment:
 ----
 > cd code
-> docker compose -f docker compose.dev.yml up
+> docker compose -f code/docker compose.dev.yml up -d
+> docker compose -f code/docker compose.dev.yml logs -f --tail 200
 ----
