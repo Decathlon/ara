@@ -26,3 +26,7 @@ logging:
         type:
           descriptor:
             sql: INFO
+
+info:
+  app:
+    version: DEV
