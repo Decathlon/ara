@@ -18,7 +18,7 @@ import static com.decathlon.ara.web.rest.util.RestConstants.API_PATH;
 @Slf4j
 @RestController
 @RequestMapping(UserResource.PATH)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor
 public class UserResource {
 
     static final String PATH = API_PATH + "/user";
@@ -31,15 +31,11 @@ public class UserResource {
     ){
 
         return new AuthenticationUserDetailsDTO(
-                user.getClaimAsString("sub"),
+                user.getSubject(),
                 user.getFullName(),
                 user.getName(),
                 user.getEmail(),
                 user.getPicture());
     }
-
-
-
-
 
 }

@@ -76,6 +76,7 @@ public class AuthorizationServerConfig {
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .redirectUri(String.format("%s/oauth/logincomplete/ara-client-oidc", clientUrl))
                 .scope(OidcScopes.OPENID)
+                .scope(OidcScopes.PROFILE)
                 .scope("ara.read")
                 .build();
 
