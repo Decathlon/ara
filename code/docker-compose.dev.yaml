@@ -12,7 +12,7 @@ services:
     environment:
       - INFO_APP_VERSION=DEV
       - ARA_OAUTH2_MODE=oauth2-mock
-    command: ['/bin/bash', '-c', 'mvn -Pdev ${OPTIONAL_CLEAN} spring-boot:run -pl api']
+    command: ['/bin/bash', '-c', '${OPTIONAL_COMMAND:-echo with-no-optional-command} && mvn -Pdev spring-boot:run -pl api']
   front:
     image: node:12
     working_dir: /app
