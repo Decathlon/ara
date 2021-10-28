@@ -1,6 +1,6 @@
 = ARA's Developer Documentation
 
-Check you are agree with the terms and conditions of contributor license agreements. <</doc/contributing/contributing.adoc#head, Contributing>>
+Check you are agree with the terms and conditions of contributor license agreements. <<../contribution/contributing.adoc#head, Contributing>>
 
 == Getting Started
 

@@ -47,7 +47,7 @@ test scripts not updated yet to reflect a modified screen...
 
 It is also possible to sort scenarios by severity: each severity group has its own acceptance thresholds depending on
 the importance of their scenarios, allowing to have higher exigences for high-value and critical tests. +
-For this purpose, Cucumber scenarios (or whole .feature files) can have the tag "@severity-" followed by one of the severity codes configured for the project (eg. "@severity-high" for the "High" severity).
+For this purpose, Cucumber scenarios (or whole .feature files) can have the tag `@severity-` followed by one of the severity codes configured for the project (eg. `@severity-high` for the `High` severity).
 The same sort of tag can be used in Postman query names: just make sure this pseudo-tag is at the very start of the request name, or one of its parent folders (if several are defined in parent-folders and request names, the deepest severity overrides the parent ones).
 
 Any actor of the project can see at a glance if a release is eligible to go to the next step of the continuous integration chain,
@@ -114,6 +114,6 @@ image:coverage.png[]
 == Play With the Demo Project
 
 You can find more information with the
-link:../../demo/DemoWalkthrough.adoc[Demo Walk-Through]:
+link:../demo/DemoWalkthrough.adoc[Demo Walk-Through]:
 follow a typical user journey to understand how to exploit automated tests results with ARA,
 with concrete examples.

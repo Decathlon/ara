@@ -111,7 +111,7 @@ It usually shows the screen as it was after the scenario, if it failed: +
 image:screenshot.png[] +
 The miniature can be clicked to see the full screenshot.
 
-For a scenario, ARA will extract the first found Cucumber embedding with MIME type "image/png" and save it.
+For a scenario, ARA will extract the first found Cucumber embedding with MIME type `image/png` and save it.
 
 Example of how to take screenshots with Selenium:
 
@@ -166,7 +166,7 @@ ARA provide a more elaborate way to embed rich and structured data into Cucumber
 When dumping a lot of debug information into Cucumber reports, you end up like this for each scenario: +
 image:without-structured-embeddings.png[]
 
-Users cannot distinguish between all these text/plain attachments.
+Users cannot distinguish between all these `text/plain` attachments.
 Which one is the video URL? The logs URL? The scenario start date and time? Etc. And these URLs cannot even be clicked.
 
 This is a limitation of how Cucumber embeds are implemented, and plugins like
@@ -237,14 +237,14 @@ You can embed different kinds of data:
 * *StructuredEmbedding:* you can define your own data types by inheriting this abstract class: just store the data in `Object data` and redefine `toHtml()` to define its HTML representation
 
 See the
-link:../../../lib/src/main/java/com/decathlon/ara/lib/embed/producer/StructuredEmbedding.java[StructuredEmbedding's doc]
+link:../../../../code/api/lib/src/main/java/com/decathlon/ara/lib/embed/producer/StructuredEmbedding.java[StructuredEmbedding's doc]
 for a description of all fields.
 
 You basically have two main classes to deal with structured embeddings (see JavaDoc for more information):
 
-* link:../../../lib/src/main/java/com/decathlon/ara/lib/embed/producer/StructuredEmbeddingsBuilder.java[StructuredEmbeddingsBuilder]
+* link:../../../../code/api/lib/src/main/java/com/decathlon/ara/lib/embed/producer/StructuredEmbeddingsBuilder.java[StructuredEmbeddingsBuilder]
   to produce embedding data
-* link:../../../lib/src/main/java/com/decathlon/ara/lib/embed/consumer/StructuredEmbeddingsExtractor.java[StructuredEmbeddingsExtractor]
+* link:../../../../code/api/lib/src/main/java/com/decathlon/ara/lib/embed/consumer/StructuredEmbeddingsExtractor.java[StructuredEmbeddingsExtractor]
   to consume embedding data
 
 === Structured Embeddings Recognized by ARA
@@ -276,7 +276,7 @@ You can also <<embed-screenshot, embed screenshot via a regular Cucumber embed>>
 
 ==== [[structured-video]] Video
 
-With regular Cucumber embedding, a video is just a text/plain attachment that happens to be a URL in a Cucumber report:
+With regular Cucumber embedding, a video is just a `text/plain` attachment that happens to be a URL in a Cucumber report:
 user have to copy/paste this URL in a new tab to view the video. +
 With structured embeddings, the video will be playable right in your HTML report.
 
