@@ -2,7 +2,8 @@
 = Upload a Cypress execution report
 
 This section explains how to upload a Cypress execution. The report handling relies on a Cucumber preprocessor.
-For more details, you can read: <<../developer/WritingEndToEndTests.adoc, How to write Cypress tests>>
+For more details, you can read:
+<<../../../development/test/WritingEndToEndTests.adoc#head, How to write Cypress tests>>
 
 == Report generation
 
