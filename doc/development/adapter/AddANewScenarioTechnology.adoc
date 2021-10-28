@@ -1,6 +1,6 @@
 = Adding a new testing framework
 
-Before reading this section, it is advised to read first <<../uploads/HowItWorks.adoc#head, how ARA executions works>>. +
+Before reading this section, it is advised to read first <<../../usage/execution/uploads/HowItWorks.adoc#head, how ARA executions works>>. +
 This documentation aims to show how to contribute to ARA by adding a testing technology that isn't yet supported. +
 
 IMPORTANT: Your ARA version must be at least 5.0.0
@@ -17,7 +17,7 @@ The test scenarios processing are divided into multiple packages depending on th
 You can find them in the package `com.decathlon.ara.scenario` (in the `*[ara-server]*` module). You can then create here a new package with the name of the technology you want to implement, next to the already existing ones. +
 Bear in mind that it is required for the package name to be in lowercase.
 +
-image::images/scenario/scenario_package.png[The scenario package]
+image::scenario_package.png[The scenario package]
 IMPORTANT: In order to respect the project homogeneity, it is *highly* recommended keeping the same package structure.
 
 . *Indexer*: +
@@ -42,7 +42,7 @@ Once the scenario indexer is implemented, you now need to add the new `Technolog
 +
 [source,java]
 ----
-include::../../database/src/main/java/com/decathlon/ara/domain/enumeration/Technology.java[]
+include::../../../code/api/database/src/main/java/com/decathlon/ara/domain/enumeration/Technology.java[]
 ----
 
 . *Strategy class*: +
@@ -114,7 +114,7 @@ insert into technology_setting (project_id, code, value, technology) select proj
 
 It's your turn to document how to use your test framework results! +
 In the `doc` folder in your ARA project, add your documentation in the `uploads` directory.
-If you want an idea on how to write it, you can check the <<../uploads/UploadPostman.adoc#head, Postman>>, <<../uploads/UploadCucumber.adoc#head, Cucumber>>, or any other test framework related documentation. +
+If you want an idea on how to write it, you can check the <<../../usage/execution/uploads/UploadPostman.adoc#head, Postman>>, <<../../usage/execution/uploads/UploadCucumber.adoc#head, Cucumber>>, or any other test framework related documentation. +
 If there are any settings to take into account, do not forget to explain what there are and what they refer to.
 
 == Thank you for contributing to ARA!

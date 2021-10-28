@@ -2,21 +2,6 @@
 
 Here is how to set up ARA, configure it, and plug the continuous integration of your project onto ARA.
 
-== Install ARA
-
-To install ARA:
-
-. Create a database:
-.. directly with the following <<../../../database/instance/init-database.sql, script>>
-.. or create a container containing your database (script for <<../../../database/instance/manage-db.sh, Linux>> or <<../../../database/instance/manage-db.bat, Windows>>)
-. Build the front with the `npm run build` command, in the *client* folder
-. Add `spring.datasource.url`, `spring.datasource.username` and `spring.datasource.password` with the matching values in your <<../../../database/src/main/resources/db-application.properties, properties file>> to let your application connect to your database
-. Create a jar, containing the front you just built: run `mvn clean install` in the project root folder
-. Launch your jar (for instance with the command): +
-`java -Xmx2048m -Dspring.profiles.active=_profile_ -jar ara-_x.y.z_.jar --spring.config.location=classpath:/`, where +
-* `ara-_x.y.z_.jar` is the generated jar and `_x.y.z_` your current version
-* `_profile_` is the profile you built your jar with (e.g. `dev` or `prod`)
-
 == Enable or Disable an experimental feature
 
 ARA may contain some unstable features, which are still under beta tests, and which are disabled on
@@ -81,9 +66,9 @@ Your project is now ready to receive its test reports.
 
 == Send Execution Reports to ARA
 
-If you use want to upload Cucumber reports, just follow the <<../../uploads/UploadCucumber.adoc#head, Upload Cucumber procedure>>
+If you use want to upload Cucumber reports, just follow the <<../../execution/uploads/UploadCucumber.adoc#head, Upload Cucumber procedure>>
 
-If you use want to upload Postman reports, just follow the <<../../uploads/UploadPostman.adoc#head, Upload Postman procedure>>
+If you use want to upload Postman reports, just follow the <<../../execution/uploads/UploadPostman.adoc#head, Upload Postman procedure>>
 
 == Upload Cucumber Scenarios and Postman Requests to ARA
 
@@ -93,26 +78,26 @@ There is an optional additional step to feed ARA with all data it needs from you
 
 If you need:
 
-* the tracking of @ignore Cucumber scenarios
+* the tracking of `@ignore` Cucumber scenarios
 * functionality coverage of automated tests
 * team association for Cucumber scenarios and Postman requests (through functionalities)
 
 Then, whenever something is pushed on your main/default branch of your version control system,
 you will need to upload the Cucumber scenarios and Postman collections to ARA, so ARA can keep track of them.
 
-This is done independently of executions, because executions can run a sub-set of scenarios, or run them several times (one run with @country-all + @country-fr, and another run with @country-all + @country-us...) or exclude all the @ignore scenarios.
+This is done independently of executions, because executions can run a sub-set of scenarios, or run them several times (one run with `@country-all` + `@country-fr`, and another run with `@country-all` + `@country-us`...) or exclude all the `@ignore` scenarios.
 
 === How?
 
 If you have several sources, you will need to upload them individually. +
 In ARA terminology, a source is a Version Control System (Git...) URL
-to a folder containing either .feature Cucumber files or Postman collections;
+to a folder containing either `.feature` Cucumber files or Postman collections;
 a source can be used several times by different test types
-(same .features files used by both "Web desktop" and "Web mobile" test types, for instance).
+(same `.features` files used by both "Web desktop" and "Web mobile" test types, for instance).
 
 ==== How to Upload Collections of a Postman Source?
 
-ZIP all you *.json collections, while keeping the parent directories.
+Zip all you `*.json` collections, while keeping the parent directories.
 
 For instance, you have Postman collections like `src/main/resources/team1/subteamA/collection1.json`,
 and the matching ARA source have VCS URL pointing to the folder `src/main/resources` of your project,
@@ -140,7 +125,7 @@ Upload it to:
 
 == Going Further: More Meta-Data for Executed Cucumber Scenarios
 
-ARA works fine by just feeding it with a Cucumber report.json.
+ARA works fine by just feeding it with a Cucumber `report.json`.
 
 ARA optionally offers you to display more meta-data to help user debug scenarios more easily. +
 But you need to modify how you run your Cucumber scenarios and embed special data into the report. +
@@ -155,7 +140,7 @@ You may want each check to have its own Cucumber step for better debugging what 
 By default, Cucumber will stop the scenario at the first failed step. +
 If the first check step fails, you then have no idea if the following checks would pass or fail.
 
-You can use this Cucumber fork in order to mark some @Then steps as "soft-failures", and allow
+You can use this Cucumber fork in order to mark some `@Then` steps as "soft-failures", and allow
 
 https://github.com/slaout/cucumber-jvm
 
