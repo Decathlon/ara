@@ -43,7 +43,7 @@ Here are main layers in the server module, with the main technologies used by th
             v
     +---------------+
     |    Swagger{io}| Exposes a live documentation of
-    +---------------+ REST APIs at /swagger{dash}ui.html
+    +---------------+ REST APIs at /actuator/swagger{dash}ui/index.html?url=/actuator/openapi
 ....
 
 === Class Diagram
@@ -378,7 +378,13 @@ Once your ARA instance is live, you can update the current state of a feature fl
 
 Swagger is a documentation and test tool for APIs. +
 All REST resources must have JavaDoc so that it can be used for public API documentation. +
-You can access to it at http://localhost:8080/swagger-ui.html
+You can access to it at http://localhost:8080/actuator/swagger-ui/index.html?url=/actuator/openapi
+
+Most operations on the swagger need authentication.
+So if you want to test methods, we recommand running the front as well, so you can authenticate and run any method depending on your rights:app-name :
+
+* Connect to the application: http://localhost:7000
+* Go the the actuator through the same domain: http://localhost:7000/actuator/swagger-ui/index.html?url=/actuator/openapi
 
 == Tests & Quality
 
