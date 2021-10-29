@@ -19,6 +19,8 @@
 
 <script>
   import { mapState } from 'vuex'
+  import { AuthenticationService } from '../service/authentication.service'
+  import RememberUrlService from '../service/rememberurl.service'
 
   export default {
     name: 'redirecter',
@@ -36,6 +38,15 @@
 
     methods: {
       redirect () {
+        if (RememberUrlService.redirectAsked(true) && RememberUrlService.redirectNeeded(this.$route.path)) {
+          const redicrectPath = RememberUrlService.getRedirectPath()
+          if (redicrectPath) {
+            this.$router.replace({
+              path: redicrectPath
+            })
+            return
+          }
+        }
         if (!this.defaultProjectCode) {
           // No project: go to project management screen
           this.$router.replace({ name: 'management-projects' })
@@ -56,7 +67,12 @@
       if (this.loaded) {
         this.redirect()
       } else {
-        this.$store.dispatch('projects/ensureProjectsLoaded')
+        AuthenticationService.isAlreadyLoggedIn()
+          .then((isLogged) => {
+            if (isLogged) {
+              this.$store.dispatch('projects/ensureProjectsLoaded')
+            }
+          })
       }
     },
 
