@@ -32,8 +32,6 @@ import VueVirtualScroller from 'vue-virtual-scroller'
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import { AuthenticationService } from './service/authentication.service'
 import configurationPlugin from '@/config'
-import { config } from './config'
-import api from './libs/api'
 import VueCookies from 'vue-cookies'
 
 import { sanitizeUrl } from '@braintree/sanitize-url'
@@ -57,95 +55,11 @@ iView.Message.config({
 })
 
 const router = new VueRouter({
-  mode: 'history',
   routes: routes
 })
 
-const deferNext = function (next, action, message) {
-  console.info(`calling next:${action} / message: ${message}`)
-  return next(action)
-}
-
-const manageLoginRedirection = async function (to, from, next) {
-  const getOauthProviders = async () => {
-    return Vue.http.get(api.paths.authenticationConfiguration(), api.REQUEST_OPTIONS)
-      .then(response => response.body)
-      .then(content => {
-        const res = {
-          loginStartingUrl: content.loginStartingUrl,
-          logoutProcessingUrl: content.logoutProcessingUrl,
-          providers: content.providers.reduce((previous, current) => {
-            previous[current.providerType] = {
-              uri: `${content.loginStartingUrl}/${current.code}`,
-              display: current.displayName,
-              icon: current.providerType === 'custom' ? 'building' : current.providerType,
-              name: current.code
-            }
-            return previous
-          }, {})
-        }
-        console.debug(res)
-        return res
-      })
-  }
-
-  const isPublic = to.matched.some(record => record.meta.public)
-  const onlyWhenLoggedOut = to.matched.some(record => record.meta.onlyWhenLoggedOut)
-
-  if (isPublic) {
-    return deferNext(next, undefined, 'url is public')
-  }
-  if (config.downloadError) {
-    return deferNext(next, '/login', 'downloadError is defined')
-  }
-
-  const loggedIn = await AuthenticationService.isAlreadyLoggedIn()
-  const needToDownloadConfig = !(config.isComplete)
-  console.debug(`loggedIn? ${loggedIn} / needToDownloadConfig? ${needToDownloadConfig}`)
-  if (needToDownloadConfig) {
-    try {
-      config.authentication = await getOauthProviders()
-      console.debug('Authent conf retrieved')
-      config.downloadError = false
-    } catch (err) {
-      console.error(err)
-      config.downloadError = true
-      return deferNext(next, '/login', 'error while retrieving providers')
-    }
-  }
-
-  const requireLogin = !loggedIn && config.authentication.enabled
-  if (!loggedIn) {
-    iView.Notice.open({
-      title: 'Access denied',
-      desc: 'You need to login first if you want to access this page.'
-    })
-    return deferNext(next, '/login', 'access denied')
-  }
-
-  const loggedInButTryingToReachALoggedOutPage = loggedIn && onlyWhenLoggedOut
-  if (loggedInButTryingToReachALoggedOutPage) {
-    iView.Notice.open({
-      title: 'You are already connected!',
-      desc: 'Logged out pages (such as the login page) can\'t be viewed if you are already connected. Please logout from ARA first.',
-      duration: 0
-    })
-    return next('/')
-  }
-
-  const loginNotRequiredButTryingToAccessLogin = !requireLogin && onlyWhenLoggedOut
-  if (loginNotRequiredButTryingToAccessLogin) {
-    iView.Notice.open({
-      title: 'Login not required!',
-      desc: 'You cannot access the login page because the authentication is not enabled.<br>If you want to enable it, please check your configuration files.',
-      duration: 0
-    })
-    return next('/')
-  }
-}
-
 router.beforeEach(async (to, from, next) => {
-  await manageLoginRedirection(to, from, next)
+  await AuthenticationService.manageLoginRedirection(to, from, next)
 
   iView.LoadingBar.start()
   util.title(to.meta.title)
@@ -158,6 +72,8 @@ router.afterEach(() => {
   iView.LoadingBar.finish()
   window.scrollTo(0, 0)
 })
+
+util.cleanFromPreviousVersion()
 
 Vue.prototype.$sanitizeUrl = sanitizeUrl
 

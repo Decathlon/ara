@@ -42,6 +42,8 @@ spring:
     #host: please-configure-spring.mail.host
 
 springdoc:
+  swagger-ui:
+    disable-swagger-default-url: true
   packagesToScan: com.decathlon.ara
   pathsToMatch: /api/**
   use-management-port: true
