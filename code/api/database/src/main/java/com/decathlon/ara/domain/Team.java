@@ -42,7 +42,7 @@ public class Team implements Serializable {
 
     private long projectId;
 
-    @Column(length = 128)
+    @Column(length = 128, nullable = false)
     private String name;
 
     private boolean assignableToProblems;

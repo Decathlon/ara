@@ -54,14 +54,14 @@ public class Communication implements Comparable<Communication>, Serializable {
     @JoinColumn(name = "project_id")
     private Project project;
 
-    @Column(length = 32)
+    @Column(length = 32, nullable = false)
     private String code;
 
-    @Column(length = 64)
+    @Column(length = 64, nullable = false)
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 4)
+    @Column(length = 4, nullable = false)
     private CommunicationType type;
 
     @Lob

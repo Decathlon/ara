@@ -38,12 +38,13 @@ public class CycleDefinition implements Serializable {
 
     private long projectId;
 
-    @Column(length = 16)
+    @Column(length = 16, nullable = false)
     private String branch;
 
-    @Column(length = 16)
+    @Column(length = 16, nullable = false)
     private String name;
 
+    @Column(nullable = false)
     private int branchPosition;
 
 }

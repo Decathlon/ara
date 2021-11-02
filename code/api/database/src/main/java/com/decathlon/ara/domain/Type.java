@@ -41,10 +41,10 @@ public class Type implements Comparable<Type>, Serializable {
 
     private long projectId;
 
-    @Column(length = 16)
+    @Column(length = 16, nullable = false)
     private String code;
 
-    @Column(length = 50)
+    @Column(length = 50, nullable = false)
     private String name;
 
     private boolean isBrowser;
@@ -58,7 +58,7 @@ public class Type implements Comparable<Type>, Serializable {
      * created to indicate it is not an mis-configuration.
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "source_id")
+    @JoinColumn(name = "source_id", nullable = false)
     private Source source;
 
     @Override

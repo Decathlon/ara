@@ -41,10 +41,10 @@ public class Country implements Comparable<Country>, Serializable {
 
     private long projectId;
 
-    @Column(length = 2)
+    @Column(length = 2, nullable = false)
     private String code;
 
-    @Column(length = 40)
+    @Column(length = 40, nullable = false)
     private String name;
 
     @Override

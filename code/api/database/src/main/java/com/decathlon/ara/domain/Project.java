@@ -43,10 +43,10 @@ public class Project implements Comparable<Project>, Serializable {
     @SequenceGenerator(name = "project_id", sequenceName = "project_id", allocationSize = 1)
     private Long id;
 
-    @Column(length = 32)
+    @Column(length = 32, nullable = false)
     private String code;
 
-    @Column(length = 64)
+    @Column(length = 64, nullable = false)
     private String name;
 
     /**

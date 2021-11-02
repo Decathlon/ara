@@ -41,10 +41,12 @@ public class TechnologySetting implements Comparable<TechnologySetting>, Seriali
 
     private Long projectId;
 
+    @Column(nullable = false)
     private String code;
 
     private String value;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Technology technology;
 
