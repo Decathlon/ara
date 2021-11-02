@@ -76,7 +76,7 @@ public class PostmanScenarioIndexerService {
         final FileSystem zip = FileSystems.newFileSystem(zipFile.toPath(), this.getClass().getClassLoader());
 
         for (Path jsonFilePath : listJsonFilePaths(zip)) {
-            log.trace("SCENARIO|postman|Processing the file {}", jsonFilePath.toString());
+            log.debug("SCENARIO|postman|Processing the file {}", jsonFilePath.toString());
             try {
                 InputStream input = Files.newInputStream(jsonFilePath);
                 final CollectionWithScripts collection = objectMapper.readValue(input, CollectionWithScripts.class);

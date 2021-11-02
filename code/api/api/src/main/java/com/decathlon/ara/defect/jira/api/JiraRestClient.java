@@ -176,10 +176,10 @@ public class JiraRestClient {
         final Integer remainingResultsNumber = total - firstResultsNumber;
 
         List<JiraIssue> allIssues = searchResult.getIssues();
-        log.trace("DEFECT|jira|[Jira] Getting issues from [{}]", finalUrl);
-        log.trace("DEFECT|jira|[Jira] Planning to load {} issues...", total);
+        log.debug("DEFECT|jira|[Jira] Getting issues from [{}]", finalUrl);
+        log.debug("DEFECT|jira|[Jira] Planning to load {} issues...", total);
         if (remainingResultsNumber > 0) {
-            log.trace("DEFECT|jira|[Jira] Loading the remaining ({}) issues ...", remainingResultsNumber);
+            log.debug("DEFECT|jira|[Jira] Loading the remaining ({}) issues ...", remainingResultsNumber);
             final Integer pageNumbers = remainingResultsNumber / actualMaxResults;
             List<String> paginatedUrls = IntStream
                     .range(0, pageNumbers + 1)
@@ -187,19 +187,19 @@ public class JiraRestClient {
                     .mapToObj(String::valueOf)
                     .map(startIndex -> String.format("%s&startAt=%s&maxResults=%d", urlWithJQL, startIndex, actualMaxResults))
                     .collect(Collectors.toList());
-            log.trace("DEFECT|jira|[Jira] {} API calls required", paginatedUrls.size());
+            log.debug("DEFECT|jira|[Jira] {} API calls required", paginatedUrls.size());
             for (String paginatedUrl: paginatedUrls) {
                 JiraIssueSearchResults paginatedSearchResult = getSearchResultsFromHeaderAndUrl(header, paginatedUrl);
                 List<JiraIssue> paginatedIssues = paginatedSearchResult.getIssues();
-                log.trace("DEFECT|jira|[Jira] Pagination: loaded {} issues from url [{}]", paginatedIssues.size(), paginatedUrl);
+                log.debug("DEFECT|jira|[Jira] Pagination: loaded {} issues from url [{}]", paginatedIssues.size(), paginatedUrl);
                 allIssues = Stream.of(allIssues, paginatedIssues)
                         .flatMap(Collection::stream)
                         .collect(Collectors.toList());
-                log.trace("DEFECT|jira|[Jira] Pagination: Now reaching {} issues", allIssues.size());
+                log.debug("DEFECT|jira|[Jira] Pagination: Now reaching {} issues", allIssues.size());
             }
         }
 
-        log.trace("DEFECT|jira|[Jira] {} issues effectively loaded", allIssues.size());
+        log.debug("DEFECT|jira|[Jira] {} issues effectively loaded", allIssues.size());
         return allIssues;
     }
 
@@ -211,7 +211,7 @@ public class JiraRestClient {
      * @throws BadRequestException thrown if (one of) the API call(s) returned an error code
      */
     private JiraIssueSearchResults getSearchResultsFromHeaderAndUrl(HttpHeaders header, String url) throws BadRequestException {
-        log.trace("DEFECT|jira|[Jira] Searching issues... ({})", url);
+        log.debug("DEFECT|jira|[Jira] Searching issues... ({})", url);
 
         HttpEntity<JiraIssueSearchResults> request = new HttpEntity<>(header);
         final ParameterizedTypeReference<JiraIssueSearchResults> responseType = new ParameterizedTypeReference<>() {};

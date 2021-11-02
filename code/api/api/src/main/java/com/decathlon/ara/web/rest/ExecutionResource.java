@@ -255,7 +255,7 @@ public class ExecutionResource {
             result = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 
-        log.trace("EXECUTION|Freeing the /upload resource...");
+        log.debug("EXECUTION|Freeing the /upload resource...");
         log.info("EXECUTION|ARA is still uploading executions");
         return result;
     }

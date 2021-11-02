@@ -163,7 +163,7 @@ public class DefectService {
 
     @Transactional
     public void fullIndex(Project project, DefectAdapter defectAdapter) throws FetchException {
-        log.trace("DEFECT|Begin defect full indexing for project {}", project.getName());
+        log.debug("DEFECT|Begin defect full indexing for project {}", project.getName());
 
         final long projectId = project.getId();
         final List<Problem> problems = problemRepository.findAllByProjectIdAndDefectIdIsNotEmpty(projectId);
@@ -175,7 +175,7 @@ public class DefectService {
 
     @Transactional
     public void incrementalIndex(Project project, DefectAdapter defectAdapter, Date since) throws FetchException {
-        log.trace("DEFECT|Begin defect incremental indexing for updates since {} for project {}", since, project.getName());
+        log.debug("DEFECT|Begin defect incremental indexing for updates since {} for project {}", since, project.getName());
 
         final long projectId = project.getId();
         final List<Problem> problems = problemRepository.findAllByProjectIdAndDefectIdIsNotEmpty(projectId);

@@ -153,7 +153,7 @@ public class RtcDefectAdapter implements DefectAdapter {
         }
         try {
             final Integer parsedId = Integer.valueOf(id);
-            log.trace("DEFECT|rtc|Parsed defect ID {} (logged for no 'Result of method not used' warning)", parsedId);
+            log.debug("DEFECT|rtc|Parsed defect ID {} (logged for no 'Result of method not used' warning)", parsedId);
             return true;
         } catch (NumberFormatException e) {
             return false;
@@ -303,13 +303,13 @@ public class RtcDefectAdapter implements DefectAdapter {
 
         if (closedStates.stream().anyMatch(s -> s.equalsIgnoreCase(lowerState))) {
             if (openStates.contains(lowerState)) {
-                log.trace("DEFECT|rtc|Work item status \"{}\" is configured both as OPEN and CLOSED: CLOSED have priority", state);
+                log.debug("DEFECT|rtc|Work item status \"{}\" is configured both as OPEN and CLOSED: CLOSED have priority", state);
             }
             return ProblemStatus.CLOSED;
         } else if (openStates.stream().anyMatch(s -> s.equalsIgnoreCase(lowerState))) {
             return ProblemStatus.OPEN;
         }
-        log.trace("DEFECT|rtc|Work item status \"{}\" is not configured as OPEN nor as CLOSED: consider it OPEN", state);
+        log.debug("DEFECT|rtc|Work item status \"{}\" is not configured as OPEN nor as CLOSED: consider it OPEN", state);
         return ProblemStatus.OPEN;
     }
 

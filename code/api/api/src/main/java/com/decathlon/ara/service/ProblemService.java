@@ -732,7 +732,7 @@ public class ProblemService {
     public void recomputeFirstAndLastSeenDateTimes(long projectId) {
         final List<Problem> problems = problemRepository.findByProjectId(projectId);
         for (int i = 0; i < problems.size(); i++) {
-            log.trace("PROBLEM|Recomputing problem {}/{} ", Integer.valueOf(i + 1), Integer.valueOf(problems.size()));
+            log.debug("PROBLEM|Recomputing problem {}/{} ", Integer.valueOf(i + 1), Integer.valueOf(problems.size()));
             problemDenormalizationService.updateFirstAndLastSeenDateTimes(Collections.singleton(problems.get(i)));
         }
     }

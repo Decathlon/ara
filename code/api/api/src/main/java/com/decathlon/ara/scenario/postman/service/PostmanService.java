@@ -148,7 +148,7 @@ public class PostmanService {
      */
     public void parse(JsonParser parser, NewmanParsingResult result) throws IOException {
         if (!parser.isClosed() && parser.nextToken() == JsonToken.START_OBJECT) {
-            log.trace("SCENARIO|postman|JSON stream contains a root object: parsing the Newman report");
+            log.debug("SCENARIO|postman|JSON stream contains a root object: parsing the Newman report");
             parseRootObject(parser, result);
         } else {
             log.warn("SCENARIO|postman|JSON stream does not contain a root object: no Newman report to parse");
@@ -174,15 +174,15 @@ public class PostmanService {
             final String fieldName = parser.getCurrentName();
 
             if (startingObject && "collection".equals(fieldName)) {
-                log.trace("SCENARIO|postman|[json:$] found collection: parsing it");
+                log.debug("SCENARIO|postman|[json:$] found collection: parsing it");
                 result.setCollection(objectMapper.readValue(parser, Collection.class));
 
             } else if (startingObject && "run".equals(fieldName)) {
-                log.trace("SCENARIO|postman|[json:$] found run: parsing it");
+                log.debug("SCENARIO|postman|[json:$] found run: parsing it");
                 parseRun(parser, result);
 
             } else if (jsonToken != JsonToken.FIELD_NAME) {
-                log.trace("SCENARIO|postman|[json:$] unmapped {} (last field name: {})", jsonToken, fieldName);
+                log.debug("SCENARIO|postman|[json:$] unmapped {} (last field name: {})", jsonToken, fieldName);
                 parser.skipChildren();
             }
         }
@@ -207,17 +207,17 @@ public class PostmanService {
             final String fieldName = parser.getCurrentName();
 
             if (startingArray && "executions".equals(fieldName)) {
-                log.trace("SCENARIO|postman|[json:$.run] found executions: parsing it");
+                log.debug("SCENARIO|postman|[json:$.run] found executions: parsing it");
                 List<Execution> executions = new ArrayList<>();
                 result.setExecutions(executions);
                 parseExecutions(parser, executions);
 
             } else if (startingArray && "failures".equals(fieldName)) {
-                log.trace("SCENARIO|postman|[json:$.run] found failures: parsing it");
+                log.debug("SCENARIO|postman|[json:$.run] found failures: parsing it");
                 result.setFailures(Arrays.asList(objectMapper.readValue(parser, Failure[].class)));
 
             } else if (jsonToken != JsonToken.FIELD_NAME) {
-                log.trace("SCENARIO|postman|[json:$.run] unmapped {} (last field name: {})", jsonToken, fieldName);
+                log.debug("SCENARIO|postman|[json:$.run] unmapped {} (last field name: {})", jsonToken, fieldName);
                 parser.skipChildren();
             }
         }
@@ -238,7 +238,7 @@ public class PostmanService {
             }
 
             if (jsonToken == JsonToken.START_OBJECT) {
-                log.trace("SCENARIO|postman|[json:$.run.executions] found execution: parsing it");
+                log.debug("SCENARIO|postman|[json:$.run.executions] found execution: parsing it");
                 Execution execution = objectMapper.readValue(parser, Execution.class);
                 executions.add(execution); // Add BEFORE saving to file: if write fails (no space left), the "half-"file can be deleted
                 saveExecutionStreamToFile(execution);
