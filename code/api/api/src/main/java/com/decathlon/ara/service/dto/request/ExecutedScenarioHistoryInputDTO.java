@@ -44,35 +44,40 @@ public class ExecutedScenarioHistoryInputDTO {
     private ExecutedScenarioHistoryDuration duration;
 
     public Optional<Period> getDuration() {
-        if (duration == null || duration.type == null || duration.value < 1) {
+        if (duration == null) {
             return Optional.empty();
         }
-        Period period;
-        var durationType = duration.getType();
-        var durationValue = duration.getValue();
-        switch (durationType) {
-            case DAY:
-                period = Period.ofDays(durationValue);
-                break;
-            case WEEK:
-                period = Period.ofWeeks(durationValue);
-                break;
-            case MONTH:
-                period = Period.ofMonths(durationValue);
-                break;
-            case YEAR:
-                period = Period.ofYears(durationValue);
-                break;
-            default:
-                period = Period.ZERO;
-        }
-        return Optional.of(period);
+        return duration.getDuration();
     }
 
     @Data
     private class ExecutedScenarioHistoryDuration {
         private int value;
         private ExecutedScenarioHistoryDurationType type;
+
+        private Optional<Period> getDuration() {
+            if (type == null || value < 1) {
+                return Optional.empty();
+            }
+            Period period;
+            switch (type) {
+                case DAY:
+                    period = Period.ofDays(value);
+                    break;
+                case WEEK:
+                    period = Period.ofWeeks(value);
+                    break;
+                case MONTH:
+                    period = Period.ofMonths(value);
+                    break;
+                case YEAR:
+                    period = Period.ofYears(value);
+                    break;
+                default:
+                    period = Period.ZERO;
+            }
+            return Optional.of(period);
+        }
     }
 
     private enum ExecutedScenarioHistoryDurationType {

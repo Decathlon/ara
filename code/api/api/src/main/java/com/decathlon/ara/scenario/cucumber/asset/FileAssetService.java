@@ -18,9 +18,6 @@
 package com.decathlon.ara.scenario.cucumber.asset;
 
 import com.decathlon.ara.configuration.AraConfiguration;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +25,10 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Write to disk (can be a NFS mount-point or a Docker mounted volume binding... this is transparent) parts of the data

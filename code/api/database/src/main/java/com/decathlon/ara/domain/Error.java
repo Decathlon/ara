@@ -73,6 +73,11 @@ public class Error implements Comparable<Error> {
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "errors")
     private Set<ProblemPattern> problemPatterns = new HashSet<>();
 
+    @PreRemove
+    private void removeProblemPatterns() {
+        problemPatterns.forEach(this::removeProblemPattern);
+    }
+
     // 2/2 for @EqualsAndHashCode to work: used for entities created outside of JPA
     public void setExecutedScenario(ExecutedScenario executedScenario) {
         this.executedScenario = executedScenario;

@@ -17,9 +17,9 @@
 
 package com.decathlon.ara.scenario.cucumber.asset;
 
+import com.decathlon.ara.configuration.AraConfiguration;
 import com.decathlon.ara.scenario.cucumber.asset.ssh.SshClientHelper;
 import com.decathlon.ara.scenario.cucumber.asset.ssh.SshException;
-import com.decathlon.ara.configuration.AraConfiguration;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

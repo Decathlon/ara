@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.ci.service.DateService;
 import com.decathlon.ara.ci.util.FetchException;
 import com.decathlon.ara.common.NotGonnaHappenException;
 import com.decathlon.ara.defect.DefectAdapter;
@@ -30,6 +29,7 @@ import com.decathlon.ara.repository.ProblemRepository;
 import com.decathlon.ara.repository.ProjectRepository;
 import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
 import com.decathlon.ara.service.support.Settings;
+import com.decathlon.ara.service.util.DateService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
