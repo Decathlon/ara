@@ -11,7 +11,7 @@ spring:
             client-secret: ara-client
             authorization-grant-type: authorization_code
             redirect-uri: "${ara.clientBaseUrl}/${ara.loginProcessingUrl}/{registrationId}"
-            scope: openid
+            scope: openid, profile
         provider:
           spring:
             issuer-uri: http://oauth2.dev.localhost:9000
