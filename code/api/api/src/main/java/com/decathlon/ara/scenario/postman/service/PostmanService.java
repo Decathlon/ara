@@ -151,7 +151,7 @@ public class PostmanService {
             log.debug("SCENARIO|postman|JSON stream contains a root object: parsing the Newman report");
             parseRootObject(parser, result);
         } else {
-            log.warn("SCENARIO|postman|JSON stream does not contain a root object: no Newman report to parse");
+            log.error("SCENARIO|postman|JSON stream does not contain a root object: no Newman report to parse");
             throw new IOException("JSON stream does not contain a root object: no Newman report to parse");
         }
     }

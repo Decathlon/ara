@@ -75,7 +75,7 @@ public class QualityService {
         try {
             qualityThresholds = objectMapper.readValue(execution.getQualityThresholds(), TYPE_REFERENCE_TO_MAP_STRING_QUALITY_THRESHOLD);
         } catch (IOException e) {
-            log.error("EXECUTION|Cannot parse qualityThresholds, doing without them but marking the execution as incomplete: {}", execution.getQualityThresholds(), e);
+            log.warn("EXECUTION|Cannot parse qualityThresholds, doing without them but marking the execution as incomplete: {}", execution.getQualityThresholds(), e);
             qualityThresholds = null;
             globalQualityStatus = QualityStatus.INCOMPLETE;
         }
@@ -90,7 +90,7 @@ public class QualityService {
             qualitySeverities.add(qualitySeverity);
 
             if (threshold == null) {
-                log.error("EXECUTION|No qualityThresholds for {}: doing without them but marking the severity and execution as incomplete", severity.getCode());
+                log.warn("EXECUTION|No qualityThresholds for {}: doing without them but marking the severity and execution as incomplete", severity.getCode());
                 qualitySeverity.setStatus(QualityStatus.INCOMPLETE);
                 globalQualityStatus = QualityStatus.INCOMPLETE;
             }

@@ -59,7 +59,7 @@ public class QualityThresholdTransformer {
             try {
                 return objectMapper.readValue(jsonQualityThreshold, TYPE_REFERENCE);
             } catch (IOException e) {
-                log.error("EXECUTION|Cannot parse qualityThresholds: {}", jsonQualityThreshold, e);
+                log.warn("EXECUTION|Cannot parse qualityThresholds: {}", jsonQualityThreshold, e);
                 return new HashMap<>();
             }
         }

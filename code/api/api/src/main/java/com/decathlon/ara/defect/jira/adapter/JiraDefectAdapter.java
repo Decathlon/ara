@@ -64,7 +64,7 @@ public class JiraDefectAdapter implements DefectAdapter {
         } catch (BadRequestException e) {
             String jiraIds = String.join(", ", ids);
             String errorMessage = String.format("DEFECT|jira|Error while fetching the following ids from Jira: [%s]", jiraIds);
-            log.warn(errorMessage, e);
+            log.error(errorMessage, e);
             throw new FetchException(errorMessage, e);
         }
     }

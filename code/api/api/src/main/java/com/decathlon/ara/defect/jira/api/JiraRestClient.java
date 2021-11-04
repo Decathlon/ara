@@ -93,7 +93,7 @@ public class JiraRestClient {
     private String getJiraBaseUrl(Long projectId) throws BadRequestException {
         String baseUrl = settingService.get(projectId, Settings.DEFECT_JIRA_BASE_URL);
         if (StringUtils.isBlank(baseUrl)) {
-            log.warn("DEFECT|jira|Jira base url not found for this project ({})", projectId);
+            log.error("DEFECT|jira|Jira base url not found for this project ({})", projectId);
             throw new BadRequestException("Jira base url not found", Entities.SETTING, "jira_base_url_not_found");
         }
         return baseUrl;
@@ -108,13 +108,13 @@ public class JiraRestClient {
     public HttpHeaders getHeader(Long projectId) throws BadRequestException {
         String token = settingService.get(projectId, Settings.DEFECT_JIRA_TOKEN);
         if (StringUtils.isBlank(token)) {
-            log.warn("DEFECT|jira|Jira token not found for this project ({})", projectId);
+            log.error("DEFECT|jira|Jira token not found for this project ({})", projectId);
             throw new BadRequestException("Jira token not found", Entities.SETTING, "jira_token_not_found");
         }
 
         String login = settingService.get(projectId, Settings.DEFECT_JIRA_LOGIN);
         if (StringUtils.isBlank(login)) {
-            log.warn("DEFECT|jira|Jira login not found for this project ({})", projectId);
+            log.error("DEFECT|jira|Jira login not found for this project ({})", projectId);
             throw new BadRequestException("Jira login not found", Entities.SETTING, "jira_login_not_found");
         }
 

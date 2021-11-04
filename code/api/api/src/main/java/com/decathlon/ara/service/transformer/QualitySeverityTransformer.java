@@ -39,9 +39,7 @@ import java.util.List;
 @Slf4j
 public class QualitySeverityTransformer {
 
-    static final TypeReference<List<QualitySeverityDTO>> TYPE_REFERENCE
-            = new TypeReference<>() {
-    };
+    static final TypeReference<List<QualitySeverityDTO>> TYPE_REFERENCE = new TypeReference<>() {};
 
     @Autowired
     private ObjectMapper objectMapper;
