@@ -153,7 +153,7 @@ public class RtcDefectAdapter implements DefectAdapter {
         }
         try {
             final Integer parsedId = Integer.valueOf(id);
-            log.trace("Parsed defect ID {} (logged for no 'Result of method not used' warning)", parsedId);
+            log.debug("DEFECT|rtc|Parsed defect ID {} (logged for no 'Result of method not used' warning)", parsedId);
             return true;
         } catch (NumberFormatException e) {
             return false;
@@ -263,7 +263,7 @@ public class RtcDefectAdapter implements DefectAdapter {
                     final String nextPageUrl = URLDecoder.decode(rawNextPageUrl, StandardCharsets.UTF_8.name());
                     defects.addAll(queryDefects(projectId, cookies, nextPageUrl, requestedPageSize));
                 } catch (UnsupportedEncodingException e) {
-                    log.error("Ignoring URL of next page because it cannot be parsed: {}", url, e);
+                    log.warn("DEFECT|rtc|Ignoring URL of next page because it cannot be parsed: {}", url, e);
                 }
             }
         }
@@ -303,13 +303,13 @@ public class RtcDefectAdapter implements DefectAdapter {
 
         if (closedStates.stream().anyMatch(s -> s.equalsIgnoreCase(lowerState))) {
             if (openStates.contains(lowerState)) {
-                log.error("Work item status \"{}\" is configured both as OPEN and CLOSED: CLOSED have priority", state);
+                log.debug("DEFECT|rtc|Work item status \"{}\" is configured both as OPEN and CLOSED: CLOSED have priority", state);
             }
             return ProblemStatus.CLOSED;
         } else if (openStates.stream().anyMatch(s -> s.equalsIgnoreCase(lowerState))) {
             return ProblemStatus.OPEN;
         }
-        log.error("Work item status \"{}\" is not configured as OPEN nor as CLOSED: consider it OPEN", state);
+        log.debug("DEFECT|rtc|Work item status \"{}\" is not configured as OPEN nor as CLOSED: consider it OPEN", state);
         return ProblemStatus.OPEN;
     }
 

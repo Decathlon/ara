@@ -37,7 +37,7 @@ public class AraCartographyMapper {
         try {
             return objectMapper.writeValueAsString(functionalities);
         } catch (JsonProcessingException ex) {
-            log.error("Unable to serialize the wanted cartography into an ARA export.", ex.getMessage());
+            log.error("FEATURE|Unable to serialize the wanted cartography into an ARA export.", ex);
             return "{}";
         }
     }
@@ -52,7 +52,7 @@ public class AraCartographyMapper {
         try {
             return objectMapper.readValue(jsonRepresentation, TYPE_REFERENCE);
         } catch (IOException ex) {
-            log.error("Unable to deserialize the given JSON into a list of Functionalities.", ex.getMessage());
+            log.error("FEATURE|Unable to deserialize the given JSON into a list of Functionalities.", ex);
             return new ArrayList<>();
         }
     }

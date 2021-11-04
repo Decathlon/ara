@@ -63,7 +63,7 @@ public class JiraDefectAdapter implements DefectAdapter {
             return defects;
         } catch (BadRequestException e) {
             String jiraIds = String.join(", ", ids);
-            String errorMessage = String.format("Error while fetching the following ids from Jira: [%s]", jiraIds);
+            String errorMessage = String.format("DEFECT|jira|Error while fetching the following ids from Jira: [%s]", jiraIds);
             log.error(errorMessage, e);
             throw new FetchException(errorMessage, e);
         }
@@ -78,8 +78,8 @@ public class JiraDefectAdapter implements DefectAdapter {
         } catch (BadRequestException e) {
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
             String formattedDate = dateFormat.format(startDate);
-            String errorMessage = String.format("An error occurred while fetching the updated issues after %s", formattedDate);
-            log.error(errorMessage, e);
+            String errorMessage = String.format("DEFECT|jira|An error occurred while fetching the updated issues after %s", formattedDate);
+            log.warn(errorMessage, e);
             throw new FetchException(errorMessage, e);
         }
     }

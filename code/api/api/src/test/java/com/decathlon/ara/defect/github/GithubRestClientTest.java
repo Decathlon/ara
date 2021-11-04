@@ -17,6 +17,20 @@
 
 package com.decathlon.ara.defect.github;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.assertj.core.api.Assertions;
+import org.assertj.core.util.Lists;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -27,24 +41,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.util.Lists;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -135,7 +131,7 @@ public class GithubRestClientTest {
             this.cut.requestIssue(issue);
             Assertions.fail("IOException is expected on error 500.");
         } catch (IOException | URISyntaxException ex) {
-            String expectedMessage = "Error while requesting issue " + issue + " on repo "
+            String expectedMessage = "DEFECT|github|Error while requesting issue " + issue + " on repo "
                     + owner + "/" + repo + " : 500";
             Assertions.assertThat(ex.getMessage()).isEqualTo(expectedMessage);
         }
@@ -221,7 +217,7 @@ public class GithubRestClientTest {
             this.cut.getIssuesUpdatedSince(date);
             Assertions.fail("An IOException was expected here.");
         } catch (IOException ex) {
-            Assertions.assertThat(ex.getMessage()).isEqualTo("Error while retrieving issues updated since "
+            Assertions.assertThat(ex.getMessage()).isEqualTo("DEFECT|github|Error while retrieving issues updated since "
                     + expectedDate + " on repo " + owner + "/" + repo + " : 500");
         }
     }

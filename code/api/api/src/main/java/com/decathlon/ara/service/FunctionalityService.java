@@ -428,7 +428,7 @@ public class FunctionalityService {
         }
 
         // Prepare the new functionalities to import
-        log.info("Start importing {} functionalities into project {}", functionalityDTOS.size(), projectCode);
+        log.info("FEATURE|import|Importing {} functionalities into the project {}...", functionalityDTOS.size(), projectCode);
         final Date now = new Date();
         List<Functionality> functionalities = mapper.toEntity(functionalityDTOS);
         functionalities.forEach(f -> {
@@ -446,7 +446,7 @@ public class FunctionalityService {
                 .filter(f -> f.getParentId() == null)
                 .collect(Collectors.toList());
         functionalities.removeAll(rootFunctionalities);
-        log.info("Saving {} root functionalities into project {}", rootFunctionalities.size(), projectCode);
+        log.info("FEATURE|import|Saving {} root functionalities into the project {}", rootFunctionalities.size(), projectCode);
         rootFunctionalities.forEach(f -> this.saveNewFunctionality(f, oldIdsToNewIds, false));
 
         // While there is still functionalities to save...
@@ -456,7 +456,7 @@ public class FunctionalityService {
                     .filter(f -> f.getParentId() != null && oldIdsToNewIds.containsKey(f.getParentId()))
                     .collect(Collectors.toList());
             functionalities.removeAll(childFunctionalities);
-            log.info("Saving {} child functionalities into project {}", childFunctionalities.size(), projectCode);
+            log.info("FEATURE|import|Saving {} child functionalities into the project {}", childFunctionalities.size(), projectCode);
             childFunctionalities.forEach(f -> this.saveNewFunctionality(f, oldIdsToNewIds, true));
         }
     }

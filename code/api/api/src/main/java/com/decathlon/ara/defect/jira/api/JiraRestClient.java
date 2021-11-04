@@ -69,14 +69,14 @@ public class JiraRestClient {
         ResponseEntity<JiraIssue> response = restTemplate.exchange(url, HttpMethod.GET, request, responseType);
         HttpStatus httpStatus = response.getStatusCode();
         if (HttpStatus.NOT_FOUND.equals(httpStatus)) {
-            String infoMessage = String.format("The issue %s was not found", issueKey);
-            log.info(infoMessage);
+            String infoMessage = String.format("DEFECT|jira|The issue %s was not found", issueKey);
+            log.warn(infoMessage);
             return Optional.empty();
         }
         Boolean responseIsNotOK = !HttpStatus.OK.equals(httpStatus);
         if (responseIsNotOK) {
-            String errorMessage = String.format("The Jira request [%s] %s returned an error status code -> %s", HttpMethod.GET, url, httpStatus);
-            log.error(errorMessage);
+            String errorMessage = String.format("DEFECT|jira|The Jira request [%s] %s returned an error status code -> %s", HttpMethod.GET, url, httpStatus);
+            log.warn(errorMessage);
             throw new BadRequestException(errorMessage, Entities.SETTING, "jira_request_error");
         }
 
@@ -93,7 +93,7 @@ public class JiraRestClient {
     private String getJiraBaseUrl(Long projectId) throws BadRequestException {
         String baseUrl = settingService.get(projectId, Settings.DEFECT_JIRA_BASE_URL);
         if (StringUtils.isBlank(baseUrl)) {
-            log.error("Jira base url not found for this project ({})", projectId);
+            log.error("DEFECT|jira|Jira base url not found for this project ({})", projectId);
             throw new BadRequestException("Jira base url not found", Entities.SETTING, "jira_base_url_not_found");
         }
         return baseUrl;
@@ -108,13 +108,13 @@ public class JiraRestClient {
     public HttpHeaders getHeader(Long projectId) throws BadRequestException {
         String token = settingService.get(projectId, Settings.DEFECT_JIRA_TOKEN);
         if (StringUtils.isBlank(token)) {
-            log.error("Jira token not found for this project ({})", projectId);
+            log.error("DEFECT|jira|Jira token not found for this project ({})", projectId);
             throw new BadRequestException("Jira token not found", Entities.SETTING, "jira_token_not_found");
         }
 
         String login = settingService.get(projectId, Settings.DEFECT_JIRA_LOGIN);
         if (StringUtils.isBlank(login)) {
-            log.error("Jira login not found for this project ({})", projectId);
+            log.error("DEFECT|jira|Jira login not found for this project ({})", projectId);
             throw new BadRequestException("Jira login not found", Entities.SETTING, "jira_login_not_found");
         }
 
@@ -176,10 +176,10 @@ public class JiraRestClient {
         final Integer remainingResultsNumber = total - firstResultsNumber;
 
         List<JiraIssue> allIssues = searchResult.getIssues();
-        log.info("[Jira] Getting issues from [{}]", finalUrl);
-        log.info("[Jira] Planning to load {} issues...", total);
+        log.debug("DEFECT|jira|[Jira] Getting issues from [{}]", finalUrl);
+        log.debug("DEFECT|jira|[Jira] Planning to load {} issues...", total);
         if (remainingResultsNumber > 0) {
-            log.info("[Jira] Loading the remaining ({}) issues ...", remainingResultsNumber);
+            log.debug("DEFECT|jira|[Jira] Loading the remaining ({}) issues ...", remainingResultsNumber);
             final Integer pageNumbers = remainingResultsNumber / actualMaxResults;
             List<String> paginatedUrls = IntStream
                     .range(0, pageNumbers + 1)
@@ -187,19 +187,19 @@ public class JiraRestClient {
                     .mapToObj(String::valueOf)
                     .map(startIndex -> String.format("%s&startAt=%s&maxResults=%d", urlWithJQL, startIndex, actualMaxResults))
                     .collect(Collectors.toList());
-            log.info("[Jira] {} API calls required", paginatedUrls.size());
+            log.debug("DEFECT|jira|[Jira] {} API calls required", paginatedUrls.size());
             for (String paginatedUrl: paginatedUrls) {
                 JiraIssueSearchResults paginatedSearchResult = getSearchResultsFromHeaderAndUrl(header, paginatedUrl);
                 List<JiraIssue> paginatedIssues = paginatedSearchResult.getIssues();
-                log.info("[Jira] Pagination: loaded {} issues from url [{}]", paginatedIssues.size(), paginatedUrl);
+                log.debug("DEFECT|jira|[Jira] Pagination: loaded {} issues from url [{}]", paginatedIssues.size(), paginatedUrl);
                 allIssues = Stream.of(allIssues, paginatedIssues)
                         .flatMap(Collection::stream)
                         .collect(Collectors.toList());
-                log.info("[Jira] Pagination: Now reaching {} issues", allIssues.size());
+                log.debug("DEFECT|jira|[Jira] Pagination: Now reaching {} issues", allIssues.size());
             }
         }
 
-        log.info("[Jira] {} issues effectively loaded", allIssues.size());
+        log.debug("DEFECT|jira|[Jira] {} issues effectively loaded", allIssues.size());
         return allIssues;
     }
 
@@ -211,17 +211,17 @@ public class JiraRestClient {
      * @throws BadRequestException thrown if (one of) the API call(s) returned an error code
      */
     private JiraIssueSearchResults getSearchResultsFromHeaderAndUrl(HttpHeaders header, String url) throws BadRequestException {
-        log.info("[Jira] Searching issues... ({})", url);
+        log.debug("DEFECT|jira|[Jira] Searching issues... ({})", url);
 
         HttpEntity<JiraIssueSearchResults> request = new HttpEntity<>(header);
-        final ParameterizedTypeReference<JiraIssueSearchResults> responseType = new ParameterizedTypeReference<JiraIssueSearchResults>() {};
+        final ParameterizedTypeReference<JiraIssueSearchResults> responseType = new ParameterizedTypeReference<>() {};
         ResponseEntity<JiraIssueSearchResults> response = restTemplate.exchange(url, HttpMethod.GET, request, responseType);
 
         HttpStatus httpStatus = response.getStatusCode();
         Boolean responseIsNotOK = !HttpStatus.OK.equals(httpStatus);
         if (responseIsNotOK) {
-            String errorMessage = String.format("[Jira] The Jira request [%s] %s returned an error status code -> %s", HttpMethod.GET, url, httpStatus);
-            log.error(errorMessage);
+            String errorMessage = String.format("DEFECT|jira|[Jira] The Jira request [%s] %s returned an error status code -> %s", HttpMethod.GET, url, httpStatus);
+            log.warn(errorMessage);
             throw new BadRequestException(errorMessage, Entities.SETTING, "jira_request_error");
         }
         return response.getBody();

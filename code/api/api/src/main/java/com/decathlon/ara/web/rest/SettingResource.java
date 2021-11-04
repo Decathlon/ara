@@ -144,7 +144,7 @@ public class SettingResource {
         try {
             matchingTechnology = Technology.valueOf(technology.toUpperCase());
         } catch (IllegalArgumentException e) {
-            log.error("Please check that the technology {} exists", technology, e);
+            log.error("SETTING|technology|Please check that the technology {} exists", technology, e);
             String message = String.format(Messages.NOT_FOUND_TECHNOLOGY, technology);
             throw new BadRequestException(message, Entities.TECHNOLOGY_SETTING, "unknown_technology");
         }

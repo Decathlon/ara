@@ -70,7 +70,7 @@ public class FileAssetService implements AssetService {
 
             return araConfiguration.getFileHttpAccess() + subFolder + "/" + fileName;
         } catch (IOException e) {
-            log.error("Screenshot saving failed: {}", e.getMessage(), e);
+            log.warn("SCENARIO|cucumber|Screenshot saving failed: {}", e.getMessage(), e);
             return null;
         }
     }
@@ -97,7 +97,7 @@ public class FileAssetService implements AssetService {
 
             return araConfiguration.getFileHttpAccess() + subFolder + "/" + fileName;
         } catch (IOException e) {
-            log.error("HTTP log saving failed: {}", e.getMessage(), e);
+            log.warn("SCENARIO|cucumber|HTTP log saving failed: {}", e.getMessage(), e);
             return null;
         }
     }

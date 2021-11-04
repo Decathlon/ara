@@ -119,12 +119,12 @@ public class QualityEmailService {
     void addInlineResource(Map<String, Resource> inlineResources, String name, String path) {
         try (final InputStream stream = EmailService.class.getClassLoader().getResourceAsStream(path)) {
             if (stream == null) {
-                log.error("Cannot find the inline resource in classpath to include it in the email: {}", path);
+                log.warn("EMAIL|Cannot find the inline resource in classpath to include it in the email: {}", path);
             } else {
                 inlineResources.put(name, new ByteArrayResource(IOUtils.toByteArray(stream)));
             }
         } catch (IOException e) {
-            log.error("Cannot include the resource in the email: {}", path, e);
+            log.warn("EMAIL|Cannot include the resource in the email: {}", path, e);
         }
     }
 
@@ -152,7 +152,7 @@ public class QualityEmailService {
     private Optional<String> configuredEmail(long projectId, String settingCode) {
         String value = settingService.get(projectId, settingCode);
         if (StringUtils.isEmpty(value)) {
-            log.info("Not sending email report because the project setting {} has not been provided", settingCode);
+            log.warn("EMAIL|Not sending email report because the project setting {} has not been provided", settingCode);
             return Optional.empty();
         }
         return Optional.of(value);

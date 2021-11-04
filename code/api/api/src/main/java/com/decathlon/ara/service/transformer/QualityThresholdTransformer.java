@@ -20,13 +20,14 @@ package com.decathlon.ara.service.transformer;
 import com.decathlon.ara.ci.bean.QualityThreshold;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This service provide transformation utilities (JSON - DTO) for the QualityThreshold.
@@ -58,8 +59,7 @@ public class QualityThresholdTransformer {
             try {
                 return objectMapper.readValue(jsonQualityThreshold, TYPE_REFERENCE);
             } catch (IOException e) {
-                log.error("Cannot parse qualityThresholds: {} - Cause : {}", jsonQualityThreshold, e.getMessage());
-                log.debug("Full error is {}", e);
+                log.warn("EXECUTION|Cannot parse qualityThresholds: {}", jsonQualityThreshold, e);
                 return new HashMap<>();
             }
         }

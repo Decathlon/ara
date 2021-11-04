@@ -20,13 +20,14 @@ package com.decathlon.ara.service.transformer;
 import com.decathlon.ara.service.dto.quality.QualitySeverityDTO;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This service provide transformation utilities (JSON - DTO) for the QualitySeverity.
@@ -38,8 +39,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class QualitySeverityTransformer {
 
-    static final TypeReference<List<QualitySeverityDTO>> TYPE_REFERENCE
-            = new TypeReference<List<QualitySeverityDTO>>() {};
+    static final TypeReference<List<QualitySeverityDTO>> TYPE_REFERENCE = new TypeReference<>() {};
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -59,8 +59,7 @@ public class QualitySeverityTransformer {
         try {
             return objectMapper.readValue(jsonQualitySeverities, TYPE_REFERENCE);
         } catch (IOException e) {
-            log.error("Cannot parse qualitySeverities: {} - Cause : {}", jsonQualitySeverities, e.getMessage());
-            log.debug("Full error : {}", e);
+            log.warn("EXECUTION|Cannot parse qualitySeverities: {}", jsonQualitySeverities, e);
             return new ArrayList<>();
         }
     }

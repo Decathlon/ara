@@ -57,18 +57,20 @@ public class PostmanResource {
     public ResponseEntity<Void> uploadScenarios(@PathVariable String projectCode,
                                                 @PathVariable String sourceCode,
                                                 @RequestParam("file") MultipartFile file) {
+        log.info("SCENARIO|postman|Project: {} -> Receiving postman scenarios ({}) zip for upload", projectCode, sourceCode);
         File tempZipFile = null;
         try {
             tempZipFile = File.createTempFile("ara_scenario_upload_", ".zip");
             tempZipFile.deleteOnExit();
             file.transferTo(tempZipFile);
             postmanScenarioUploader.uploadPostman(projectService.toId(projectCode), sourceCode, tempZipFile);
+            log.info("SCENARIO|postman|Project: {} -> Postman scenarios ({}) successfully uploaded", projectCode, sourceCode);
             return ResponseEntity.ok().build();
         } catch (BadRequestException e) {
-            log.error("Failed to upload ZIP file containing Postman requests for source code {}", sourceCode, e);
+            log.error("SCENARIO|postman|Project: {} -> Failed to upload ZIP file containing Postman requests for source code {}", projectCode, sourceCode, e);
             return ResponseUtil.handle(e);
         } catch (IOException e) {
-            log.error("Failed to upload ZIP file containing Postman requests for source code {}", sourceCode, e);
+            log.error("SCENARIO|postman|Project: {} -> Failed to upload ZIP file containing Postman requests for source code {}", projectCode, sourceCode, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .headers(HeaderUtil.exception(Entities.SCENARIO, e))
                     .build();

@@ -74,19 +74,19 @@ public class ExecutionIndexerService {
     @Transactional
     public void indexExecution(PlannedIndexation plannedIndexation) {
         if (plannedIndexation == null) {
-            log.info("No execution indexation found");
+            log.warn("EXECUTION|No execution indexation found");
             return;
         }
 
         File rawExecutionFolder = plannedIndexation.getExecutionFolder();
         if (rawExecutionFolder == null) {
-            log.info("No execution folder found");
+            log.warn("EXECUTION|No execution folder found");
             return;
         }
 
         CycleDefinition cycleDefinition = plannedIndexation.getCycleDefinition();
         if (cycleDefinition == null) {
-            log.info("No cycle definition found");
+            log.warn("EXECUTION|No cycle definition found");
             return;
         }
         String branch = cycleDefinition.getBranch();
@@ -94,7 +94,7 @@ public class ExecutionIndexerService {
         final Long projectId = cycleDefinition.getProjectId();
 
         String link = rawExecutionFolder.getAbsolutePath() + File.separator;
-        log.info("Began execution indexing {}/{} for link {}", branch, cycle, link);
+        log.info("EXECUTION|Began execution indexing {}/{} for link {}", branch, cycle, link);
 
         Optional<Execution> previousExecution = executionRepository.findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(projectId, link);
         List<Long> existingErrorIds = getErrorIds(previousExecution);
@@ -102,8 +102,8 @@ public class ExecutionIndexerService {
         Optional<Execution> processedExecution = executionFilesProcessorService.getExecution(plannedIndexation);
 
         if (!processedExecution.isPresent()) {
-            log.info("Could not extract any execution from the directory {}", link);
-            log.info("Some of the files may be incorrect, please check again");
+            log.warn("EXECUTION|Could not extract any execution from the directory {}", link);
+            log.warn("EXECUTION|Some of the files may be incorrect, please check again");
             return;
         }
 
@@ -121,7 +121,7 @@ public class ExecutionIndexerService {
         }
 
         String url = processedExecution.get().getJobUrl();
-        log.info("Ended indexing execution {}/{} job URL {} and link {}", branch, cycle, url, link);
+        log.info("EXECUTION|Ended indexing execution {}/{} job URL {} and link {}", branch, cycle, url, link);
     }
 
     /**
@@ -132,7 +132,7 @@ public class ExecutionIndexerService {
         try {
             qualityEmailService.sendQualityEmail(execution.getCycleDefinition().getProjectId(), execution.getId());
         } catch (Exception e) {
-            log.error("Uncaught exception while sending quality email (continuing normally)", e);
+            log.warn("EXECUTION|Uncaught exception while sending quality email (continuing normally)", e);
         }
     }
 
