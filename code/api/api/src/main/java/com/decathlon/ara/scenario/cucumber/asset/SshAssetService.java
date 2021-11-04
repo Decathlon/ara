@@ -17,9 +17,9 @@
 
 package com.decathlon.ara.scenario.cucumber.asset;
 
+import com.decathlon.ara.configuration.AraConfiguration;
 import com.decathlon.ara.scenario.cucumber.asset.ssh.SshClientHelper;
 import com.decathlon.ara.scenario.cucumber.asset.ssh.SshException;
-import com.decathlon.ara.configuration.AraConfiguration;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -73,7 +73,7 @@ public class SshAssetService implements AssetService {
 
             return araConfiguration.getSshHttpAccess() + subFolder + "/" + fileName;
         } catch (SshException e) {
-            log.error("Screenshot upload failed: {}", e.getMessage(), e);
+            log.warn("SCENARIO|cucumber|Screenshot upload failed: {}", e.getMessage(), e);
             return null;
         }
     }
@@ -103,7 +103,7 @@ public class SshAssetService implements AssetService {
 
             return araConfiguration.getSshHttpAccess() + subFolder + "/" + fileName;
         } catch (SshException e) {
-            log.error("HTTP log upload failed: {}", e.getMessage(), e);
+            log.warn("SCENARIO|cucumber|HTTP log upload failed: {}", e.getMessage(), e);
             return null;
         }
     }

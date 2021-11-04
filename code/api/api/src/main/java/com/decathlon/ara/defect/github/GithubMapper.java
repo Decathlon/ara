@@ -40,10 +40,10 @@ import java.util.Optional;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 class GithubMapper {
     static final TypeReference<GithubIssue> TYPE_REFERENCE_TO_GITHUB_ISSUE =
-            new TypeReference<GithubIssue>() {
+            new TypeReference<>() {
             };
     static final TypeReference<List<GithubIssue>> TYPE_REFERENCE_TO_LIST_GITHUB_ISSUE =
-            new TypeReference<List<GithubIssue>>() {
+            new TypeReference<>() {
             };
 
     @Autowired
@@ -59,7 +59,7 @@ class GithubMapper {
         try {
             return Optional.of(this.objectMapper.readValue(json, TYPE_REFERENCE_TO_GITHUB_ISSUE));
         } catch (IOException ex) {
-            log.warn("Unable to cast this json to a github issue : " + json, ex);
+            log.error("DEFECT|Unable to cast this json to a Github issue : " + json, ex);
             return Optional.empty();
         }
     }
@@ -74,7 +74,7 @@ class GithubMapper {
         try {
             return this.objectMapper.readValue(json, TYPE_REFERENCE_TO_LIST_GITHUB_ISSUE);
         } catch (IOException ex) {
-            log.warn("Unable to cast this json to a list of github issues : " + json, ex);
+            log.error("DEFECT|Unable to cast this json to a list of Github issues : " + json, ex);
             return new ArrayList<>();
         }
     }

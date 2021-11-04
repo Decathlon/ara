@@ -20,7 +20,6 @@ package com.decathlon.ara.service;
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.SpringApplicationContext;
-import com.decathlon.ara.ci.service.DateService;
 import com.decathlon.ara.ci.util.FetchException;
 import com.decathlon.ara.defect.DefectAdapter;
 import com.decathlon.ara.defect.bean.Defect;
@@ -46,6 +45,7 @@ import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
 import com.decathlon.ara.service.mapper.*;
 import com.decathlon.ara.service.support.Settings;
+import com.decathlon.ara.service.util.DateService;
 import com.decathlon.ara.service.util.ObjectUtil;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -299,7 +299,7 @@ public class ProblemService {
                     statuses = defectAdapter.getStatuses(projectId, Collections.singletonList(newDefectId));
                 } catch (FetchException e) {
                     // Also catch RuntimeException to not impact calling code in case of a faulty DefectAdapter in a custom ARA
-                    log.error("Cannot check existence of new defect assignation to problem (defect {})", newDefectId, e);
+                    log.warn("PROBLEM|Cannot check existence of new defect assignation to problem (defect {})", newDefectId, e);
                     problemDto.setDefectExistence(DefectExistence.UNKNOWN); // For re-indexing when connexion to bug-tracker is back
                     problemDto.setStatus(ProblemStatus.OPEN); // In case defect was closed and removed: it should be acted on
                     problemDto.setClosingDateTime(null); // Not CLOSED anymore (if it was)
@@ -716,7 +716,7 @@ public class ProblemService {
             return problemMapper.toDto(problemRepository.save(problem));
         } catch (FetchException e) {
             // Also catch RuntimeException to not impact calling code in case of a faulty DefectAdapter in a custom ARA
-            log.error("Cannot refresh defect status of problem (defect {})", problem.getDefectId(), e);
+            log.warn("PROBLEM|Cannot refresh defect status of problem (defect {})", problem.getDefectId(), e);
             final String message = String.format(Messages.PROCESS_ERROR_WHILE_CONTACTING_DEFECT_TRACKING_SYSTEM,
                     defectAdapter.getName());
             throw new BadGatewayException(message, Entities.PROBLEM);
@@ -732,7 +732,7 @@ public class ProblemService {
     public void recomputeFirstAndLastSeenDateTimes(long projectId) {
         final List<Problem> problems = problemRepository.findByProjectId(projectId);
         for (int i = 0; i < problems.size(); i++) {
-            log.info("Recomputing problem {}/{} ", Integer.valueOf(i + 1), Integer.valueOf(problems.size()));
+            log.debug("PROBLEM|Recomputing problem {}/{} ", Integer.valueOf(i + 1), Integer.valueOf(problems.size()));
             problemDenormalizationService.updateFirstAndLastSeenDateTimes(Collections.singleton(problems.get(i)));
         }
     }

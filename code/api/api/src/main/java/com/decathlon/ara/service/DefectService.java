@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.ci.service.DateService;
 import com.decathlon.ara.ci.util.FetchException;
 import com.decathlon.ara.common.NotGonnaHappenException;
 import com.decathlon.ara.defect.DefectAdapter;
@@ -30,6 +29,7 @@ import com.decathlon.ara.repository.ProblemRepository;
 import com.decathlon.ara.repository.ProjectRepository;
 import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
 import com.decathlon.ara.service.support.Settings;
+import com.decathlon.ara.service.util.DateService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,7 +147,7 @@ public class DefectService {
             lastIncrementalIndexDates.put(projectId, startDate);
         } catch (FetchException e) {
             // Also catch RuntimeException to not impact calling code in case of a faulty DefectAdapter in a custom ARA
-            log.error("Failed to index defects of project " + project.getName() + ": " +
+            log.error("DEFECT|Failed to index defects of project " + project.getName() + ": " +
                     "will perhaps have a better chance later...", e);
         }
     }
@@ -163,7 +163,7 @@ public class DefectService {
 
     @Transactional
     public void fullIndex(Project project, DefectAdapter defectAdapter) throws FetchException {
-        log.trace("Begin defect full indexing for project {}", project.getName());
+        log.debug("DEFECT|Begin defect full indexing for project {}", project.getName());
 
         final long projectId = project.getId();
         final List<Problem> problems = problemRepository.findAllByProjectIdAndDefectIdIsNotEmpty(projectId);
@@ -175,7 +175,7 @@ public class DefectService {
 
     @Transactional
     public void incrementalIndex(Project project, DefectAdapter defectAdapter, Date since) throws FetchException {
-        log.trace("Begin defect incremental indexing for updates since {} for project {}", since, project.getName());
+        log.debug("DEFECT|Begin defect incremental indexing for updates since {} for project {}", since, project.getName());
 
         final long projectId = project.getId();
         final List<Problem> problems = problemRepository.findAllByProjectIdAndDefectIdIsNotEmpty(projectId);

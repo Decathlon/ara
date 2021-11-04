@@ -17,11 +17,6 @@
 
 package com.decathlon.ara.service;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.Optional;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +29,12 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -69,7 +70,7 @@ public class EmailService {
 
             emailSenderInit.send(message);
         } catch (MessagingException e) {
-            log.error("Cannot send email", e);
+            log.error("EMAIL|Cannot send email", e);
         }
     }
 

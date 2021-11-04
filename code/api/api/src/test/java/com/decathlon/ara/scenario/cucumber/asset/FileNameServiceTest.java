@@ -17,17 +17,16 @@
 
 package com.decathlon.ara.scenario.cucumber.asset;
 
-import static com.decathlon.ara.util.TestUtil.timestamp;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
+import com.decathlon.ara.service.util.DateService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.decathlon.ara.ci.service.DateService;
+import static com.decathlon.ara.util.TestUtil.timestamp;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class FileNameServiceTest {

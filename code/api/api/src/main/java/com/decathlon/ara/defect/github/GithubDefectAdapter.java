@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GithubDefectAdapter implements DefectAdapter {
-    private static final String UNABLE_TO_ACCESS_GITHUB = "Unable to access Github.";
+    private static final String UNABLE_TO_ACCESS_GITHUB = "DEFECT|Unable to access Github.";
     @Autowired
     private GithubRestClient restClient;
 
