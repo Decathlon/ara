@@ -40,5 +40,5 @@ It contains parameters to lightly configure this component:
 |CLIENT_HOSTNAME|The client hostname used for redirect uri|127.0.0.1|
 CLIENT_PORT|The client port used for redirect uri|9000|
 
-Notice: the client id and client secret is `ara-gw` for both
+Notice: the client id and client secret is `ara-client` for authorization code (set in ara). the client id and client secret for grant type client-credentials is `other-client` for both.
 
