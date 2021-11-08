@@ -20,8 +20,8 @@ You can run it with:
 
 Use:
 
-* port: `10 000`
-* management port: `10 001`
+* port: `9000`
+* management port: `9001`
 
 ## With Makefile
 
@@ -35,10 +35,10 @@ It contains parameters to lightly configure this component:
 
 |ENV VAR|Description|Default value|
 |-|-|-|
-|SERVER_PORT|The server port of this Oauth2 authorization server|10000|
-|PROVIDER_HOSTNAME|The provider hostname for OIDC|oauth2-dev-server|
+|SERVER_PORT|The server port of this Oauth2 authorization server|9000|
+|PROVIDER_HOSTNAME|The provider hostname for OIDC|oauth2.dev.localhost|
 |CLIENT_HOSTNAME|The client hostname used for redirect uri|127.0.0.1|
-CLIENT_PORT|The client port used for redirect uri|9000|
+CLIENT_PORT|The client port used for redirect uri|7000|
 
 Notice: the client id and client secret is `ara-client` for authorization code (set in ara). the client id and client secret for grant type client-credentials is `other-client` for both.
 
