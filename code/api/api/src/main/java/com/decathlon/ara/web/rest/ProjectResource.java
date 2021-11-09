@@ -24,6 +24,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,6 +40,7 @@ import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotUniqueException;
 import com.decathlon.ara.web.rest.util.HeaderUtil;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
+import com.decathlon.ara.web.rest.util.RestConstants;
 
 /**
  * REST controller for managing Projects.
@@ -88,11 +90,10 @@ public class ProjectResource {
      * @return the ResponseEntity with status 200 (OK) and with body the updated entity, or with status 400 (Bad Request) if the entity is not
      * valid, or with status 500 (Internal Server Error) if the entity couldn't be updated
      */
-    @PutMapping("/{id:[0-9]+}")
-    public ResponseEntity<ProjectDTO> update(@PathVariable Long id, @Valid @RequestBody ProjectDTO dtoToUpdate) {
-        dtoToUpdate.setId(id); // HTTP PUT requires the URL to be the URL of the entity
+    @PutMapping("/" + RestConstants.PROJECT_CODE_REQUEST_PARAMETER)
+    public ResponseEntity<ProjectDTO> update(@PathVariable String projectCode, @Valid @RequestBody ProjectDTO dtoToUpdate) {
         try {
-            ProjectDTO updatedDto = service.update(dtoToUpdate);
+            ProjectDTO updatedDto = service.update(projectCode, dtoToUpdate);
             return ResponseEntity.ok()
                     .headers(HeaderUtil.entityUpdated(NAME, updatedDto.getId()))
                     .body(updatedDto);
@@ -107,8 +108,8 @@ public class ProjectResource {
      * @return the ResponseEntity with status 200 (OK) and the list of entities in body
      */
     @GetMapping("")
-    public List<ProjectDTO> getAll() {
-        return service.findAll();
+    public List<ProjectDTO> getAll(Authentication authentication) {
+        return service.findAll(authentication.getName());
     }
 
 }

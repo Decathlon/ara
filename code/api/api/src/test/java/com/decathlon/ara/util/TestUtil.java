@@ -133,7 +133,7 @@ public final class TestUtil {
     public static <T> T getField(Object o, Class<?> fieldClass, String fieldName) {
         Field declaredField;
         try {
-            declaredField = o.getClass().getDeclaredField(fieldName);
+            declaredField = fieldClass.getDeclaredField(fieldName);
             declaredField.setAccessible(true);
             return (T) declaredField.get(o);
         } catch (NoSuchFieldException e) {

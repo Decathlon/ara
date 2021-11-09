@@ -68,12 +68,20 @@ public class ProjectDTO {
         return code;
     }
 
+    public void setCode(String code) {
+        this.code = code;
+    }
+
     public String getName() {
         return name;
     }
 
     public boolean isDefaultAtStartup() {
         return defaultAtStartup;
+    }
+
+    public void setDefaultAtStartup(boolean defaultAtStartup) {
+        this.defaultAtStartup = defaultAtStartup;
     }
 
 }

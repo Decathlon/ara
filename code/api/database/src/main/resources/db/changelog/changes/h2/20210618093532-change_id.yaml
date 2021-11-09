@@ -159,4 +159,3 @@ databaseChangeLog:
         sequenceName: TYPE_ID
     - sql:
           sql: alter sequence TYPE_ID restart with (select max(id)+1 from TYPE)
-

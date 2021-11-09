@@ -1,0 +1,368 @@
+databaseChangeLog:
+- changeSet:
+    id: 1651676307273-1
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: CONSTRAINT_7D
+            name: NAME
+            type: VARCHAR(255)
+        tableName: GROUP2
+- changeSet:
+    id: 1651676307273-2
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: CONSTRAINT_10A
+            name: GROUP_NAME
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: CONSTRAINT_10A
+            name: USER_NAME
+            type: VARCHAR(255)
+        - column:
+            name: ROLE
+            type: VARCHAR(255)
+        tableName: GROUP_MEMBER
+- changeSet:
+    id: 1651676307273-3
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: CONSTRAINT_3D
+            name: MEMBER_NAME
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: CONSTRAINT_3D
+            name: PROJECT_ID
+            type: BIGINT
+        - column:
+            name: ROLE
+            type: VARCHAR(255)
+        tableName: PROJECT_GROUP_MEMBER
+- changeSet:
+    id: 1651676307273-4
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: CONSTRAINT_D
+            name: MEMBER_NAME
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: CONSTRAINT_D
+            name: PROJECT_ID
+            type: BIGINT
+        - column:
+            name: ROLE
+            type: VARCHAR(255)
+        tableName: PROJECT_USER_MEMBER
+- changeSet:
+    id: 1651676307273-5
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: CONSTRAINT_27E
+            name: ID
+            type: VARCHAR(255)
+        - column:
+            name: ISSUER
+            type: VARCHAR(255)
+        - column:
+            name: NAME
+            type: VARCHAR(255)
+        tableName: USER
+- changeSet:
+    id: 1651676307273-6
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: CONSTRAINT_D7
+            name: KEY
+            type: VARCHAR(255)
+        - column:
+            name: VALUE
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: CONSTRAINT_D7
+            name: USER_ID
+            type: VARCHAR(255)
+        tableName: USER_PREFERENCE
+- changeSet:
+    id: 1651676307273-7
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: CONSTRAINT_B
+            name: ROLE
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: CONSTRAINT_B
+            name: USER_ID
+            type: VARCHAR(255)
+        tableName: USER_ROLE
+- changeSet:
+    id: 1651676307273-8
+    author: '? (generated)'
+    changes:
+    - addUniqueConstraint:
+        columnNames: NAME, ISSUER
+        constraintName: UKIW5Y19ADPPAECW71IFXAIXQME
+        tableName: USER
+- changeSet:
+    id: 1651676307273-9
+    author: '? (generated)'
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: PROJECT_ID
+        indexName: FK7DIM1HSOP1J0047BPWGH49QYN_INDEX_D
+        tableName: PROJECT_USER_MEMBER
+- changeSet:
+    id: 1651676307273-10
+    author: '? (generated)'
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: USER_ID
+        indexName: FK859N2JVI8IVHUI0RL0ESWS6O_INDEX_B
+        tableName: USER_ROLE
+- changeSet:
+    id: 1651676307273-11
+    author: '? (generated)'
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: GROUP_NAME
+        indexName: FKAUPDRFEY1Y1XHJ9QCTFVI4CI1_INDEX_1
+        tableName: GROUP_MEMBER
+- changeSet:
+    id: 1651676307273-12
+    author: '? (generated)'
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: PROJECT_ID
+        indexName: FKB8IHRBR19NTL33RL9F9QQPX2Y_INDEX_3
+        tableName: PROJECT_GROUP_MEMBER
+- changeSet:
+    id: 1651676307273-13
+    author: '? (generated)'
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: USER_ID
+        indexName: FKQ5OJ1CO3WU38LTB5G1XG9WEL4_INDEX_D
+        tableName: USER_PREFERENCE
+- changeSet:
+    id: 1651676307273-14
+    author: '? (generated)'
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: MEMBER_NAME
+        indexName: FKQ6AIKCSND6SOYMO6AG0999JSI_INDEX_D
+        tableName: PROJECT_USER_MEMBER
+- changeSet:
+    id: 1651676307273-15
+    author: '? (generated)'
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: USER_NAME
+        indexName: FKQ7YNVUVLA7MY5OQ5344Y93XKV_INDEX_1
+        tableName: GROUP_MEMBER
+- changeSet:
+    id: 1651676307273-16
+    author: '? (generated)'
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: MEMBER_NAME
+        indexName: FKRIP8UA9IUSV6YDD5H48YMG48Q_INDEX_3
+        tableName: PROJECT_GROUP_MEMBER
+- changeSet:
+    id: 1651676307273-17
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: PROJECT_ID
+        baseTableName: PROJECT_USER_MEMBER
+        constraintName: FK7DIM1HSOP1J0047BPWGH49QYN
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: ID
+        referencedTableName: PROJECT
+        validate: true
+- changeSet:
+    id: 1651676307273-18
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: USER_ID
+        baseTableName: USER_ROLE
+        constraintName: FK859N2JVI8IVHUI0RL0ESWS6O
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: ID
+        referencedTableName: USER
+        validate: true
+- changeSet:
+    id: 1651676307273-19
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: GROUP_NAME
+        baseTableName: GROUP_MEMBER
+        constraintName: FKAUPDRFEY1Y1XHJ9QCTFVI4CI1
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: NAME
+        referencedTableName: GROUP2
+        validate: true
+- changeSet:
+    id: 1651676307273-20
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: PROJECT_ID
+        baseTableName: PROJECT_GROUP_MEMBER
+        constraintName: FKB8IHRBR19NTL33RL9F9QQPX2Y
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: ID
+        referencedTableName: PROJECT
+        validate: true
+- changeSet:
+    id: 1651676307273-21
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: USER_ID
+        baseTableName: USER_PREFERENCE
+        constraintName: FKQ5OJ1CO3WU38LTB5G1XG9WEL4
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: ID
+        referencedTableName: USER
+        validate: true
+- changeSet:
+    id: 1651676307273-22
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: MEMBER_NAME
+        baseTableName: PROJECT_USER_MEMBER
+        constraintName: FKQ6AIKCSND6SOYMO6AG0999JSI
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: ID
+        referencedTableName: USER
+        validate: true
+- changeSet:
+    id: 1651676307273-23
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: USER_NAME
+        baseTableName: GROUP_MEMBER
+        constraintName: FKQ7YNVUVLA7MY5OQ5344Y93XKV
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: ID
+        referencedTableName: USER
+        validate: true
+- changeSet:
+    id: 1651676307273-24
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: MEMBER_NAME
+        baseTableName: PROJECT_GROUP_MEMBER
+        constraintName: FKRIP8UA9IUSV6YDD5H48YMG48Q
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: NAME
+        referencedTableName: GROUP2
+        validate: true
+- changeSet:
+    id: 1651676307273-25
+    author: '? (generated)'
+    changes:
+    - dropColumn:
+        columnName: DEFAULT_AT_STARTUP
+        tableName: PROJECT
+
