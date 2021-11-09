@@ -57,11 +57,12 @@ public class CucumberResource {
      */
     @PostMapping("scenarios/upload/{sourceCode}")
     public ResponseEntity<Void> uploadScenarios(@PathVariable String projectCode, @PathVariable String sourceCode, @Valid @RequestBody String json) {
+        log.info("SCENARIO|Uploading Cucumber scenarios (source: {}) for project {}", sourceCode, projectCode);
         try {
             cucumberScenarioUploader.uploadCucumber(projectService.toId(projectCode), sourceCode, json);
             return ResponseEntity.ok().build();
         } catch (BadRequestException e) {
-            log.error("Failed to upload Cucumber scenarios for source code {}", sourceCode, e);
+            log.error("SCENARIO|Failed to upload Cucumber scenarios for source code {}", sourceCode, e);
             return ResponseUtil.handle(e);
         }
     }
