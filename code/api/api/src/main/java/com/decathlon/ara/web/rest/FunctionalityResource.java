@@ -246,7 +246,7 @@ public class FunctionalityResource {
      * @param projectCode the current project code
      * @return the JSON of all the exporters available.
      */
-    @RequestMapping(method = RequestMethod.OPTIONS, path = "/export")
+    @RequestMapping(method = RequestMethod.OPTIONS, value = "/export")
     public ResponseEntity<List<ExporterInfoDTO>> getExportOptions(@PathVariable String projectCode) {
         return ResponseEntity.ok().body(service.listAvailableExporters());
     }

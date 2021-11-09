@@ -23,24 +23,24 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.decathlon.ara.Entities;
-import com.decathlon.ara.Messages;
-import com.decathlon.ara.domain.Project;
+import com.decathlon.ara.domain.enumeration.MemberRole;
 import com.decathlon.ara.loader.DemoExecutionLoader;
 import com.decathlon.ara.loader.DemoFunctionalityLoader;
 import com.decathlon.ara.loader.DemoProblemLoader;
 import com.decathlon.ara.loader.DemoScenarioLoader;
 import com.decathlon.ara.loader.DemoSettingsLoader;
-import com.decathlon.ara.repository.ProjectRepository;
 import com.decathlon.ara.service.dto.cycledefinition.CycleDefinitionDTO;
+import com.decathlon.ara.service.dto.member.MemberDTO;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.dto.team.TeamDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
@@ -56,8 +56,6 @@ public class DemoService {
 
     private static final Logger LOG = LoggerFactory.getLogger(DemoService.class);
 
-    private final ProjectRepository projectRepository;
-
     private final ProjectService projectService;
 
     private final SettingService settingService;
@@ -72,12 +70,13 @@ public class DemoService {
 
     private final DemoSettingsLoader demoSettingsLoader;
 
+    private final ProjectUserMemberService projectUserMemberService;
+
     @Autowired
-    public DemoService(ProjectRepository projectRepository, ProjectService projectService,
-            SettingService settingService, DemoExecutionLoader demoExecutionLoader,
+    public DemoService(ProjectService projectService, SettingService settingService, DemoExecutionLoader demoExecutionLoader,
             DemoFunctionalityLoader demoFunctionalityLoader, DemoProblemLoader demoProblemLoader,
-            DemoScenarioLoader demoScenarioLoader, DemoSettingsLoader demoSettingsLoader) {
-        this.projectRepository = projectRepository;
+            DemoScenarioLoader demoScenarioLoader, DemoSettingsLoader demoSettingsLoader,
+            ProjectUserMemberService projectUserMemberService) {
         this.projectService = projectService;
         this.settingService = settingService;
         this.demoExecutionLoader = demoExecutionLoader;
@@ -85,6 +84,7 @@ public class DemoService {
         this.demoProblemLoader = demoProblemLoader;
         this.demoScenarioLoader = demoScenarioLoader;
         this.demoSettingsLoader = demoSettingsLoader;
+        this.projectUserMemberService = projectUserMemberService;
     }
 
     /**
@@ -95,8 +95,10 @@ public class DemoService {
      */
     @Transactional
     public ProjectDTO create() throws BadRequestException {
-        if (projectService.findOne(PROJECT_CODE_DEMO).isPresent()) {
-            throw new BadRequestException(Messages.RULE_DEMO_PROJECT_ALREADY_EXISTS, Entities.PROJECT, "demo-exists");
+        Optional<ProjectDTO> existingProject = projectService.findOne(PROJECT_CODE_DEMO);
+        if (existingProject.isPresent()) {
+            projectUserMemberService.addMember(PROJECT_CODE_DEMO, new MemberDTO(SecurityContextHolder.getContext().getAuthentication().getName(), MemberRole.ADMIN));
+            return existingProject.get();
         }
 
         // IMPORTANT: Use DTO constructors everywhere,
@@ -129,15 +131,12 @@ public class DemoService {
      * @throws NotFoundException if there is no demo project
      */
     public void delete() throws NotFoundException {
-        final Project project = projectRepository.findOneByCode(PROJECT_CODE_DEMO);
-        if (project == null) {
-            throw new NotFoundException(Messages.NOT_FOUND_PROJECT, Entities.PROJECT);
-        }
+        long projectId = projectService.toId(PROJECT_CODE_DEMO);
 
-        final String executionBasePath = settingService.get(project.getId().longValue(),
+        final String executionBasePath = settingService.get(projectId,
                 Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH);
 
-        projectRepository.delete(project);
+        projectService.delete(PROJECT_CODE_DEMO);
 
         if (executionBasePath.contains(Settings.PROJECT_VARIABLE)) {
             final String projectExecutionsFolder = executionBasePath

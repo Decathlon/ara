@@ -1,0 +1,200 @@
+databaseChangeLog:
+- changeSet:
+    id: 1651676613100-1
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: project_user_member_pkey
+            name: member_name
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: project_user_member_pkey
+            name: project_id
+            type: BIGINT
+        - column:
+            name: role
+            type: VARCHAR(255)
+        tableName: project_user_member
+- changeSet:
+    id: 1651676613100-2
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: group2_pkey
+            name: name
+            type: VARCHAR(255)
+        tableName: group2
+- changeSet:
+    id: 1651676613100-3
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: group_member_pkey
+            name: group_name
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: group_member_pkey
+            name: user_name
+            type: VARCHAR(255)
+        - column:
+            name: role
+            type: VARCHAR(255)
+        tableName: group_member
+- changeSet:
+    id: 1651676613100-4
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: project_group_member_pkey
+            name: member_name
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: project_group_member_pkey
+            name: project_id
+            type: BIGINT
+        - column:
+            name: role
+            type: VARCHAR(255)
+        tableName: project_group_member
+- changeSet:
+    id: 1651676613100-5
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: project_id
+        baseTableName: project_user_member
+        constraintName: fk7dim1hsop1j0047bpwgh49qyn
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: project
+        validate: true
+- changeSet:
+    id: 1651676613100-6
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: project_id
+        baseTableName: project_group_member
+        constraintName: fkb8ihrbr19ntl33rl9f9qqpx2y
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: project
+        validate: true
+- changeSet:
+    id: 1651676613100-7
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: group_name
+        baseTableName: group_member
+        constraintName: fkaupdrfey1y1xhj9qctfvi4ci1
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: name
+        referencedTableName: group2
+        validate: true
+- changeSet:
+    id: 1651676613100-8
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: member_name
+        baseTableName: project_group_member
+        constraintName: fkrip8ua9iusv6ydd5h48ymg48q
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: name
+        referencedTableName: group2
+        validate: true
+- changeSet:
+    id: 1651676613100-9
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: user_preference_pkey
+            name: key
+            type: VARCHAR(255)
+        - column:
+            name: value
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: user_preference_pkey
+            name: user_id
+            type: VARCHAR(255)
+        tableName: user_preference
+- changeSet:
+    id: 1651676613100-10
+    author: '? (generated)'
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: user_role_pkey
+            name: role
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: user_role_pkey
+            name: user_id
+            type: VARCHAR(255)
+        tableName: user_role
+- changeSet:
+    id: 1651676613100-11
+    author: '? (generated)'
+    changes:
+    - dropColumn:
+        columnName: default_at_startup
+        tableName: project
+

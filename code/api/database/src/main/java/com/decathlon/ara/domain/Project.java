@@ -19,6 +19,7 @@ package com.decathlon.ara.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -55,12 +56,6 @@ public class Project {
         this.name = name;
     }
 
-    /**
-     * True to use that project as the default one appearing at ARA's client startup when no project code is present in
-     * URL. Only one project can be declared as the default.
-     */
-    private boolean defaultAtStartup;
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "project", orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Communication> communications = new ArrayList<>();
@@ -73,6 +68,23 @@ public class Project {
         communications.add(communication);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(code);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Project)) {
+            return false;
+        }
+        Project other = (Project) obj;
+        return Objects.equals(code, other.code);
+    }
+
     public Long getId() {
         return id;
     }
@@ -83,14 +95,6 @@ public class Project {
 
     public String getName() {
         return name;
-    }
-
-    public boolean isDefaultAtStartup() {
-        return defaultAtStartup;
-    }
-
-    public void setDefaultAtStartup(boolean defaultAtStartup) {
-        this.defaultAtStartup = defaultAtStartup;
     }
 
     public List<Communication> getCommunications() {

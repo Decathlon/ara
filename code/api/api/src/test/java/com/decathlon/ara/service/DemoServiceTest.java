@@ -17,28 +17,37 @@
 
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.loader.*;
-import com.decathlon.ara.repository.ProjectRepository;
-import com.decathlon.ara.service.dto.project.ProjectDTO;
-import com.decathlon.ara.service.exception.BadRequestException;
-import com.decathlon.ara.service.exception.NotFoundException;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
+import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
-import static org.junit.Assert.assertThrows;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import com.decathlon.ara.configuration.security.TestAuthentication;
+import com.decathlon.ara.domain.enumeration.MemberRole;
+import com.decathlon.ara.loader.DemoExecutionLoader;
+import com.decathlon.ara.loader.DemoFunctionalityLoader;
+import com.decathlon.ara.loader.DemoProblemLoader;
+import com.decathlon.ara.loader.DemoScenarioLoader;
+import com.decathlon.ara.loader.DemoSettingsLoader;
+import com.decathlon.ara.service.dto.member.MemberDTO;
+import com.decathlon.ara.service.dto.project.ProjectDTO;
+import com.decathlon.ara.service.exception.BadRequestException;
+import com.decathlon.ara.service.exception.NotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class DemoServiceTest {
-
-    @Mock
-    private ProjectRepository projectRepository;
 
     @Mock
     private ProjectService projectService;
@@ -60,23 +69,35 @@ class DemoServiceTest {
 
     @Mock
     private DemoSettingsLoader demoSettingsLoader;
+    
+    @Mock
+    private ProjectUserMemberService projectUserMemberService;
 
     @InjectMocks
     private DemoService cut;
 
     @Test
-    void create_ShouldFail_WhenDemoProjectAlreadyExists() {
+    void create_ShouldAddAdminRoleToCurrentUser_WhenDemoProjectAlreadyExists() throws BadRequestException {
         // GIVEN
+        TestAuthentication authentication = new TestAuthentication();
+        SecurityContextHolder.getContext().setAuthentication(authentication);
         when(projectService.findOne(PROJECT_CODE_DEMO)).thenReturn(Optional.of(new ProjectDTO()));
 
         // WHEN
-        assertThrows(BadRequestException.class, () -> cut.create());
+        cut.create();
+        
+        //THEN
+        ArgumentCaptor<MemberDTO> captor = ArgumentCaptor.forClass(MemberDTO.class);
+        verify(projectUserMemberService).addMember(eq(PROJECT_CODE_DEMO), captor.capture());
+        MemberDTO member = captor.getValue();
+        assertEquals(authentication.getName(), member.getName());
+        assertEquals(MemberRole.ADMIN, member.getRole());
     }
 
     @Test
-    void delete_ShouldFail_WhenDemoProjectDoesNotExist() {
+    void delete_ShouldFail_WhenDemoProjectDoesNotExist() throws NotFoundException {
         // GIVEN
-        when(projectRepository.findOneByCode(PROJECT_CODE_DEMO)).thenReturn(null);
+        when(projectService.toId(PROJECT_CODE_DEMO)).thenThrow(NotFoundException.class);
 
         // WHEN
         assertThrows(NotFoundException.class, () -> cut.delete());

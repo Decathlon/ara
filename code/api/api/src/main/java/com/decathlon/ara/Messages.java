@@ -22,9 +22,12 @@ public final class Messages {
     private Messages() {
     }
 
+    public static final String ALREADY_EXIST = "The %s already exist";
+
     public static final String PARAMETER_IS_MISSING = "One or more parameters is missing or null";
     public static final String PARAMETER_HAS_ONE_OR_MORE_MISSING_FIELDS = "A parameter has one or more missing field";
 
+    public static final String NOT_FOUND = "The %s does not exist: it has perhaps been removed.";
     public static final String NOT_FOUND_COMMUNICATION = "The communication does not exist: it has perhaps been removed.";
     public static final String NOT_FOUND_COUNTRY = "The country does not exist: it has perhaps been removed.";
     public static final String NOT_FOUND_CYCLE_DEFINITION = "The cycle definition does not exist: it has perhaps been removed.";
