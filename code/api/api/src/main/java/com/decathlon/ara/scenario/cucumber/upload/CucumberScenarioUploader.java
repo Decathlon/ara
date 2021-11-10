@@ -33,13 +33,18 @@ public class CucumberScenarioUploader {
      * @throws BadRequestException if the source cannot be found, the source code is not using CUCUMBER technology, or something goes wrong while parsing the report content
      */
     public void uploadCucumber(long projectId, String sourceCode, String json) throws BadRequestException {
+        log.info("SCENARIO|Preparing for Cucumber scenarios to upload");
+        log.debug("SCENARIO|Receiving the following json:");
+        log.debug(json);
         uploader.processUploadedContent(projectId, sourceCode, Technology.CUCUMBER, source -> {
             // Extract and save scenarios of the source from the report.json
             List<Feature> features;
             try {
+                log.info("SCENARIO|Preparing to parse the Cucumber JSON report");
                 features = CucumberReportUtil.parseReportJson(json);
+                log.debug("SCENARIO|Extracting {} Cucumber features", features.size());
             } catch (IOException e) {
-                log.error("Cannot parse uploaded Cucumber report.json", e);
+                log.error("SCENARIO|Cannot parse uploaded Cucumber report.json", e);
                 throw new BadRequestException("Cannot parse uploaded Cucumber report.json", Entities.SCENARIO, "cannot_parse_report_json");
             }
             return ScenarioExtractorUtil.extractScenarios(source, features);

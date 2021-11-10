@@ -90,7 +90,6 @@ public class Error implements Comparable<Error> {
     }
 
     public void removeProblemPattern(ProblemPattern problemPattern) {
-        this.problemPatterns.remove(problemPattern);
         problemPattern.getErrors().remove(this);
     }
 
