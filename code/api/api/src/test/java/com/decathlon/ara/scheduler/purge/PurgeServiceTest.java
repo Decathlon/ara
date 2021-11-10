@@ -51,7 +51,7 @@ class PurgeServiceTest {
 
         // Then
         purgeService.purgeExecutionsByProjectCode(projectCode);
-        verify(executionRepository, never()).deleteByTestDateTimeBefore(any(Date.class));
+        verify(executionRepository, never()).findByCycleDefinitionProjectIdAndTestDateTimeBefore(anyLong(), any(Date.class));
     }
 
     @Test
@@ -67,7 +67,7 @@ class PurgeServiceTest {
 
         // Then
         purgeService.purgeExecutionsByProjectCode(projectCode);
-        verify(executionRepository, never()).deleteByTestDateTimeBefore(any(Date.class));
+        verify(executionRepository, never()).findByCycleDefinitionProjectIdAndTestDateTimeBefore(anyLong(), any(Date.class));
     }
 
     @Test
@@ -83,7 +83,7 @@ class PurgeServiceTest {
 
         // Then
         purgeService.purgeExecutionsByProjectCode(projectCode);
-        verify(executionRepository, never()).deleteByTestDateTimeBefore(any(Date.class));
+        verify(executionRepository, never()).findByCycleDefinitionProjectIdAndTestDateTimeBefore(anyLong(), any(Date.class));
     }
 
     @Test
@@ -99,7 +99,7 @@ class PurgeServiceTest {
 
         // Then
         purgeService.purgeExecutionsByProjectCode(projectCode);
-        verify(executionRepository, never()).deleteByTestDateTimeBefore(any(Date.class));
+        verify(executionRepository, never()).findByCycleDefinitionProjectIdAndTestDateTimeBefore(anyLong(), any(Date.class));
     }
 
     @Test
@@ -117,7 +117,7 @@ class PurgeServiceTest {
 
         // Then
         purgeService.purgeExecutionsByProjectCode(projectCode);
-        verify(executionRepository, never()).deleteByTestDateTimeBefore(any(Date.class));
+        verify(executionRepository, never()).findByCycleDefinitionProjectIdAndTestDateTimeBefore(anyLong(), any(Date.class));
     }
 
     @Test
@@ -136,7 +136,7 @@ class PurgeServiceTest {
 
         // Then
         purgeService.purgeExecutionsByProjectCode(projectCode);
-        verify(executionRepository, never()).deleteByTestDateTimeBefore(any(Date.class));
+        verify(executionRepository, never()).findByCycleDefinitionProjectIdAndTestDateTimeBefore(anyLong(), any(Date.class));
     }
 
     @Test
@@ -153,13 +153,15 @@ class PurgeServiceTest {
         when(settingService.get(projectId, Settings.EXECUTION_PURGE_DURATION_VALUE)).thenReturn(value);
         when(settingService.get(projectId, Settings.EXECUTION_PURGE_DURATION_TYPE)).thenReturn(type);
         when(dateService.getTodayDateMinusPeriod(3, type)).thenReturn(Optional.of(startDate));
-        when(executionRepository.deleteByTestDateTimeBefore(startDate)).thenReturn(10L);
 
         // Then
         purgeService.purgeExecutionsByProjectCode(projectCode);
-        ArgumentCaptor<Date> startDateArgumentCaptor = ArgumentCaptor.forClass(Date.class);
-        verify(executionRepository).deleteByTestDateTimeBefore(startDateArgumentCaptor.capture());
+        var startDateArgumentCaptor = ArgumentCaptor.forClass(Date.class);
+        var projectIdArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(executionRepository)
+        .findByCycleDefinitionProjectIdAndTestDateTimeBefore(projectIdArgumentCaptor.capture(), startDateArgumentCaptor.capture());
         assertThat(startDateArgumentCaptor.getValue()).isEqualTo(startDate);
+        assertThat(projectIdArgumentCaptor.getValue()).isEqualTo(projectId);
     }
 
     @Test
@@ -198,27 +200,28 @@ class PurgeServiceTest {
         when(settingService.get(projectId1, Settings.EXECUTION_PURGE_DURATION_VALUE)).thenReturn(value1);
         when(settingService.get(projectId1, Settings.EXECUTION_PURGE_DURATION_TYPE)).thenReturn(type1);
         when(dateService.getTodayDateMinusPeriod(1, type1)).thenReturn(Optional.of(startDate1));
-        when(executionRepository.deleteByTestDateTimeBefore(startDate1)).thenReturn(10L);
 
         when(project2.getId()).thenReturn(projectId2);
         when(project2.getCode()).thenReturn(projectCode2);
         when(settingService.get(projectId2, Settings.EXECUTION_PURGE_DURATION_VALUE)).thenReturn(value2);
         when(settingService.get(projectId2, Settings.EXECUTION_PURGE_DURATION_TYPE)).thenReturn(type2);
         when(dateService.getTodayDateMinusPeriod(2, type2)).thenReturn(Optional.of(startDate2));
-        when(executionRepository.deleteByTestDateTimeBefore(startDate2)).thenReturn(20L);
 
         when(project3.getId()).thenReturn(projectId3);
         when(project3.getCode()).thenReturn(projectCode3);
         when(settingService.get(projectId3, Settings.EXECUTION_PURGE_DURATION_VALUE)).thenReturn(value3);
         when(settingService.get(projectId3, Settings.EXECUTION_PURGE_DURATION_TYPE)).thenReturn(type3);
         when(dateService.getTodayDateMinusPeriod(3, type3)).thenReturn(Optional.of(startDate3));
-        when(executionRepository.deleteByTestDateTimeBefore(startDate3)).thenReturn(30L);
 
         // Then
         purgeService.purgeAllProjects();
-        ArgumentCaptor<Date> startDateArgumentCaptor = ArgumentCaptor.forClass(Date.class);
-        verify(executionRepository, times(3)).deleteByTestDateTimeBefore(startDateArgumentCaptor.capture());
-        var allValues = startDateArgumentCaptor.getAllValues();
-        assertThat(allValues).containsExactlyInAnyOrder(startDate1, startDate2, startDate3);
+        var startDateArgumentCaptor = ArgumentCaptor.forClass(Date.class);
+        var projectIdArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(executionRepository, times(3))
+        .findByCycleDefinitionProjectIdAndTestDateTimeBefore(projectIdArgumentCaptor.capture(), startDateArgumentCaptor.capture());
+        var allDateValues = startDateArgumentCaptor.getAllValues();
+        var allProjectIdValues = projectIdArgumentCaptor.getAllValues();
+        assertThat(allDateValues).containsExactlyInAnyOrder(startDate1, startDate2, startDate3);
+        assertThat(allProjectIdValues).containsExactlyInAnyOrder(projectId1, projectId2, projectId3);
     }
 }

@@ -87,9 +87,14 @@ public class PurgeService {
             return;
         }
 
-        var numberOfDeletedExecutions = executionRepository.deleteByTestDateTimeBefore(startDate.get());
+        var executedScnToDelete = executionRepository.findByCycleDefinitionProjectIdAndTestDateTimeBefore(projectId, startDate.get());
+
+        var numberOfDeletedExecutions = executedScnToDelete.size();
         var executionsPlural = numberOfDeletedExecutions > 1 ? "s" : "";
-        log.info("{} execution{} effectively deleted", numberOfDeletedExecutions, executionsPlural);
+
+        log.info("Preparing to delete {} execution{}...", numberOfDeletedExecutions, executionsPlural);
+        executionRepository.deleteAllInBatch(executedScnToDelete);
+        log.info("{} execution{} successfully deleted", numberOfDeletedExecutions, executionsPlural);
     }
 
     /**
