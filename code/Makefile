@@ -66,6 +66,9 @@ build-web-ui: ## Build ara-web-ui
 build-api: ## Build ara-api
 	@echo '-- Build API image --'
 	@$(eval FULL_IMAGE = $(API_IMAGE):$(API_VERSION))
+ifeq ($(FULL),true)
+	$(MAKE) -C api mvn-install
+endif
 	$(MAKE) -C api mvn-build-image FULL_IMAGE=$(FULL_IMAGE)
 	@./bin/docker-tags-version.sh "$(API_IMAGE)" "$(API_VERSION)" "$(PUBLISH)"
 
@@ -151,6 +154,7 @@ copy-candidate-to-stable: ## Copy Candidate chart to Stable chart
 	@echo '... to stable chart'
 	@rm -rf ../charts/stable && cp -r ../charts/candidate ../charts/stable
 	@$(eval CHART_VERSION=$(shell make get-chart-version TARGET_CHART=candidate | sed -e 's/-rc.*//'))
+	@sed -i'.old' 's/^name:.*$\/name: ara-stable/' ../charts/stable/Chart.yaml
 	@$(MAKE) update-chart-version VERSION=$(CHART_VERSION) TARGET_CHART=stable
 
 get-%-version: ## Get module version

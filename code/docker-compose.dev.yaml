@@ -11,7 +11,7 @@ services:
       ara-dev: {}
     environment:
       - INFO_APP_VERSION=DEV
-      - ARA_OAUTH2_MODE=oauth2-mock
+      #- ARA_OAUTH2_MODE=oauth2
     command: ['/bin/bash', '-c', '${OPTIONAL_COMMAND:-echo with-no-optional-command} && mvn -Pdev spring-boot:run -pl api']
   front:
     image: node:12

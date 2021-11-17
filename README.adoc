@@ -60,15 +60,55 @@ Please note the following :
 
 == How to install it on my Infrastructure
 
-This kind of install is recommanded if you want a Production environment for ARA and your projects.
-Unfortunatelly for now, we only support GNU/Linux based machine for this kind of installation
-(but if you want to contribute, be our guest ! :D ).
+ARA has a Helm chart to easily install it in a Kubernetes Cluster.
 
-The limitation is due to the fact that volume mounting with Docker on Windows can be quite buggy from a machine to
-another, and the mounting is necessary to persist ARA datas and recover them on server restart.
+* Add the ara repository if not already added:
 
-You can find the full installation procedure <<doc/integrator/main/IntegratorDocumentation.adoc#head, here, in the
-Integrator Documentation>>
+```shell
+helm repo add ara https://decathlon.github.io/ara/
+```
+
+* Update repositories
+
+```shell
+helm repo update
+```
+
+* Install it with custom values
+
+```shell
+helm install -f values.yaml --create-namespace --namespace ara my-ara ara/ara
+```
+
+A sample `values.yaml` could be like this one:
+
+```yaml
+api:
+  authentication: oauth2-github # Put a friendly value to disable default authentication
+  customConfig:
+    # Active providers
+    # provider-type has to be one of custom / github / google
+    # code refers to the provider key ( spring.security.oauth2.client.registration.<code>)
+    oauth2providers:
+      conf:
+      - display-name: Github
+        provider-type: github
+        code: github
+
+    # Oauth
+    spring:
+      security:
+        oauth2:
+          # >> the authorization_code conf
+          client:
+            registration:
+              # fed
+              github:
+                clientId: YOUR_OAUTH2_CLIENT_ID
+                clientSecret: YOUR_OAUTH2_CLIENT_SECRET
+                redirect-uri: "${ara.clientBaseUrl}/${ara.loginProcessingUrl}/{registrationId}"
+
+```
 
 == How to Use ARA?
 
