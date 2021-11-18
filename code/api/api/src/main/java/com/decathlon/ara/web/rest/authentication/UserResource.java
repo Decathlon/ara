@@ -25,31 +25,31 @@ public class UserResource {
 
     @GetMapping("/details")
     public AuthenticationUserDetailsDTO getUserDetails(
-            @AuthenticationPrincipal OidcUser user,
-            @AuthenticationPrincipal OAuth2User userOauth2
+            @AuthenticationPrincipal OidcUser oidcUser,
+            @AuthenticationPrincipal OAuth2User oauth2User
     ){
-        if (user != null) {
+        if (oidcUser != null) {
             return new AuthenticationUserDetailsDTO(
-                user.getSubject(),
-                user.getFullName(),
-                user.getName(),
-                user.getEmail(),
-                user.getPicture());
+                oidcUser.getSubject(),
+                oidcUser.getFullName(),
+                oidcUser.getName(),
+                oidcUser.getEmail(),
+                oidcUser.getPicture());
         }
 
-        if (userOauth2 != null) {
+        if (oauth2User != null) {
             return new AuthenticationUserDetailsDTO(
-                safeStringAttribute(userOauth2, "id"),
-                safeStringAttribute(userOauth2, "name"),
-                safeStringAttribute(userOauth2, "login"),
-                safeStringAttribute(userOauth2, "email"),
-                safeStringAttribute(userOauth2, "avatar_url"));
+                safeStringAttribute(oauth2User, "id"),
+                safeStringAttribute(oauth2User, "name"),
+                safeStringAttribute(oauth2User, "login"),
+                safeStringAttribute(oauth2User, "email"),
+                safeStringAttribute(oauth2User, "avatar_url"));
         }
         return new AuthenticationUserDetailsDTO();
     }
 
-    private String safeStringAttribute(OAuth2User userOauth2, String attribute) {
-        return Optional.ofNullable(userOauth2.getAttribute(attribute)).orElse("").toString();
+    private String safeStringAttribute(OAuth2User oauth2User, String attribute) {
+        return Optional.ofNullable(oauth2User.getAttribute(attribute)).orElse("").toString();
     }
 
 }

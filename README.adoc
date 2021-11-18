@@ -99,16 +99,17 @@ api:
     spring:
       security:
         oauth2:
-          # >> the authorization_code conf
           client:
             registration:
-              # fed
               github:
                 clientId: YOUR_OAUTH2_CLIENT_ID
                 clientSecret: YOUR_OAUTH2_CLIENT_SECRET
                 redirect-uri: "${ara.clientBaseUrl}/${ara.loginProcessingUrl}/{registrationId}"
 
 ```
+
+You can use any other OAuth2 provider supported by Spring Security (e.g. Facebook, Google, custom, etc.).
+
 
 == How to Use ARA?
 
