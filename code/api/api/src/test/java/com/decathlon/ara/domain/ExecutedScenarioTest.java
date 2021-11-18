@@ -17,12 +17,13 @@
 
 package com.decathlon.ara.domain;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.junit.jupiter.api.Test;
-
 import com.decathlon.ara.domain.enumeration.Handling;
 import com.decathlon.ara.domain.enumeration.ProblemStatus;
+import org.junit.jupiter.api.Test;
+
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ExecutedScenarioTest {
 
@@ -56,9 +57,8 @@ public class ExecutedScenarioTest {
     public void getHandling_ShouldReturnHANDLED_WhenAtLeastOneErrorWithProblem() {
         // GIVEN
         final Error errorWithProblem = new Error().withStepLine(2);
-        errorWithProblem.addProblemPattern(new ProblemPattern()
-                .withProblem(new Problem()
-                        .withStatus(ProblemStatus.OPEN)));
+        var problemPattern = new ProblemPattern().withProblem(new Problem().withStatus(ProblemStatus.OPEN));
+        errorWithProblem.setProblemOccurrences(Set.of(new ProblemOccurrence(new Error(), problemPattern)));
         final ExecutedScenario executedScenarioWithoutError = new ExecutedScenario();
         executedScenarioWithoutError.addError(new Error().withStepLine(1));
         executedScenarioWithoutError.addError(errorWithProblem);

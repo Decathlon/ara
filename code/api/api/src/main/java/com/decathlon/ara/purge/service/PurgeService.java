@@ -1,5 +1,6 @@
 package com.decathlon.ara.purge.service;
 
+import com.decathlon.ara.domain.Execution;
 import com.decathlon.ara.repository.ExecutionRepository;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.SettingService;
@@ -14,6 +15,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Slf4j
@@ -87,13 +89,14 @@ public class PurgeService {
             return;
         }
 
-        var executedScnToDelete = executionRepository.findByCycleDefinitionProjectIdAndTestDateTimeBefore(projectId, startDate.get());
+        var executionsToDelete = executionRepository.findByCycleDefinitionProjectIdAndTestDateTimeBefore(projectId, startDate.get());
 
-        var numberOfDeletedExecutions = executedScnToDelete.size();
+        var numberOfDeletedExecutions = executionsToDelete.size();
         var executionsPlural = numberOfDeletedExecutions > 1 ? "s" : "";
 
         log.info("Preparing to delete {} execution{}...", numberOfDeletedExecutions, executionsPlural);
-        executionRepository.deleteAllInBatch(executedScnToDelete);
+        var executionIdsToDelete = executionsToDelete.stream().map(Execution::getId).collect(Collectors.toList());
+        executionRepository.deleteAllByIdInBatch(executionIdsToDelete);
         log.info("{} execution{} successfully deleted", numberOfDeletedExecutions, executionsPlural);
     }
 

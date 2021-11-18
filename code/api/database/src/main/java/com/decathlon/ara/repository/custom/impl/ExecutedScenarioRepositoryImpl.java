@@ -107,6 +107,7 @@ public class ExecutedScenarioRepositoryImpl implements ExecutedScenarioRepositor
         // Downward joins
         final QError error = QError.error;
         final QProblemPattern problemPattern = QProblemPattern.problemPattern;
+        final QProblemOccurrence problemOccurrence = QProblemOccurrence.problemOccurrence;
         final QProblem problem = QProblem.problem;
 
         // Upward joins
@@ -125,7 +126,8 @@ public class ExecutedScenarioRepositoryImpl implements ExecutedScenarioRepositor
 
                 // Downward joins
                 .leftJoin(executedScenario.errors, error)
-                .leftJoin(error.problemPatterns, problemPattern)
+                .leftJoin(error.problemOccurrences, problemOccurrence)
+                .leftJoin(problemOccurrence.problemPattern, problemPattern)
                 .leftJoin(problemPattern.problem, problem)
 
                 // Upward joins

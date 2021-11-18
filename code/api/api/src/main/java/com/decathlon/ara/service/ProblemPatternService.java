@@ -17,12 +17,11 @@
 
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.domain.QProblem;
-import com.decathlon.ara.repository.CountryRepository;
-import com.decathlon.ara.repository.ErrorRepository;
-import com.decathlon.ara.repository.ProblemPatternRepository;
-import com.decathlon.ara.repository.ProblemRepository;
-import com.decathlon.ara.repository.TypeRepository;
+import com.decathlon.ara.Entities;
+import com.decathlon.ara.Messages;
+import com.decathlon.ara.domain.Error;
+import com.decathlon.ara.domain.*;
+import com.decathlon.ara.repository.*;
 import com.decathlon.ara.repository.custom.util.JpaCacheManager;
 import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
 import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
@@ -34,16 +33,6 @@ import com.decathlon.ara.service.exception.NotUniqueException;
 import com.decathlon.ara.service.mapper.ErrorWithExecutedScenarioAndRunAndExecutionMapper;
 import com.decathlon.ara.service.mapper.ProblemMapper;
 import com.decathlon.ara.service.mapper.ProblemPatternMapper;
-import com.decathlon.ara.Entities;
-import com.decathlon.ara.Messages;
-import com.decathlon.ara.domain.Country;
-import com.decathlon.ara.domain.Error;
-import com.decathlon.ara.domain.Problem;
-import com.decathlon.ara.domain.ProblemPattern;
-import com.decathlon.ara.domain.Type;
-import java.util.Collections;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +40,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Service for managing ProblemPattern.
@@ -161,7 +154,7 @@ public class ProblemPatternService {
         if (problemPattern == null) {
             throw new NotFoundException(Messages.NOT_FOUND_PATTERN, Entities.PROBLEM_PATTERN);
         }
-        Page<Error> errors = errorRepository.findDistinctByProblemPatternsInOrderById(Collections.singletonList(problemPattern), pageable);
+        Page<Error> errors = errorRepository.findDistinctByProblemOccurrencesProblemOccurrenceIdProblemPatternInOrderById(Collections.singletonList(problemPattern), pageable);
         return errors.map(errorWithExecutedScenarioAndRunAndExecutionMapper::toDto);
     }
 
@@ -215,12 +208,13 @@ public class ProblemPatternService {
      *                       cache-evicted after transaction commit
      */
     private void evictErrorProblemPatternsCacheFor(ProblemPattern problemPattern) {
-        Set<Long> errorIds = problemPattern.getErrors()
+        Set<Long> errorIds = problemPattern.getProblemOccurrences()
                 .stream()
+                .map(ProblemOccurrence::getError)
                 .map(Error::getId)
                 .collect(Collectors.toSet());
         transactionService.doAfterCommit(() ->
-                jpaCacheManager.evictCollections(Error.PROBLEM_PATTERNS_COLLECTION_CACHE, errorIds));
+                jpaCacheManager.evictCollections(Error.PROBLEM_OCCURRENCES_COLLECTION_CACHE, errorIds));
     }
 
     void assignExistingEntities(long projectId, ProblemPattern problemPattern) throws NotFoundException {

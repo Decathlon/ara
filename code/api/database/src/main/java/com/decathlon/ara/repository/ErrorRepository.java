@@ -38,7 +38,7 @@ public interface ErrorRepository extends JpaRepository<Error, Long>, JpaSpecific
         QuerydslPredicateExecutor<Error> {
 
     // NO projectId: patterns is already restrained to the correct project
-    Page<Error> findDistinctByProblemPatternsInOrderById(List<ProblemPattern> patterns, Pageable pageable);
+    Page<Error> findDistinctByProblemOccurrencesProblemOccurrenceIdProblemPatternInOrderById(List<ProblemPattern> patterns, Pageable pageable);
 
     /**
      * Find errors problems paginated and ordered by their date time (descending)
@@ -46,7 +46,7 @@ public interface ErrorRepository extends JpaRepository<Error, Long>, JpaSpecific
      * @param pageable the pagination details, must not be null
      * @return the errors. If none found, an empty page is returned
      */
-    Page<Error> findDistinctByProblemPatternsInOrderByIdDesc(List<ProblemPattern> patterns, Pageable pageable);
+    Page<Error> findDistinctByProblemOccurrencesProblemOccurrenceIdProblemPatternInOrderByIdDesc(List<ProblemPattern> patterns, Pageable pageable);
 
     @Query("SELECT error " +
             "FROM Error error " +

@@ -157,7 +157,8 @@ public class ExecutedScenario implements Comparable<ExecutedScenario> {
         }
 
         for (Error error : getErrors()) {
-            for (ProblemPattern problemPattern : error.getProblemPatterns()) {
+            for (ProblemOccurrence problemOccurrence : error.getProblemOccurrences()) {
+                var problemPattern = problemOccurrence.getProblemPattern();
                 if (problemPattern.getProblem().isHandled()) {
                     return Handling.HANDLED;
                 }

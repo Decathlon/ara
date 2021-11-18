@@ -17,18 +17,12 @@
 
 package com.decathlon.ara.repository.custom.impl;
 
-import com.decathlon.ara.domain.Execution;
-import com.decathlon.ara.domain.Problem;
-import com.decathlon.ara.domain.QExecution;
-import com.decathlon.ara.domain.QError;
-import com.decathlon.ara.domain.QProblem;
-import com.decathlon.ara.domain.QProblemPattern;
-import com.decathlon.ara.domain.QRun;
+import com.decathlon.ara.domain.*;
 import com.decathlon.ara.domain.enumeration.ProblemStatus;
 import com.decathlon.ara.domain.enumeration.ProblemStatusFilter;
 import com.decathlon.ara.domain.filter.ProblemFilter;
-import com.decathlon.ara.domain.projection.ProblemAggregate;
 import com.decathlon.ara.domain.projection.FirstAndLastProblemOccurrence;
+import com.decathlon.ara.domain.projection.ProblemAggregate;
 import com.decathlon.ara.repository.CountryRepository;
 import com.decathlon.ara.repository.ProblemRepository;
 import com.decathlon.ara.repository.TypeRepository;
@@ -40,12 +34,6 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -53,6 +41,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class ProblemRepositoryImpl implements ProblemRepositoryCustom {
@@ -151,7 +142,8 @@ public class ProblemRepositoryImpl implements ProblemRepositoryCustom {
         return jpaQueryFactory.selectDistinct(QProblem.problem.id)
                 .from(QProblem.problem)
                 .join(QProblem.problem.patterns, QProblemPattern.problemPattern)
-                .join(QProblemPattern.problemPattern.errors, QError.error)
+                .join(QProblemPattern.problemPattern.problemOccurrences, QProblemOccurrence.problemOccurrence)
+                .join(QProblemOccurrence.problemOccurrence.error, QError.error)
                 .where(QError.error.executedScenario.run.execution.id.eq(execution.getId()))
                 .fetchCount();
     }
@@ -166,7 +158,8 @@ public class ProblemRepositoryImpl implements ProblemRepositoryCustom {
         List<Tuple> tuples = jpaQueryFactory.selectDistinct(QProblem.problem.id, QError.error.executedScenario.run.execution.id)
                 .from(QProblem.problem)
                 .join(QProblem.problem.patterns, QProblemPattern.problemPattern)
-                .join(QProblemPattern.problemPattern.errors, QError.error)
+                .join(QProblemPattern.problemPattern.problemOccurrences, QProblemOccurrence.problemOccurrence)
+                .join(QProblemOccurrence.problemOccurrence.error, QError.error)
                 .where(QProblem.problem.id.in(problemIds))
                 .where(QError.error.executedScenario.run.execution.id.in(executionIds))
                 .fetch();
@@ -235,7 +228,8 @@ public class ProblemRepositoryImpl implements ProblemRepositoryCustom {
         )
                 .from(QProblem.problem)
                 .join(QProblem.problem.patterns, QProblemPattern.problemPattern)
-                .join(QProblemPattern.problemPattern.errors, QError.error)
+                .join(QProblemPattern.problemPattern.problemOccurrences, QProblemOccurrence.problemOccurrence)
+                .join(QProblemOccurrence.problemOccurrence.error, QError.error)
                 .join(QError.error.executedScenario.run, QRun.run)
                 .join(QRun.run.execution, QExecution.execution)
                 .where(QProblem.problem.id.in(problemIds))
@@ -292,7 +286,8 @@ public class ProblemRepositoryImpl implements ProblemRepositoryCustom {
                         QExecution.execution.testDateTime.max()))
                 .from(QProblem.problem)
                 .join(QProblem.problem.patterns, QProblemPattern.problemPattern)
-                .join(QProblemPattern.problemPattern.errors, QError.error)
+                .join(QProblemPattern.problemPattern.problemOccurrences, QProblemOccurrence.problemOccurrence)
+                .join(QProblemOccurrence.problemOccurrence.error, QError.error)
                 .join(QError.error.executedScenario.run, QRun.run)
                 .join(QRun.run.execution, QExecution.execution)
                 .where(QProblem.problem.id.in(problems.stream()

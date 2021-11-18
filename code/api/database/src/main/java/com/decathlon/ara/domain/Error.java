@@ -19,8 +19,8 @@ package com.decathlon.ara.domain;
 
 import com.querydsl.core.annotations.QueryInit;
 import lombok.*;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.Comparator;
@@ -39,7 +39,7 @@ import static java.util.Comparator.*;
 @Table(indexes = @Index(columnList = "executed_scenario_id"))
 public class Error implements Comparable<Error> {
 
-    public static final String PROBLEM_PATTERNS_COLLECTION_CACHE = "com.decathlon.ara.domain.Error.problemPatterns";
+    public static final String PROBLEM_OCCURRENCES_COLLECTION_CACHE = "com.decathlon.ara.domain.Error.problemOccurrences";
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "error_id")
@@ -69,28 +69,14 @@ public class Error implements Comparable<Error> {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.TextType")
     private String exception;
 
-    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE, region = PROBLEM_PATTERNS_COLLECTION_CACHE)
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "errors")
-    private Set<ProblemPattern> problemPatterns = new HashSet<>();
-
-    @PreRemove
-    private void removeProblemPatterns() {
-        problemPatterns.forEach(this::removeProblemPattern);
-    }
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "problemOccurrenceId.error", orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<ProblemOccurrence> problemOccurrences = new HashSet<>();
 
     // 2/2 for @EqualsAndHashCode to work: used for entities created outside of JPA
     public void setExecutedScenario(ExecutedScenario executedScenario) {
         this.executedScenario = executedScenario;
         this.executedScenarioId = (executedScenario == null ? null : executedScenario.getId());
-    }
-
-    public void addProblemPattern(ProblemPattern problemPattern) {
-        this.problemPatterns.add(problemPattern);
-        problemPattern.getErrors().add(this);
-    }
-
-    public void removeProblemPattern(ProblemPattern problemPattern) {
-        problemPattern.getErrors().remove(this);
     }
 
     @Override

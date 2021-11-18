@@ -17,23 +17,18 @@
 
 package com.decathlon.ara.repository;
 
-import com.decathlon.ara.domain.Country;
 import com.decathlon.ara.domain.Error;
-import com.decathlon.ara.domain.ProblemPattern;
-import com.decathlon.ara.domain.Type;
-import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.decathlon.ara.domain.*;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
-import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
-import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -104,9 +99,11 @@ public class ErrorRepositoryIT {
         cut.autoAssignProblemsToNewErrors(projectId, newErrorIds);
 
         // THEN
-        Set<Error> affectedErrors = problemPatternRepository.getOne(1041L).getErrors();
+        var affectedErrors = problemPatternRepository.getOne(1041L).getProblemOccurrences().stream()
+                .map(ProblemOccurrence::getError)
+                .collect(Collectors.toList());
         assertThat(affectedErrors).hasSize(3);
-        assertThat(idsOf(affectedErrors)).contains(longs(124, 313, 314));
+        assertThat(idsOf(new HashSet<>(affectedErrors))).contains(longs(124, 313, 314));
     }
 
 }
