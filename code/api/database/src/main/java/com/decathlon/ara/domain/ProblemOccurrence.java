@@ -7,14 +7,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @NoArgsConstructor
-@AssociationOverrides({
-        @AssociationOverride(name = "problemOccurrenceId.error", joinColumns = @JoinColumn(name = "error_id")),
-        @AssociationOverride(name = "problemOccurrenceId.problemPattern", joinColumns = @JoinColumn(name = "problem_pattern_id"))
-})
-public class ProblemOccurrence {
+@AssociationOverride(name = "problemOccurrenceId.error", joinColumns = @JoinColumn(name = "error_id"))
+@AssociationOverride(name = "problemOccurrenceId.problemPattern", joinColumns = @JoinColumn(name = "problem_pattern_id"))
+public class ProblemOccurrence implements Serializable {
 
     @EmbeddedId
     private ProblemOccurrenceId problemOccurrenceId;

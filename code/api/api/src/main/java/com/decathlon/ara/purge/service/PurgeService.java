@@ -15,7 +15,6 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Slf4j
@@ -95,7 +94,7 @@ public class PurgeService {
         var executionsPlural = numberOfDeletedExecutions > 1 ? "s" : "";
 
         log.info("Preparing to delete {} execution{}...", numberOfDeletedExecutions, executionsPlural);
-        var executionIdsToDelete = executionsToDelete.stream().map(Execution::getId).collect(Collectors.toList());
+        var executionIdsToDelete = executionsToDelete.stream().map(Execution::getId).toList();
         executionRepository.deleteAllByIdInBatch(executionIdsToDelete);
         log.info("{} execution{} successfully deleted", numberOfDeletedExecutions, executionsPlural);
     }

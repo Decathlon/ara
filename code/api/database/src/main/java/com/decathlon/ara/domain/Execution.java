@@ -27,6 +27,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.SortNatural;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
 import java.util.TreeSet;
@@ -41,7 +42,7 @@ import java.util.TreeSet;
 @Table(uniqueConstraints={
         @UniqueConstraint(columnNames = {"cycle_definition_id", "test_date_time"})
 })
-public class Execution {
+public class Execution implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "execution_id")

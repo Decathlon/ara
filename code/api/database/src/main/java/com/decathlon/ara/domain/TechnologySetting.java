@@ -21,6 +21,7 @@ import com.decathlon.ara.domain.enumeration.Technology;
 import lombok.*;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Comparator;
 
 import static java.util.Comparator.*;
@@ -31,7 +32,7 @@ import static java.util.Comparator.*;
 @With
 @Entity
 @EqualsAndHashCode(of = { "projectId", "code", "technology" })
-public class TechnologySetting implements Comparable<TechnologySetting> {
+public class TechnologySetting implements Comparable<TechnologySetting>, Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "technology_setting_id")

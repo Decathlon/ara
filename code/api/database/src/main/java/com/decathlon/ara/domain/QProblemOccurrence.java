@@ -41,6 +41,7 @@ public class QProblemOccurrence extends EntityPathBase<ProblemOccurrence> {
     public QProblemOccurrence(Class<? extends ProblemOccurrence> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.error = inits.isInitialized("problemOccurrenceId.error") ? new QError(forProperty("problemOccurrenceId.error")) : null;
-        this.problemPattern = inits.isInitialized("problemOccurrenceId.problemPattern") ? new QProblemPattern(forProperty("problemOccurrenceId.problemPattern"), inits.get("problemOccurrenceId.problemPattern")) : null;
+        var problemOccurrenceIdProblemPattern = "problemOccurrenceId.problemPattern";
+        this.problemPattern = inits.isInitialized(problemOccurrenceIdProblemPattern) ? new QProblemPattern(forProperty(problemOccurrenceIdProblemPattern), inits.get(problemOccurrenceIdProblemPattern)) : null;
     }
 }

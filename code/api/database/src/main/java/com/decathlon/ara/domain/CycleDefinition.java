@@ -20,6 +20,7 @@ package com.decathlon.ara.domain;
 import lombok.*;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Data
 @NoArgsConstructor
@@ -28,7 +29,7 @@ import javax.persistence.*;
 @Entity
 // Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
 @EqualsAndHashCode(of = { "projectId", "branch", "name" })
-public class CycleDefinition {
+public class CycleDefinition implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cycle_definition_id")
