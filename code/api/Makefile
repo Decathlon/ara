@@ -11,7 +11,7 @@ JAVA_VERSION=16
 # WITH JAVA MAVEN
 
 mvn-install: ## Install project
-	@./mvnw clean install
+	@./mvnw clean install -Pdev
 
 mvn-run: ## DEV - run api
 	@./mvnw -Pdev spring-boot:run -pl api
