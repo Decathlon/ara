@@ -1241,4 +1241,27 @@ entries:
     urls:
     - https://github.com/Decathlon/ara/releases/download/ara-7.0.1/ara-7.0.1.tgz
     version: 7.0.1
-generated: "2021-11-10T16:35:08.160263053Z"
+  ara-candidate:
+  - apiVersion: v2
+    created: "2021-11-22T07:52:59.392091466Z"
+    description: 'ARA helps you to fight against regressions by letting it preanalyze
+      your non-regression tests runs, tracks and follows problems, keep their history,
+      and even break your CI build if quality isn''t met. '
+    digest: 3dd1ae2bb8c9ce75d17c2806acd020750ddaf92d3dc73796ceaf4d59190767b4
+    home: https://github.com/Decathlon/ara
+    icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
+    keywords:
+    - ara
+    - analyser
+    - tests aggregator
+    - regression monitoring
+    maintainers:
+    - email: thomas.gruson@protonmail.com
+      name: Thomgrus
+    name: ara-candidate
+    sources:
+    - https://github.com/Decathlon/ara
+    urls:
+    - https://github.com/Decathlon/ara/releases/download/ara-candidate-10.0.0-rc.7/ara-candidate-10.0.0-rc.7.tgz
+    version: 10.0.0-rc.7
+generated: "2021-11-22T07:52:59.392760975Z"
