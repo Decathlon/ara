@@ -12,8 +12,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper=true)
 @Entity
 public class AraScenarioVersion extends Auditable<String> {
 

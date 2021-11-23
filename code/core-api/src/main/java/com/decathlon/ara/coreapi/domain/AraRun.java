@@ -1,6 +1,7 @@
 package com.decathlon.ara.coreapi.domain;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 @Data
+@EqualsAndHashCode(callSuper=true)
 @Entity
 public class AraRun extends Auditable<String> {
 
