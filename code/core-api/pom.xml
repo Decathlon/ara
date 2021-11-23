@@ -125,8 +125,8 @@
                 <configuration>
                     <skip>${maven.test.skip}</skip>
                     <excludes>
-                        <exclude>com/decathlon/ara/**/*Entity.class</exclude>
-                        <exclude>**/config/*</exclude>
+                        <exclude>com/decathlon/ara/coreapi/domain/*</exclude>
+                        <exclude>com/decathlon/ara/coreapi/config/*</exclude>
                     </excludes>
                 </configuration>
                 <executions>
