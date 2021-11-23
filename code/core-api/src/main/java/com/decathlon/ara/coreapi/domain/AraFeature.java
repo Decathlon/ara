@@ -3,7 +3,6 @@ package com.decathlon.ara.coreapi.domain;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 @Data
 @Entity
