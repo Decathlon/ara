@@ -2,6 +2,9 @@ package com.decathlon.ara.coreapi.domain;
 
 import lombok.Data;
 
+import java.util.Collections;
+import java.util.List;
+
 import javax.persistence.*;
 
 @Data
@@ -20,5 +23,11 @@ public class AraScenarioResult {
 
     @Lob
     private String trace;
+
+    @ManyToOne
+    private AraProblem problem;
+
+    @OneToMany
+    private List<AraScenarioVersionStep> incidentSteps = Collections.emptyList();
 
 }

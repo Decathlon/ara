@@ -2,13 +2,14 @@ package com.decathlon.ara.coreapi.domain;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
 
 @Data
 @Entity
-public class AraProject {
+public class AraProject implements Serializable {
 
     @Id
     private String code;
