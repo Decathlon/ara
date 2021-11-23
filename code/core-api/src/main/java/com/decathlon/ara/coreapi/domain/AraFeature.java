@@ -1,10 +1,12 @@
 package com.decathlon.ara.coreapi.domain;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 
 @Data
+@EqualsAndHashCode(callSuper=true)
 @Entity
 public class AraFeature extends Auditable<String> {
     @Id
