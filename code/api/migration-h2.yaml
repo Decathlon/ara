@@ -15,6 +15,15 @@ services:
       - api_net
     volumes:
       - ./db_h2:/app/data
+    depends_on:
+      - oauth2-dev-server
+  oauth2-dev-server:
+    image: "decathlon/ara-oads:${OADS_VERSION:-latest}"
+    restart: unless-stopped
+    networks:
+      api_net:
+        aliases:
+          - oauth2.dev.localhost
   ara-h2-mig-api:
     image: docker.io/decathlon/ara-api
     restart: always
@@ -28,16 +37,18 @@ services:
       - api_net
     volumes:
       - ./db_h2_mig:/app/data
+    depends_on:
+      - oauth2-dev-server
   waiter-h2-api:
     image: aligor/wait-for-url
-    command: ["--url", "http://ara-h2-api:8000/actuator/info", "--retries", "20", "--delay", "3000"]
+    command: ["--url", "http://ara-h2-api:8001/actuator/info", "--retries", "20", "--delay", "3000"]
     networks:
       - api_net
     depends_on:
       - ara-h2-api
   waiter-h2-mig-api:
     image: aligor/wait-for-url
-    command: ["--url", "http://ara-h2-mig-api:8000/actuator/info", "--retries", "20", "--delay", "3000"]
+    command: ["--url", "http://ara-h2-mig-api:8001/actuator/info", "--retries", "20", "--delay", "3000"]
     networks:
       - api_net
     depends_on:
