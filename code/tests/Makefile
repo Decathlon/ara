@@ -14,7 +14,7 @@ TARGET_ENV?=local
 
 secrets-import: ## Import secrets from GCP
 	@mkdir -p secrets
-	@gcloud --project=build-factory-qualif-47lt secrets versions access latest --secret=karate-ara-qualif-config > secrets/karate-config-qualif.js
+	@gcloud secrets versions access latest --secret=karate-ara-qualif-config > secrets/karate-config-qualif.js
 
 start-local: ## Start local environment
 	@docker compose -f ../docker-compose.yaml up -d
