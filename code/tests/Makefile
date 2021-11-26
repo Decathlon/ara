@@ -26,7 +26,7 @@ destroy-local: ## Destroy local environment
 
 test-karate: ## Run tests. You can specify TARGET_ENV to change tests env.
 	@echo '-- Run tests With env: $(TARGET_ENV) --'
-	-@mvn test -DargLine="-Dkarate.env=$(TARGET_ENV) -Dkarate.config.dir=secrets"
+	-@mvn clean verify -DargLine="-Dkarate.env=$(TARGET_ENV) -Dkarate.config.dir=secrets"
 	@open file:///$$PWD/target/karate-reports/karate-summary.html
 
 
