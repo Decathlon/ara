@@ -1,0 +1,50 @@
+databaseChangeLog:
+- changeSet:
+    id: 1637858656728-1
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: COMMENT
+        newDataType: varchar(2147483647)
+        tableName: FUNCTIONALITY
+- changeSet:
+    id: 1637858656728-2
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: COMMENT
+        newDataType: varchar(2147483647)
+        tableName: PROBLEM
+- changeSet:
+    id: 1637858656728-3
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: CONTENT
+        newDataType: varchar(2147483647)
+        tableName: EXECUTED_SCENARIO
+- changeSet:
+    id: 1637858656728-4
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: CONTENT
+        newDataType: varchar(2147483647)
+        tableName: SCENARIO
+- changeSet:
+    id: 1637858656728-5
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: EXCEPTION
+        newDataType: varchar(2147483647)
+        tableName: PROBLEM_PATTERN
+- changeSet:
+    id: 1637858656728-6
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: MESSAGE
+        newDataType: varchar(2147483647)
+        tableName: COMMUNICATION
+

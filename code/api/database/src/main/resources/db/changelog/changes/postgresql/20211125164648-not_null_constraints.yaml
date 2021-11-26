@@ -1,0 +1,246 @@
+databaseChangeLog:
+- changeSet:
+    id: 1637855398120-27
+    author: '? (generated)'
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: error_id
+        indexName: idxgom365xdjsepb9rc36xcuafur
+        tableName: problem_occurrence
+- changeSet:
+    id: 1637855398120-1
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(16)
+        columnName: branch
+        tableName: cycle_definition
+        validate: true
+- changeSet:
+    id: 1637855398120-2
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(32)
+        columnName: code
+        tableName: communication
+        validate: true
+- changeSet:
+    id: 1637855398120-3
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(2)
+        columnName: code
+        tableName: country
+        validate: true
+- changeSet:
+    id: 1637855398120-4
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(32)
+        columnName: code
+        tableName: project
+        validate: true
+- changeSet:
+    id: 1637855398120-5
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(64)
+        columnName: code
+        tableName: setting
+        validate: true
+- changeSet:
+    id: 1637855398120-6
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(32)
+        columnName: code
+        tableName: severity
+        validate: true
+- changeSet:
+    id: 1637855398120-7
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(16)
+        columnName: code
+        tableName: source
+        validate: true
+- changeSet:
+    id: 1637855398120-8
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(255)
+        columnName: code
+        tableName: technology_setting
+        validate: true
+- changeSet:
+    id: 1637855398120-9
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(16)
+        columnName: code
+        tableName: type
+        validate: true
+- changeSet:
+    id: 1637855398120-10
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(16)
+        columnName: default_branch
+        tableName: source
+        validate: true
+- changeSet:
+    id: 1637855398120-11
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(8)
+        columnName: initials
+        tableName: severity
+        validate: true
+- changeSet:
+    id: 1637855398120-12
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(64)
+        columnName: name
+        tableName: communication
+        validate: true
+- changeSet:
+    id: 1637855398120-13
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(40)
+        columnName: name
+        tableName: country
+        validate: true
+- changeSet:
+    id: 1637855398120-14
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(16)
+        columnName: name
+        tableName: cycle_definition
+        validate: true
+- changeSet:
+    id: 1637855398120-15
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(64)
+        columnName: name
+        tableName: project
+        validate: true
+- changeSet:
+    id: 1637855398120-16
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(128)
+        columnName: name
+        tableName: root_cause
+        validate: true
+- changeSet:
+    id: 1637855398120-17
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(32)
+        columnName: name
+        tableName: severity
+        validate: true
+- changeSet:
+    id: 1637855398120-18
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(32)
+        columnName: name
+        tableName: source
+        validate: true
+- changeSet:
+    id: 1637855398120-19
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(128)
+        columnName: name
+        tableName: team
+        validate: true
+- changeSet:
+    id: 1637855398120-20
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(50)
+        columnName: name
+        tableName: type
+        validate: true
+- changeSet:
+    id: 1637855398120-21
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(16)
+        columnName: short_name
+        tableName: severity
+        validate: true
+- changeSet:
+    id: 1637855398120-22
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: bigint
+        columnName: source_id
+        tableName: type
+        validate: true
+- changeSet:
+    id: 1637855398120-23
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(16)
+        columnName: technology
+        tableName: source
+        validate: true
+- changeSet:
+    id: 1637855398120-24
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(255)
+        columnName: technology
+        tableName: technology_setting
+        validate: true
+- changeSet:
+    id: 1637855398120-25
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(4)
+        columnName: type
+        tableName: communication
+        validate: true
+- changeSet:
+    id: 1637855398120-26
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(255)
+        columnName: vcs_url
+        tableName: source
+        validate: true
+
