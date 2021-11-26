@@ -17,10 +17,10 @@ secrets-import: ## Import secrets from GCP
 	@gcloud --project=build-factory-qualif-47lt secrets versions access latest --secret=karate-ara-qualif-config > secrets/karate-config-qualif.js
 
 start-local: ## Start local environment
-	@docker compose run -f ../docker-compose.yaml up -d
+	@docker compose -f ../docker-compose.yaml up -d
 
 destroy-local: ## Destroy local environment
-	@docker compose run -f ../docker-compose.yaml down
+	@docker compose -f ../docker-compose.yaml down
 
 # WITH JAVA MAVEN
 
