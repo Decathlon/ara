@@ -18,6 +18,8 @@ databaseChangeLog:
         columnName: branch
         tableName: cycle_definition
         validate: true
+    - sql:
+          sql: update cycle_definition set branch = 'default_branch' where branch is null;
 - changeSet:
     id: 1637855398120-2
     author: '? (generated)'
@@ -27,6 +29,8 @@ databaseChangeLog:
         columnName: code
         tableName: communication
         validate: true
+    - sql:
+          sql: update communication set code = 'generated_code' where code is null;
 - changeSet:
     id: 1637855398120-3
     author: '? (generated)'
@@ -36,6 +40,8 @@ databaseChangeLog:
         columnName: code
         tableName: country
         validate: true
+    - sql:
+          sql: update country set code = 'xx' where code is null;
 - changeSet:
     id: 1637855398120-4
     author: '? (generated)'
@@ -45,6 +51,8 @@ databaseChangeLog:
         columnName: code
         tableName: project
         validate: true
+    - sql:
+          sql: update project set code = 'generated_code' where code is null;
 - changeSet:
     id: 1637855398120-5
     author: '? (generated)'
@@ -54,6 +62,8 @@ databaseChangeLog:
         columnName: code
         tableName: setting
         validate: true
+    - sql:
+          sql: update setting set code = 'generated.code' where code is null;
 - changeSet:
     id: 1637855398120-6
     author: '? (generated)'
@@ -63,6 +73,8 @@ databaseChangeLog:
         columnName: code
         tableName: severity
         validate: true
+    - sql:
+          sql: update severity set code = 'generated_code' where code is null;
 - changeSet:
     id: 1637855398120-7
     author: '? (generated)'
@@ -72,6 +84,8 @@ databaseChangeLog:
         columnName: code
         tableName: source
         validate: true
+    - sql:
+          sql: update source set code = 'generated_code' where code is null;
 - changeSet:
     id: 1637855398120-8
     author: '? (generated)'
@@ -81,6 +95,8 @@ databaseChangeLog:
         columnName: code
         tableName: technology_setting
         validate: true
+    - sql:
+          sql: update technology_setting set code = 'generated.code' where code is null;
 - changeSet:
     id: 1637855398120-9
     author: '? (generated)'
@@ -90,6 +106,8 @@ databaseChangeLog:
         columnName: code
         tableName: type
         validate: true
+    - sql:
+          sql: update type set code = 'generated_code' where code is null;
 - changeSet:
     id: 1637855398120-10
     author: '? (generated)'
@@ -99,6 +117,8 @@ databaseChangeLog:
         columnName: default_branch
         tableName: source
         validate: true
+    - sql:
+          sql: update source set default_branch = 'generated_branch' where default_branch is null;
 - changeSet:
     id: 1637855398120-11
     author: '? (generated)'
@@ -108,6 +128,8 @@ databaseChangeLog:
         columnName: initials
         tableName: severity
         validate: true
+    - sql:
+          sql: update severity set initials = 'gen_init' where initials is null;
 - changeSet:
     id: 1637855398120-12
     author: '? (generated)'
@@ -117,6 +139,8 @@ databaseChangeLog:
         columnName: name
         tableName: communication
         validate: true
+    - sql:
+          sql: update communication set name = 'generated_name' where name is null;
 - changeSet:
     id: 1637855398120-13
     author: '? (generated)'
@@ -126,6 +150,8 @@ databaseChangeLog:
         columnName: name
         tableName: country
         validate: true
+    - sql:
+          sql: update country set name = 'generated_name' where name is null;
 - changeSet:
     id: 1637855398120-14
     author: '? (generated)'
@@ -135,6 +161,8 @@ databaseChangeLog:
         columnName: name
         tableName: cycle_definition
         validate: true
+    - sql:
+          sql: update cycle_definition set name = 'default_cycle' where name is null;
 - changeSet:
     id: 1637855398120-15
     author: '? (generated)'
@@ -144,6 +172,8 @@ databaseChangeLog:
         columnName: name
         tableName: project
         validate: true
+    - sql:
+          sql: update project set name = 'generated_name' where name is null;
 - changeSet:
     id: 1637855398120-16
     author: '? (generated)'
@@ -153,6 +183,8 @@ databaseChangeLog:
         columnName: name
         tableName: root_cause
         validate: true
+    - sql:
+          sql: update root_cause set name = 'generated_name' where name is null;
 - changeSet:
     id: 1637855398120-17
     author: '? (generated)'
@@ -162,6 +194,8 @@ databaseChangeLog:
         columnName: name
         tableName: severity
         validate: true
+    - sql:
+          sql: update severity set name = 'generated_name' where name is null;
 - changeSet:
     id: 1637855398120-18
     author: '? (generated)'
@@ -171,6 +205,8 @@ databaseChangeLog:
         columnName: name
         tableName: source
         validate: true
+    - sql:
+          sql: update source set name = 'generated_name' where name is null;
 - changeSet:
     id: 1637855398120-19
     author: '? (generated)'
@@ -180,6 +216,8 @@ databaseChangeLog:
         columnName: name
         tableName: team
         validate: true
+    - sql:
+          sql: update team set name = 'generated_name' where name is null;
 - changeSet:
     id: 1637855398120-20
     author: '? (generated)'
@@ -189,6 +227,8 @@ databaseChangeLog:
         columnName: name
         tableName: type
         validate: true
+    - sql:
+          sql: update type set name = 'generated_name' where name is null;
 - changeSet:
     id: 1637855398120-21
     author: '? (generated)'
@@ -198,6 +238,8 @@ databaseChangeLog:
         columnName: short_name
         tableName: severity
         validate: true
+    - sql:
+          sql: update severity set short_name = 'generated_abrev' where short_name is null;
 - changeSet:
     id: 1637855398120-22
     author: '? (generated)'
@@ -207,6 +249,8 @@ databaseChangeLog:
         columnName: source_id
         tableName: type
         validate: true
+    - sql:
+          sql: delete from type where source_id is null;
 - changeSet:
     id: 1637855398120-23
     author: '? (generated)'
@@ -216,6 +260,8 @@ databaseChangeLog:
         columnName: technology
         tableName: source
         validate: true
+    - sql:
+          sql: update source set technology = 'GENERIC' where technology is null;
 - changeSet:
     id: 1637855398120-24
     author: '? (generated)'
@@ -225,6 +271,8 @@ databaseChangeLog:
         columnName: technology
         tableName: technology_setting
         validate: true
+    - sql:
+          sql: update technology_setting set technology = 'GENERIC' where technology is null;
 - changeSet:
     id: 1637855398120-25
     author: '? (generated)'
@@ -234,6 +282,8 @@ databaseChangeLog:
         columnName: type
         tableName: communication
         validate: true
+    - sql:
+          sql: update communication set type = 'TEXT' where type is null;
 - changeSet:
     id: 1637855398120-26
     author: '? (generated)'
@@ -243,4 +293,6 @@ databaseChangeLog:
         columnName: vcs_url
         tableName: source
         validate: true
+    - sql:
+          sql: update source set vcs_url = 'http://vcs.your-company.org/{{branch}}/files' where vcs_url is null;
 
