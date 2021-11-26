@@ -22,6 +22,12 @@ start-local: ## Start local environment
 destroy-local: ## Destroy local environment
 	@docker compose -f ../docker-compose.yaml down
 
+start-local: ## Start local environment
+	@docker compose run -f ../docker-compose.yaml up -d
+
+destroy-local: ## Destroy local environment
+	@docker compose run -f ../docker-compose.yaml down
+
 # WITH JAVA MAVEN
 
 test-karate: ## Run tests. You can specify TARGET_ENV to change tests env.
