@@ -23,7 +23,7 @@ const RememberUrlService = {
     }
 
     // in all other cases, we just register the current asked route
-    localStorage.setItem(LAST_ROUTEPATH_KEY, to.path)
+    localStorage.setItem(LAST_ROUTEPATH_KEY, to.fullPath)
   },
 
   resetRedirectAsked () {
