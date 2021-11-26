@@ -14,13 +14,19 @@ TARGET_ENV?=local
 
 secrets-import: ## Import secrets from GCP
 	@mkdir -p secrets
-	@gcloud --project=build-factory-qualif-47lt secrets versions access latest --secret=karate-ara-qualif-config > secrets/karate-config-qualif.js
+	@gcloud secrets versions access latest --secret=karate-ara-qualif-config > secrets/karate-config-qualif.js
+
+start-local: ## Start local environment
+	@docker compose -f ../docker-compose.yaml up -d
+
+destroy-local: ## Destroy local environment
+	@docker compose -f ../docker-compose.yaml down
 
 # WITH JAVA MAVEN
 
 test-karate: ## Run tests. You can specify TARGET_ENV to change tests env.
 	@echo '-- Run tests With env: $(TARGET_ENV) --'
-	-@mvn test -DargLine="-Dkarate.env=$(TARGET_ENV) -Dkarate.config.dir=secrets"
+	-@mvn clean verify -DargLine="-Dkarate.env=$(TARGET_ENV) -Dkarate.config.dir=secrets"
 	@open file:///$$PWD/target/karate-reports/karate-summary.html
 
 
