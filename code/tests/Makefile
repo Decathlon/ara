@@ -4,7 +4,7 @@
 
 JAVA_VERSION=17
 
-TARGET_ENV?=qualif
+TARGET_ENV?=local
 
 #####################################
 ##             DEVELOP             ##
@@ -14,7 +14,7 @@ TARGET_ENV?=qualif
 
 secrets-import: ## Import secrets from GCP
 	@mkdir -p secrets
-	@gcloud secrets versions access latest --secret=karate-ara-qualif-config > secrets/karate-config-qualif.js
+	@gcloud --project=build-factory-qualif-47lt secrets versions access latest --secret=karate-ara-qualif-config > secrets/karate-config-qualif.js
 
 # WITH JAVA MAVEN
 
