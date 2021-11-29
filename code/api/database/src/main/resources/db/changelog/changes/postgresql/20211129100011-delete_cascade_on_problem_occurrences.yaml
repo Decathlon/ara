@@ -1,0 +1,61 @@
+databaseChangeLog:
+- changeSet:
+    id: 1638176527965-7
+    author: '? (generated)'
+    changes:
+    - dropIndex:
+        indexName: idxgom365xdjsepb9rc36xcuafur
+        tableName: problem_occurrence
+- changeSet:
+    id: 1638176527965-1
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: problem_occurrence
+        constraintName: fk7ufw7w6ty9af8d2knfj8wf61s
+- changeSet:
+    id: 1638176527965-2
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: error_id
+        baseTableName: problem_occurrence
+        constraintName: fk7ufw7w6ty9af8d2knfj8wf61s
+        onDelete: CASCADE
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: error
+- changeSet:
+    id: 1638176527965-3
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: problem_occurrence
+        constraintName: fkorsa8kvts94kximvdh0lmlfjg
+- changeSet:
+    id: 1638176527965-4
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: problem_pattern_id
+        baseTableName: problem_occurrence
+        constraintName: fkorsa8kvts94kximvdh0lmlfjg
+        onDelete: CASCADE
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: problem_pattern
+- changeSet:
+    id: 1638176527965-5
+    author: '? (generated)'
+    changes:
+    - dropPrimaryKey:
+        tableName: problem_occurrence
+- changeSet:
+    id: 1638176527965-6
+    author: '? (generated)'
+    changes:
+    - addPrimaryKey:
+        columnNames: error_id, problem_pattern_id
+        constraintName: problem_occurrence_pkey
+        tableName: problem_occurrence
+

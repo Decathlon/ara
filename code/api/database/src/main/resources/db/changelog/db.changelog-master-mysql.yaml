@@ -11,3 +11,5 @@ databaseChangeLog:
       file: classpath*:db/changelog/changes/mysql/20210301105923-ADD_UNIQUE_CONSTRAINTS.yaml
   - include:
       file: classpath*:db/changelog/changes/mysql/20210618090253-change_id.yaml
+  - include:
+      file: classpath*:db/changelog/changes/mysql/20211129100521-delete_cascade_on_problem_occurrences.yaml
