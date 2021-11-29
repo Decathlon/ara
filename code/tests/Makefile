@@ -22,10 +22,16 @@ start-local: ## Start local environment
 destroy-local: ## Destroy local environment
 	@docker compose -f ../docker-compose.yaml down
 
+logs-local: ## Display logs for local, SERVICE can be set to choose service to log
+	@docker compose -f ../docker-compose.yaml logs $(SERVICE) -f --tail 200
+
 # WITH JAVA MAVEN
 
 test-karate: ## Run tests. You can specify TARGET_ENV to change tests env.
 	@echo '-- Run tests With env: $(TARGET_ENV) --'
+ifeq ($(TARGET_ENV),local)
+	@docker compose -f docker-compose-tests.yaml run load-data && echo 'Test data initialized'
+endif
 	-@mvn clean verify -DargLine="-Dkarate.env=$(TARGET_ENV) -Dkarate.config.dir=secrets"
 	@open file:///$$PWD/target/karate-reports/karate-summary.html
 

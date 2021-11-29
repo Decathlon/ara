@@ -1,0 +1,24 @@
+# Please Note that this file IS NOT PRODUCTION READY.
+# It's only dedicated to local test & try
+
+version: '3'
+
+services:
+  load-data:
+    image: "postgres:12"
+    restart: unless-stopped
+    volumes:
+      - ./data:/data:ro
+    environment:
+      - PGHOST=ara-db
+      - PGPORT=5432
+      - PGDATABASE=ara
+      - PGUSER=changeme
+      - PGPASSWORD=changeme
+    command: psql -f /data/tests-project.sql
+    networks:
+      db_net: {}
+networks:
+  db_net: 
+    external: true
+    name: code_db_net
