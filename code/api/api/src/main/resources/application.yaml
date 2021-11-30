@@ -60,6 +60,8 @@ ara:
     mode: oauth2-mock
   maxExecutionDaysToKeep: 14
   minExecutionsToKeepPerCycle: 20
+  purge:
+    schedule: "0 0 0 * * *" # every day at midnight
 
   # Enabled every minutes, starting 40 seconds after startup to be EXACTLY BETWEEN two execution indexing schedules
   defectSyncSchedulingDelayInMilliseconds: 60000
