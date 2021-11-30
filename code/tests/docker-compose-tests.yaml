@@ -4,6 +4,11 @@
 version: '3'
 
 services:
+  available-check:
+    image: aligor/wait-for-url
+    command: ["--url", "http://ara-api:8001/actuator/health", "--retries", "30", "--delay", "2000"]
+    networks:
+      web_net: {}
   load-data:
     image: "postgres:12"
     restart: unless-stopped
@@ -22,3 +27,6 @@ networks:
   db_net: 
     external: true
     name: code_db_net
+  web_net:
+    external: true
+    name: code_web_net

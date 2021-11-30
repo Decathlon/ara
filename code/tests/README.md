@@ -39,3 +39,12 @@ You can also specify one service:
 ```shell
 make logs-local SERVICE=ara-api
 ```
+
+There is actually 4 services you can target:
+
+* ara-api
+* ara-db
+* ara-web-ui
+* oauth2-dev-server
+
+This service correspond to declared service in `../code/docker-compose.yaml`

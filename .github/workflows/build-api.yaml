@@ -153,3 +153,11 @@ jobs:
         uses: github/codeql-action/analyze@v1
         with:
           category: "ara_api"
+      - 
+        name: Integration tests
+        run: |
+          pushd code/tests
+          make start-local
+          make test-karate BATCH=true
+          make destroy-local
+          popd

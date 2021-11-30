@@ -6,7 +6,6 @@ version: '3'
 services:
   ara-db:
     image: "postgres:12"
-    pull_policy: always
     restart: unless-stopped
     environment:
       - POSTGRES_DB=ara
@@ -18,7 +17,6 @@ services:
       - 5432:5432
   ara-api:
     image: "decathlon/ara-api:${API_VERSION:-latest}"
-    pull_policy: always
     restart: unless-stopped
     environment:
       - ARA_DATABASE_TARGET=postgresql
@@ -32,7 +30,6 @@ services:
       db_net: {}
   ara-web-ui:
     image: "decathlon/ara-web-ui:${WEB_UI_VERSION:-latest}"
-    pull_policy: always
     restart: unless-stopped
     environment:
       - ARA_API_HOST=ara-api
