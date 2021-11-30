@@ -27,3 +27,15 @@ To clear local environment you can destroy it with:
 ```shell
 make destroy-local
 ```
+
+You can see application logs with:
+
+```shell
+make logs-local
+```
+
+You can also specify one service:
+
+```shell
+make logs-local SERVICE=ara-api
+```

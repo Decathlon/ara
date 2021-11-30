@@ -15,7 +15,7 @@ services:
       - PGDATABASE=ara
       - PGUSER=changeme
       - PGPASSWORD=changeme
-    command: psql -f /data/tests-project.sql
+    command: psql -f /data/clear-data.sql -f /data/tests-project.sql
     networks:
       db_net: {}
 networks:

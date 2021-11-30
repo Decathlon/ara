@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestParallel {
     @Test
-    void testParallel() {
-        Results results = Runner.path("classpath:features").tags("@sanity-check").parallel(1);
+    void sanityCheck() {
+        Results results = Runner.path("classpath:features").tags("@sanity-check,@medium-check").parallel(1);
         assertEquals(0, results.getFailCount(), results.getErrorMessages());
     }
 }
