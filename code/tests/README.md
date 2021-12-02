@@ -47,4 +47,12 @@ There is actually 4 services you can target:
 * ara-web-ui
 * oauth2-dev-server
 
-This service correspond to declared service in `../code/docker-compose.yaml`
+This service correspond to declared service in `../docker-compose.yaml`
+
+To test your current dev package:
+
+in `..`
+
+```shell
+make build-api FULL=true
+```
