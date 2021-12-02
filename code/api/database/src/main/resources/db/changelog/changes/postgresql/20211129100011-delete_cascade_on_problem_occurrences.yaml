@@ -12,7 +12,7 @@ databaseChangeLog:
     changes:
     - dropForeignKeyConstraint:
         baseTableName: problem_occurrence
-        constraintName: fk7ufw7w6ty9af8d2knfj8wf61s
+        constraintName: FK7lub23f9xbi92jqumgrjts9tk
 - changeSet:
     id: 1638176527965-2
     author: '? (generated)'
@@ -31,7 +31,7 @@ databaseChangeLog:
     changes:
     - dropForeignKeyConstraint:
         baseTableName: problem_occurrence
-        constraintName: fkorsa8kvts94kximvdh0lmlfjg
+        constraintName: FKm3twuhvstqk2icoycegrcmu69
 - changeSet:
     id: 1638176527965-4
     author: '? (generated)'
