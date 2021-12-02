@@ -21,7 +21,7 @@ on:
     - cron: '30 1 * * 0'
 
 jobs:
-  code_web_ui_change:
+  code_app_change:
     # continue-on-error: true # Uncomment once integration is finished
     runs-on: ubuntu-latest
     # Map a step output to a job output
@@ -32,13 +32,12 @@ jobs:
         uses: fkirc/skip-duplicate-actions@v3.4.0
         with:
           github_token: ${{ github.token }}
-          paths: '["code/web-ui/**"]'
+          paths: '["code/web-ui/**", ".github/workflows/build-web-ui.yaml"]'
           cancel_others: 'true'
           do_not_skip: '["push", "workflow_dispatch", "schedule"]'
   build-web-ui:
-    needs:
-      - code_web_ui_change
-    if: ${{ needs.code_web_ui_change.outputs.should_skip != 'true' }}
+    needs: code_app_change
+    if: ${{ needs.code_app_change.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
     steps:
       -
@@ -71,25 +70,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - 
-        id: skip_check
-        run: |
-          if [[ $GITHUB_REF == refs/pull/* ]]; then
-            WEB_UI_EXISTS=false
-          else
-            pushd code
-            WEB_UI_EXISTS=$(make -s check-web-ui-image)
-            popd
-          fi
-          echo ::set-output name=docker_skip::${WEB_UI_EXISTS}
-      - 
         name: Prepare
         id: prep
-        if: ${{ steps.skip_check.outputs.docker_skip != 'true' }}
         run: |
           PUSH=FALSE
+          pushd code
+          APP_EXISTS=$(make -s check-web-ui-image)
+          popd
           if [[ $GITHUB_REF == refs/heads/* ]]; then
             BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
-            if [ "${{ github.event.repository.default_branch }}" = "$BRANCH_NAME" ]; then
+            if [ "${{ github.event.repository.default_branch }}" = "$BRANCH_NAME" ] && [ "$APP_EXISTS" != 'true' ]; then
               PUSH=TRUE
             fi
           elif [[ $GITHUB_REF == refs/pull/* ]]; then
@@ -105,22 +95,19 @@ jobs:
           echo ::set-output name=suffix::${SUFFIX}
       -
         name: Set up QEMU
-        if: ${{ steps.skip_check.outputs.docker_skip != 'true' }}
         uses: docker/setup-qemu-action@v1
       -
         name: Set up Docker Buildx
-        if: ${{ steps.skip_check.outputs.docker_skip != 'true' }}
         uses: docker/setup-buildx-action@v1
       -
         name: Login to DockerHub
-        if: ${{ steps.skip_check.outputs.docker_skip != 'true' && steps.prep.outputs.push == 'true' }}
+        if: ${{ steps.prep.outputs.push == 'true' }}
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - 
         name: Build and push
-        if: ${{ steps.skip_check.outputs.docker_skip != 'true' }}
         run: |
           pushd code
           make build-web-ui SUFFIX=${{ steps.prep.outputs.suffix }} PUBLISH=${{ steps.prep.outputs.push }}
