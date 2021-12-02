@@ -24,6 +24,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.SortNatural;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Set;
@@ -39,7 +40,7 @@ import static java.util.Comparator.*;
 // Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
 @EqualsAndHashCode(of = { "executionId", "country", "type" })
 @Table(indexes = @Index(columnList = "execution_id"))
-public class Run implements Comparable<Run> {
+public class Run implements Comparable<Run>, Serializable {
 
     public static final String SEVERITY_TAGS_SEPARATOR = ",";
 

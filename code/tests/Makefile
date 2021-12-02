@@ -32,7 +32,7 @@ test-karate: ## Run tests. You can specify TARGET_ENV to change tests env.
 ifeq ($(TARGET_ENV),local)
 	@docker compose -f docker-compose-tests.yaml run load-data && echo 'Test data initialized'
 endif
-	-@mvn clean verify -DargLine="-Dkarate.env=$(TARGET_ENV) -Dkarate.config.dir=secrets"
+	@mvn clean verify -DargLine="-Dkarate.env=$(TARGET_ENV) -Dkarate.config.dir=secrets" && echo 'SUCCESS' >> target/results.txt || echo 'FAILURE' >> target/results.txt
 ifneq ($(BATCH),true)
 	@open file:///$$PWD/target/karate-reports/karate-summary.html
 endif

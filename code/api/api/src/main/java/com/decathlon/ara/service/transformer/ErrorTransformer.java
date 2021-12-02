@@ -19,15 +19,17 @@ package com.decathlon.ara.service.transformer;
 
 import com.decathlon.ara.domain.Error;
 import com.decathlon.ara.domain.Problem;
+import com.decathlon.ara.domain.ProblemOccurrence;
 import com.decathlon.ara.domain.ProblemPattern;
 import com.decathlon.ara.service.dto.error.ErrorWithProblemsDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * This service provide transformation utilities (DTO - DO and DO - DTO) for the Error.
@@ -59,7 +61,8 @@ public class ErrorTransformer {
             result.setStepLine(error.getStepLine());
             result.setException(error.getException());
 
-            List<Problem> problems = error.getProblemPatterns().stream()
+            List<Problem> problems = error.getProblemOccurrences().stream()
+                    .map(ProblemOccurrence::getProblemPattern)
                     .map(ProblemPattern::getProblem)
                     .sorted(Comparator.nullsLast(Problem::compareTo))
                     .distinct()

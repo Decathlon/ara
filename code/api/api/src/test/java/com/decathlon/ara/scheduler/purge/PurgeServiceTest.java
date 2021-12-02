@@ -1,5 +1,6 @@
 package com.decathlon.ara.scheduler.purge;
 
+import com.decathlon.ara.domain.Execution;
 import com.decathlon.ara.purge.service.PurgeService;
 import com.decathlon.ara.repository.ExecutionRepository;
 import com.decathlon.ara.service.ProjectService;
@@ -20,7 +21,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,7 +51,7 @@ class PurgeServiceTest {
 
         // Then
         purgeService.purgeExecutionsByProjectCode(projectCode);
-        verify(executionRepository, never()).findByCycleDefinitionProjectIdAndTestDateTimeBefore(anyLong(), any(Date.class));
+        verify(executionRepository, never()).deleteAllByIdInBatch(anyList());
     }
 
     @Test
@@ -67,7 +67,7 @@ class PurgeServiceTest {
 
         // Then
         purgeService.purgeExecutionsByProjectCode(projectCode);
-        verify(executionRepository, never()).findByCycleDefinitionProjectIdAndTestDateTimeBefore(anyLong(), any(Date.class));
+        verify(executionRepository, never()).deleteAllByIdInBatch(anyList());
     }
 
     @Test
@@ -83,7 +83,7 @@ class PurgeServiceTest {
 
         // Then
         purgeService.purgeExecutionsByProjectCode(projectCode);
-        verify(executionRepository, never()).findByCycleDefinitionProjectIdAndTestDateTimeBefore(anyLong(), any(Date.class));
+        verify(executionRepository, never()).deleteAllByIdInBatch(anyList());
     }
 
     @Test
@@ -99,7 +99,7 @@ class PurgeServiceTest {
 
         // Then
         purgeService.purgeExecutionsByProjectCode(projectCode);
-        verify(executionRepository, never()).findByCycleDefinitionProjectIdAndTestDateTimeBefore(anyLong(), any(Date.class));
+        verify(executionRepository, never()).deleteAllByIdInBatch(anyList());
     }
 
     @Test
@@ -117,7 +117,7 @@ class PurgeServiceTest {
 
         // Then
         purgeService.purgeExecutionsByProjectCode(projectCode);
-        verify(executionRepository, never()).findByCycleDefinitionProjectIdAndTestDateTimeBefore(anyLong(), any(Date.class));
+        verify(executionRepository, never()).deleteAllByIdInBatch(anyList());
     }
 
     @Test
@@ -136,7 +136,7 @@ class PurgeServiceTest {
 
         // Then
         purgeService.purgeExecutionsByProjectCode(projectCode);
-        verify(executionRepository, never()).findByCycleDefinitionProjectIdAndTestDateTimeBefore(anyLong(), any(Date.class));
+        verify(executionRepository, never()).deleteAllByIdInBatch(anyList());
     }
 
     @Test
@@ -148,20 +148,29 @@ class PurgeServiceTest {
         var type = "anyDurationType";
         var startDate = mock(Date.class);
 
+        Execution execution1 = mock(Execution.class);
+        Long executionId1 = 1L;
+        Execution execution2 = mock(Execution.class);
+        Long executionId2 = 2L;
+        Execution execution3 = mock(Execution.class);
+        Long executionId3 = 3L;
+        List<Execution> executionsToDelete = List.of(execution1, execution2, execution3);
+
         // When
         when(projectService.toId(projectCode)).thenReturn(projectId);
         when(settingService.get(projectId, Settings.EXECUTION_PURGE_DURATION_VALUE)).thenReturn(value);
         when(settingService.get(projectId, Settings.EXECUTION_PURGE_DURATION_TYPE)).thenReturn(type);
         when(dateService.getTodayDateMinusPeriod(3, type)).thenReturn(Optional.of(startDate));
+        when(executionRepository.findByCycleDefinitionProjectIdAndTestDateTimeBefore(projectId, startDate)).thenReturn(executionsToDelete);
+        when(execution1.getId()).thenReturn(executionId1);
+        when(execution2.getId()).thenReturn(executionId2);
+        when(execution3.getId()).thenReturn(executionId3);
 
         // Then
         purgeService.purgeExecutionsByProjectCode(projectCode);
-        var startDateArgumentCaptor = ArgumentCaptor.forClass(Date.class);
-        var projectIdArgumentCaptor = ArgumentCaptor.forClass(Long.class);
-        verify(executionRepository)
-        .findByCycleDefinitionProjectIdAndTestDateTimeBefore(projectIdArgumentCaptor.capture(), startDateArgumentCaptor.capture());
-        assertThat(startDateArgumentCaptor.getValue()).isEqualTo(startDate);
-        assertThat(projectIdArgumentCaptor.getValue()).isEqualTo(projectId);
+        var executionIdsToDeleteArgumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(executionRepository).deleteAllByIdInBatch(executionIdsToDeleteArgumentCaptor.capture());
+        assertThat(executionIdsToDeleteArgumentCaptor.getValue()).containsExactlyInAnyOrder(executionId1, executionId2, executionId3);
     }
 
     @Test
@@ -175,6 +184,9 @@ class PurgeServiceTest {
         var value1 = "1";
         var type1 = "anyDurationType1";
         var startDate1 = mock(Date.class);
+        Execution executionToDelete11 = mock(Execution.class);
+        Long executionId11 = 11L;
+        List<Execution> executionsToDelete1 = List.of(executionToDelete11);
 
         // Project 2
         var project2 = mock(ProjectDTO.class);
@@ -183,6 +195,11 @@ class PurgeServiceTest {
         var value2 = "2";
         var type2 = "anyDurationType2";
         var startDate2 = mock(Date.class);
+        Execution executionToDelete21 = mock(Execution.class);
+        Execution executionToDelete22 = mock(Execution.class);
+        Long executionId21 = 21L;
+        Long executionId22 = 22L;
+        List<Execution> executionsToDelete2 = List.of(executionToDelete21, executionToDelete22);
 
         // Project 3
         var project3 = mock(ProjectDTO.class);
@@ -191,6 +208,13 @@ class PurgeServiceTest {
         var value3 = "3";
         var type3 = "anyDurationType3";
         var startDate3 = mock(Date.class);
+        Execution executionToDelete31 = mock(Execution.class);
+        Execution executionToDelete32 = mock(Execution.class);
+        Execution executionToDelete33 = mock(Execution.class);
+        Long executionId31 = 31L;
+        Long executionId32 = 32L;
+        Long executionId33 = 33L;
+        List<Execution> executionsToDelete3 = List.of(executionToDelete31, executionToDelete32, executionToDelete33);
 
         // When
         when(projectService.findAll()).thenReturn(List.of(project1, project2, project3));
@@ -200,28 +224,34 @@ class PurgeServiceTest {
         when(settingService.get(projectId1, Settings.EXECUTION_PURGE_DURATION_VALUE)).thenReturn(value1);
         when(settingService.get(projectId1, Settings.EXECUTION_PURGE_DURATION_TYPE)).thenReturn(type1);
         when(dateService.getTodayDateMinusPeriod(1, type1)).thenReturn(Optional.of(startDate1));
+        when(executionRepository.findByCycleDefinitionProjectIdAndTestDateTimeBefore(projectId1, startDate1)).thenReturn(executionsToDelete1);
+        when(executionToDelete11.getId()).thenReturn(executionId11);
 
         when(project2.getId()).thenReturn(projectId2);
         when(project2.getCode()).thenReturn(projectCode2);
         when(settingService.get(projectId2, Settings.EXECUTION_PURGE_DURATION_VALUE)).thenReturn(value2);
         when(settingService.get(projectId2, Settings.EXECUTION_PURGE_DURATION_TYPE)).thenReturn(type2);
         when(dateService.getTodayDateMinusPeriod(2, type2)).thenReturn(Optional.of(startDate2));
+        when(executionRepository.findByCycleDefinitionProjectIdAndTestDateTimeBefore(projectId2, startDate2)).thenReturn(executionsToDelete2);
+        when(executionToDelete21.getId()).thenReturn(executionId21);
+        when(executionToDelete22.getId()).thenReturn(executionId22);
 
         when(project3.getId()).thenReturn(projectId3);
         when(project3.getCode()).thenReturn(projectCode3);
         when(settingService.get(projectId3, Settings.EXECUTION_PURGE_DURATION_VALUE)).thenReturn(value3);
         when(settingService.get(projectId3, Settings.EXECUTION_PURGE_DURATION_TYPE)).thenReturn(type3);
         when(dateService.getTodayDateMinusPeriod(3, type3)).thenReturn(Optional.of(startDate3));
+        when(executionRepository.findByCycleDefinitionProjectIdAndTestDateTimeBefore(projectId3, startDate3)).thenReturn(executionsToDelete3);
+        when(executionToDelete31.getId()).thenReturn(executionId31);
+        when(executionToDelete32.getId()).thenReturn(executionId32);
+        when(executionToDelete33.getId()).thenReturn(executionId33);
 
         // Then
         purgeService.purgeAllProjects();
-        var startDateArgumentCaptor = ArgumentCaptor.forClass(Date.class);
-        var projectIdArgumentCaptor = ArgumentCaptor.forClass(Long.class);
-        verify(executionRepository, times(3))
-        .findByCycleDefinitionProjectIdAndTestDateTimeBefore(projectIdArgumentCaptor.capture(), startDateArgumentCaptor.capture());
-        var allDateValues = startDateArgumentCaptor.getAllValues();
-        var allProjectIdValues = projectIdArgumentCaptor.getAllValues();
-        assertThat(allDateValues).containsExactlyInAnyOrder(startDate1, startDate2, startDate3);
-        assertThat(allProjectIdValues).containsExactlyInAnyOrder(projectId1, projectId2, projectId3);
+        var executionIdsToDeleteArgumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(executionRepository, times(3)).deleteAllByIdInBatch(executionIdsToDeleteArgumentCaptor.capture());
+        assertThat(executionIdsToDeleteArgumentCaptor.getAllValues())
+                .hasSize(3)
+                .containsExactlyInAnyOrder(List.of(executionId11), List.of(executionId21, executionId22), List.of(executionId31, executionId32, executionId33));
     }
 }

@@ -21,6 +21,7 @@ package com.decathlon.ara.domain;
 import lombok.*;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
@@ -34,7 +35,7 @@ import static java.util.Comparator.*;
 @Entity
 // Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
 @EqualsAndHashCode(of = { "source", "featureFile", "name", "line" })
-public class Scenario implements Comparable<Scenario> {
+public class Scenario implements Comparable<Scenario>, Serializable {
 
     public static final String COUNTRY_CODES_SEPARATOR = ",";
 

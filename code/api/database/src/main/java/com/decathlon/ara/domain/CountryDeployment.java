@@ -22,6 +22,7 @@ import com.decathlon.ara.domain.enumeration.Result;
 import lombok.*;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Date;
 
@@ -34,7 +35,7 @@ import static java.util.Comparator.*;
 @Entity
 // Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
 @EqualsAndHashCode(of = { "executionId", "country" })
-public class CountryDeployment implements Comparable<CountryDeployment> {
+public class CountryDeployment implements Comparable<CountryDeployment>, Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "country_deployment_id")

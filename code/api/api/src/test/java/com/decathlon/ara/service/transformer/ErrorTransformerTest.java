@@ -17,10 +17,11 @@
 
 package com.decathlon.ara.service.transformer;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
+import com.decathlon.ara.domain.Error;
+import com.decathlon.ara.domain.ProblemOccurrence;
+import com.decathlon.ara.domain.ProblemPattern;
+import com.decathlon.ara.service.dto.error.ErrorWithProblemsDTO;
+import com.decathlon.ara.service.dto.problem.ProblemDTO;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
@@ -33,10 +34,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import com.decathlon.ara.domain.Error;
-import com.decathlon.ara.domain.ProblemPattern;
-import com.decathlon.ara.service.dto.error.ErrorWithProblemsDTO;
-import com.decathlon.ara.service.dto.problem.ProblemDTO;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 @ExtendWith(MockitoExtension.class)
 public class ErrorTransformerTest {
@@ -52,10 +52,10 @@ public class ErrorTransformerTest {
     @MockitoSettings(strictness = Strictness.LENIENT)
     public void toDto_should_transform_the_do() {
         // Given
-        ProblemPattern pattern = new ProblemPattern();
+        ProblemPattern pattern1 = new ProblemPattern();
         ProblemDTO problemDTO1 = new ProblemDTO();
-        pattern.setId(1L);
-        pattern.setScenarioName("scn1");
+        pattern1.setId(1L);
+        pattern1.setScenarioName("scn1");
         problemDTO1.setId(1L);
         ProblemPattern pattern2 = new ProblemPattern();
         ProblemDTO problemDTO2 = new ProblemDTO();
@@ -68,9 +68,13 @@ public class ErrorTransformerTest {
         problemDTO3.setId(3L);
         pattern3.setScenarioName("scn3");
         List<ProblemDTO> problems = Lists.list(problemDTO1, problemDTO2, problemDTO3);
-        Set<ProblemPattern> problemPatterns = Set.of(pattern, pattern2, pattern3);
+        var problemOccurrences = Set.of(
+                new ProblemOccurrence(new Error(), pattern1),
+                new ProblemOccurrence(new Error(), pattern2),
+                new ProblemOccurrence(new Error(), pattern3)
+        );
         Error value = new Error(1L, 1L, null, "step",
-                "def", 25, "exception", problemPatterns);
+                "def", 25, "exception", problemOccurrences);
         Mockito.doReturn(problems).when(problemTransformer).toDtos(Mockito.anyCollection());
         // When
         ErrorWithProblemsDTO result = cut.toDto(value);

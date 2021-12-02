@@ -27,6 +27,7 @@ import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Set;
@@ -42,7 +43,7 @@ import static java.util.Comparator.*;
 // Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
 @EqualsAndHashCode(of = { "runId", "featureFile", "name", "line" })
 @Table(indexes = @Index(columnList = "run_id"))
-public class ExecutedScenario implements Comparable<ExecutedScenario> {
+public class ExecutedScenario implements Comparable<ExecutedScenario>, Serializable {
 
     public static final int CUCUMBER_ID_MAX_SIZE = 640;
 
@@ -157,7 +158,8 @@ public class ExecutedScenario implements Comparable<ExecutedScenario> {
         }
 
         for (Error error : getErrors()) {
-            for (ProblemPattern problemPattern : error.getProblemPatterns()) {
+            for (ProblemOccurrence problemOccurrence : error.getProblemOccurrences()) {
+                var problemPattern = problemOccurrence.getProblemPattern();
                 if (problemPattern.getProblem().isHandled()) {
                     return Handling.HANDLED;
                 }

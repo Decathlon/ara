@@ -21,6 +21,7 @@ import com.decathlon.ara.domain.enumeration.CommunicationType;
 import lombok.*;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Comparator;
 
 import static java.util.Comparator.*;
@@ -32,7 +33,7 @@ import static java.util.Comparator.*;
 @Entity
 // Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
 @EqualsAndHashCode(of = { "projectId", "code" })
-public class Communication implements Comparable<Communication> {
+public class Communication implements Comparable<Communication>, Serializable {
 
     public static final String EXECUTIONS = "executions";
     public static final String SCENARIO_WRITING_HELPS = "scenario-writing-helps";

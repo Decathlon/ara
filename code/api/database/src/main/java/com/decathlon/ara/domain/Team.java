@@ -20,6 +20,7 @@ package com.decathlon.ara.domain;
 import lombok.*;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +31,7 @@ import java.util.List;
 @With
 // Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
 @EqualsAndHashCode(of = { "projectId", "name" })
-public class Team {
+public class Team implements Serializable {
 
     public static final Team NOT_ASSIGNED = new Team(Long.valueOf(-404), -404, "(No team)", true, false, new ArrayList<>());
 

@@ -18,8 +18,11 @@
 package com.decathlon.ara.domain;
 
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,7 +35,7 @@ import java.util.Set;
 @EqualsAndHashCode(of = { "problemId", "featureFile", "featureName", "scenarioName", "scenarioNameStartsWith", "step",
         "stepStartsWith", "stepDefinition", "stepDefinitionStartsWith", "exception", "release", "country", "type",
         "typeIsBrowser", "typeIsMobile", "platform" })
-public class ProblemPattern {
+public class ProblemPattern implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "problem_pattern_id")
@@ -147,30 +150,14 @@ public class ProblemPattern {
     @Column(length = 32)
     private String platform;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "problem_occurrence",
-            joinColumns = @JoinColumn(name = "problem_pattern_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "error_id", referencedColumnName = "id"),
-            indexes = {
-                    @Index(columnList = "error_id")
-            }
-    )
-    private Set<Error> errors = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "problemOccurrenceId.problemPattern", orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<ProblemOccurrence> problemOccurrences = new HashSet<>();
 
     // 2/2 for @EqualsAndHashCode to work: used for entities created outside of JPA
     public void setProblem(Problem problem) {
         this.problem = problem;
         this.problemId = (problem == null ? null : problem.getId());
-    }
-
-    public void addError(Error error) {
-        this.errors.add(error);
-        error.getProblemPatterns().add(this);
-    }
-
-    public void removeError(Error error) {
-        this.errors.remove(error);
-        error.getProblemPatterns().remove(this);
     }
 
 }

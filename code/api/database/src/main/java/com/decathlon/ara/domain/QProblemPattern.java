@@ -17,14 +17,11 @@
 
 package com.decathlon.ara.domain;
 
-import static com.querydsl.core.types.PathMetadataFactory.*;
-
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.PathMetadata;
 import com.querydsl.core.types.dsl.*;
 
-import com.querydsl.core.types.PathMetadata;
-import javax.annotation.Generated;
-import com.querydsl.core.types.Path;
-import com.querydsl.core.types.dsl.PathInits;
+import static com.querydsl.core.types.PathMetadataFactory.forVariable;
 
 public class QProblemPattern extends EntityPathBase<ProblemPattern> {
 
@@ -36,7 +33,7 @@ public class QProblemPattern extends EntityPathBase<ProblemPattern> {
 
     public final QCountry country;
 
-    public final SetPath<Error, QError> errors = this.<Error, QError>createSet("errors", Error.class, QError.class, PathInits.DIRECT2);
+    public final SetPath<ProblemOccurrence, QProblemOccurrence> problemOccurrences = this.createSet("problemOccurrences", ProblemOccurrence.class, QProblemOccurrence.class, PathInits.DIRECT2);
 
     public final StringPath exception = createString("exception");
 

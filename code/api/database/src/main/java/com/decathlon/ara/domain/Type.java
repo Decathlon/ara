@@ -20,6 +20,7 @@ package com.decathlon.ara.domain;
 import lombok.*;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Comparator;
 
 import static java.util.Comparator.*;
@@ -31,7 +32,7 @@ import static java.util.Comparator.*;
 @Entity
 // Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
 @EqualsAndHashCode(of = { "projectId", "code" })
-public class Type implements Comparable<Type> {
+public class Type implements Comparable<Type>, Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "type_id")

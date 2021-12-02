@@ -448,12 +448,14 @@ public class ProblemService {
     private void evictErrorProblemPatternsCacheFor(Problem problem) {
         final Set<Long> errorIds = problem.getPatterns()
                 .stream()
-                .flatMap(p -> p.getErrors().stream())
+                .map(ProblemPattern::getProblemOccurrences)
+                .flatMap(Collection::stream)
+                .map(ProblemOccurrence::getError)
                 .map(Error::getId)
                 .collect(Collectors.toSet());
 
         transactionService.doAfterCommit(() ->
-                jpaCacheManager.evictCollections(Error.PROBLEM_PATTERNS_COLLECTION_CACHE, errorIds));
+                jpaCacheManager.evictCollections(Error.PROBLEM_OCCURRENCES_COLLECTION_CACHE, errorIds));
     }
 
     /**
@@ -508,7 +510,7 @@ public class ProblemService {
         }
 
         List<ProblemPattern> problemPatterns = problem.getPatterns();
-        Page<Error> errors = errorRepository.findDistinctByProblemPatternsInOrderByIdDesc(problemPatterns, pageable);
+        Page<Error> errors = errorRepository.findDistinctByProblemOccurrencesProblemOccurrenceIdProblemPatternInOrderByIdDesc(problemPatterns, pageable);
         if (errors == null) {
             return null;
         }

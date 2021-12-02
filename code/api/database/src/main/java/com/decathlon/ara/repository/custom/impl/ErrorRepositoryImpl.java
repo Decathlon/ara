@@ -207,7 +207,7 @@ public class ErrorRepositoryImpl implements ErrorRepositoryCustom {
         }
 
         transactionAppenderUtil.doAfterCommit(() ->
-                jpaCacheManager.evictCollections(Error.PROBLEM_PATTERNS_COLLECTION_CACHE, matchingErrorIds));
+                jpaCacheManager.evictCollections(Error.PROBLEM_OCCURRENCES_COLLECTION_CACHE, matchingErrorIds));
 
         long insertedRows = (insert.getBatchCount() > 0 ? insert.execute() : 0);
 
@@ -220,7 +220,8 @@ public class ErrorRepositoryImpl implements ErrorRepositoryCustom {
                 .distinct()
                 .from(QProblem.problem)
                 .join(QProblem.problem.patterns, QProblemPattern.problemPattern)
-                .join(QProblemPattern.problemPattern.errors, QError.error)
+                .join(QProblemPattern.problemPattern.problemOccurrences, QProblemOccurrence.problemOccurrence)
+                .join(QProblemOccurrence.problemOccurrence.error, QError.error)
                 .where(QError.error.id.in(errors.stream().map(Error::getId).collect(Collectors.toSet())))
                 .fetch();
 

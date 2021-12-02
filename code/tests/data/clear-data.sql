@@ -17,8 +17,8 @@ alter TABLE functionality_coverage ALTER CONSTRAINT "FKpcol94n02a8mv94ls64ao6p" 
 alter TABLE problem ALTER CONSTRAINT "FKmou64hw0xh3mdspog4s9si9gv" DEFERRABLE;
 alter TABLE problem ALTER CONSTRAINT "FKpjf9330s0digv54qmyjnx2p8y" DEFERRABLE;
 
-alter TABLE problem_occurrence ALTER CONSTRAINT "FK7lub23f9xbi92jqumgrjts9tk" DEFERRABLE;
-alter TABLE problem_occurrence ALTER CONSTRAINT "FKm3twuhvstqk2icoycegrcmu69" DEFERRABLE;
+alter TABLE problem_occurrence ALTER CONSTRAINT "fk7ufw7w6ty9af8d2knfj8wf61s" DEFERRABLE;
+alter TABLE problem_occurrence ALTER CONSTRAINT "fkorsa8kvts94kximvdh0lmlfjg" DEFERRABLE;
 
 alter TABLE problem_pattern ALTER CONSTRAINT "FK38mpcmm4yrd45j8acvhb4hpbj" DEFERRABLE;
 alter TABLE problem_pattern ALTER CONSTRAINT "FKbeunicbf28ol04ycus2ufc306" DEFERRABLE;

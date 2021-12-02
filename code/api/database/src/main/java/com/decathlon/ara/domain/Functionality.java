@@ -24,6 +24,7 @@ import lombok.*;
 import org.hibernate.annotations.SortNatural;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Set;
@@ -39,7 +40,7 @@ import static java.util.Comparator.*;
 @NamedEntityGraph(name = "Functionality.scenarios", attributeNodes = @NamedAttributeNode("scenarios"))
 // Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
 @EqualsAndHashCode(of = { "projectId", "parentId", "name" })
-public class Functionality implements Comparable<Functionality> {
+public class Functionality implements Comparable<Functionality>, Serializable {
 
     public static final String COUNTRY_CODES_SEPARATOR = ",";
 
