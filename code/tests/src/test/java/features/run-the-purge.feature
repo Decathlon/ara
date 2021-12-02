@@ -22,15 +22,18 @@ Feature: Run the purge executions
     When method put
     Then status 200
   Scenario: Call force purge execution endpoint
+    # Get last id
     Given path '/api/projects/tests-project/executions/latest'
     When method get
     Then status 200
     And def lastId = response[0].id
 
+    # Run the purge
     Given path '/api/projects/tests-project/purge/force'
     When method delete
     Then status 200
 
+    # Check last execution exists
     Given path '/api/projects/tests-project/executions/latest'
     When method get
     Then status 200
@@ -38,6 +41,39 @@ Feature: Run the purge executions
     And assert lastIdAfterPurge == lastId
     * def previousId = lastId - 1
 
+    # Check previous execution is purged
     Given path '/api/projects/tests-project/executions/' + previousId
     When method get
     Then status 404
+
+    # Check problem exists
+    Given path '/api/projects/tests-project/problems/filter'
+    And param page = 0
+    And param size = 10
+    And request
+      """
+      {
+        "status": null,
+        "blamedTeamId": null,
+        "name": null,
+        "defectId": null,
+        "defectExistence": null,
+        "rootCauseId": null
+      }
+      """
+    When method post
+    Then status 200
+    And match response.content[0].id == '#number'
+    * def problemId = response.content[0].id
+
+    # Check problem pattern exists
+    Given path '/api/projects/tests-project/problems/' + problemId
+    When method get
+    Then status 200
+    And response.patterns == '#[1]'
+
+    # Check error still exists
+    Given path '/api/projects/tests-project/problems/' + problemId + '/errors'
+    When method get
+    Then status 200
+    And response.content == '#[1]'
