@@ -69,7 +69,7 @@ build-api: ## Build ara-api
 ifeq ($(FULL),true)
 	$(MAKE) -C api mvn-install
 endif
-	$(MAKE) -C api mvn-build-image FULL_IMAGE=$(FULL_IMAGE)
+	$(MAKE) -C api mvn-build-image FULL_IMAGE="$(FULL_IMAGE)"
 	@./bin/docker-tags-version.sh "$(API_IMAGE)" "$(API_VERSION)" "$(PUBLISH)"
 
 build-oads: ## Build the ara oauth2-dev-server

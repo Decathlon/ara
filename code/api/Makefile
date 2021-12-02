@@ -3,6 +3,7 @@
 #####################################
 
 JAVA_VERSION=16
+VERSION=$(shell make -s get-version)
 
 #####################################
 ##             DEVELOP             ##
@@ -47,10 +48,11 @@ dkr-run: ## DEV - run api with docker
 #####################################
 
 mvn-build-image: ## Build image with maven
-ifdef $(FULL_IMAGE)
+ifdef FULL_IMAGE
 	@echo 'Building with specfic image name: $(FULL_IMAGE)'
 endif
-	@./mvnw spring-boot:build-image -Dmaven.test.skip=true -Dspring-boot.build-image.imageName=$(FULL_IMAGE) -pl api
+	@./mvnw spring-boot:build-image -Dmaven.test.skip=true -pl api
+	@docker tag docker.io/decathlon/ara-api:$(VERSION) $(FULL_IMAGE)
 
 #####################################
 ##              UTILS              ##
