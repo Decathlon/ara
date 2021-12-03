@@ -34,9 +34,9 @@ Please note the following :
 2. Run the command `Invoke-WebRequest -OutFile docker compose.yml https://raw.githubusercontent.com/Decathlon/ara/main/code/docker-compose.yaml`
 3. Run the command `docker compose up`
 4. Open up a browser on `http://127.0.0.1:7000`
-5. Enjoy !
-6. To stop it, in the command line, just do a `docker compose down` in the same directory as the `docker compose.yaml`
-7. To restart it, in the command line do a `docker compose up` in the same directory as the `docker compose.yaml`
+5. Enjoy ! You can sign in with `admin`/`admin`
+6. To stop it, in the command line, just do a `docker compose down` in the same directory as the `docker-compose.yaml`
+7. To restart it, in the command line do a `docker compose up` in the same directory as the `docker-compose.yaml`
 
 
 === I've got a Mac !
@@ -45,9 +45,9 @@ Please note the following :
 2. Run the command `wget https://raw.githubusercontent.com/Decathlon/ara/main/code/docker-compose.yaml`
 3. Run the command `docker compose up`
 4. Open up a browser on `http://127.0.0.1:7000`
-5. Enjoy !
-6. To stop it, in the command line, just do a `docker compose down` in the same directory as the `docker compose.yaml`
-7. To restart it, in the command line do a `docker compose up` in the same directory as the `docker compose.yaml`
+5. Enjoy ! You can sign in with `admin`/`admin`
+6. To stop it, in the command line, just do a `docker compose down` in the same directory as the `docker-compose.yaml`
+7. To restart it, in the command line do a `docker compose up` in the same directory as the `docker-compose.yaml`
 
 
 === I've got a GNU/Linux PC !
@@ -56,9 +56,9 @@ Please note the following :
 2. Run the command `wget https://raw.githubusercontent.com/Decathlon/ara/main/code/docker-compose.yaml`
 3. Run the command `docker compose up`
 4. Open up a browser on `http://127.0.0.1:7000`
-5. Enjoy !
-6. To stop it, in the command line, just do a `docker compose down` in the same directory as the `docker compose.yaml`
-7. To restart it, in the command line do a `docker compose up` in the same directory as the `docker compose.yaml`
+5. Enjoy ! You can sign in with `admin`/`admin`
+6. To stop it, in the command line, just do a `docker compose down` in the same directory as the `docker-compose.yaml`
+7. To restart it, in the command line do a `docker compose up` in the same directory as the `docker-compose.yaml`
 
 == How to install it on my Infrastructure
 
@@ -79,7 +79,7 @@ helm repo update
 * Install it with custom values
 
 ```shell
-helm install -f values.yaml --create-namespace --namespace ara my-ara ara/ara
+helm install -f values.yaml --create-namespace --namespace ara my-ara ara/ara-stable
 ```
 
 A sample `values.yaml` could be like this one:
@@ -112,6 +112,11 @@ api:
 
 You can use any other OAuth2 provider supported by Spring Security (e.g. Facebook, Google, custom, etc.).
 
+To install and ARA version on the candidate channel:
+```shell
+helm install -f values.yaml --create-namespace --namespace ara my-ara ara/ara-candidate
+```
+
 
 == How to Use ARA?
 
@@ -128,6 +133,30 @@ to learn how the project is structured and how to develop new features in ARA an
 To start a development environment:
 ----
 > cd code
-> docker compose -f code/docker compose.dev.yml up -d
-> docker compose -f code/docker compose.dev.yml logs -f --tail 200
+> docker compose -f code/docker-compose.dev.yml up -d
+> docker compose -f code/docker-compose.dev.yml logs -f --tail 200
 ----
+
+=== Commit convention
+
+ARA use https://github.com/angular/angular/blob/master/CONTRIBUTING.md#-commit-message-format[Angular Commit Message Conventions] in order to generate nice changelog and increase maintenability and lisibility.
+
+In local environment, you can use git hooks configured for developer.
+
+To enable this tools, `node` is required. You can follow this step to use it:
+
+```
+npm install
+npm run prepare
+```
+
+And that's all !
+
+You can now use the standard `git commit` to interact with a prompt to build your conventional commits.
+
+[NOTE]
+.Tools used
+====
+* https://github.com/commitizen/cz-cli[commitizen]
+* https://github.com/typicode/husky[husky]
+====
