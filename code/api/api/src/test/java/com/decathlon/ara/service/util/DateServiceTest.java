@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 
@@ -212,4 +213,106 @@ class DateServiceTest {
         assertThat(actualDate).isEqualTo(expectedDate);
     }
 
+    @Test
+    void getFormattedDurationBetween2Dates_return0ms_whenSameDate() {
+        // Given
+        LocalDateTime date = LocalDateTime.now();
+
+        // When
+
+        // Then
+        var formattedDuration = dateService.getFormattedDurationBetween2Dates(date, date);
+        assertThat(formattedDuration).isEqualTo("0ms");
+    }
+
+    @Test
+    void getFormattedDurationBetween2Dates_returnMilliseconds_whenDatesAreFewMillisecondsDifferent() {
+        // Given
+        LocalDateTime startDate = LocalDateTime.of(2021, 12, 3, 10, 2, 3, 100000000);
+        LocalDateTime endDate = LocalDateTime.of(2021, 12, 3, 10, 2, 3, 250000000);
+
+        // When
+
+        // Then
+        var formattedDuration = dateService.getFormattedDurationBetween2Dates(startDate, endDate);
+        assertThat(formattedDuration).isEqualTo("150ms");
+    }
+
+    @Test
+    void getFormattedDurationBetween2Dates_returnSeconds_whenDatesAreFewSecondsDifferent() {
+        // Given
+        LocalDateTime startDate = LocalDateTime.of(2021, 12, 3, 10, 2, 3, 100000000);
+        LocalDateTime endDate = LocalDateTime.of(2021, 12, 3, 10, 2, 5, 250000000);
+
+        // When
+
+        // Then
+        var formattedDuration = dateService.getFormattedDurationBetween2Dates(startDate, endDate);
+        assertThat(formattedDuration).isEqualTo("2s 150ms");
+    }
+
+    @Test
+    void getFormattedDurationBetween2Dates_returnMinutes_whenDatesAreFewMinutesDifferent() {
+        // Given
+        LocalDateTime startDate = LocalDateTime.of(2021, 12, 3, 10, 2, 3, 100000000);
+        LocalDateTime endDate = LocalDateTime.of(2021, 12, 3, 10, 12, 5, 250000000);
+
+        // When
+
+        // Then
+        var formattedDuration = dateService.getFormattedDurationBetween2Dates(startDate, endDate);
+        assertThat(formattedDuration).isEqualTo("10m 2s 150ms");
+    }
+
+    @Test
+    void getFormattedDurationBetween2Dates_returnHours_whenDatesAreFewHoursDifferent() {
+        // Given
+        LocalDateTime startDate = LocalDateTime.of(2021, 12, 3, 10, 2, 3, 100000000);
+        LocalDateTime endDate = LocalDateTime.of(2021, 12, 3, 15, 12, 5, 250000000);
+
+        // When
+
+        // Then
+        var formattedDuration = dateService.getFormattedDurationBetween2Dates(startDate, endDate);
+        assertThat(formattedDuration).isEqualTo("5h 10m 2s 150ms");
+    }
+
+    @Test
+    void getFormattedDurationBetween2Dates_returnDays_whenDatesAreFewDaysDifferent() {
+        // Given
+        LocalDateTime startDate = LocalDateTime.of(2021, 12, 3, 10, 2, 3, 100000000);
+        LocalDateTime endDate = LocalDateTime.of(2021, 12, 20, 15, 12, 5, 250000000);
+
+        // When
+
+        // Then
+        var formattedDuration = dateService.getFormattedDurationBetween2Dates(startDate, endDate);
+        assertThat(formattedDuration).isEqualTo("17d 5h 10m 2s 150ms");
+    }
+
+    @Test
+    void getFormattedDurationBetween2Dates_returnDays_whenEndDateIsOlderThanStartDate() {
+        // Given
+        LocalDateTime startDate = LocalDateTime.of(2021, 12, 20, 15, 12, 5, 250000000);
+        LocalDateTime endDate = LocalDateTime.of(2021, 12, 3, 10, 2, 3, 100000000);
+
+        // When
+
+        // Then
+        var formattedDuration = dateService.getFormattedDurationBetween2Dates(startDate, endDate);
+        assertThat(formattedDuration).isEqualTo("17d 5h 10m 2s 150ms");
+    }
+
+    @Test
+    void getFormattedDurationBetween2Dates_returnDaysAndMilliseconds_whenDatesAreFewDaysAndMillisecondsDifferent() {
+        // Given
+        LocalDateTime startDate = LocalDateTime.of(2021, 12, 3, 10, 2, 3, 100000000);
+        LocalDateTime endDate = LocalDateTime.of(2022, 3, 21, 10, 2, 3, 250000000);
+
+        // When
+
+        // Then
+        var formattedDuration = dateService.getFormattedDurationBetween2Dates(startDate, endDate);
+        assertThat(formattedDuration).isEqualTo("108d 150ms");
+    }
 }
