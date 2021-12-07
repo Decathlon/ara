@@ -291,6 +291,19 @@ class DateServiceTest {
     }
 
     @Test
+    void getFormattedDurationBetween2Dates_returnOnlyDays_whenDatesAreOnlyFewDaysDifferent() {
+        // Given
+        LocalDateTime startDate = LocalDateTime.of(2021, 12, 3, 10, 2, 3, 100000000);
+        LocalDateTime endDate = LocalDateTime.of(2021, 12, 20, 10, 2, 3, 100000000);
+
+        // When
+
+        // Then
+        var formattedDuration = dateService.getFormattedDurationBetween2Dates(startDate, endDate);
+        assertThat(formattedDuration).isEqualTo("17d");
+    }
+
+    @Test
     void getFormattedDurationBetween2Dates_returnDays_whenEndDateIsOlderThanStartDate() {
         // Given
         LocalDateTime startDate = LocalDateTime.of(2021, 12, 20, 15, 12, 5, 250000000);

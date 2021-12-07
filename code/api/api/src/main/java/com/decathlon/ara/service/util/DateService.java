@@ -3,10 +3,10 @@ package com.decathlon.ara.service.util;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -57,37 +57,17 @@ public class DateService {
      * @return a formatted duration between those 2 dates
      */
     public String getFormattedDurationBetween2Dates(LocalDateTime startDate, LocalDateTime endDate) {
-        var totalMilliseconds = Math.abs(ChronoUnit.MILLIS.between(startDate, endDate));
-
-        if (totalMilliseconds == 0) {
+        var duration = startDate.isBefore(endDate) ? Duration.between(startDate, endDate) : Duration.between(endDate, startDate);
+        if (duration.toMillis() == 0) {
             return "0ms";
         }
+        var ms = duration.toMillisPart() > 0 ? String.format("%dms", duration.toMillisPart()) : "";
+        var s = duration.toSecondsPart() > 0 ? String.format("%ds", duration.toSecondsPart()) : "";
+        var m = duration.toMinutesPart() > 0 ? String.format("%dm", duration.toMinutesPart()) : "";
+        var h = duration.toHoursPart() > 0 ? String.format("%dh", duration.toHoursPart()) : "";
+        var d = duration.toDaysPart() > 0 ? String.format("%dd", duration.toDaysPart()) : "";
 
-        var millisecondsInASecond = 1000;
-        var secondsInAMinute = 60;
-        var minutesInAnHour = 60;
-        var hoursInADay = 24;
-
-        var millisecondsInAMinute = millisecondsInASecond * secondsInAMinute;
-        var millisecondsInAnHour = millisecondsInAMinute * minutesInAnHour;
-        var millisecondsInADay = millisecondsInAnHour * hoursInADay;
-
-        var milliseconds = totalMilliseconds % millisecondsInASecond;
-        var seconds = (totalMilliseconds / millisecondsInASecond) % secondsInAMinute;
-        var minutes = ((totalMilliseconds / millisecondsInAMinute) % minutesInAnHour);
-        var hours   = ((totalMilliseconds / millisecondsInAnHour) % hoursInADay);
-        var days = totalMilliseconds / millisecondsInADay;
-
-        var formattedMilliseconds = milliseconds > 0 ? String.format("%dms", milliseconds) : "";
-        var formattedSeconds = seconds > 0 ? String.format("%ds", seconds) : "";
-        var formattedMinutes = minutes > 0 ? String.format("%dm", minutes) : "";
-        var formattedHours = hours > 0 ? String.format("%dh", hours) : "";
-        var formattedDays = days > 0 ? String.format("%dd", days) : "";
-
-        return List.of(formattedDays, formattedHours, formattedMinutes, formattedSeconds, formattedMilliseconds)
-                .stream()
-                .filter(StringUtils::isNotBlank)
-                .collect(Collectors.joining(" "));
+        return List.of(d, h, m, s, ms).stream().filter(StringUtils::isNotBlank).collect(Collectors.joining(" "));
     }
 
 }
