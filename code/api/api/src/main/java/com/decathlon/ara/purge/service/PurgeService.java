@@ -15,6 +15,9 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.stream.IntStream;
 
 @Slf4j
@@ -82,20 +85,26 @@ public class PurgeService {
 
         var periodDescription = (durationValueAsInt > 1 ? durationValueAsInt + " " : "") + durationType.toLowerCase() + valuePlural;
         log.info("Preparing to delete all execution older than the last {}", periodDescription);
-        var startDate = dateService.getTodayDateMinusPeriod(durationValueAsInt, durationType);
-        if (startDate.isEmpty()) {
+        var purgeThresholdDate = dateService.getTodayDateMinusPeriod(durationValueAsInt, durationType);
+        if (purgeThresholdDate.isEmpty()) {
             log.warn("Purge aborted, because the period was incorrect");
             return;
         }
 
-        var executionsToDelete = executionRepository.findByCycleDefinitionProjectIdAndTestDateTimeBefore(projectId, startDate.get());
+        var executionsToDelete = executionRepository.findByCycleDefinitionProjectIdAndTestDateTimeBefore(projectId, purgeThresholdDate.get());
 
         var numberOfDeletedExecutions = executionsToDelete.size();
         var executionsPlural = numberOfDeletedExecutions > 1 ? "s" : "";
 
-        log.info("Preparing to delete {} execution{}...", numberOfDeletedExecutions, executionsPlural);
+        var simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        log.info("Preparing to delete {} execution{} (older than {})...", numberOfDeletedExecutions, executionsPlural, simpleDateFormat.format(purgeThresholdDate.get()));
         var executionIdsToDelete = executionsToDelete.stream().map(Execution::getId).toList();
+        var purgeRunStartDate = LocalDateTime.now();
         executionRepository.deleteAllByIdInBatch(executionIdsToDelete);
+        var purgeRunEndDate = LocalDateTime.now();
+        var purgeDurationDescription = dateService.getFormattedDurationBetween2Dates(purgeRunStartDate, purgeRunEndDate);
+        DateTimeFormatter detailedDateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss.SSS");
+        log.info("Purge ran from {} to {} - ({})", purgeRunStartDate.format(detailedDateFormat), purgeRunEndDate.format(detailedDateFormat), purgeDurationDescription);
         log.info("{} execution{} successfully deleted", numberOfDeletedExecutions, executionsPlural);
     }
 
