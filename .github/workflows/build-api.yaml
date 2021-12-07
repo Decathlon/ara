@@ -65,6 +65,23 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v2
+        with:
+          semantic_version: 18
+          dry_run: false
+          extra_plugins: |
+            @semantic-release/commit-analyzer@9.0.2
+            @semantic-release/release-notes-generator@10.0.3
+            @semantic-release/exec@6.0.2
+            @semantic-release/git@10.0.1
+            @semantic-release/github@8.0.2
+          extends: |
+            semantic-release-monorepo
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+
       -
         name: Add host binding
         run: sudo echo "127.0.0.1 oauth2.dev.localhost" >> sudo tee -a /etc/hosts

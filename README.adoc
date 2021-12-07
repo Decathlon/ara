@@ -2,7 +2,7 @@
 
 image:https://github.com/Decathlon/ara/actions/workflows/build-api.yaml/badge.svg[API] image:https://github.com/Decathlon/ara/actions/workflows/build-web-ui.yaml/badge.svg[WEB-UI] image:https://github.com/Decathlon/ara/actions/workflows/charts-release.yaml/badge.svg[CHARTS]
 
-image::https://img.shields.io/badge/commitizen-friendly-brightgreen.svg[link="http://commitizen.github.io/cz-cli/"]
+image:https://img.shields.io/badge/commitizen-friendly-brightgreen.svg[link="http://commitizen.github.io/cz-cli/"] image:https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release[link="https://github.com/semantic-release/semantic-release"]
 
 ARA icon by https://github.com/slaout[Sébastien Laout], licensed under https://creativecommons.org/licenses/by-nc-sa/4.0/[Creative Commons 4.0 Attributions license]
 [#img-by-nc-sa]
