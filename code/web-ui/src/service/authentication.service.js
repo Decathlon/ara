@@ -11,9 +11,22 @@ const conf = config
 
 let isLogged = false
 
-const AuthenticationService = {
+class AuthenticationServiceClass {
+  setLogged = (logged) => {
+    isLogged = logged
+  }
 
-  async isAlreadyLoggedIn () {
+  setLoggedOutInterceptor = (router) => {
+    Vue.http.interceptors.push((request, next) => {
+      next((response) => {
+        if (response.url !== api.paths.loggedStatus && response.status === 401) {
+          router.push({ name: 'login' })
+        }
+      })
+    })
+  }
+
+  isAlreadyLoggedIn = async () => {
     return new Promise((resolve) => {
       if (isLogged) {
         resolve(true)
@@ -23,9 +36,9 @@ const AuthenticationService = {
         })
       }
     })
-  },
+  }
 
-  updateAuthenticationStatus () {
+  updateAuthenticationStatus = () => {
     return Vue.http.get(api.paths.loggedStatus)
       .then(answer => answer.body)
       .then(body => {
@@ -41,9 +54,9 @@ const AuthenticationService = {
       }).catch((e) => {
         isLogged = false
       })
-  },
+  }
 
-  async getOauthProviders () {
+  getOauthProviders = async () => {
     return Vue.http.get(api.paths.authenticationConfiguration(), api.REQUEST_OPTIONS)
       .then(response => response.body)
       .then(content => {
@@ -63,9 +76,9 @@ const AuthenticationService = {
         console.debug(res)
         return res
       })
-  },
+  }
 
-  async manageLoginRedirection (to, from, next) {
+  manageLoginRedirection = async (to, from, next) => {
     // RememberUrlService.redirectToLastWantedUrlWhenLoggin(from, to, next)
     RememberUrlService.keepLastUrl(to)
 
@@ -126,34 +139,34 @@ const AuthenticationService = {
       })
       return next('/')
     }
-  },
+  }
 
-  logout () {
+  logout = () => {
     this.clearDetails()
     // window.location.href = config.authentication.logoutProcessingUrl
     console.debug(`conf imported ? ${conf !== undefined}`)
     window.location.href = conf.authentication.logoutProcessingUrl
-  },
+  }
 
-  getDetails () {
+  getDetails = () => {
     return {
       user: JSON.parse(localStorage.getItem(USER_DETAILS)),
       providerName: JSON.parse(localStorage.getItem(PROVIDER_NAME))
     }
-  },
-
-  saveUserDetails (authenticationDetails) {
-    localStorage.setItem(USER_DETAILS, JSON.stringify(authenticationDetails))
-  },
-
-  saveProviderName (providerName) {
-    localStorage.setItem(PROVIDER_NAME, JSON.stringify(providerName))
-  },
-
-  clearDetails () {
-    localStorage.removeItem(USER_DETAILS)
   }
 
+  saveUserDetails = (authenticationDetails) => {
+    localStorage.setItem(USER_DETAILS, JSON.stringify(authenticationDetails))
+  }
+
+  saveProviderName = (providerName) => {
+    localStorage.setItem(PROVIDER_NAME, JSON.stringify(providerName))
+  }
+
+  clearDetails = () => {
+    localStorage.removeItem(USER_DETAILS)
+  }
 }
 
+const AuthenticationService = new AuthenticationServiceClass()
 export { AuthenticationService }

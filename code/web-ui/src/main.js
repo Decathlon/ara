@@ -73,6 +73,8 @@ router.afterEach(() => {
   window.scrollTo(0, 0)
 })
 
+AuthenticationService.setLoggedOutInterceptor(router)
+
 util.cleanFromPreviousVersion()
 
 Vue.prototype.$sanitizeUrl = sanitizeUrl
