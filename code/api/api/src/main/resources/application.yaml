@@ -22,6 +22,8 @@ info:
     version: version
   api:
     version: @project.version@
+
+# Srping custom conf
 spring:
   profiles:
     include: @profiles.from.maven@,${ara.oauth2.mode},${ara.logging.mode}
@@ -99,6 +101,13 @@ ara:
 
 server:
   port: 8000
+  # Session management
+  servlet:
+    session:
+      timeout: 14400s
+      cookie:
+        max-age: 43200
+
 management:
   server:
     port: 8001
