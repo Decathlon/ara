@@ -48,30 +48,31 @@ public class Severity implements Comparable<Severity>, Serializable {
 
     private long projectId;
 
-    @Column(length = 32)
+    @Column(length = 32, nullable = false)
     private String code;
 
     /**
      * The order in which the severities should appear: the lowest position should be for the highest severity.
      */
+    @Column(nullable = false)
     private int position;
 
     /**
      * The full name (eg. "Sanity Check").
      */
-    @Column(length = 32)
+    @Column(length = 32, nullable = false)
     private String name;
 
     /**
      * The shorter name (but still intelligible) to display on table column headers where space is constrained (eg. "Sanity Ch.").
      */
-    @Column(length = 16)
+    @Column(length = 16, nullable = false)
     private String shortName;
 
     /**
      * The shortest name to display on email subjects to help keep it very short (eg. "S.C.").
      */
-    @Column(length = 8)
+    @Column(length = 8, nullable = false)
     private String initials;
 
     /**

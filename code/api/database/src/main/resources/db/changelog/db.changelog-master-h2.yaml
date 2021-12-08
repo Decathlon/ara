@@ -4,4 +4,6 @@ databaseChangeLog:
   - include:
       file: classpath*:db/changelog/changes/h2/20210618093532-change_id.yaml
   - include:
+      file: classpath*:db/changelog/changes/h2/20211125174155-not_null_constraints.yaml
+  - include:
       file: classpath*:db/changelog/changes/h2/20211129100815-delete_cascade_on_problem_occurrences.yaml

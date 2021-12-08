@@ -40,7 +40,7 @@ public class RootCause implements Serializable {
 
     private long projectId;
 
-    @Column(length = 128)
+    @Column(length = 128, nullable = false)
     private String name;
 
     // No cascade, as this collection is only used while removing a rootCause

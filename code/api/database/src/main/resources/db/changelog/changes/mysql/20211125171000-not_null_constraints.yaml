@@ -1,0 +1,288 @@
+databaseChangeLog:
+- changeSet:
+    id: 1637856823278-1
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(16)
+        columnName: branch
+        tableName: cycle_definition
+        validate: true
+    - sql:
+          sql: update cycle_definition set branch = 'default_branch' where branch is null;
+- changeSet:
+    id: 1637856823278-2
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(32)
+        columnName: code
+        tableName: communication
+        validate: true
+    - sql:
+          sql: update communication set code = 'generated_code' where code is null;
+- changeSet:
+    id: 1637856823278-3
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(2)
+        columnName: code
+        tableName: country
+        validate: true
+    - sql:
+          sql: update country set code = 'xx' where code is null;
+- changeSet:
+    id: 1637856823278-4
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(32)
+        columnName: code
+        tableName: project
+        validate: true
+    - sql:
+          sql: update project set code = 'generated_code' where code is null;
+- changeSet:
+    id: 1637856823278-5
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(64)
+        columnName: code
+        tableName: setting
+        validate: true
+    - sql:
+          sql: update setting set code = 'generated.code' where code is null;
+- changeSet:
+    id: 1637856823278-6
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(32)
+        columnName: code
+        tableName: severity
+        validate: true
+    - sql:
+          sql: update severity set code = 'generated_code' where code is null;
+- changeSet:
+    id: 1637856823278-7
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(16)
+        columnName: code
+        tableName: source
+        validate: true
+    - sql:
+          sql: update source set code = 'generated_code' where code is null;
+- changeSet:
+    id: 1637856823278-8
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(255)
+        columnName: code
+        tableName: technology_setting
+        validate: true
+    - sql:
+          sql: update technology_setting set code = 'generated.code' where code is null;
+- changeSet:
+    id: 1637856823278-9
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(16)
+        columnName: code
+        tableName: type
+        validate: true
+    - sql:
+          sql: update type set code = 'generated_code' where code is null;
+- changeSet:
+    id: 1637856823278-10
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(16)
+        columnName: default_branch
+        tableName: source
+        validate: true
+    - sql:
+          sql: update source set default_branch = 'generated_branch' where default_branch is null;
+- changeSet:
+    id: 1637856823278-11
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(8)
+        columnName: initials
+        tableName: severity
+        validate: true
+    - sql:
+          sql: update severity set initials = 'gen_init' where initials is null;
+- changeSet:
+    id: 1637856823278-12
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(64)
+        columnName: name
+        tableName: communication
+        validate: true
+    - sql:
+          sql: update communication set name = 'generated_name' where name is null;
+- changeSet:
+    id: 1637856823278-13
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(40)
+        columnName: name
+        tableName: country
+        validate: true
+    - sql:
+          sql: update country set name = 'generated_name' where name is null;
+- changeSet:
+    id: 1637856823278-14
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(16)
+        columnName: name
+        tableName: cycle_definition
+        validate: true
+    - sql:
+          sql: update cycle_definition set name = 'default_cycle' where name is null;
+- changeSet:
+    id: 1637856823278-15
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(64)
+        columnName: name
+        tableName: project
+        validate: true
+    - sql:
+          sql: update project set name = 'generated_name' where name is null;
+- changeSet:
+    id: 1637856823278-16
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(128)
+        columnName: name
+        tableName: root_cause
+        validate: true
+    - sql:
+          sql: update root_cause set name = 'generated_name' where name is null;
+- changeSet:
+    id: 1637856823278-17
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(32)
+        columnName: name
+        tableName: severity
+        validate: true
+    - sql:
+          sql: update severity set name = 'generated_name' where name is null;
+- changeSet:
+    id: 1637856823278-18
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(32)
+        columnName: name
+        tableName: source
+        validate: true
+    - sql:
+          sql: update source set name = 'generated_name' where name is null;
+- changeSet:
+    id: 1637856823278-19
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(128)
+        columnName: name
+        tableName: team
+        validate: true
+    - sql:
+          sql: update team set name = 'generated_name' where name is null;
+- changeSet:
+    id: 1637856823278-20
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(50)
+        columnName: name
+        tableName: type
+        validate: true
+    - sql:
+          sql: update type set name = 'generated_name' where name is null;
+- changeSet:
+    id: 1637856823278-21
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(16)
+        columnName: short_name
+        tableName: severity
+        validate: true
+    - sql:
+          sql: update severity set short_name = 'generated_abrev' where short_name is null;
+- changeSet:
+    id: 1637856823278-22
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: bigint(19)
+        columnName: source_id
+        tableName: type
+        validate: true
+    - sql:
+          sql: delete from type where source_id is null;
+- changeSet:
+    id: 1637856823278-23
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(16)
+        columnName: technology
+        tableName: source
+        validate: true
+    - sql:
+          sql: update source set technology = 'GENERIC' where technology is null;
+- changeSet:
+    id: 1637856823278-24
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(255)
+        columnName: technology
+        tableName: technology_setting
+        validate: true
+    - sql:
+          sql: update technology_setting set technology = 'GENERIC' where technology is null;
+- changeSet:
+    id: 1637856823278-25
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(4)
+        columnName: type
+        tableName: communication
+        validate: true
+    - sql:
+          sql: update communication set type = 'TEXT' where type is null;
+- changeSet:
+    id: 1637856823278-26
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(255)
+        columnName: vcs_url
+        tableName: source
+        validate: true
+    - sql:
+          sql: update source set vcs_url = 'http://vcs.your-company.org/{{branch}}/files' where vcs_url is null;
+

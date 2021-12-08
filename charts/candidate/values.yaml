@@ -8,7 +8,7 @@ api:
     image:
         registry: docker.io
         repository: decathlon/ara-api
-        tag: 11.1.4
+        tag: 12.0.0
         imagePullPolicy: IfNotPresent
     loggingMode:
         - logging-console
@@ -47,7 +47,7 @@ ui:
     image:
         registry: docker.io
         repository: decathlon/ara-web-ui
-        tag: 9.3.0
+        tag: 9.3.2
         imagePullPolicy: IfNotPresent
     replicas: 1
     annotations: {}

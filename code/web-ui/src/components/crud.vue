@@ -35,6 +35,9 @@
           <div class="hints">
             {{field.help}}
           </div>
+          <div v-if="isExpectedToDisplayErrorMessage(field)" class="error-description">
+            <Icon type="md-close-circle"></Icon> This field is required and cannot be left blank!
+          </div>
         </Form-item>
       </Form>
     </Modal>
@@ -46,6 +49,7 @@
   import formFieldComponent from '../components/form-field'
   import api from '../libs/api'
   import util from '../libs/util'
+  import _ from 'lodash'
 
   export default {
     name: 'crud',
@@ -188,6 +192,7 @@
         }
       })
       return {
+        triedToSubmitForm: false,
         loadingTable: false,
         editing: false,
         loadingSaving: true,
@@ -199,6 +204,16 @@
     },
 
     computed: {
+      shouldDisplayErrorIfAny () {
+        const isInEditMode = !this.editingNew
+        const alreadyTriedToSave = this.editingNew && this.triedToSubmitForm
+        return isInEditMode || alreadyTriedToSave
+      },
+
+      formIsValid () {
+        return !_.some(this.fields, (field) => this.fieldContainsError(field))
+      },
+
       /**
        * @return the field that has primaryKey set to true (eg. the 'id' or 'code' field)
        */
@@ -231,6 +246,20 @@
     },
 
     methods: {
+      fieldContainsError (field) {
+        const fieldValue = this.editingData[field.code]
+        const isASelectField = field.type === 'select'
+        const isATextField = field.type === 'string' || field.type === 'textarea' || field.type === 'password'
+        const isANumberField = field.type === 'int'
+        const cannotBeLeftBlank = field.required && (isATextField || isANumberField || isASelectField)
+        const fieldIsBlank = (fieldValue === null || fieldValue === undefined || ((isATextField || isASelectField) && _.isString(fieldValue) && fieldValue.trim().length === 0))
+        return cannotBeLeftBlank && fieldIsBlank
+      },
+
+      isExpectedToDisplayErrorMessage (field) {
+        return this.shouldDisplayErrorIfAny && this.fieldContainsError(field)
+      },
+
       load () {
         this.loadingTable = true
         Vue.http
@@ -278,6 +307,18 @@
       },
 
       save () {
+        if (!this.formIsValid) {
+          if (this.editingNew) {
+            this.triedToSubmitForm = true
+          }
+          this.loadingSaving = false
+          this.$Message.error({
+            content: 'Not saved, please check your fields again before submitting',
+            duration: 10,
+            closable: true
+          })
+          return
+        }
         if (this.editingNew) {
           let row = { ...this.editingData }
           row.id = undefined
@@ -372,3 +413,9 @@
     }
   }
 </script>
+<style>
+ .error-description {
+   color: red;
+   font-weight: bold;
+ }
+</style>

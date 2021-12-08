@@ -42,7 +42,7 @@ public class Setting implements Comparable<Setting>, Serializable {
     // No access to the parent project entity: settings are obtained from a project, so the project is already known
     private long projectId;
 
-    @Column(length = 64)
+    @Column(length = 64, nullable = false)
     private String code;
 
     @Column(length = 512)
