@@ -53,9 +53,9 @@ jobs:
           config-file: ./.github/codeql/codeql-web-ui-config.yml
 
       - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@v2
-        working-directory: ./code/web-ui
+        uses: Thomgrus/semantic-release-action@feat/add-working-dir
         with:
+          working_directory: ./code/web-ui
           semantic_version: 18
           dry_run: false
           extra_plugins: |
