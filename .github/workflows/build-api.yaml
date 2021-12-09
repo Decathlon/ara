@@ -66,10 +66,14 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@v2
+      - name: Ensure package json for semantic-release-monorepo
         working-directory: ./code/api
+        run: test -e package.json || echo '{}' > package.json
+
+      - name: Semantic Release
+        uses: Thomgrus/semantic-release-action@feat/add-working-dir
         with:
+          working_directory: ./code/api
           semantic_version: 18
           dry_run: false
           extra_plugins: |
