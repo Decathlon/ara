@@ -71,6 +71,14 @@ jobs:
         working-directory: ./code/api
         run: test -e package.json || echo '{}' > package.json
 
+      -
+        name: Add pre-push hook for semantic release git
+        run: |
+          cat << EOF > .git/hooks/pre-push
+          #!/bin/bash
+          git pull
+          EOF
+
       - name: Semantic Release
         uses: Thomgrus/semantic-release-action@feat/add-working-dir
         with:
