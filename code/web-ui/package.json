@@ -1,6 +1,6 @@
 {
   "name": "ara-web-ui",
-  "version": "9.5.0",
+  "version": "9.5.1",
   "description": "Agile Regression Analyzer front app",
   "author": "Decathlon <developers@decathlon.com>",
   "private": true,
