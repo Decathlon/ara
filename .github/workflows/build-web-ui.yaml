@@ -60,6 +60,7 @@ jobs:
           #!/bin/bash
           git pull
           EOF
+          chmod +x .git/hooks/pre-push
 
       - name: Semantic Release
         uses: Thomgrus/semantic-release-action@feat/add-working-dir
