@@ -6,6 +6,7 @@
         "@semantic-release/commit-analyzer",
         "@semantic-release/release-notes-generator",
         ["@semantic-release/exec", {
+            "verifyConditionsCmd": "git pull",
             "prepareCmd": "make update-version VERSION=${nextRelease.version}"
         }],
         ["@semantic-release/git", {
