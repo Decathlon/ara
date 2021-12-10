@@ -69,7 +69,7 @@ jobs:
 
       - name: Ensure package json for semantic-release-monorepo
         working-directory: ./code/api
-        run: test -e package.json || echo '{}' > package.json
+        run: test -e package.json || echo '{"name":"ara-api"}' > package.json
 
       -
         name: Add pre-push hook for semantic release git
