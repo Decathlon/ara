@@ -67,7 +67,7 @@ jobs:
           extends: |
             semantic-release-monorepo
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
 
       - 
         name: Get project version
