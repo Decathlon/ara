@@ -1,0 +1,25 @@
+{
+    "tagFormat": "ara-candidate-${version}",
+    "branches": [
+        {"name": "main"}
+    ],
+    "plugins": [
+        "@semantic-release/commit-analyzer",
+        "@semantic-release/release-notes-generator",
+        ["@semantic-release/exec", {
+            "verifyConditionsCmd": "git pull"
+        }],
+        ["@semantic-release/changelog", {
+            "changelogFile": "CHANGELOG.md"
+        }],
+        ["@semantic-release/git", {
+            "assets": ["Chart.yaml"],
+            "message": "chore(release-candidate): ara-candidate ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+          }],
+        ["semantic-release-helm", {
+            "chartPath": ".",
+            "crPublish": false,
+            "onlyUpdateVersion": true
+        }]
+    ]
+}
