@@ -1,4 +1,4 @@
-{{- $name := printf "%s-%s-%s" .Release.Name .Chart.Name "api" -}}
+{{- $name := printf "%s-%s" .Release.Name "api" -}}
 {{- $defaultImage := printf "%s:%s" "decathlon/ara-api" .Chart.Version -}}
 apiVersion: apps/v1
 kind: Deployment

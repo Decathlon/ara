@@ -8,7 +8,7 @@ If release name contains chart name it will be used as a name.
 {{- if .Values.nameOverride -}}
 {{- .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
-{{- printf "%s-%s" .Release.Name .Chart.Name | trunc 63 | trimSuffix "-" -}}
+{{- printf "%s" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
 
@@ -23,7 +23,7 @@ Create chart name and version as used by the chart label.
 Create configmap name.
 */}}
 {{- define "ara.configmap.name" -}}
-{{ printf "%s-%s-%s" .Release.Name .Chart.Name "configmap"  }}
+{{ printf "%s-%s" .Release.Name "configmap"  }}
 {{- end -}}
 
 {{/*
@@ -33,7 +33,7 @@ Secret name for database.
 {{- if .Values.database.secretConfig.external -}}
 {{ .Values.database.secretConfig.secretName }}
 {{- else -}}
-{{ printf "%s-%s-%s" .Release.Name .Chart.Name "db"  }}
+{{ printf "%s-%s" .Release.Name "db"  }}
 {{- end -}}
 {{- end -}}
 
@@ -44,7 +44,7 @@ Secret name for api.
 {{- if .Values.api.secretConfig.external -}}
 {{ .Values.api.secretConfig.secretName }}
 {{- else -}}
-{{ printf "%s-%s-%s" .Release.Name .Chart.Name "api"  }}
+{{ printf "%s-%s" .Release.Name "api"  }}
 {{- end -}}
 {{- end -}}
 
@@ -53,7 +53,7 @@ Define db host url
 */}}
 {{- define "ara.database.host" -}}
 {{- if eq .Values.database.mode "cluster" -}}
-{{ printf "%s-%s-db.%s.svc.cluster.local:5432" .Release.Name .Chart.Name .Release.Namespace }}
+{{ printf "%s-db.%s.svc.cluster.local:5432" .Release.Name .Release.Namespace }}
 {{- else -}}
 {{ .Values.database.host }}
 {{- end -}}
