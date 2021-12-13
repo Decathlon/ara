@@ -10,20 +10,65 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        chart:
+          - candidate
+          - stable
     steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@v3.4.0
+        with:
+          github_token: ${{ github.token }}
+          paths: '["charts/${{ matrix.chart }}/**"]'
+          cancel_others: 'true'
+          do_not_skip: '["workflow_dispatch"]'
       - name: Checkout
+        if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Configure Git
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          persist-credentials: false # To use github token provide for semantic release
       - name: Install Helm
+        if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
         uses: azure/setup-helm@v1
         with:
           version: v3.4.0
+      - name: Add pre-push hook for semantic release git
+        if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
+        run: |
+          cat << EOF > .git/hooks/pre-push
+          #!/bin/bash
+          git pull --rebase
+          EOF
+          chmod +x .git/hooks/pre-push
+      - name: Semantic Release
+        if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
+        uses: cycjimmy/semantic-release-action@v2
+        with:
+          working_directory: ./charts/${{ matrix.chart }}
+          semantic_version: 18
+          dry_run: false
+          extra_plugins: |
+            @semantic-release/commit-analyzer@9.0.2
+            @semantic-release/release-notes-generator@10.0.3
+            @semantic-release/exec@6.0.2
+            @semantic-release/changelog@6.0.1
+            @semantic-release/git@10.0.1
+            semantic-release-helm@2.1.0
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Configure Git
+        if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
       - name: Run chart-releaser
+        if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
         uses: helm/chart-releaser-action@v1.2.1
+        with:
+          config: .github/cr-${{ matrix.chart }}-config.yaml
+          charts_dir: charts/${{ matrix.chart }}
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
