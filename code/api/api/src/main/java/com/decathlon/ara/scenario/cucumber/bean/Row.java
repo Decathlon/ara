@@ -18,14 +18,24 @@
 package com.decathlon.ara.scenario.cucumber.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Data;
 
-@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Row {
 
     private Integer line;
     private String[] cells = new String[0];
     private Comment[] comments = new Comment[0];
+
+    public Integer getLine() {
+        return line;
+    }
+
+    public String[] getCells() {
+        return cells;
+    }
+
+    public Comment[] getComments() {
+        return comments;
+    }
 
 }

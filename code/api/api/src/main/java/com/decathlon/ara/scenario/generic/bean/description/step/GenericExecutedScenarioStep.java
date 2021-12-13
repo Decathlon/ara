@@ -17,18 +17,10 @@
 
 package com.decathlon.ara.scenario.generic.bean.description.step;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-
 import java.util.Optional;
 
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GenericExecutedScenarioStep {
 
@@ -54,5 +46,21 @@ public class GenericExecutedScenarioStep {
                 .map(v -> ":" + v)
                 .orElse("");
         return String.format("%d:%s%s:%s", line, status, valueAsString, content);
+    }
+
+    public Long getLine() {
+        return line;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public Long getValue() {
+        return value;
+    }
+
+    public String getContent() {
+        return content;
     }
 }

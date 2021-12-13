@@ -17,6 +17,16 @@
 
 package com.decathlon.ara.defect.github;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.decathlon.ara.ci.util.FetchException;
 import com.decathlon.ara.defect.DefectAdapter;
 import com.decathlon.ara.defect.bean.Defect;
@@ -25,17 +35,6 @@ import com.decathlon.ara.service.SettingProviderService;
 import com.decathlon.ara.service.SettingService;
 import com.decathlon.ara.service.dto.setting.SettingDTO;
 import com.decathlon.ara.service.support.Settings;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
 
 /**
  * Implementation of {@link DefectAdapter} for Github issues system.
@@ -43,20 +42,24 @@ import java.util.stream.Collectors;
  * @author Sylvain Nieuwlandt
  * @since 3.1.0
  */
-@Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GithubDefectAdapter implements DefectAdapter {
+
+    private static final Logger LOG = LoggerFactory.getLogger(GithubDefectAdapter.class);
+
     private static final String UNABLE_TO_ACCESS_GITHUB = "DEFECT|Unable to access Github.";
-    @Autowired
     private GithubRestClient restClient;
 
-    @Autowired
     private SettingService settingService;
 
-    @Autowired
     private SettingProviderService settingProviderService;
 
+    public GithubDefectAdapter(GithubRestClient restClient, SettingService settingService,
+            SettingProviderService settingProviderService) {
+        this.restClient = restClient;
+        this.settingService = settingService;
+        this.settingProviderService = settingProviderService;
+    }
 
     @Override
     public List<Defect> getStatuses(long projectId, List<String> ids) throws FetchException {
@@ -76,7 +79,7 @@ public class GithubDefectAdapter implements DefectAdapter {
                     .map(this::toDefect)
                     .collect(Collectors.toList());
         } catch (IOException | URISyntaxException ex) {
-            log.error(UNABLE_TO_ACCESS_GITHUB, ex);
+            LOG.error(UNABLE_TO_ACCESS_GITHUB, ex);
             throw new FetchException(UNABLE_TO_ACCESS_GITHUB, ex);
         }
     }
@@ -95,7 +98,7 @@ public class GithubDefectAdapter implements DefectAdapter {
                     .map(this::toDefect)
                     .collect(Collectors.toList());
         } catch (IOException | URISyntaxException ex) {
-            log.error(UNABLE_TO_ACCESS_GITHUB, ex);
+            LOG.error(UNABLE_TO_ACCESS_GITHUB, ex);
             throw new FetchException(UNABLE_TO_ACCESS_GITHUB, ex);
         }
     }

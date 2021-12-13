@@ -17,17 +17,9 @@
 
 package com.decathlon.ara.service.dto.quality;
 
-import com.decathlon.ara.service.dto.severity.SeverityDTO;
 import com.decathlon.ara.domain.enumeration.QualityStatus;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
+import com.decathlon.ara.service.dto.severity.SeverityDTO;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 public class QualitySeverityDTO {
 
     private SeverityDTO severity;
@@ -43,5 +35,37 @@ public class QualitySeverityDTO {
      * Deduced from {@code percent} and the quality thresholds of this {@code severity} at the time of execution.
      */
     private QualityStatus status;
+
+    public SeverityDTO getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(SeverityDTO severity) {
+        this.severity = severity;
+    }
+
+    public ScenarioCountDTO getScenarioCounts() {
+        return scenarioCounts;
+    }
+
+    public void setScenarioCounts(ScenarioCountDTO scenarioCounts) {
+        this.scenarioCounts = scenarioCounts;
+    }
+
+    public int getPercent() {
+        return percent;
+    }
+
+    public void setPercent(int percent) {
+        this.percent = percent;
+    }
+
+    public QualityStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(QualityStatus status) {
+        this.status = status;
+    }
 
 }

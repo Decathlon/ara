@@ -1,12 +1,12 @@
 package com.decathlon.ara.cartography;
 
-import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.stereotype.Service;
+
+import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
 
 /**
  * AraExporter is a Exporter which serialize the functionalities into a ARA-specific format (typically the JSON object
@@ -16,7 +16,6 @@ import java.util.Map;
  * @since 4.1.0
  */
 @Service
-@Slf4j
 public class AraExporter extends Exporter {
 
     private AraCartographyMapper MAPPER = new AraCartographyMapper();

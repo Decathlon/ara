@@ -63,6 +63,7 @@ import com.decathlon.ara.service.dto.execution.ExecutionWithCountryDeploymentsAn
 import com.decathlon.ara.service.dto.execution.ExecutionWithHandlingCountsDTO;
 import com.decathlon.ara.service.dto.run.RunDTO;
 import com.decathlon.ara.service.dto.run.RunWithExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO;
+import com.decathlon.ara.util.factory.CycleDefinitionFactory;
 import com.decathlon.ara.web.rest.util.HeaderUtil;
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
@@ -70,14 +71,14 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 @Disabled
 @SpringBootTest
 @TestExecutionListeners({
-    TransactionalTestExecutionListener.class,
-    DependencyInjectionTestExecutionListener.class,
-    DbUnitTestExecutionListener.class
+        TransactionalTestExecutionListener.class,
+        DependencyInjectionTestExecutionListener.class,
+        DbUnitTestExecutionListener.class
 })
 @TestPropertySource(
-		locations = "classpath:application-db-h2.properties")
+        locations = "classpath:application-db-h2.properties")
 @Transactional
-public class ExecutionResourceIT {
+class ExecutionResourceIT {
 
     private static final String PROJECT_CODE = "p";
 
@@ -104,7 +105,7 @@ public class ExecutionResourceIT {
 
     @Test
     @DatabaseSetup("/dbunit/full-small-fake-dataset.xml")
-    public void testGetPage() {
+    void testGetPage() {
         int pageIndex = 0;
         int pageSize = 2;
 
@@ -139,7 +140,7 @@ public class ExecutionResourceIT {
 
     @Test
     @DatabaseSetup("/dbunit/full-small-fake-dataset.xml")
-    public void testGetOne() {
+    void testGetOne() {
         ResponseEntity<ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO> response = cut.getOne(PROJECT_CODE, 2);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -173,7 +174,7 @@ public class ExecutionResourceIT {
     @Test
     @DatabaseSetup("/dbunit/full-small-fake-dataset.xml")
     @DatabaseSetup("/dbunit/full-small-fake-dataset-defect-settings.xml")
-    public void testGetOneWithProblems() {
+    void testGetOneWithProblems() {
         ResponseEntity<ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO> response = cut.getOne(PROJECT_CODE, 3);
         ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO execution = response.getBody();
 
@@ -211,14 +212,14 @@ public class ExecutionResourceIT {
     }
 
     @Test
-    public void testGetOneNonexistent() {
+    void testGetOneNonexistent() {
         ResponseEntity<ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO> response = cut.getOne(PROJECT_CODE, NONEXISTENT);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
     @DatabaseSetup("/dbunit/full-small-fake-dataset.xml")
-    public void testDiscard() {
+    void testDiscard() {
         ResponseEntity<ExecutionDTO> response = cut.discard(PROJECT_CODE, 1, "Discard Reason");
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -235,7 +236,7 @@ public class ExecutionResourceIT {
 
     @Test
     @DatabaseSetup("/dbunit/full-small-fake-dataset.xml")
-    public void testDiscardWithoutReason() {
+    void testDiscardWithoutReason() {
         ResponseEntity<ExecutionDTO> response = cut.discard(PROJECT_CODE, NONEXISTENT, "");
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.reason_mandatory_for_discarded_executions");
@@ -245,14 +246,14 @@ public class ExecutionResourceIT {
 
     @Test
     @DatabaseSetup("/dbunit/full-small-fake-dataset.xml")
-    public void testDiscardNonexistent() {
+    void testDiscardNonexistent() {
         ResponseEntity<ExecutionDTO> response = cut.discard(PROJECT_CODE, NONEXISTENT, "Discard Reason");
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
     @DatabaseSetup("/dbunit/full-small-fake-dataset.xml")
-    public void testUnDiscard() {
+    void testUnDiscard() {
         ResponseEntity<ExecutionDTO> response = cut.unDiscard(PROJECT_CODE, 3);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -269,14 +270,14 @@ public class ExecutionResourceIT {
 
     @Test
     @DatabaseSetup("/dbunit/full-small-fake-dataset.xml")
-    public void testUnDiscardNonexistent() {
+    void testUnDiscardNonexistent() {
         ResponseEntity<ExecutionDTO> response = cut.unDiscard(PROJECT_CODE, NONEXISTENT);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
     @DatabaseSetup("/dbunit/ExecutionRepository-getLatestEligibleVersions.xml")
-    public void testGetLatestEligibleVersions() {
+    void testGetLatestEligibleVersions() {
         // WHEN
         final ResponseEntity<List<ExecutionDTO>> response = cut.getLatestEligibleVersions(PROJECT_CODE);
 
@@ -311,7 +312,7 @@ public class ExecutionResourceIT {
 
     @Test
     @DatabaseSetup("/dbunit/brand-new-project-dataset.xml")
-    public void testUploadPostman() throws IOException {
+    void testUploadPostman() throws IOException {
         // Given
         InputStream zipContent = getClass().getResourceAsStream("/postman/ara-reports-upload.zip");
         MultipartFile file = new MockMultipartFile("zip", zipContent);
@@ -320,8 +321,8 @@ public class ExecutionResourceIT {
         String cycleName = "day";
         File incomingPath = new File("/tmp/ara/executions/custom/" + projectCode
                 + "/" + branchName + "/" + cycleName + "/incoming/1547216212139");
-        CycleDefinition cycle = new CycleDefinition(1L, 2, branchName, cycleName, 1);
-        PlannedIndexation plannedIndexation = new PlannedIndexation().withCycleDefinition(cycle).withExecutionFolder(incomingPath);
+        CycleDefinition cycle = CycleDefinitionFactory.get(1L, 2, branchName, cycleName, 1);
+        PlannedIndexation plannedIndexation = new PlannedIndexation(cycle, incomingPath);
         try {
             // When
             ResponseEntity<Void> responseEntity = cut.upload(projectCode, branchName, cycleName, file);

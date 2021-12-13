@@ -1,22 +1,21 @@
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.Entities;
-import com.decathlon.ara.service.ExecutionHistoryService;
-import com.decathlon.ara.service.ProjectService;
-import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.web.rest.util.RestConstants;
-import lombok.RequiredArgsConstructor;
+import javax.transaction.Transactional;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.transaction.Transactional;
+import com.decathlon.ara.Entities;
+import com.decathlon.ara.service.ExecutionHistoryService;
+import com.decathlon.ara.service.ProjectService;
+import com.decathlon.ara.service.exception.NotFoundException;
+import com.decathlon.ara.web.rest.util.RestConstants;
 
 @Controller
 @RequestMapping(TemplateResource.PATH)
-@RequiredArgsConstructor
 @Transactional(Transactional.TxType.REQUIRED)
 public class TemplateResource {
     private static final String NAME = "template";
@@ -27,6 +26,11 @@ public class TemplateResource {
 
     private final ExecutionHistoryService executionHistoryService;
     private final ProjectService projectService;
+
+    public TemplateResource(ExecutionHistoryService executionHistoryService, ProjectService projectService) {
+        this.executionHistoryService = executionHistoryService;
+        this.projectService = projectService;
+    }
 
     @GetMapping("cycle-execution")
     public String nrtCycle(@RequestParam("project") String projectCode,

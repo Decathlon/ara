@@ -17,11 +17,8 @@
 
 package com.decathlon.ara.defect.jira.api.model;
 
-import lombok.Data;
-
 import java.util.List;
 
-@Data
 public class JiraIssueSearchResults {
 
     private String expand;
@@ -33,4 +30,24 @@ public class JiraIssueSearchResults {
     private Integer total;
 
     private List<JiraIssue> issues;
+
+    public String getExpand() {
+        return expand;
+    }
+
+    public Integer getStartAt() {
+        return startAt;
+    }
+
+    public Integer getMaxResults() {
+        return maxResults;
+    }
+
+    public Integer getTotal() {
+        return total;
+    }
+
+    public List<JiraIssue> getIssues() {
+        return issues;
+    }
 }

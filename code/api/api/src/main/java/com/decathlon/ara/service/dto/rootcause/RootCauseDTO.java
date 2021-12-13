@@ -19,15 +19,7 @@ package com.decathlon.ara.service.dto.rootcause;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 public class RootCauseDTO {
 
     private Long id;
@@ -35,5 +27,24 @@ public class RootCauseDTO {
     @NotNull(message = "The name is required.")
     @Size(min = 1, max = 128, message = "The name is required and must not exceed {max} characters.")
     private String name;
+
+    public RootCauseDTO() {
+    }
+
+    public RootCauseDTO(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
 
 }

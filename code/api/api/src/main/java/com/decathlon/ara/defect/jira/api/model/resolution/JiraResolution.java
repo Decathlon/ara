@@ -17,9 +17,6 @@
 
 package com.decathlon.ara.defect.jira.api.model.resolution;
 
-import lombok.Data;
-
-@Data
 public class JiraResolution {
 
     private String self;
@@ -29,4 +26,20 @@ public class JiraResolution {
     private String description;
 
     private String name;
+
+    public String getSelf() {
+        return self;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

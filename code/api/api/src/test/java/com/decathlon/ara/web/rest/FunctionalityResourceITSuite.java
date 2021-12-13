@@ -51,7 +51,10 @@ public class FunctionalityResourceITSuite {
     }
 
     static FunctionalityDTO folder(String name) {
-        return new FunctionalityDTO().withType(FunctionalityType.FOLDER.name()).withName(name);
+        FunctionalityDTO functionality = new FunctionalityDTO();
+        functionality.setType(FunctionalityType.FOLDER.name());
+        functionality.setName(name);
+        return functionality;
     }
 
 }

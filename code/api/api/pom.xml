@@ -42,13 +42,11 @@
         <ara.default.database>h2</ara.default.database>
         <profiles.from.maven>default</profiles.from.maven>
         <jacoco.version>0.8.7</jacoco.version>
-        <mapstruct.version>1.4.2.Final</mapstruct.version>
         <springdoc.version>1.5.9</springdoc.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <jacoco.phase.agent>initialize</jacoco.phase.agent>
         <jacoco.phase.report>verify</jacoco.phase.report>
-        <delombok.phase>generate-sources</delombok.phase>
         <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
     </properties>
 
@@ -88,6 +86,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-inline</artifactId>
+			<scope>test</scope>
+		</dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
@@ -125,22 +128,9 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- Inject getters/setters for POJO beans -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-        </dependency>
-
-        <!-- Entity<->DTO Mappapplicater classes generation -->
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct</artifactId>
-            <version>${mapstruct.version}</version>
         </dependency>
 
         <!-- For SshClientHelper -->
@@ -327,54 +317,14 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
-                        </path>
-                        <path>
-                            <groupId>org.mapstruct</groupId>
-                            <artifactId>mapstruct-processor</artifactId>
-                            <version>${mapstruct.version}</version>
-                        </path>
-                    </annotationProcessorPaths>
-                    <compilerArgs>
-                        <arg>-Amapstruct.suppressGeneratorTimestamp=true</arg>
-                        <arg>-Amapstruct.defaultComponentModel=spring</arg>
-                        <arg>-Amapstruct.unmappedTargetPolicy=IGNORE</arg>
-                    </compilerArgs>
                 </configuration>
             </plugin>
 
             <!-- Make sure the JavaDoc is correct -->
             <plugin>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok-maven-plugin</artifactId>
-                <version>1.18.20.0</version>
-                <executions>
-                    <execution>
-                        <id>delombok</id>
-                        <phase>${delombok.phase}</phase>
-                        <goals>
-                            <goal>delombok</goal>
-                        </goals>
-                        <configuration>
-                            <formatPreferences>
-                                <javaLangAsFQN>skip</javaLangAsFQN>
-                            </formatPreferences>
-                            <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
-                            <outputDirectory>${project.build.directory}/delombokified-sources-for-javadoc</outputDirectory>
-                            <addOutputDirectory>false</addOutputDirectory> <!-- Only delombokify for JavaDoc -->
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
+		    <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
-                    <sourcepath>${project.build.directory}/delombokified-sources-for-javadoc;${project.build.directory}/generated-sources/annotations</sourcepath>
                     <source>${java.version}</source>
                 </configuration>
             </plugin>
@@ -407,15 +357,13 @@
             <id>dev</id>
             <properties>
                 <profiles.from.maven>dev</profiles.from.maven>
-                <!-- skip javadoc, tests, jacoco, lombok for dev profile -->
+                <!-- skip javadoc, tests, jacoco for dev profile -->
                 <maven.javadoc.skip>true</maven.javadoc.skip>
                 <!-- skip tests, but need to define it on each sub module-->
                 <maven.test.skip>true</maven.test.skip>
                 <!-- no jacoco for dev profile -->
                 <jacoco.phase.agent>none</jacoco.phase.agent>
                 <jacoco.phase.report>none</jacoco.phase.report>
-                <!-- skip some lombok stuff for dev profile -->
-                <delombok.phase>none</delombok.phase>
             </properties>
         </profile>
 

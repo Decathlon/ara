@@ -18,16 +18,26 @@
 package com.decathlon.ara.service.dto.coverage;
 
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class CoverageDTO {
 
     private List<AxisDTO> axes;
     private int[] values;
+
+    public List<AxisDTO> getAxes() {
+        return axes;
+    }
+
+    public void setAxes(List<AxisDTO> axes) {
+        this.axes = axes;
+    }
+
+    public int[] getValues() {
+        return values;
+    }
+
+    public void setValues(int[] values) {
+        this.values = values;
+    }
 
 }

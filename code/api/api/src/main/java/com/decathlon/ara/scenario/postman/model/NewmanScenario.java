@@ -17,22 +17,15 @@
 
 package com.decathlon.ara.scenario.postman.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.decathlon.ara.domain.ExecutedScenario;
 import com.decathlon.ara.scenario.postman.bean.Execution;
 import com.decathlon.ara.scenario.postman.bean.Failure;
 import com.decathlon.ara.scenario.postman.bean.Item;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.util.ArrayList;
-import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NewmanScenario {
 
@@ -57,5 +50,33 @@ public class NewmanScenario {
      * BUT we remove all NewmanScenarios without any execution early on in the processing, so in most processing code, execution will not be null.
      */
     private Execution execution;
+
+    public ExecutedScenario getScenario() {
+        return scenario;
+    }
+
+    public void setScenario(ExecutedScenario scenario) {
+        this.scenario = scenario;
+    }
+
+    public Item getItem() {
+        return item;
+    }
+
+    public void setItem(Item item) {
+        this.item = item;
+    }
+
+    public Execution getExecution() {
+        return execution;
+    }
+
+    public void setExecution(Execution execution) {
+        this.execution = execution;
+    }
+
+    public List<Failure> getFailures() {
+        return failures;
+    }
 
 }

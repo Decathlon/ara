@@ -17,23 +17,28 @@
 
 package com.decathlon.ara.scenario.postman.support;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
-import lombok.AllArgsConstructor;
+
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 
-@AllArgsConstructor
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+
 public class StreamingHttpMessageConverter<R> implements HttpMessageConverter<R> {
 
     private final JsonFactory factory;
     private final JsonStreamer<R> jsonStreamer;
+
+    public StreamingHttpMessageConverter(JsonFactory factory, JsonStreamer<R> jsonStreamer) {
+        this.factory = factory;
+        this.jsonStreamer = jsonStreamer;
+    }
 
     @Override
     public boolean canRead(Class<?> clazz, MediaType mediaType) {

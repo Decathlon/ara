@@ -17,15 +17,13 @@
 
 package com.decathlon.ara.scenario.cucumber.bean;
 
+import java.util.Optional;
+
 import com.decathlon.ara.lib.embed.consumer.StructuredEmbeddingsHolder;
 import com.decathlon.ara.scenario.cucumber.support.ResultsWithMatch;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
 
-import java.util.Optional;
-
-@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Step implements ResultsWithMatch {
 
@@ -90,6 +88,50 @@ public class Step implements ResultsWithMatch {
             }
         }
         return Optional.empty();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getKeyword() {
+        return keyword;
+    }
+
+    public Integer getLine() {
+        return line;
+    }
+
+    public Result getResult() {
+        return result;
+    }
+
+    public Row[] getRows() {
+        return rows;
+    }
+
+    public Match getMatch() {
+        return match;
+    }
+
+    public Embedded[] getEmbeddings() {
+        return embeddings;
+    }
+
+    public String[] getOutput() {
+        return output;
+    }
+
+    public Comment[] getComments() {
+        return comments;
+    }
+
+    public int[] getMatchedColumns() {
+        return matchedColumns;
+    }
+
+    public DocString getDocString() {
+        return docString;
     }
 
 }

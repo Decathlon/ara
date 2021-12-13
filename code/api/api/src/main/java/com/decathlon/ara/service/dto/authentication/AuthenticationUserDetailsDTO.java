@@ -17,15 +17,6 @@
 
 package com.decathlon.ara.service.dto.authentication;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 public class AuthenticationUserDetailsDTO {
 
     private String id;
@@ -37,4 +28,35 @@ public class AuthenticationUserDetailsDTO {
     private String email;
 
     private String picture;
+
+    public AuthenticationUserDetailsDTO() {
+    }
+
+    public AuthenticationUserDetailsDTO(String id, String name, String login, String email, String picture) {
+        this.id = id;
+        this.name = name;
+        this.login = login;
+        this.email = email;
+        this.picture = picture;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPicture() {
+        return picture;
+    }
 }

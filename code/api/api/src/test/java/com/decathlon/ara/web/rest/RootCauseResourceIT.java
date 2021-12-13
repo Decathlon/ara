@@ -37,6 +37,7 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
 import com.decathlon.ara.service.dto.rootcause.RootCauseDTO;
+import com.decathlon.ara.util.factory.RootCauseDTOFactory;
 import com.decathlon.ara.web.rest.util.HeaderUtil;
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
@@ -44,15 +45,15 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 @Disabled
 @SpringBootTest
 @TestExecutionListeners({
-    TransactionalTestExecutionListener.class,
-    DependencyInjectionTestExecutionListener.class,
-    DbUnitTestExecutionListener.class
+        TransactionalTestExecutionListener.class,
+        DependencyInjectionTestExecutionListener.class,
+        DbUnitTestExecutionListener.class
 })
 @TestPropertySource(
-		locations = "classpath:application-db-h2.properties")
+        locations = "classpath:application-db-h2.properties")
 @Transactional
 @DatabaseSetup("/dbunit/root-cause.xml")
-public class RootCauseResourceIT {
+class RootCauseResourceIT {
 
     private static final String PROJECT_CODE = "p";
 
@@ -60,9 +61,9 @@ public class RootCauseResourceIT {
     private RootCauseResource cut;
 
     @Test
-    public void create_ShouldInsertEntity_WhenAllRulesAreRespected() {
+    void create_ShouldInsertEntity_WhenAllRulesAreRespected() {
         // GIVEN
-        final RootCauseDTO rootCause = new RootCauseDTO(null, " A Trimmed Root Cause \t ");
+        final RootCauseDTO rootCause = RootCauseDTOFactory.get(null, " A Trimmed Root Cause \t ");
 
         // WHEN
         ResponseEntity<RootCauseDTO> response = cut.create(PROJECT_CODE, rootCause);
@@ -73,16 +74,16 @@ public class RootCauseResourceIT {
         assertThat(response.getBody().getId()).isGreaterThan(3);
         assertThat(response.getBody().getName()).isEqualTo("A Trimmed Root Cause");
         assertThat(cut.getAll(PROJECT_CODE).getBody()).containsExactly( // Ordered by name ASC
-                new RootCauseDTO(response.getBody().getId(), "A Trimmed Root Cause"),
-                new RootCauseDTO(Long.valueOf(1), "Root Cause A"),
-                new RootCauseDTO(Long.valueOf(3), "Root Cause B"),
-                new RootCauseDTO(Long.valueOf(2), "Root Cause C"));
+                RootCauseDTOFactory.get(response.getBody().getId(), "A Trimmed Root Cause"),
+                RootCauseDTOFactory.get(Long.valueOf(1), "Root Cause A"),
+                RootCauseDTOFactory.get(Long.valueOf(3), "Root Cause B"),
+                RootCauseDTOFactory.get(Long.valueOf(2), "Root Cause C"));
     }
 
     @Test
-    public void create_ShouldFailAsBadRequest_WhenIdProvided() {
+    void create_ShouldFailAsBadRequest_WhenIdProvided() {
         // GIVEN
-        final RootCauseDTO rootCauseWithId = new RootCauseDTO(NONEXISTENT, "Id should not be provided");
+        final RootCauseDTO rootCauseWithId = RootCauseDTOFactory.get(NONEXISTENT, "Id should not be provided");
 
         // WHEN
         ResponseEntity<RootCauseDTO> response = cut.create(PROJECT_CODE, rootCauseWithId);
@@ -96,9 +97,9 @@ public class RootCauseResourceIT {
     }
 
     @Test
-    public void create_ShouldFailAsNotUnique_WhenNameAlreadyExists() {
+    void create_ShouldFailAsNotUnique_WhenNameAlreadyExists() {
         // GIVEN
-        final RootCauseDTO rootCauseWithExistingName = new RootCauseDTO(null, "Root Cause A");
+        final RootCauseDTO rootCauseWithExistingName = RootCauseDTOFactory.get(null, "Root Cause A");
 
         // WHEN
         ResponseEntity<RootCauseDTO> response = cut.create(PROJECT_CODE, rootCauseWithExistingName);
@@ -114,23 +115,23 @@ public class RootCauseResourceIT {
     }
 
     @Test
-    public void getAll_ShouldReturnAllEntitiesOrderedByName() {
+    void getAll_ShouldReturnAllEntitiesOrderedByName() {
         // WHEN
         ResponseEntity<List<RootCauseDTO>> response = cut.getAll(PROJECT_CODE);
 
         // THEN
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).containsExactly( // Ordered by name ASC
-                new RootCauseDTO(Long.valueOf(1), "Root Cause A"),
-                new RootCauseDTO(Long.valueOf(3), "Root Cause B"),
-                new RootCauseDTO(Long.valueOf(2), "Root Cause C"));
+                RootCauseDTOFactory.get(Long.valueOf(1), "Root Cause A"),
+                RootCauseDTOFactory.get(Long.valueOf(3), "Root Cause B"),
+                RootCauseDTOFactory.get(Long.valueOf(2), "Root Cause C"));
     }
 
     @Test
-    public void update_ShouldUpdateEntity_WhenAllRulesAreRespected() {
+    void update_ShouldUpdateEntity_WhenAllRulesAreRespected() {
         // GIVEN
         final Long existingId = Long.valueOf(1);
-        final RootCauseDTO rootCause = new RootCauseDTO(null, "Renamed");
+        final RootCauseDTO rootCause = RootCauseDTOFactory.get(null, "Renamed");
 
         // WHEN
         ResponseEntity<RootCauseDTO> response = cut.update(PROJECT_CODE, existingId, rootCause);
@@ -140,16 +141,16 @@ public class RootCauseResourceIT {
         assertThat(header(response, HeaderUtil.ALERT)).isEqualTo("ara.root-cause.updated");
         assertThat(header(response, HeaderUtil.PARAMS)).isEqualTo("1");
         assertThat(cut.getAll(PROJECT_CODE).getBody()).containsExactly( // Ordered by name ASC
-                new RootCauseDTO(Long.valueOf(1), "Renamed"),
-                new RootCauseDTO(Long.valueOf(3), "Root Cause B"),
-                new RootCauseDTO(Long.valueOf(2), "Root Cause C"));
+                RootCauseDTOFactory.get(Long.valueOf(1), "Renamed"),
+                RootCauseDTOFactory.get(Long.valueOf(3), "Root Cause B"),
+                RootCauseDTOFactory.get(Long.valueOf(2), "Root Cause C"));
     }
 
     @Test
-    public void update_ShouldNotFailAsNameNotUnique_WhenUpdatingWithoutAnyChange() {
+    void update_ShouldNotFailAsNameNotUnique_WhenUpdatingWithoutAnyChange() {
         // GIVEN
         Long existingId = Long.valueOf(1);
-        final RootCauseDTO rootCause = new RootCauseDTO(existingId, "Root Cause A");
+        final RootCauseDTO rootCause = RootCauseDTOFactory.get(existingId, "Root Cause A");
 
         // WHEN
         ResponseEntity<RootCauseDTO> response = cut.update(PROJECT_CODE, existingId, rootCause);
@@ -162,9 +163,9 @@ public class RootCauseResourceIT {
     }
 
     @Test
-    public void update_ShouldFailAsNotFound_WhenUpdatingNonexistentEntity() {
+    void update_ShouldFailAsNotFound_WhenUpdatingNonexistentEntity() {
         // GIVEN
-        final RootCauseDTO anyRootCause = new RootCauseDTO(null, "Trying to update nonexistent");
+        final RootCauseDTO anyRootCause = RootCauseDTOFactory.get(null, "Trying to update nonexistent");
 
         // WHEN
         ResponseEntity<RootCauseDTO> response = cut.update(PROJECT_CODE, NONEXISTENT, anyRootCause);
@@ -178,10 +179,10 @@ public class RootCauseResourceIT {
     }
 
     @Test
-    public void update_ShouldFailAsNotUnique_WhenNameAlreadyExists() {
+    void update_ShouldFailAsNotUnique_WhenNameAlreadyExists() {
         // GIVEN
         final Long id = Long.valueOf(2);
-        final RootCauseDTO rootCauseWithExistingName = new RootCauseDTO(null, "Root Cause A");
+        final RootCauseDTO rootCauseWithExistingName = RootCauseDTOFactory.get(null, "Root Cause A");
 
         // WHEN
         ResponseEntity<RootCauseDTO> response = cut.update(PROJECT_CODE, id, rootCauseWithExistingName);
@@ -197,7 +198,7 @@ public class RootCauseResourceIT {
     }
 
     @Test
-    public void delete_ShouldDeleteEntity_WhenRulesAreRespected() {
+    void delete_ShouldDeleteEntity_WhenRulesAreRespected() {
         // GIVEN
         final long existingId = 1;
 
@@ -209,12 +210,12 @@ public class RootCauseResourceIT {
         assertThat(header(response, HeaderUtil.ALERT)).isEqualTo("ara.root-cause.deleted");
         assertThat(header(response, HeaderUtil.PARAMS)).isEqualTo("1");
         assertThat(cut.getAll(PROJECT_CODE).getBody()).containsExactly( // Ordered by name ASC
-                new RootCauseDTO(Long.valueOf(3), "Root Cause B"),
-                new RootCauseDTO(Long.valueOf(2), "Root Cause C"));
+                RootCauseDTOFactory.get(Long.valueOf(3), "Root Cause B"),
+                RootCauseDTOFactory.get(Long.valueOf(2), "Root Cause C"));
     }
 
     @Test
-    public void delete_ShouldFailAsNotFound_WhenDeletingNonexistentEntity() {
+    void delete_ShouldFailAsNotFound_WhenDeletingNonexistentEntity() {
         // WHEN
         ResponseEntity<Void> response = cut.delete(PROJECT_CODE, NONEXISTENT.longValue());
 

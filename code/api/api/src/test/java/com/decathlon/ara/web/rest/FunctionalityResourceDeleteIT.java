@@ -44,15 +44,15 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 @Disabled
 @SpringBootTest
 @TestExecutionListeners({
-    TransactionalTestExecutionListener.class,
-    DependencyInjectionTestExecutionListener.class,
-    DbUnitTestExecutionListener.class
+        TransactionalTestExecutionListener.class,
+        DependencyInjectionTestExecutionListener.class,
+        DbUnitTestExecutionListener.class
 })
 @TestPropertySource(
-		locations = "classpath:application-db-h2.properties")
+        locations = "classpath:application-db-h2.properties")
 @Transactional
 @DatabaseSetup("/dbunit/functionality.xml")
-public class FunctionalityResourceDeleteIT {
+class FunctionalityResourceDeleteIT {
 
     private static final String PROJECT_CODE = "p";
 
@@ -63,7 +63,7 @@ public class FunctionalityResourceDeleteIT {
     private FunctionalityResource cut;
 
     @Test
-    public void testDeleteNonexistent() {
+    void testDeleteNonexistent() {
         ResponseEntity<Void> response = cut.delete(PROJECT_CODE, NONEXISTENT.longValue());
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_found");
@@ -75,17 +75,17 @@ public class FunctionalityResourceDeleteIT {
     }
 
     @Test
-    public void testDeleteOneFunctionality() {
+    void testDeleteOneFunctionality() {
         deleteSingle(22);
     }
 
     @Test
-    public void testDeleteOneSingleFolder() {
+    void testDeleteOneSingleFolder() {
         deleteSingle(12);
     }
 
     @Test
-    public void testDeleteFolderWithChildren() {
+    void testDeleteFolderWithChildren() {
         long id = 11;
         deleteAndAssertSuccess(id);
         assertCountIsNow(7);
@@ -96,7 +96,7 @@ public class FunctionalityResourceDeleteIT {
     }
 
     @Test
-    public void testDeleteRootFolderWithChildren() {
+    void testDeleteRootFolderWithChildren() {
         long id = 1;
         deleteAndAssertSuccess(id);
         assertCountIsNow(5);
@@ -113,7 +113,7 @@ public class FunctionalityResourceDeleteIT {
     }
 
     private void assertNotFoundAnymore(long id) {
-        final Functionality functionality = functionalityRepository.getOne(Long.valueOf(id));
+        final Functionality functionality = functionalityRepository.getById(Long.valueOf(id));
         try {
             assertThat(functionality).isNull();
         } catch (EntityNotFoundException e) {

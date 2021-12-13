@@ -17,11 +17,8 @@
 
 package com.decathlon.ara.defect.jira.api.model.comment;
 
-import lombok.Data;
-
 import java.util.List;
 
-@Data
 public class JiraCommentResults {
 
     private List<JiraComment> comments;
@@ -31,5 +28,21 @@ public class JiraCommentResults {
     private Integer total;
 
     private Integer startAt;
+
+    public List<JiraComment> getComments() {
+        return comments;
+    }
+
+    public Integer getMaxResults() {
+        return maxResults;
+    }
+
+    public Integer getTotal() {
+        return total;
+    }
+
+    public Integer getStartAt() {
+        return startAt;
+    }
 
 }

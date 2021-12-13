@@ -115,6 +115,9 @@ endif
 	@echo "  - include:" >> api/database/src/main/resources/db/changelog/db.changelog-master-$(BASE).yaml
 	@echo "      file: classpath*:db/changelog/changes/$(BASE)/$(DATE_WITH_TIME)-$(DIFF_LABEL).yaml" >> api/database/src/main/resources/db/changelog/db.changelog-master-$(BASE).yaml
 	@$(MAKE) stop-migration-stack
+ifeq ($(BASE),h2)
+	@rm -r api/db_h2 api/db_h2_mig
+endif
 
 up-migration:
 	@echo '-- Up migration stack --'

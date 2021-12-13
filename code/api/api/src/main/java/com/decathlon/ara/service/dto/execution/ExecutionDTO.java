@@ -17,25 +17,27 @@
 
 package com.decathlon.ara.service.dto.execution;
 
-import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
-import com.decathlon.ara.domain.enumeration.JobStatus;
-import com.decathlon.ara.domain.enumeration.QualityStatus;
-import com.decathlon.ara.ci.bean.QualityThreshold;
-import com.decathlon.ara.domain.enumeration.Result;
-import com.decathlon.ara.service.dto.quality.QualitySeverityDTO;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
+import com.decathlon.ara.ci.bean.QualityThreshold;
+import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
+import com.decathlon.ara.domain.enumeration.JobStatus;
+import com.decathlon.ara.domain.enumeration.QualityStatus;
+import com.decathlon.ara.domain.enumeration.Result;
+import com.decathlon.ara.service.dto.quality.QualitySeverityDTO;
+import com.decathlon.ara.util.JsonUtil.StringToListDeserializer;
+import com.decathlon.ara.util.JsonUtil.StringToMapDeserializer;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 public class ExecutionDTO {
+
+    private static final TypeReference<Map<String, QualityThreshold>> QUALITY_THRESHOLDS_TYPE_REF = new TypeReference<>() {
+    };
+    private static final TypeReference<List<QualitySeverityDTO>> QUALITY_SEVERITIES_TYPE_REF = new TypeReference<>() {
+    };
 
     private Long id;
 
@@ -63,14 +65,108 @@ public class ExecutionDTO {
 
     private boolean blockingValidation;
 
+    @JsonDeserialize(using = QualityThreholdsDeserializer.class)
     private Map<String, QualityThreshold> qualityThresholds;
 
     private QualityStatus qualityStatus;
 
+    @JsonDeserialize(using = QualitySeveritiesDeserializer.class)
     private List<QualitySeverityDTO> qualitySeverities;
 
     private Long duration;
 
     private Long estimatedDuration;
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getBranch() {
+        return branch;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getRelease() {
+        return release;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public Date getBuildDateTime() {
+        return buildDateTime;
+    }
+
+    public Date getTestDateTime() {
+        return testDateTime;
+    }
+
+    public String getJobUrl() {
+        return jobUrl;
+    }
+
+    public JobStatus getStatus() {
+        return status;
+    }
+
+    public Result getResult() {
+        return result;
+    }
+
+    public ExecutionAcceptance getAcceptance() {
+        return acceptance;
+    }
+
+    public String getDiscardReason() {
+        return discardReason;
+    }
+
+    public boolean isBlockingValidation() {
+        return blockingValidation;
+    }
+
+    public Map<String, QualityThreshold> getQualityThresholds() {
+        return qualityThresholds;
+    }
+
+    public QualityStatus getQualityStatus() {
+        return qualityStatus;
+    }
+
+    public List<QualitySeverityDTO> getQualitySeverities() {
+        return qualitySeverities;
+    }
+
+    public Long getDuration() {
+        return duration;
+    }
+
+    public Long getEstimatedDuration() {
+        return estimatedDuration;
+    }
+
+    private static class QualityThreholdsDeserializer extends StringToMapDeserializer<String, QualityThreshold> {
+
+        private static final long serialVersionUID = 1L;
+
+        protected QualityThreholdsDeserializer() {
+            super(QUALITY_THRESHOLDS_TYPE_REF);
+        }
+
+    }
+
+    private static class QualitySeveritiesDeserializer extends StringToListDeserializer<QualitySeverityDTO> {
+
+        private static final long serialVersionUID = 1L;
+
+        protected QualitySeveritiesDeserializer() {
+            super(QUALITY_SEVERITIES_TYPE_REF);
+        }
+
+    }
 
 }

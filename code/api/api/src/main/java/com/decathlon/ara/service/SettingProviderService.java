@@ -17,19 +17,6 @@
 
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.defect.DefectAdapter;
-import com.decathlon.ara.service.dto.setting.SettingDTO;
-import com.decathlon.ara.service.dto.setting.SettingGroupDTO;
-import com.decathlon.ara.service.dto.setting.SettingOptionDTO;
-import com.decathlon.ara.service.dto.setting.SettingType;
-import com.decathlon.ara.service.support.Settings;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -40,23 +27,39 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import com.decathlon.ara.defect.DefectAdapter;
+import com.decathlon.ara.service.dto.setting.SettingDTO;
+import com.decathlon.ara.service.dto.setting.SettingDTO.SettingDTOBuilder;
+import com.decathlon.ara.service.dto.setting.SettingGroupDTO;
+import com.decathlon.ara.service.dto.setting.SettingOptionDTO;
+import com.decathlon.ara.service.dto.setting.SettingType;
+import com.decathlon.ara.service.support.Settings;
+
 /**
  * Service for providing setting definitions. It is ignored from code coverage, as it's merely a configuration file.
  */
-@Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SettingProviderService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SettingProviderService.class);
 
     private static final String EG_QUOTE = "Eg. \"";
     private static final String THE_LIST_IS_CASE_INSENSITIVE = "The list is case insensitive. ";
 
     private static final Object DEFAULT_EXECUTIONS_FOLDER_LOCK = new Object();
 
-    @NonNull
     private final DefectService defectService;
 
     private String defaultExecutionsFolderCache;
+
+    public SettingProviderService(DefectService defectService) {
+        this.defectService = defectService;
+    }
 
     /**
      * Get the project settings, organized as a tree of groups, and populate this tree with the provided values.
@@ -87,7 +90,7 @@ public class SettingProviderService {
         List<SettingDTO> settings = new ArrayList<>();
 
         final String defaultExecutionBasePath = getDefaultExecutionsFolder() + Settings.DEFAULT_EXECUTION_VARIABLES;
-        settings.add(new SettingDTO()
+        settings.add(new SettingDTOBuilder()
                 .withCode(Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH)
                 .withName("Execution base path")
                 .withType(SettingType.STRING)
@@ -101,10 +104,10 @@ public class SettingProviderService {
                         Settings.CYCLE_VARIABLE + " is the name of the given execution. " +
                         EG_QUOTE + defaultExecutionBasePath + " (on Linux) " +
                         "or \"C:/ara/data/executions/" + Settings.DEFAULT_EXECUTION_VARIABLES + "\" (on Windows) " +
-                        "or \"classpath:/executions/" + Settings.DEFAULT_EXECUTION_VARIABLES + "\" (for tests)"));
+                        "or \"classpath:/executions/" + Settings.DEFAULT_EXECUTION_VARIABLES + "\" (for tests)").build());
 
         final String defaultCycleDefinitionPath = "/cycleDefinition.json";
-        settings.add(new SettingDTO()
+        settings.add(new SettingDTOBuilder()
                 .withCode(Settings.EXECUTION_INDEXER_FILE_CYCLE_DEFINITION_PATH)
                 .withName("Cycle definition path")
                 .withType(SettingType.STRING)
@@ -112,10 +115,10 @@ public class SettingProviderService {
                 .withDefaultValue(defaultCycleDefinitionPath)
                 .withHelp("" +
                         "Cycle definition are extracted from this path. " +
-                        EG_QUOTE + defaultCycleDefinitionPath + "\", appended to the run's job folder."));
+                        EG_QUOTE + defaultCycleDefinitionPath + "\", appended to the run's job folder.").build());
 
         final String defaultBuildInformationPath = "buildInformation.json";
-        settings.add(new SettingDTO()
+        settings.add(new SettingDTOBuilder()
                 .withCode(Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH)
                 .withName("Build information path")
                 .withType(SettingType.STRING)
@@ -124,9 +127,9 @@ public class SettingProviderService {
                 .withHelp("" +
                         "Build information are extracted from this path. " +
                         EG_QUOTE + defaultBuildInformationPath + "\", appended to EITHER the execution's jobUrl OR to the run's jobUrl. " +
-                        "It is used to complete builds to index when the hierarchy of all deployment and NRT jobs is generated."));
+                        "It is used to complete builds to index when the hierarchy of all deployment and NRT jobs is generated.").build());
 
-        settings.add(new SettingDTO()
+        settings.add(new SettingDTOBuilder()
                 .withCode(Settings.EXECUTION_INDEXER_FILE_DELETE_AFTER_INDEXING_AS_DONE)
                 .withName("Delete after indexing as done")
                 .withType(SettingType.BOOLEAN)
@@ -137,7 +140,7 @@ public class SettingProviderService {
                         "The deletion is active by default: you can disable it temporarily to debug what ARA receives, " +
                         "but be careful not to keep the option disabled for too long: disk could quickly become full " +
                         "with big Postman and/or Cucumber report files, " +
-                        "and you will have to manually delete the directories yourself or use a cron job."));
+                        "and you will have to manually delete the directories yourself or use a cron job.").build());
 
         return settings;
     }
@@ -148,20 +151,20 @@ public class SettingProviderService {
         var monthOption = new SettingOptionDTO("MONTH", "month");
         var yearOption = new SettingOptionDTO("YEAR", "year");
         var options = List.of(dayOption, weekOption, monthOption, yearOption);
-        var durationValueSetting = new SettingDTO()
+        var durationValueSetting = new SettingDTOBuilder()
                 .withCode(Settings.EXECUTION_PURGE_DURATION_VALUE)
                 .withName("Duration value")
                 .withType(SettingType.INT)
                 .withRequired(true)
                 .withDefaultValue("-1")
-                .withHelp("Define how many unit. If -1 is selected, then no purge is applied. Also keep in mind that any negative number is equivalent to -1 (i.e. no purge).");
-        var durationTypeSetting = new SettingDTO()
+                .withHelp("Define how many unit. If -1 is selected, then no purge is applied. Also keep in mind that any negative number is equivalent to -1 (i.e. no purge).").build();
+        var durationTypeSetting = new SettingDTOBuilder()
                 .withCode(Settings.EXECUTION_PURGE_DURATION_TYPE)
                 .withName("Duration type")
                 .withType(SettingType.SELECT)
                 .withRequired(true)
                 .withOptions(options)
-                .withHelp("Define what kind of duration (i.e. day, week, month or year). If the duration unit value above is negative, just select any option.");
+                .withHelp("Define what kind of duration (i.e. day, week, month or year). If the duration unit value above is negative, just select any option.").build();
         var settings = List.of(durationValueSetting, durationTypeSetting);
         return new SettingGroupDTO("Execution purge", settings);
     }
@@ -195,8 +198,8 @@ public class SettingProviderService {
         } catch (IOException e) {
             final String userDirectory = Paths.get(System.getProperty("user.home"), "ara-data", "executions")
                     .toAbsolutePath().toString() + File.separator;
-            log.warn("Cannot create or write to the default executions directory: " +
-                            "using {} as the default folder to store executions instead of {}",
+            LOG.warn("Cannot create or write to the default executions directory: " +
+                    "using {} as the default folder to store executions instead of {}",
                     userDirectory, defaultDirectory, e);
             return userDirectory;
         }
@@ -205,20 +208,20 @@ public class SettingProviderService {
     private SettingGroupDTO getEmailReportsDefinitions() {
         SettingGroupDTO group = new SettingGroupDTO("Email Reports", new ArrayList<>());
 
-        group.getSettings().add(new SettingDTO()
+        group.getSettings().add(new SettingDTOBuilder()
                 .withCode(Settings.EMAIL_FROM)
                 .withName("From")
                 .withType(SettingType.STRING)
                 .withRequired(true)
                 .withHelp("" +
                         "The email address (with an optional name) from which to send reports once a new execution is finished. " +
-                        EG_QUOTE + "ARA for Project X <project-x@technical.company.com>\" or just \"project-x@technical.company.com\"."));
+                        EG_QUOTE + "ARA for Project X <project-x@technical.company.com>\" or just \"project-x@technical.company.com\".").build());
 
         final String theReceiverEmailAddress =
                 "The receiver email address (or addresses, separated by commas (\",\")) for an execution ";
         final String noEmailIfNoAddress = "No email will be sent if the setting is not provided.";
 
-        group.getSettings().add(new SettingDTO()
+        group.getSettings().add(new SettingDTOBuilder()
                 .withCode(Settings.EMAIL_TO_EXECUTION_CRASHED)
                 .withName("To, on crash")
                 .withType(SettingType.STRING)
@@ -227,9 +230,9 @@ public class SettingProviderService {
                         theReceiverEmailAddress +
                         "without cycleDefinition.json, so we do not know what tests are expected to run for the given cycle. " +
                         EG_QUOTE + "Technical Leader <technical-leader@company.com>\" or just \"technical-leader@company.com\". " +
-                        noEmailIfNoAddress));
+                        noEmailIfNoAddress).build());
 
-        group.getSettings().add(new SettingDTO()
+        group.getSettings().add(new SettingDTOBuilder()
                 .withCode(Settings.EMAIL_TO_EXECUTION_RAN)
                 .withName("To, on ran")
                 .withType(SettingType.STRING)
@@ -238,9 +241,9 @@ public class SettingProviderService {
                         theReceiverEmailAddress +
                         "that ran but is not set to block the workflow on failure, only run test for information. " +
                         EG_QUOTE + "Project Leader <project-leader@company.com>\" or just \"project-leader@company.com\". " +
-                        noEmailIfNoAddress));
+                        noEmailIfNoAddress).build());
 
-        group.getSettings().add(new SettingDTO()
+        group.getSettings().add(new SettingDTOBuilder()
                 .withCode(Settings.EMAIL_TO_EXECUTION_ELIGIBLE_PASSED)
                 .withName("To, on eligible and passed")
                 .withType(SettingType.STRING)
@@ -249,9 +252,9 @@ public class SettingProviderService {
                         theReceiverEmailAddress +
                         "that is set to block workflow on failure, and with a quality-status of PASSED " +
                         EG_QUOTE + "Project Team <project@lists.company.com>\" or just \"project@lists.company.com\". " +
-                        noEmailIfNoAddress));
+                        noEmailIfNoAddress).build());
 
-        group.getSettings().add(new SettingDTO()
+        group.getSettings().add(new SettingDTOBuilder()
                 .withCode(Settings.EMAIL_TO_EXECUTION_ELIGIBLE_WARNING)
                 .withName("To, on eligible but warning")
                 .withType(SettingType.STRING)
@@ -260,9 +263,9 @@ public class SettingProviderService {
                         theReceiverEmailAddress +
                         "that is set to block workflow on failure, and with a quality-status of WARNING " +
                         EG_QUOTE + "Project Team <project@lists.company.com>\" or just \"project@lists.company.com\". " +
-                        noEmailIfNoAddress));
+                        noEmailIfNoAddress).build());
 
-        group.getSettings().add(new SettingDTO()
+        group.getSettings().add(new SettingDTOBuilder()
                 .withCode(Settings.EMAIL_TO_EXECUTION_NOT_ELIGIBLE)
                 .withName("To, on not eligible")
                 .withType(SettingType.STRING)
@@ -271,7 +274,7 @@ public class SettingProviderService {
                         theReceiverEmailAddress +
                         "that is set to block workflow on failure, and with a quality-status of INCOMPLETE or FAILED " +
                         EG_QUOTE + "Project Team <project@lists.company.com>, Project Leader <leader@company.com>\". " +
-                        noEmailIfNoAddress));
+                        noEmailIfNoAddress).build());
 
         return group;
     }
@@ -286,7 +289,7 @@ public class SettingProviderService {
         indexers.addAll(defectAdapters.stream()
                 .map(f -> new SettingOptionDTO(f.getCode(), f.getName()))
                 .collect(Collectors.toList()));
-        group.getSettings().add(new SettingDTO()
+        group.getSettings().add(new SettingDTOBuilder()
                 .withCode(Settings.DEFECT_INDEXER)
                 .withName("System")
                 .withType(SettingType.SELECT)
@@ -297,14 +300,14 @@ public class SettingProviderService {
                         "Define the system used to store and manage defects, " +
                         "in order to update problem statuses with the defect statuses from this provider. " +
                         "If none is provided, problem's defects will not be linked: " +
-                        "users will have to open/close them manually."));
+                        "users will have to open/close them manually.").build());
 
         if (projectValues == null) {
             return group;
         }
         String currentDefectAdapter = projectValues.get(Settings.DEFECT_INDEXER);
         if (StringUtils.isNotEmpty(currentDefectAdapter)) {
-            group.getSettings().add(new SettingDTO()
+            group.getSettings().add(new SettingDTOBuilder()
                     .withCode(Settings.DEFECT_URL_FORMAT)
                     .withName("URL format")
                     .withType(SettingType.STRING)
@@ -317,8 +320,7 @@ public class SettingProviderService {
                             "\"http://bugtracker.company.com/issues/{{id}}\", the ID will link to " +
                             "\"http://bugtracker.company.com/issues/PROJECT-42\". " +
                             "If the URL format is not defined, defect IDs will not be links.")
-                    .withValidate(value -> StringUtils.isEmpty(value) || StringUtils.contains(value, "{{id}}") ? null :
-                            "The \"{{id}}\" placeholder is required."));
+                    .withValidate(value -> StringUtils.isEmpty(value) || StringUtils.contains(value, "{{id}}") ? null : "The \"{{id}}\" placeholder is required.").build());
             group.getSettings().addAll(
                     defectAdapters.stream()
                             .filter(f -> f.getCode().equals(currentDefectAdapter))
@@ -332,17 +334,17 @@ public class SettingProviderService {
     public List<SettingDTO> getDefectRtcDefinitions() {
         List<SettingDTO> settings = new ArrayList<>();
 
-        settings.add(new SettingDTO()
+        settings.add(new SettingDTOBuilder()
                 .withCode(Settings.DEFECT_RTC_ROOT_URL)
                 .withName("Root URL")
                 .withType(SettingType.STRING)
                 .withRequired(true)
                 .withHelp("" +
                         "Root URL of RTC to query work-item statuses: includes protocol, domain and port, but NO path. " +
-                        EG_QUOTE + "https://rtc.my-company.com/ccm\"."));
+                        EG_QUOTE + "https://rtc.my-company.com/ccm\".").build());
 
         String defaultPreAuthenticatePath = "/authenticated/identity";
-        settings.add(new SettingDTO()
+        settings.add(new SettingDTOBuilder()
                 .withCode(Settings.DEFECT_RTC_PRE_AUTHENTICATE_PATH)
                 .withName("Pre-authenticate path")
                 .withType(SettingType.STRING)
@@ -351,10 +353,10 @@ public class SettingProviderService {
                 .withHelp("" +
                         "Path (to be appended to the root URL) " +
                         "of the page to query (GET) before and after authentication. " +
-                        EG_QUOTE + defaultPreAuthenticatePath + "\""));
+                        EG_QUOTE + defaultPreAuthenticatePath + "\"").build());
 
         String defaultAuthenticatePath = "/authenticated/j_security_check";
-        settings.add(new SettingDTO()
+        settings.add(new SettingDTOBuilder()
                 .withCode(Settings.DEFECT_RTC_AUTHENTICATE_PATH)
                 .withName("Authenticate path")
                 .withType(SettingType.STRING)
@@ -363,10 +365,10 @@ public class SettingProviderService {
                 .withHelp("" +
                         "Path (to be appended to the root URL) " +
                         "of the Ajax URL to query (POST) to send authentication credentials. " +
-                        EG_QUOTE + defaultAuthenticatePath + "\""));
+                        EG_QUOTE + defaultAuthenticatePath + "\"").build());
 
         String defaultWorkItemResourcePath = "/rpt/repository/work" + "item/";
-        settings.add(new SettingDTO()
+        settings.add(new SettingDTOBuilder()
                 .withCode(Settings.DEFECT_RTC_WORK_ITEM_RESOURCE_PATH)
                 .withName("Work-item resource path")
                 .withType(SettingType.STRING)
@@ -375,25 +377,25 @@ public class SettingProviderService {
                 .withHelp("" +
                         "Path (to be appended to the root path) " +
                         "of the URL to query all work-items (filters query will be appended). " +
-                        EG_QUOTE + defaultWorkItemResourcePath + "\""));
+                        EG_QUOTE + defaultWorkItemResourcePath + "\"").build());
 
-        settings.add(new SettingDTO()
+        settings.add(new SettingDTOBuilder()
                 .withCode(Settings.DEFECT_RTC_USERNAME)
                 .withName("Username")
                 .withType(SettingType.STRING)
                 .withRequired(true)
                 .withHelp("" +
-                        "Username to authenticate to RTC (only read actions will be done)."));
+                        "Username to authenticate to RTC (only read actions will be done).").build());
 
-        settings.add(new SettingDTO()
+        settings.add(new SettingDTOBuilder()
                 .withCode(Settings.DEFECT_RTC_PASSWORD)
                 .withName("Password")
                 .withType(SettingType.PASSWORD)
                 .withRequired(true)
                 .withHelp("" +
-                        "Password to authenticate to RTC (only read actions will be done)."));
+                        "Password to authenticate to RTC (only read actions will be done).").build());
 
-        settings.add(new SettingDTO()
+        settings.add(new SettingDTOBuilder()
                 .withCode(Settings.DEFECT_RTC_BATCH_SIZE)
                 .withName("Batch size")
                 .withType(SettingType.INT)
@@ -402,10 +404,10 @@ public class SettingProviderService {
                 .withHelp("" +
                         "Number of batched work-items to request at once per HTTP request to RTC. " +
                         "Will be used to form a filter passed in URL (resulting URL should not be longer than 2000 " +
-                        "characters for interoperability) and as page size when requesting recently modified items."));
+                        "characters for interoperability) and as page size when requesting recently modified items.").build());
 
         String defaultWorkItemTypes = "Defect,Issue,Task";
-        settings.add(new SettingDTO()
+        settings.add(new SettingDTOBuilder()
                 .withCode(Settings.DEFECT_RTC_WORK_ITEM_TYPES)
                 .withName("Work-item types")
                 .withType(SettingType.STRING)
@@ -414,10 +416,10 @@ public class SettingProviderService {
                 .withHelp("" +
                         "All RTC work-item types to support (and watch) for problem defect assignation. " +
                         THE_LIST_IS_CASE_INSENSITIVE +
-                        EG_QUOTE + defaultWorkItemTypes + "\""));
+                        EG_QUOTE + defaultWorkItemTypes + "\"").build());
 
         String defaultClosedStates = "Closed,Done,Invalid,Resolved,Verified";
-        settings.add(new SettingDTO()
+        settings.add(new SettingDTOBuilder()
                 .withCode(Settings.DEFECT_RTC_CLOSED_STATES)
                 .withName("Closed states")
                 .withType(SettingType.STRING)
@@ -430,10 +432,10 @@ public class SettingProviderService {
                         EG_QUOTE + defaultClosedStates + "\". " +
                         THE_LIST_IS_CASE_INSENSITIVE +
                         "If a state is configured to be considered both CLOSED and OPEN, CLOSED wins, with a warning in logs. " +
-                        "If a state is not configured, it will be considered OPEN, with a warning in logs."));
+                        "If a state is not configured, it will be considered OPEN, with a warning in logs.").build());
 
         String defaultOpenStates = "Blocked,New,In progress,Deploy ready,Reopened,Test ready,Triaged,Waiting for info,Waiting for review";
-        settings.add(new SettingDTO()
+        settings.add(new SettingDTOBuilder()
                 .withCode(Settings.DEFECT_RTC_OPEN_STATES)
                 .withName("Open states")
                 .withType(SettingType.STRING)
@@ -446,7 +448,7 @@ public class SettingProviderService {
                         EG_QUOTE + defaultOpenStates + "\". " +
                         THE_LIST_IS_CASE_INSENSITIVE +
                         "If a state is configured to be considered both CLOSED and OPEN, CLOSED wins, with a warning in logs. " +
-                        "If a state is not configured, it will be considered OPEN, with a warning in logs."));
+                        "If a state is not configured, it will be considered OPEN, with a warning in logs.").build());
 
         return settings;
     }
@@ -454,23 +456,23 @@ public class SettingProviderService {
     public List<SettingDTO> getDefectGithubDefinitions() {
         List<SettingDTO> result = new ArrayList<>();
 
-        result.add(new SettingDTO()
+        result.add(new SettingDTOBuilder()
                 .withCode(Settings.DEFECT_GITHUB_OWNER)
                 .withName("Github Repository's owner")
                 .withType(SettingType.STRING)
                 .withRequired(true)
                 .withHelp("" +
                         "The owner of this project's Github repository. Usually the user or organization which " +
-                        "holds the repository."));
+                        "holds the repository.").build());
 
-        result.add(new SettingDTO()
+        result.add(new SettingDTOBuilder()
                 .withCode(Settings.DEFECT_GITHUB_REPONAME)
                 .withName("Github Repository's name")
                 .withType(SettingType.STRING)
                 .withRequired(true)
-                .withHelp("The name of this project's Github repository."));
+                .withHelp("The name of this project's Github repository.").build());
 
-        result.add(new SettingDTO()
+        result.add(new SettingDTOBuilder()
                 .withCode(Settings.DEFECT_GITHUB_TOKEN)
                 .withName("Authorization token")
                 .withType(SettingType.STRING)
@@ -481,25 +483,23 @@ public class SettingProviderService {
                         "To create a personal access token, on Github, go to the Settings page of your account, then " +
                         "click on the 'Developer settings' menu and click on the 'Personal Access Token' menu item. " +
                         "In this page, generate a new token (enable sso if your organization use it), and copy the " +
-                        "Authorization token displayed in this field."));
+                        "Authorization token displayed in this field.").build());
         return result;
     }
 
     public List<SettingDTO> getDefectJiraDefinitions() {
         List<SettingDTO> result = new ArrayList<>();
 
-        result.add(new SettingDTO()
+        result.add(new SettingDTOBuilder()
                 .withCode(Settings.DEFECT_JIRA_BASE_URL)
                 .withName("Base url")
                 .withType(SettingType.STRING)
                 .withRequired(true)
                 .withHelp(
                         "The Jira base url of your organization or company." +
-                                "Hint: It usually follows this pattern: https://company.atlassian.net, where 'company' is your company name."
-                )
-        );
+                                "Hint: It usually follows this pattern: https://company.atlassian.net, where 'company' is your company name.").build());
 
-        result.add(new SettingDTO()
+        result.add(new SettingDTOBuilder()
                 .withCode(Settings.DEFECT_JIRA_TOKEN)
                 .withName("Authentication token")
                 .withType(SettingType.PASSWORD)
@@ -508,22 +508,18 @@ public class SettingProviderService {
                         "The token Jira uses to authenticate ARA.\n" +
                                 "You first need to set one in your Jira configuration, then copy the generated token here.\n" +
                                 "CAUTION: Jira lets you copy the token only once.\n" +
-                                "How to create your Jira token: https://confluence.atlassian.com/cloud/api-tokens-938839638.html"
-                )
-        );
+                                "How to create your Jira token: https://confluence.atlassian.com/cloud/api-tokens-938839638.html").build());
 
-        result.add(new SettingDTO()
+        result.add(new SettingDTOBuilder()
                 .withCode(Settings.DEFECT_JIRA_LOGIN)
                 .withName("Login")
                 .withType(SettingType.STRING)
                 .withRequired(true)
                 .withHelp(
                         "This is simply the login matching the token previously set in Jira.\n" +
-                                "Bear in mind that it can also be an email address"
-                )
-        );
+                                "Bear in mind that it can also be an email address").build());
 
-        result.add(new SettingDTO()
+        result.add(new SettingDTOBuilder()
                 .withCode(Settings.DEFECT_JIRA_FILTER_PROJECTS)
                 .withName("Project filters")
                 .withType(SettingType.STRING)
@@ -537,9 +533,7 @@ public class SettingProviderService {
                                 "thus making several calls using pagination.\n\n" +
                                 "The filter contains the Jira projects code separated by a comma:\n" +
                                 "e.g. the filter PRJ-1, PRJ-2, PRJ-3 matches the Jira projects PRJ-1, PRJ-2 and PRJ-3." +
-                                "If left empty, no filter is applied."
-                )
-        );
+                                "If left empty, no filter is applied.").build());
 
         return result;
     }

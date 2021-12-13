@@ -17,10 +17,33 @@
 
 package com.decathlon.ara.loader;
 
+import static com.decathlon.ara.loader.DemoLoaderConstants.BRANCH_DEVELOP;
+import static com.decathlon.ara.loader.DemoLoaderConstants.BRANCH_MASTER;
+import static com.decathlon.ara.loader.DemoLoaderConstants.CYCLE_DAY;
+import static com.decathlon.ara.loader.DemoLoaderConstants.CYCLE_NIGHT;
+import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
+import static com.decathlon.ara.loader.DemoLoaderConstants.SOURCE_CODE_API;
+import static com.decathlon.ara.loader.DemoLoaderConstants.SOURCE_CODE_WEB;
+import static com.decathlon.ara.loader.DemoLoaderConstants.TYPE_CODE_FIREFOX_DESKTOP;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.decathlon.ara.domain.Communication;
 import com.decathlon.ara.domain.enumeration.CommunicationType;
 import com.decathlon.ara.domain.enumeration.Technology;
-import com.decathlon.ara.service.*;
+import com.decathlon.ara.service.CommunicationService;
+import com.decathlon.ara.service.CountryService;
+import com.decathlon.ara.service.CycleDefinitionService;
+import com.decathlon.ara.service.ProjectService;
+import com.decathlon.ara.service.SeverityService;
+import com.decathlon.ara.service.SourceService;
+import com.decathlon.ara.service.TeamService;
+import com.decathlon.ara.service.TypeService;
 import com.decathlon.ara.service.dto.communication.CommunicationDTO;
 import com.decathlon.ara.service.dto.country.CountryDTO;
 import com.decathlon.ara.service.dto.cycledefinition.CycleDefinitionDTO;
@@ -32,56 +55,47 @@ import com.decathlon.ara.service.dto.type.TypeWithSourceCodeDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Arrays;
-import java.util.List;
-
-import static com.decathlon.ara.loader.DemoLoaderConstants.*;
 
 /**
  * Load project with its settings as the Demo project.
  */
-@Slf4j
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DemoSettingsLoader {
 
     private static final String UL_START = "<ul style='list-style: none;'>";
     private static final String UL_STOP = "</ul>";
 
-    @NonNull
     private final ProjectService projectService;
 
-    @NonNull
     private final CommunicationService communicationService;
 
-    @NonNull
     private final SourceService sourceService;
 
-    @NonNull
     private final TypeService typeService;
 
-    @NonNull
     private final CountryService countryService;
 
-    @NonNull
     private final SeverityService severityService;
 
-    @NonNull
-    private final SettingService settingService;
-
-    @NonNull
     private final CycleDefinitionService cycleDefinitionService;
 
-    @NonNull
     private final TeamService teamService;
+
+    @Autowired
+    public DemoSettingsLoader(ProjectService projectService, CommunicationService communicationService,
+            SourceService sourceService, TypeService typeService, CountryService countryService,
+            SeverityService severityService,
+            CycleDefinitionService cycleDefinitionService, TeamService teamService) {
+        this.projectService = projectService;
+        this.communicationService = communicationService;
+        this.sourceService = sourceService;
+        this.typeService = typeService;
+        this.countryService = countryService;
+        this.severityService = severityService;
+        this.cycleDefinitionService = cycleDefinitionService;
+        this.teamService = teamService;
+    }
 
     public ProjectDTO createProjectWithCommunicationsAndRootCauses() throws NotUniqueException {
         return projectService.create(
@@ -223,7 +237,7 @@ public class DemoSettingsLoader {
                 createTeam(projectId, "Buy", true),
                 createTeam(projectId, "Account", true),
                 createTeam(projectId, "Infrastructure", false)
-                // Add new teams at end of list, as they will be accessed by index
+        // Add new teams at end of list, as they will be accessed by index
         );
     }
 

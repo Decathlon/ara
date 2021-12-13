@@ -1,20 +1,16 @@
 package com.decathlon.ara.coreapi.domain;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import java.time.LocalDateTime;
+
+import javax.persistence.EntityListeners;
+import javax.persistence.MappedSuperclass;
+
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.EntityListeners;
-import javax.persistence.MappedSuperclass;
-import java.time.LocalDateTime;
-
-@Getter(AccessLevel.PROTECTED)
-@Setter(AccessLevel.PROTECTED)
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public class Auditable<U> {
@@ -30,5 +26,21 @@ public class Auditable<U> {
 
     @LastModifiedDate
     private LocalDateTime lastModifiedDatetime;
+
+    protected U getCreatedBy() {
+        return createdBy;
+    }
+
+    protected LocalDateTime getCreatedDatetime() {
+        return createdDatetime;
+    }
+
+    protected U getLastModifiedBy() {
+        return lastModifiedBy;
+    }
+
+    protected LocalDateTime getLastModifiedDatetime() {
+        return lastModifiedDatetime;
+    }
 
 }

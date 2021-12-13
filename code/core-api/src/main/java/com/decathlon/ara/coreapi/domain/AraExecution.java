@@ -1,13 +1,17 @@
 package com.decathlon.ara.coreapi.domain;
 
-import lombok.Data;
-
-import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
-@Data
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+
 @Entity
 public class AraExecution {
     @Id
@@ -25,5 +29,29 @@ public class AraExecution {
 
     @ManyToOne
     private AraEnvironment environment;
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public LocalDateTime getStartDatetime() {
+        return startDatetime;
+    }
+
+    public List<AraScenarioResult> getScenarioResults() {
+        return scenarioResults;
+    }
+
+    public AraEnvironment getEnvironment() {
+        return environment;
+    }
 
 }

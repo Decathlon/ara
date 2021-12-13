@@ -17,15 +17,6 @@
 
 package com.decathlon.ara.service.dto.ignore;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 public class ScenarioIgnoreCountDTO {
 
     private long ignored;
@@ -33,6 +24,22 @@ public class ScenarioIgnoreCountDTO {
 
     public int getPercent() {
         return (total == 0 ? 0 : (int) Math.ceil(100 * ignored / (double) total));
+    }
+
+    public long getIgnored() {
+        return ignored;
+    }
+
+    public void setIgnored(long ignored) {
+        this.ignored = ignored;
+    }
+
+    public long getTotal() {
+        return total;
+    }
+
+    public void setTotal(long total) {
+        this.total = total;
     }
 
 }

@@ -17,6 +17,18 @@
 
 package com.decathlon.ara.scenario.cucumber.indexer;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.decathlon.ara.domain.ExecutedScenario;
 import com.decathlon.ara.domain.Run;
 import com.decathlon.ara.scenario.common.indexer.ScenariosIndexer;
@@ -26,36 +38,28 @@ import com.decathlon.ara.scenario.cucumber.settings.CucumberSettings;
 import com.decathlon.ara.service.FileProcessorService;
 import com.decathlon.ara.service.TechnologySettingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Slf4j
 public class CucumberScenariosIndexer implements ScenariosIndexer {
 
-    @NonNull
+    private static final Logger LOG = LoggerFactory.getLogger(CucumberScenariosIndexer.class);
+
     private final ObjectMapper objectMapper;
 
-    @NonNull
     private final ExecutedScenarioExtractorService executedScenarioExtractorService;
 
-    @NonNull
     private final TechnologySettingService technologySettingService;
 
-    @NonNull
     private final FileProcessorService fileProcessorService;
+
+    public CucumberScenariosIndexer(ObjectMapper objectMapper,
+            ExecutedScenarioExtractorService executedScenarioExtractorService,
+            TechnologySettingService technologySettingService, FileProcessorService fileProcessorService) {
+        this.objectMapper = objectMapper;
+        this.executedScenarioExtractorService = executedScenarioExtractorService;
+        this.technologySettingService = technologySettingService;
+        this.fileProcessorService = fileProcessorService;
+    }
 
     /**
      * Get the Cucumber executed scenarios
@@ -85,8 +89,7 @@ public class CucumberScenariosIndexer implements ScenariosIndexer {
         List<ExecutedScenario> executedScenarios = executedScenarioExtractorService.extractExecutedScenarios(
                 features,
                 stepDefinitions,
-                run.getJobUrl()
-        );
+                run.getJobUrl());
 
         return executedScenarios;
     }
@@ -100,7 +103,7 @@ public class CucumberScenariosIndexer implements ScenariosIndexer {
         try (InputStream input = new FileInputStream(cucumberReport)) {
             return objectMapper.readValue(input, objectMapper.getTypeFactory().constructCollectionType(List.class, Feature.class));
         } catch (IOException e) {
-            log.info("Cannot download report file in {}", cucumberReport.getPath(), e);
+            LOG.info("Cannot download report file in {}", cucumberReport.getPath(), e);
             return new ArrayList<>();
         }
     }
@@ -114,8 +117,8 @@ public class CucumberScenariosIndexer implements ScenariosIndexer {
         try (InputStream input = new FileInputStream(stepDefinitionsFile)) {
             return objectMapper.readValue(input, objectMapper.getTypeFactory().constructCollectionType(List.class, String.class));
         } catch (IOException e) {
-            log.info("Cannot download the step definitions file in {}", stepDefinitionsFile.getPath(), e);
-            log.info("Please check your (technology) settings again");
+            LOG.info("Cannot download the step definitions file in {}", stepDefinitionsFile.getPath(), e);
+            LOG.info("Please check your (technology) settings again");
             return new ArrayList<>();
         }
     }

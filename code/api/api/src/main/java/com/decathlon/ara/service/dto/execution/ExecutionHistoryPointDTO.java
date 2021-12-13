@@ -17,22 +17,11 @@
 
 package com.decathlon.ara.service.dto.execution;
 
+import java.util.List;
+
 import com.decathlon.ara.service.dto.countrydeployment.CountryDeploymentDTO;
 import com.decathlon.ara.service.dto.run.RunWithQualitiesDTO;
-import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import lombok.With;
 
-@Data
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 public class ExecutionHistoryPointDTO extends ExecutionDTO {
 
     private Long previousId;
@@ -43,4 +32,27 @@ public class ExecutionHistoryPointDTO extends ExecutionDTO {
 
     private List<RunWithQualitiesDTO> runs;
 
+    public Long getPreviousId() {
+        return previousId;
+    }
+
+    public void setPreviousId(Long previousId) {
+        this.previousId = previousId;
+    }
+
+    public Long getNextId() {
+        return nextId;
+    }
+
+    public void setNextId(Long nextId) {
+        this.nextId = nextId;
+    }
+
+    public List<CountryDeploymentDTO> getCountryDeployments() {
+        return countryDeployments;
+    }
+
+    public List<RunWithQualitiesDTO> getRuns() {
+        return runs;
+    }
 }

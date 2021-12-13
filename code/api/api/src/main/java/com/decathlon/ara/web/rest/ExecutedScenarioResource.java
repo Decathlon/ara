@@ -17,6 +17,19 @@
 
 package com.decathlon.ara.web.rest;
 
+import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+
+import java.util.List;
+
+import javax.validation.Valid;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.scenario.common.service.ExecutedScenarioService;
@@ -26,37 +39,25 @@ import com.decathlon.ara.service.dto.executedscenario.ExecutedScenarioWithRunAnd
 import com.decathlon.ara.service.dto.request.ExecutedScenarioHistoryInputDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
-import java.util.List;
-import javax.validation.Valid;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 
 /**
  * REST controller for managing ExecutedScenarios.
  */
 @RestController
 @RequestMapping(ExecutedScenarioResource.PATH)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ExecutedScenarioResource {
 
     private static final String NAME = Entities.EXECUTED_SCENARIO;
     static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
 
-    @NonNull
     private final ExecutedScenarioService executedScenarioService;
 
-    @NonNull
     private final ProjectService projectService;
+
+    public ExecutedScenarioResource(ExecutedScenarioService executedScenarioService, ProjectService projectService) {
+        this.executedScenarioService = executedScenarioService;
+        this.projectService = projectService;
+    }
 
     /**
      * @param projectCode the code of the project in which to work
@@ -65,7 +66,7 @@ public class ExecutedScenarioResource {
      */
     @PostMapping("/history")
     public ResponseEntity<List<ExecutedScenarioWithRunAndTeamIdsAndExecutionAndErrorsAndProblemsDTO>> getHistory(
-            @PathVariable String projectCode, @Valid @RequestBody ExecutedScenarioHistoryInputDTO input) {
+                                                                                                                 @PathVariable String projectCode, @Valid @RequestBody ExecutedScenarioHistoryInputDTO input) {
         try {
             return ResponseEntity.ok().body(executedScenarioService.findHistory(projectService.toId(projectCode), input));
         } catch (BadRequestException e) {

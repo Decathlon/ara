@@ -17,34 +17,36 @@
 
 package com.decathlon.ara.scenario.cucumber.asset;
 
-import com.decathlon.ara.configuration.AraConfiguration;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Service;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Service;
+
+import com.decathlon.ara.configuration.AraConfiguration;
 
 /**
  * Write to disk (can be a NFS mount-point or a Docker mounted volume binding... this is transparent) parts of the data
  * from Cucumber and Postman reports.
  */
 @Service
-@Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @ConditionalOnProperty(name = "ara.adapter.asset.name", havingValue = "file", matchIfMissing = true)
 public class FileAssetService implements AssetService {
 
-    @NonNull
+    private static final Logger LOG = LoggerFactory.getLogger(FileAssetService.class);
+
     private final AraConfiguration araConfiguration;
 
-    @NonNull
     private final FileNameService fileNameService;
+
+    public FileAssetService(AraConfiguration araConfiguration, FileNameService fileNameService) {
+        this.araConfiguration = araConfiguration;
+        this.fileNameService = fileNameService;
+    }
 
     /**
      * Write a Cucumber scenario screenshot to disk.
@@ -70,7 +72,7 @@ public class FileAssetService implements AssetService {
 
             return araConfiguration.getFileHttpAccess() + subFolder + "/" + fileName;
         } catch (IOException e) {
-            log.warn("SCENARIO|cucumber|Screenshot saving failed: {}", e.getMessage(), e);
+            LOG.warn("SCENARIO|cucumber|Screenshot saving failed: {}", e.getMessage(), e);
             return null;
         }
     }
@@ -97,7 +99,7 @@ public class FileAssetService implements AssetService {
 
             return araConfiguration.getFileHttpAccess() + subFolder + "/" + fileName;
         } catch (IOException e) {
-            log.warn("SCENARIO|cucumber|HTTP log saving failed: {}", e.getMessage(), e);
+            LOG.warn("SCENARIO|cucumber|HTTP log saving failed: {}", e.getMessage(), e);
             return null;
         }
     }

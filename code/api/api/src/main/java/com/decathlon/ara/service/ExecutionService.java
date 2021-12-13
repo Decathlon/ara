@@ -17,43 +17,25 @@
 
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.Entities;
-import com.decathlon.ara.Messages;
-import com.decathlon.ara.ci.bean.PlannedIndexation;
-import com.decathlon.ara.ci.service.ExecutionIndexerService;
-import com.decathlon.ara.domain.CycleDefinition;
-import com.decathlon.ara.domain.Execution;
-import com.decathlon.ara.domain.ExecutionCompletionRequest;
-import com.decathlon.ara.domain.Run;
-import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
-import com.decathlon.ara.domain.enumeration.Handling;
-import com.decathlon.ara.domain.enumeration.JobStatus;
-import com.decathlon.ara.domain.enumeration.QualityStatus;
-import com.decathlon.ara.scenario.cucumber.util.ScenarioExtractorUtil;
-import com.decathlon.ara.repository.CycleDefinitionRepository;
-import com.decathlon.ara.repository.ExecutionCompletionRequestRepository;
-import com.decathlon.ara.repository.ExecutionRepository;
-import com.decathlon.ara.repository.FunctionalityRepository;
-import com.decathlon.ara.service.dto.error.ErrorWithProblemsDTO;
-import com.decathlon.ara.service.dto.executedscenario.ExecutedScenarioWithTeamIdsAndErrorsAndProblemsDTO;
-import com.decathlon.ara.service.dto.execution.ExecutionCriteriaDTO;
-import com.decathlon.ara.service.dto.execution.ExecutionDTO;
-import com.decathlon.ara.service.dto.execution.ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO;
-import com.decathlon.ara.service.dto.execution.ExecutionWithHandlingCountsDTO;
-import com.decathlon.ara.service.dto.problem.ProblemDTO;
-import com.decathlon.ara.service.dto.run.RunWithExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO;
-import com.decathlon.ara.service.exception.BadRequestException;
-import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.service.mapper.ExecutionMapper;
-import com.decathlon.ara.service.mapper.ExecutionWithHandlingCountsMapper;
-import com.decathlon.ara.service.support.Settings;
-import com.decathlon.ara.service.transformer.ExecutionTransformer;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -61,62 +43,87 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.decathlon.ara.Entities;
+import com.decathlon.ara.Messages;
+import com.decathlon.ara.ci.bean.PlannedIndexation;
+import com.decathlon.ara.ci.service.ExecutionIndexerService;
+import com.decathlon.ara.domain.CycleDefinition;
+import com.decathlon.ara.domain.Error;
+import com.decathlon.ara.domain.ExecutedScenario;
+import com.decathlon.ara.domain.Execution;
+import com.decathlon.ara.domain.ExecutionCompletionRequest;
+import com.decathlon.ara.domain.Problem;
+import com.decathlon.ara.domain.ProblemOccurrence;
+import com.decathlon.ara.domain.ProblemPattern;
+import com.decathlon.ara.domain.Run;
+import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
+import com.decathlon.ara.domain.enumeration.JobStatus;
+import com.decathlon.ara.domain.enumeration.QualityStatus;
+import com.decathlon.ara.repository.CycleDefinitionRepository;
+import com.decathlon.ara.repository.ExecutionCompletionRequestRepository;
+import com.decathlon.ara.repository.ExecutionRepository;
+import com.decathlon.ara.repository.FunctionalityRepository;
+import com.decathlon.ara.scenario.cucumber.util.ScenarioExtractorUtil;
+import com.decathlon.ara.service.dto.error.ErrorWithProblemsDTO;
+import com.decathlon.ara.service.dto.executedscenario.ExecutedScenarioWithTeamIdsAndErrorsAndProblemsDTO;
+import com.decathlon.ara.service.dto.execution.ExecutionCriteriaDTO;
+import com.decathlon.ara.service.dto.execution.ExecutionDTO;
+import com.decathlon.ara.service.dto.execution.ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO;
+import com.decathlon.ara.service.dto.execution.ExecutionWithHandlingCountsDTO;
+import com.decathlon.ara.service.dto.problem.ProblemDTO;
+import com.decathlon.ara.service.exception.BadRequestException;
+import com.decathlon.ara.service.exception.NotFoundException;
+import com.decathlon.ara.service.mapper.GenericMapper;
+import com.decathlon.ara.service.support.Settings;
 
 /**
  * Service for managing Execution.
  */
-@Slf4j
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ExecutionService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ExecutionService.class);
 
     private static final String STILL_COMPUTING = "STILL_COMPUTING";
 
-    @NonNull
     private final ExecutionRepository executionRepository;
 
-    @NonNull
     private final ExecutionCompletionRequestRepository executionCompletionRequestRepository;
 
-    @NonNull
     private final FunctionalityRepository functionalityRepository;
 
-    @NonNull
-    private final ExecutionMapper executionMapper;
+    private final GenericMapper mapper;
 
-    @NonNull
-    private final ExecutionWithHandlingCountsMapper executionWithHandlingCountsMapper;
-
-    @NonNull
-    private final ExecutionTransformer executionTransformer;
-
-    @NonNull
     private final ExecutionHistoryService executionHistoryService;
 
-    @NonNull
     private final ArchiveService archiveService;
 
-    @NonNull
     private final SettingService settingService;
 
-    @NonNull
     private final ExecutionIndexerService executionIndexerService;
 
-    @NonNull
     private final CycleDefinitionRepository cycleDefinitionRepository;
 
-    @NonNull
-    private final FeatureService featureService;
-
-    @NonNull
     private final ProblemService problemService;
 
+    @Autowired
+    public ExecutionService(ExecutionRepository executionRepository,
+            ExecutionCompletionRequestRepository executionCompletionRequestRepository,
+            FunctionalityRepository functionalityRepository, GenericMapper mapper, ExecutionHistoryService executionHistoryService,
+            ArchiveService archiveService, SettingService settingService,
+            ExecutionIndexerService executionIndexerService, CycleDefinitionRepository cycleDefinitionRepository, ProblemService problemService) {
+        this.executionRepository = executionRepository;
+        this.executionCompletionRequestRepository = executionCompletionRequestRepository;
+        this.functionalityRepository = functionalityRepository;
+        this.mapper = mapper;
+        this.executionHistoryService = executionHistoryService;
+        this.archiveService = archiveService;
+        this.settingService = settingService;
+        this.executionIndexerService = executionIndexerService;
+        this.cycleDefinitionRepository = cycleDefinitionRepository;
+        this.problemService = problemService;
+    }
 
     /**
      * Get all executions.
@@ -150,82 +157,49 @@ public class ExecutionService {
             this.removeScenariosWithoutErrors(execution);
         }
 
-        ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO resultDto
-                = executionTransformer.toFullyDetailledDto(execution);
+        return mapper.map(execution, ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO.class,
+                (entity, dto) -> mapExecutionProblem(projectId, entity, dto));
+    }
 
+    private void mapExecutionProblem(Long projectId, Execution execution, ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO dto) {
+        int[] positions = { 0, 0, 0 };
         final Map<Long, Long> functionalityTeamIds = functionalityRepository.getFunctionalityTeamIds(projectId);
-        for (RunWithExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO run : resultDto.getRuns()) {
-            for (ExecutedScenarioWithTeamIdsAndErrorsAndProblemsDTO executedScenario : run.getExecutedScenarios()) {
-                executedScenario.setTeamIds(ScenarioExtractorUtil.extractFunctionalityIds(executedScenario.getName()).stream()
+        for (Run run : safeToIterate(execution.getRuns())) {
+            for (ExecutedScenario executedScenario : safeToIterate(run.getExecutedScenarios())) {
+                ExecutedScenarioWithTeamIdsAndErrorsAndProblemsDTO executedScenarioDto = dto.getRuns().get(positions[0]).getExecutedScenarios().get(positions[1]);
+                executedScenarioDto.setTeamIds(ScenarioExtractorUtil.extractFunctionalityIds(executedScenario.getName()).stream()
                         .map(functionalityTeamIds::get)
                         .filter(Objects::nonNull) // Unknown functionality IDs have null team IDs
                         .collect(Collectors.toSet()));
-                for (ErrorWithProblemsDTO error : executedScenario.getErrors()) {
-                    for (ProblemDTO problem : error.getProblems()) {
+                for (Error error : safeToIterate(executedScenario.getErrors())) {
+                    List<Problem> problems = error.getProblemOccurrences().stream()
+                            .map(ProblemOccurrence::getProblemPattern)
+                            .map(ProblemPattern::getProblem)
+                            .sorted(Comparator.nullsLast(Problem::compareTo))
+                            .distinct()
+                            .toList();
+                    ErrorWithProblemsDTO errorDto = executedScenarioDto.getErrors().get(positions[2]);
+                    errorDto.setProblems(mapper.mapCollection(problems, ProblemDTO.class));
+                    for (ProblemDTO problem : errorDto.getProblems()) {
                         problem.setDefectUrl(problemService.retrieveDefectUrl(projectId, problem));
                     }
+                    positions[2] = positions[2] + 1;
                 }
+                positions[1] = positions[1] + 1;
+                positions[2] = 0;
             }
+            positions[0] = positions[0] + 1;
+            positions[1] = 0;
+            positions[2] = 0;
         }
-
-        return resultDto;
     }
 
-    private boolean matchFilters(ExecutedScenarioWithTeamIdsAndErrorsAndProblemsDTO scenario, ExecutionCriteriaDTO criteria) {
-        // Apply the "ONLY SCENARIO IN ERROR" filter
-        boolean match = !(!criteria.isWithSucceed() && scenario.getErrors().isEmpty());
-        // Apply the "TEAM" filter
-        if (null != criteria.getTeam()) {
-            match = match && ((-404L == criteria.getTeam() && scenario.getTeamIds().isEmpty())
-                    || scenario.getTeamIds().contains(criteria.getTeam())
-                    || this.containsTeamIdInErrors(scenario, criteria.getTeam()));
+    @SuppressWarnings("unchecked")
+    private <T extends Collection<?>> T safeToIterate(T collection) {
+        if (collection == null) {
+            return (T) Collections.emptyList();
         }
-        // Apply the "SEVERITY" filter
-        if (StringUtils.isNotEmpty(criteria.getSeverity())) {
-            boolean emptySeverity = StringUtils.isEmpty(scenario.getSeverity()) || "&".equals(scenario.getSeverity());
-            match = match && (criteria.getSeverity().equals(scenario.getSeverity())
-                    || ("none".equals(criteria.getSeverity()) && emptySeverity)
-                    || ("medium".equals(criteria.getSeverity()) && emptySeverity));
-        }
-        // Apply the "HANDLING" filter
-        if (StringUtils.isNotEmpty(criteria.getHandling())) {
-            match = match && Handling.valueOf(criteria.getHandling()) == scenario.getHandling();
-        }
-        // Apply the "FEATURE" filter
-        if (StringUtils.isNotEmpty(criteria.getFeature())) {
-            match = match && scenario.getFeatureName().toLowerCase().contains(criteria.getFeature().toLowerCase());
-        }
-        // Apply the "SCENARIO" filter
-        if (StringUtils.isNotEmpty(criteria.getScenario())) {
-            match = match && scenario.getName().toLowerCase().contains(criteria.getScenario().toLowerCase());
-        }
-        // Apply the "STEP" filter
-        if (StringUtils.isNotEmpty(criteria.getStep())) {
-            match = match && !scenario.getErrors().isEmpty() && scenario.getErrors().stream()
-                    .anyMatch(e -> e.getStep().toLowerCase().contains(criteria.getStep().toLowerCase()));
-        }
-        // Apply the "EXCEPTION" filter
-        if (StringUtils.isNotEmpty(criteria.getException()) && !scenario.getErrors().isEmpty()) {
-            match = match && scenario.getErrors().stream()
-                    .anyMatch(e -> e.getException().toLowerCase().contains(criteria.getException().toLowerCase()));
-        }
-        // Apply the "PROBLEM" filter
-        if (null != criteria.getProblem()) {
-            match = match && !scenario.getErrors().isEmpty() && scenario.getErrors().stream()
-                    .anyMatch(e -> e.getProblems().stream()
-                            .anyMatch(p -> p.getId().equals(criteria.getProblem())));
-        }
-        return match;
-    }
-
-    private boolean containsTeamIdInErrors(ExecutedScenarioWithTeamIdsAndErrorsAndProblemsDTO scenario, long teamId) {
-        for (ErrorWithProblemsDTO error : scenario.getErrors()) {
-            if (error.getProblems().stream()
-                    .anyMatch(p -> p.getBlamedTeam().getId() == teamId)) {
-                return true;
-            }
-        }
-        return false;
+        return collection;
     }
 
     private void removeScenariosWithoutErrors(Execution execution) {
@@ -255,7 +229,7 @@ public class ExecutionService {
 
         execution.setAcceptance(ExecutionAcceptance.DISCARDED);
         execution.setDiscardReason(discardReason);
-        return executionMapper.toDto(executionRepository.save(execution));
+        return mapper.map(executionRepository.save(execution), ExecutionDTO.class);
     }
 
     /**
@@ -274,7 +248,7 @@ public class ExecutionService {
 
         execution.setAcceptance(ExecutionAcceptance.NEW);
         execution.setDiscardReason(null);
-        return executionMapper.toDto(executionRepository.save(execution));
+        return mapper.map(executionRepository.save(execution), ExecutionDTO.class);
     }
 
     /**
@@ -345,9 +319,7 @@ public class ExecutionService {
     }
 
     private ExecutionWithHandlingCountsDTO toDtoWithAggregate(Execution execution) {
-        ExecutionWithHandlingCountsDTO dto = executionWithHandlingCountsMapper.toDto(execution);
-        dto.setScenarioCounts(executionHistoryService.getExecutedScenarioHandlingCountsFor(execution));
-        return dto;
+        return mapper.map(execution, ExecutionWithHandlingCountsDTO.class, (entity, dto) -> dto.setScenarioCounts(executionHistoryService.getExecutedScenarioHandlingCountsFor(entity)));
     }
 
     /**
@@ -355,7 +327,7 @@ public class ExecutionService {
      * @return latest blocking and eligible executions for each branch
      */
     public List<ExecutionDTO> getLatestEligibleVersions(long projectId) {
-        return executionMapper.toDto(executionRepository.getLatestEligibleVersionsByProjectId(projectId));
+        return mapper.mapCollection(executionRepository.getLatestEligibleVersionsByProjectId(projectId), ExecutionDTO.class);
     }
 
     /**
@@ -390,19 +362,18 @@ public class ExecutionService {
      * @param cycleDefinition the cycle definition
      */
     public synchronized void launchExecutionDirectoriesProcessingThread(
-            Long projectId,
-            List<File> executionDirectories,
-            CycleDefinition cycleDefinition
-    ) {
+                                                                        Long projectId,
+                                                                        List<File> executionDirectories,
+                                                                        CycleDefinition cycleDefinition) {
         Thread processExecutionDirectoriesThread = new Thread(() -> {
-            log.info("EXECUTION|Processing execution files in a new thread");
+            LOG.info("EXECUTION|Processing execution files in a new thread");
             for (final File executionDirectory : executionDirectories) {
                 try {
                     processSpecificDirectory(cycleDefinition, executionDirectory);
                 } catch (Exception e) {
-                    log.warn("EXECUTION|A problem occurred while indexing this execution [{}]", executionDirectory.getPath(), e);
+                    LOG.warn("EXECUTION|A problem occurred while indexing this execution [{}]", executionDirectory.getPath(), e);
                 } finally {
-                    log.info("EXECUTION|Cleaning the incoming folder: {}", executionDirectory.getAbsolutePath());
+                    LOG.info("EXECUTION|Cleaning the incoming folder: {}", executionDirectory.getAbsolutePath());
                     cleanExecutionFiles(projectId, executionDirectory);
                 }
             }
@@ -411,11 +382,9 @@ public class ExecutionService {
     }
 
     public void processSpecificDirectory(CycleDefinition cycleDefinition, File executionDirectory) {
-        log.info("EXECUTION|Received new execution report in {}", executionDirectory.getAbsolutePath());
+        LOG.info("EXECUTION|Received new execution report in {}", executionDirectory.getAbsolutePath());
 
-        PlannedIndexation plannedIndexation = new PlannedIndexation()
-                .withCycleDefinition(cycleDefinition)
-                .withExecutionFolder(executionDirectory);
+        PlannedIndexation plannedIndexation = new PlannedIndexation(cycleDefinition, executionDirectory);
         executionIndexerService.indexExecution(plannedIndexation);
     }
 
@@ -427,7 +396,7 @@ public class ExecutionService {
 
     List<File> retrieveAllExecutionDirectories(File file, String buildInformationFilePath) {
         if (ArrayUtils.isEmpty(file.list())) {
-            log.warn("EXECUTION|No entries found in the zip file {}", file.getAbsolutePath());
+            LOG.warn("EXECUTION|No entries found in the zip file {}", file.getAbsolutePath());
             return new ArrayList<>();
         }
 
@@ -445,7 +414,7 @@ public class ExecutionService {
         return executionDirectories;
     }
 
-    Boolean isExecutionDirectory(File file, String buildInformationFilePath) {
+    boolean isExecutionDirectory(File file, String buildInformationFilePath) {
         return file.isDirectory() && file.getName().matches("[0-9]+")
                 && new File(file, buildInformationFilePath).exists();
     }
@@ -461,7 +430,7 @@ public class ExecutionService {
             try {
                 FileUtils.deleteDirectory(executionDirectory);
             } catch (IOException e) {
-                log.warn("EXECUTION|The directory [{}] wasn't deleted due to an error", executionDirectory.getAbsolutePath(), e);
+                LOG.warn("EXECUTION|The directory [{}] wasn't deleted due to an error", executionDirectory.getAbsolutePath(), e);
             }
         }
     }

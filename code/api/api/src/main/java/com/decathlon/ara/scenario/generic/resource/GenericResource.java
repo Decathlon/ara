@@ -17,46 +17,52 @@
 
 package com.decathlon.ara.scenario.generic.resource;
 
+import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+
+import java.util.List;
+
+import javax.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.decathlon.ara.scenario.generic.bean.GenericExecutedScenarioReport;
 import com.decathlon.ara.scenario.generic.upload.GenericScenarioUploader;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-import java.util.List;
-
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
-
-@Slf4j
 @RestController
 @RequestMapping(PROJECT_API_PATH + "/generic")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GenericResource {
 
-    @NonNull
+    private static final Logger LOG = LoggerFactory.getLogger(GenericResource.class);
+
     private final ProjectService projectService;
 
-    @NonNull
     private final GenericScenarioUploader genericScenarioUploader;
+
+    public GenericResource(ProjectService projectService, GenericScenarioUploader genericScenarioUploader) {
+        this.projectService = projectService;
+        this.genericScenarioUploader = genericScenarioUploader;
+    }
 
     @PostMapping("scenarios/upload/{sourceCode}")
     public ResponseEntity<Void> uploadGenericScenarios(
-            @PathVariable String projectCode,
-            @PathVariable String sourceCode,
-            @RequestBody List<@Valid GenericExecutedScenarioReport> genericReports
-    ) {
+                                                       @PathVariable String projectCode,
+                                                       @PathVariable String sourceCode,
+                                                       @RequestBody List<@Valid GenericExecutedScenarioReport> genericReports) {
         try {
             Long projectId = projectService.toId(projectCode);
             genericScenarioUploader.upload(projectId, sourceCode, genericReports);
         } catch (BadRequestException e) {
-            log.error("Ara failed to add generic scenarios ({})", sourceCode, e);
+            LOG.error("Ara failed to add generic scenarios ({})", sourceCode, e);
             return ResponseUtil.handle(e);
         }
         return ResponseEntity.ok().build();

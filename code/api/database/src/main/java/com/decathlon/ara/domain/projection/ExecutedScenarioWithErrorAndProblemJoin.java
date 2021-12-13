@@ -21,22 +21,12 @@ import com.decathlon.ara.domain.ExecutedScenario;
 import com.decathlon.ara.domain.Problem;
 import com.decathlon.ara.domain.Run;
 import com.decathlon.ara.domain.Severity;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
 /**
  * A join of {@link ExecutedScenario}, {@link Error} and {@link Problem}: provide a few information about the scenario,
  * with handled (with not reappeared problem) and unhandled (without problem, or with reappeared problem) errors, if
  * any.
  */
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
-@With
 public class ExecutedScenarioWithErrorAndProblemJoin {
 
     /**
@@ -72,5 +62,41 @@ public class ExecutedScenarioWithErrorAndProblemJoin {
      * If both {@link #unhandledCount} and {@code handledCount} are 0, the scenario is successful (it has no error).
      */
     private long handledCount;
+
+    public ExecutedScenarioWithErrorAndProblemJoin() {
+    }
+
+    public ExecutedScenarioWithErrorAndProblemJoin(long id, long runId, String severity, String name, long unhandledCount, long handledCount) {
+        this.id = id;
+        this.runId = runId;
+        this.severity = severity;
+        this.name = name;
+        this.unhandledCount = unhandledCount;
+        this.handledCount = handledCount;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public long getRunId() {
+        return runId;
+    }
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public long getUnhandledCount() {
+        return unhandledCount;
+    }
+
+    public long getHandledCount() {
+        return handledCount;
+    }
 
 }

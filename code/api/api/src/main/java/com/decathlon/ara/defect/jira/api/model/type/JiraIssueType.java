@@ -17,9 +17,6 @@
 
 package com.decathlon.ara.defect.jira.api.model.type;
 
-import lombok.Data;
-
-@Data
 public class JiraIssueType {
 
     private String self;
@@ -37,5 +34,37 @@ public class JiraIssueType {
     private Integer avatarId;
 
     private String entityId;
+
+    public String getSelf() {
+        return self;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getIconUrl() {
+        return iconUrl;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Boolean getSubtask() {
+        return subtask;
+    }
+
+    public Integer getAvatarId() {
+        return avatarId;
+    }
+
+    public String getEntityId() {
+        return entityId;
+    }
 
 }

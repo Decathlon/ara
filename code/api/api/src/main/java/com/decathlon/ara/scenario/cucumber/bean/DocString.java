@@ -19,13 +19,11 @@ package com.decathlon.ara.scenario.cucumber.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
 
 /**
  * Doc Strings are handy for specifying a larger piece of text. This is inspired from Python’s Docstring syntax. In your step definition, there’s
  * no need to find this text and match it in your Regexp. It will automatically be passed as the last parameter in the step definition.
  */
-@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DocString {
 
@@ -35,5 +33,17 @@ public class DocString {
     private String contentType;
 
     private Integer line;
+
+    public String getValue() {
+        return value;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public Integer getLine() {
+        return line;
+    }
 
 }

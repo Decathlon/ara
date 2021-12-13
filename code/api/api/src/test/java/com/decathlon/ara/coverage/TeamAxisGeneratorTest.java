@@ -21,7 +21,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,9 +35,11 @@ import com.decathlon.ara.domain.Functionality;
 import com.decathlon.ara.domain.Team;
 import com.decathlon.ara.repository.TeamRepository;
 import com.decathlon.ara.service.dto.coverage.AxisPointDTO;
+import com.decathlon.ara.util.TestUtil;
+import com.decathlon.ara.util.builder.FunctionalityBuilder;
 
 @ExtendWith(MockitoExtension.class)
-public class TeamAxisGeneratorTest {
+class TeamAxisGeneratorTest {
 
     private static final int A_PROJECT_ID = 42;
 
@@ -45,31 +50,34 @@ public class TeamAxisGeneratorTest {
     private TeamAxisGenerator cut;
 
     @Test
-    public void testGetCode() {
+    void testGetCode() {
         assertThat(cut.getCode()).isEqualTo("team");
     }
 
     @Test
-    public void testGetName() {
+    void testGetName() {
         assertThat(cut.getName()).isEqualTo("Teams");
     }
 
     @Test
-    public void testGetPoints() {
+    void testGetPoints() {
         // GIVEN
         when(teamRepository.findAllByProjectIdOrderByName(A_PROJECT_ID)).thenReturn(Arrays.asList(
-                new Team().withId(Long.valueOf(1)).withName("Team 1").withAssignableToFunctionalities(true),
-                new Team().withId(Long.valueOf(2)).withName("Not assignable").withAssignableToFunctionalities(false),
-                new Team().withId(Long.valueOf(3)).withName("Team 3").withAssignableToFunctionalities(true)));
+                team(Long.valueOf(1), "Team 1", true),
+                team(Long.valueOf(2), "Team 2", false),
+                team(Long.valueOf(3), "Team 3", true)));
 
-        // WHEN / THEN
-        assertThat(cut.getPoints(A_PROJECT_ID)).containsExactly(
-                new AxisPointDTO("1", "Team 1", null),
-                new AxisPointDTO("3", "Team 3", null));
+        // WHEN
+        List<AxisPointDTO> points = cut.getPoints(A_PROJECT_ID).toList();
+
+        // THEN
+        Assertions.assertEquals(2, points.size());
+        Assertions.assertTrue(equals(points.get(0), "1", "Team 1", null));
+        Assertions.assertTrue(equals(points.get(1), "3", "Team 3", null));
     }
 
     @Test
-    public void testGetValuePoints_without_team() {
+    void testGetValuePoints_without_team() {
         // GIVEN
         Functionality functionality = new Functionality();
 
@@ -78,12 +86,22 @@ public class TeamAxisGeneratorTest {
     }
 
     @Test
-    public void testGetValuePoints_with_team() {
+    void testGetValuePoints_with_team() {
         // GIVEN
-        Functionality functionality = new Functionality().withTeamId(Long.valueOf(1));
+        Functionality functionality = new FunctionalityBuilder().withTeamId(Long.valueOf(1)).build();
 
         // WHEN / THEN
         assertThat(cut.getValuePoints(functionality)).isEqualTo(new String[] { "1" });
+    }
+
+    private Team team(Long id, String name, boolean assignableToFunctionalities) {
+        Team team = new Team(id, name);
+        TestUtil.setField(team, "assignableToFunctionalities", assignableToFunctionalities);
+        return team;
+    }
+
+    private boolean equals(AxisPointDTO result, String id, String name, String tooltip) {
+        return Objects.equals(result.getId(), id) && Objects.equals(result.getName(), name) && Objects.equals(result.getTooltip(), tooltip);
     }
 
 }

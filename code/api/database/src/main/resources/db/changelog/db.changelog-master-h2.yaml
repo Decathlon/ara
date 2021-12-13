@@ -9,3 +9,7 @@ databaseChangeLog:
       file: classpath*:db/changelog/changes/h2/20211129100815-delete_cascade_on_problem_occurrences.yaml
   - include:
       file: classpath*:db/changelog/changes/h2/20220125165550-change_data_type.yaml
+  - include:
+      file: classpath*:db/changelog/changes/h2/20220126152954-missing_changes.yaml
+  - include:
+      file: classpath*:db/changelog/changes/h2/20220126171337-not_null_constraints.yaml

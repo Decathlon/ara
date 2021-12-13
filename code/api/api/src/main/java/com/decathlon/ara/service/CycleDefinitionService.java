@@ -17,43 +17,42 @@
 
 package com.decathlon.ara.service;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.domain.CycleDefinition;
-import com.decathlon.ara.domain.QCycleDefinition;
 import com.decathlon.ara.repository.CycleDefinitionRepository;
 import com.decathlon.ara.repository.ExecutionRepository;
 import com.decathlon.ara.service.dto.cycledefinition.CycleDefinitionDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
-import com.decathlon.ara.service.mapper.CycleDefinitionMapper;
-import com.decathlon.ara.service.util.ObjectUtil;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
+import com.decathlon.ara.service.mapper.GenericMapper;
 
 /**
  * Service for managing CycleDefinition.
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CycleDefinitionService {
 
-    @NonNull
     private final CycleDefinitionRepository repository;
 
-    @NonNull
-    private final CycleDefinitionMapper mapper;
+    private final GenericMapper mapper;
 
-    @NonNull
     private final ExecutionRepository executionRepository;
+
+    public CycleDefinitionService(CycleDefinitionRepository repository, GenericMapper mapper,
+            ExecutionRepository executionRepository) {
+        this.repository = repository;
+        this.mapper = mapper;
+        this.executionRepository = executionRepository;
+    }
 
     /**
      * Create a new entity.
@@ -64,13 +63,12 @@ public class CycleDefinitionService {
      * @throws NotUniqueException when the given name is already used by another entity
      */
     public CycleDefinitionDTO create(long projectId, CycleDefinitionDTO dtoToCreate) throws NotUniqueException {
-        ObjectUtil.trimStringValues(dtoToCreate);
         validateBusinessRules(projectId, dtoToCreate);
-        final CycleDefinition entity = mapper.toEntity(dtoToCreate);
+        final CycleDefinition entity = mapper.map(dtoToCreate, CycleDefinition.class);
         entity.setProjectId(projectId);
         final CycleDefinition savedEntity = repository.save(entity);
         updateBranchPositions(projectId, savedEntity.getBranch(), savedEntity.getBranchPosition());
-        return mapper.toDto(savedEntity);
+        return mapper.map(savedEntity, CycleDefinitionDTO.class);
     }
 
     /**
@@ -83,8 +81,6 @@ public class CycleDefinitionService {
      * @throws NotUniqueException when the given name is already used by another entity
      */
     public CycleDefinitionDTO update(long projectId, CycleDefinitionDTO dtoToUpdate) throws BadRequestException {
-        ObjectUtil.trimStringValues(dtoToUpdate);
-
         // Must update an existing entity
         CycleDefinition dataBaseEntity = repository.findAllByProjectIdAndId(projectId, dtoToUpdate.getId());
         if (dataBaseEntity == null) {
@@ -93,11 +89,11 @@ public class CycleDefinitionService {
 
         validateBusinessRules(projectId, dtoToUpdate);
 
-        final CycleDefinition entity = mapper.toEntity(dtoToUpdate);
+        final CycleDefinition entity = mapper.map(dtoToUpdate, CycleDefinition.class);
         entity.setProjectId(projectId);
         final CycleDefinition savedEntity = repository.save(entity);
         updateBranchPositions(projectId, savedEntity.getBranch(), savedEntity.getBranchPosition());
-        return mapper.toDto(savedEntity);
+        return mapper.map(savedEntity, CycleDefinitionDTO.class);
     }
 
     /**
@@ -108,7 +104,7 @@ public class CycleDefinitionService {
      */
     @Transactional(readOnly = true)
     public List<CycleDefinitionDTO> findAll(long projectId) {
-        return mapper.toDto(repository.findAllByProjectIdOrderByBranchPositionAscBranchAscNameAsc(projectId));
+        return mapper.mapCollection(repository.findAllByProjectIdOrderByBranchPositionAscBranchAscNameAsc(projectId), CycleDefinitionDTO.class);
     }
 
     /**
@@ -135,7 +131,7 @@ public class CycleDefinitionService {
     private void validateBusinessRules(long projectId, CycleDefinitionDTO dto) throws NotUniqueException {
         Optional<CycleDefinition> existingEntityWithSameBranchAndName = repository.findByProjectIdAndBranchAndName(projectId, dto.getBranch(), dto.getName());
         if (existingEntityWithSameBranchAndName.isPresent() && !existingEntityWithSameBranchAndName.get().getId().equals(dto.getId())) {
-            throw new NotUniqueException(Messages.NOT_UNIQUE_CYCLE_DEFINITION_NAME_BRANCH, Entities.CYCLE_DEFINITION, QCycleDefinition.cycleDefinition.branch.getMetadata().getName(), existingEntityWithSameBranchAndName.get().getId());
+            throw new NotUniqueException(Messages.NOT_UNIQUE_CYCLE_DEFINITION_NAME_BRANCH, Entities.CYCLE_DEFINITION, "branch", existingEntityWithSameBranchAndName.get().getId());
         }
     }
 

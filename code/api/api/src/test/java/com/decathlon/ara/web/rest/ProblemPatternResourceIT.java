@@ -56,6 +56,7 @@ import com.decathlon.ara.service.dto.response.DeletePatternDTO;
 import com.decathlon.ara.service.dto.run.RunWithExecutionDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
+import com.decathlon.ara.util.TestUtil;
 import com.decathlon.ara.web.rest.util.HeaderUtil;
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
@@ -63,14 +64,14 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 @Disabled
 @SpringBootTest
 @TestExecutionListeners({
-    TransactionalTestExecutionListener.class,
-    DependencyInjectionTestExecutionListener.class,
-    DbUnitTestExecutionListener.class
+        TransactionalTestExecutionListener.class,
+        DependencyInjectionTestExecutionListener.class,
+        DbUnitTestExecutionListener.class
 })
 @TestPropertySource(
-		locations = "classpath:application-db-h2.properties")
+        locations = "classpath:application-db-h2.properties")
 @Transactional
-public class ProblemPatternResourceIT {
+class ProblemPatternResourceIT {
 
     private static final String PROJECT_CODE = "p";
     private static final long PROJECT_ID = 1;
@@ -89,7 +90,7 @@ public class ProblemPatternResourceIT {
 
     @Test
     @DatabaseSetup("/dbunit/full-small-fake-dataset.xml")
-    public void testDeleteOkOnSinglePatternProblem() {
+    void testDeleteOkOnSinglePatternProblem() {
         // GIVEN
         long patternIdToDelete = 1011;
         long problemIdOfPatternToDelete = 1001;
@@ -109,7 +110,7 @@ public class ProblemPatternResourceIT {
 
     @Test
     @DatabaseSetup("/dbunit/full-small-fake-dataset.xml")
-    public void testDeleteOkOnTwoPatternsProblem() throws BadRequestException {
+    void testDeleteOkOnTwoPatternsProblem() throws BadRequestException {
         // GIVEN
         long patternIdToDelete = 1011;
         long problemIdOfPatternToDelete = 1002;
@@ -130,7 +131,7 @@ public class ProblemPatternResourceIT {
 
     @Test
     @DatabaseSetup("/dbunit/full-small-fake-dataset.xml")
-    public void testDeleteNonexistent() {
+    void testDeleteNonexistent() {
         // WHEN
         ResponseEntity<DeletePatternDTO> response = cut.delete(PROJECT_CODE, NONEXISTENT.longValue());
 
@@ -143,7 +144,7 @@ public class ProblemPatternResourceIT {
 
     @Test
     @DatabaseSetup("/dbunit/full-small-fake-dataset.xml")
-    public void testGetProblemPatternErrors() {
+    void testGetProblemPatternErrors() {
         int pageIndex = 0;
         int pageSize = 2;
 
@@ -204,7 +205,7 @@ public class ProblemPatternResourceIT {
 
     @Test
     @DatabaseSetup("/dbunit/full-small-fake-dataset.xml")
-    public void testGetProblemPatternErrorsNonexistent() {
+    void testGetProblemPatternErrorsNonexistent() {
         ResponseEntity<Page<ErrorWithExecutedScenarioAndRunAndExecutionDTO>> response =
                 cut.getProblemPatternErrors(PROJECT_CODE, NONEXISTENT.longValue(), firstPageOf10());
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -212,13 +213,11 @@ public class ProblemPatternResourceIT {
 
     @Test
     @DatabaseSetup("/dbunit/full-small-fake-dataset.xml")
-    public void testUpdate() throws NotFoundException {
+    void testUpdate() throws NotFoundException {
         // GIVEN
         Long problemId = Long.valueOf(1001);
         long problemPatternId = 1011;
-        ProblemPatternDTO pattern = new ProblemPatternDTO();
-        pattern.setFeatureFile("c.feature");
-        pattern.setStep("Step 7");
+        ProblemPatternDTO pattern = problemPatternDTO("c.feature", "Step 7");
 
         // WHEN
         ResponseEntity<ProblemPatternDTO> response = cut.update(PROJECT_CODE, problemPatternId, pattern);
@@ -250,7 +249,7 @@ public class ProblemPatternResourceIT {
 
     @Test
     @DatabaseSetup("/dbunit/full-small-fake-dataset.xml")
-    public void testUpdateNonexistent() {
+    void testUpdateNonexistent() {
         ResponseEntity<ProblemPatternDTO> response = cut.update(PROJECT_CODE, NONEXISTENT.longValue(), new ProblemPatternDTO());
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_found");
@@ -260,10 +259,10 @@ public class ProblemPatternResourceIT {
 
     @Test
     @DatabaseSetup("/dbunit/ProblemPatternResourceIT-update.xml")
-    public void update_ShouldDoNothing_WhenUpdatingAPatternWithoutChangingIt() {
+    void update_ShouldDoNothing_WhenUpdatingAPatternWithoutChangingIt() {
         // GIVEN
         long problemPatternId = 12; // Already is pattern with step="Step 2"
-        ProblemPatternDTO problemPattern = new ProblemPatternDTO().withStep("Step 2");
+        ProblemPatternDTO problemPattern = problemPatternDTO(null, "Step 2");
 
         // WHEN
         ResponseEntity<ProblemPatternDTO> response = cut.update(PROJECT_CODE, problemPatternId, problemPattern);
@@ -274,10 +273,10 @@ public class ProblemPatternResourceIT {
 
     @Test
     @DatabaseSetup("/dbunit/ProblemPatternResourceIT-update.xml")
-    public void update_ShouldThrowNotUnique_WhenUpdatingPatternWithSameCriteriaAsAnotherPatternOfTheSameProblem() {
+    void update_ShouldThrowNotUnique_WhenUpdatingPatternWithSameCriteriaAsAnotherPatternOfTheSameProblem() {
         // GIVEN
         long problemPatternId = 11; // is currently step="Step 1" & its problem already has a pattern with step="Step 2"
-        ProblemPatternDTO problemPattern = new ProblemPatternDTO().withStep("Step 2");
+        ProblemPatternDTO problemPattern = problemPatternDTO(null, "Step 2");
 
         // WHEN
         ResponseEntity<ProblemPatternDTO> response = cut.update(PROJECT_CODE, problemPatternId, problemPattern);
@@ -287,6 +286,13 @@ public class ProblemPatternResourceIT {
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_unique");
         assertThat(header(response, HeaderUtil.MESSAGE)).isEqualTo("A pattern with the same criterion already exists for this problem.");
         assertThat(header(response, HeaderUtil.PARAMS)).isEqualTo("problem-pattern");
+    }
+
+    private ProblemPatternDTO problemPatternDTO(String scenarioName, String step) {
+        ProblemPatternDTO problemPatternDTO = new ProblemPatternDTO();
+        TestUtil.setField(problemPatternDTO, "scenarioName", scenarioName);
+        TestUtil.setField(problemPatternDTO, "step", step);
+        return problemPatternDTO;
     }
 
 }

@@ -17,6 +17,24 @@
 
 package com.decathlon.ara.service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.cartography.AraCartographyMapper;
@@ -26,7 +44,6 @@ import com.decathlon.ara.cartography.SquashExporter;
 import com.decathlon.ara.common.NotGonnaHappenException;
 import com.decathlon.ara.domain.Country;
 import com.decathlon.ara.domain.Functionality;
-import com.decathlon.ara.domain.QFunctionality;
 import com.decathlon.ara.domain.Team;
 import com.decathlon.ara.domain.enumeration.FunctionalitySeverity;
 import com.decathlon.ara.domain.enumeration.FunctionalityType;
@@ -45,67 +62,49 @@ import com.decathlon.ara.service.dto.team.TeamDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
-import com.decathlon.ara.service.mapper.FunctionalityMapper;
-import com.decathlon.ara.service.mapper.FunctionalityWithChildrenMapper;
-import com.decathlon.ara.service.mapper.ScenarioMapper;
+import com.decathlon.ara.service.mapper.GenericMapper;
 import com.decathlon.ara.service.support.TreePosition;
-import com.decathlon.ara.service.util.ObjectUtil;
 import com.google.common.collect.Lists;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Service for managing Functionality.
  */
 @Service
-@Slf4j
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FunctionalityService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(FunctionalityService.class);
     /**
      * This list will contains all the available exporters to expose to ARA. If you create a new Exporter, please add
      * it to this list.
      */
     static final List<Exporter> AVAILABLE_EXPORTERS = Lists.newArrayList(
-            new AraExporter(), new SquashExporter()
-    );
+            new AraExporter(), new SquashExporter());
 
     private static final AraCartographyMapper CARTOGRAPHY_MAPPER = new AraCartographyMapper();
 
-
-    @NonNull
     private final FunctionalityRepository repository;
 
-    @NonNull
     private final CountryRepository countryRepository;
 
-    @NonNull
     private final TeamRepository teamRepository;
 
-    @NonNull
     private final TeamService teamService;
 
-    @NonNull
     private final ProjectService projectService;
 
-    @NonNull
-    private final FunctionalityMapper mapper;
+    private final GenericMapper mapper;
 
-    @NonNull
-    private final FunctionalityWithChildrenMapper mapperWithChildren;
-
-    @NonNull
-    private final ScenarioMapper scenarioMapper;
+    public FunctionalityService(FunctionalityRepository repository, CountryRepository countryRepository,
+            TeamRepository teamRepository, TeamService teamService, ProjectService projectService,
+            GenericMapper mapper) {
+        this.repository = repository;
+        this.countryRepository = countryRepository;
+        this.teamRepository = teamRepository;
+        this.teamService = teamService;
+        this.projectService = projectService;
+        this.mapper = mapper;
+    }
 
     private static boolean isFolder(FunctionalityDTO functionality) {
         return FunctionalityType.FOLDER.name().equals(functionality.getType());
@@ -149,8 +148,6 @@ public class FunctionalityService {
      * @throws BadRequestException if the name is empty
      */
     public FunctionalityDTO update(long projectId, FunctionalityDTO dtoToUpdate) throws BadRequestException {
-        ObjectUtil.trimStringValues(dtoToUpdate);
-
         // Must update an existing entity
         Functionality dataBaseEntity = repository.findByProjectIdAndId(projectId, dtoToUpdate.getId())
                 .orElseThrow(() -> {
@@ -164,7 +161,7 @@ public class FunctionalityService {
         validateBusinessRules(projectId, dtoToUpdate);
 
         // We only update modifiable properties: don't change any data identifying the entity and its place or role in the tree
-        Functionality entityToUpdate = mapper.toEntity(dtoToUpdate);
+        Functionality entityToUpdate = mapper.map(dtoToUpdate, Functionality.class);
         entityToUpdate.setId(dataBaseEntity.getId());
         entityToUpdate.setProjectId(dataBaseEntity.getProjectId());
         entityToUpdate.setCreationDateTime(dataBaseEntity.getCreationDateTime());
@@ -176,7 +173,7 @@ public class FunctionalityService {
         entityToUpdate.setCoveredCountryScenarios(dataBaseEntity.getCoveredCountryScenarios());
         entityToUpdate.setIgnoredScenarios(dataBaseEntity.getIgnoredScenarios());
         entityToUpdate.setIgnoredCountryScenarios(dataBaseEntity.getIgnoredCountryScenarios());
-        return mapper.toDto(repository.save(entityToUpdate));
+        return mapper.map(repository.save(entityToUpdate), FunctionalityDTO.class);
     }
 
     private void validateBusinessRules(long projectId, FunctionalityDTO functionality) throws BadRequestException {
@@ -197,7 +194,7 @@ public class FunctionalityService {
         Functionality existingEntityWithSameNameAndParent = repository.findByProjectIdAndNameAndParentId(projectId, functionality.getName(), functionality.getParentId());
         if (existingEntityWithSameNameAndParent != null && !existingEntityWithSameNameAndParent.getId().equals(functionality.getId())) {
             String message = (existingEntityWithSameNameAndParent.getType() == FunctionalityType.FOLDER ? Messages.NOT_UNIQUE_FUNCTIONALITY_FOLDER_NAME : Messages.NOT_UNIQUE_FUNCTIONALITY_NAME);
-            throw new NotUniqueException(message, Entities.FUNCTIONALITY, QFunctionality.functionality.name.getMetadata().getName(), existingEntityWithSameNameAndParent.getId());
+            throw new NotUniqueException(message, Entities.FUNCTIONALITY, "name", existingEntityWithSameNameAndParent.getId());
         }
 
         if (isFolder) {
@@ -221,21 +218,19 @@ public class FunctionalityService {
      * @throws BadRequestException if something is wrong in the request
      */
     public FunctionalityDTO create(Long projectId, NewFunctionalityDTO newDto) throws BadRequestException {
-        ObjectUtil.trimStringValues(newDto.getFunctionality());
-
         // Compute new position and verify all technical rules related to the position of the node in the tree
         TreePosition treePosition = computeDestinationTreePosition(projectId, newDto.getReferenceId(), newDto.getRelativePosition(), null);
 
         // Define some properties (before toEntity for no NullPointerException)
         FunctionalityDTO dtoToCreate = newDto.getFunctionality();
         dtoToCreate.setId(null);
-        dtoToCreate.setParentId(treePosition.getParentId());
-        dtoToCreate.setOrder(treePosition.getOrder());
+        dtoToCreate.setParentId(treePosition.parentId());
+        dtoToCreate.setOrder(treePosition.order());
 
         // The created entity must be valid against business rules
         validateBusinessRules(projectId, dtoToCreate);
 
-        final Functionality entity = mapper.toEntity(dtoToCreate);
+        final Functionality entity = mapper.map(dtoToCreate, Functionality.class);
         entity.setProjectId(projectId);
         entity.setCreationDateTime(new Date());
         entity.setUpdateDateTime(entity.getCreationDateTime());
@@ -247,7 +242,7 @@ public class FunctionalityService {
         entity.setIgnoredScenarios(isFolder ? null : 0);
         entity.setIgnoredCountryScenarios(null);
 
-        return mapper.toDto(repository.save(entity));
+        return mapper.map(repository.save(entity), FunctionalityDTO.class);
     }
 
     /**
@@ -280,7 +275,7 @@ public class FunctionalityService {
         }
 
         List<Functionality> functionalitiesToDelete = repository.findByProjectIdAndIdIn(projectId, ids);
-        Boolean thereAreSomeUnknownIds = ids.size() > functionalitiesToDelete.size();
+        boolean thereAreSomeUnknownIds = ids.size() > functionalitiesToDelete.size();
         if (thereAreSomeUnknownIds) {
             throw new NotFoundException(Messages.NOT_FOUND_FUNCTIONALITY_OR_FOLDER, Entities.FUNCTIONALITY);
         }
@@ -303,10 +298,10 @@ public class FunctionalityService {
 
         // Compute new position and verify all technical rules related to the position of the node in the tree
         TreePosition treePosition = computeDestinationTreePosition(projectId, moveRequest.getReferenceId(), moveRequest.getRelativePosition(), source);
-        source.setParentId(treePosition.getParentId());
-        source.setOrder(treePosition.getOrder());
+        source.setParentId(treePosition.parentId());
+        source.setOrder(treePosition.order());
 
-        return mapper.toDto(repository.save(source));
+        return mapper.map(repository.save(source), FunctionalityDTO.class);
     }
 
     /**
@@ -328,19 +323,21 @@ public class FunctionalityService {
         if (CollectionUtils.isEmpty(sourceIds)) {
             throw new BadRequestException(Messages.PARAMETER_HAS_ONE_OR_MORE_MISSING_FIELDS, Entities.FUNCTIONALITY, "move_functionality_list_missing_sources_id");
         }
-        Functionality referenceFunctionality = repository.findByProjectIdAndId(projectId, destinationId)
-                .orElseThrow(() -> new NotFoundException(Messages.NOT_FOUND_FUNCTIONALITY_OR_FOLDER_REFERENCE, Entities.FUNCTIONALITY));
+        Optional<Functionality> referenceFunctionality = repository.findByProjectIdAndId(projectId, destinationId);
+        if (referenceFunctionality.isEmpty()) {
+            throw new NotFoundException(Messages.NOT_FOUND_FUNCTIONALITY_OR_FOLDER_REFERENCE, Entities.FUNCTIONALITY);
+        }
 
         List<Functionality> sourceFunctionalities = repository.findByProjectIdAndIdIn(projectId, sourceIds);
-        Boolean notAllTheFunctionalitiesAreFound = sourceIds.size() != sourceFunctionalities.size();
+        boolean notAllTheFunctionalitiesAreFound = sourceIds.size() != sourceFunctionalities.size();
         if (notAllTheFunctionalitiesAreFound) {
             throw new NotFoundException(Messages.NOT_FOUND_FUNCTIONALITY_OR_FOLDER_REFERENCE, Entities.FUNCTIONALITY);
         }
 
         for (Functionality sourceFunctionality : sourceFunctionalities) {
             TreePosition treePosition = computeDestinationTreePosition(projectId, destinationId, moveRequest.getRelativePosition(), sourceFunctionality);
-            sourceFunctionality.setParentId(treePosition.getParentId());
-            sourceFunctionality.setOrder(treePosition.getOrder());
+            sourceFunctionality.setParentId(treePosition.parentId());
+            sourceFunctionality.setOrder(treePosition.order());
         }
 
         repository.saveAll(sourceFunctionalities);
@@ -362,9 +359,8 @@ public class FunctionalityService {
         if (functionality.getType() != FunctionalityType.FUNCTIONALITY) {
             throw new BadRequestException(Messages.RULE_FUNCTIONALITY_FOLDER_HAVE_NO_COVERAGE, Entities.FUNCTIONALITY, "folders_have_no_coverage");
         }
-        return scenarioMapper.toDto(functionality.getScenarios());
+        return mapper.mapCollection(functionality.getScenarios(), ScenarioDTO.class);
     }
-
 
     /**
      * List all the available cartography exporters in ARA.
@@ -373,7 +369,7 @@ public class FunctionalityService {
      */
     public List<ExporterInfoDTO> listAvailableExporters() {
         List<ExporterInfoDTO> result = new ArrayList<>();
-        for (final Exporter exporter: AVAILABLE_EXPORTERS) {
+        for (final Exporter exporter : AVAILABLE_EXPORTERS) {
             result.add(new ExporterInfoDTO(exporter.getId(), exporter.getName(),
                     exporter.getDescription(), exporter.getFormat(), exporter.listRequiredFields()));
         }
@@ -391,7 +387,7 @@ public class FunctionalityService {
      */
     public ByteArrayResource generateExport(List<Long> functionalitiesIds, String exportType, Map<String, String> requiredInfos) throws BadRequestException {
         List<Functionality> functionalities = repository.findAllById(functionalitiesIds);
-        List<FunctionalityDTO> functionalityDTOS = mapper.toDto(functionalities);
+        List<FunctionalityDTO> functionalityDTOS = mapper.mapCollection(functionalities, FunctionalityDTO.class);
         Map<String, String> infos = new HashMap<>();
         if (null != requiredInfos) {
             infos.putAll(requiredInfos);
@@ -428,15 +424,14 @@ public class FunctionalityService {
         }
 
         // Prepare the new functionalities to import
-        log.info("FEATURE|import|Importing {} functionalities into the project {}...", functionalityDTOS.size(), projectCode);
+        LOG.info("FEATURE|import|Importing {} functionalities into the project {}...", functionalityDTOS.size(), projectCode);
         final Date now = new Date();
-        List<Functionality> functionalities = mapper.toEntity(functionalityDTOS);
-        functionalities.forEach(f -> {
-            f.setProjectId(projectId);
-            f.setCreationDateTime(now);
-            f.setUpdateDateTime(now);
-            f.setCountryCodes(this.extractExistingCountriesCodes(f.getCountryCodes(), countries));
-            f.setTeamId(teams.contains(f.getTeamId()) ? f.getTeamId() : null);
+        List<Functionality> functionalities = mapper.mapCollection(functionalityDTOS, Functionality.class, (dto, entity) -> {
+            entity.setProjectId(projectId);
+            entity.setCreationDateTime(now);
+            entity.setUpdateDateTime(now);
+            entity.setCountryCodes(this.extractExistingCountriesCodes(entity.getCountryCodes(), countries));
+            entity.setTeamId(teams.contains(entity.getTeamId()) ? entity.getTeamId() : null);
         });
 
         Map<Long, Long> oldIdsToNewIds = new HashMap<>();
@@ -446,7 +441,7 @@ public class FunctionalityService {
                 .filter(f -> f.getParentId() == null)
                 .collect(Collectors.toList());
         functionalities.removeAll(rootFunctionalities);
-        log.info("FEATURE|import|Saving {} root functionalities into the project {}", rootFunctionalities.size(), projectCode);
+        LOG.info("FEATURE|import|Saving {} root functionalities into the project {}", rootFunctionalities.size(), projectCode);
         rootFunctionalities.forEach(f -> this.saveNewFunctionality(f, oldIdsToNewIds, false));
 
         // While there is still functionalities to save...
@@ -456,7 +451,7 @@ public class FunctionalityService {
                     .filter(f -> f.getParentId() != null && oldIdsToNewIds.containsKey(f.getParentId()))
                     .collect(Collectors.toList());
             functionalities.removeAll(childFunctionalities);
-            log.info("FEATURE|import|Saving {} child functionalities into the project {}", childFunctionalities.size(), projectCode);
+            LOG.info("FEATURE|import|Saving {} child functionalities into the project {}", childFunctionalities.size(), projectCode);
             childFunctionalities.forEach(f -> this.saveNewFunctionality(f, oldIdsToNewIds, true));
         }
     }
@@ -473,7 +468,7 @@ public class FunctionalityService {
                 .collect(Collectors.joining(","));
     }
 
-    private void saveNewFunctionality(Functionality func, Map<Long,Long> oldIdsToNewIds, boolean withParent) {
+    private void saveNewFunctionality(Functionality func, Map<Long, Long> oldIdsToNewIds, boolean withParent) {
         Long oldId = func.getId();
         func.setId(null);
         func.setParentId(withParent ? oldIdsToNewIds.get(func.getParentId()) : null);
@@ -684,9 +679,7 @@ public class FunctionalityService {
         List<FunctionalityWithChildrenDTO> nodes = new ArrayList<>();
         for (Functionality functionality : flatFunctionalities) {
             if (Objects.equals(functionality.getParentId(), parentId)) {
-                FunctionalityWithChildrenDTO dto = mapperWithChildren.toDto(functionality);
-                dto.setChildren(buildTree(flatFunctionalities, functionality.getId()));
-                nodes.add(dto); // flatFunctionalities is already sorted by "order" column
+                nodes.add(mapper.map(functionality, FunctionalityWithChildrenDTO.class, (entity, dto) -> dto.setChildren(buildTree(flatFunctionalities, functionality.getId())))); // flatFunctionalities is already sorted by "order" column
             }
         }
         return nodes;

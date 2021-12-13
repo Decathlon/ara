@@ -17,17 +17,6 @@
 
 package com.decathlon.ara.scenario.cucumber.util;
 
-import com.decathlon.ara.domain.Functionality;
-import com.decathlon.ara.domain.Scenario;
-import com.decathlon.ara.domain.Source;
-import com.decathlon.ara.scenario.postman.service.PostmanService;
-import com.decathlon.ara.scenario.cucumber.bean.Element;
-import com.decathlon.ara.scenario.cucumber.bean.Feature;
-import com.decathlon.ara.scenario.cucumber.bean.Tag;
-import com.google.common.collect.Sets;
-import lombok.experimental.UtilityClass;
-import org.apache.commons.lang3.ArrayUtils;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -35,11 +24,24 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.ArrayUtils;
+
+import com.decathlon.ara.domain.Functionality;
+import com.decathlon.ara.domain.Scenario;
+import com.decathlon.ara.domain.Source;
+import com.decathlon.ara.scenario.cucumber.bean.Element;
+import com.decathlon.ara.scenario.cucumber.bean.Feature;
+import com.decathlon.ara.scenario.cucumber.bean.Tag;
+import com.decathlon.ara.scenario.postman.service.PostmanService;
+import com.google.common.collect.Sets;
+
 /**
  * A set of static functions with no dependency nor side-effect (no download, upload, database access...) that take a parsed Cucumber's report.json (ideally with dry-run option and with ignored scenarios as well) and extract scenarios in it.
  */
-@UtilityClass
 public class ScenarioExtractorUtil {
+
+    private ScenarioExtractorUtil() {
+    }
 
     private static final Pattern FUNCTIONALITY_IDS_ZONE_PATTERN = Pattern.compile("F[uo]nction[n]?al[l]?it[yi][e]?[s]?[ \\t]([^:]+)[:](.*)", Pattern.CASE_INSENSITIVE);
     private static final Pattern FUNCTIONALITY_PATTERN_ON_ID = Pattern.compile("[^;]+([;]f[uo]nction[n]?al[l]?it[yi][e]?[s]?-[^:]+[:][-]*).*", Pattern.CASE_INSENSITIVE);

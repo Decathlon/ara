@@ -6,9 +6,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 
-import lombok.Data;
-
-@Data
 @Entity
 public class AraScenarioVersionStep {
 
@@ -19,5 +16,17 @@ public class AraScenarioVersionStep {
 
     private long line;
     private String content;
+
+    protected Long getId() {
+        return id;
+    }
+
+    protected long getLine() {
+        return line;
+    }
+
+    protected String getContent() {
+        return content;
+    }
 
 }

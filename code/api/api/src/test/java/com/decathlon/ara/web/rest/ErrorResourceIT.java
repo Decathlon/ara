@@ -52,33 +52,30 @@ import com.decathlon.ara.service.dto.problempattern.ProblemPatternDTO;
 import com.decathlon.ara.service.dto.response.DistinctStatisticsDTO;
 import com.decathlon.ara.service.dto.run.RunWithExecutionDTO;
 import com.decathlon.ara.service.dto.type.TypeWithSourceDTO;
+import com.decathlon.ara.util.builder.ProblemPatternDTOBuilder;
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 
 @Disabled
 @SpringBootTest
 @TestExecutionListeners({
-    TransactionalTestExecutionListener.class,
-    DependencyInjectionTestExecutionListener.class,
-    DbUnitTestExecutionListener.class
+        TransactionalTestExecutionListener.class,
+        DependencyInjectionTestExecutionListener.class,
+        DbUnitTestExecutionListener.class
 })
 @TestPropertySource(
-		locations = "classpath:application-db-h2.properties")
+        locations = "classpath:application-db-h2.properties")
 @Transactional
 @DatabaseSetup("/dbunit/full-small-fake-dataset.xml")
-public class ErrorResourceIT {
+class ErrorResourceIT {
 
     private static final String PROJECT_CODE = "p";
 
     @Autowired
     private ErrorResource cut;
 
-    private static ProblemPatternDTO pattern() {
-        return new ProblemPatternDTO();
-    }
-
     private static CountryDTO country(String code) {
-        return new CountryDTO().withCode(code);
+        return new CountryDTO(code, null);
     }
 
     private static TypeWithSourceDTO type() {
@@ -88,7 +85,7 @@ public class ErrorResourceIT {
     }
 
     @Test
-    public void testGetOne() {
+    void testGetOne() {
         ResponseEntity<ErrorWithExecutedScenarioAndRunAndExecutionDTO> response = cut.getOne(PROJECT_CODE, 123);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -134,47 +131,47 @@ public class ErrorResourceIT {
     }
 
     @Test
-    public void testGetOneNonexistent() {
+    void testGetOneNonexistent() {
         ResponseEntity<ErrorWithExecutedScenarioAndRunAndExecutionDTO> response = cut.getOne(PROJECT_CODE, NONEXISTENT.longValue());
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
-    public void testGetMatchingErrors() {
+    void testGetMatchingErrors() {
         // Most fields are EQUALS matches
-        assertGetMatchingErrors(pattern().withFeatureFile("a.feature"), 9);
-        assertGetMatchingErrors(pattern().withFeatureName("Feature C"), 3);
-        assertGetMatchingErrors(pattern().withScenarioName("Scenario d"), 5);
-        assertGetMatchingErrors(pattern().withStep("Step 8"), 1);
-        assertGetMatchingErrors(pattern().withStepDefinition("^Step 7$"), 2);
-        assertGetMatchingErrors(pattern().withRelease("1710"), 4);
-        assertGetMatchingErrors(pattern().withCountry(country("cn")), 14);
-        assertGetMatchingErrors(pattern().withType(type()), 11);
-        assertGetMatchingErrors(pattern().withPlatform("euin2"), 5);
+        assertGetMatchingErrors(new ProblemPatternDTOBuilder().withFeatureFile("a.feature").build(), 9);
+        assertGetMatchingErrors(new ProblemPatternDTOBuilder().withFeatureName("Feature C").build(), 3);
+        assertGetMatchingErrors(new ProblemPatternDTOBuilder().withScenarioName("Scenario d").build(), 5);
+        assertGetMatchingErrors(new ProblemPatternDTOBuilder().withStep("Step 8").build(), 1);
+        assertGetMatchingErrors(new ProblemPatternDTOBuilder().withStepDefinition("^Step 7$").build(), 2);
+        assertGetMatchingErrors(new ProblemPatternDTOBuilder().withRelease("1710").build(), 4);
+        assertGetMatchingErrors(new ProblemPatternDTOBuilder().withCountry(country("cn")).build(), 14);
+        assertGetMatchingErrors(new ProblemPatternDTOBuilder().withType(type()).build(), 11);
+        assertGetMatchingErrors(new ProblemPatternDTOBuilder().withPlatform("euin2").build(), 5);
 
         // Exception is a LIKE matching
-        assertGetMatchingErrors(pattern().withException("Exception 7"), 3);
-        assertGetMatchingErrors(pattern().withException("E%7"), 3);
-        assertGetMatchingErrors(pattern().withException("Exception"), 19);
+        assertGetMatchingErrors(new ProblemPatternDTOBuilder().withException("Exception 7").build(), 3);
+        assertGetMatchingErrors(new ProblemPatternDTOBuilder().withException("E%7").build(), 3);
+        assertGetMatchingErrors(new ProblemPatternDTOBuilder().withException("Exception").build(), 19);
 
         // Types with TRUE/FALSE are exact matches, null will exclude that type for matching algorithm
-        assertGetMatchingErrors(pattern().withTypeIsBrowser(Boolean.TRUE), 8);
-        assertGetMatchingErrors(pattern().withTypeIsBrowser(Boolean.FALSE), 11);
-        assertGetMatchingErrors(pattern().withTypeIsMobile(Boolean.TRUE), 0);
-        assertGetMatchingErrors(pattern().withTypeIsMobile(Boolean.FALSE), 19);
+        assertGetMatchingErrors(new ProblemPatternDTOBuilder().withTypeIsBrowser(Boolean.TRUE).build(), 8);
+        assertGetMatchingErrors(new ProblemPatternDTOBuilder().withTypeIsBrowser(Boolean.FALSE).build(), 11);
+        assertGetMatchingErrors(new ProblemPatternDTOBuilder().withTypeIsMobile(Boolean.TRUE).build(), 0);
+        assertGetMatchingErrors(new ProblemPatternDTOBuilder().withTypeIsMobile(Boolean.FALSE).build(), 19);
 
         // Typical combinations of several patterns: it's an AND matching
-        assertGetMatchingErrors(pattern().withException("Exc%2").withScenarioName("Scenario d"), 2);
-        assertGetMatchingErrors(pattern().withException("Exc%2").withScenarioName("Scenario d").withStepDefinition("^Step 8$"), 1);
+        assertGetMatchingErrors(new ProblemPatternDTOBuilder().withException("Exc%2").withScenarioName("Scenario d").build(), 2);
+        assertGetMatchingErrors(new ProblemPatternDTOBuilder().withException("Exc%2").withScenarioName("Scenario d").withStepDefinition("^Step 8$").build(), 1);
 
         // Nothing matches
-        assertGetMatchingErrors(pattern().withException("Nothing matches"), 0);
+        assertGetMatchingErrors(new ProblemPatternDTOBuilder().withException("Nothing matches").build(), 0);
     }
 
     @Test
-    public void testProblemsFromGetMatchingErrors() {
+    void testProblemsFromGetMatchingErrors() {
         // GIVEN
-        ProblemPatternDTO pattern = pattern().withCountry(country("nl"));
+        ProblemPatternDTO pattern = new ProblemPatternDTOBuilder().withCountry(country("nl")).build();
 
         // WHEN
         ResponseEntity<Page<ErrorWithExecutedScenarioAndRunAndExecutionAndProblemsDTO>> response =
@@ -207,7 +204,7 @@ public class ErrorResourceIT {
     }
 
     @Test
-    public void testGetDistinctReleases() {
+    void testGetDistinctReleases() {
         // WHEN
         ResponseEntity<DistinctStatisticsDTO> response = cut.getDistinct(PROJECT_CODE, "releases");
 
@@ -216,7 +213,7 @@ public class ErrorResourceIT {
     }
 
     @Test
-    public void testGetDistinctCountries() {
+    void testGetDistinctCountries() {
         // WHEN
         ResponseEntity<DistinctStatisticsDTO> response = cut.getDistinct(PROJECT_CODE, "countries");
 
@@ -229,7 +226,7 @@ public class ErrorResourceIT {
     }
 
     @Test
-    public void testGetDistinctTypes() {
+    void testGetDistinctTypes() {
         // WHEN
         ResponseEntity<DistinctStatisticsDTO> response = cut.getDistinct(PROJECT_CODE, "types");
 
@@ -242,7 +239,7 @@ public class ErrorResourceIT {
     }
 
     @Test
-    public void testGetDistinctPlatforms() {
+    void testGetDistinctPlatforms() {
         // WHEN
         ResponseEntity<DistinctStatisticsDTO> response = cut.getDistinct(PROJECT_CODE, "platforms");
 
@@ -251,7 +248,7 @@ public class ErrorResourceIT {
     }
 
     @Test
-    public void testGetDistinctFeatureNames() {
+    void testGetDistinctFeatureNames() {
         // WHEN
         ResponseEntity<DistinctStatisticsDTO> response = cut.getDistinct(PROJECT_CODE, "featureNames");
 
@@ -260,7 +257,7 @@ public class ErrorResourceIT {
     }
 
     @Test
-    public void testGetDistinctFeatureFiles() {
+    void testGetDistinctFeatureFiles() {
         // WHEN
         ResponseEntity<DistinctStatisticsDTO> response = cut.getDistinct(PROJECT_CODE, "featureFiles");
 
@@ -269,7 +266,7 @@ public class ErrorResourceIT {
     }
 
     @Test
-    public void testGetDistinctScenarioNames() {
+    void testGetDistinctScenarioNames() {
         // WHEN
         ResponseEntity<DistinctStatisticsDTO> response = cut.getDistinct(PROJECT_CODE, "scenarioNames");
 
@@ -279,7 +276,7 @@ public class ErrorResourceIT {
     }
 
     @Test
-    public void testGetDistinctSteps() {
+    void testGetDistinctSteps() {
         // WHEN
         ResponseEntity<DistinctStatisticsDTO> response = cut.getDistinct(PROJECT_CODE, "steps");
 
@@ -289,7 +286,7 @@ public class ErrorResourceIT {
     }
 
     @Test
-    public void testGetDistinctStepDefinitions() {
+    void testGetDistinctStepDefinitions() {
         // WHEN
         ResponseEntity<DistinctStatisticsDTO> response = cut.getDistinct(PROJECT_CODE, "stepDefinitions");
 

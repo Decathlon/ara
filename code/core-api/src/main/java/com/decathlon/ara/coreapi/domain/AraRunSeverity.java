@@ -1,10 +1,7 @@
 package com.decathlon.ara.coreapi.domain;
 
-import lombok.Data;
-
 import javax.persistence.*;
 
-@Data
 @Entity
 public class AraRunSeverity {
     @Id
@@ -17,4 +14,20 @@ public class AraRunSeverity {
 
     private double warningThreshold;
     private double failureThreshold;
+
+    protected Long getId() {
+        return id;
+    }
+
+    protected AraDefaultSeverity getDefaultSeverity() {
+        return defaultSeverity;
+    }
+
+    protected double getWarningThreshold() {
+        return warningThreshold;
+    }
+
+    protected double getFailureThreshold() {
+        return failureThreshold;
+    }
 }

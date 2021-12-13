@@ -1,0 +1,56 @@
+databaseChangeLog:
+- changeSet:
+    id: 1643213692833-1
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: bigint
+        columnName: EXECUTED_SCENARIO_ID
+        tableName: ERROR
+        validate: true
+- changeSet:
+    id: 1643213692833-2
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: bigint
+        columnName: EXECUTION_ID
+        tableName: COUNTRY_DEPLOYMENT
+        validate: true
+- changeSet:
+    id: 1643213692833-3
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: bigint
+        columnName: EXECUTION_ID
+        tableName: RUN
+        validate: true
+- changeSet:
+    id: 1643213692833-4
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: bigint
+        columnName: PROBLEM_ID
+        tableName: PROBLEM_PATTERN
+        validate: true
+- changeSet:
+    id: 1643213692833-5
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: bigint
+        columnName: PROJECT_ID
+        tableName: COMMUNICATION
+        validate: true
+- changeSet:
+    id: 1643213692833-6
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: bigint
+        columnName: RUN_ID
+        tableName: EXECUTED_SCENARIO
+        validate: true
+

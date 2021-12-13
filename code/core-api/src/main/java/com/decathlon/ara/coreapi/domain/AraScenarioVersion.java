@@ -11,11 +11,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
-@Data
-@EqualsAndHashCode(callSuper=true)
 @Entity
 public class AraScenarioVersion extends Auditable<String> {
 
@@ -35,5 +30,29 @@ public class AraScenarioVersion extends Auditable<String> {
 
     @OneToMany
     private List<AraScenarioVersionStep> steps = Collections.emptyList();
+
+    protected Long getId() {
+        return id;
+    }
+
+    protected String getVersion() {
+        return version;
+    }
+
+    protected String getPath() {
+        return path;
+    }
+
+    protected AraRepository getRepository() {
+        return repository;
+    }
+
+    protected AraScenario getScenario() {
+        return scenario;
+    }
+
+    protected List<AraScenarioVersionStep> getSteps() {
+        return steps;
+    }
 
 }

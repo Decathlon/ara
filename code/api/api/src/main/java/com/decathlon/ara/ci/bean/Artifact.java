@@ -17,15 +17,6 @@
 
 package com.decathlon.ara.ci.bean;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
 public class Artifact {
 
     /**
@@ -33,5 +24,9 @@ public class Artifact {
      * Eg. "reports/json/report.json".
      */
     private String relativePath;
+
+    public String getRelativePath() {
+        return relativePath;
+    }
 
 }

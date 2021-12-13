@@ -17,20 +17,13 @@
 
 package com.decathlon.ara.scenario.postman.model;
 
+import java.util.List;
+
 import com.decathlon.ara.scenario.postman.bean.Collection;
 import com.decathlon.ara.scenario.postman.bean.Execution;
 import com.decathlon.ara.scenario.postman.bean.Failure;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NewmanParsingResult {
 
@@ -39,5 +32,29 @@ public class NewmanParsingResult {
     private List<Execution> executions;
 
     private List<Failure> failures;
+
+    public Collection getCollection() {
+        return collection;
+    }
+
+    public void setCollection(Collection collection) {
+        this.collection = collection;
+    }
+
+    public List<Execution> getExecutions() {
+        return executions;
+    }
+
+    public void setExecutions(List<Execution> executions) {
+        this.executions = executions;
+    }
+
+    public List<Failure> getFailures() {
+        return failures;
+    }
+
+    public void setFailures(List<Failure> failures) {
+        this.failures = failures;
+    }
 
 }

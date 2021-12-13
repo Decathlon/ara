@@ -19,15 +19,7 @@ package com.decathlon.ara.ci.bean;
 
 import com.decathlon.ara.domain.Country;
 import com.decathlon.ara.domain.Type;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
 public class PlatformRule {
 
     public static final String TEST_TYPES_SEPARATOR = ",";
@@ -68,5 +60,46 @@ public class PlatformRule {
      * True to enable this country, false to ignore it (no deployment, no NRT).
      */
     private boolean enabled;
+    
+    public PlatformRule() {
+    }
+
+    public PlatformRule(boolean blockingValidation, String country, String countryTags, String testTypes,
+            String severityTags, boolean enabled) {
+        this.blockingValidation = blockingValidation;
+        this.country = country;
+        this.countryTags = countryTags;
+        this.testTypes = testTypes;
+        this.severityTags = severityTags;
+        this.enabled = enabled;
+    }
+
+    public static String getTestTypesSeparator() {
+        return TEST_TYPES_SEPARATOR;
+    }
+
+    public boolean isBlockingValidation() {
+        return blockingValidation;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public String getCountryTags() {
+        return countryTags;
+    }
+
+    public String getTestTypes() {
+        return testTypes;
+    }
+
+    public String getSeverityTags() {
+        return severityTags;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
 
 }

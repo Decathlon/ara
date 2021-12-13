@@ -18,15 +18,7 @@
 package com.decathlon.ara.scenario.postman.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class KeyValue {
 
@@ -39,5 +31,13 @@ public class KeyValue {
      * Value of the header (eg. "application/json") or of the query parameter or form data or url-encoded request body (eg. "42").
      */
     private String value;
+
+    public String getKey() {
+        return key;
+    }
+
+    public String getValue() {
+        return value;
+    }
 
 }

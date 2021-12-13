@@ -17,18 +17,9 @@
 
 package com.decathlon.ara.service.dto.functionality;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 public class FunctionalityDTO {
 
     private Long id;
@@ -69,4 +60,159 @@ public class FunctionalityDTO {
     private String ignoredCountryScenarios;
 
     private String comment;
+
+    public FunctionalityDTO() {
+    }
+
+    public FunctionalityDTO(Long id, Long parentId, double order, String type,
+            String name,
+            String countryCodes, Long teamId, String severity,
+            String created,
+            Boolean started, Boolean notAutomatable, Integer coveredScenarios, String coveredCountryScenarios,
+            Integer ignoredScenarios, String ignoredCountryScenarios, String comment) {
+        this.id = id;
+        this.parentId = parentId;
+        this.order = order;
+        this.type = type;
+        this.name = name;
+        this.countryCodes = countryCodes;
+        this.teamId = teamId;
+        this.severity = severity;
+        this.created = created;
+        this.started = started;
+        this.notAutomatable = notAutomatable;
+        this.coveredScenarios = coveredScenarios;
+        this.coveredCountryScenarios = coveredCountryScenarios;
+        this.ignoredScenarios = ignoredScenarios;
+        this.ignoredCountryScenarios = ignoredCountryScenarios;
+        this.comment = comment;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
+    public double getOrder() {
+        return order;
+    }
+
+    public void setOrder(double order) {
+        this.order = order;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCountryCodes() {
+        return countryCodes;
+    }
+
+    public void setCountryCodes(String countryCodes) {
+        this.countryCodes = countryCodes;
+    }
+
+    public Long getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(Long teamId) {
+        this.teamId = teamId;
+    }
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(String severity) {
+        this.severity = severity;
+    }
+
+    public String getCreated() {
+        return created;
+    }
+
+    public void setCreated(String created) {
+        this.created = created;
+    }
+
+    public Boolean getStarted() {
+        return started;
+    }
+
+    public void setStarted(Boolean started) {
+        this.started = started;
+    }
+
+    public Boolean getNotAutomatable() {
+        return notAutomatable;
+    }
+
+    public void setNotAutomatable(Boolean notAutomatable) {
+        this.notAutomatable = notAutomatable;
+    }
+
+    public Integer getCoveredScenarios() {
+        return coveredScenarios;
+    }
+
+    public void setCoveredScenarios(Integer coveredScenarios) {
+        this.coveredScenarios = coveredScenarios;
+    }
+
+    public String getCoveredCountryScenarios() {
+        return coveredCountryScenarios;
+    }
+
+    public void setCoveredCountryScenarios(String coveredCountryScenarios) {
+        this.coveredCountryScenarios = coveredCountryScenarios;
+    }
+
+    public Integer getIgnoredScenarios() {
+        return ignoredScenarios;
+    }
+
+    public void setIgnoredScenarios(Integer ignoredScenarios) {
+        this.ignoredScenarios = ignoredScenarios;
+    }
+
+    public String getIgnoredCountryScenarios() {
+        return ignoredCountryScenarios;
+    }
+
+    public void setIgnoredCountryScenarios(String ignoredCountryScenarios) {
+        this.ignoredCountryScenarios = ignoredCountryScenarios;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
 }

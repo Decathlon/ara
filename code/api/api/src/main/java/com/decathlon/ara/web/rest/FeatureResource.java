@@ -17,19 +17,10 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.Entities;
-import com.decathlon.ara.service.FeatureService;
-import com.decathlon.ara.service.dto.feature.DetailledFeatureDTO;
-import com.decathlon.ara.service.dto.feature.FeatureDTO;
-import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.web.rest.util.ResponseUtil;
-import com.decathlon.ara.web.rest.util.RestConstants;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,6 +30,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.decathlon.ara.Entities;
+import com.decathlon.ara.service.FeatureService;
+import com.decathlon.ara.service.dto.feature.DetailledFeatureDTO;
+import com.decathlon.ara.service.dto.feature.FeatureDTO;
+import com.decathlon.ara.service.exception.NotFoundException;
+import com.decathlon.ara.web.rest.util.ResponseUtil;
+import com.decathlon.ara.web.rest.util.RestConstants;
 
 /**
  * This REST resource will handle the Feature flipping of ARA, to enable or disable experimental features.
@@ -50,7 +49,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping(FeatureResource.PATH)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FeatureResource {
 
     private static final String NAME = Entities.FEATURE;
@@ -59,8 +57,11 @@ public class FeatureResource {
      */
     static final String PATH = RestConstants.API_PATH + "/" + NAME + "s";
 
-    @NonNull
     private FeatureService featureService;
+
+    public FeatureResource(FeatureService featureService) {
+        this.featureService = featureService;
+    }
 
     /**
      * List will return all the features available with their current state.
@@ -122,6 +123,7 @@ public class FeatureResource {
             return ResponseUtil.handle(ex);
         }
     }
+
     /**
      * Update the given list of features to the new state.
      *

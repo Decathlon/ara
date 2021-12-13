@@ -17,6 +17,10 @@
 
 package com.decathlon.ara.defect.jira.api.model;
 
+import java.time.ZonedDateTime;
+import java.util.Date;
+import java.util.List;
+
 import com.decathlon.ara.defect.jira.api.model.attachment.JiraAttachment;
 import com.decathlon.ara.defect.jira.api.model.comment.JiraCommentResults;
 import com.decathlon.ara.defect.jira.api.model.priority.JiraPriority;
@@ -30,13 +34,7 @@ import com.decathlon.ara.defect.jira.api.model.vote.JiraVotes;
 import com.decathlon.ara.defect.jira.api.model.worklog.JiraWorklog;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
 
-import java.time.ZonedDateTime;
-import java.util.Date;
-import java.util.List;
-
-@Data
 public class JiraFields {
 
     private List<String> labels;
@@ -60,7 +58,7 @@ public class JiraFields {
     private String summary;
 
     @JsonProperty("duedate")
-    @JsonFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date dueDate;
 
     private JiraCommentResults comment;
@@ -72,7 +70,7 @@ public class JiraFields {
     private JiraUser creator;
 
     @JsonProperty("created")
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     private ZonedDateTime creationDate;
 
     @JsonProperty("attachment")
@@ -81,6 +79,82 @@ public class JiraFields {
     private JiraResolution resolution;
 
     @JsonProperty("resolutiondate")
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     private ZonedDateTime resolutionDate;
+
+    public List<String> getLabels() {
+        return labels;
+    }
+
+    public JiraUser getAssignee() {
+        return assignee;
+    }
+
+    public JiraUser getReporter() {
+        return reporter;
+    }
+
+    public JiraProgress getProgress() {
+        return progress;
+    }
+
+    public JiraVotes getVotes() {
+        return votes;
+    }
+
+    public JiraWorklog getWorklog() {
+        return worklog;
+    }
+
+    public JiraIssueType getIssueType() {
+        return issueType;
+    }
+
+    public JiraProject getProject() {
+        return project;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public Date getDueDate() {
+        return dueDate;
+    }
+
+    public JiraCommentResults getComment() {
+        return comment;
+    }
+
+    public JiraPriority getPriority() {
+        return priority;
+    }
+
+    public JiraStatus getStatus() {
+        return status;
+    }
+
+    public JiraUser getCreator() {
+        return creator;
+    }
+
+    public ZonedDateTime getCreationDate() {
+        return creationDate;
+    }
+
+    public List<JiraAttachment> getAttachments() {
+        return attachments;
+    }
+
+    public JiraResolution getResolution() {
+        return resolution;
+    }
+
+    public ZonedDateTime getResolutionDate() {
+        return resolutionDate;
+    }
 }

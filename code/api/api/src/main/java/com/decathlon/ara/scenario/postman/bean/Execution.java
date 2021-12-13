@@ -18,15 +18,7 @@
 package com.decathlon.ara.scenario.postman.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Execution {
 
@@ -50,5 +42,21 @@ public class Execution {
      * The list of assertions is created by JavaScript: to list all assertions, there is no other way than executing the collection.
      */
     private Assertion[] assertions;
+
+    public ItemId getItem() {
+        return item;
+    }
+
+    public Request getRequest() {
+        return request;
+    }
+
+    public Response getResponse() {
+        return response;
+    }
+
+    public Assertion[] getAssertions() {
+        return assertions;
+    }
 
 }

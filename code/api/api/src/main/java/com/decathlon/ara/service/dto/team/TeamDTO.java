@@ -19,15 +19,7 @@ package com.decathlon.ara.service.dto.team;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 public class TeamDTO {
 
     private Long id;
@@ -39,5 +31,37 @@ public class TeamDTO {
     private boolean assignableToProblems;
 
     private boolean assignableToFunctionalities;
+
+    public TeamDTO() {
+    }
+
+    public TeamDTO(Long id,
+            String name,
+            boolean assignableToProblems, boolean assignableToFunctionalities) {
+        this.id = id;
+        this.name = name;
+        this.assignableToProblems = assignableToProblems;
+        this.assignableToFunctionalities = assignableToFunctionalities;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isAssignableToProblems() {
+        return assignableToProblems;
+    }
+
+    public boolean isAssignableToFunctionalities() {
+        return assignableToFunctionalities;
+    }
 
 }

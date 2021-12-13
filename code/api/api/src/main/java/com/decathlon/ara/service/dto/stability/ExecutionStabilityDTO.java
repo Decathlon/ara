@@ -18,19 +18,36 @@
 package com.decathlon.ara.service.dto.stability;
 
 import java.util.Date;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
 public class ExecutionStabilityDTO {
 
     private Long executionId;
     private Date testDate;
     private String status;
+
+    public ExecutionStabilityDTO() {
+    }
+
+    public ExecutionStabilityDTO(Long executionId, Date testDate, String status) {
+        this.executionId = executionId;
+        this.testDate = testDate;
+        this.status = status;
+    }
+
+    public ExecutionStabilityDTO(String status) {
+        this.status = status;
+    }
+
+    public Long getExecutionId() {
+        return executionId;
+    }
+
+    public Date getTestDate() {
+        return testDate;
+    }
+
+    public String getStatus() {
+        return status;
+    }
 
 }

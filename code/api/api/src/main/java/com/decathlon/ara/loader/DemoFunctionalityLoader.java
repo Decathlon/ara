@@ -17,6 +17,13 @@
 
 package com.decathlon.ara.loader;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.decathlon.ara.domain.enumeration.FunctionalitySeverity;
 import com.decathlon.ara.domain.enumeration.FunctionalityType;
 import com.decathlon.ara.service.FunctionalityService;
@@ -25,29 +32,21 @@ import com.decathlon.ara.service.dto.request.FunctionalityPosition;
 import com.decathlon.ara.service.dto.request.NewFunctionalityDTO;
 import com.decathlon.ara.service.dto.team.TeamDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Load functionalities into the Demo project.
  */
-@Slf4j
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DemoFunctionalityLoader {
 
     private static final String ALL_COUNTRY_CODES = "fr,us";
 
-    @NonNull
     private final FunctionalityService functionalityService;
+
+    public DemoFunctionalityLoader(FunctionalityService functionalityService) {
+        this.functionalityService = functionalityService;
+    }
 
     public Map<String, Long> createFunctionalityTree(long projectId, List<TeamDTO> teams)
             throws BadRequestException {

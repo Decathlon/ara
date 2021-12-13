@@ -17,23 +17,26 @@
 
 package com.decathlon.ara.scenario.cucumber.util;
 
+import java.io.IOException;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.decathlon.ara.scenario.cucumber.bean.Element;
 import com.decathlon.ara.scenario.cucumber.bean.Feature;
 import com.decathlon.ara.scenario.cucumber.bean.Hook;
 import com.decathlon.ara.scenario.cucumber.bean.Row;
 import com.decathlon.ara.scenario.cucumber.bean.Step;
+import com.decathlon.ara.util.JsonUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.util.List;
-import lombok.experimental.UtilityClass;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A set of static functions with no dependency nor side-effect (no download, upload, database access...) that parse Cucumber's report.json and manipulate basic data.
  */
-@UtilityClass
 public class CucumberReportUtil {
+
+    private CucumberReportUtil() {
+    }
 
     /**
      * @param reportJson the content of a report.json as produced by Cucumber
@@ -41,7 +44,7 @@ public class CucumberReportUtil {
      * @throws IOException if something goes wrong while parsing the report content
      */
     public static List<Feature> parseReportJson(String reportJson) throws IOException {
-        List<Feature> features = new ObjectMapper().readValue(reportJson, new TypeReference<List<Feature>>() {
+        List<Feature> features = JsonUtil.parse(reportJson, new TypeReference<List<Feature>>() {
             // Nothing to override from this abstract class
         });
         if (features == null) {

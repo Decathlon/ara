@@ -18,19 +18,32 @@
 package com.decathlon.ara.domain.projection;
 
 import java.util.Date;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 public class FirstAndLastProblemOccurrence {
 
     private Long problemId;
     private Date firstSeenDateTime;
     private Date lastSeenDateTime;
+
+    public FirstAndLastProblemOccurrence() {
+    }
+
+    public FirstAndLastProblemOccurrence(Long problemId, Date firstSeenDateTime, Date lastSeenDateTime) {
+        this.problemId = problemId;
+        this.firstSeenDateTime = firstSeenDateTime;
+        this.lastSeenDateTime = lastSeenDateTime;
+    }
+
+    public Long getProblemId() {
+        return problemId;
+    }
+
+    public Date getFirstSeenDateTime() {
+        return firstSeenDateTime;
+    }
+
+    public Date getLastSeenDateTime() {
+        return lastSeenDateTime;
+    }
 
 }

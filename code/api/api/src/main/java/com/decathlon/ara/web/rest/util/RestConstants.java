@@ -17,12 +17,12 @@
 
 package com.decathlon.ara.web.rest.util;
 
-import lombok.experimental.UtilityClass;
-
 import static com.decathlon.ara.service.support.DtoConstants.CODE_PATTERN;
 
-@UtilityClass
 public final class RestConstants {
+
+    private RestConstants() {
+    }
 
     public static final String AUTH_PATH = "/oauth";
 

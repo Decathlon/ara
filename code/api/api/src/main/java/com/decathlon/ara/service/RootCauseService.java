@@ -17,38 +17,37 @@
 
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.domain.QRootCause;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.decathlon.ara.Entities;
+import com.decathlon.ara.Messages;
+import com.decathlon.ara.domain.Problem;
+import com.decathlon.ara.domain.RootCause;
 import com.decathlon.ara.repository.RootCauseRepository;
 import com.decathlon.ara.service.dto.rootcause.RootCauseDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
-import com.decathlon.ara.service.mapper.RootCauseMapper;
-import com.decathlon.ara.Entities;
-import com.decathlon.ara.Messages;
-import com.decathlon.ara.domain.Problem;
-import com.decathlon.ara.domain.RootCause;
-import com.decathlon.ara.service.util.ObjectUtil;
-import java.util.List;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.decathlon.ara.service.mapper.GenericMapper;
 
 /**
  * Service for managing RootCause.
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RootCauseService {
 
-    @NonNull
     private final RootCauseRepository repository;
 
-    @NonNull
-    private final RootCauseMapper mapper;
+    private final GenericMapper mapper;
+
+    public RootCauseService(RootCauseRepository repository, GenericMapper mapper) {
+        this.repository = repository;
+        this.mapper = mapper;
+    }
 
     /**
      * Create a new entity.
@@ -59,11 +58,10 @@ public class RootCauseService {
      * @throws NotUniqueException when the given name is already used by another entity
      */
     public RootCauseDTO create(long projectId, RootCauseDTO dtoToCreate) throws NotUniqueException {
-        ObjectUtil.trimStringValues(dtoToCreate);
         validateBusinessRules(projectId, dtoToCreate);
-        final RootCause entity = mapper.toEntity(dtoToCreate);
+        final RootCause entity = mapper.map(dtoToCreate, RootCause.class);
         entity.setProjectId(projectId);
-        return mapper.toDto(repository.save(entity));
+        return mapper.map(repository.save(entity), RootCauseDTO.class);
     }
 
     /**
@@ -76,8 +74,6 @@ public class RootCauseService {
      * @throws NotUniqueException when the given name is already used by another entity
      */
     public RootCauseDTO update(long projectId, RootCauseDTO dtoToUpdate) throws BadRequestException {
-        ObjectUtil.trimStringValues(dtoToUpdate);
-
         // Must update an existing entity
         RootCause dataBaseEntity = repository.findByProjectIdAndId(projectId, dtoToUpdate.getId().longValue());
         if (dataBaseEntity == null) {
@@ -86,9 +82,9 @@ public class RootCauseService {
 
         validateBusinessRules(projectId, dtoToUpdate);
 
-        final RootCause entity = mapper.toEntity(dtoToUpdate);
+        final RootCause entity = mapper.map(dtoToUpdate, RootCause.class);
         entity.setProjectId(projectId);
-        return mapper.toDto(repository.save(entity));
+        return mapper.map(repository.save(entity), RootCauseDTO.class);
     }
 
     /**
@@ -99,7 +95,7 @@ public class RootCauseService {
      */
     @Transactional(readOnly = true)
     public List<RootCauseDTO> findAll(long projectId) {
-        return mapper.toDto(repository.findAllByProjectIdOrderByName(projectId));
+        return mapper.mapCollection(repository.findAllByProjectIdOrderByName(projectId), RootCauseDTO.class);
     }
 
     /**
@@ -116,7 +112,7 @@ public class RootCauseService {
         if (rootCause == null) {
             throw new NotFoundException(Messages.NOT_FOUND_ROOT_CAUSE, Entities.ROOT_CAUSE);
         }
-        return mapper.toDto(rootCause);
+        return mapper.map(rootCause, RootCauseDTO.class);
     }
 
     /**
@@ -145,7 +141,7 @@ public class RootCauseService {
     private void validateBusinessRules(long projectId, RootCauseDTO dto) throws NotUniqueException {
         RootCause existingEntityWithSameName = repository.findByProjectIdAndName(projectId, dto.getName());
         if (existingEntityWithSameName != null && !existingEntityWithSameName.getId().equals(dto.getId())) {
-            throw new NotUniqueException(Messages.NOT_UNIQUE_ROOT_CAUSE_NAME, Entities.ROOT_CAUSE, QRootCause.rootCause.name.getMetadata().getName(), existingEntityWithSameName.getId());
+            throw new NotUniqueException(Messages.NOT_UNIQUE_ROOT_CAUSE_NAME, Entities.ROOT_CAUSE, "name", existingEntityWithSameName.getId());
         }
     }
 

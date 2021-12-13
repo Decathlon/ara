@@ -18,15 +18,7 @@
 package com.decathlon.ara.service.dto.scenario;
 
 import com.decathlon.ara.service.dto.source.SourceDTO;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 public class ScenarioDTO {
 
     private Long id;
@@ -58,4 +50,64 @@ public class ScenarioDTO {
     private int line;
 
     private String content;
+
+    public Long getId() {
+        return id;
+    }
+
+    public SourceDTO getSource() {
+        return source;
+    }
+
+    public String getFeatureFile() {
+        return featureFile;
+    }
+
+    public String getFeatureName() {
+        return featureName;
+    }
+
+    public String getFeatureTags() {
+        return featureTags;
+    }
+
+    public String getTags() {
+        return tags;
+    }
+
+    public boolean isIgnored() {
+        return ignored;
+    }
+
+    public String getCountryCodes() {
+        return countryCodes;
+    }
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getWrongFunctionalityIds() {
+        return wrongFunctionalityIds;
+    }
+
+    public String getWrongCountryCodes() {
+        return wrongCountryCodes;
+    }
+
+    public String getWrongSeverityCode() {
+        return wrongSeverityCode;
+    }
+
+    public int getLine() {
+        return line;
+    }
+
+    public String getContent() {
+        return content;
+    }
 }

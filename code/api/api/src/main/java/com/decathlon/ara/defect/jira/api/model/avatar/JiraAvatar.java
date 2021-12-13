@@ -18,9 +18,7 @@
 package com.decathlon.ara.defect.jira.api.model.avatar;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
 
-@Data
 public class JiraAvatar {
 
     @JsonProperty("48x48")
@@ -34,5 +32,21 @@ public class JiraAvatar {
 
     @JsonProperty("16x16")
     private String small;
+
+    public String getLargest() {
+        return largest;
+    }
+
+    public String getLarge() {
+        return large;
+    }
+
+    public String getMedium() {
+        return medium;
+    }
+
+    public String getSmall() {
+        return small;
+    }
 
 }

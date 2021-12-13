@@ -17,6 +17,19 @@
 
 package com.decathlon.ara.service;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.common.NotGonnaHappenException;
@@ -27,37 +40,28 @@ import com.decathlon.ara.service.dto.setting.SettingGroupDTO;
 import com.decathlon.ara.service.dto.setting.SettingType;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Service for managing Settings of a Project.
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SettingService {
 
     private static final String VALIDATION_ERROR_KEY = "validation";
 
-    @NonNull
     private final SettingRepository repository;
 
-    @NonNull
     private final SettingProviderService settingProviderService;
 
     // A SettingService can be used by several threads at once:
     // make sure the global cache is reliably thread-safe with ConcurrentHashMap.computeIfAbsent and synchronizedMap()
     private Map<Long, Map<String, String>> projectsValuesCache = new ConcurrentHashMap<>();
+
+    public SettingService(SettingRepository repository, SettingProviderService settingProviderService) {
+        this.repository = repository;
+        this.settingProviderService = settingProviderService;
+    }
 
     /**
      * Get the project settings, organized as a tree of groups, with values and descriptions.
@@ -162,9 +166,7 @@ public class SettingService {
         // Change value in database
         Setting setting = repository.findByProjectIdAndCode(projectId, code);
         if (setting == null) {
-            setting = new Setting();
-            setting.setProjectId(projectId);
-            setting.setCode(code);
+            setting = new Setting(projectId, code);
         } else if (StringUtils.compare(setting.getValue(), newValue) == 0) {
             return;
         }
@@ -191,8 +193,7 @@ public class SettingService {
     @Transactional
     public Map<String, String> getValues(long projectId) {
         // Lazy-loading of the cache (thread-safe with ConcurrentHashMap.computeIfAbsent and synchronizedMap())
-        return projectsValuesCache.computeIfAbsent(projectId, key ->
-                Collections.synchronizedMap(repository.getProjectSettings(projectId)));
+        return projectsValuesCache.computeIfAbsent(projectId, key -> Collections.synchronizedMap(repository.getProjectSettings(projectId)));
     }
 
     /**
@@ -242,9 +243,7 @@ public class SettingService {
                     throw new BadRequestException(Messages.RULE_SETTING_WRONG_FORMAT_INT, Entities.SETTING, VALIDATION_ERROR_KEY);
                 }
                 break;
-            case STRING:
-            case TEXTAREA:
-            case PASSWORD:
+            case STRING, TEXTAREA, PASSWORD:
                 // String values: no format to validate
                 break;
             default:
@@ -253,7 +252,7 @@ public class SettingService {
     }
 
     private void validateSettingCustomValidator(String newValue, SettingDTO settingDefinition) throws BadRequestException {
-        final Function<String, String> validator = settingDefinition.getValidate();
+        final UnaryOperator<String> validator = settingDefinition.getValidate();
         if (validator != null) {
             final String validationError = validator.apply(newValue);
             if (StringUtils.isNotEmpty(validationError)) {

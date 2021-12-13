@@ -19,7 +19,9 @@ package com.decathlon.ara.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.only;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,22 +39,22 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.decathlon.ara.domain.Severity;
 import com.decathlon.ara.repository.SeverityRepository;
 import com.decathlon.ara.service.dto.severity.SeverityDTO;
-import com.decathlon.ara.service.mapper.SeverityMapper;
+import com.decathlon.ara.service.mapper.GenericMapper;
 
 @ExtendWith(MockitoExtension.class)
-public class SeverityServiceTest {
+class SeverityServiceTest {
 
     @Mock
     private SeverityRepository severityRepository;
 
     @Mock
-    private SeverityMapper severityMapper;
+    private GenericMapper mapper;
 
     @InjectMocks
     private SeverityService cut;
 
     @Test
-    public void getSeveritiesWithAll_ShouldCallRepositoryFindAllByOrderByPosition_WhenCalled() {
+    void getSeveritiesWithAll_ShouldCallRepositoryFindAllByOrderByPosition_WhenCalled() {
         // GIVEN
         long aProjectId = 42;
 
@@ -64,7 +66,7 @@ public class SeverityServiceTest {
     }
 
     @Test
-    public void getSeveritiesWithAll_ShouldAddTheAllSpecialSeverity_WhenCalled() {
+    void getSeveritiesWithAll_ShouldAddTheAllSpecialSeverity_WhenCalled() {
         // GIVEN
         long aProjectId = 42;
         List<Severity> severities = new ArrayList<>();
@@ -79,7 +81,7 @@ public class SeverityServiceTest {
     }
 
     @Test
-    public void getSeveritiesWithAll_ShouldCallMapperWithResultOfRepositoryFindAllByOrderByPosition_WhenCalled() {
+    void getSeveritiesWithAll_ShouldCallMapperWithResultOfRepositoryFindAllByOrderByPosition_WhenCalled() {
         // GIVEN
         long aProjectId = 42;
         List<Severity> severities = new ArrayList<>();
@@ -89,26 +91,26 @@ public class SeverityServiceTest {
         cut.getSeveritiesWithAll(aProjectId);
 
         // THEN
-        verify(severityMapper, only()).toDto(severities);
+        verify(mapper, times(1)).mapCollection(severities, SeverityDTO.class);
     }
 
     @Test
-    public void getSeveritiesWithAll_ShouldReturnMapperResult_WhenCalled() {
+    void getSeveritiesWithAll_ShouldReturnMapperResult_WhenCalled() {
         // GIVEN
         long aProjectId = 42;
         List<SeverityDTO> severityDTOs = Collections.singletonList(new SeverityDTO());
-        when(severityMapper.toDto(anyCollection())).thenReturn(severityDTOs);
+        when(mapper.mapCollection(anyCollection(), eq(SeverityDTO.class))).thenReturn(severityDTOs);
 
         // WHEN / THEN
         assertThat(cut.getSeveritiesWithAll(aProjectId)).isSameAs(severityDTOs);
     }
 
     @Test
-    public void getDefaultSeverityCode_ShouldReturnTheDefaultOne_WhenOneIsDefinedAsDefault() {
+    void getDefaultSeverityCode_ShouldReturnTheDefaultOne_WhenOneIsDefinedAsDefault() {
         // GIVEN
         List<SeverityDTO> severities = Arrays.asList(
-                new SeverityDTO().withCode("a"),
-                new SeverityDTO().withCode("b").withDefaultOnMissing(true));
+                new SeverityDTO("a", null, null, null, null, false),
+                new SeverityDTO("b", null, null, null, null, true));
 
         // WHEN
         final String defaultSeverityCode = cut.getDefaultSeverityCode(severities);
@@ -118,11 +120,11 @@ public class SeverityServiceTest {
     }
 
     @Test
-    public void getDefaultSeverityCode_ShouldReturnNull_WhenNoSeverityIsDefinedAsDefault() {
+    void getDefaultSeverityCode_ShouldReturnNull_WhenNoSeverityIsDefinedAsDefault() {
         // GIVEN
         List<SeverityDTO> severities = Arrays.asList(
-                new SeverityDTO().withCode("a"),
-                new SeverityDTO().withCode("b"));
+                new SeverityDTO("a", null, null, null, null, false),
+                new SeverityDTO("b", null, null, null, null, false));
 
         // WHEN
         final String defaultSeverityCode = cut.getDefaultSeverityCode(severities);

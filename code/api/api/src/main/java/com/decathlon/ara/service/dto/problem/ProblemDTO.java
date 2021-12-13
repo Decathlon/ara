@@ -17,29 +17,18 @@
 
 package com.decathlon.ara.service.dto.problem;
 
-import com.decathlon.ara.SpringApplicationContext;
+import java.util.Date;
+
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import com.decathlon.ara.domain.enumeration.DefectExistence;
 import com.decathlon.ara.domain.enumeration.EffectiveProblemStatus;
 import com.decathlon.ara.domain.enumeration.ProblemStatus;
-import com.decathlon.ara.service.DefectService;
-import com.decathlon.ara.service.SettingService;
 import com.decathlon.ara.service.dto.execution.ExecutionDTO;
 import com.decathlon.ara.service.dto.rootcause.RootCauseDTO;
 import com.decathlon.ara.service.dto.team.TeamDTO;
-import com.decathlon.ara.service.support.Settings;
-import java.util.Date;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-import org.apache.commons.lang3.StringUtils;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 public class ProblemDTO {
 
     private Long id;
@@ -80,5 +69,112 @@ public class ProblemDTO {
      * or null if the problem never appeared.
      */
     private Date lastSeenDateTime;
+
+    public ProblemDTO() {
+    }
+
+    public ProblemDTO(
+            String name,
+            String comment, TeamDTO blamedTeam,
+            String defectId,
+            RootCauseDTO rootCause) {
+        this.name = name;
+        this.comment = comment;
+        this.blamedTeam = blamedTeam;
+        this.defectId = defectId;
+        this.rootCause = rootCause;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public ProblemStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ProblemStatus status) {
+        this.status = status;
+    }
+
+    public EffectiveProblemStatus getEffectiveStatus() {
+        return effectiveStatus;
+    }
+
+    public TeamDTO getBlamedTeam() {
+        return blamedTeam;
+    }
+
+    public void setBlamedTeam(TeamDTO blamedTeam) {
+        this.blamedTeam = blamedTeam;
+    }
+
+    public String getDefectId() {
+        return defectId;
+    }
+
+    public void setDefectId(String defectId) {
+        this.defectId = defectId;
+    }
+
+    public DefectExistence getDefectExistence() {
+        return defectExistence;
+    }
+
+    public void setDefectExistence(DefectExistence defectExistence) {
+        this.defectExistence = defectExistence;
+    }
+
+    public Date getClosingDateTime() {
+        return closingDateTime;
+    }
+
+    public void setClosingDateTime(Date closingDateTime) {
+        this.closingDateTime = closingDateTime;
+    }
+
+    public String getDefectUrl() {
+        return defectUrl;
+    }
+
+    public void setDefectUrl(String defectUrl) {
+        this.defectUrl = defectUrl;
+    }
+
+    public RootCauseDTO getRootCause() {
+        return rootCause;
+    }
+
+    public void setRootCause(RootCauseDTO rootCause) {
+        this.rootCause = rootCause;
+    }
+
+    public Date getCreationDateTime() {
+        return creationDateTime;
+    }
+
+    public void setCreationDateTime(Date creationDateTime) {
+        this.creationDateTime = creationDateTime;
+    }
+
+    public Date getFirstSeenDateTime() {
+        return firstSeenDateTime;
+    }
+
+    public Date getLastSeenDateTime() {
+        return lastSeenDateTime;
+    }
 
 }

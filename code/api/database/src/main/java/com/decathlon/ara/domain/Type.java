@@ -17,22 +17,25 @@
 
 package com.decathlon.ara.domain;
 
-import lombok.*;
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.nullsFirst;
 
-import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Comparator;
+import java.util.Objects;
 
-import static java.util.Comparator.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 @Entity
-// Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
-@EqualsAndHashCode(of = { "projectId", "code" })
-public class Type implements Comparable<Type>, Serializable {
+public class Type implements Comparable<Type> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "type_id")
@@ -63,11 +66,67 @@ public class Type implements Comparable<Type>, Serializable {
 
     @Override
     public int compareTo(Type other) {
-        // Keep business key in sync with @EqualsAndHashCode
         Comparator<Type> projectIdComparator = comparing(t -> Long.valueOf(t.getProjectId()), nullsFirst(naturalOrder()));
         Comparator<Type> codeComparator = comparing(Type::getCode, nullsFirst(naturalOrder()));
         return nullsFirst(projectIdComparator
                 .thenComparing(codeComparator)).compare(this, other);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(code, projectId);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Type)) {
+            return false;
+        }
+        Type other = (Type) obj;
+        return Objects.equals(code, other.code) && projectId == other.projectId;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(long projectId) {
+        this.projectId = projectId;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isBrowser() {
+        return isBrowser;
+    }
+
+    public boolean isMobile() {
+        return isMobile;
+    }
+
+    public Source getSource() {
+        return source;
+    }
+
+    public void setSource(Source source) {
+        this.source = source;
     }
 
 }

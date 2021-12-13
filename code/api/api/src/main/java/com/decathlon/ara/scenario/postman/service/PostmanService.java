@@ -17,33 +17,6 @@
 
 package com.decathlon.ara.scenario.postman.service;
 
-import com.decathlon.ara.domain.ExecutedScenario;
-import com.decathlon.ara.domain.Run;
-import com.decathlon.ara.domain.Source;
-import com.decathlon.ara.scenario.postman.bean.Collection;
-import com.decathlon.ara.scenario.postman.bean.Error;
-import com.decathlon.ara.scenario.postman.bean.*;
-import com.decathlon.ara.scenario.postman.model.NewmanParsingResult;
-import com.decathlon.ara.scenario.postman.model.NewmanScenario;
-import com.decathlon.ara.scenario.cucumber.asset.AssetService;
-import com.decathlon.ara.scenario.cucumber.bean.Status;
-import com.decathlon.ara.scenario.cucumber.bean.Tag;
-import com.decathlon.ara.scenario.cucumber.util.ScenarioExtractorUtil;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.text.StringEscapeUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -53,17 +26,56 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@Slf4j
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
+
+import com.decathlon.ara.domain.ExecutedScenario;
+import com.decathlon.ara.domain.Run;
+import com.decathlon.ara.domain.Source;
+import com.decathlon.ara.scenario.cucumber.asset.AssetService;
+import com.decathlon.ara.scenario.cucumber.bean.Status;
+import com.decathlon.ara.scenario.cucumber.bean.Tag;
+import com.decathlon.ara.scenario.cucumber.util.ScenarioExtractorUtil;
+import com.decathlon.ara.scenario.postman.bean.Assertion;
+import com.decathlon.ara.scenario.postman.bean.Body;
+import com.decathlon.ara.scenario.postman.bean.Collection;
+import com.decathlon.ara.scenario.postman.bean.Error;
+import com.decathlon.ara.scenario.postman.bean.Execution;
+import com.decathlon.ara.scenario.postman.bean.Failure;
+import com.decathlon.ara.scenario.postman.bean.Item;
+import com.decathlon.ara.scenario.postman.bean.KeyValue;
+import com.decathlon.ara.scenario.postman.bean.Request;
+import com.decathlon.ara.scenario.postman.bean.Response;
+import com.decathlon.ara.scenario.postman.bean.Stream;
+import com.decathlon.ara.scenario.postman.bean.Url;
+import com.decathlon.ara.scenario.postman.model.NewmanParsingResult;
+import com.decathlon.ara.scenario.postman.model.NewmanScenario;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PostmanService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PostmanService.class);
 
     /**
      * A Postman request is in a folder, sub-folder... To delimit each path segment (folder or request), they are separated with this delimiter.<br>
@@ -83,11 +95,14 @@ public class PostmanService {
     private static final String CONTENT_DIV_BEGIN_AND_LINE_END = "<div class=\"content\">\n";
     private static final String DIV_END_AND_LINE_END = "</div>\n";
 
-    @NonNull
     private final ObjectMapper objectMapper;
 
-    @NonNull
     private final AssetService assetService;
+
+    public PostmanService(ObjectMapper objectMapper, AssetService assetService) {
+        this.objectMapper = objectMapper;
+        this.assetService = assetService;
+    }
 
     /**
      * <p>Newman reports are very huge.<br>
@@ -148,10 +163,10 @@ public class PostmanService {
      */
     public void parse(JsonParser parser, NewmanParsingResult result) throws IOException {
         if (!parser.isClosed() && parser.nextToken() == JsonToken.START_OBJECT) {
-            log.debug("SCENARIO|postman|JSON stream contains a root object: parsing the Newman report");
+            LOG.debug("SCENARIO|postman|JSON stream contains a root object: parsing the Newman report");
             parseRootObject(parser, result);
         } else {
-            log.error("SCENARIO|postman|JSON stream does not contain a root object: no Newman report to parse");
+            LOG.error("SCENARIO|postman|JSON stream does not contain a root object: no Newman report to parse");
             throw new IOException("JSON stream does not contain a root object: no Newman report to parse");
         }
     }
@@ -174,15 +189,15 @@ public class PostmanService {
             final String fieldName = parser.getCurrentName();
 
             if (startingObject && "collection".equals(fieldName)) {
-                log.debug("SCENARIO|postman|[json:$] found collection: parsing it");
+                LOG.debug("SCENARIO|postman|[json:$] found collection: parsing it");
                 result.setCollection(objectMapper.readValue(parser, Collection.class));
 
             } else if (startingObject && "run".equals(fieldName)) {
-                log.debug("SCENARIO|postman|[json:$] found run: parsing it");
+                LOG.debug("SCENARIO|postman|[json:$] found run: parsing it");
                 parseRun(parser, result);
 
             } else if (jsonToken != JsonToken.FIELD_NAME) {
-                log.debug("SCENARIO|postman|[json:$] unmapped {} (last field name: {})", jsonToken, fieldName);
+                LOG.debug("SCENARIO|postman|[json:$] unmapped {} (last field name: {})", jsonToken, fieldName);
                 parser.skipChildren();
             }
         }
@@ -207,17 +222,17 @@ public class PostmanService {
             final String fieldName = parser.getCurrentName();
 
             if (startingArray && "executions".equals(fieldName)) {
-                log.debug("SCENARIO|postman|[json:$.run] found executions: parsing it");
+                LOG.debug("SCENARIO|postman|[json:$.run] found executions: parsing it");
                 List<Execution> executions = new ArrayList<>();
                 result.setExecutions(executions);
                 parseExecutions(parser, executions);
 
             } else if (startingArray && "failures".equals(fieldName)) {
-                log.debug("SCENARIO|postman|[json:$.run] found failures: parsing it");
+                LOG.debug("SCENARIO|postman|[json:$.run] found failures: parsing it");
                 result.setFailures(Arrays.asList(objectMapper.readValue(parser, Failure[].class)));
 
             } else if (jsonToken != JsonToken.FIELD_NAME) {
-                log.debug("SCENARIO|postman|[json:$.run] unmapped {} (last field name: {})", jsonToken, fieldName);
+                LOG.debug("SCENARIO|postman|[json:$.run] unmapped {} (last field name: {})", jsonToken, fieldName);
                 parser.skipChildren();
             }
         }
@@ -238,7 +253,7 @@ public class PostmanService {
             }
 
             if (jsonToken == JsonToken.START_OBJECT) {
-                log.debug("SCENARIO|postman|[json:$.run.executions] found execution: parsing it");
+                LOG.debug("SCENARIO|postman|[json:$.run.executions] found execution: parsing it");
                 Execution execution = objectMapper.readValue(parser, Execution.class);
                 executions.add(execution); // Add BEFORE saving to file: if write fails (no space left), the "half-"file can be deleted
                 saveExecutionStreamToFile(execution);
@@ -392,7 +407,7 @@ public class PostmanService {
             if (newmanScenario.isPresent()) {
                 newmanScenario.get().setExecution(execution);
             } else {
-                log.warn("SCENARIO|postman|Execution {} has no matching item in the Postman collection", itemId);
+                LOG.warn("SCENARIO|postman|Execution {} has no matching item in the Postman collection", itemId);
             }
         }
     }
@@ -422,7 +437,7 @@ public class PostmanService {
             if (newmanScenario.isPresent()) {
                 newmanScenario.get().getFailures().add(failure);
             } else {
-                log.warn("SCENARIO|postman|Failure {} has no matching item in the Postman collection", failure.getSource().getId());
+                LOG.warn("SCENARIO|postman|Failure {} has no matching item in the Postman collection", failure.getSource().getId());
             }
         }
     }
@@ -701,7 +716,7 @@ public class PostmanService {
                 try {
                     Files.delete(Paths.get(tempFile.getPath()));
                 } catch (IOException e) {
-                    log.warn("SCENARIO|postman|Cannot delete temporary file {}", tempFile, e);
+                    LOG.warn("SCENARIO|postman|Cannot delete temporary file {}", tempFile, e);
                 }
                 stream.setTempFile(null);
             }
@@ -845,13 +860,13 @@ public class PostmanService {
                 html.append("<pre>").append(escapeHtml(body.getRaw())).append("</pre>\n");
                 break;
             case "file":
-                log.warn("SCENARIO|postman|File upload was used in a collection, while its collection export is absent in Postman.");
+                LOG.warn("SCENARIO|postman|File upload was used in a collection, while its collection export is absent in Postman.");
                 html.append(ERROR_PARAGRAPH +
                         "Postman does not export the files to upload, so it has not been sent..." +
                         PARAGRAPH_AND_LINE_END);
                 break;
             default:
-                log.warn("SCENARIO|postman|Used new/unknown request body mode {}", body.getMode());
+                LOG.warn("SCENARIO|postman|Used new/unknown request body mode {}", body.getMode());
                 html.append(ERROR_PARAGRAPH + "Used new (unknown to ARA) request body mode ")
                         .append(body.getMode())
                         .append(PARAGRAPH_AND_LINE_END);
@@ -873,7 +888,7 @@ public class PostmanService {
                 fileContent = FileUtils.readFileToString(stream.getTempFile(), StandardCharsets.UTF_8);
                 fileContent = prettyPrint(fileContent, contentType);
             } catch (IOException e) {
-                log.warn("SCENARIO|postman|Cannot read temporary file {}", stream.getTempFile(), e);
+                LOG.warn("SCENARIO|postman|Cannot read temporary file {}", stream.getTempFile(), e);
                 fileContent = "Error in ARA while reading the content of the response received by Newman:\n" +
                         ExceptionUtils.getStackTrace(e);
             }
@@ -894,8 +909,7 @@ public class PostmanService {
             try {
                 Object json = objectMapper.readValue(fileContent, Object.class);
                 return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
-            } catch (@SuppressWarnings(
-                    "squid:S1166") IOException e) { // Exception handlers should preserve the original exceptions
+            } catch (@SuppressWarnings("squid:S1166") IOException e) { // Exception handlers should preserve the original exceptions
                 // Ignore exception because it is a user malformed object, and we gracefully fallback by not indenting it
             }
         }
@@ -929,7 +943,7 @@ public class PostmanService {
                     try {
                         return ZonedDateTime.parse(value, DateTimeFormatter.RFC_1123_DATE_TIME).toInstant();
                     } catch (DateTimeParseException e) {
-                        log.warn("SCENARIO|postman|Cannot parse date from response header in Newman report: {}", value, e);
+                        LOG.warn("SCENARIO|postman|Cannot parse date from response header in Newman report: {}", value, e);
                         return null;
                     }
                 });

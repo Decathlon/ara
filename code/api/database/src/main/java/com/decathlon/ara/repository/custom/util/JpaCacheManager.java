@@ -18,24 +18,27 @@
 package com.decathlon.ara.repository.custom.util;
 
 import java.util.Collection;
+
 import javax.persistence.EntityManager;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+
 import org.hibernate.Session;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
  * Helper class to manage JPA cache, and evict some regions where needed.
  */
 @Component
-@Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class JpaCacheManager {
 
-    @NonNull
+    private static final Logger LOG = LoggerFactory.getLogger(JpaCacheManager.class);
+
     private EntityManager entityManager;
+
+    public JpaCacheManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
 
     /**
      * Evict the cache data for the given identified collection instance.
@@ -44,12 +47,12 @@ public class JpaCacheManager {
      * @param ownerIdentifier  the identifier of the owning entity
      */
     public void evictCollection(String collectionRegion, Long ownerIdentifier) {
-        log.debug("Evicting collection cache {} for owner entity {}", collectionRegion, ownerIdentifier);
+        LOG.debug("Evicting collection cache {} for owner entity {}", collectionRegion, ownerIdentifier);
         entityManager
                 .unwrap(Session.class)
                 .getSessionFactory()
                 .getCache()
-                .evictCollection(collectionRegion, ownerIdentifier);
+                .evictCollectionData(collectionRegion, ownerIdentifier);
     }
 
     /**

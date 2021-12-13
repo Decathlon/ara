@@ -22,16 +22,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.Test;
 
-public class CountryTest {
+import com.decathlon.ara.util.factory.CountryFactory;
+
+class CountryTest {
 
     private static Country country(String code) {
         String dummyName = Integer.toString(RandomUtils.nextInt()); // Check it must have no impact
-        return new Country(Long.valueOf(42), 1, code, dummyName);
+        return CountryFactory.get(Long.valueOf(42), 1, code, dummyName);
     }
 
     @Test
-    @SuppressWarnings("static-method")
-    public void testCompareTo() {
+    void testCompareTo() {
         assertThat(country(null).compareTo(country(null))).isZero();
         assertThat(country(null).compareTo(country("A"))).isNegative();
         assertThat(country("A").compareTo(country(null))).isPositive();

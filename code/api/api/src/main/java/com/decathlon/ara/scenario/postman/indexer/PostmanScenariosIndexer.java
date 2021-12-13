@@ -17,6 +17,22 @@
 
 package com.decathlon.ara.scenario.postman.indexer;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.decathlon.ara.ci.util.JsonParserConsumer;
 import com.decathlon.ara.domain.ExecutedScenario;
 import com.decathlon.ara.domain.Run;
@@ -28,36 +44,27 @@ import com.decathlon.ara.service.FileProcessorService;
 import com.decathlon.ara.service.TechnologySettingService;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Slf4j
 public class PostmanScenariosIndexer implements ScenariosIndexer {
 
-    @NonNull
+    private static final Logger LOG = LoggerFactory.getLogger(PostmanScenariosIndexer.class);
+
     private final PostmanService postmanService;
 
-    @NonNull
     private final JsonFactory jsonFactory;
 
-    @NonNull
     private final TechnologySettingService technologySettingService;
 
-    @NonNull
     private final FileProcessorService fileProcessorService;
+
+    public PostmanScenariosIndexer(PostmanService postmanService, JsonFactory jsonFactory,
+            TechnologySettingService technologySettingService, FileProcessorService fileProcessorService) {
+        this.postmanService = postmanService;
+        this.jsonFactory = jsonFactory;
+        this.technologySettingService = technologySettingService;
+        this.fileProcessorService = fileProcessorService;
+    }
 
     /**
      * Get the Postman executed scenarios
@@ -88,7 +95,7 @@ public class PostmanScenariosIndexer implements ScenariosIndexer {
                     try (InputStream input = new FileInputStream(postmanReportFile); JsonParser parser = jsonFactory.createParser(input)) {
                         consumer.accept(parser);
                     } catch (IOException e) {
-                        log.error("Error while handling the postman report file {}", postmanReportFile.getPath(), e);
+                        LOG.error("Error while handling the postman report file {}", postmanReportFile.getPath(), e);
                         return new ArrayList<>();
                     }
                     List<ExecutedScenario> currentFileExecutedScenarios = postmanService.postProcess(run, newmanParsingResult, postmanReportFile.getName(), requestPosition);

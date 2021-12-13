@@ -17,13 +17,6 @@
 
 package com.decathlon.ara.service.dto.support;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.With;
-
-@Data
-@With
-@AllArgsConstructor
 public class UpsertResultDTO<T> {
 
     /**
@@ -35,5 +28,19 @@ public class UpsertResultDTO<T> {
      * Describe the operation that just happened on the given DTO.
      */
     private Upsert operation;
+
+    public UpsertResultDTO(T upsertedDto, Upsert operation) {
+        super();
+        this.upsertedDto = upsertedDto;
+        this.operation = operation;
+    }
+
+    public T getUpsertedDto() {
+        return upsertedDto;
+    }
+
+    public Upsert getOperation() {
+        return operation;
+    }
 
 }

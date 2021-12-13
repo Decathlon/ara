@@ -19,6 +19,7 @@ package com.decathlon.ara.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.Arrays;
@@ -29,13 +30,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Assertions;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 
-import lombok.experimental.UtilityClass;
-
-@UtilityClass
 public final class TestUtil {
+
+    private TestUtil() {
+    }
 
     public static final Long NONEXISTENT = Long.valueOf(-42);
 
@@ -98,6 +100,52 @@ public final class TestUtil {
             return current;
         }
         throw new RuntimeException("Cannot find index " + index);
+    }
+
+    public static <T> void setField(Object o, String fieldName, Object value) {
+        setField(o, o.getClass(), fieldName, value);
+    }
+
+    public static <T> void setField(Object o, Class<?> fieldClass, String fieldName, Object value) {
+        try {
+            Field declaredField = fieldClass.getDeclaredField(fieldName);
+            declaredField.setAccessible(true);
+            declaredField.set(o, value);
+        } catch (NoSuchFieldException e) {
+            if (fieldClass.getSuperclass() != Object.class) {
+                setField(o, fieldClass.getSuperclass(), fieldName, value);
+                return;
+            }
+            Assertions.fail(e);
+            throw new RuntimeException(e); //should not be reached
+        } catch (SecurityException | IllegalArgumentException | IllegalAccessException e) {
+            Assertions.fail(e);
+            throw new RuntimeException(e); //should not be reached
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T getField(Object o, String fieldName) {
+        return (T) getField(o, o.getClass(), fieldName);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T getField(Object o, Class<?> fieldClass, String fieldName) {
+        Field declaredField;
+        try {
+            declaredField = o.getClass().getDeclaredField(fieldName);
+            declaredField.setAccessible(true);
+            return (T) declaredField.get(o);
+        } catch (NoSuchFieldException e) {
+            if (fieldClass.getSuperclass() != Object.class) {
+                return (T) getField(o, fieldClass.getSuperclass(), fieldName);
+            }
+            Assertions.fail(e);
+            throw new RuntimeException(e); //should not be reached
+        } catch (SecurityException | IllegalArgumentException | IllegalAccessException e) {
+            Assertions.fail(e);
+            throw new RuntimeException(e); //should not be reached
+        }
     }
 
 }

@@ -18,14 +18,12 @@
 package com.decathlon.ara.lib.embed.consumer;
 
 import com.decathlon.ara.lib.embed.producer.EmbeddingPriority;
-import lombok.Data;
 
 /**
  * Represents one Structured Embedding parsed from an HTML string containing one or more structured embeddings.
  *
  * @see StructuredEmbeddingsHolder StructuredEmbeddingsHolder is holding all embeddings from the same HTML string
  */
-@Data
 public class ParsedStructuredEmbedding {
 
     /**
@@ -59,9 +57,48 @@ public class ParsedStructuredEmbedding {
      */
     private final int priorityOrder;
 
-    /**
+	/**
      * The HTML representation of the embedding, for human display
      */
     private final String html;
+    
+    public ParsedStructuredEmbedding(String kind, String name, String type, Object data, String priority,
+			int priorityOrder, String html) {
+		this.kind = kind;
+		this.name = name;
+		this.type = type;
+		this.data = data;
+		this.priority = priority;
+		this.priorityOrder = priorityOrder;
+		this.html = html;
+	}
+
+	public String getKind() {
+		return kind;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public Object getData() {
+		return data;
+	}
+
+	public String getPriority() {
+		return priority;
+	}
+
+	public int getPriorityOrder() {
+		return priorityOrder;
+	}
+
+	public String getHtml() {
+		return html;
+	}
 
 }

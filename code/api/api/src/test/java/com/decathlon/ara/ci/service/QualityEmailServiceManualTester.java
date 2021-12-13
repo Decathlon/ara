@@ -17,20 +17,16 @@
 
 package com.decathlon.ara.ci.service;
 
-import com.decathlon.ara.configuration.AraConfiguration;
-import com.decathlon.ara.domain.Project;
-import com.decathlon.ara.domain.Team;
-import com.decathlon.ara.repository.ProjectRepository;
-import com.decathlon.ara.repository.TeamRepository;
-import com.decathlon.ara.service.EmailService;
-import com.decathlon.ara.service.ExecutionHistoryService;
-import com.decathlon.ara.service.SettingService;
-import com.decathlon.ara.service.dto.execution.ExecutionHistoryPointDTO;
-import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.service.support.Settings;
-import com.decathlon.ara.util.TestUtil;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -48,15 +44,20 @@ import org.thymeleaf.spring5.SpringTemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
+import com.decathlon.ara.configuration.AraConfiguration;
+import com.decathlon.ara.domain.Project;
+import com.decathlon.ara.domain.Team;
+import com.decathlon.ara.repository.ProjectRepository;
+import com.decathlon.ara.repository.TeamRepository;
+import com.decathlon.ara.service.EmailService;
+import com.decathlon.ara.service.ExecutionHistoryService;
+import com.decathlon.ara.service.SettingService;
+import com.decathlon.ara.service.dto.execution.ExecutionHistoryPointDTO;
+import com.decathlon.ara.service.exception.NotFoundException;
+import com.decathlon.ara.service.support.Settings;
+import com.decathlon.ara.util.TestUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * This class is not a unit-test: it is meant to run manually, to debug the writing of the mail template (this is why
@@ -111,9 +112,7 @@ public class QualityEmailServiceManualTester {
         cut = new QualityEmailService(araConfiguration, executionHistoryService, teamRepository, emailService, projectRepository, settingService);
 
         when(araConfiguration.getClientBaseUrl()).thenReturn("http://localhost:8081/");
-        when(projectRepository.findById(Long.valueOf(1))).thenReturn(Optional.of(new Project()
-                .withCode("projectCode")
-                .withName("projectName")));
+        when(projectRepository.findById(Long.valueOf(1))).thenReturn(Optional.of(new Project("projectCode", "projectName")));
         when(settingService.get(1, Settings.EMAIL_FROM)).thenReturn("ARA Manual Tester <" + from + ">");
         when(settingService.get(1, Settings.EMAIL_TO_EXECUTION_RAN)).thenReturn(to);
         when(settingService.get(1, Settings.EMAIL_TO_EXECUTION_ELIGIBLE_WARNING)).thenReturn(to);

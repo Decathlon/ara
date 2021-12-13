@@ -15,3 +15,5 @@ databaseChangeLog:
       file: classpath*:db/changelog/changes/mysql/20211125171000-not_null_constraints.yaml
   - include:
       file: classpath*:db/changelog/changes/mysql/20220125173016-delete_cascade_on_problem_occurrences.yaml
+  - include:
+      file: classpath*:db/changelog/changes/mysql/20220126170954-not_null_constraints.yaml

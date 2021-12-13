@@ -17,24 +17,20 @@
 
 package com.decathlon.ara.service.authentication;
 
-import com.decathlon.ara.configuration.authentication.provider.AuthProvidersConf;
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import com.decathlon.ara.configuration.authentication.provider.AuthProvidersConf;
+import com.decathlon.ara.configuration.authentication.provider.AuthProvidersConf.Oauth2ProvidersInfos;
 
-import static com.decathlon.ara.configuration.authentication.provider.AuthProvidersConf.Oauth2ProvidersInfos;
-
-@Slf4j
 @Service
 @Transactional
 public class AuthenticationService {
 
-    @NonNull
     private final AuthProvidersConf authDetailsConf;
 
     @Value("${ara.loginStartingUrl}")
@@ -44,23 +40,22 @@ public class AuthenticationService {
     private String logoutProcessingUrl;
 
     @Autowired
-    public AuthenticationService(@NonNull AuthProvidersConf authDetailsConf) {
+    public AuthenticationService(AuthProvidersConf authDetailsConf) {
         this.authDetailsConf = authDetailsConf;
     }
 
-    public AuthenticationConf getAuthenticationConf(){
+    public AuthenticationConf getAuthenticationConf() {
         return new AuthenticationConf(
                 this.authDetailsConf.getConf(),
                 this.loginStartingUrl,
                 this.logoutProcessingUrl);
     }
 
-
     public static class AuthenticationConf {
 
         private List<Oauth2ProvidersInfos> providers;
         private String loginStartingUrl;
-        private  String logoutProcessingUrl;
+        private String logoutProcessingUrl;
 
         public AuthenticationConf(List<Oauth2ProvidersInfos> providers, String loginStartingUrl, String logoutProcessingUrl) {
             this.providers = providers;

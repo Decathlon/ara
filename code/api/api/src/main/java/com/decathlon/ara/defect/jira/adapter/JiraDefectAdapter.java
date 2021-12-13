@@ -17,6 +17,16 @@
 
 package com.decathlon.ara.defect.jira.adapter;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.atlassian.jira.issue.IssueKey;
 import com.decathlon.ara.ci.util.FetchException;
 import com.decathlon.ara.defect.DefectAdapter;
@@ -27,30 +37,24 @@ import com.decathlon.ara.defect.jira.api.model.JiraIssue;
 import com.decathlon.ara.service.SettingProviderService;
 import com.decathlon.ara.service.dto.setting.SettingDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
-@Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class JiraDefectAdapter implements DefectAdapter {
 
-    @Autowired
+    private static final Logger LOG = LoggerFactory.getLogger(JiraDefectAdapter.class);
+
     private SettingProviderService settingProviderService;
 
-    @Autowired
     private JiraRestClient jiraRestClient;
 
-    @Autowired
     private JiraMapper jiraMapper;
+
+    public JiraDefectAdapter(SettingProviderService settingProviderService, JiraRestClient jiraRestClient,
+            JiraMapper jiraMapper) {
+        this.settingProviderService = settingProviderService;
+        this.jiraRestClient = jiraRestClient;
+        this.jiraMapper = jiraMapper;
+    }
 
     @Override
     public List<Defect> getStatuses(long projectId, List<String> ids) throws FetchException {
@@ -64,7 +68,7 @@ public class JiraDefectAdapter implements DefectAdapter {
         } catch (BadRequestException e) {
             String jiraIds = String.join(", ", ids);
             String errorMessage = String.format("DEFECT|jira|Error while fetching the following ids from Jira: [%s]", jiraIds);
-            log.error(errorMessage, e);
+            LOG.error(errorMessage, e);
             throw new FetchException(errorMessage, e);
         }
     }
@@ -79,7 +83,7 @@ public class JiraDefectAdapter implements DefectAdapter {
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
             String formattedDate = dateFormat.format(startDate);
             String errorMessage = String.format("DEFECT|jira|An error occurred while fetching the updated issues after %s", formattedDate);
-            log.warn(errorMessage, e);
+            LOG.warn(errorMessage, e);
             throw new FetchException(errorMessage, e);
         }
     }

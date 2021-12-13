@@ -17,21 +17,23 @@
 
 package com.decathlon.ara.scenario.cucumber.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.decathlon.ara.domain.Error;
 import com.decathlon.ara.scenario.cucumber.bean.Status;
 import com.decathlon.ara.scenario.cucumber.bean.Step;
 import com.decathlon.ara.scenario.cucumber.support.ResultsWithMatch;
-import lombok.experimental.UtilityClass;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A set of static functions with no dependency nor side-effect (no download, upload, database access...) that take a parsed Cucumber's report.json and extract errors in it.
  */
-@UtilityClass
 public class ErrorExtractorUtil {
+
+    private ErrorExtractorUtil() {
+    }
 
     public static List<Error> extractErrors(List<String> stepDefinitions, ResultsWithMatch[] stepsOrHooks, String hookName) {
         final List<Error> errors = new ArrayList<>();

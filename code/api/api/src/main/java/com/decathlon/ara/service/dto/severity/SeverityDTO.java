@@ -17,21 +17,13 @@
 
 package com.decathlon.ara.service.dto.severity;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-
 import static com.decathlon.ara.service.support.DtoConstants.CODE_MESSAGE;
 import static com.decathlon.ara.service.support.DtoConstants.CODE_PATTERN;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
 public class SeverityDTO {
 
     @NotNull(message = "The code is required.")
@@ -66,10 +58,56 @@ public class SeverityDTO {
     @Size(min = 1, max = 8, message = "The initials are required and must not exceed {max} characters.")
     private String initials;
 
+    public SeverityDTO() {
+    }
+
+    public SeverityDTO(
+            String code,
+            Integer position,
+            String name,
+            String shortName,
+            String initials,
+            boolean defaultOnMissing) {
+        this.code = code;
+        this.position = position;
+        this.name = name;
+        this.shortName = shortName;
+        this.initials = initials;
+        this.defaultOnMissing = defaultOnMissing;
+    }
+
     /**
      * True to use that severity as a default one when a scenario does not declare its severity or has a nonexistent
      * one. Only one severity can be declared as the default.
      */
     private boolean defaultOnMissing;
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public Integer getPosition() {
+        return position;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getShortName() {
+        return shortName;
+    }
+
+    public String getInitials() {
+        return initials;
+    }
+
+    public boolean isDefaultOnMissing() {
+        return defaultOnMissing;
+    }
 
 }

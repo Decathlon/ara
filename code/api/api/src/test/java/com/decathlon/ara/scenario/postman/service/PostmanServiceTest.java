@@ -46,6 +46,7 @@ import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.AdditionalMatchers;
@@ -78,13 +79,15 @@ import com.decathlon.ara.scenario.postman.bean.Stream;
 import com.decathlon.ara.scenario.postman.bean.Url;
 import com.decathlon.ara.scenario.postman.model.NewmanParsingResult;
 import com.decathlon.ara.scenario.postman.model.NewmanScenario;
+import com.decathlon.ara.util.TestUtil;
+import com.decathlon.ara.util.builder.RunBuilder;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
-public class PostmanServiceTest {
+class PostmanServiceTest {
 
     private static final String NEW_LINE = System.getProperty("line.separator");
     private static final String JSON_RAW = "[{\"key\":\"value\"}]";
@@ -105,7 +108,7 @@ public class PostmanServiceTest {
     private PostmanService cut;
 
     @Test
-    public void parse_should_throw_exception_when_malformed_json() throws IOException {
+    void parse_should_throw_exception_when_malformed_json() throws IOException {
         // GIVEN
         when(Boolean.valueOf(jsonParser.isClosed())).thenReturn(Boolean.FALSE);
         when(jsonParser.nextToken()).thenReturn(JsonToken.START_ARRAY);
@@ -115,7 +118,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void parse_should_throw_exception_when_closed_stream() throws IOException {
+    void parse_should_throw_exception_when_closed_stream() throws IOException {
         // GIVEN
         when(Boolean.valueOf(jsonParser.isClosed())).thenReturn(Boolean.TRUE);
 
@@ -124,7 +127,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void parse_should_parse_the_newman_report_stream() throws IOException {
+    void parse_should_parse_the_newman_report_stream() throws IOException {
         // Yes, for a proper JUnit test, JsonParser should be mocked and all parse*() methods should be tested independently.
         // This would be too time-consuming to write, and we are not sure yet if the streaming benefit is that strong, so the code could go away in a future version.
 
@@ -180,43 +183,40 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void saveExecutionStreamToFile_should_not_crash_if_execution_has_null_response() throws IOException {
+    void saveExecutionStreamToFile_should_not_crash_if_execution_has_null_response() throws IOException {
         // GIVEN
         Execution execution = new Execution();
 
         // WHEN
-        cut.saveExecutionStreamToFile(execution);
+        Assertions.assertDoesNotThrow(() -> cut.saveExecutionStreamToFile(execution));
+        ;
     }
 
     @Test
-    public void saveExecutionStreamToFile_should_not_crash_if_response_has_null_stream() throws IOException {
+    void saveExecutionStreamToFile_should_not_crash_if_response_has_null_stream() throws IOException {
         // GIVEN
-        Execution execution = new Execution()
-                .withResponse(new Response());
+        Execution execution = execution(null, null, new Response(), null);
 
         // WHEN
-        cut.saveExecutionStreamToFile(execution);
+        Assertions.assertDoesNotThrow(() -> cut.saveExecutionStreamToFile(execution));
+        ;
     }
 
     @Test
-    public void saveExecutionStreamToFile_should_not_crash_if_stream_has_null_data() throws IOException {
+    void saveExecutionStreamToFile_should_not_crash_if_stream_has_null_data() throws IOException {
         // GIVEN
-        Execution execution = new Execution()
-                .withResponse(new Response()
-                        .withStream(new Stream()));
+        Execution execution = execution(null, null, response(0, null, new Stream(), 0, null), null);
 
         // WHEN
-        cut.saveExecutionStreamToFile(execution);
+        Assertions.assertDoesNotThrow(() -> cut.saveExecutionStreamToFile(execution));
+        ;
     }
 
     @Test
-    public void saveExecutionStreamToFile_should_save_execution_stream_to_file() throws IOException {
+    void saveExecutionStreamToFile_should_save_execution_stream_to_file() throws IOException {
         // GIVEN
-        final Stream stream = new Stream()
-                .withData(new byte[] { 'a', 'b', 'c' });
-        Execution execution = new Execution()
-                .withResponse(new Response()
-                        .withStream(stream));
+        final Stream stream = stream(new byte[] { 'a', 'b', 'c' }, null);
+        Execution execution = execution(null, null, response(0, null, stream, 0, null), null);
 
         try {
             // WHEN
@@ -232,7 +232,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toScenarios_should_return_empty_list_when_items_is_null() {
+    void toScenarios_should_return_empty_list_when_items_is_null() {
         // WHEN
         final List<NewmanScenario> newmanScenarios = cut.toScenarios(null, null, null);
 
@@ -241,15 +241,10 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toScenarios_should_wrap_item_tree_into_newman_scenario_list() {
+    void toScenarios_should_wrap_item_tree_into_newman_scenario_list() {
         // GIVEN
         Item[] items = new Item[] {
-                new Item()
-                        .withName("parent")
-                        .withChildren(new Item[] {
-                        new Item().withName("request1"),
-                        new Item().withName("request2")
-                })
+                item(null, "parent", null, new Item[] { item(null, "request1", null, null), item(null, "request2", null, null) })
         };
 
         // WHEN
@@ -261,15 +256,10 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toScenarios_should_append_executed_scenarios_to_newman_scenarios() {
+    void toScenarios_should_append_executed_scenarios_to_newman_scenarios() {
         // GIVEN
         Item[] items = new Item[] {
-                new Item()
-                        .withName("parent")
-                        .withChildren(new Item[] {
-                        new Item().withName("request1"),
-                        new Item().withName("request2")
-                })
+                item(null, "parent", null, new Item[] { item(null, "request1", null, null), item(null, "request2", null, null) })
         };
 
         // WHEN
@@ -281,15 +271,10 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toScenarios_should_increment_lines() {
+    void toScenarios_should_increment_lines() {
         // GIVEN
         Item[] items = new Item[] {
-                new Item()
-                        .withName("parent")
-                        .withChildren(new Item[] {
-                        new Item().withName("request1"),
-                        new Item().withName("request2")
-                })
+                item(null, "parent", null, new Item[] { item(null, "request1", null, null), item(null, "request2", null, null) })
         };
         AtomicInteger requestPosition = new AtomicInteger(5);
 
@@ -302,9 +287,9 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toScenarios_should_fill_the_severity_of_executed_scenarios_by_calling_toSeverity_with_parent_and_request_names() {
+    void toScenarios_should_fill_the_severity_of_executed_scenarios_by_calling_toSeverity_with_parent_and_request_names() {
         // GIVEN
-        Item[] items = new Item[] { new Item().withName("request") };
+        Item[] items = new Item[] { item(null, "request", null, null) };
         final String[] parentFolders = new String[] { "parent" };
         doReturn("the-severity").when(cut).getSeverity(eq("parent"), eq("request"));
 
@@ -317,9 +302,9 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toScenarios_should_fill_tags_of_executed_scenarios_with_the_severity() {
+    void toScenarios_should_fill_tags_of_executed_scenarios_with_the_severity() {
         // GIVEN
-        Item[] items = new Item[] { new Item().withName("request") };
+        Item[] items = new Item[] { item(null, "request", null, null) };
         doReturn("the-severity").when(cut).getSeverity(eq("request"));
 
         // WHEN
@@ -331,9 +316,9 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toScenarios_should_not_fill_tags_of_executed_scenarios_if_the_severity_is_empty() {
+    void toScenarios_should_not_fill_tags_of_executed_scenarios_if_the_severity_is_empty() {
         // GIVEN
-        Item[] items = new Item[] { new Item().withName("request") };
+        Item[] items = new Item[] { item(null, "request", null, null) };
         doReturn("").when(cut).getSeverity(eq("request"));
 
         // WHEN
@@ -345,9 +330,9 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toScenarios_should_fill_name_of_executed_scenarios_with_the_parent_and_request_names() {
+    void toScenarios_should_fill_name_of_executed_scenarios_with_the_parent_and_request_names() {
         // GIVEN
-        Item[] items = new Item[] { new Item().withName("request") };
+        Item[] items = new Item[] { item(null, "request", null, null) };
         final String[] parentFolders = new String[] { "parent" };
         doReturn("request-without-severity").when(cut).removeSeverityTag(eq("request"));
 
@@ -360,9 +345,9 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toScenarios_should_fill_cucumber_id_of_executed_scenarios_with_toCucumberId_with_the_name_without_severity() {
+    void toScenarios_should_fill_cucumber_id_of_executed_scenarios_with_toCucumberId_with_the_name_without_severity() {
         // GIVEN
-        Item[] items = new Item[] { new Item().withName("request") };
+        Item[] items = new Item[] { item(null, "request", null, null) };
         doReturn("request-without-severity").when(cut).removeSeverityTag(eq("request"));
         doReturn("cucumber-id").when(cut).toCucumberId(AdditionalMatchers.aryEq(new String[] { "request-without-severity" }));
 
@@ -375,9 +360,9 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toScenarios_should_inherit_parent_severity_when_no_severity_in_name() {
+    void toScenarios_should_inherit_parent_severity_when_no_severity_in_name() {
         // GIVEN
-        Item[] items = new Item[] { new Item().withName("request") };
+        Item[] items = new Item[] { item(null, "request", null, null) };
         doReturn("").when(cut).getSeverity(eq("request"));
 
         // WHEN
@@ -389,9 +374,9 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toScenarios_should_override_parent_severity_when_a_severity_is_present_in_name() {
+    void toScenarios_should_override_parent_severity_when_a_severity_is_present_in_name() {
         // GIVEN
-        Item[] items = new Item[] { new Item().withName("request") };
+        Item[] items = new Item[] { item(null, "request", null, null) };
         doReturn("severity").when(cut).getSeverity(eq("request"));
 
         // WHEN
@@ -403,7 +388,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toCucumberId_should_return_concatenated_and_without_functionalities() {
+    void toCucumberId_should_return_concatenated_and_without_functionalities() {
         // GIVEN
         String[] path = new String[] {
                 // Testing only a few functionality syntaxes: all possibilities are tested by
@@ -423,7 +408,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toCucumberId_should_return_limit_max_characters() {
+    void toCucumberId_should_return_limit_max_characters() {
         // GIVEN
         String[] path = new String[] {
                 // Testing only a few functionality syntaxes: all possibilities are tested by
@@ -452,7 +437,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void testRemoveSeverityTag() {
+    void testRemoveSeverityTag() {
         assertThat(cut.removeSeverityTag("@severity-high - real title")).isEqualTo("real title");
         assertThat(cut.removeSeverityTag("@severity-high : real title")).isEqualTo("real title");
         assertThat(cut.removeSeverityTag("@severity-high: real title")).isEqualTo("real title");
@@ -469,7 +454,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void testGetSeverity() {
+    void testGetSeverity() {
         // Only a request
         assertThat(cut.getSeverity("@severity-high request")).isEqualTo("high");
 
@@ -498,14 +483,14 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void mapExecutionsToScenarios_should_match_executions_to_scenarios_if_any() {
+    void mapExecutionsToScenarios_should_match_executions_to_scenarios_if_any() {
         // GIVEN
-        final Execution execution2 = new Execution().withItem(new ItemId().withId("id2"));
-        final Execution execution3 = new Execution().withItem(new ItemId().withId("id3"));
+        final Execution execution2 = execution(itemId("id2"), null, null, null);
+        final Execution execution3 = execution(itemId("id3"), null, null, null);
         List<Execution> executions = Arrays.asList(execution2, execution3);
 
-        final NewmanScenario newmanScenario1 = new NewmanScenario().withItem(new Item().withId("id1"));
-        final NewmanScenario newmanScenario2 = new NewmanScenario().withItem(new Item().withId("id2"));
+        final NewmanScenario newmanScenario1 = newmanScenario(null, item("id1", null, null, null), null);
+        final NewmanScenario newmanScenario2 = newmanScenario(null, item("id2", null, null, null), null);
         List<NewmanScenario> newmanScenarios = Arrays.asList(newmanScenario1, newmanScenario2);
 
         // WHEN
@@ -517,14 +502,14 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void mapFailuresToScenarios_should_match_failures_to_scenarios_if_any() {
+    void mapFailuresToScenarios_should_match_failures_to_scenarios_if_any() {
         // GIVEN
-        final Failure failure2 = new Failure().withSource(new Source().withId("id2"));
-        final Failure failure3 = new Failure().withSource(new Source().withId("id3"));
+        final Failure failure2 = failure(null, null, postmanSource("id2"));
+        final Failure failure3 = failure(null, null, postmanSource("id3"));
         List<Failure> failures = Arrays.asList(failure2, failure3);
 
-        final NewmanScenario newmanScenario1 = new NewmanScenario().withItem(new Item().withId("id1"));
-        final NewmanScenario newmanScenario2 = new NewmanScenario().withItem(new Item().withId("id2"));
+        final NewmanScenario newmanScenario1 = newmanScenario(null, item("id1", null, null, null), null);
+        final NewmanScenario newmanScenario2 = newmanScenario(null, item("id2", null, null, null), null);
         List<NewmanScenario> newmanScenarios = Arrays.asList(newmanScenario1, newmanScenario2);
 
         // WHEN
@@ -538,19 +523,13 @@ public class PostmanServiceTest {
 
     @Test
     @MockitoSettings(strictness = Strictness.LENIENT)
-    public void buildScenarioContents_should_build_the_scenario_content() {
+    void buildScenarioContents_should_build_the_scenario_content() {
         // GIVEN
-        final NewmanScenario newmanScenario = new NewmanScenario()
-                .withItem(new Item()
-                        .withRequest(new Request()))
-                .withExecution(new Execution()
-                        .withResponse(new Response()
-                                .withResponseTime(12))
-                        .withAssertions(new Assertion[] {
-                                new Assertion("assertion-1"),
-                                new Assertion("assertion-2")
-                        }))
-                .withScenario(new ExecutedScenario());
+        final NewmanScenario newmanScenario = newmanScenario(new ExecutedScenario(), item(null, null, new Request(), null),
+                execution(null, null, response(0, null, null, 12, null), new Assertion[] {
+                        new Assertion("assertion-1"),
+                        new Assertion("assertion-2")
+                }));
         List<NewmanScenario> newmanScenarios = Collections.singletonList(newmanScenario);
 
         doReturn("pre_status").when(cut).getStatus(same(newmanScenario.getFailures()), eq(-100000), eq(false));
@@ -572,13 +551,9 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void buildScenarioContents_should_build_the_scenario_content_when_no_assertions_are_made() {
+    void buildScenarioContents_should_build_the_scenario_content_when_no_assertions_are_made() {
         // GIVEN
-        final NewmanScenario newmanScenario = new NewmanScenario()
-                .withItem(new Item()
-                        .withRequest(new Request()))
-                .withExecution(new Execution())
-                .withScenario(new ExecutedScenario());
+        final NewmanScenario newmanScenario = newmanScenario(new ExecutedScenario(), item(null, null, new Request(), null), new Execution());
         List<NewmanScenario> newmanScenarios = Collections.singletonList(
                 newmanScenario);
 
@@ -598,13 +573,9 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void buildScenarioContents_should_support_multi_lines_requests() {
+    void buildScenarioContents_should_support_multi_lines_requests() {
         // GIVEN
-        final NewmanScenario newmanScenario = new NewmanScenario()
-                .withItem(new Item()
-                        .withRequest(new Request()))
-                .withExecution(new Execution().withResponse(new Response().withResponseTime(42)))
-                .withScenario(new ExecutedScenario());
+        final NewmanScenario newmanScenario = newmanScenario(new ExecutedScenario(), item(null, null, new Request(), null), execution(null, null, response(0, null, null, 42, null), null));
         List<NewmanScenario> newmanScenarios = Collections.singletonList(
                 newmanScenario);
 
@@ -626,7 +597,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void getStatus_should_return_failed_when_the_requested_line_is_failed() {
+    void getStatus_should_return_failed_when_the_requested_line_is_failed() {
         // GIVEN
         Failure failure1 = new Failure();
         Failure failure2 = new Failure();
@@ -643,7 +614,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void getStatus_should_return_passed_when_the_requested_line_did_not_fail() {
+    void getStatus_should_return_passed_when_the_requested_line_did_not_fail() {
         // GIVEN
         Failure failure1 = new Failure();
         Failure failure2 = new Failure();
@@ -660,7 +631,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void getStatus_should_return_skipped_when_asked_to_override_other_statuses() {
+    void getStatus_should_return_skipped_when_asked_to_override_other_statuses() {
         // GIVEN
         List<Failure> failures = Collections.singletonList(new Failure());
 
@@ -672,7 +643,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void getStatus_should_return_passed_when_no_failure() {
+    void getStatus_should_return_passed_when_no_failure() {
         // GIVEN
         List<Failure> failures = Collections.emptyList();
 
@@ -684,7 +655,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void getStatus_should_return_passed_when_null_failure_list() {
+    void getStatus_should_return_passed_when_null_failure_list() {
         // WHEN
         final String status = cut.getStatus(null, 5, false);
 
@@ -693,14 +664,14 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void buildScenarioErrors_should_fill_list_with_generated_errors() {
+    void buildScenarioErrors_should_fill_list_with_generated_errors() {
         // GIVEN
         Failure failure11 = new Failure();
         Failure failure12 = new Failure();
         Failure failure21 = new Failure();
 
-        NewmanScenario scenario1 = new NewmanScenario().withScenario(new ExecutedScenario().withId(Long.valueOf(1)));
-        NewmanScenario scenario2 = new NewmanScenario().withScenario(new ExecutedScenario().withId(Long.valueOf(2)));
+        NewmanScenario scenario1 = newmanScenario(executedScenario(Long.valueOf(1)), null, null);
+        NewmanScenario scenario2 = newmanScenario(executedScenario(Long.valueOf(2)), null, null);
 
         scenario1.getFailures().add(failure11);
         scenario1.getFailures().add(failure12);
@@ -708,9 +679,9 @@ public class PostmanServiceTest {
 
         List<NewmanScenario> newmanScenarios = Arrays.asList(scenario1, scenario2);
 
-        Error error11 = new Error().withStepLine(11);
-        Error error12 = new Error().withStepLine(12);
-        Error error21 = new Error().withStepLine(21);
+        Error error11 = error(11);
+        Error error12 = error(12);
+        Error error21 = error(21);
 
         doReturn(error11).when(cut).toError(same(scenario1), same(failure11));
         doReturn(error12).when(cut).toError(same(scenario1), same(failure12));
@@ -728,17 +699,12 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toError_should_fill_up_error() {
+    void toError_should_fill_up_error() {
         // GIVEN
         Request request = new Request();
         final Assertion[] assertions = new Assertion[0];
-        NewmanScenario newmanScenario = new NewmanScenario()
-                .withExecution(new Execution()
-                        .withAssertions(assertions))
-                .withItem(new Item().withRequest(request));
-        Failure failure = new Failure()
-                .withError(new com.decathlon.ara.scenario.postman.bean.Error()
-                        .withStack("stack"));
+        NewmanScenario newmanScenario = newmanScenario(null, item(null, null, request, null), execution(null, null, null, assertions));
+        Failure failure = failure(postmanError(null, null, null, "stack"), null, null);
         doReturn(Integer.valueOf(42)).when(cut).toErrorLine(same(failure));
         doReturn("step").when(cut).toStep(same(newmanScenario), eq(42));
 
@@ -753,14 +719,10 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toError_should_return_name_and_message_when_null_stack() {
+    void toError_should_return_name_and_message_when_null_stack() {
         // GIVEN
-        NewmanScenario newmanScenario = new NewmanScenario()
-                .withExecution(new Execution());
-        Failure failure = new Failure()
-                .withError(new com.decathlon.ara.scenario.postman.bean.Error()
-                        .withName("name")
-                        .withMessage("message"));
+        NewmanScenario newmanScenario = newmanScenario(null, null, new Execution());
+        Failure failure = failure(postmanError("name", null, "message", null), null, null);
         doReturn(Integer.valueOf(42)).when(cut).toErrorLine(any());
         doReturn("any").when(cut).toStep(any(), eq(42));
 
@@ -772,14 +734,10 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toError_should_return_name_when_empty_stack_and_null_message() {
+    void toError_should_return_name_when_empty_stack_and_null_message() {
         // GIVEN
-        NewmanScenario newmanScenario = new NewmanScenario()
-                .withExecution(new Execution());
-        Failure failure = new Failure()
-                .withError(new com.decathlon.ara.scenario.postman.bean.Error()
-                        .withName("name")
-                        .withMessage(null));
+        NewmanScenario newmanScenario = newmanScenario(null, null, new Execution());
+        Failure failure = failure(postmanError("name", null, null, null), null, null);
         doReturn(Integer.valueOf(42)).when(cut).toErrorLine(any());
         doReturn("any").when(cut).toStep(any(), eq(42));
 
@@ -791,14 +749,10 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toError_should_return_name_when_empty_stack_and_empty_message() {
+    void toError_should_return_name_when_empty_stack_and_empty_message() {
         // GIVEN
-        NewmanScenario newmanScenario = new NewmanScenario()
-                .withExecution(new Execution());
-        Failure failure = new Failure()
-                .withError(new com.decathlon.ara.scenario.postman.bean.Error()
-                        .withName("name")
-                        .withMessage(""));
+        NewmanScenario newmanScenario = newmanScenario(null, null, new Execution());
+        Failure failure = failure(postmanError("name", null, "", null), null, null);
         doReturn(Integer.valueOf(42)).when(cut).toErrorLine(any());
         doReturn("any").when(cut).toStep(any(), eq(42));
 
@@ -810,14 +764,10 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toError_should_return_message_when_empty_stack_and_null_name() {
+    void toError_should_return_message_when_empty_stack_and_null_name() {
         // GIVEN
-        NewmanScenario newmanScenario = new NewmanScenario()
-                .withExecution(new Execution());
-        Failure failure = new Failure()
-                .withError(new com.decathlon.ara.scenario.postman.bean.Error()
-                        .withName(null)
-                        .withMessage("message"));
+        NewmanScenario newmanScenario = newmanScenario(null, null, new Execution());
+        Failure failure = failure(postmanError(null, null, "message", null), null, null);
         doReturn(Integer.valueOf(42)).when(cut).toErrorLine(any());
         doReturn("any").when(cut).toStep(any(), eq(42));
 
@@ -829,14 +779,10 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toError_should_return_message_when_empty_stack_and_empty_name() {
+    void toError_should_return_message_when_empty_stack_and_empty_name() {
         // GIVEN
-        NewmanScenario newmanScenario = new NewmanScenario()
-                .withExecution(new Execution());
-        Failure failure = new Failure()
-                .withError(new com.decathlon.ara.scenario.postman.bean.Error()
-                        .withName("")
-                        .withMessage("message"));
+        NewmanScenario newmanScenario = newmanScenario(null, null, new Execution());
+        Failure failure = failure(postmanError("", null, "message", null), null, null);
         doReturn(Integer.valueOf(42)).when(cut).toErrorLine(any());
         doReturn("any").when(cut).toStep(any(), eq(42));
 
@@ -848,14 +794,10 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toError_should_return_unknown_error_when_empty_stack_and_null_name_and_message() {
+    void toError_should_return_unknown_error_when_empty_stack_and_null_name_and_message() {
         // GIVEN
-        NewmanScenario newmanScenario = new NewmanScenario()
-                .withExecution(new Execution());
-        Failure failure = new Failure()
-                .withError(new com.decathlon.ara.scenario.postman.bean.Error()
-                        .withName(null)
-                        .withMessage(null));
+        NewmanScenario newmanScenario = newmanScenario(null, null, new Execution());
+        Failure failure = failure(postmanError(null, null, null, null), null, null);
         doReturn(Integer.valueOf(42)).when(cut).toErrorLine(any());
         doReturn("any").when(cut).toStep(any(), eq(42));
 
@@ -867,14 +809,10 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toError_should_return_unknown_error_when_empty_stack_and_empty_name_and_message() {
+    void toError_should_return_unknown_error_when_empty_stack_and_empty_name_and_message() {
         // GIVEN
-        NewmanScenario newmanScenario = new NewmanScenario()
-                .withExecution(new Execution());
-        Failure failure = new Failure()
-                .withError(new com.decathlon.ara.scenario.postman.bean.Error()
-                        .withName("")
-                        .withMessage(""));
+        NewmanScenario newmanScenario = newmanScenario(null, null, new Execution());
+        Failure failure = failure(postmanError("", null, "", null), null, null);
         doReturn(Integer.valueOf(42)).when(cut).toErrorLine(any());
         doReturn("any").when(cut).toStep(any(), eq(42));
 
@@ -886,7 +824,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toStep_should_return_pre_request_script_for_minus_100000() {
+    void toStep_should_return_pre_request_script_for_minus_100000() {
         // WHEN
         final String step = cut.toStep(null, -100000);
 
@@ -895,7 +833,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toStep_should_return_test_script_for_100000() {
+    void toStep_should_return_test_script_for_100000() {
         // WHEN
         final String step = cut.toStep(null, 100000);
 
@@ -904,16 +842,14 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toStep_should_return_the_assertion_index() {
+    void toStep_should_return_the_assertion_index() {
         // GIVEN
-        NewmanScenario newmanScenario = new NewmanScenario()
-                .withExecution(new Execution()
-                        .withAssertions(new Assertion[] {
-                                new Assertion("name0"),
-                                new Assertion("name1"),
-                                new Assertion("name2"),
-                                new Assertion("name3")
-                        }));
+        NewmanScenario newmanScenario = newmanScenario(null, null, execution(null, null, null, new Assertion[] {
+                new Assertion("name0"),
+                new Assertion("name1"),
+                new Assertion("name2"),
+                new Assertion("name3")
+        }));
 
         // WHEN
         final String step = cut.toStep(newmanScenario, 2); // Avoid testing index 0 or 1, as they are values easily answered by regressions
@@ -923,14 +859,12 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toStep_should_return_the_assertion_index_even_at_index_0() { // 0 is first index (do not confound with request line -1)
+    void toStep_should_return_the_assertion_index_even_at_index_0() { // 0 is first index (do not confound with request line -1)
         // GIVEN
-        NewmanScenario newmanScenario = new NewmanScenario()
-                .withExecution(new Execution()
-                        .withAssertions(new Assertion[] {
-                                new Assertion("name0"),
-                                new Assertion("name1")
-                        }));
+        NewmanScenario newmanScenario = newmanScenario(null, null, execution(null, null, null, new Assertion[] {
+                new Assertion("name0"),
+                new Assertion("name1"),
+        }));
 
         // WHEN
         final String step = cut.toStep(newmanScenario, 0); // Avoid testing index 0 or 1, as they are values easily answered by regressions
@@ -940,14 +874,10 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toStep_should_return_request_step_when_requesting_an_index_with_null_assertions() {
+    void toStep_should_return_request_step_when_requesting_an_index_with_null_assertions() {
         // GIVEN
         final Request request = new Request();
-        final NewmanScenario newmanScenario = new NewmanScenario()
-                .withItem(new Item()
-                        .withRequest(request))
-                .withExecution(new Execution()
-                        .withAssertions(null));
+        final NewmanScenario newmanScenario = newmanScenario(null, item(null, null, request, null), new Execution());
         doReturn("request_step").when(cut).buildRequestStep(eq(request));
 
         // WHEN
@@ -958,14 +888,10 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toStep_should_return_request_step_when_requesting_and_index_not_in_assertions() {
+    void toStep_should_return_request_step_when_requesting_and_index_not_in_assertions() {
         // GIVEN
         final Request request = new Request();
-        final NewmanScenario newmanScenario = new NewmanScenario()
-                .withItem(new Item()
-                        .withRequest(request))
-                .withExecution(new Execution()
-                        .withAssertions(new Assertion[0]));
+        final NewmanScenario newmanScenario = newmanScenario(null, item(null, null, request, null), execution(null, null, null, new Assertion[0]));
         doReturn("request_step").when(cut).buildRequestStep(eq(request));
 
         // WHEN
@@ -976,16 +902,12 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toStep_should_return_request_step_when_requesting_request_line() {
+    void toStep_should_return_request_step_when_requesting_request_line() {
         // GIVEN
         final Request request = new Request();
-        final NewmanScenario newmanScenario = new NewmanScenario()
-                .withItem(new Item()
-                        .withRequest(request))
-                .withExecution(new Execution()
-                        .withAssertions(new Assertion[] {
-                                new Assertion()
-                        }));
+        final NewmanScenario newmanScenario = newmanScenario(null, item(null, null, request, null), execution(null, null, null, new Assertion[] {
+                new Assertion()
+        }));
         doReturn("request_step").when(cut).buildRequestStep(eq(request));
 
         // WHEN
@@ -996,9 +918,9 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toErrorLine_should_return_minus_100000_for_pre_request_script() {
+    void toErrorLine_should_return_minus_100000_for_pre_request_script() {
         // GIVEN
-        Failure failure = new Failure().withAt("prerequest-script");
+        Failure failure = failure(null, "prerequest-script", null);
 
         // WHEN
         final int line = cut.toErrorLine(failure);
@@ -1008,9 +930,9 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toErrorLine_should_return_100000_for_test_script() {
+    void toErrorLine_should_return_100000_for_test_script() {
         // GIVEN
-        Failure failure = new Failure().withAt("test-script");
+        Failure failure = failure(null, "test-script", null);
 
         // WHEN
         final int line = cut.toErrorLine(failure);
@@ -1020,9 +942,9 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toErrorLine_should_return_request_line_for_null_error_index() {
+    void toErrorLine_should_return_request_line_for_null_error_index() {
         // GIVEN
-        Failure failure = new Failure().withError(new com.decathlon.ara.scenario.postman.bean.Error());
+        Failure failure = failure(postmanError(null, null, null, null), null, null);
 
         // WHEN
         final int line = cut.toErrorLine(failure);
@@ -1032,9 +954,9 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toErrorLine_should_return_error_index_when_present() {
+    void toErrorLine_should_return_error_index_when_present() {
         // GIVEN
-        Failure failure = new Failure().withError(new com.decathlon.ara.scenario.postman.bean.Error().withIndex(Integer.valueOf(5)));
+        Failure failure = failure(postmanError(null, Integer.valueOf(5), null, null), null, null);
 
         // WHEN
         final int line = cut.toErrorLine(failure);
@@ -1044,12 +966,10 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void buildRequestStep_should_return_method_and_url() {
+    void buildRequestStep_should_return_method_and_url() {
         // GIVEN
         Url url = new Url();
-        Request request = new Request()
-                .withMethod("METHOD")
-                .withUrl(url);
+        Request request = request(url, null, "METHOD", null);
         doReturn("URL").when(cut).toUrlString(same(url));
 
         // WHEN
@@ -1060,15 +980,10 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toUrlString_should_append_all_url_fields() {
+    void toUrlString_should_append_all_url_fields() {
         // GIVEN
         final KeyValue[] query = new KeyValue[0];
-        Url url = new Url()
-                .withProtocol("protocol")
-                .withHost(new String[] { "the", "real", "host" })
-                .withPort("port")
-                .withPath(new String[] { "the", "real", "path" })
-                .withQuery(query);
+        Url url = url("protocol", "port", new String[] { "the", "real", "path" }, new String[] { "the", "real", "host" }, query);
         doReturn("?query=string").when(cut).toQueryString(same(query));
 
         // WHEN
@@ -1079,13 +994,12 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toUrlString_should_not_append_missing_optional_fields() {
+    void toUrlString_should_not_append_missing_optional_fields() {
         // GIVEN
-        Url url = new Url()
-                .withProtocol("protocol")
-                .withHost(new String[] { "host" })
-                .withPort(null) // Postman does not put the port if not filled
-                .withPath(NO_PARENT); // Trying empty value: postman sometimes use this
+        Url url = url("protocol",
+                null, // Postman does not put the port if not filled
+                NO_PARENT, // Trying empty value: postman sometimes use this
+                new String[] { "host" }, null);
         doReturn("").when(cut).toQueryString(any());
 
         // WHEN
@@ -1096,7 +1010,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toUrlString_should_not_crash_when_no_url() {
+    void toUrlString_should_not_crash_when_no_url() {
         // GIVEN
         Url url = new Url(); // When user provides no URL, all fields are null, except "query": it's an empty array
         doReturn("").when(cut).toQueryString(any());
@@ -1109,10 +1023,9 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toUrlString_should_return_host_when_only_host() {
+    void toUrlString_should_return_host_when_only_host() {
         // GIVEN
-        Url url = new Url()
-                .withHost(new String[] { "host" });
+        Url url = url(null, null, null, new String[] { "host" }, null);
         doReturn("").when(cut).toQueryString(any());
 
         // WHEN
@@ -1123,13 +1036,9 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toUrlString_should_not_append_port_if_empty() {
+    void toUrlString_should_not_append_port_if_empty() {
         // GIVEN
-        Url url = new Url()
-                .withProtocol("protocol")
-                .withHost(new String[] { "host" })
-                .withPort("")
-                .withPath(new String[] { "path" });
+        Url url = url("protocol", "", new String[] { "path" }, new String[] { "host" }, null);
         doReturn("").when(cut).toQueryString(any());
 
         // WHEN
@@ -1140,13 +1049,9 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toUrlString_should_not_append_port_if_80() {
+    void toUrlString_should_not_append_port_if_80() {
         // GIVEN
-        Url url = new Url()
-                .withProtocol("protocol")
-                .withHost(new String[] { "host" })
-                .withPort("80")
-                .withPath(new String[] { "path" });
+        Url url = url("protocol", "80", new String[] { "path" }, new String[] { "host" }, null);
         doReturn("").when(cut).toQueryString(any());
 
         // WHEN
@@ -1157,7 +1062,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toQueryString_should_return_empty_string_on_null_query() {
+    void toQueryString_should_return_empty_string_on_null_query() {
         // WHEN
         final String queryString = cut.toQueryString(null);
 
@@ -1166,7 +1071,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toQueryString_should_return_empty_string_on_empty_query() {
+    void toQueryString_should_return_empty_string_on_empty_query() {
         // GIVEN
         KeyValue[] query = new KeyValue[0];
 
@@ -1178,12 +1083,12 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toQueryString_should_concatenate_keys_and_values_as_is_because_postman_already_percent_encode_them() {
+    void toQueryString_should_concatenate_keys_and_values_as_is_because_postman_already_percent_encode_them() {
         // GIVEN
         KeyValue[] query = new KeyValue[] {
-                new KeyValue().withKey("key1").withValue("value1=%26encoded"),
-                new KeyValue().withKey("key2").withValue("value2"),
-                new KeyValue().withKey("key3").withValue("value3")
+                keyValue("key1", "value1=%26encoded"),
+                keyValue("key2", "value2"),
+                keyValue("key3", "value3"),
         };
 
         // WHEN
@@ -1194,45 +1099,37 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void postProcess_should_work() {
+    void postProcess_should_work() {
         // GIVEN
-        com.decathlon.ara.domain.Source source = new com.decathlon.ara.domain.Source()
-                .withPostmanCountryRootFolders(true);
+        com.decathlon.ara.domain.Source source = source(true);
 
-        Run run = new Run()
-                .withType(new Type().withSource(source))
-                .withJobUrl("run-url/");
+        Type type = new Type();
+        type.setSource(source);
+        Run run = new RunBuilder()
+                .withType(type)
+                .withJobUrl("run-url/").build();
 
         final Item[] items = new Item[0];
         final List<Execution> executions = Collections.emptyList();
         final List<Failure> failures = Collections.emptyList();
-        NewmanParsingResult result = new NewmanParsingResult()
-                .withCollection(new Collection()
-                        .withItem(items)
-                        .withInfo(new Info()
-                                .withName("collection-name")))
-                .withExecutions(executions)
-                .withFailures(failures);
+        Info info = new Info();
+        TestUtil.setField(info, "name", "collection-name");
+        Collection collection = new Collection();
+        TestUtil.setField(collection, "item", items);
+        TestUtil.setField(collection, "info", info);
+        NewmanParsingResult result = newmanParsingResult(collection, executions, failures);
 
         final NewmanScenario newmanScenarioWithoutExecution = new NewmanScenario();
         Stream stream = new Stream();
         List<NewmanScenario> newmanScenarios = new ArrayList<>();
         newmanScenarios.add(newmanScenarioWithoutExecution);
 
-        final Response response1 = new Response()
-                .withStream(stream);
-        final NewmanScenario newmanScenarioWithExecution = new NewmanScenario()
-                .withExecution(new Execution()
-                        .withResponse(response1))
-                .withScenario(new ExecutedScenario());
+        final Response response1 = response(0, null, stream, 0, null);
+        final NewmanScenario newmanScenarioWithExecution = newmanScenario(new ExecutedScenario(), null, execution(null, null, response1, null));
         newmanScenarios.add(newmanScenarioWithExecution);
 
-        final Response response2 = new Response()
-                .withStream(stream);
-        final NewmanScenario newmanScenarioWithExecutionAndFailure = new NewmanScenario()
-                .withExecution(new Execution()
-                        .withResponse(response2))
-                .withScenario(new ExecutedScenario());
+        final Response response2 = response(0, null, stream, 0, null);
+        final NewmanScenario newmanScenarioWithExecutionAndFailure = newmanScenario(new ExecutedScenario(), null, execution(null, null, response2, null));
         newmanScenarioWithExecutionAndFailure.getFailures().add(new Failure());
         newmanScenarios.add(newmanScenarioWithExecutionAndFailure);
 
@@ -1248,7 +1145,8 @@ public class PostmanServiceTest {
         doReturn("collection-file-name").when(cut).toCollectionFileName(source, newmanReportPath);
         doReturn("http-log-url-1").when(cut).uploadHttpLog(same(newmanScenarioWithExecution));
         doReturn("http-log-url-2").when(cut).uploadHttpLog(same(newmanScenarioWithExecutionAndFailure));
-        doReturn(Optional.of(Instant.EPOCH)).when(cut).getStartDateTime(eq(response1));
+        doReturn(Optional.of(Instant.EPOCH)).when(cut).getStartDateTime(response1);
+        doReturn(Optional.of(Instant.EPOCH)).when(cut).getStartDateTime(response2);
 
         // WHEN
         final List<ExecutedScenario> executedScenarios = cut.postProcess(run, result, newmanReportPath, requestPosition);
@@ -1270,29 +1168,31 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void deleteTempFile_should_not_crash_if_response_is_null() {
+    void deleteTempFile_should_not_crash_if_response_is_null() {
         // WHEN
-        cut.deleteTempFile(null);
+        Assertions.assertDoesNotThrow(() -> cut.deleteTempFile(null));
     }
 
     @Test
-    public void deleteTempFile_should_not_crash_if_response_stream_is_null() {
+    void deleteTempFile_should_not_crash_if_response_stream_is_null() {
         // WHEN
-        cut.deleteTempFile(new Response());
+        Assertions.assertDoesNotThrow(() -> cut.deleteTempFile(new Response()));
     }
 
     @Test
-    public void deleteTempFile_should_not_crash_if_tempFile_is_null() {
+    void deleteTempFile_should_not_crash_if_tempFile_is_null() {
         // WHEN
-        cut.deleteTempFile(new Response().withStream(new Stream()));
+        Assertions.assertDoesNotThrow(() -> cut.deleteTempFile(response(0, null, new Stream(), 0, null)));
     }
 
     @Test
-    public void deleteTempFile_should_delete_the_temporary_file_and_set_it_to_null() throws IOException {
+    void deleteTempFile_should_delete_the_temporary_file_and_set_it_to_null() throws IOException {
         // GIVEN
         File tempFile = File.createTempFile("ara_temp_unit_test_file_", ".bin");
         tempFile.deleteOnExit();
-        Response response = new Response().withStream(new Stream().withTempFile(tempFile));
+        Stream stream = new Stream();
+        stream.setTempFile(tempFile);
+        Response response = response(0, null, stream, 0, null);
 
         try {
             // WHEN
@@ -1307,7 +1207,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void deleteTempFiles_should_so_nothing_on_null_executions() {
+    void deleteTempFiles_should_so_nothing_on_null_executions() {
         // GIVEN
         NewmanParsingResult newmanParsingResult = new NewmanParsingResult();
 
@@ -1319,14 +1219,13 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void deleteTempFiles_should_delete_all_files() {
+    void deleteTempFiles_should_delete_all_files() {
         // GIVEN
         final Response response1 = new Response();
         final Response response2 = new Response();
-        NewmanParsingResult newmanParsingResult = new NewmanParsingResult()
-                .withExecutions(Arrays.asList(
-                        new Execution().withResponse(response1),
-                        new Execution().withResponse(response2)));
+        NewmanParsingResult newmanParsingResult = newmanParsingResult(null, Arrays.asList(
+                execution(null, null, response1, null),
+                execution(null, null, response2, null)), null);
 
         ArgumentCaptor<Response> argument = ArgumentCaptor.forClass(Response.class);
         doNothing().when(cut).deleteTempFile(argument.capture());
@@ -1339,7 +1238,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void uploadHttpLog_should_do_nothing_and_return_null_on_empty_failures() {
+    void uploadHttpLog_should_do_nothing_and_return_null_on_empty_failures() {
         // GIVEN
         NewmanScenario newmanScenario = new NewmanScenario(); // Empty failures by default
 
@@ -1353,11 +1252,9 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void uploadHttpLog_should_upload_generated_html_and_return_uploaded_url_when_there_are_failures() {
+    void uploadHttpLog_should_upload_generated_html_and_return_uploaded_url_when_there_are_failures() {
         // GIVEN
-        NewmanScenario newmanScenario = new NewmanScenario()
-                .withExecution(new Execution()
-                        .withResponse(new Response()));
+        NewmanScenario newmanScenario = newmanScenario(null, null, execution(null, null, new Response(), null));
         newmanScenario.getFailures().add(new Failure());
         doReturn("html").when(cut).generateHttpLogHtml(same(newmanScenario));
         when(assetService.saveHttpLogs("html")).thenReturn("url");
@@ -1371,12 +1268,10 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void uploadHttpLog_should_delete_temp_file_after_upload() {
+    void uploadHttpLog_should_delete_temp_file_after_upload() {
         // GIVEN
         final Response response = new Response();
-        NewmanScenario newmanScenario = new NewmanScenario()
-                .withExecution(new Execution()
-                        .withResponse(response));
+        NewmanScenario newmanScenario = newmanScenario(null, null, execution(null, null, response, null));
         newmanScenario.getFailures().add(new Failure());
         doReturn("any").when(cut).generateHttpLogHtml(any());
         when(assetService.saveHttpLogs(any())).thenReturn("any");
@@ -1390,24 +1285,15 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void generateHttpLogHtml_should_return_the_generated_html() {
+    void generateHttpLogHtml_should_return_the_generated_html() {
         // GIVEN
         KeyValue[] requestHeaders = new KeyValue[0];
         KeyValue[] responseHeaders = new KeyValue[0];
         final Body requestBody = new Body();
         final Stream responseStream = new Stream();
-        Request request = new Request()
-                .withHeader(requestHeaders)
-                .withBody(requestBody);
-        Response response = new Response()
-                .withCode(200)
-                .withStatus("<status>")
-                .withHeader(responseHeaders)
-                .withStream(responseStream);
-        NewmanScenario newmanScenario = new NewmanScenario()
-                .withExecution(new Execution()
-                        .withRequest(request)
-                        .withResponse(response));
+        Request request = request(null, requestHeaders, null, requestBody);
+        Response response = response(200, "<status>", responseStream, 0l, responseHeaders);
+        NewmanScenario newmanScenario = newmanScenario(null, null, execution(null, request, response, null));
         doReturn("<request step>").when(cut).buildRequestStep(same(request));
         doAnswer(invocation -> {
             StringBuilder builder = (StringBuilder) invocation.getArguments()[0];
@@ -1458,17 +1344,12 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void generateHttpLogHtml_should_return_the_generated_html_with_an_indication_when_null_response() {
+    void generateHttpLogHtml_should_return_the_generated_html_with_an_indication_when_null_response() {
         // GIVEN
         KeyValue[] requestHeaders = new KeyValue[0];
         final Body requestBody = new Body();
-        Request request = new Request()
-                .withHeader(requestHeaders)
-                .withBody(requestBody);
-        NewmanScenario newmanScenario = new NewmanScenario()
-                .withExecution(new Execution()
-                        .withRequest(request)
-                        .withResponse(null));
+        Request request = request(null, requestHeaders, null, requestBody);
+        NewmanScenario newmanScenario = newmanScenario(null, null, execution(null, request, null, null));
         doReturn("<request step>").when(cut).buildRequestStep(same(request));
         doAnswer(invocation -> {
             StringBuilder builder = (StringBuilder) invocation.getArguments()[0];
@@ -1506,10 +1387,10 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void getContentType_should_return_null_when_not_found() {
+    void getContentType_should_return_null_when_not_found() {
         // GIVEN
         KeyValue[] headers = new KeyValue[] {
-                new KeyValue().withKey("key").withValue("value")
+                keyValue("key", "value")
         };
 
         // WHEN
@@ -1520,12 +1401,12 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void getContentType_should_return_the_content_type() {
+    void getContentType_should_return_the_content_type() {
         // GIVEN
         KeyValue[] headers = new KeyValue[] {
-                new KeyValue().withKey("key1").withValue("value1"),
-                new KeyValue().withKey("Content-Type").withValue("the-content-type"),
-                new KeyValue().withKey("key3").withValue("value3")
+                keyValue("key1", "value1"),
+                keyValue("Content-Type", "the-content-type"),
+                keyValue("key3", "value3")
         };
 
         // WHEN
@@ -1536,7 +1417,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void appendKeyValues_should_append_nothing_on_null_keyValues() {
+    void appendKeyValues_should_append_nothing_on_null_keyValues() {
         // GIVEN
         StringBuilder html = new StringBuilder();
 
@@ -1548,7 +1429,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void appendKeyValues_should_append_nothing_on_empty_keyValues() {
+    void appendKeyValues_should_append_nothing_on_empty_keyValues() {
         // GIVEN
         StringBuilder html = new StringBuilder();
 
@@ -1560,12 +1441,12 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void appendKeyValues_should_append_escaped_keyValues() {
+    void appendKeyValues_should_append_escaped_keyValues() {
         // GIVEN
         StringBuilder html = new StringBuilder();
         KeyValue[] keyValues = new KeyValue[] {
-                new KeyValue().withKey("key1 with <html>").withValue("value1"),
-                new KeyValue().withKey("key2").withValue("value2 with <html>")
+                keyValue("key1 with <html>", "value1"),
+                keyValue("key2", "value2 with <html>")
         };
 
         // WHEN
@@ -1579,7 +1460,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void appendRequestBody_should_do_nothing_on_null_body() {
+    void appendRequestBody_should_do_nothing_on_null_body() {
         // GIVEN
         StringBuilder html = new StringBuilder();
 
@@ -1591,7 +1472,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void appendRequestBody_should_do_nothing_on_null_mode() {
+    void appendRequestBody_should_do_nothing_on_null_mode() {
         // GIVEN
         StringBuilder html = new StringBuilder();
         Body body = new Body();
@@ -1604,11 +1485,11 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void appendRequestBody_should_append_form_data() {
+    void appendRequestBody_should_append_form_data() {
         // GIVEN
         StringBuilder html = new StringBuilder();
         final KeyValue[] formData = new KeyValue[0];
-        Body body = new Body().withMode("formdata").withFormData(formData);
+        Body body = body("formdata", formData, null, null);
         doAnswer(invocation -> {
             StringBuilder builder = (StringBuilder) invocation.getArguments()[0];
             builder.append("prettyFormData");
@@ -1623,11 +1504,11 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void appendRequestBody_should_append_url_encoded() {
+    void appendRequestBody_should_append_url_encoded() {
         // GIVEN
         StringBuilder html = new StringBuilder();
         final KeyValue[] urlEncoded = new KeyValue[0];
-        Body body = new Body().withMode("urlencoded").withUrlEncoded(urlEncoded);
+        Body body = body("urlencoded", null, urlEncoded, null);
         doAnswer(invocation -> {
             StringBuilder builder = (StringBuilder) invocation.getArguments()[0];
             builder.append("prettyUrlEncoded");
@@ -1642,10 +1523,10 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void appendRequestBody_should_append_pretty_raw() {
+    void appendRequestBody_should_append_pretty_raw() {
         // GIVEN
         StringBuilder html = new StringBuilder();
-        Body body = new Body().withMode("raw").withRaw("<html>");
+        Body body = body("raw", null, null, "<html>");
 
         // WHEN
         cut.appendRequestBody(html, body);
@@ -1655,10 +1536,10 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void appendRequestBody_should_append_error_for_unsupported_file() {
+    void appendRequestBody_should_append_error_for_unsupported_file() {
         // GIVEN
         StringBuilder html = new StringBuilder();
-        Body body = new Body().withMode("file");
+        Body body = body("file", null, null, null);
 
         // WHEN
         cut.appendRequestBody(html, body);
@@ -1669,10 +1550,10 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void appendRequestBody_should_append_error_for_unknown_mode() {
+    void appendRequestBody_should_append_error_for_unknown_mode() {
         // GIVEN
         StringBuilder html = new StringBuilder();
-        Body body = new Body().withMode("unknown");
+        Body body = body("unknown", null, null, null);
 
         // WHEN
         cut.appendRequestBody(html, body);
@@ -1683,7 +1564,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void appendResponseBody_should_append_nothing_when_null_stream_file() {
+    void appendResponseBody_should_append_nothing_when_null_stream_file() {
         // GIVEN
         StringBuilder html = new StringBuilder();
 
@@ -1695,7 +1576,7 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void appendResponseBody_should_append_pretty_file_content() throws IOException {
+    void appendResponseBody_should_append_pretty_file_content() throws IOException {
         // GIVEN
         File tempFile = File.createTempFile("ara_temp_unit_test_file_", ".bin");
         tempFile.deleteOnExit();
@@ -1703,7 +1584,8 @@ public class PostmanServiceTest {
         try {
             StringBuilder html = new StringBuilder();
             FileUtils.writeStringToFile(tempFile, "content", StandardCharsets.UTF_8);
-            Stream stream = new Stream().withTempFile(tempFile);
+            Stream stream = new Stream();
+            stream.setTempFile(tempFile);
             doReturn("<p>pretty</p>").when(cut).prettyPrint(eq("content"), eq("application/json"));
 
             // WHEN
@@ -1717,10 +1599,11 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void appendResponseBody_should_append_error_message_when_file_read_error() {
+    void appendResponseBody_should_append_error_message_when_file_read_error() {
         // GIVEN
         StringBuilder html = new StringBuilder();
-        Stream stream = new Stream().withTempFile(new File("nonexistent"));
+        Stream stream = new Stream();
+        stream.setTempFile(new File("nonexistent"));
 
         // WHEN
         cut.appendResponseBody(html, stream, "any");
@@ -1732,70 +1615,70 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void prettyPrint_should_indent_application_json() {
+    void prettyPrint_should_indent_application_json() {
         assertThat(cut.prettyPrint(JSON_RAW, "application/json")).isEqualTo(JSON_INDENTED);
     }
 
     @Test
-    public void prettyPrint_should_indent_application_json_with_charset() {
+    void prettyPrint_should_indent_application_json_with_charset() {
         assertThat(cut.prettyPrint(JSON_RAW, "application/json; charset=iso-8859-1")).isEqualTo(JSON_INDENTED);
     }
 
     @Test
-    public void prettyPrint_should_not_indent_other_mime_types() {
+    void prettyPrint_should_not_indent_other_mime_types() {
         assertThat(cut.prettyPrint(JSON_RAW, "other/mime-type")).isEqualTo(JSON_RAW);
     }
 
     @Test
-    public void prettyPrint_should_not_indent_malformed_json() {
+    void prettyPrint_should_not_indent_malformed_json() {
         assertThat(cut.prettyPrint("{malformed", "application/json")).isEqualTo("{malformed");
     }
 
     @Test
-    public void testEscapeHtml() {
+    void testEscapeHtml() {
         assertThat(cut.escapeHtml("<p class=\"any\">&amp; foo'bar")).isEqualTo("&lt;p class=&quot;any&quot;&gt;&amp;amp; foo&apos;bar");
     }
 
     @Test
-    public void testGetStartDateTime_should_return_the_parsed_date_for_utc() {
+    void testGetStartDateTime_should_return_the_parsed_date_for_utc() {
         // GIVEN
         final KeyValue[] headers = {
-                new KeyValue("Some", "value"),
-                new KeyValue("Date", "Wed, 21 Oct 2015 07:28:01 GMT"),
-                new KeyValue("Other", "value")
+                keyValue("Some", "value"),
+                keyValue("Date", "Wed, 21 Oct 2015 07:28:01 GMT"),
+                keyValue("Other", "value")
         };
         Calendar expected = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         expected.set(2015, Calendar.OCTOBER, 21, 7, 28, 1);
         expected.set(Calendar.MILLISECOND, 0);
 
         // WHEN
-        final Optional<Instant> startDateTime = cut.getStartDateTime(new Response().withHeader(headers));
+        final Optional<Instant> startDateTime = cut.getStartDateTime(response(0, null, null, 0, headers));
 
         // THEN
         assertThat(startDateTime.orElse(null)).isEqualTo(expected.toInstant());
     }
 
     @Test
-    public void testGetStartDateTime_should_return_the_parsed_date_for_other_time_zone() {
+    void testGetStartDateTime_should_return_the_parsed_date_for_other_time_zone() {
         // GIVEN
         final KeyValue[] headers = {
-                new KeyValue("Some", "value"),
-                new KeyValue("Date", "Wed, 21 Oct 2015 07:28:01 -0500"), // CDT
-                new KeyValue("Other", "value")
+                keyValue("Some", "value"),
+                keyValue("Date", "Wed, 21 Oct 2015 07:28:01 -0500"), // CDT
+                keyValue("Other", "value")
         };
         Calendar expected = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         expected.set(2015, Calendar.OCTOBER, 21, 7 + 5, 28, 1);
         expected.set(Calendar.MILLISECOND, 0);
 
         // WHEN
-        final Optional<Instant> startDateTime = cut.getStartDateTime(new Response().withHeader(headers));
+        final Optional<Instant> startDateTime = cut.getStartDateTime(response(0, null, null, 0, headers));
 
         // THEN
         assertThat(startDateTime.orElse(null)).isEqualTo(expected.toInstant());
     }
 
     @Test
-    public void testGetStartDateTime_should_return_empty_if_null_response() {
+    void testGetStartDateTime_should_return_empty_if_null_response() {
         // GIVEN
         final Response response = null;
 
@@ -1807,33 +1690,32 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void testGetStartDateTime_should_return_empty_if_none() {
+    void testGetStartDateTime_should_return_empty_if_none() {
         // GIVEN
-        final KeyValue[] headers = { new KeyValue("No", "date") };
+        final KeyValue[] headers = { keyValue("No", "date") };
 
         // WHEN
-        final Optional<Instant> startDateTime = cut.getStartDateTime(new Response().withHeader(headers));
+        final Optional<Instant> startDateTime = cut.getStartDateTime(response(0, null, null, 0, headers));
 
         // THEN
         assertThat(startDateTime).isEmpty();
     }
 
     @Test
-    public void testGetStartDateTime_should_return_empty_if_not_able_to_parse() {
+    void testGetStartDateTime_should_return_empty_if_not_able_to_parse() {
         // GIVEN
-        final KeyValue[] headers = { new KeyValue("Date", "not able to parse") };
+        final KeyValue[] headers = { keyValue("Date", "not able to parse") };
 
         // WHEN
-        final Optional<Instant> startDateTime = cut.getStartDateTime(new Response().withHeader(headers));
+        final Optional<Instant> startDateTime = cut.getStartDateTime(response(0, null, null, 0, headers));
 
         // THEN
         assertThat(startDateTime).isEmpty();
     }
 
     @Test
-    public void toCollectionFileName_ShouldRemoveCountryCodes_WhenSourceRequiresIt() {
-        com.decathlon.ara.domain.Source sourceWithCountries = new com.decathlon.ara.domain.Source()
-                .withPostmanCountryRootFolders(true);
+    void toCollectionFileName_ShouldRemoveCountryCodes_WhenSourceRequiresIt() {
+        com.decathlon.ara.domain.Source sourceWithCountries = source(true);
 
         // With no countries
         assertThat(cut.toCollectionFileName(sourceWithCountries, "file.json")).isEqualTo("file.json");
@@ -1859,9 +1741,8 @@ public class PostmanServiceTest {
     }
 
     @Test
-    public void toCollectionFileName_ShouldNotRemoveCountryCodes_WhenSourceDoesNotRequireIt() {
-        com.decathlon.ara.domain.Source sourceWithoutCountries = new com.decathlon.ara.domain.Source()
-                .withPostmanCountryRootFolders(false);
+    void toCollectionFileName_ShouldNotRemoveCountryCodes_WhenSourceDoesNotRequireIt() {
+        com.decathlon.ara.domain.Source sourceWithoutCountries = source(false);
 
         // With no countries
         assertThat(cut.toCollectionFileName(sourceWithoutCountries, "file.json")).isEqualTo("file.json");
@@ -1876,6 +1757,140 @@ public class PostmanServiceTest {
 
         // Keep the postman_collection suffix in the feature_file (not in the feature_name, so make sure it will stay like that)
         assertThat(cut.toCollectionFileName(sourceWithoutCountries, "file.postman_collection.json")).isEqualTo("file.postman_collection.json");
+    }
+
+    private ItemId itemId(String id) {
+        ItemId itemId = new ItemId();
+        TestUtil.setField(itemId, "id", id);
+        return itemId;
+    }
+
+    private Request request(Url url, KeyValue[] header, String method, Body body) {
+        Request request = new Request();
+        TestUtil.setField(request, "url", url);
+        TestUtil.setField(request, "header", header);
+        TestUtil.setField(request, "method", method);
+        TestUtil.setField(request, "body", body);
+        return request;
+    }
+
+    private Stream stream(byte[] data, File tempFile) {
+        Stream stream = new Stream();
+        stream.setData(data);
+        stream.setTempFile(tempFile);
+        return stream;
+    }
+
+    private Response response(int code, String status, Stream stream, long responseTime, KeyValue[] header) {
+        Response response = new Response();
+        TestUtil.setField(response, "code", code);
+        TestUtil.setField(response, "status", status);
+        TestUtil.setField(response, "stream", stream);
+        TestUtil.setField(response, "responseTime", responseTime);
+        TestUtil.setField(response, "header", header);
+        return response;
+    }
+
+    private Execution execution(ItemId item, Request request, Response response, Assertion[] assertions) {
+        Execution execution = new Execution();
+        TestUtil.setField(execution, "item", item);
+        TestUtil.setField(execution, "request", request);
+        TestUtil.setField(execution, "response", response);
+        TestUtil.setField(execution, "assertions", assertions);
+        return execution;
+    }
+
+    private Item item(String id, String name, Request request, Item[] children) {
+        Item item = new Item();
+        TestUtil.setField(item, "id", id);
+        TestUtil.setField(item, "name", name);
+        TestUtil.setField(item, "request", request);
+        TestUtil.setField(item, "children", children);
+        return item;
+    }
+
+    private NewmanScenario newmanScenario(ExecutedScenario scenario, Item item, Execution execution) {
+        NewmanScenario newmanScenario = new NewmanScenario();
+        newmanScenario.setScenario(scenario);
+        newmanScenario.setItem(item);
+        newmanScenario.setExecution(execution);
+        return newmanScenario;
+    }
+
+    private Source postmanSource(String id) {
+        Source source = new Source();
+        TestUtil.setField(source, "id", id);
+        return source;
+    }
+
+    private Failure failure(com.decathlon.ara.scenario.postman.bean.Error error, String at, Source source) {
+        Failure failure = new Failure();
+        TestUtil.setField(failure, "error", error);
+        TestUtil.setField(failure, "at", at);
+        TestUtil.setField(failure, "source", source);
+        return failure;
+    }
+
+    private ExecutedScenario executedScenario(Long id) {
+        ExecutedScenario executedScenario = new ExecutedScenario();
+        TestUtil.setField(executedScenario, "id", id);
+        return executedScenario;
+    }
+
+    private com.decathlon.ara.scenario.postman.bean.Error postmanError(String name, Integer index, String message, String stack) {
+        com.decathlon.ara.scenario.postman.bean.Error error = new com.decathlon.ara.scenario.postman.bean.Error();
+        TestUtil.setField(error, "name", name);
+        TestUtil.setField(error, "index", index);
+        TestUtil.setField(error, "message", message);
+        TestUtil.setField(error, "stack", stack);
+        return error;
+    }
+
+    private Error error(int stepLine) {
+        Error error = new Error();
+        error.setStepLine(stepLine);
+        return error;
+    }
+
+    private Url url(String protocol, String port, String[] path, String[] host, KeyValue[] query) {
+        Url url = new Url();
+        TestUtil.setField(url, "protocol", protocol);
+        TestUtil.setField(url, "port", port);
+        TestUtil.setField(url, "path", path);
+        TestUtil.setField(url, "host", host);
+        TestUtil.setField(url, "query", query);
+        return url;
+
+    }
+
+    private KeyValue keyValue(String key, String value) {
+        KeyValue keyValue = new KeyValue();
+        TestUtil.setField(keyValue, "key", key);
+        TestUtil.setField(keyValue, "value", value);
+        return keyValue;
+    }
+
+    private com.decathlon.ara.domain.Source source(boolean postmanCountryRootFolders) {
+        com.decathlon.ara.domain.Source source = new com.decathlon.ara.domain.Source();
+        TestUtil.setField(source, "postmanCountryRootFolders", postmanCountryRootFolders);
+        return source;
+    }
+
+    private Body body(String mode, KeyValue[] formData, KeyValue[] urlEncoded, String raw) {
+        Body body = new Body();
+        TestUtil.setField(body, "mode", mode);
+        TestUtil.setField(body, "formData", formData);
+        TestUtil.setField(body, "urlEncoded", urlEncoded);
+        TestUtil.setField(body, "raw", raw);
+        return body;
+    }
+
+    private NewmanParsingResult newmanParsingResult(Collection collection, List<Execution> executions, List<Failure> failures) {
+        NewmanParsingResult newmanParsingResult = new NewmanParsingResult();
+        newmanParsingResult.setCollection(collection);
+        newmanParsingResult.setExecutions(executions);
+        newmanParsingResult.setFailures(failures);
+        return newmanParsingResult;
     }
 
 }

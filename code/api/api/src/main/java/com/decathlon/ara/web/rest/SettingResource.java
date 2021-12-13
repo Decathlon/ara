@@ -17,6 +17,21 @@
 
 package com.decathlon.ara.web.rest;
 
+import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+
+import java.util.List;
+
+import javax.validation.Valid;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
@@ -29,38 +44,31 @@ import com.decathlon.ara.service.dto.setting.SettingValueDTO;
 import com.decathlon.ara.service.dto.setting.TechnologySettingGroupDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.util.List;
-
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 
 /**
  * REST controller for managing Settings.
  */
-@Slf4j
 @RestController
 @RequestMapping(SettingResource.PATH)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SettingResource {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SettingResource.class);
 
     private static final String NAME = Entities.SETTING;
     static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
 
-    @NonNull
     private final SettingService settingService;
 
-    @NonNull
     private final ProjectService projectService;
 
-    @NonNull
     private final TechnologySettingService technologySettingService;
+
+    public SettingResource(SettingService settingService, ProjectService projectService,
+            TechnologySettingService technologySettingService) {
+        this.settingService = settingService;
+        this.projectService = projectService;
+        this.technologySettingService = technologySettingService;
+    }
 
     /**
      * PUT to update an existing entity.
@@ -131,11 +139,10 @@ public class SettingResource {
      */
     @PutMapping("/{code:.+}/technology/{technology}")
     public List<TechnologySettingGroupDTO> update(
-            @PathVariable String projectCode,
-            @PathVariable String code,
-            @Valid @RequestBody SettingValueDTO settingValue,
-            @PathVariable String technology
-
+                                                  @PathVariable String projectCode,
+                                                  @PathVariable String code,
+                                                  @Valid @RequestBody SettingValueDTO settingValue,
+                                                  @PathVariable String technology
 
     ) throws BadRequestException {
         final Long projectId = projectService.toId(projectCode);
@@ -144,7 +151,7 @@ public class SettingResource {
         try {
             matchingTechnology = Technology.valueOf(technology.toUpperCase());
         } catch (IllegalArgumentException e) {
-            log.error("SETTING|technology|Please check that the technology {} exists", technology, e);
+            LOG.error("SETTING|technology|Please check that the technology {} exists", technology, e);
             String message = String.format(Messages.NOT_FOUND_TECHNOLOGY, technology);
             throw new BadRequestException(message, Entities.TECHNOLOGY_SETTING, "unknown_technology");
         }

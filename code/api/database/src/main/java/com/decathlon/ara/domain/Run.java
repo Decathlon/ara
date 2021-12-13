@@ -17,30 +17,43 @@
 
 package com.decathlon.ara.domain;
 
-import com.decathlon.ara.domain.enumeration.JobStatus;
-import lombok.*;
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.nullsFirst;
+
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.SortNatural;
 
-import javax.persistence.*;
-import java.io.Serializable;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Set;
-import java.util.TreeSet;
+import com.decathlon.ara.domain.enumeration.JobStatus;
 
-import static java.util.Comparator.*;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 @Entity
-// Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
-@EqualsAndHashCode(of = { "executionId", "country", "type" })
 @Table(indexes = @Index(columnList = "execution_id"))
-public class Run implements Comparable<Run>, Serializable {
+public class Run implements Comparable<Run> {
 
     public static final String SEVERITY_TAGS_SEPARATOR = ",";
 
@@ -48,12 +61,6 @@ public class Run implements Comparable<Run>, Serializable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "run_id")
     @SequenceGenerator(name = "run_id", sequenceName = "run_id", allocationSize = 1)
     private Long id;
-
-    // 1/2 for @EqualsAndHashCode to work: used when an entity is fetched by JPA
-    @Column(name = "execution_id", insertable = false, updatable = false)
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
-    private Long executionId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "execution_id")
@@ -143,10 +150,8 @@ public class Run implements Comparable<Run>, Serializable {
     @SortNatural
     private Set<ExecutedScenario> executedScenarios = new TreeSet<>();
 
-    // 2/2 for @EqualsAndHashCode to work: used for entities created outside of JPA
     public void setExecution(Execution execution) {
         this.execution = execution;
-        this.executionId = (execution == null ? null : execution.getId());
     }
 
     public void addExecutedScenario(ExecutedScenario executedScenario) {
@@ -171,13 +176,154 @@ public class Run implements Comparable<Run>, Serializable {
 
     @Override
     public int compareTo(Run other) {
-        // Keep business key in sync with @EqualsAndHashCode
-        Comparator<Run> executionIdComparator = comparing(r -> r.executionId, nullsFirst(naturalOrder()));
+        Comparator<Run> executionIdComparator = comparing(Run::getExecutionId, nullsFirst(naturalOrder()));
         Comparator<Run> countryComparator = comparing(Run::getCountry, nullsFirst(naturalOrder()));
         Comparator<Run> typeComparator = comparing(Run::getType, nullsFirst(naturalOrder()));
         return nullsFirst(executionIdComparator
                 .thenComparing(countryComparator)
                 .thenComparing(typeComparator)).compare(this, other);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(country, getExecutionId(), type);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Run)) {
+            return false;
+        }
+        Run other = (Run) obj;
+        return Objects.equals(country, other.country) && Objects.equals(getExecutionId(), other.getExecutionId())
+                && Objects.equals(type, other.type);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getExecutionId() {
+        return execution == null ? null : execution.getId();
+    }
+
+    public Country getCountry() {
+        return country;
+    }
+
+    public void setCountry(Country country) {
+        this.country = country;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public String getPlatform() {
+        return platform;
+    }
+
+    public void setPlatform(String platform) {
+        this.platform = platform;
+    }
+
+    public String getJobUrl() {
+        return jobUrl;
+    }
+
+    public void setJobUrl(String jobUrl) {
+        this.jobUrl = jobUrl;
+    }
+
+    public String getJobLink() {
+        return jobLink;
+    }
+
+    public void setJobLink(String jobLink) {
+        this.jobLink = jobLink;
+    }
+
+    public JobStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(JobStatus status) {
+        this.status = status;
+    }
+
+    public String getCountryTags() {
+        return countryTags;
+    }
+
+    public void setCountryTags(String countryTags) {
+        this.countryTags = countryTags;
+    }
+
+    public Date getStartDateTime() {
+        return startDateTime;
+    }
+
+    public void setStartDateTime(Date startDateTime) {
+        this.startDateTime = startDateTime;
+    }
+
+    public Long getEstimatedDuration() {
+        return estimatedDuration;
+    }
+
+    public void setEstimatedDuration(Long estimatedDuration) {
+        this.estimatedDuration = estimatedDuration;
+    }
+
+    public Long getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Long duration) {
+        this.duration = duration;
+    }
+
+    public String getSeverityTags() {
+        return severityTags;
+    }
+
+    public void setSeverityTags(String severityTags) {
+        this.severityTags = severityTags;
+    }
+
+    public Boolean getIncludeInThresholds() {
+        return includeInThresholds;
+    }
+
+    public void setIncludeInThresholds(Boolean includeInThresholds) {
+        this.includeInThresholds = includeInThresholds;
+    }
+
+    public Set<ExecutedScenario> getExecutedScenarios() {
+        return executedScenarios;
+    }
+
+    public Execution getExecution() {
+        return execution;
     }
 
 }

@@ -17,13 +17,6 @@
 
 package com.decathlon.ara.service.dto.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class MoveFunctionalityDTO {
 
     /**
@@ -40,5 +33,17 @@ public class MoveFunctionalityDTO {
      * The position where to move sourceId relative to referenceId.
      */
     private FunctionalityPosition relativePosition;
+
+    public Long getSourceId() {
+        return sourceId;
+    }
+
+    public Long getReferenceId() {
+        return referenceId;
+    }
+
+    public FunctionalityPosition getRelativePosition() {
+        return relativePosition;
+    }
 
 }

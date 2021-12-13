@@ -17,18 +17,17 @@
 
 package com.decathlon.ara.scenario.cucumber.bean;
 
-import com.decathlon.ara.lib.embed.consumer.StructuredEmbeddingsExtractor;
-import com.decathlon.ara.lib.embed.consumer.StructuredEmbeddingsHolder;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Optional;
 
-@Data
+import org.apache.commons.lang3.StringUtils;
+
+import com.decathlon.ara.lib.embed.consumer.StructuredEmbeddingsExtractor;
+import com.decathlon.ara.lib.embed.consumer.StructuredEmbeddingsHolder;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Embedded {
 
@@ -83,6 +82,14 @@ public class Embedded {
             }
         }
         return Optional.empty();
+    }
+
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public String getData() {
+        return data;
     }
 
 }

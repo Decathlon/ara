@@ -17,21 +17,13 @@
 
 package com.decathlon.ara.service.dto.type;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-
 import static com.decathlon.ara.service.support.DtoConstants.CODE_MESSAGE;
 import static com.decathlon.ara.service.support.DtoConstants.CODE_PATTERN;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
 public class TypeDTO {
 
     @NotNull(message = "The code is required.")
@@ -46,5 +38,38 @@ public class TypeDTO {
     private boolean isBrowser;
 
     private boolean isMobile;
+
+    public TypeDTO() {
+    }
+
+    public TypeDTO(
+            String code,
+            String name,
+            boolean isBrowser, boolean isMobile) {
+        this.code = code;
+        this.name = name;
+        this.isBrowser = isBrowser;
+        this.isMobile = isMobile;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isBrowser() {
+        return isBrowser;
+    }
+
+    public boolean isMobile() {
+        return isMobile;
+    }
 
 }

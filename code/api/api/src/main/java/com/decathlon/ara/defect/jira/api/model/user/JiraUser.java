@@ -19,9 +19,7 @@ package com.decathlon.ara.defect.jira.api.model.user;
 
 import com.decathlon.ara.defect.jira.api.model.avatar.JiraAvatar;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
 
-@Data
 public class JiraUser {
 
     private String self;
@@ -40,4 +38,36 @@ public class JiraUser {
     private String timeZone;
 
     private String accountType;
+
+    public String getSelf() {
+        return self;
+    }
+
+    public String getAccountId() {
+        return accountId;
+    }
+
+    public String getEmailAddress() {
+        return emailAddress;
+    }
+
+    public JiraAvatar getAvatar() {
+        return avatar;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public String getTimeZone() {
+        return timeZone;
+    }
+
+    public String getAccountType() {
+        return accountType;
+    }
 }

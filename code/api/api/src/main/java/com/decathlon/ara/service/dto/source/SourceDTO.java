@@ -17,29 +17,21 @@
 
 package com.decathlon.ara.service.dto.source;
 
-import com.decathlon.ara.domain.enumeration.Technology;
-import java.util.Comparator;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.With;
-
 import static com.decathlon.ara.service.support.DtoConstants.CODE_MESSAGE;
 import static com.decathlon.ara.service.support.DtoConstants.CODE_PATTERN;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.nullsFirst;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
-// Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
-@EqualsAndHashCode(of = { "code" })
+import java.util.Comparator;
+import java.util.Objects;
+
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
+import com.decathlon.ara.domain.enumeration.Technology;
+
 public class SourceDTO implements Comparable<SourceDTO> {
 
     /**
@@ -75,11 +67,80 @@ public class SourceDTO implements Comparable<SourceDTO> {
 
     private boolean postmanCountryRootFolders;
 
+    public SourceDTO() {
+    }
+
+    public SourceDTO(
+            String code,
+            String name,
+            String letter,
+            Technology technology,
+            String vcsUrl,
+            String defaultBranch,
+            boolean postmanCountryRootFolders) {
+        this.code = code;
+        this.name = name;
+        this.letter = letter;
+        this.technology = technology;
+        this.vcsUrl = vcsUrl;
+        this.defaultBranch = defaultBranch;
+        this.postmanCountryRootFolders = postmanCountryRootFolders;
+    }
+
     @Override
     public int compareTo(SourceDTO other) {
         // Keep business key in sync with @EqualsAndHashCode
         Comparator<SourceDTO> codeComparator = comparing(SourceDTO::getCode, nullsFirst(naturalOrder()));
         return nullsFirst(codeComparator).compare(this, other);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(code);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof SourceDTO)) {
+            return false;
+        }
+        SourceDTO other = (SourceDTO) obj;
+        return Objects.equals(code, other.code);
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getLetter() {
+        return letter;
+    }
+
+    public Technology getTechnology() {
+        return technology;
+    }
+
+    public String getVcsUrl() {
+        return vcsUrl;
+    }
+
+    public String getDefaultBranch() {
+        return defaultBranch;
+    }
+
+    public boolean isPostmanCountryRootFolders() {
+        return postmanCountryRootFolders;
     }
 
 }

@@ -17,22 +17,13 @@
 
 package com.decathlon.ara.service.dto.executedscenario;
 
+import java.util.List;
+import java.util.Set;
+
 import com.decathlon.ara.domain.enumeration.Handling;
 import com.decathlon.ara.service.dto.error.ErrorWithProblemsDTO;
 import com.decathlon.ara.service.dto.run.RunWithExecutionDTO;
-import java.util.List;
-import java.util.Set;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
 
-@Data
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
-@AllArgsConstructor
 public class ExecutedScenarioWithRunAndTeamIdsAndExecutionAndErrorsAndProblemsDTO extends ExecutedScenarioDTO {
 
     private Handling handling;
@@ -45,5 +36,25 @@ public class ExecutedScenarioWithRunAndTeamIdsAndExecutionAndErrorsAndProblemsDT
     private Set<Long> teamIds;
 
     private List<ErrorWithProblemsDTO> errors;
+
+    public Handling getHandling() {
+        return handling;
+    }
+
+    public RunWithExecutionDTO getRun() {
+        return run;
+    }
+
+    public Set<Long> getTeamIds() {
+        return teamIds;
+    }
+
+    public void setTeamIds(Set<Long> teamIds) {
+        this.teamIds = teamIds;
+    }
+
+    public List<ErrorWithProblemsDTO> getErrors() {
+        return errors;
+    }
 
 }

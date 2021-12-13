@@ -18,15 +18,7 @@
 package com.decathlon.ara.scenario.postman.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Request {
 
@@ -49,5 +41,21 @@ public class Request {
      * The body content sent with the HTTP request.
      */
     private Body body;
+
+    public Url getUrl() {
+        return url;
+    }
+
+    public KeyValue[] getHeader() {
+        return header;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public Body getBody() {
+        return body;
+    }
 
 }

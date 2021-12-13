@@ -17,14 +17,12 @@
 
 package com.decathlon.ara.defect.jira.api.model.attachment;
 
+import java.time.ZonedDateTime;
+
 import com.decathlon.ara.defect.jira.api.model.user.JiraUser;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
 
-import java.time.ZonedDateTime;
-
-@Data
 public class JiraAttachment {
 
     private String self;
@@ -36,7 +34,7 @@ public class JiraAttachment {
     private JiraUser author;
 
     @JsonProperty("created")
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     private ZonedDateTime creationDate;
 
     private Integer size;
@@ -44,4 +42,36 @@ public class JiraAttachment {
     private String mimeType;
 
     private String content;
+
+    public String getSelf() {
+        return self;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public JiraUser getAuthor() {
+        return author;
+    }
+
+    public ZonedDateTime getCreationDate() {
+        return creationDate;
+    }
+
+    public Integer getSize() {
+        return size;
+    }
+
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public String getContent() {
+        return content;
+    }
 }

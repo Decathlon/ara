@@ -17,19 +17,34 @@
 
 package com.decathlon.ara.service.dto.quality;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 public class ScenarioCountDTO {
 
     private int total;
     private int failed;
     private int passed;
+
+    public int getTotal() {
+        return total;
+    }
+
+    public void setTotal(int total) {
+        this.total = total;
+    }
+
+    public int getFailed() {
+        return failed;
+    }
+
+    public void setFailed(int failed) {
+        this.failed = failed;
+    }
+
+    public int getPassed() {
+        return passed;
+    }
+
+    public void setPassed(int passed) {
+        this.passed = passed;
+    }
 
 }

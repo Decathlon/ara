@@ -1,12 +1,16 @@
 package com.decathlon.ara.coreapi.domain;
 
-import lombok.Data;
-
-import javax.persistence.*;
 import java.util.Collections;
 import java.util.Set;
 
-@Data
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
+
 @Entity
 public class AraRule {
 
@@ -23,5 +27,21 @@ public class AraRule {
 
     @OneToMany
     private Set<AraTag> executionTags = Collections.emptySet();
+
+    protected Long getId() {
+        return id;
+    }
+
+    protected AraProject getProject() {
+        return project;
+    }
+
+    protected Set<AraTag> getRunTags() {
+        return runTags;
+    }
+
+    protected Set<AraTag> getExecutionTags() {
+        return executionTags;
+    }
 
 }

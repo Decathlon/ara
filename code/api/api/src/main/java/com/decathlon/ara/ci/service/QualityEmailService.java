@@ -17,6 +17,26 @@
 
 package com.decathlon.ara.ci.service;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.decathlon.ara.configuration.AraConfiguration;
 import com.decathlon.ara.domain.Project;
 import com.decathlon.ara.domain.Team;
@@ -32,46 +52,35 @@ import com.decathlon.ara.service.dto.quality.QualitySeverityDTO;
 import com.decathlon.ara.service.dto.run.ExecutedScenarioHandlingCountsDTO;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.support.Settings;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Slf4j
 public class QualityEmailService {
 
-    @NonNull
+    private static final Logger LOG = LoggerFactory.getLogger(QualityEmailService.class);
+
     private final AraConfiguration araConfiguration;
 
-    @NonNull
     private final ExecutionHistoryService executionHistoryService;
 
-    @NonNull
     private final TeamRepository teamRepository;
 
-    @NonNull
     private final EmailService emailService;
 
-    @NonNull
     private final ProjectRepository projectRepository;
 
-    @NonNull
     private final SettingService settingService;
+
+    public QualityEmailService(AraConfiguration araConfiguration, ExecutionHistoryService executionHistoryService,
+            TeamRepository teamRepository, EmailService emailService, ProjectRepository projectRepository,
+            SettingService settingService) {
+        this.araConfiguration = araConfiguration;
+        this.executionHistoryService = executionHistoryService;
+        this.teamRepository = teamRepository;
+        this.emailService = emailService;
+        this.projectRepository = projectRepository;
+        this.settingService = settingService;
+    }
 
     @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public void sendQualityEmail(long projectId, long executionId) throws NotFoundException {
@@ -88,7 +97,7 @@ public class QualityEmailService {
             variables.put("execution", execution);
             variables.put("teamsAssignableToProblems", teamsAssignableToProblems);
             variables.put("qualitiesPerTeamAndSeverity", aggregateQualitiesPerTeamAndSeverity(execution));
-            variables.put("NO_TEAM", new Team().withId(Long.valueOf(-404)).withName("(No team)"));
+            variables.put("NO_TEAM", new Team(Long.valueOf(-404), "(No team)"));
 
             variables.put("buildDate", formatDate(execution.getBuildDateTime()));
             variables.put("testDate", formatDate(execution.getTestDateTime()));
@@ -98,7 +107,7 @@ public class QualityEmailService {
             final String clientBaseUrl = araConfiguration.getClientBaseUrl();
             final Long projectIdLong = Long.valueOf(projectId);
             final Project project = projectRepository.findById(projectIdLong)
-                    .orElse(new Project().withCode(projectIdLong.toString()).withName("Project " + projectId));
+                    .orElse(new Project(projectIdLong.toString(), "Project " + projectId));
             final String url = clientBaseUrl + "#/projects/" + project.getCode() + "/executions/" + execution.getId();
             variables.put("executionUrl", url);
             variables.put("projectName", project.getName());
@@ -119,12 +128,12 @@ public class QualityEmailService {
     void addInlineResource(Map<String, Resource> inlineResources, String name, String path) {
         try (final InputStream stream = EmailService.class.getClassLoader().getResourceAsStream(path)) {
             if (stream == null) {
-                log.warn("EMAIL|Cannot find the inline resource in classpath to include it in the email: {}", path);
+                LOG.warn("EMAIL|Cannot find the inline resource in classpath to include it in the email: {}", path);
             } else {
                 inlineResources.put(name, new ByteArrayResource(IOUtils.toByteArray(stream)));
             }
         } catch (IOException e) {
-            log.warn("EMAIL|Cannot include the resource in the email: {}", path, e);
+            LOG.warn("EMAIL|Cannot include the resource in the email: {}", path, e);
         }
     }
 
@@ -152,7 +161,7 @@ public class QualityEmailService {
     private Optional<String> configuredEmail(long projectId, String settingCode) {
         String value = settingService.get(projectId, settingCode);
         if (StringUtils.isEmpty(value)) {
-            log.warn("EMAIL|Not sending email report because the project setting {} has not been provided", settingCode);
+            LOG.warn("EMAIL|Not sending email report because the project setting {} has not been provided", settingCode);
             return Optional.empty();
         }
         return Optional.of(value);
@@ -216,9 +225,7 @@ public class QualityEmailService {
             return "Quality for this build:";
         } else if (execution.getQualityStatus().isAcceptable()) {
             return "The build is <b style='background-color: #19be6b; color: white; padding: 1px 2px; border-radius: 2px;'>eligible to deploy</b>" +
-                    (execution.getQualityStatus() == QualityStatus.WARNING ?
-                            " but <b style='background-color: #ffcc30; padding: 1px 2px; border-radius: 2px;'>without much margin regarding the thresholds</b>" :
-                            "") +
+                    (execution.getQualityStatus() == QualityStatus.WARNING ? " but <b style='background-color: #ffcc30; padding: 1px 2px; border-radius: 2px;'>without much margin regarding the thresholds</b>" : "") +
                     ":";
         } else {
             return "The build is <b style='background-color: #ed3f14; color: white; padding: 1px 2px; border-radius: 2px;'>not eligible to deploy</b>:";
@@ -227,15 +234,11 @@ public class QualityEmailService {
 
     Map<String, Map<String, ExecutedScenarioHandlingCountsDTO>> aggregateQualitiesPerTeamAndSeverity(ExecutionHistoryPointDTO execution) {
         Map<String, Map<String, ExecutedScenarioHandlingCountsDTO>> globalRunQualities = new HashMap<>();
-        execution.getRuns().forEach(run ->
-                run.getQualitiesPerTeamAndSeverity().forEach((teamId, runQualities) ->
-                        runQualities.forEach((severityCode, counts) -> {
-                            final Map<String, ExecutedScenarioHandlingCountsDTO> foundCounts = globalRunQualities.computeIfAbsent(teamId, k -> new HashMap<>());
-                            final ExecutedScenarioHandlingCountsDTO foundCount = foundCounts.computeIfAbsent(severityCode, k -> new ExecutedScenarioHandlingCountsDTO());
-                            foundCount.add(counts);
-                        })
-                )
-        );
+        execution.getRuns().forEach(run -> run.getQualitiesPerTeamAndSeverity().forEach((teamId, runQualities) -> runQualities.forEach((severityCode, counts) -> {
+            final Map<String, ExecutedScenarioHandlingCountsDTO> foundCounts = globalRunQualities.computeIfAbsent(teamId, k -> new HashMap<>());
+            final ExecutedScenarioHandlingCountsDTO foundCount = foundCounts.computeIfAbsent(severityCode, k -> new ExecutedScenarioHandlingCountsDTO());
+            foundCount.add(counts);
+        })));
         return globalRunQualities;
     }
 

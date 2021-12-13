@@ -18,15 +18,7 @@
 package com.decathlon.ara.scenario.postman.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Url {
 
@@ -54,5 +46,25 @@ public class Url {
      * All encoded query parameters (eg. "parameter: foo%26bar" for parameter "parameter"="foo&bar").
      */
     private KeyValue[] query;
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public String getPort() {
+        return port;
+    }
+
+    public String[] getPath() {
+        return path;
+    }
+
+    public String[] getHost() {
+        return host;
+    }
+
+    public KeyValue[] getQuery() {
+        return query;
+    }
 
 }

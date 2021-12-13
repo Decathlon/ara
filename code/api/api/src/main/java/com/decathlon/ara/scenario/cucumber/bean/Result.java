@@ -19,9 +19,7 @@ package com.decathlon.ara.scenario.cucumber.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
 
-@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Result {
 
@@ -31,5 +29,17 @@ public class Result {
     private String errorMessage;
 
     private long duration;
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public long getDuration() {
+        return duration;
+    }
 
 }

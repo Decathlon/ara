@@ -20,12 +20,10 @@ package com.decathlon.ara.lib.embed.consumer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import lombok.Data;
 
 /**
  * Holds the result of all structured embeddings parsed by {@link StructuredEmbeddingsExtractor#extract(String)}.
  */
-@Data
 public class StructuredEmbeddingsHolder {
 
     /**
@@ -45,5 +43,9 @@ public class StructuredEmbeddingsHolder {
                 .findFirst()
                 .map(e -> (String) e.getData());
     }
+
+	public List<ParsedStructuredEmbedding> getEmbeddings() {
+		return embeddings;
+	}
 
 }

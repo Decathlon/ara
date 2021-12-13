@@ -17,17 +17,12 @@
 
 package com.decathlon.ara.service.dto.countrydeployment;
 
+import java.util.Date;
+
 import com.decathlon.ara.domain.enumeration.JobStatus;
 import com.decathlon.ara.domain.enumeration.Result;
 import com.decathlon.ara.service.dto.country.CountryDTO;
-import java.util.Date;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class CountryDeploymentDTO {
 
     private Long id;
@@ -47,5 +42,41 @@ public class CountryDeploymentDTO {
     private Long estimatedDuration;
 
     private Long duration;
+
+    public Long getId() {
+        return id;
+    }
+
+    public CountryDTO getCountry() {
+        return country;
+    }
+
+    public String getPlatform() {
+        return platform;
+    }
+
+    public String getJobUrl() {
+        return jobUrl;
+    }
+
+    public JobStatus getStatus() {
+        return status;
+    }
+
+    public Result getResult() {
+        return result;
+    }
+
+    public Date getStartDateTime() {
+        return startDateTime;
+    }
+
+    public Long getEstimatedDuration() {
+        return estimatedDuration;
+    }
+
+    public Long getDuration() {
+        return duration;
+    }
 
 }

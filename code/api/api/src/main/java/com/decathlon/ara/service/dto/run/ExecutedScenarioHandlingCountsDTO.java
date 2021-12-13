@@ -19,18 +19,10 @@ package com.decathlon.ara.service.dto.run;
 
 import com.decathlon.ara.domain.ExecutedScenario;
 import com.decathlon.ara.domain.enumeration.Handling;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
 /**
  * Holds a number of {@link ExecutedScenario} + the count of these scenarios in each {@link Handling} state.
  */
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 public class ExecutedScenarioHandlingCountsDTO {
 
     /**
@@ -69,6 +61,30 @@ public class ExecutedScenarioHandlingCountsDTO {
         setPassed(getPassed() + other.getPassed());
         setUnhandled(getUnhandled() + other.getUnhandled());
         setHandled(getHandled() + other.getHandled());
+    }
+
+    public int getPassed() {
+        return passed;
+    }
+
+    public void setPassed(int passed) {
+        this.passed = passed;
+    }
+
+    public int getUnhandled() {
+        return unhandled;
+    }
+
+    public void setUnhandled(int unhandled) {
+        this.unhandled = unhandled;
+    }
+
+    public int getHandled() {
+        return handled;
+    }
+
+    public void setHandled(int handled) {
+        this.handled = handled;
     }
 
 }

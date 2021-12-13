@@ -1,9 +1,11 @@
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.service.ExecutionHistoryService;
-import com.decathlon.ara.service.ProjectService;
-import com.decathlon.ara.service.dto.execution.ExecutionHistoryPointDTO;
-import com.decathlon.ara.service.exception.NotFoundException;
+import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.lenient;
+
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,15 +15,14 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ui.ExtendedModelMap;
 
-import java.util.List;
-
-import static org.junit.Assert.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
+import com.decathlon.ara.service.ExecutionHistoryService;
+import com.decathlon.ara.service.ProjectService;
+import com.decathlon.ara.service.dto.execution.ExecutionHistoryPointDTO;
+import com.decathlon.ara.service.exception.NotFoundException;
+import com.decathlon.ara.util.TestUtil;
 
 @ExtendWith(MockitoExtension.class)
-public class TemplateResourceTest {
+class TemplateResourceTest {
 
     private final ExecutionHistoryPointDTO executionHistory = new ExecutionHistoryPointDTO();
     @Mock
@@ -34,9 +35,9 @@ public class TemplateResourceTest {
     private ExtendedModelMap model;
 
     @BeforeEach
-    public void mockData() throws NotFoundException {
-        executionHistory.setBranch("main");
-        executionHistory.setName("day");
+    void mockData() throws NotFoundException {
+        TestUtil.setField(executionHistory, "branch", "main");
+        TestUtil.setField(executionHistory, "name", "day");
         model.addAttribute("execution", null);
 
         lenient().when(projectService.toId("test")).thenReturn(1L);
@@ -44,17 +45,17 @@ public class TemplateResourceTest {
     }
 
     @Test
-    public void shouldBeNotFoundProject() {
+    void shouldBeNotFoundProject() {
         assertThrows(NotFoundException.class, () -> controller.nrtCycle("not-project", "main", "day", model));
     }
 
     @Test
-    public void shouldBeNotFoundExecution() {
+    void shouldBeNotFoundExecution() {
         assertThrows(NotFoundException.class, () -> controller.nrtCycle("test", "develop", "day", model));
     }
 
     @Test
-    public void shouldBeFound() throws NotFoundException {
+    void shouldBeFound() throws NotFoundException {
         controller.nrtCycle("test", "main", "day", model);
         assertEquals(model.getAttribute("execution"), executionHistory);
     }

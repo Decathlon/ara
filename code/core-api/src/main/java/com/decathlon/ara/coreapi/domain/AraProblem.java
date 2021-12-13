@@ -15,9 +15,6 @@ import javax.persistence.SequenceGenerator;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 
-import lombok.Data;
-
-@Data
 @Entity
 public class AraProblem {
 
@@ -44,4 +41,40 @@ public class AraProblem {
 
     @OneToMany
     private Set<AraTag> tags = Collections.emptySet();
+
+    protected Long getId() {
+        return id;
+    }
+
+    protected String getName() {
+        return name;
+    }
+
+    protected String getDescription() {
+        return description;
+    }
+
+    protected String getDefectCode() {
+        return defectCode;
+    }
+
+    protected String getPattern() {
+        return pattern;
+    }
+
+    protected String getCreatedBy() {
+        return createdBy;
+    }
+
+    protected LocalDateTime getCreatedDatetime() {
+        return createdDatetime;
+    }
+
+    protected List<AraProblemHistory> getScenarioResults() {
+        return scenarioResults;
+    }
+
+    protected Set<AraTag> getTags() {
+        return tags;
+    }
 }

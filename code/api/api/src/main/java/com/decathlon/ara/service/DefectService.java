@@ -17,6 +17,24 @@
 
 package com.decathlon.ara.service;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.decathlon.ara.ci.util.FetchException;
 import com.decathlon.ara.common.NotGonnaHappenException;
 import com.decathlon.ara.defect.DefectAdapter;
@@ -30,18 +48,6 @@ import com.decathlon.ara.repository.ProjectRepository;
 import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
 import com.decathlon.ara.service.support.Settings;
 import com.decathlon.ara.service.util.DateService;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * Handles synchronization of problem statuses with their external defects.<br>
@@ -49,36 +55,41 @@ import java.util.stream.Collectors;
  * The technical details of how to contact the defect tracking system are handled by
  * {@link DefectAdapter}.
  */
-@Slf4j
 @Service
 public class DefectService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DefectService.class);
 
     final Map<Long, Date> lastFullIndexDates = new ConcurrentHashMap<>();
     final Map<Long, Date> lastIncrementalIndexDates = new ConcurrentHashMap<>();
 
-    @Autowired // No constructor-injection to avoid cyclic-dependencies because SettingService depends on DefectService
-    @Lazy
-    private SettingService settingService;
+    private final SettingService settingService;
 
-    @Autowired
-    private ProjectRepository projectRepository;
+    private final ProjectRepository projectRepository;
 
-    @Autowired
-    private ProblemRepository problemRepository;
+    private final ProblemRepository problemRepository;
 
-    @Autowired
-    private DateService dateService;
+    private final DateService dateService;
 
-    @Autowired
-    private TransactionAppenderUtil transactionAppenderUtil;
+    private final TransactionAppenderUtil transactionAppenderUtil;
 
-    @Autowired
-    private ApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
 
     /**
      * Lazy-loaded: to be used through {@link #getAdapters()}.
      */
     private List<DefectAdapter> adapters;
+
+    public DefectService(@Lazy SettingService settingService, ProjectRepository projectRepository,
+            ProblemRepository problemRepository, DateService dateService,
+            TransactionAppenderUtil transactionAppenderUtil, ApplicationContext applicationContext) {
+        this.settingService = settingService;
+        this.projectRepository = projectRepository;
+        this.problemRepository = problemRepository;
+        this.dateService = dateService;
+        this.transactionAppenderUtil = transactionAppenderUtil;
+        this.applicationContext = applicationContext;
+    }
 
     /**
      * Get the defect adapter configured for the project, if one such adapter is configured for the project.<br>
@@ -147,7 +158,7 @@ public class DefectService {
             lastIncrementalIndexDates.put(projectId, startDate);
         } catch (FetchException e) {
             // Also catch RuntimeException to not impact calling code in case of a faulty DefectAdapter in a custom ARA
-            log.error("DEFECT|Failed to index defects of project " + project.getName() + ": " +
+            LOG.error("DEFECT|Failed to index defects of project " + project.getName() + ": " +
                     "will perhaps have a better chance later...", e);
         }
     }
@@ -163,7 +174,7 @@ public class DefectService {
 
     @Transactional
     public void fullIndex(Project project, DefectAdapter defectAdapter) throws FetchException {
-        log.debug("DEFECT|Begin defect full indexing for project {}", project.getName());
+        LOG.debug("DEFECT|Begin defect full indexing for project {}", project.getName());
 
         final long projectId = project.getId();
         final List<Problem> problems = problemRepository.findAllByProjectIdAndDefectIdIsNotEmpty(projectId);
@@ -175,7 +186,7 @@ public class DefectService {
 
     @Transactional
     public void incrementalIndex(Project project, DefectAdapter defectAdapter, Date since) throws FetchException {
-        log.debug("DEFECT|Begin defect incremental indexing for updates since {} for project {}", since, project.getName());
+        LOG.debug("DEFECT|Begin defect incremental indexing for updates since {} for project {}", since, project.getName());
 
         final long projectId = project.getId();
         final List<Problem> problems = problemRepository.findAllByProjectIdAndDefectIdIsNotEmpty(projectId);
@@ -194,8 +205,7 @@ public class DefectService {
                 .forEach(problem -> problem.setDefectExistence(DefectExistence.UNKNOWN));
 
         // Flag the project to get new full indexing (indexing is done in another thread)
-        transactionAppenderUtil.doAfterCommit(() ->
-                lastFullIndexDates.remove(projectId));
+        transactionAppenderUtil.doAfterCommit(() -> lastFullIndexDates.remove(projectId));
     }
 
     private void incrementalIndex(long projectId, DefectAdapter defectAdapter, Date since, List<Problem> problems) throws FetchException {

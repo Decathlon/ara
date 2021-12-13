@@ -17,10 +17,16 @@
 
 package com.decathlon.ara.service;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.domain.Project;
-import com.decathlon.ara.domain.QProject;
 import com.decathlon.ara.domain.RootCause;
 import com.decathlon.ara.repository.ProjectRepository;
 import com.decathlon.ara.repository.RootCauseRepository;
@@ -28,37 +34,30 @@ import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
-import com.decathlon.ara.service.mapper.ProjectMapper;
-import com.decathlon.ara.service.util.ObjectUtil;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import com.decathlon.ara.service.mapper.GenericMapper;
 
 /**
  * Service for managing Project.
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ProjectService {
 
-    @NonNull
     private final ProjectRepository repository;
 
-    @NonNull
     private final RootCauseRepository rootCauseRepository;
 
-    @NonNull
-    private final ProjectMapper mapper;
+    private final GenericMapper mapper;
 
-    @NonNull
     private final CommunicationService communicationService;
+
+    public ProjectService(ProjectRepository repository, RootCauseRepository rootCauseRepository, GenericMapper mapper,
+            CommunicationService communicationService) {
+        this.repository = repository;
+        this.rootCauseRepository = rootCauseRepository;
+        this.mapper = mapper;
+        this.communicationService = communicationService;
+    }
 
     /**
      * Create a new entity.
@@ -68,18 +67,17 @@ public class ProjectService {
      * @throws NotUniqueException when the given code or name is already used by another entity
      */
     public ProjectDTO create(ProjectDTO dtoToCreate) throws NotUniqueException {
-        ObjectUtil.trimStringValues(dtoToCreate);
         validateBusinessRules(dtoToCreate);
-        final Project entity = mapper.toEntity(dtoToCreate);
+        final Project entity = mapper.map(dtoToCreate, Project.class);
         communicationService.initializeProject(entity);
-        final ProjectDTO createdProject = mapper.toDto(repository.save(entity));
+        final ProjectDTO createdProject = mapper.map(repository.save(entity), ProjectDTO.class);
 
         final long projectId = createdProject.getId().longValue();
         rootCauseRepository.saveAll(Arrays.asList(
-                new RootCause().withProjectId(projectId).withName("Fragile test"),
-                new RootCause().withProjectId(projectId).withName("Network issue"),
-                new RootCause().withProjectId(projectId).withName("Regression"),
-                new RootCause().withProjectId(projectId).withName("Test to update")));
+                new RootCause(projectId, "Fragile test"),
+                new RootCause(projectId, "Network issue"),
+                new RootCause(projectId, "Regression"),
+                new RootCause(projectId, "Test to update")));
 
         return createdProject;
     }
@@ -93,8 +91,6 @@ public class ProjectService {
      * @throws NotUniqueException when the given code or name is already used by another entity
      */
     public ProjectDTO update(ProjectDTO dtoToUpdate) throws BadRequestException {
-        ObjectUtil.trimStringValues(dtoToUpdate);
-
         // Must update an existing entity
         Optional<Project> dataBaseEntity = repository.findById(dtoToUpdate.getId());
         if (!dataBaseEntity.isPresent()) {
@@ -103,9 +99,9 @@ public class ProjectService {
 
         validateBusinessRules(dtoToUpdate);
 
-        final Project entity = mapper.toEntity(dtoToUpdate);
+        final Project entity = mapper.map(dtoToUpdate, Project.class);
         entity.setCommunications(dataBaseEntity.get().getCommunications());
-        return mapper.toDto(repository.save(entity));
+        return mapper.map(repository.save(entity), ProjectDTO.class);
     }
 
     /**
@@ -115,7 +111,7 @@ public class ProjectService {
      */
     @Transactional(readOnly = true)
     public List<ProjectDTO> findAll() {
-        return mapper.toDto(repository.findAllByOrderByName());
+        return mapper.mapCollection(repository.findAllByOrderByName(), ProjectDTO.class);
     }
 
     /**
@@ -126,7 +122,7 @@ public class ProjectService {
      */
     @Transactional(readOnly = true)
     public Optional<ProjectDTO> findOne(String code) {
-        return Optional.ofNullable(repository.findOneByCode(code)).map(mapper::toDto);
+        return Optional.ofNullable(repository.findOneByCode(code)).map(project -> mapper.map(project, ProjectDTO.class));
     }
 
     /**
@@ -154,18 +150,18 @@ public class ProjectService {
     private void validateUniqueCode(ProjectDTO dto) throws NotUniqueException {
         Project existingEntityWithSameCode = repository.findOneByCode(dto.getCode());
         if (existingEntityWithSameCode != null && !existingEntityWithSameCode.getId().equals(dto.getId())) {
-            throw new NotUniqueException(Messages.NOT_UNIQUE_PROJECT_CODE, Entities.PROJECT, QProject.project.code.getMetadata().getName(), existingEntityWithSameCode.getId());
+            throw new NotUniqueException(Messages.NOT_UNIQUE_PROJECT_CODE, Entities.PROJECT, "code", existingEntityWithSameCode.getId());
         }
     }
 
     private void validateUniqueName(ProjectDTO dto) throws NotUniqueException {
         Project existingEntityWithSameName = repository.findOneByName(dto.getName());
         if (existingEntityWithSameName != null && !existingEntityWithSameName.getId().equals(dto.getId())) {
-            throw new NotUniqueException(Messages.NOT_UNIQUE_PROJECT_NAME, Entities.PROJECT, QProject.project.name.getMetadata().getName(), existingEntityWithSameName.getId());
+            throw new NotUniqueException(Messages.NOT_UNIQUE_PROJECT_NAME, Entities.PROJECT, "name", existingEntityWithSameName.getId());
         }
     }
 
-    private void switchProjectAsDefault(ProjectDTO dto)  {
+    private void switchProjectAsDefault(ProjectDTO dto) {
         if (dto.isDefaultAtStartup()) {
             Project entityDataBaseWithDefaultAtStartup = repository.findByDefaultAtStartup(true);
             if (entityDataBaseWithDefaultAtStartup != null && !entityDataBaseWithDefaultAtStartup.getCode().equals(dto.getCode())) {

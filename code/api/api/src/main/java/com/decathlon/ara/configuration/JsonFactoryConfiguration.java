@@ -17,9 +17,16 @@
 
 package com.decathlon.ara.configuration;
 
-import com.fasterxml.jackson.core.JsonFactory;
+import java.io.IOException;
+
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 @Configuration
 public class JsonFactoryConfiguration {
@@ -35,6 +42,26 @@ public class JsonFactoryConfiguration {
     @Bean
     public JsonFactory jsonFactory() {
         return new JsonFactory();
+    }
+
+    @Bean
+    public Jackson2ObjectMapperBuilderCustomizer jsonCustomizer() {
+        return builder -> builder.deserializers(new StringTrimDeserializer());
+    }
+
+    private static class StringTrimDeserializer extends StdDeserializer<String> {
+
+        private static final long serialVersionUID = 1L;
+
+        protected StringTrimDeserializer() {
+            super(String.class);
+        }
+
+        @Override
+        public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            return p.getValueAsString().trim();
+        }
+
     }
 
 }

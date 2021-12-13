@@ -45,8 +45,6 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import com.decathlon.ara.ci.bean.QualityThreshold;
-import com.decathlon.ara.domain.Country;
-import com.decathlon.ara.domain.CycleDefinition;
 import com.decathlon.ara.domain.Error;
 import com.decathlon.ara.domain.ExecutedScenario;
 import com.decathlon.ara.domain.Execution;
@@ -58,13 +56,18 @@ import com.decathlon.ara.repository.SeverityRepository;
 import com.decathlon.ara.service.dto.quality.QualitySeverityDTO;
 import com.decathlon.ara.service.dto.quality.ScenarioCountDTO;
 import com.decathlon.ara.service.dto.severity.SeverityDTO;
-import com.decathlon.ara.service.mapper.SeverityMapper;
+import com.decathlon.ara.service.mapper.GenericMapper;
+import com.decathlon.ara.util.TestUtil;
+import com.decathlon.ara.util.builder.RunBuilder;
+import com.decathlon.ara.util.factory.CountryFactory;
+import com.decathlon.ara.util.factory.CycleDefinitionFactory;
+import com.decathlon.ara.util.factory.ExecutionBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 
 @ExtendWith(MockitoExtension.class)
-public class QualityServiceTest {
+class QualityServiceTest {
 
     private static final long PROJECT_ID = 1;
 
@@ -75,7 +78,7 @@ public class QualityServiceTest {
     private SeverityRepository severityRepository;
 
     @Mock
-    private SeverityMapper severityMapper;
+    private GenericMapper mapper;
 
     @InjectMocks
     private QualityService cut;
@@ -89,13 +92,14 @@ public class QualityServiceTest {
     private int lastId;
 
     @Test
-    public void computeQuality_should_set_quality_status_INCOMPLETE_when_qualityThresholds_are_malformed() throws IOException {
+    void computeQuality_should_set_quality_status_INCOMPLETE_when_qualityThresholds_are_malformed() throws IOException {
         // GIVEN
-        Execution execution = new Execution()
-                .withCycleDefinition(new CycleDefinition().withProjectId(PROJECT_ID))
-                .withQualityThresholds("some");
+        Execution execution = new ExecutionBuilder()
+                .withCycleDefinition(CycleDefinitionFactory.get(PROJECT_ID))
+                .withQualityThresholds("some").build();
         when(objectMapper.readValue(anyString(), eq(QualityService.TYPE_REFERENCE_TO_MAP_STRING_QUALITY_THRESHOLD)))
-                .thenThrow(new JsonProcessingException(""){});
+                .thenThrow(new JsonProcessingException("") {
+                });
         when(objectMapper.writeValueAsString(qualitySeverityListArgument.capture())).thenReturn("any");
 
         // WHEN
@@ -107,16 +111,16 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void computeQuality_should_set_quality_status_INCOMPLETE_when_one_qualityThreshold_is_missing() throws IOException {
+    void computeQuality_should_set_quality_status_INCOMPLETE_when_one_qualityThreshold_is_missing() throws IOException {
         // GIVEN
-        Execution execution = new Execution()
-                .withCycleDefinition(new CycleDefinition().withProjectId(PROJECT_ID))
+        Execution execution = new ExecutionBuilder()
+                .withCycleDefinition(CycleDefinitionFactory.get(PROJECT_ID))
                 .withQualityThresholds("some")
-                .withRuns(Collections.singleton(new Run().withIncludeInThresholds(Boolean.TRUE)));
+                .withRuns(Collections.singleton(new RunBuilder().withIncludeInThresholds(Boolean.TRUE).build())).build();
         when(objectMapper.readValue(anyString(), eq(QualityService.TYPE_REFERENCE_TO_MAP_STRING_QUALITY_THRESHOLD))).thenReturn(ImmutableMap.of());
         when(objectMapper.writeValueAsString(qualitySeverityListArgument.capture())).thenReturn("any");
         when(severityRepository.findAllByProjectIdOrderByPosition(PROJECT_ID)).thenReturn(Collections.singletonList(
-                new Severity().withCode("1").withDefaultOnMissing(true)));
+                severity("1", 0, true)));
 
         // WHEN
         cut.computeQuality(execution);
@@ -127,12 +131,12 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void computeQuality_should_set_quality_status_INCOMPLETE_when_one_run_has_no_result() throws IOException {
+    void computeQuality_should_set_quality_status_INCOMPLETE_when_one_run_has_no_result() throws IOException {
         // GIVEN
-        Execution execution = new Execution()
-                .withCycleDefinition(new CycleDefinition().withProjectId(PROJECT_ID))
+        Execution execution = new ExecutionBuilder()
+                .withCycleDefinition(CycleDefinitionFactory.get(PROJECT_ID))
                 .withQualityThresholds("some")
-                .withRuns(Collections.singleton(new Run().withIncludeInThresholds(Boolean.TRUE)));
+                .withRuns(Collections.singleton(new RunBuilder().withIncludeInThresholds(Boolean.TRUE).build())).build();
         when(objectMapper.readValue(anyString(), eq(QualityService.TYPE_REFERENCE_TO_MAP_STRING_QUALITY_THRESHOLD))).thenReturn(ImmutableMap.of());
         when(objectMapper.writeValueAsString(qualitySeverityListArgument.capture())).thenReturn("any");
 
@@ -146,34 +150,34 @@ public class QualityServiceTest {
 
     @Test
     @MockitoSettings(strictness = Strictness.LENIENT)
-    public void computeQuality_should_set_the_quality_fields() throws IOException {
+    void computeQuality_should_set_the_quality_fields() throws IOException {
         // GIVEN
-        Execution execution = new Execution()
-                .withCycleDefinition(new CycleDefinition().withProjectId(PROJECT_ID))
+        Execution execution = new ExecutionBuilder()
+                .withCycleDefinition(CycleDefinitionFactory.get(PROJECT_ID))
                 .withQualityThresholds("the_ones")
                 .withRuns(new HashSet<>(Collections.singletonList(
                         run()
                                 .withIncludeInThresholds(Boolean.TRUE)
                                 .withStatus(JobStatus.DONE)
                                 .withExecutedScenarios(new HashSet<>(Arrays.asList(
-                                        passedScenario(),
-                                        failedScenario(),
-                                        passedScenario().withSeverity("2")))))));
+                                        passedScenario(null),
+                                        failedScenario(null),
+                                        passedScenario("2")))).build()))).build();
 
         Map<String, QualityThreshold> qualityThresholds = new HashMap<>();
-        qualityThresholds.put("1", new QualityThreshold().withFailure(1).withWarning(99));
-        qualityThresholds.put("2", new QualityThreshold().withFailure(42));
+        qualityThresholds.put("1", new QualityThreshold(1, 99));
+        qualityThresholds.put("2", new QualityThreshold(42, 0));
         when(objectMapper.readValue(eq("the_ones"), eq(QualityService.TYPE_REFERENCE_TO_MAP_STRING_QUALITY_THRESHOLD))).thenReturn(qualityThresholds);
 
         when(severityRepository.findAllByProjectIdOrderByPosition(PROJECT_ID)).thenReturn(Arrays.asList(
-                new Severity().withCode("1").withPosition(1).withDefaultOnMissing(true), // Will be WARNING
-                new Severity().withCode("2").withPosition(2) // Will be PASSED, but should not override the WARNING for global quality
+                severity("1", 1, true), // Will be WARNING
+                severity("2", 2, false) // Will be PASSED, but should not override the WARNING for global quality
         ));
 
         when(objectMapper.writeValueAsString(qualitySeverityListArgument.capture())).thenReturn("result");
 
         SeverityDTO severityAllDto = new SeverityDTO();
-        doReturn(severityAllDto).when(severityMapper).toDto(Severity.ALL);
+        doReturn(severityAllDto).when(mapper).map(Severity.ALL, SeverityDTO.class);
 
         // WHEN
         cut.computeQuality(execution);
@@ -192,22 +196,22 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void getActiveSeverities_should_return_all_if_one_run_has_all() {
+    void getActiveSeverities_should_return_all_if_one_run_has_all() {
         // GIVEN
-        Execution execution = new Execution()
-                .withCycleDefinition(new CycleDefinition().withProjectId(PROJECT_ID))
+        Execution execution = new ExecutionBuilder()
+                .withCycleDefinition(CycleDefinitionFactory.get(PROJECT_ID))
                 .withRuns(new HashSet<>(Arrays.asList(
                         run()
                                 .withIncludeInThresholds(Boolean.TRUE)
-                                .withSeverityTags("all"),
+                                .withSeverityTags("all").build(),
                         run()
                                 .withIncludeInThresholds(Boolean.TRUE)
-                                .withSeverityTags("1,2"))));
+                                .withSeverityTags("1,2").build()))).build();
 
         when(severityRepository.findAllByProjectIdOrderByPosition(PROJECT_ID)).thenReturn(Arrays.asList(
-                new Severity().withCode("1").withPosition(1),
-                new Severity().withCode("2").withPosition(2),
-                new Severity().withCode("3").withPosition(3)));
+                severity("1", 1, false),
+                severity("2", 2, false),
+                severity("3", 3, false)));
 
         // WHEN
         SortedSet<Severity> activeSeverities = cut.getActiveSeverities(execution);
@@ -217,21 +221,21 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void getActiveSeverities_should_return_all_if_one_run_has_no_severity_tag() {
+    void getActiveSeverities_should_return_all_if_one_run_has_no_severity_tag() {
         // GIVEN
-        Execution execution = new Execution()
-                .withCycleDefinition(new CycleDefinition().withProjectId(PROJECT_ID))
+        Execution execution = new ExecutionBuilder()
+                .withCycleDefinition(CycleDefinitionFactory.get(PROJECT_ID))
                 .withRuns(new HashSet<>(Arrays.asList(
                         run()
                                 .withIncludeInThresholds(Boolean.TRUE)
-                                .withSeverityTags(null),
+                                .withSeverityTags(null).build(),
                         run()
                                 .withIncludeInThresholds(Boolean.TRUE)
-                                .withSeverityTags("1,2"))));
+                                .withSeverityTags("1,2").build()))).build();
         when(severityRepository.findAllByProjectIdOrderByPosition(PROJECT_ID)).thenReturn(Arrays.asList(
-                new Severity().withCode("1").withPosition(1),
-                new Severity().withCode("2").withPosition(2),
-                new Severity().withCode("3").withPosition(3)));
+                severity("1", 1, false),
+                severity("2", 2, false),
+                severity("3", 3, false)));
 
         // WHEN
         SortedSet<Severity> activeSeverities = cut.getActiveSeverities(execution);
@@ -241,21 +245,21 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void getActiveSeverities_should_return_all_if_no_run_is_included_in_thresholds() {
+    void getActiveSeverities_should_return_all_if_no_run_is_included_in_thresholds() {
         // GIVEN
-        Execution execution = new Execution()
-                .withCycleDefinition(new CycleDefinition().withProjectId(PROJECT_ID))
+        Execution execution = new ExecutionBuilder()
+                .withCycleDefinition(CycleDefinitionFactory.get(PROJECT_ID))
                 .withRuns(new HashSet<>(Arrays.asList(
                         run()
                                 .withIncludeInThresholds(Boolean.FALSE)
-                                .withSeverityTags(null),
+                                .withSeverityTags(null).build(),
                         run()
                                 .withIncludeInThresholds(Boolean.FALSE)
-                                .withSeverityTags("1,2"))));
+                                .withSeverityTags("1,2").build()))).build();
         when(severityRepository.findAllByProjectIdOrderByPosition(PROJECT_ID)).thenReturn(Arrays.asList(
-                new Severity().withCode("1").withPosition(1),
-                new Severity().withCode("2").withPosition(2),
-                new Severity().withCode("3").withPosition(3)));
+                severity("1", 1, false),
+                severity("2", 2, false),
+                severity("3", 3, false)));
 
         // WHEN
         SortedSet<Severity> activeSeverities = cut.getActiveSeverities(execution);
@@ -265,17 +269,17 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void getActiveSeverities_should_sort_returned_severities_by_position_instead_of_by_code() {
+    void getActiveSeverities_should_sort_returned_severities_by_position_instead_of_by_code() {
         // GIVEN
-        Execution execution = new Execution()
-                .withCycleDefinition(new CycleDefinition().withProjectId(PROJECT_ID))
+        Execution execution = new ExecutionBuilder()
+                .withCycleDefinition(CycleDefinitionFactory.get(PROJECT_ID))
                 .withRuns(new HashSet<>(Collections.singletonList(
                         run()
                                 .withIncludeInThresholds(Boolean.TRUE)
-                                .withSeverityTags("a,b"))));
+                                .withSeverityTags("a,b").build()))).build();
         when(severityRepository.findAllByProjectIdOrderByPosition(PROJECT_ID)).thenReturn(Arrays.asList(
-                new Severity().withCode("b").withPosition(1),
-                new Severity().withCode("a").withPosition(2)));
+                severity("b", 1, false),
+                severity("a", 2, false)));
 
         // WHEN
         SortedSet<Severity> activeSeverities = cut.getActiveSeverities(execution);
@@ -285,18 +289,18 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void getActiveSeverities_should_return_only_active_severities() {
+    void getActiveSeverities_should_return_only_active_severities() {
         // GIVEN
-        Execution execution = new Execution()
-                .withCycleDefinition(new CycleDefinition().withProjectId(PROJECT_ID))
+        Execution execution = new ExecutionBuilder()
+                .withCycleDefinition(CycleDefinitionFactory.get(PROJECT_ID))
                 .withRuns(new HashSet<>(Collections.singletonList(
                         run()
                                 .withIncludeInThresholds(Boolean.TRUE)
-                                .withSeverityTags("1,2"))));
+                                .withSeverityTags("1,2").build()))).build();
         when(severityRepository.findAllByProjectIdOrderByPosition(PROJECT_ID)).thenReturn(Arrays.asList(
-                new Severity().withCode("1").withPosition(1),
-                new Severity().withCode("2").withPosition(2),
-                new Severity().withCode("3").withPosition(3)));
+                severity("1", 1, false),
+                severity("2", 2, false),
+                severity("3", 3, false)));
 
         // WHEN
         SortedSet<Severity> activeSeverities = cut.getActiveSeverities(execution);
@@ -306,18 +310,18 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void getActiveSeverities_should_return_severity_ordered_by_position() {
+    void getActiveSeverities_should_return_severity_ordered_by_position() {
         // GIVEN
-        Execution execution = new Execution()
-                .withCycleDefinition(new CycleDefinition().withProjectId(PROJECT_ID))
+        Execution execution = new ExecutionBuilder()
+                .withCycleDefinition(CycleDefinitionFactory.get(PROJECT_ID))
                 .withRuns(new HashSet<>(Collections.singletonList(
                         run()
                                 .withIncludeInThresholds(Boolean.TRUE)
-                                .withSeverityTags("3,2"))));
+                                .withSeverityTags("3,2").build()))).build();
         when(severityRepository.findAllByProjectIdOrderByPosition(PROJECT_ID)).thenReturn(Arrays.asList(
-                new Severity().withCode("1").withPosition(2),
-                new Severity().withCode("2").withPosition(1),
-                new Severity().withCode("3").withPosition(3)));
+                severity("1", 2, false),
+                severity("2", 1, false),
+                severity("3", 3, false)));
 
         // WHEN
         SortedSet<Severity> activeSeverities = cut.getActiveSeverities(execution);
@@ -327,14 +331,14 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void getActiveSeverities_should_throw_IllegalArgumentException_on_unknown_severity() {
+    void getActiveSeverities_should_throw_IllegalArgumentException_on_unknown_severity() {
         // GIVEN
-        Execution execution = new Execution()
-                .withCycleDefinition(new CycleDefinition().withProjectId(PROJECT_ID))
+        Execution execution = new ExecutionBuilder()
+                .withCycleDefinition(CycleDefinitionFactory.get(PROJECT_ID))
                 .withRuns(new HashSet<>(Collections.singletonList(
                         run()
                                 .withIncludeInThresholds(Boolean.TRUE)
-                                .withSeverityTags("any"))));
+                                .withSeverityTags("any").build()))).build();
         when(severityRepository.findAllByProjectIdOrderByPosition(PROJECT_ID)).thenReturn(Collections.emptyList());
 
         // WHEN
@@ -342,12 +346,12 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void computeQualityOfSeverity_should_map_severity_to_a_dto() {
+    void computeQualityOfSeverity_should_map_severity_to_a_dto() {
         // GIVEN
         Execution execution = new Execution();
         Severity someSeverity = Severity.ALL;
         SeverityDTO someSeverityDto = new SeverityDTO();
-        doReturn(someSeverityDto).when(severityMapper).toDto(someSeverity);
+        doReturn(someSeverityDto).when(mapper).map(someSeverity, SeverityDTO.class);
 
         // WHEN
         QualitySeverityDTO quality = cut.computeQualityOfSeverity(execution, someSeverity, null);
@@ -357,30 +361,30 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void computeQualityOfSeverity_should_compute_well() {
+    void computeQualityOfSeverity_should_compute_well() {
         // GIVEN
-        Execution execution = new Execution()
+        Execution execution = new ExecutionBuilder()
                 .withRuns(new HashSet<>(Arrays.asList(
                         // Count it
                         run()
                                 .withIncludeInThresholds(Boolean.TRUE)
                                 .withStatus(JobStatus.DONE)
                                 .withExecutedScenarios(new HashSet<>(Collections.singletonList(
-                                        passedScenario().withSeverity("some")))),
+                                        passedScenario("some")))).build(),
                         // Not the same severity
                         run()
                                 .withIncludeInThresholds(Boolean.TRUE)
                                 .withStatus(JobStatus.DONE)
                                 .withExecutedScenarios(new HashSet<>(Collections.singletonList(
-                                        passedScenario().withSeverity("OTHER")))),
+                                        passedScenario("OTHER")))).build(),
                         // Not included in quality computation
                         run()
                                 .withIncludeInThresholds(Boolean.FALSE)
                                 .withStatus(JobStatus.DONE)
                                 .withExecutedScenarios(new HashSet<>(Collections.singletonList(
-                                        passedScenario().withSeverity("some")))))));
-        Severity someSeverity = new Severity().withCode("some");
-        QualityThreshold threshold = new QualityThreshold().withFailure(1).withWarning(1);
+                                        passedScenario("some")))).build()))).build();
+        Severity someSeverity = severity("some", 0, false);
+        QualityThreshold threshold = new QualityThreshold(1, 1);
 
         // WHEN
         QualitySeverityDTO quality = cut.computeQualityOfSeverity(execution, someSeverity, threshold);
@@ -392,14 +396,14 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void getRunsToIncludeInQuality_should_return_all_runs_to_include() {
+    void getRunsToIncludeInQuality_should_return_all_runs_to_include() {
         // GIVEN
-        final Run run1 = run().withIncludeInThresholds(Boolean.TRUE);
-        final Run run2 = run().withIncludeInThresholds(Boolean.TRUE);
-        Execution execution = new Execution()
+        final Run run1 = run().withIncludeInThresholds(Boolean.TRUE).build();
+        final Run run2 = run().withIncludeInThresholds(Boolean.TRUE).build();
+        Execution execution = new ExecutionBuilder()
                 .withRuns(new HashSet<>(Arrays.asList(
                         run1,
-                        run2)));
+                        run2))).build();
 
         // WHEN
         Set<Run> runs = cut.getRunsToIncludeInQuality(execution);
@@ -409,16 +413,16 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void getRunsToIncludeInQuality_should_return_only_runs_to_include() {
+    void getRunsToIncludeInQuality_should_return_only_runs_to_include() {
         // GIVEN
-        final Run run1 = run().withIncludeInThresholds(Boolean.TRUE);
-        final Run run2 = run().withIncludeInThresholds(Boolean.FALSE);
-        final Run run3 = run().withIncludeInThresholds(null);
-        Execution execution = new Execution()
+        final Run run1 = run().withIncludeInThresholds(Boolean.TRUE).build();
+        final Run run2 = run().withIncludeInThresholds(Boolean.FALSE).build();
+        final Run run3 = run().withIncludeInThresholds(null).build();
+        Execution execution = new ExecutionBuilder()
                 .withRuns(new HashSet<>(Arrays.asList(
                         run1,
                         run2,
-                        run3)));
+                        run3))).build();
 
         // WHEN
         Set<Run> runs = cut.getRunsToIncludeInQuality(execution);
@@ -428,18 +432,18 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void isComplete_should_return_true_if_all_runs_are_DONE() {
+    void isComplete_should_return_true_if_all_runs_are_DONE() {
         // GIVEN
-        Execution execution = new Execution()
+        Execution execution = new ExecutionBuilder()
                 .withRuns(new HashSet<>(Arrays.asList(
                         run()
                                 .withIncludeInThresholds(Boolean.TRUE)
                                 .withStatus(JobStatus.DONE)
-                                .withExecutedScenarios(Collections.singleton(new ExecutedScenario())),
+                                .withExecutedScenarios(Collections.singleton(new ExecutedScenario())).build(),
                         run()
                                 .withIncludeInThresholds(Boolean.TRUE)
                                 .withStatus(JobStatus.DONE)
-                                .withExecutedScenarios(Collections.singleton(new ExecutedScenario())))));
+                                .withExecutedScenarios(Collections.singleton(new ExecutedScenario())).build()))).build();
 
         // WHEN
         boolean complete = cut.isComplete(execution);
@@ -449,12 +453,12 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void isComplete_should_return_false_if_any_run_is_not_DONE() {
+    void isComplete_should_return_false_if_any_run_is_not_DONE() {
         // GIVEN
-        Execution execution = new Execution()
+        Execution execution = new ExecutionBuilder()
                 .withRuns(new HashSet<>(Arrays.asList(
-                        run().withIncludeInThresholds(Boolean.TRUE).withStatus(JobStatus.DONE),
-                        run().withIncludeInThresholds(Boolean.TRUE).withStatus(JobStatus.PENDING))));
+                        run().withIncludeInThresholds(Boolean.TRUE).withStatus(JobStatus.DONE).build(),
+                        run().withIncludeInThresholds(Boolean.TRUE).withStatus(JobStatus.PENDING).build()))).build();
 
         // WHEN
         boolean complete = cut.isComplete(execution);
@@ -464,14 +468,14 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void isComplete_should_return_false_if_any_run_is_not_DONE_even_if_it_has_executedScenarios() {
+    void isComplete_should_return_false_if_any_run_is_not_DONE_even_if_it_has_executedScenarios() {
         // GIVEN
-        Execution execution = new Execution()
+        Execution execution = new ExecutionBuilder()
                 .withRuns(new HashSet<>(Collections.singletonList(
                         run()
                                 .withIncludeInThresholds(Boolean.TRUE)
                                 .withStatus(JobStatus.PENDING)
-                                .withExecutedScenarios(new HashSet<>(Collections.singletonList(new ExecutedScenario()))))));
+                                .withExecutedScenarios(new HashSet<>(Collections.singletonList(new ExecutedScenario()))).build()))).build();
 
         // WHEN
         boolean complete = cut.isComplete(execution);
@@ -481,18 +485,18 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void isComplete_should_return_false_if_any_run_has_no_executed_scenario() {
+    void isComplete_should_return_false_if_any_run_has_no_executed_scenario() {
         // GIVEN
-        Execution execution = new Execution()
+        Execution execution = new ExecutionBuilder()
                 .withRuns(new HashSet<>(Arrays.asList(
                         run()
                                 .withIncludeInThresholds(Boolean.TRUE)
                                 .withStatus(JobStatus.DONE)
-                                .withExecutedScenarios(new HashSet<>(Collections.singletonList(new ExecutedScenario()))),
+                                .withExecutedScenarios(new HashSet<>(Collections.singletonList(new ExecutedScenario()))).build(),
                         run()
                                 .withIncludeInThresholds(Boolean.TRUE)
                                 .withStatus(JobStatus.DONE)
-                                .withExecutedScenarios(Collections.emptySet()))));
+                                .withExecutedScenarios(Collections.emptySet()).build()))).build();
 
         // WHEN
         boolean complete = cut.isComplete(execution);
@@ -502,17 +506,17 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void isComplete_should_return_true_if_all_runs_to_include_are_DONE() {
+    void isComplete_should_return_true_if_all_runs_to_include_are_DONE() {
         // GIVEN
-        Execution execution = new Execution()
+        Execution execution = new ExecutionBuilder()
                 .withRuns(new HashSet<>(Arrays.asList(
                         run()
                                 .withIncludeInThresholds(Boolean.TRUE)
                                 .withStatus(JobStatus.DONE)
-                                .withExecutedScenarios(Collections.singleton(new ExecutedScenario())),
+                                .withExecutedScenarios(Collections.singleton(new ExecutedScenario())).build(),
                         run()
                                 .withIncludeInThresholds(Boolean.FALSE)
-                                .withStatus(JobStatus.PENDING))));
+                                .withStatus(JobStatus.PENDING).build()))).build();
 
         // WHEN
         boolean complete = cut.isComplete(execution);
@@ -522,12 +526,12 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void countScenariosOfSeverity_should_count_all() {
+    void countScenariosOfSeverity_should_count_all() {
         // GIVEN
         final Set<Run> runs = Collections.singleton(run()
                 .withExecutedScenarios(new HashSet<>(Arrays.asList(
-                        passedScenario(),
-                        failedScenario()))));
+                        passedScenario(null),
+                        failedScenario(null)))).build());
 
         // WHEN
         ScenarioCountDTO counts = cut.countScenariosOfSeverity(runs, Severity.ALL);
@@ -539,14 +543,14 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void countScenariosOfSeverity_should_count_default() {
+    void countScenariosOfSeverity_should_count_default() {
         // GIVEN
         final Set<Run> runs = Collections.singleton(run()
                 .withExecutedScenarios(new HashSet<>(Arrays.asList(
-                        passedScenario().withSeverity(""),
-                        failedScenario().withSeverity("some"),
-                        failedScenario().withSeverity("other")))));
-        Severity someSeverity = new Severity().withCode("some").withDefaultOnMissing(true);
+                        passedScenario(""),
+                        failedScenario("some"),
+                        failedScenario("other")))).build());
+        Severity someSeverity = severity("some", 0, true);
 
         // WHEN
         ScenarioCountDTO counts = cut.countScenariosOfSeverity(runs, someSeverity);
@@ -558,13 +562,13 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void countScenariosOfSeverity_should_count_only_the_given_severity() {
+    void countScenariosOfSeverity_should_count_only_the_given_severity() {
         // GIVEN
         final Set<Run> runs = Collections.singleton(run()
                 .withExecutedScenarios(new HashSet<>(Arrays.asList(
-                        passedScenario().withSeverity(""),
-                        failedScenario().withSeverity("some")))));
-        Severity someSeverity = new Severity().withCode("some");
+                        passedScenario(""),
+                        failedScenario("some")))).build());
+        Severity someSeverity = severity("some", 0, false);
 
         // WHEN
         ScenarioCountDTO counts = cut.countScenariosOfSeverity(runs, someSeverity);
@@ -576,23 +580,21 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void countScenario_should_increment_total_count() {
+    void countScenario_should_increment_total_count() {
         // GIVEN
         ScenarioCountDTO counts = new ScenarioCountDTO();
 
         // WHEN
-        cut.countScenario(counts, passedScenario());
+        cut.countScenario(counts, passedScenario(null));
 
         // THEN
         assertThat(counts.getTotal()).isEqualTo(1);
     }
 
     @Test
-    public void countScenario_should_increment_passed_count() {
+    void countScenario_should_increment_passed_count() {
         // GIVEN
-        ScenarioCountDTO counts = new ScenarioCountDTO()
-                .withFailed(7)
-                .withPassed(2);
+        ScenarioCountDTO counts = scenarioCountDTO(0, 7, 2);
         ExecutedScenario executedScenario = new ExecutedScenario();
 
         // WHEN
@@ -604,14 +606,12 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void countScenario_should_increment_failed_count() {
+    void countScenario_should_increment_failed_count() {
         // GIVEN
-        ScenarioCountDTO counts = new ScenarioCountDTO()
-                .withFailed(7)
-                .withPassed(2);
+        ScenarioCountDTO counts = scenarioCountDTO(0, 7, 2);
 
         // WHEN
-        cut.countScenario(counts, failedScenario());
+        cut.countScenario(counts, failedScenario(null));
 
         // THEN
         assertThat(counts.getFailed()).isEqualTo(8);
@@ -619,9 +619,9 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void getQualityPercentage_should_return_100_when_no_scenario() {
+    void getQualityPercentage_should_return_100_when_no_scenario() {
         // GIVEN
-        ScenarioCountDTO counts = new ScenarioCountDTO().withTotal(0);
+        ScenarioCountDTO counts = new ScenarioCountDTO();
 
         // WHEN
         final int percentage = cut.getQualityPercentage(counts);
@@ -631,9 +631,9 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void getQualityPercentage_should_return_50_when_half_scenarios_succeed() {
+    void getQualityPercentage_should_return_50_when_half_scenarios_succeed() {
         // GIVEN
-        ScenarioCountDTO counts = new ScenarioCountDTO().withPassed(1).withTotal(2);
+        ScenarioCountDTO counts = scenarioCountDTO(2, 0, 1);
 
         // WHEN
         final int percentage = cut.getQualityPercentage(counts);
@@ -643,9 +643,9 @@ public class QualityServiceTest {
     }
 
     @Test
-    public void getQualityPercentage_should_truncate_instead_of_round_to_not_return_100_when_not_fully_passed() {
+    void getQualityPercentage_should_truncate_instead_of_round_to_not_return_100_when_not_fully_passed() {
         // GIVEN
-        ScenarioCountDTO counts = new ScenarioCountDTO().withPassed(199).withTotal(200);
+        ScenarioCountDTO counts = scenarioCountDTO(200, 0, 199);
 
         // WHEN
         final int percentage = cut.getQualityPercentage(counts);
@@ -654,20 +654,39 @@ public class QualityServiceTest {
         assertThat(percentage).isEqualTo(99);
     }
 
-    private Run run() {
-        return new Run()
-                .withCountry(new Country()
-                        .withCode(String.valueOf(lastId++)));
+    private RunBuilder run() {
+        return new RunBuilder()
+                .withCountry(CountryFactory.get(String.valueOf(lastId++)));
     }
 
-    private ExecutedScenario passedScenario() {
-        return new ExecutedScenario().withLine(lastId++);
-    }
-
-    private ExecutedScenario failedScenario() {
-        ExecutedScenario executedScenario = passedScenario();
-        executedScenario.getErrors().add(new Error());
+    private ExecutedScenario passedScenario(String severity) {
+        ExecutedScenario executedScenario = new ExecutedScenario();
+        executedScenario.setLine(lastId++);
+        executedScenario.setSeverity(severity);
         return executedScenario;
+    }
+
+    private ExecutedScenario failedScenario(String severity) {
+        ExecutedScenario executedScenario = passedScenario(null);
+        executedScenario.getErrors().add(new Error());
+        executedScenario.setSeverity(severity);
+        return executedScenario;
+    }
+
+    private Severity severity(String code, int position, boolean defaultOnMissing) {
+        Severity severity = new Severity();
+        TestUtil.setField(severity, "code", code);
+        TestUtil.setField(severity, "position", position);
+        TestUtil.setField(severity, "defaultOnMissing", defaultOnMissing);
+        return severity;
+    }
+
+    private ScenarioCountDTO scenarioCountDTO(int total, int failed, int passed) {
+        ScenarioCountDTO scenarioCountDTO = new ScenarioCountDTO();
+        scenarioCountDTO.setTotal(total);
+        scenarioCountDTO.setFailed(failed);
+        scenarioCountDTO.setPassed(passed);
+        return scenarioCountDTO;
     }
 
 }

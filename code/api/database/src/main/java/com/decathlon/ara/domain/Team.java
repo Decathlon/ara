@@ -17,21 +17,20 @@
 
 package com.decathlon.ara.domain;
 
-import lombok.*;
-
-import javax.persistence.*;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+
 @Entity
-@With
-// Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
-@EqualsAndHashCode(of = { "projectId", "name" })
-public class Team implements Serializable {
+public class Team {
 
     public static final Team NOT_ASSIGNED = new Team(Long.valueOf(-404), -404, "(No team)", true, false, new ArrayList<>());
 
@@ -52,5 +51,51 @@ public class Team implements Serializable {
     // No cascade, as this collection is only used while removing a team
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "blamedTeam")
     private List<Problem> problems = new ArrayList<>();
+
+    public Team() {
+    }
+
+    public Team(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public Team(Long id, long projectId, String name, boolean assignableToProblems, boolean assignableToFunctionalities,
+            List<Problem> problems) {
+        this.id = id;
+        this.projectId = projectId;
+        this.name = name;
+        this.assignableToProblems = assignableToProblems;
+        this.assignableToFunctionalities = assignableToFunctionalities;
+        this.problems = problems;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(long projectId) {
+        this.projectId = projectId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isAssignableToProblems() {
+        return assignableToProblems;
+    }
+
+    public boolean isAssignableToFunctionalities() {
+        return assignableToFunctionalities;
+    }
+
+    public List<Problem> getProblems() {
+        return problems;
+    }
 
 }

@@ -18,9 +18,7 @@
 package com.decathlon.ara.defect.jira.api.model.status;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
 
-@Data
 public class JiraStatus {
 
     private String self;
@@ -35,4 +33,28 @@ public class JiraStatus {
 
     @JsonProperty("statusCategory")
     private JiraStatusCategory category;
+
+    public String getSelf() {
+        return self;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getIconUrl() {
+        return iconUrl;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public JiraStatusCategory getCategory() {
+        return category;
+    }
 }

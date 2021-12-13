@@ -1,14 +1,16 @@
 package com.decathlon.ara.cartography;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * AraCartographyMapper handles all serialization/deserialization of ARA functionalities to export/import feature.
@@ -16,10 +18,12 @@ import java.util.List;
  * @author  Sylvain Nieuwlandt
  * @since 4.1.0
  */
-@Slf4j
 public class AraCartographyMapper {
 
-    private static final TypeReference<List<FunctionalityDTO>> TYPE_REFERENCE = new TypeReference<List<FunctionalityDTO>>() {};
+    private static final Logger LOG = LoggerFactory.getLogger(AraCartographyMapper.class);
+
+    private static final TypeReference<List<FunctionalityDTO>> TYPE_REFERENCE = new TypeReference<List<FunctionalityDTO>>() {
+    };
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -37,7 +41,7 @@ public class AraCartographyMapper {
         try {
             return objectMapper.writeValueAsString(functionalities);
         } catch (JsonProcessingException ex) {
-            log.error("FEATURE|Unable to serialize the wanted cartography into an ARA export.", ex);
+            LOG.error("FEATURE|Unable to serialize the wanted cartography into an ARA export.", ex);
             return "{}";
         }
     }
@@ -52,7 +56,7 @@ public class AraCartographyMapper {
         try {
             return objectMapper.readValue(jsonRepresentation, TYPE_REFERENCE);
         } catch (IOException ex) {
-            log.error("FEATURE|Unable to deserialize the given JSON into a list of Functionalities.", ex);
+            LOG.error("FEATURE|Unable to deserialize the given JSON into a list of Functionalities.", ex);
             return new ArrayList<>();
         }
     }
