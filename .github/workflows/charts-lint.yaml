@@ -45,7 +45,7 @@ jobs:
             echo "::set-output name=changed::true"
           fi
       - name: Run chart-testing (lint)
-        run: ct lint --target-branch main
+        run: ct lint --check-version-increment=false --target-branch main 
   lint-docs:
     runs-on: ubuntu-latest
     if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
