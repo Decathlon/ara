@@ -1,5 +1,5 @@
 {{- if eq .Values.database.mode "cluster" }}
-{{- $name := printf "%s-%s-%s" .Release.Name .Chart.Name "db" -}}
+{{- $name := printf "%s-%s" .Release.Name "db" -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

@@ -1,5 +1,5 @@
 {{- if eq .Values.api.authentication "oauth2-mock" }}
-{{- $name := printf "%s-%s-%s" .Release.Name .Chart.Name "oauth2-mock" -}}
+{{- $name := printf "%s-%s" .Release.Name "oauth2-mock" -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
