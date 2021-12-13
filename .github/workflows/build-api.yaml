@@ -81,7 +81,7 @@ jobs:
           chmod +x .git/hooks/pre-push
 
       - name: Semantic Release
-        uses: Thomgrus/semantic-release-action@feat/add-working-dir
+        uses: cycjimmy/semantic-release-action@v2
         with:
           working_directory: ./code/api
           semantic_version: 18
