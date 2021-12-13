@@ -17,19 +17,12 @@
 
 package com.decathlon.ara.web.rest;
 
+import static com.decathlon.ara.web.rest.util.RestConstants.API_PATH;
 
-import com.decathlon.ara.service.ProjectService;
-import com.decathlon.ara.service.exception.BadRequestException;
-import com.decathlon.ara.service.exception.NotUniqueException;
-import com.decathlon.ara.Entities;
-import com.decathlon.ara.service.dto.project.ProjectDTO;
-import com.decathlon.ara.web.rest.util.HeaderUtil;
-import com.decathlon.ara.web.rest.util.ResponseUtil;
 import java.util.List;
+
 import javax.validation.Valid;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,21 +32,29 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.API_PATH;
+import com.decathlon.ara.Entities;
+import com.decathlon.ara.service.ProjectService;
+import com.decathlon.ara.service.dto.project.ProjectDTO;
+import com.decathlon.ara.service.exception.BadRequestException;
+import com.decathlon.ara.service.exception.NotUniqueException;
+import com.decathlon.ara.web.rest.util.HeaderUtil;
+import com.decathlon.ara.web.rest.util.ResponseUtil;
 
 /**
  * REST controller for managing Projects.
  */
 @RestController
 @RequestMapping(ProjectResource.PATH)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ProjectResource {
 
     private static final String NAME = Entities.PROJECT;
     static final String PATH = API_PATH + "/" + NAME + "s";
 
-    @NonNull
     private final ProjectService service;
+
+    public ProjectResource(ProjectService service) {
+        this.service = service;
+    }
 
     /**
      * POST to create a new entity.

@@ -1,26 +1,25 @@
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.purge.service.PurgeService;
-import com.decathlon.ara.web.rest.util.ResponseUtil;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import com.decathlon.ara.purge.service.PurgeService;
+import com.decathlon.ara.web.rest.util.ResponseUtil;
 
-@Slf4j
 @RestController
 @RequestMapping(PROJECT_API_PATH + "/purge")
-@RequiredArgsConstructor
 public class PurgeResource {
 
-    @NonNull
     private final PurgeService purgeService;
+
+    public PurgeResource(PurgeService purgeService) {
+        this.purgeService = purgeService;
+    }
 
     /**
      * Force a project executions purge

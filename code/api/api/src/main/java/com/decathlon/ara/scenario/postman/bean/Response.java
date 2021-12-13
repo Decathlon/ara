@@ -18,15 +18,7 @@
 package com.decathlon.ara.scenario.postman.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Response {
 
@@ -55,5 +47,25 @@ public class Response {
      * The time in milliseconds between request sent and response received.
      */
     private long responseTime;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public KeyValue[] getHeader() {
+        return header;
+    }
+
+    public Stream getStream() {
+        return stream;
+    }
+
+    public long getResponseTime() {
+        return responseTime;
+    }
 
 }

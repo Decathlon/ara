@@ -17,21 +17,13 @@
 
 package com.decathlon.ara.service.dto.project;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-
 import static com.decathlon.ara.service.support.DtoConstants.CODE_MESSAGE;
 import static com.decathlon.ara.service.support.DtoConstants.CODE_PATTERN;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
 public class ProjectDTO {
 
     private Long id;
@@ -50,5 +42,38 @@ public class ProjectDTO {
      * URL. Only one project can be declared as the default.
      */
     private boolean defaultAtStartup;
+
+    public ProjectDTO() {
+    }
+
+    public ProjectDTO(Long id,
+            String code,
+            String name,
+            boolean defaultAtStartup) {
+        this.id = id;
+        this.code = code;
+        this.name = name;
+        this.defaultAtStartup = defaultAtStartup;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isDefaultAtStartup() {
+        return defaultAtStartup;
+    }
 
 }

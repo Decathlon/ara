@@ -17,15 +17,12 @@
 
 package com.decathlon.ara.defect.jira.api.model.status;
 
-import lombok.Data;
-
-@Data
 public class JiraStatusCategory {
 
-    public final static String UNDEFINED = "undefined";
-    public final static String NEW = "new";
-    public final static String DONE = "done";
-    public final static String INDETERMINATE = "indeterminate";
+    public static final String UNDEFINED = "undefined";
+    public static final String NEW = "new";
+    public static final String DONE = "done";
+    public static final String INDETERMINATE = "indeterminate";
 
     private String self;
 
@@ -36,4 +33,40 @@ public class JiraStatusCategory {
     private String colorName;
 
     private String name;
+
+    public static String getUndefined() {
+        return UNDEFINED;
+    }
+
+    public static String getNew() {
+        return NEW;
+    }
+
+    public static String getDone() {
+        return DONE;
+    }
+
+    public static String getIndeterminate() {
+        return INDETERMINATE;
+    }
+
+    public String getSelf() {
+        return self;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public String getColorName() {
+        return colorName;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

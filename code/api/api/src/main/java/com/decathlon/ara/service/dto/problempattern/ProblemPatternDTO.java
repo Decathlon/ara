@@ -17,18 +17,11 @@
 
 package com.decathlon.ara.service.dto.problempattern;
 
+import javax.validation.constraints.Size;
+
 import com.decathlon.ara.service.dto.country.CountryDTO;
 import com.decathlon.ara.service.dto.type.TypeWithSourceDTO;
-import javax.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 public class ProblemPatternDTO {
 
     private Long id;
@@ -69,5 +62,83 @@ public class ProblemPatternDTO {
 
     @Size(max = 32, message = "The platform must not exceed {max} characters.")
     private String platform;
+
+    public ProblemPatternDTO() {
+    }
+
+    public ProblemPatternDTO(
+            String stepDefinition,
+            String exception) {
+        this.stepDefinition = stepDefinition;
+        this.exception = exception;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getFeatureFile() {
+        return featureFile;
+    }
+
+    public String getFeatureName() {
+        return featureName;
+    }
+
+    public String getScenarioName() {
+        return scenarioName;
+    }
+
+    public boolean isScenarioNameStartsWith() {
+        return scenarioNameStartsWith;
+    }
+
+    public String getStep() {
+        return step;
+    }
+
+    public boolean isStepStartsWith() {
+        return stepStartsWith;
+    }
+
+    public String getStepDefinition() {
+        return stepDefinition;
+    }
+
+    public boolean isStepDefinitionStartsWith() {
+        return stepDefinitionStartsWith;
+    }
+
+    public String getException() {
+        return exception;
+    }
+
+    public String getRelease() {
+        return release;
+    }
+
+    public CountryDTO getCountry() {
+        return country;
+    }
+
+    public TypeWithSourceDTO getType() {
+        return type;
+    }
+
+    public Boolean getTypeIsBrowser() {
+        return typeIsBrowser;
+    }
+
+    public Boolean getTypeIsMobile() {
+        return typeIsMobile;
+    }
+
+    public String getPlatform() {
+        return platform;
+    }
 
 }

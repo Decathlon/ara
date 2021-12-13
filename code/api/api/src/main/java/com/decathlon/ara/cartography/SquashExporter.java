@@ -1,16 +1,5 @@
 package com.decathlon.ara.cartography;
 
-import com.decathlon.ara.domain.enumeration.FunctionalityType;
-import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,22 +8,36 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.decathlon.ara.domain.enumeration.FunctionalityType;
+import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
+
 /**
  * SquashExporter is an Exporter which serialize the functionalities in order to make them importable in SquashTM.
  *
  * @author Sylvain Nieuwlandt
  * @since 4.1.0
  */
-@Slf4j
 public class SquashExporter extends Exporter {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SquashExporter.class);
 
     static final String PROJECT_NAME = "squash_project_name";
     static final String USER = "squash_user";
-    private static final Map<String,String> CRITICALITY_MAPPING = new HashMap<>();
-    private static final String[] HEADERS =  {"ACTION", "PROJECT_ID", "PROJECT_NAME", "REQ_PATH", "REQ_NUM", "REQ_VERSION_NUM", "REQ_VERSION_NAME",
+    private static final Map<String, String> CRITICALITY_MAPPING = new HashMap<>();
+    private static final String[] HEADERS = { "ACTION", "PROJECT_ID", "PROJECT_NAME", "REQ_PATH", "REQ_NUM", "REQ_VERSION_NUM", "REQ_VERSION_NAME",
             "REQ_VERSION_CRITICALITY", "REQ_VERSION_CATEGORY", "REQ_VERSION_STATUS", "REQ_VERSION_DESCRIPTION", "REQ_VERSION_#_TC",
             "REQ_VERSION_#_ATTACHEMENT", "REQ_VERSION_CREATED_ON", "REQ_VERSION_CREATED_BY", "REQ_VERSION_LAST_MODIFIED_ON",
-            "REQ_VERSION_LAST_MODIFIED_BY", "REQ_VERSION_MILESTONE", "REQ_VERSION_CUF_<code du cuf>"};
+            "REQ_VERSION_LAST_MODIFIED_BY", "REQ_VERSION_MILESTONE", "REQ_VERSION_CUF_<code du cuf>" };
 
     static {
         CRITICALITY_MAPPING.put("HIGH", "CRITICAL");
@@ -68,7 +71,7 @@ public class SquashExporter extends Exporter {
         this.createHeaderRow(sheet);
         Date importDate = new Date();
         int idx = 1;
-        for (FunctionalityDTO functionality: functionalities) {
+        for (FunctionalityDTO functionality : functionalities) {
             StringBuilder pathBuilder = new StringBuilder("/");
             if (FunctionalityType.FUNCTIONALITY.name().equals(functionality.getType())) {
                 String criticity = CRITICALITY_MAPPING.get(functionality.getSeverity());
@@ -87,7 +90,7 @@ public class SquashExporter extends Exporter {
             workbook.close();
             return outputStream.toByteArray();
         } catch (IOException ex) {
-            log.error("FEATURE|squash|export|Unable to write the Squash export", ex);
+            LOG.error("FEATURE|squash|export|Unable to write the Squash export", ex);
         }
         return new byte[0];
     }

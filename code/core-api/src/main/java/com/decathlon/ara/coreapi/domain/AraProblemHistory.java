@@ -8,9 +8,6 @@ import javax.persistence.Id;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 
-import lombok.Data;
-
-@Data
 @Entity
 public class AraProblemHistory {
     
@@ -22,5 +19,17 @@ public class AraProblemHistory {
     private String createdBy;
 
     private String status;
+
+    protected LocalDateTime getCreatedDatetime() {
+        return createdDatetime;
+    }
+
+    protected String getCreatedBy() {
+        return createdBy;
+    }
+
+    protected String getStatus() {
+        return status;
+    }
 
 }

@@ -44,15 +44,15 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 @Disabled
 @SpringBootTest
 @TestExecutionListeners({
-    TransactionalTestExecutionListener.class,
-    DependencyInjectionTestExecutionListener.class,
-    DbUnitTestExecutionListener.class
+        TransactionalTestExecutionListener.class,
+        DependencyInjectionTestExecutionListener.class,
+        DbUnitTestExecutionListener.class
 })
 @TestPropertySource(
-		locations = "classpath:application-db-h2.properties")
+        locations = "classpath:application-db-h2.properties")
 @Transactional
 @DatabaseSetup("/dbunit/cycleDefinition.xml")
-public class CycleDefinitionResourceIT {
+class CycleDefinitionResourceIT {
 
     private static final String PROJECT_CODE = "p";
 
@@ -60,13 +60,12 @@ public class CycleDefinitionResourceIT {
     private CycleDefinitionResource cut;
 
     @Test
-    public void create_ShouldInsertEntity_WhenAllRulesAreRespected() {
+    void create_ShouldInsertEntity_WhenAllRulesAreRespected() {
         // GIVEN
-        CycleDefinitionDTO cycleDefinitionDTO = new CycleDefinitionDTO()
-                .withId(null)
-                .withBranch("   newBranch \t ")
-                .withName(" newName\t")
-                .withBranchPosition(Integer.valueOf(0));
+        CycleDefinitionDTO cycleDefinitionDTO = new CycleDefinitionDTO(null,
+                "   newBranch \t ",
+                " newName\t",
+                Integer.valueOf(0));
 
         // WHEN
         ResponseEntity<CycleDefinitionDTO> response = cut.create(PROJECT_CODE, cycleDefinitionDTO);
@@ -86,7 +85,7 @@ public class CycleDefinitionResourceIT {
     }
 
     @Test
-    public void create_ShouldFailAsBadRequest_WhenIdProvided() {
+    void create_ShouldFailAsBadRequest_WhenIdProvided() {
         // GIVEN
         final CycleDefinitionDTO cycleDefinitionWithId = new CycleDefinitionDTO(NONEXISTENT, "any", "any", 0);
 
@@ -102,11 +101,9 @@ public class CycleDefinitionResourceIT {
     }
 
     @Test
-    public void create_ShouldFailAsNotUnique_WhenBranchAndNameAlreadyExist() {
+    void create_ShouldFailAsNotUnique_WhenBranchAndNameAlreadyExist() {
         // GIVEN
-        CycleDefinitionDTO cycleDefinitionWithExistingBranchAndName = new CycleDefinitionDTO();
-        cycleDefinitionWithExistingBranchAndName.setBranch("develop");
-        cycleDefinitionWithExistingBranchAndName.setName("cycle1");
+        CycleDefinitionDTO cycleDefinitionWithExistingBranchAndName = new CycleDefinitionDTO(null, "develop", "cycle1", null);
 
         // WHEN
         ResponseEntity<CycleDefinitionDTO> response = cut.create(PROJECT_CODE, cycleDefinitionWithExistingBranchAndName);
@@ -122,7 +119,7 @@ public class CycleDefinitionResourceIT {
     }
 
     @Test
-    public void getAll_ShouldReturnAllEntitiesOrderedByBranchPositionBranchAndName() {
+    void getAll_ShouldReturnAllEntitiesOrderedByBranchPositionBranchAndName() {
         // WHEN
         ResponseEntity<List<CycleDefinitionDTO>> response = cut.getAll(PROJECT_CODE);
 
@@ -136,7 +133,7 @@ public class CycleDefinitionResourceIT {
     }
 
     @Test
-    public void update_ShouldUpdateEntity_WhenAllRulesAreRespected() {
+    void update_ShouldUpdateEntity_WhenAllRulesAreRespected() {
         // GIVEN
         CycleDefinitionDTO cycleDefinitionDTO = new CycleDefinitionDTO(null, "   updated \t ", "  updatedToo\t", 0);
 
@@ -155,7 +152,7 @@ public class CycleDefinitionResourceIT {
     }
 
     @Test
-    public void testUpdateExistingBranchAndName() {
+    void testUpdateExistingBranchAndName() {
         // GIVEN
         final Long id = Long.valueOf(200);
         final CycleDefinitionDTO cycleDefinition = new CycleDefinitionDTO(null, "stab", "cycle3", 4);
@@ -171,7 +168,7 @@ public class CycleDefinitionResourceIT {
     }
 
     @Test
-    public void testUpdateNonexistent() {
+    void testUpdateNonexistent() {
         // GIVEN
         final CycleDefinitionDTO anyCycleDefinition = new CycleDefinitionDTO(null, "nonexistent", "nonexistent", 0);
 
@@ -187,7 +184,7 @@ public class CycleDefinitionResourceIT {
     }
 
     @Test
-    public void update_ShouldUpdateBranchPositionOfAllCyclesOfSameBranch_WhenUpdatingBranchPositionOfOneCycleOfABranch() {
+    void update_ShouldUpdateBranchPositionOfAllCyclesOfSameBranch_WhenUpdatingBranchPositionOfOneCycleOfABranch() {
         // GIVEN
         final Long idOfABranchWithAnotherCycle = Long.valueOf(199);
         final CycleDefinitionDTO cycleDefinitionWithUpdatedPosition =
@@ -205,7 +202,7 @@ public class CycleDefinitionResourceIT {
     }
 
     @Test
-    public void testDeleteOk() {
+    void testDeleteOk() {
         // WHEN
         ResponseEntity<Void> response = cut.delete(PROJECT_CODE, Long.valueOf(201));
 
@@ -222,7 +219,7 @@ public class CycleDefinitionResourceIT {
     }
 
     @Test
-    public void testDeleteNonexistent() {
+    void testDeleteNonexistent() {
         // WHEN
         ResponseEntity<Void> response = cut.delete(PROJECT_CODE, NONEXISTENT);
 
@@ -235,7 +232,7 @@ public class CycleDefinitionResourceIT {
     }
 
     @Test
-    public void testDelete_used_to_execution() {
+    void testDelete_used_to_execution() {
         // GIVEN 
         ResponseEntity<Void> response = cut.delete(PROJECT_CODE, Long.valueOf(202));
 

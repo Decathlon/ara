@@ -20,7 +20,10 @@ package com.decathlon.ara.lib.embed.consumer;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import lombok.extern.slf4j.Slf4j;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
@@ -29,8 +32,9 @@ import net.minidev.json.parser.ParseException;
 /**
  * Read an HTML String, parse it and extract all structured embeddings it contains.
  */
-@Slf4j
 public class StructuredEmbeddingsExtractor {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(StructuredEmbeddingsExtractor.class);
 
     // We only recognize version 1, and its non-breaking sub-versions (using https://semver.org/ to ensure that)
     private static final Pattern MAGIC_HEADER_PATTERN = Pattern.compile("^(<!--StructuredEmbeddings_v1(.[0-9]+)?.([0-9]+)?=).*$", Pattern.DOTALL);
@@ -60,7 +64,7 @@ public class StructuredEmbeddingsExtractor {
         try {
             array = (JSONArray) new JSONParser(JSONParser.MODE_PERMISSIVE).parse(json);
         } catch (ParseException e) {
-            log.error("Cannot parse StructuredEmbeddings JSON", e);
+        	LOG.error("Cannot parse StructuredEmbeddings JSON", e);
             return Optional.empty();
         }
 

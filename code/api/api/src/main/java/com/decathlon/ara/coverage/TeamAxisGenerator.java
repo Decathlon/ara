@@ -17,24 +17,25 @@
 
 package com.decathlon.ara.coverage;
 
-import com.decathlon.ara.repository.TeamRepository;
-import com.decathlon.ara.domain.Functionality;
-import com.decathlon.ara.domain.Team;
-import com.decathlon.ara.service.dto.coverage.AxisPointDTO;
 import java.util.stream.Stream;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.decathlon.ara.domain.Functionality;
+import com.decathlon.ara.domain.Team;
+import com.decathlon.ara.repository.TeamRepository;
+import com.decathlon.ara.service.dto.coverage.AxisPointDTO;
+
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TeamAxisGenerator implements AxisGenerator {
 
-    @NonNull
     private final TeamRepository teamRepository;
+
+    public TeamAxisGenerator(TeamRepository teamRepository) {
+        this.teamRepository = teamRepository;
+    }
 
     @Override
     public String getCode() {

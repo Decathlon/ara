@@ -1,19 +1,23 @@
 package com.decathlon.ara.service.dto.setting;
 
-import com.decathlon.ara.domain.enumeration.Technology;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.With;
+import java.util.List;
 
-@Data
-@EqualsAndHashCode(callSuper=true)
-@NoArgsConstructor
-@AllArgsConstructor
-@With
+import com.decathlon.ara.domain.enumeration.Technology;
+
 public class TechnologySettingGroupDTO extends SettingGroupDTO {
 
     private Technology technology;
+
+    public TechnologySettingGroupDTO() {
+    }
+
+    public TechnologySettingGroupDTO(String name, List<SettingDTO> settings, Technology technology) {
+        super(name, settings);
+        this.technology = technology;
+    }
+
+    public Technology getTechnology() {
+        return technology;
+    }
 
 }

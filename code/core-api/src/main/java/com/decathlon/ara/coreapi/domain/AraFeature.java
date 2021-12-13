@@ -1,12 +1,7 @@
 package com.decathlon.ara.coreapi.domain;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
 import javax.persistence.*;
 
-@Data
-@EqualsAndHashCode(callSuper=true)
 @Entity
 public class AraFeature extends Auditable<String> {
     @Id
@@ -26,4 +21,40 @@ public class AraFeature extends Auditable<String> {
 
     @ManyToOne
     private AraTeam team;
+
+    protected Long getId() {
+        return id;
+    }
+
+    protected String getName() {
+        return name;
+    }
+
+    protected String getDescription() {
+        return description;
+    }
+
+    protected String getCode() {
+        return code;
+    }
+
+    protected String getPath() {
+        return path;
+    }
+
+    protected String getStatus() {
+        return status;
+    }
+
+    protected String getComment() {
+        return comment;
+    }
+
+    protected AraPriority getPriority() {
+        return priority;
+    }
+
+    protected AraTeam getTeam() {
+        return team;
+    }
 }

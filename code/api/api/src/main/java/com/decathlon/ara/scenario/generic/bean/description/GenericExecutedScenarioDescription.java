@@ -17,22 +17,15 @@
 
 package com.decathlon.ara.scenario.generic.bean.description;
 
-import com.decathlon.ara.scenario.generic.bean.description.step.GenericExecutedScenarioStep;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-import org.springframework.util.CollectionUtils;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
+import org.springframework.util.CollectionUtils;
+
+import com.decathlon.ara.scenario.generic.bean.description.step.GenericExecutedScenarioStep;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GenericExecutedScenarioDescription {
 
@@ -52,5 +45,13 @@ public class GenericExecutedScenarioDescription {
         return steps.stream()
                 .map(GenericExecutedScenarioStep::getStepLine)
                 .collect(Collectors.joining("\n"));
+    }
+
+    public List<GenericExecutedScenarioStep> getSteps() {
+        return steps;
+    }
+
+    public Integer getStartLineNumber() {
+        return startLineNumber;
     }
 }

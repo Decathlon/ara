@@ -19,15 +19,7 @@ package com.decathlon.ara.scenario.postman.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ItemWithScripts {
 
@@ -68,5 +60,29 @@ public class ItemWithScripts {
 
     @JsonProperty("event")
     private Event[] events;
+
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Request getRequest() {
+        return request;
+    }
+
+    public ItemWithScripts[] getChildren() {
+        return children;
+    }
+
+    public boolean isSubFolder() {
+        return isSubFolder;
+    }
+
+    public Event[] getEvents() {
+        return events;
+    }
 
 }

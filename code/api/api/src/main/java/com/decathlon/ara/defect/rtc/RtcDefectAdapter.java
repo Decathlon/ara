@@ -17,6 +17,48 @@
 
 package com.decathlon.ara.defect.rtc;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.X509TrustManager;
+
+import org.apache.commons.collections4.ListUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+
 import com.decathlon.ara.ci.util.FetchException;
 import com.decathlon.ara.common.NotGonnaHappenException;
 import com.decathlon.ara.defect.DefectAdapter;
@@ -28,40 +70,11 @@ import com.decathlon.ara.service.SettingProviderService;
 import com.decathlon.ara.service.SettingService;
 import com.decathlon.ara.service.dto.setting.SettingDTO;
 import com.decathlon.ara.service.support.Settings;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.ListUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.*;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.X509TrustManager;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-@Slf4j
 @Service
 public class RtcDefectAdapter implements DefectAdapter {
+
+    private static final Logger LOG = LoggerFactory.getLogger(RtcDefectAdapter.class);
 
     private static final Pattern COOKIE_PATTERN = Pattern.compile("^([^=]*)=([^;]*)");
     private static final Pattern RTC_ID_PATTERN = Pattern.compile("[-]?[0-9]{1,10}");
@@ -75,9 +88,9 @@ public class RtcDefectAdapter implements DefectAdapter {
 
     @Autowired
     public RtcDefectAdapter(SettingService settingService,
-                            RestTemplateBuilder restTemplateBuilder,
-                            RtcDateTimeAdapter rtcDateTimeAdapter,
-                            SettingProviderService settingProviderService) {
+            RestTemplateBuilder restTemplateBuilder,
+            RtcDateTimeAdapter rtcDateTimeAdapter,
+            SettingProviderService settingProviderService) {
         this.settingService = settingService;
         this.rtcDateTimeAdapter = rtcDateTimeAdapter;
         this.settingProviderService = settingProviderService;
@@ -153,7 +166,7 @@ public class RtcDefectAdapter implements DefectAdapter {
         }
         try {
             final Integer parsedId = Integer.valueOf(id);
-            log.debug("DEFECT|rtc|Parsed defect ID {} (logged for no 'Result of method not used' warning)", parsedId);
+            LOG.debug("DEFECT|rtc|Parsed defect ID {} (logged for no 'Result of method not used' warning)", parsedId);
             return true;
         } catch (NumberFormatException e) {
             return false;
@@ -263,7 +276,7 @@ public class RtcDefectAdapter implements DefectAdapter {
                     final String nextPageUrl = URLDecoder.decode(rawNextPageUrl, StandardCharsets.UTF_8.name());
                     defects.addAll(queryDefects(projectId, cookies, nextPageUrl, requestedPageSize));
                 } catch (UnsupportedEncodingException e) {
-                    log.warn("DEFECT|rtc|Ignoring URL of next page because it cannot be parsed: {}", url, e);
+                    LOG.warn("DEFECT|rtc|Ignoring URL of next page because it cannot be parsed: {}", url, e);
                 }
             }
         }
@@ -303,13 +316,13 @@ public class RtcDefectAdapter implements DefectAdapter {
 
         if (closedStates.stream().anyMatch(s -> s.equalsIgnoreCase(lowerState))) {
             if (openStates.contains(lowerState)) {
-                log.debug("DEFECT|rtc|Work item status \"{}\" is configured both as OPEN and CLOSED: CLOSED have priority", state);
+                LOG.debug("DEFECT|rtc|Work item status \"{}\" is configured both as OPEN and CLOSED: CLOSED have priority", state);
             }
             return ProblemStatus.CLOSED;
         } else if (openStates.stream().anyMatch(s -> s.equalsIgnoreCase(lowerState))) {
             return ProblemStatus.OPEN;
         }
-        log.debug("DEFECT|rtc|Work item status \"{}\" is not configured as OPEN nor as CLOSED: consider it OPEN", state);
+        LOG.debug("DEFECT|rtc|Work item status \"{}\" is not configured as OPEN nor as CLOSED: consider it OPEN", state);
         return ProblemStatus.OPEN;
     }
 
@@ -433,7 +446,7 @@ public class RtcDefectAdapter implements DefectAdapter {
                 try {
                     // Install the all-trusting trust manager
                     final SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
-                    final var trustManagers = new SimpleTrustManager[]{new SimpleTrustManager()};
+                    final var trustManagers = new SimpleTrustManager[] { new SimpleTrustManager() };
                     sslContext.init(null, trustManagers, null);
                     HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
                     ((HttpsURLConnection) connection).setSSLSocketFactory(sslContext.getSocketFactory());

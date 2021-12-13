@@ -17,19 +17,16 @@
 
 package com.decathlon.ara.scenario.cucumber.asset;
 
-import com.decathlon.ara.service.util.DateService;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import static com.decathlon.ara.lib.embed.producer.StructuredEmbeddingsBuilder.HUMAN_AND_MACHINE_READABLE_TIMESTAMP_PATTERN;
 
 import java.text.SimpleDateFormat;
 
-import static com.decathlon.ara.lib.embed.producer.StructuredEmbeddingsBuilder.HUMAN_AND_MACHINE_READABLE_TIMESTAMP_PATTERN;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import com.decathlon.ara.service.util.DateService;
 
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FileNameService {
 
     /**
@@ -37,8 +34,11 @@ public class FileNameService {
      */
     private static final int MAX_SCENARIO_NAME_LENGTH = 128;
 
-    @NonNull
     private final DateService dateService;
+
+    public FileNameService(DateService dateService) {
+        this.dateService = dateService;
+    }
 
     /**
      * @param scenarioName the raw scenario name, as displayed to users

@@ -17,21 +17,10 @@
 
 package com.decathlon.ara.web.rest;
 
+import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 
-import com.decathlon.ara.service.ProblemPatternService;
-import com.decathlon.ara.service.ProjectService;
-import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
-import com.decathlon.ara.service.dto.problempattern.ProblemPatternDTO;
-import com.decathlon.ara.service.dto.response.DeletePatternDTO;
-import com.decathlon.ara.service.exception.BadRequestException;
-import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.web.rest.util.HeaderUtil;
-import com.decathlon.ara.web.rest.util.ResponseUtil;
-import com.decathlon.ara.Entities;
 import javax.validation.Valid;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -43,24 +32,35 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import com.decathlon.ara.Entities;
+import com.decathlon.ara.service.ProblemPatternService;
+import com.decathlon.ara.service.ProjectService;
+import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
+import com.decathlon.ara.service.dto.problempattern.ProblemPatternDTO;
+import com.decathlon.ara.service.dto.response.DeletePatternDTO;
+import com.decathlon.ara.service.exception.BadRequestException;
+import com.decathlon.ara.service.exception.NotFoundException;
+import com.decathlon.ara.web.rest.util.HeaderUtil;
+import com.decathlon.ara.web.rest.util.ResponseUtil;
 
 /**
  * REST controller for managing Problem Patterns.
  */
 @RestController
 @RequestMapping(ProblemPatternResource.PATH)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ProblemPatternResource {
 
     private static final String NAME = Entities.PROBLEM_PATTERN;
     static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
 
-    @NonNull
     private final ProblemPatternService service;
 
-    @NonNull
     private final ProjectService projectService;
+
+    public ProblemPatternResource(ProblemPatternService service, ProjectService projectService) {
+        this.service = service;
+        this.projectService = projectService;
+    }
 
     /**
      * DELETE one entity.
@@ -90,7 +90,7 @@ public class ProblemPatternResource {
      */
     @GetMapping("/{id:[0-9]+}/errors")
     public ResponseEntity<Page<ErrorWithExecutedScenarioAndRunAndExecutionDTO>> getProblemPatternErrors(
-            @PathVariable String projectCode, @PathVariable long id, Pageable pageable) {
+                                                                                                        @PathVariable String projectCode, @PathVariable long id, Pageable pageable) {
         try {
             return ResponseEntity.ok()
                     .body(service.getProblemPatternErrors(projectService.toId(projectCode), id, pageable));

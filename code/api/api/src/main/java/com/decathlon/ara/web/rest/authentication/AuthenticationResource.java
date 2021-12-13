@@ -17,40 +17,38 @@
 
 package com.decathlon.ara.web.rest.authentication;
 
+import static com.decathlon.ara.web.rest.util.RestConstants.AUTH_PATH;
 
-import com.decathlon.ara.service.authentication.AuthenticationService;
-import static com.decathlon.ara.service.authentication.AuthenticationService.AuthenticationConf;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.decathlon.ara.service.authentication.AuthenticationService;
+import com.decathlon.ara.service.authentication.AuthenticationService.AuthenticationConf;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.AUTH_PATH;
-
-@Slf4j
 @RestController
 @RequestMapping(AUTH_PATH)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AuthenticationResource {
 
-    @NonNull
+    private static final Logger LOG = LoggerFactory.getLogger(AuthenticationResource.class);
+
     private final AuthenticationService authenticationService;
 
+    public AuthenticationResource(AuthenticationService authenticationService) {
+        this.authenticationService = authenticationService;
+    }
+
     @GetMapping("/status")
-    public Boolean getStatus(){
+    public Boolean getStatus() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        boolean isAuthenticated= authentication != null &&
+        boolean isAuthenticated = authentication != null &&
                 authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getName());
 
-
-        log.debug("Is logged ?" + isAuthenticated);
+        LOG.debug("Is logged ? {}", isAuthenticated);
         return isAuthenticated;
     }
 

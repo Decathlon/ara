@@ -17,74 +17,87 @@
 
 package com.decathlon.ara.service;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
+import com.decathlon.ara.domain.Country;
 import com.decathlon.ara.domain.Error;
-import com.decathlon.ara.domain.*;
-import com.decathlon.ara.repository.*;
+import com.decathlon.ara.domain.Problem;
+import com.decathlon.ara.domain.ProblemOccurrence;
+import com.decathlon.ara.domain.ProblemPattern;
+import com.decathlon.ara.domain.Type;
+import com.decathlon.ara.repository.CountryRepository;
+import com.decathlon.ara.repository.ProblemPatternRepository;
+import com.decathlon.ara.repository.ProblemRepository;
+import com.decathlon.ara.repository.TypeRepository;
 import com.decathlon.ara.repository.custom.util.JpaCacheManager;
 import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
 import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
+import com.decathlon.ara.service.dto.problem.ProblemDTO;
 import com.decathlon.ara.service.dto.problempattern.ProblemPatternDTO;
 import com.decathlon.ara.service.dto.response.DeletePatternDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
-import com.decathlon.ara.service.mapper.ErrorWithExecutedScenarioAndRunAndExecutionMapper;
-import com.decathlon.ara.service.mapper.ProblemMapper;
-import com.decathlon.ara.service.mapper.ProblemPatternMapper;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collections;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.decathlon.ara.service.mapper.GenericMapper;
 
 /**
  * Service for managing ProblemPattern.
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ProblemPatternService {
 
-    @NonNull
     private final ProblemDenormalizationService problemDenormalizationService;
 
-    @NonNull
     private final ProblemPatternRepository problemPatternRepository;
 
-    @NonNull
     private final ProblemRepository problemRepository;
 
-    @NonNull
-    private final ErrorRepository errorRepository;
+    private final ErrorService errorService;
 
-    @NonNull
     private final CountryRepository countryRepository;
 
-    @NonNull
     private final TypeRepository typeRepository;
 
-    @NonNull
-    private final ProblemPatternMapper problemPatternMapper;
+    private final GenericMapper mapper;
 
-    @NonNull
-    private final ProblemMapper problemMapper;
-
-    @NonNull
-    private final ErrorWithExecutedScenarioAndRunAndExecutionMapper errorWithExecutedScenarioAndRunAndExecutionMapper;
-
-    @NonNull
     private final JpaCacheManager jpaCacheManager;
 
-    @NonNull
     private final TransactionAppenderUtil transactionService;
+
+    @Autowired
+    public ProblemPatternService(ProblemDenormalizationService problemDenormalizationService,
+            ProblemPatternRepository problemPatternRepository, ProblemRepository problemRepository,
+            @Lazy ErrorService errorService, CountryRepository countryRepository, TypeRepository typeRepository,
+            GenericMapper mapper,
+            JpaCacheManager jpaCacheManager, TransactionAppenderUtil transactionService) {
+        this.problemDenormalizationService = problemDenormalizationService;
+        this.problemPatternRepository = problemPatternRepository;
+        this.problemRepository = problemRepository;
+        this.errorService = errorService;
+        this.countryRepository = countryRepository;
+        this.typeRepository = typeRepository;
+        this.mapper = mapper;
+        this.jpaCacheManager = jpaCacheManager;
+        this.transactionService = transactionService;
+    }
 
     /**
      * Get one problem pattern by id.
@@ -100,7 +113,7 @@ public class ProblemPatternService {
         if (problemPattern == null) {
             throw new NotFoundException(Messages.NOT_FOUND_PROBLEM_PATTERN, Entities.PROBLEM_PATTERN);
         }
-        return problemPatternMapper.toDto(problemPattern);
+        return mapper.map(problemPattern, ProblemPatternDTO.class);
     }
 
     /**
@@ -131,7 +144,7 @@ public class ProblemPatternService {
         DeletePatternDTO response = new DeletePatternDTO();
         if (sourceProblem.getPatterns().isEmpty()) {
             problemRepository.delete(sourceProblem);
-            response.setDeletedProblem(problemMapper.toDto(sourceProblem));
+            response.setDeletedProblem(mapper.map(sourceProblem, ProblemDTO.class));
         } else {
             problemDenormalizationService.updateFirstAndLastSeenDateTimes(Collections.singleton(sourceProblem));
         }
@@ -154,8 +167,13 @@ public class ProblemPatternService {
         if (problemPattern == null) {
             throw new NotFoundException(Messages.NOT_FOUND_PATTERN, Entities.PROBLEM_PATTERN);
         }
-        Page<Error> errors = errorRepository.findDistinctByProblemOccurrencesProblemOccurrenceIdProblemPatternInOrderById(Collections.singletonList(problemPattern), pageable);
-        return errors.map(errorWithExecutedScenarioAndRunAndExecutionMapper::toDto);
+        List<Order> orders = new ArrayList<>();
+        orders.add(new Order(Direction.ASC, "id"));
+        for (Order order : pageable.getSort()) {
+            orders.add(order);
+        }
+
+        return errorService.getErrors(Collections.singletonList(problemPattern), PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(orders)));
     }
 
     /**
@@ -174,7 +192,7 @@ public class ProblemPatternService {
         }
 
         // We update the pattern, but don't change the problem it's associated to, and we remove all assigned errors from the old pattern
-        ProblemPattern entityToUpdate = problemPatternMapper.toEntity(dtoToUpdate);
+        ProblemPattern entityToUpdate = mapper.map(dtoToUpdate, ProblemPattern.class);
         assignExistingEntities(projectId, entityToUpdate);
         entityToUpdate.setProblem(problemPattern.getProblem()); // BEFORE the next Pattern.equals(...)
 
@@ -183,7 +201,7 @@ public class ProblemPatternService {
             // ProblemPattern.equals(...) uses problemId & all aggregation rule criteria
             // Here, both pattern.problemId are equal, so we check criteria equality inside the same problem
             if (existingPattern.equals(entityToUpdate) && !existingPattern.getId().equals(entityToUpdate.getId())) {
-                throw new NotUniqueException(Messages.NOT_UNIQUE_PATTERN_IN_PROBLEM, Entities.PROBLEM_PATTERN, QProblem.problem.patterns.getMetadata().getName(), existingPattern.getId());
+                throw new NotUniqueException(Messages.NOT_UNIQUE_PATTERN_IN_PROBLEM, Entities.PROBLEM_PATTERN, "patterns", existingPattern.getId());
             }
         }
 
@@ -194,10 +212,10 @@ public class ProblemPatternService {
         problemPattern = problemPatternRepository.save(entityToUpdate);
 
         // Reassign errors to the new pattern, and update the first and last seen occurrences
-        errorRepository.assignPatternToErrors(projectId, problemPattern); // Also evict errors' cache of the NEW pattern
+        errorService.assignPatternToErrors(projectId, problemPattern); // Also evict errors' cache of the NEW pattern
         problemDenormalizationService.updateFirstAndLastSeenDateTimes(Collections.singleton(problemPattern.getProblem()));
 
-        return problemPatternMapper.toDto(problemPattern);
+        return mapper.map(problemPattern, ProblemPatternDTO.class);
     }
 
     /**
@@ -213,8 +231,7 @@ public class ProblemPatternService {
                 .map(ProblemOccurrence::getError)
                 .map(Error::getId)
                 .collect(Collectors.toSet());
-        transactionService.doAfterCommit(() ->
-                jpaCacheManager.evictCollections(Error.PROBLEM_OCCURRENCES_COLLECTION_CACHE, errorIds));
+        transactionService.doAfterCommit(() -> jpaCacheManager.evictCollections(Error.PROBLEM_OCCURRENCES_COLLECTION_CACHE, errorIds));
     }
 
     void assignExistingEntities(long projectId, ProblemPattern problemPattern) throws NotFoundException {

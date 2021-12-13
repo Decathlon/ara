@@ -17,19 +17,8 @@
 
 package com.decathlon.ara.web.rest;
 
+import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 
-import com.decathlon.ara.service.ErrorService;
-import com.decathlon.ara.service.ProjectService;
-import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionAndProblemsDTO;
-import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
-import com.decathlon.ara.service.dto.problempattern.ProblemPatternDTO;
-import com.decathlon.ara.service.dto.response.DistinctStatisticsDTO;
-import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.web.rest.util.ResponseUtil;
-import com.decathlon.ara.Entities;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -40,24 +29,34 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import com.decathlon.ara.Entities;
+import com.decathlon.ara.service.ErrorService;
+import com.decathlon.ara.service.ProjectService;
+import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionAndProblemsDTO;
+import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
+import com.decathlon.ara.service.dto.problempattern.ProblemPatternDTO;
+import com.decathlon.ara.service.dto.response.DistinctStatisticsDTO;
+import com.decathlon.ara.service.exception.NotFoundException;
+import com.decathlon.ara.web.rest.util.ResponseUtil;
 
 /**
  * REST controller for managing Unidentified Errors.
  */
 @RestController
 @RequestMapping(ErrorResource.PATH)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ErrorResource {
 
     private static final String NAME = Entities.ERROR;
     static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
 
-    @NonNull
     private final ErrorService service;
 
-    @NonNull
     private final ProjectService projectService;
+
+    public ErrorResource(ErrorService service, ProjectService projectService) {
+        this.service = service;
+        this.projectService = projectService;
+    }
 
     /**
      * GET one entity.
@@ -68,7 +67,7 @@ public class ErrorResource {
      */
     @GetMapping("/{id:[0-9]+}")
     public ResponseEntity<ErrorWithExecutedScenarioAndRunAndExecutionDTO> getOne(
-            @PathVariable String projectCode, @PathVariable long id) {
+                                                                                 @PathVariable String projectCode, @PathVariable long id) {
         try {
             return ResponseEntity.ok().body(service.findOne(projectService.toId(projectCode), id));
         } catch (NotFoundException e) {
@@ -86,7 +85,7 @@ public class ErrorResource {
      */
     @PostMapping("/matching")
     public ResponseEntity<Page<ErrorWithExecutedScenarioAndRunAndExecutionAndProblemsDTO>> getMatchingErrors(
-            @PathVariable String projectCode, @RequestBody ProblemPatternDTO pattern, Pageable pageable) {
+                                                                                                             @PathVariable String projectCode, @RequestBody ProblemPatternDTO pattern, Pageable pageable) {
         try {
             return ResponseEntity.ok().body(service.findMatchingErrors(projectService.toId(projectCode), pattern, pageable));
         } catch (NotFoundException e) {

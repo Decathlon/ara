@@ -17,20 +17,21 @@
 
 package com.decathlon.ara.scenario.cucumber.bean;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-@Data
-@Slf4j
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Tag {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Tag.class);
 
     public static final String IGNORE = "@ignore";
     public static final String SEVERITY_PREFIX = "@severity-";
@@ -86,7 +87,7 @@ public class Tag {
 
         // A scenario have at most one severity
         if (severities.size() > 1) {
-            log.error("Scenario \"{}\" has several severities: {}: only one will be used (in a non-deterministic way)", scenarioName, severities);
+            LOG.error("Scenario \"{}\" has several severities: {}: only one will be used (in a non-deterministic way)", scenarioName, severities);
         }
 
         // No severity assigned to the scenario
@@ -96,6 +97,14 @@ public class Tag {
 
         // Return ONE severity (pseudo-randomly, depending on the implementation of the Set)
         return severities.iterator().next();
+    }
+
+    public Integer getLine() {
+        return line;
+    }
+
+    public String getName() {
+        return name;
     }
 
 }

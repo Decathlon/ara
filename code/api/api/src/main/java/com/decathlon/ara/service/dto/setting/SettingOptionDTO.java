@@ -17,15 +17,6 @@
 
 package com.decathlon.ara.service.dto.setting;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 public class SettingOptionDTO {
 
     /**
@@ -37,5 +28,21 @@ public class SettingOptionDTO {
      * User-visible text value to show in the GUI for the option.
      */
     private String label;
+
+    public SettingOptionDTO() {
+    }
+
+    public SettingOptionDTO(String value, String label) {
+        this.value = value;
+        this.label = label;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public String getLabel() {
+        return label;
+    }
 
 }

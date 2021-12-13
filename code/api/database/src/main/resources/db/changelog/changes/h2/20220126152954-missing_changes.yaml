@@ -1,0 +1,342 @@
+databaseChangeLog:
+- changeSet:
+    id: 1643207712428-39
+    author: '? (generated)'
+    changes:
+    - dropSequence:
+        sequenceName: EXECUTION_COMPLETION_REQUEST_ID
+- changeSet:
+    id: 1643207712428-1
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: PROBLEM_OCCURRENCE
+        constraintName: FK7UFW7W6TY9AF8D2KNFJ8WF61S
+- changeSet:
+    id: 1643207712428-2
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: ERROR_ID
+        baseTableName: PROBLEM_OCCURRENCE
+        constraintName: FK7UFW7W6TY9AF8D2KNFJ8WF61S
+        onDelete: CASCADE
+        onUpdate: RESTRICT
+        referencedColumnNames: ID
+        referencedTableName: ERROR
+- changeSet:
+    id: 1643207712428-3
+    author: '? (generated)'
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: PROBLEM_OCCURRENCE
+        constraintName: FKORSA8KVTS94KXIMVDH0LMLFJG
+- changeSet:
+    id: 1643207712428-4
+    author: '? (generated)'
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: PROBLEM_PATTERN_ID
+        baseTableName: PROBLEM_OCCURRENCE
+        constraintName: FKORSA8KVTS94KXIMVDH0LMLFJG
+        onDelete: CASCADE
+        onUpdate: RESTRICT
+        referencedColumnNames: ID
+        referencedTableName: PROBLEM_PATTERN
+- changeSet:
+    id: 1643207712428-5
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(16)
+        columnName: BRANCH
+        tableName: CYCLE_DEFINITION
+        validate: true
+- changeSet:
+    id: 1643207712428-6
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(32)
+        columnName: CODE
+        tableName: COMMUNICATION
+        validate: true
+- changeSet:
+    id: 1643207712428-7
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(2)
+        columnName: CODE
+        tableName: COUNTRY
+        validate: true
+- changeSet:
+    id: 1643207712428-8
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(32)
+        columnName: CODE
+        tableName: PROJECT
+        validate: true
+- changeSet:
+    id: 1643207712428-9
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(64)
+        columnName: CODE
+        tableName: SETTING
+        validate: true
+- changeSet:
+    id: 1643207712428-10
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(32)
+        columnName: CODE
+        tableName: SEVERITY
+        validate: true
+- changeSet:
+    id: 1643207712428-11
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(16)
+        columnName: CODE
+        tableName: SOURCE
+        validate: true
+- changeSet:
+    id: 1643207712428-12
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(255)
+        columnName: CODE
+        tableName: TECHNOLOGY_SETTING
+        validate: true
+- changeSet:
+    id: 1643207712428-13
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(16)
+        columnName: CODE
+        tableName: TYPE
+        validate: true
+- changeSet:
+    id: 1643207712428-14
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: COMMENT
+        newDataType: varchar(2147483647)
+        tableName: FUNCTIONALITY
+- changeSet:
+    id: 1643207712428-15
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: COMMENT
+        newDataType: varchar(2147483647)
+        tableName: PROBLEM
+- changeSet:
+    id: 1643207712428-16
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: CONTENT
+        newDataType: varchar(2147483647)
+        tableName: EXECUTED_SCENARIO
+- changeSet:
+    id: 1643207712428-17
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: CONTENT
+        newDataType: varchar(2147483647)
+        tableName: SCENARIO
+- changeSet:
+    id: 1643207712428-18
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(16)
+        columnName: DEFAULT_BRANCH
+        tableName: SOURCE
+        validate: true
+- changeSet:
+    id: 1643207712428-19
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: EXCEPTION
+        newDataType: varchar(2147483647)
+        tableName: PROBLEM_PATTERN
+- changeSet:
+    id: 1643207712428-20
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(8)
+        columnName: INITIALS
+        tableName: SEVERITY
+        validate: true
+- changeSet:
+    id: 1643207712428-21
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: MESSAGE
+        newDataType: varchar(2147483647)
+        tableName: COMMUNICATION
+- changeSet:
+    id: 1643207712428-22
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(64)
+        columnName: NAME
+        tableName: COMMUNICATION
+        validate: true
+- changeSet:
+    id: 1643207712428-23
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(40)
+        columnName: NAME
+        tableName: COUNTRY
+        validate: true
+- changeSet:
+    id: 1643207712428-24
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(16)
+        columnName: NAME
+        tableName: CYCLE_DEFINITION
+        validate: true
+- changeSet:
+    id: 1643207712428-25
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(64)
+        columnName: NAME
+        tableName: PROJECT
+        validate: true
+- changeSet:
+    id: 1643207712428-26
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(128)
+        columnName: NAME
+        tableName: ROOT_CAUSE
+        validate: true
+- changeSet:
+    id: 1643207712428-27
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(32)
+        columnName: NAME
+        tableName: SEVERITY
+        validate: true
+- changeSet:
+    id: 1643207712428-28
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(32)
+        columnName: NAME
+        tableName: SOURCE
+        validate: true
+- changeSet:
+    id: 1643207712428-29
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(128)
+        columnName: NAME
+        tableName: TEAM
+        validate: true
+- changeSet:
+    id: 1643207712428-30
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(50)
+        columnName: NAME
+        tableName: TYPE
+        validate: true
+- changeSet:
+    id: 1643207712428-31
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(16)
+        columnName: SHORT_NAME
+        tableName: SEVERITY
+        validate: true
+- changeSet:
+    id: 1643207712428-32
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: bigint
+        columnName: SOURCE_ID
+        tableName: TYPE
+        validate: true
+- changeSet:
+    id: 1643207712428-33
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(16)
+        columnName: TECHNOLOGY
+        tableName: SOURCE
+        validate: true
+- changeSet:
+    id: 1643207712428-34
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(255)
+        columnName: TECHNOLOGY
+        tableName: TECHNOLOGY_SETTING
+        validate: true
+- changeSet:
+    id: 1643207712428-35
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(4)
+        columnName: TYPE
+        tableName: COMMUNICATION
+        validate: true
+- changeSet:
+    id: 1643207712428-36
+    author: '? (generated)'
+    changes:
+    - addNotNullConstraint:
+        columnDataType: varchar(255)
+        columnName: VCS_URL
+        tableName: SOURCE
+        validate: true
+- changeSet:
+    id: 1643207712428-37
+    author: '? (generated)'
+    changes:
+    - dropPrimaryKey:
+        tableName: PROBLEM_OCCURRENCE
+- changeSet:
+    id: 1643207712428-38
+    author: '? (generated)'
+    changes:
+    - addPrimaryKey:
+        columnNames: ERROR_ID, PROBLEM_PATTERN_ID
+        constraintName: CONSTRAINT_74
+        tableName: PROBLEM_OCCURRENCE
+

@@ -22,7 +22,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.Test;
 
-public class TypeTest {
+import com.decathlon.ara.util.factory.TypeFactory;
+
+class TypeTest {
 
     private static Type type(String code) {
         // Check they must have no impact
@@ -30,12 +32,11 @@ public class TypeTest {
         boolean dummyIsBrowser = RandomUtils.nextBoolean();
         boolean dummyIsMobile = RandomUtils.nextBoolean();
 
-        return new Type(Long.valueOf(42), 1, code, dummyName, dummyIsBrowser, dummyIsMobile, null);
+        return TypeFactory.get(Long.valueOf(42), 1, code, dummyName, dummyIsBrowser, dummyIsMobile, null);
     }
 
     @Test
-    @SuppressWarnings("static-method")
-    public void testCompareTo() {
+    void testCompareTo() {
         assertThat(type(null).compareTo(type(null))).isZero();
         assertThat(type(null).compareTo(type("A"))).isNegative();
         assertThat(type("A").compareTo(type(null))).isPositive();

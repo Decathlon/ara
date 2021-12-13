@@ -1,17 +1,13 @@
 package com.decathlon.ara.coreapi.domain;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-@Data
-@EqualsAndHashCode(callSuper=true)
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+
 @Entity
 public class AraRun extends Auditable<String> {
 
@@ -30,5 +26,33 @@ public class AraRun extends Auditable<String> {
 
     @OneToMany
     private Set<AraTag> tags = Collections.emptySet();
+
+    protected CodeWithProjectId getId() {
+        return id;
+    }
+
+    protected String getVersion() {
+        return version;
+    }
+
+    protected String getStatus() {
+        return status;
+    }
+
+    protected String getDiscardReason() {
+        return discardReason;
+    }
+
+    protected List<AraRunSeverity> getSeverities() {
+        return severities;
+    }
+
+    protected List<AraExecution> getExecutions() {
+        return executions;
+    }
+
+    protected Set<AraTag> getTags() {
+        return tags;
+    }
 
 }

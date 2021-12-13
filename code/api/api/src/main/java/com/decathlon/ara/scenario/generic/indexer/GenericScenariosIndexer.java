@@ -17,6 +17,15 @@
 
 package com.decathlon.ara.scenario.generic.indexer;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
 import com.decathlon.ara.domain.Error;
 import com.decathlon.ara.domain.ExecutedScenario;
 import com.decathlon.ara.domain.Run;
@@ -30,41 +39,29 @@ import com.decathlon.ara.scenario.generic.bean.log.GenericExecutedScenarioLogs;
 import com.decathlon.ara.scenario.generic.settings.GenericSettings;
 import com.decathlon.ara.service.FileProcessorService;
 import com.decathlon.ara.service.TechnologySettingService;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-@Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GenericScenariosIndexer implements ScenariosIndexer {
 
-    @NonNull
     private final TechnologySettingService technologySettingService;
 
-    @NonNull
     private final FileProcessorService fileProcessorService;
+
+    public GenericScenariosIndexer(TechnologySettingService technologySettingService,
+            FileProcessorService fileProcessorService) {
+        this.technologySettingService = technologySettingService;
+        this.fileProcessorService = fileProcessorService;
+    }
 
     @Override
     public List<ExecutedScenario> getExecutedScenarios(File parentFolder, Run run, Long projectId) {
         String reportsFolderPath = technologySettingService.getSettingValue(projectId, GenericSettings.REPORTS_LOCATION).orElse("");
         List<GenericExecutedScenarioReport> reports = fileProcessorService.getMappedObjectsFromDirectory(parentFolder, reportsFolderPath, GenericExecutedScenarioReport.class);
 
-        return CollectionUtils.isEmpty(reports) ?
-                new ArrayList<>() :
-                reports
-                        .stream()
-                        .map(report -> getExecutedScenarioFromGenericExecutedScenarioReport(report, run))
-                        .collect(Collectors.toList());
+        return CollectionUtils.isEmpty(reports) ? new ArrayList<>() : reports
+                .stream()
+                .map(report -> getExecutedScenarioFromGenericExecutedScenarioReport(report, run))
+                .collect(Collectors.toList());
     }
 
     /**

@@ -1,18 +1,24 @@
 package com.decathlon.ara.scenario.common.upload;
 
-import com.decathlon.ara.domain.Scenario;
-import com.decathlon.ara.repository.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Arrays;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.persistence.EntityManager;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import com.decathlon.ara.domain.Scenario;
+import com.decathlon.ara.repository.CountryRepository;
+import com.decathlon.ara.repository.FunctionalityRepository;
+import com.decathlon.ara.repository.ScenarioRepository;
+import com.decathlon.ara.repository.SeverityRepository;
+import com.decathlon.ara.repository.SourceRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ScenarioUploaderTest {
@@ -43,10 +49,7 @@ class ScenarioUploaderTest {
 
         //GIVEN
         final List<String> severityCodes = Arrays.asList("existing");
-        final List<Scenario> scenarios = Arrays.asList(new Scenario()
-                        .withSeverity("existing"),
-                new Scenario()
-                        .withSeverity("nonexitent"));
+        final List<Scenario> scenarios = Arrays.asList(scenario(null, "existing"), scenario(null, "nonexitent"));
 
         //WHEN
         cut.assignWrongSeverityCode(severityCodes, scenarios);
@@ -62,9 +65,7 @@ class ScenarioUploaderTest {
 
         //GIVEN
         List<String> countryCodes = Arrays.asList("existing");
-        final List<Scenario> scenarios = Arrays.asList(
-                new Scenario()
-                        .withSeverity("existing"));
+        final List<Scenario> scenarios = Arrays.asList(scenario(null, "existing"));
 
         //WHEN
         cut.assignWrongCountryCodes(countryCodes, scenarios);
@@ -78,8 +79,7 @@ class ScenarioUploaderTest {
 
         //GIVEN
         List<String> countryCodes = Arrays.asList("be", "cn", "de", "hk", "nl");
-        final List<Scenario> scenarios = Arrays.asList(new Scenario()
-                .withCountryCodes("nl,XX,YY"));
+        final List<Scenario> scenarios = Arrays.asList(scenario("nl,XX,YY", null));
 
         //WHEN
         cut.assignWrongCountryCodes(countryCodes, scenarios);
@@ -94,13 +94,7 @@ class ScenarioUploaderTest {
 
         //GIVEN
         List<String> countryCodes = Arrays.asList("be", "cn", "de", "hk", "nl");
-        final List<Scenario> scenarios = Arrays.asList(
-                new Scenario()
-                        .withCountryCodes("nl"),
-                new Scenario()
-                        .withCountryCodes("nonexitent"),
-                new Scenario()
-                        .withCountryCodes("de,AA,ZZ"));
+        final List<Scenario> scenarios = Arrays.asList(scenario("nl", null), scenario("nonexitent", null), scenario("de,AA,ZZ", null));
 
         //WHEN
         cut.assignWrongCountryCodes(countryCodes, scenarios);
@@ -112,6 +106,12 @@ class ScenarioUploaderTest {
         assertThat(scenarios.get(1).getWrongCountryCodes()).isEqualTo("nonexitent");
 
         assertThat(scenarios.get(0).getWrongCountryCodes()).isNull();
+    }
 
+    private Scenario scenario(String countryCodes, String severity) {
+        Scenario scenario = new Scenario();
+        scenario.setCountryCodes(countryCodes);
+        scenario.setSeverity(severity);
+        return scenario;
     }
 }

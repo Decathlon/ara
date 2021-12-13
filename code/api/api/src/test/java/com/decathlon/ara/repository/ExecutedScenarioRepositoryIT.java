@@ -17,11 +17,10 @@
 
 package com.decathlon.ara.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,24 +32,25 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
 import com.decathlon.ara.domain.projection.ExecutedScenarioWithErrorAndProblemJoin;
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
+import com.google.api.client.util.Objects;
 
 @SpringBootTest
 @TestExecutionListeners({
-    TransactionalTestExecutionListener.class,
-    DependencyInjectionTestExecutionListener.class,
-    DbUnitTestExecutionListener.class
+        TransactionalTestExecutionListener.class,
+        DependencyInjectionTestExecutionListener.class,
+        DbUnitTestExecutionListener.class
 })
 @TestPropertySource(properties = {
         "ara.database.target=h2"
 })
-public class ExecutedScenarioRepositoryIT {
+class ExecutedScenarioRepositoryIT {
 
     @Autowired
     private ExecutedScenarioRepository cut;
 
     @Test
     @DatabaseSetup({ "/dbunit/ExecutedScenarioRepositoryIT-findAllErrorCounts.xml" })
-    public void testFindAllErrorCounts() {
+    void testFindAllErrorCounts() {
         // GIVEN
         Long runId = 11L;
 
@@ -58,25 +58,40 @@ public class ExecutedScenarioRepositoryIT {
         final List<ExecutedScenarioWithErrorAndProblemJoin> errorCounts = cut.findAllErrorAndProblemCounts(Collections.singleton(runId));
 
         // THEN
-        assertThat(errorCounts).containsOnly(
-                new ExecutedScenarioWithErrorAndProblemJoin(111, 11, "medium", "With unidentified error", 1, 0),
-                new ExecutedScenarioWithErrorAndProblemJoin(112, 11, "medium", "With identified error", 1, 1),
-                new ExecutedScenarioWithErrorAndProblemJoin(113, 11, "sanity-check", "Without error", 0, 0));
+        Assertions.assertEquals(3, errorCounts.size());
+        Assertions.assertTrue(contains(errorCounts, 111, 11, "medium", "With unidentified error", 1, 0));
+        Assertions.assertTrue(contains(errorCounts, 112, 11, "medium", "With identified error", 1, 1));
+        Assertions.assertTrue(contains(errorCounts, 113, 11, "sanity-check", "Without error", 0, 0));
     }
 
     @Test
-    @DatabaseSetup({ "/dbunit/ExecutedScenarioRepositoryIT-findAllErrorAndProblemCount_even_closed_ones.xml"})
-    public void testFindAllErrorAndProblemCount_even_closed_ones() {
+    @DatabaseSetup({ "/dbunit/ExecutedScenarioRepositoryIT-findAllErrorAndProblemCount_even_closed_ones.xml" })
+    void testFindAllErrorAndProblemCount_even_closed_ones() {
         // GIVEN
         Long runId = 11L;
         // WHEN
         List<ExecutedScenarioWithErrorAndProblemJoin> allErrorAndProblemCounts = cut.findAllErrorAndProblemCounts(Collections.singleton(runId));
         // THEN
-        assertThat(allErrorAndProblemCounts).containsOnly(
-                new ExecutedScenarioWithErrorAndProblemJoin(111, 11, "medium", "With unidentified error", 1, 0),
-                new ExecutedScenarioWithErrorAndProblemJoin(112, 11, "medium", "With identified error", 1, 1),
-                new ExecutedScenarioWithErrorAndProblemJoin(113, 11, "sanity-check", "Without error", 0, 0),
-                new ExecutedScenarioWithErrorAndProblemJoin(114, 11, "high", "With identified, closed, error", 0, 1),
-                new ExecutedScenarioWithErrorAndProblemJoin(115, 11, "high", "With identified, closed (with date), error", 0, 1));
+        Assertions.assertEquals(5, allErrorAndProblemCounts.size());
+        Assertions.assertTrue(contains(allErrorAndProblemCounts, 111, 11, "medium", "With unidentified error", 1, 0));
+        Assertions.assertTrue(contains(allErrorAndProblemCounts, 112, 11, "medium", "With identified error", 1, 1));
+        Assertions.assertTrue(contains(allErrorAndProblemCounts, 113, 11, "sanity-check", "Without error", 0, 0));
+        Assertions.assertTrue(contains(allErrorAndProblemCounts, 114, 11, "high", "With identified, closed, error", 0, 1));
+        Assertions.assertTrue(contains(allErrorAndProblemCounts, 115, 11, "high", "With identified, closed (with date), error", 0, 1));
     }
+
+    private boolean contains(List<ExecutedScenarioWithErrorAndProblemJoin> results, long id, long runId, String severity, String name, long unhandledCount, long handledCount) {
+        for (ExecutedScenarioWithErrorAndProblemJoin result : results) {
+            if (equals(result, id, runId, severity, name, unhandledCount, handledCount)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean equals(ExecutedScenarioWithErrorAndProblemJoin result, long id, long runId, String severity, String name, long unhandledCount, long handledCount) {
+        return result.getId() == id && result.getRunId() == runId && Objects.equal(result.getSeverity(), severity)
+                && Objects.equal(result.getName(), name) && result.getUnhandledCount() == unhandledCount && result.getHandledCount() == handledCount;
+    }
+
 }

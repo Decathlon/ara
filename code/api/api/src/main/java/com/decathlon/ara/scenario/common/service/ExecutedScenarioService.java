@@ -17,58 +17,57 @@
 
 package com.decathlon.ara.scenario.common.service;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.domain.Error;
 import com.decathlon.ara.domain.ExecutedScenario;
 import com.decathlon.ara.domain.Problem;
-import com.decathlon.ara.scenario.cucumber.util.ScenarioExtractorUtil;
 import com.decathlon.ara.repository.ErrorRepository;
 import com.decathlon.ara.repository.ExecutedScenarioRepository;
 import com.decathlon.ara.repository.FunctionalityRepository;
+import com.decathlon.ara.scenario.cucumber.util.ScenarioExtractorUtil;
 import com.decathlon.ara.service.dto.error.ErrorWithProblemsDTO;
 import com.decathlon.ara.service.dto.executedscenario.ExecutedScenarioDTO;
 import com.decathlon.ara.service.dto.executedscenario.ExecutedScenarioWithRunAndTeamIdsAndExecutionAndErrorsAndProblemsDTO;
+import com.decathlon.ara.service.dto.problem.ProblemDTO;
 import com.decathlon.ara.service.dto.request.ExecutedScenarioHistoryInputDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
-import com.decathlon.ara.service.mapper.ExecutedScenarioMapper;
-import com.decathlon.ara.service.mapper.ExecutedScenarioWithRunAndTeamIdsAndExecutionAndErrorsAndProblemsMapper;
-import com.decathlon.ara.service.mapper.ProblemMapper;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.stream.Collectors;
+import com.decathlon.ara.service.mapper.GenericMapper;
 
 /**
  * Service for managing ExecutedScenario.
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ExecutedScenarioService {
 
-    @NonNull
     private final ExecutedScenarioRepository executedScenarioRepository;
 
-    @NonNull
     private final ErrorRepository errorRepository;
 
-    @NonNull
     private final FunctionalityRepository functionalityRepository;
 
-    @NonNull
-    private final ExecutedScenarioMapper executedScenarioMapper;
+    private final GenericMapper mapper;
 
-    @NonNull
-    private final ExecutedScenarioWithRunAndTeamIdsAndExecutionAndErrorsAndProblemsMapper executedScenarioWithRunAndTeamIdsAndExecutionAndErrorsAndProblemsMapper;
-
-    @NonNull
-    private final ProblemMapper problemMapper;
+    public ExecutedScenarioService(ExecutedScenarioRepository executedScenarioRepository,
+            ErrorRepository errorRepository, FunctionalityRepository functionalityRepository,
+            GenericMapper mapper) {
+        this.executedScenarioRepository = executedScenarioRepository;
+        this.errorRepository = errorRepository;
+        this.functionalityRepository = functionalityRepository;
+        this.mapper = mapper;
+    }
 
     /**
      * @param projectId the ID of the project in which to work
@@ -88,11 +87,10 @@ public class ExecutedScenarioService {
                 input.getCycleName(),
                 input.getCountryCode(),
                 input.getRunTypeCode(),
-                input.getDuration()
-        );
+                input.getDuration());
 
         final List<ExecutedScenarioWithRunAndTeamIdsAndExecutionAndErrorsAndProblemsDTO> dtoList =
-                executedScenarioWithRunAndTeamIdsAndExecutionAndErrorsAndProblemsMapper.toDto(executedScenarios);
+                mapper.mapCollection(executedScenarios, ExecutedScenarioWithRunAndTeamIdsAndExecutionAndErrorsAndProblemsDTO.class);
 
         assignProblemsToErrors(executedScenarios, dtoList);
         assignTeamsToExecutedScenarios(projectId, dtoList);
@@ -109,7 +107,7 @@ public class ExecutedScenarioService {
      */
     public ExecutedScenarioDTO findOne(long projectId, long executedScenarioId) {
         ExecutedScenario executedScenario = executedScenarioRepository.findOne(projectId, executedScenarioId);
-        return executedScenarioMapper.toDto(executedScenario);
+        return mapper.map(executedScenario, ExecutedScenarioDTO.class);
     }
 
     private void assignProblemsToErrors(List<ExecutedScenario> executedScenarios, List<ExecutedScenarioWithRunAndTeamIdsAndExecutionAndErrorsAndProblemsDTO> dtoList) {
@@ -117,7 +115,7 @@ public class ExecutedScenarioService {
         Map<Error, List<Problem>> errorsProblems = errorRepository.getErrorsProblems(flattenErrors(executedScenarios));
         for (ExecutedScenarioWithRunAndTeamIdsAndExecutionAndErrorsAndProblemsDTO executedScenarioDto : dtoList) {
             for (ErrorWithProblemsDTO errorDto : executedScenarioDto.getErrors()) {
-                errorDto.setProblems(problemMapper.toDto(getErrorProblems(errorsProblems, errorDto.getId())));
+                errorDto.setProblems(mapper.mapCollection(getErrorProblems(errorsProblems, errorDto.getId()), ProblemDTO.class));
             }
         }
     }

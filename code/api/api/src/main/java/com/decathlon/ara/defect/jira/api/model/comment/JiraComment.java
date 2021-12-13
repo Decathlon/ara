@@ -17,13 +17,11 @@
 
 package com.decathlon.ara.defect.jira.api.model.comment;
 
-import com.decathlon.ara.defect.jira.api.model.user.JiraUser;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Data;
-
 import java.time.ZonedDateTime;
 
-@Data
+import com.decathlon.ara.defect.jira.api.model.user.JiraUser;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 public class JiraComment {
 
     private String self;
@@ -36,11 +34,43 @@ public class JiraComment {
 
     private JiraUser updateAuthor;
 
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     private ZonedDateTime created;
 
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     private ZonedDateTime updated;
 
     private Boolean jsdPublic;
+
+    public String getSelf() {
+        return self;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public JiraUser getAuthor() {
+        return author;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public JiraUser getUpdateAuthor() {
+        return updateAuthor;
+    }
+
+    public ZonedDateTime getCreated() {
+        return created;
+    }
+
+    public ZonedDateTime getUpdated() {
+        return updated;
+    }
+
+    public Boolean getJsdPublic() {
+        return jsdPublic;
+    }
 }

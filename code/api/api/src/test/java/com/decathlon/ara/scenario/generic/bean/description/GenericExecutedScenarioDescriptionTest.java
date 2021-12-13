@@ -17,14 +17,16 @@
 
 package com.decathlon.ara.scenario.generic.bean.description;
 
-import com.decathlon.ara.scenario.generic.bean.description.step.GenericExecutedScenarioStep;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import com.decathlon.ara.scenario.generic.bean.description.step.GenericExecutedScenarioStep;
+import com.decathlon.ara.util.TestUtil;
 
 @ExtendWith(MockitoExtension.class)
 class GenericExecutedScenarioDescriptionTest {
@@ -32,7 +34,7 @@ class GenericExecutedScenarioDescriptionTest {
     @Test
     void getStepsContent_returnEmptyString_whenStepsEmpty() {
         // Given
-        GenericExecutedScenarioDescription description = new GenericExecutedScenarioDescription().withSteps(null);
+        GenericExecutedScenarioDescription description = new GenericExecutedScenarioDescription();
 
         // When
 
@@ -44,26 +46,11 @@ class GenericExecutedScenarioDescriptionTest {
     @Test
     void getStepsContent_returnContent_whenStepsNotEmpty() {
         // Given
-        GenericExecutedScenarioDescription description = new GenericExecutedScenarioDescription()
-                .withSteps(
-                        List.of(
-                                new GenericExecutedScenarioStep()
-                                        .withLine(1L)
-                                        .withStatus("passed")
-                                        .withValue(10L)
-                                        .withContent("The first line... And it passed!"),
-                                new GenericExecutedScenarioStep()
-                                        .withLine(2L)
-                                        .withStatus("skipped")
-                                        .withValue(null)
-                                        .withContent("Another line... This line was skipped!"),
-                                new GenericExecutedScenarioStep()
-                                        .withLine(3L)
-                                        .withStatus("failed")
-                                        .withValue(25L)
-                                        .withContent("The last line... It failed...")
-                        )
-                );
+        GenericExecutedScenarioDescription description = genericExecutedScenarioDescription(
+                List.of(
+                        genericExecutedScenarioStep(1L, "passed", 10L, "The first line... And it passed!"),
+                        genericExecutedScenarioStep(2L, "skipped", null, "Another line... This line was skipped!"),
+                        genericExecutedScenarioStep(3L, "failed", 25L, "The last line... It failed...")));
 
         // When
 
@@ -72,7 +59,22 @@ class GenericExecutedScenarioDescriptionTest {
         assertThat(content).isEqualTo(
                 "1:passed:10:The first line... And it passed!\n" +
                         "2:skipped:Another line... This line was skipped!\n" +
-                        "3:failed:25:The last line... It failed..."
-        );
+                        "3:failed:25:The last line... It failed...");
+
+    }
+
+    private GenericExecutedScenarioDescription genericExecutedScenarioDescription(List<GenericExecutedScenarioStep> steps) {
+        GenericExecutedScenarioDescription genericExecutedScenarioDescription = new GenericExecutedScenarioDescription();
+        TestUtil.setField(genericExecutedScenarioDescription, "steps", steps);
+        return genericExecutedScenarioDescription;
+    }
+
+    private GenericExecutedScenarioStep genericExecutedScenarioStep(Long line, String status, Long value, String content) {
+        GenericExecutedScenarioStep genericExecutedScenarioStep = new GenericExecutedScenarioStep();
+        TestUtil.setField(genericExecutedScenarioStep, "line", line);
+        TestUtil.setField(genericExecutedScenarioStep, "status", status);
+        TestUtil.setField(genericExecutedScenarioStep, "value", value);
+        TestUtil.setField(genericExecutedScenarioStep, "content", content);
+        return genericExecutedScenarioStep;
     }
 }

@@ -1,28 +1,30 @@
 package com.decathlon.ara.scenario.cucumber.upload;
 
+import java.io.IOException;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.domain.enumeration.Technology;
+import com.decathlon.ara.scenario.common.upload.ScenarioUploader;
 import com.decathlon.ara.scenario.cucumber.bean.Feature;
 import com.decathlon.ara.scenario.cucumber.util.CucumberReportUtil;
 import com.decathlon.ara.scenario.cucumber.util.ScenarioExtractorUtil;
 import com.decathlon.ara.service.exception.BadRequestException;
-import com.decathlon.ara.scenario.common.upload.ScenarioUploader;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.util.List;
 
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Slf4j
 public class CucumberScenarioUploader {
 
-    @NonNull
+    private static final Logger LOG = LoggerFactory.getLogger(CucumberScenarioUploader.class);
+
     private final ScenarioUploader uploader;
+
+    public CucumberScenarioUploader(ScenarioUploader uploader) {
+        this.uploader = uploader;
+    }
 
     /**
      * Upload the Cucumber scenario set of a test type.
@@ -33,18 +35,18 @@ public class CucumberScenarioUploader {
      * @throws BadRequestException if the source cannot be found, the source code is not using CUCUMBER technology, or something goes wrong while parsing the report content
      */
     public void uploadCucumber(long projectId, String sourceCode, String json) throws BadRequestException {
-        log.info("SCENARIO|Preparing for Cucumber scenarios to upload");
-        log.debug("SCENARIO|Receiving the following json:");
-        log.debug(json);
+        LOG.info("SCENARIO|Preparing for Cucumber scenarios to upload");
+        LOG.debug("SCENARIO|Receiving the following json:");
+        LOG.debug(json);
         uploader.processUploadedContent(projectId, sourceCode, Technology.CUCUMBER, source -> {
             // Extract and save scenarios of the source from the report.json
             List<Feature> features;
             try {
-                log.info("SCENARIO|Preparing to parse the Cucumber JSON report");
+                LOG.info("SCENARIO|Preparing to parse the Cucumber JSON report");
                 features = CucumberReportUtil.parseReportJson(json);
-                log.debug("SCENARIO|Extracting {} Cucumber features", features.size());
+                LOG.debug("SCENARIO|Extracting {} Cucumber features", features.size());
             } catch (IOException e) {
-                log.error("SCENARIO|Cannot parse uploaded Cucumber report.json", e);
+                LOG.error("SCENARIO|Cannot parse uploaded Cucumber report.json", e);
                 throw new BadRequestException("Cannot parse uploaded Cucumber report.json", Entities.SCENARIO, "cannot_parse_report_json");
             }
             return ScenarioExtractorUtil.extractScenarios(source, features);

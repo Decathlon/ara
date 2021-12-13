@@ -10,19 +10,19 @@ databaseChangeLog:
         indexName: FKm3twuhvstqk2icoycegrcmu69
         tableName: problem_occurrence
 - changeSet:
-    id: 1643128280399-8
-    author: '? (generated)'
-    changes:
-    - dropIndex:
-        indexName: FK7lub23f9xbi92jqumgrjts9tk
-        tableName: problem_occurrence
-- changeSet:
     id: 1643128280399-1
     author: '? (generated)'
     changes:
     - dropForeignKeyConstraint:
         baseTableName: problem_occurrence
         constraintName: FK7lub23f9xbi92jqumgrjts9tk
+- changeSet:
+    id: 1643128280399-8
+    author: '? (generated)'
+    changes:
+    - dropIndex:
+        indexName: FK7lub23f9xbi92jqumgrjts9tk
+        tableName: problem_occurrence
 - changeSet:
     id: 1643128280399-2
     author: '? (generated)'

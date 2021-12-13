@@ -20,19 +20,11 @@ package com.decathlon.ara.service.dto.problem;
 import com.decathlon.ara.domain.enumeration.DefectExistence;
 import com.decathlon.ara.domain.enumeration.ProblemStatusFilter;
 import com.decathlon.ara.domain.filter.ProblemFilter;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
 /**
  * Input of the problem filtering API.<br>
  * Same as {@link ProblemFilter} but without {@code projectId}, as this field is provided in REST API URL.
  */
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 public class ProblemFilterDTO {
 
     private String name;
@@ -46,5 +38,29 @@ public class ProblemFilterDTO {
     private DefectExistence defectExistence;
 
     private Long rootCauseId;
+
+    public String getName() {
+        return name;
+    }
+
+    public ProblemStatusFilter getStatus() {
+        return status;
+    }
+
+    public Long getBlamedTeamId() {
+        return blamedTeamId;
+    }
+
+    public String getDefectId() {
+        return defectId;
+    }
+
+    public DefectExistence getDefectExistence() {
+        return defectExistence;
+    }
+
+    public Long getRootCauseId() {
+        return rootCauseId;
+    }
 
 }

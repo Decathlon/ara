@@ -17,18 +17,20 @@
 
 package com.decathlon.ara.domain;
 
-import com.decathlon.ara.domain.enumeration.Handling;
-import com.decathlon.ara.domain.enumeration.ProblemStatus;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
-public class ExecutedScenarioTest {
+import com.decathlon.ara.domain.enumeration.Handling;
+import com.decathlon.ara.domain.enumeration.ProblemStatus;
+import com.decathlon.ara.util.TestUtil;
+
+class ExecutedScenarioTest {
 
     @Test
-    public void getHandling_ShouldReturnSUCCESS_WhenNoError() {
+    void getHandling_ShouldReturnSUCCESS_WhenNoError() {
         // GIVEN
         final ExecutedScenario executedScenarioWithoutError = new ExecutedScenario();
 
@@ -40,11 +42,11 @@ public class ExecutedScenarioTest {
     }
 
     @Test
-    public void getHandling_ShouldReturnUNHANDLED_WhenOnlyErrorsWithoutProblem() {
+    void getHandling_ShouldReturnUNHANDLED_WhenOnlyErrorsWithoutProblem() {
         // GIVEN
         final ExecutedScenario executedScenarioWithoutError = new ExecutedScenario();
-        executedScenarioWithoutError.addError(new Error().withStepLine(1));
-        executedScenarioWithoutError.addError(new Error().withStepLine(2));
+        executedScenarioWithoutError.addError(error(1));
+        executedScenarioWithoutError.addError(error(2));
 
         // WHEN
         final Handling handling = executedScenarioWithoutError.getHandling();
@@ -54,21 +56,31 @@ public class ExecutedScenarioTest {
     }
 
     @Test
-    public void getHandling_ShouldReturnHANDLED_WhenAtLeastOneErrorWithProblem() {
+    void getHandling_ShouldReturnHANDLED_WhenAtLeastOneErrorWithProblem() {
         // GIVEN
-        final Error errorWithProblem = new Error().withStepLine(2);
-        var problemPattern = new ProblemPattern().withProblem(new Problem().withStatus(ProblemStatus.OPEN));
-        errorWithProblem.setProblemOccurrences(Set.of(new ProblemOccurrence(new Error(), problemPattern)));
+        final Error errorWithProblem = error(2);
+        Problem problem = new Problem();
+        problem.setStatus(ProblemStatus.OPEN);
+        var problemPattern = new ProblemPattern();
+        problemPattern.setProblem(problem);
+        ProblemOccurrence problemOccurrence = new ProblemOccurrence(new Error(), problemPattern);
+        TestUtil.setField(errorWithProblem, "problemOccurrences", Set.of(problemOccurrence));
         final ExecutedScenario executedScenarioWithoutError = new ExecutedScenario();
-        executedScenarioWithoutError.addError(new Error().withStepLine(1));
+        executedScenarioWithoutError.addError(error(1));
         executedScenarioWithoutError.addError(errorWithProblem);
-        executedScenarioWithoutError.addError(new Error().withStepLine(3));
+        executedScenarioWithoutError.addError(error(3));
 
         // WHEN
         final Handling handling = executedScenarioWithoutError.getHandling();
 
         // THEN
         assertThat(handling).isEqualTo(Handling.HANDLED);
+    }
+
+    private Error error(int stepLine) {
+        Error error = new Error();
+        error.setStepLine(stepLine);
+        return error;
     }
 
 }

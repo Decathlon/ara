@@ -1,69 +1,86 @@
 package com.decathlon.ara.scenario.common.upload;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
-import com.decathlon.ara.domain.*;
+import com.decathlon.ara.domain.Country;
+import com.decathlon.ara.domain.Functionality;
+import com.decathlon.ara.domain.Scenario;
+import com.decathlon.ara.domain.Severity;
+import com.decathlon.ara.domain.Source;
 import com.decathlon.ara.domain.enumeration.FunctionalityType;
 import com.decathlon.ara.domain.enumeration.Technology;
-import com.decathlon.ara.repository.*;
+import com.decathlon.ara.repository.CountryRepository;
+import com.decathlon.ara.repository.FunctionalityRepository;
+import com.decathlon.ara.repository.ScenarioRepository;
+import com.decathlon.ara.repository.SeverityRepository;
+import com.decathlon.ara.repository.SourceRepository;
 import com.decathlon.ara.scenario.cucumber.bean.Tag;
 import com.decathlon.ara.scenario.cucumber.util.ScenarioExtractorUtil;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Slf4j
 public class ScenarioUploader {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ScenarioUploader.class);
     private static final String TOTAL = "*";
 
-    @NonNull
     private final ScenarioRepository scenarioRepository;
 
-    @NonNull
     private final FunctionalityRepository functionalityRepository;
 
-    @NonNull
     private final SourceRepository sourceRepository;
 
-    @NonNull
     private final EntityManager entityManager;
 
-    @NonNull
     private final SeverityRepository severityRepository;
 
-    @NonNull
     private final CountryRepository countryRepository;
 
+    public ScenarioUploader(ScenarioRepository scenarioRepository, FunctionalityRepository functionalityRepository,
+            SourceRepository sourceRepository, EntityManager entityManager, SeverityRepository severityRepository,
+            CountryRepository countryRepository) {
+        this.scenarioRepository = scenarioRepository;
+        this.functionalityRepository = functionalityRepository;
+        this.sourceRepository = sourceRepository;
+        this.entityManager = entityManager;
+        this.severityRepository = severityRepository;
+        this.countryRepository = countryRepository;
+    }
+
     public void processUploadedContent(long projectId, String sourceCode, Technology expectedTechnology, ScenarioListSupplier scenarioExtractor) throws BadRequestException {
-        log.info("SCENARIO|Coverage: Preparing to match scenarios and features (source: {})", sourceCode);
+        LOG.info("SCENARIO|Coverage: Preparing to match scenarios and features (source: {})", sourceCode);
         Source source = sourceRepository.findByProjectIdAndCode(projectId, sourceCode);
         if (source == null) {
-            log.error("SCENARIO|Cannot match scenarios with features because the source {} was not found", sourceCode);
+            LOG.error("SCENARIO|Cannot match scenarios with features because the source {} was not found", sourceCode);
             throw new NotFoundException(Messages.NOT_FOUND_SOURCE, Entities.SOURCE);
         }
         if (source.getTechnology() != expectedTechnology) {
             final String message = String.format(Messages.RULE_SCENARIO_UPLOAD_TO_WRONG_TECHNOLOGY, expectedTechnology, source.getTechnology());
-            log.error("SCENARIO|Cannot match scenarios with features because the technologies don't match (source {})", sourceCode);
-            log.error("SCENARIO|{}", message);
+            LOG.error("SCENARIO|Cannot match scenarios with features because the technologies don't match (source {})", sourceCode);
+            LOG.error("SCENARIO|{}", message);
             throw new BadRequestException(message, Entities.SCENARIO, "wrong_technology");
         }
 
         // Remove the previous scenarios from the same source => the database will remove the associations between functionalities and these scenarios
         var allScenarios = scenarioRepository.findAllBySourceId(source.getId());
-        log.debug("SCENARIO|{} scenarios found for source {}", allScenarios.size(), sourceCode);
+        LOG.debug("SCENARIO|{} scenarios found for source {}", allScenarios.size(), sourceCode);
         allScenarios.forEach(this::removeScenarioAssociationSafely);
         scenarioRepository.deleteAll(allScenarios);
 
@@ -81,15 +98,15 @@ public class ScenarioUploader {
         assignWrongCountryCodes(getCountryCodes(projectId), newScenarios);
         // Save the new scenarios
         newScenarios = scenarioRepository.saveAll(newScenarios);
-        log.info("SCENARIO|{} scenarios updated for source {}", newScenarios.size(), sourceCode);
+        LOG.info("SCENARIO|{} scenarios updated for source {}", newScenarios.size(), sourceCode);
         entityManager.flush();
 
         // Re-assign new scenarios to functionalities
         assignCoverage(functionalities, newScenarios);
         computeAggregates(functionalities);
         functionalityRepository.saveAll(functionalities);
-        log.info("SCENARIO|{} features updated for source {}", functionalities.size(), sourceCode);
-        log.info("SCENARIO|Coverage complete!");
+        LOG.info("SCENARIO|{} features updated for source {}", functionalities.size(), sourceCode);
+        LOG.info("SCENARIO|Coverage complete!");
     }
 
     public void removeScenarioAssociationSafely(Scenario scenario) {

@@ -17,6 +17,16 @@
 
 package com.decathlon.ara.scenario.generic.bean;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
+
 import com.decathlon.ara.scenario.generic.bean.description.GenericExecutedScenarioDescription;
 import com.decathlon.ara.scenario.generic.bean.display.GenericExecutedScenarioResultsDisplay;
 import com.decathlon.ara.scenario.generic.bean.error.GenericExecutedScenarioError;
@@ -25,18 +35,7 @@ import com.decathlon.ara.scenario.generic.bean.log.GenericExecutedScenarioLogs;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GenericExecutedScenarioReport {
 
@@ -49,7 +48,7 @@ public class GenericExecutedScenarioReport {
     private GenericExecutedScenarioDescription description;
 
     @JsonProperty("start")
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private Date startDate;
 
     private boolean ignored;
@@ -132,9 +131,7 @@ public class GenericExecutedScenarioReport {
      */
     public List<String> getCountryCodes() {
         List<String> countryCodesFromTags = getCountryCodesFromTags(tags);
-        List<String> countryCodesFromFeatureTags = feature != null ?
-                getCountryCodesFromTags(feature.getTags()) :
-                new ArrayList<>();
+        List<String> countryCodesFromFeatureTags = feature != null ? getCountryCodesFromTags(feature.getTags()) : new ArrayList<>();
         return Stream.of(countryCodesFromTags, countryCodesFromFeatureTags)
                 .flatMap(Collection::stream)
                 .distinct()
@@ -155,5 +152,61 @@ public class GenericExecutedScenarioReport {
                 .map(tag -> tag.substring("country-".length()))
                 .distinct()
                 .collect(Collectors.toList());
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public GenericExecutedScenarioFeature getFeature() {
+        return feature;
+    }
+
+    public GenericExecutedScenarioDescription getDescription() {
+        return description;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public boolean isIgnored() {
+        return ignored;
+    }
+
+    public List<GenericExecutedScenarioError> getErrors() {
+        return errors;
+    }
+
+    public List<Long> getCartography() {
+        return cartography;
+    }
+
+    public GenericExecutedScenarioResultsDisplay getDisplay() {
+        return display;
+    }
+
+    public GenericExecutedScenarioLogs getLogs() {
+        return logs;
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public String getComment() {
+        return comment;
     }
 }

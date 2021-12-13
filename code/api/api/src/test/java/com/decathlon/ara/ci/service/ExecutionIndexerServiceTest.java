@@ -48,20 +48,20 @@ import com.decathlon.ara.domain.Execution;
 import com.decathlon.ara.domain.Problem;
 import com.decathlon.ara.domain.Run;
 import com.decathlon.ara.domain.enumeration.JobStatus;
-import com.decathlon.ara.repository.ErrorRepository;
 import com.decathlon.ara.repository.ExecutionRepository;
 import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
+import com.decathlon.ara.service.ErrorService;
 import com.decathlon.ara.service.ExecutionFilesProcessorService;
 import com.decathlon.ara.service.ProblemDenormalizationService;
 
 @ExtendWith(MockitoExtension.class)
-public class ExecutionIndexerServiceTest {
+class ExecutionIndexerServiceTest {
 
     @Mock
     private ExecutionRepository executionRepository;
 
     @Mock
-    private ErrorRepository errorRepository;
+    private ErrorService errorService;
 
     @Mock
     private QualityEmailService qualityEmailService;
@@ -80,7 +80,7 @@ public class ExecutionIndexerServiceTest {
     private ExecutionIndexerService cut;
 
     @Test
-    public void indexExecution_doNothing_whenThePlannedIndexationIsNull() {
+    void indexExecution_doNothing_whenThePlannedIndexationIsNull() {
         // Given
         PlannedIndexation plannedIndexation = null;
 
@@ -92,13 +92,13 @@ public class ExecutionIndexerServiceTest {
         verify(executionFilesProcessorService, never()).getExecution(any(PlannedIndexation.class));
         verify(executionRepository, never()).save(any(Execution.class));
         verify(executionRepository, never()).findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(anyLong(), anyString());
-        verify(errorRepository, never()).autoAssignProblemsToNewErrors(anyLong(), anyList());
+        verify(errorService, never()).autoAssignProblemsToNewErrors(anyLong(), anyList());
         verify(problemDenormalizationService, never()).updateFirstAndLastSeenDateTimes(anyCollection());
         verify(transactionService, never()).doAfterCommit(any(Runnable.class));
     }
 
     @Test
-    public void indexExecution_doNothing_whenThePlannedIndexationHasNoExecutionFolder() {
+    void indexExecution_doNothing_whenThePlannedIndexationHasNoExecutionFolder() {
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
 
@@ -111,13 +111,13 @@ public class ExecutionIndexerServiceTest {
         verify(executionFilesProcessorService, never()).getExecution(any(PlannedIndexation.class));
         verify(executionRepository, never()).save(any(Execution.class));
         verify(executionRepository, never()).findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(anyLong(), anyString());
-        verify(errorRepository, never()).autoAssignProblemsToNewErrors(anyLong(), anyList());
+        verify(errorService, never()).autoAssignProblemsToNewErrors(anyLong(), anyList());
         verify(problemDenormalizationService, never()).updateFirstAndLastSeenDateTimes(anyCollection());
         verify(transactionService, never()).doAfterCommit(any(Runnable.class));
     }
 
     @Test
-    public void indexExecution_doNothing_whenThePlannedIndexationHasNoCycleDefinition() {
+    void indexExecution_doNothing_whenThePlannedIndexationHasNoCycleDefinition() {
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
         File executionFile = mock(File.class);
@@ -132,13 +132,13 @@ public class ExecutionIndexerServiceTest {
         verify(executionFilesProcessorService, never()).getExecution(any(PlannedIndexation.class));
         verify(executionRepository, never()).save(any(Execution.class));
         verify(executionRepository, never()).findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(anyLong(), anyString());
-        verify(errorRepository, never()).autoAssignProblemsToNewErrors(anyLong(), anyList());
+        verify(errorService, never()).autoAssignProblemsToNewErrors(anyLong(), anyList());
         verify(problemDenormalizationService, never()).updateFirstAndLastSeenDateTimes(anyCollection());
         verify(transactionService, never()).doAfterCommit(any(Runnable.class));
     }
 
     @Test
-    public void indexExecution_doNothing_whenNoExecutionIndexed() {
+    void indexExecution_doNothing_whenNoExecutionIndexed() {
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
         File executionFile = mock(File.class);
@@ -151,7 +151,7 @@ public class ExecutionIndexerServiceTest {
         when(cycleDefinition.getProjectId()).thenReturn(1L);
         when(cycleDefinition.getBranch()).thenReturn("branch");
         when(cycleDefinition.getName()).thenReturn("cycle");
-        when(executionRepository.findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(1L,"/execution/folder/location/in/disk" + File.separator)).thenReturn(Optional.empty());
+        when(executionRepository.findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(1L, "/execution/folder/location/in/disk" + File.separator)).thenReturn(Optional.empty());
         when(executionFilesProcessorService.getExecution(plannedIndexation)).thenReturn(Optional.empty());
 
         // Then
@@ -159,14 +159,14 @@ public class ExecutionIndexerServiceTest {
 
         verify(executionFilesProcessorService).getExecution(plannedIndexation);
         verify(executionRepository, never()).save(any(Execution.class));
-        verify(executionRepository).findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(1L,"/execution/folder/location/in/disk" + File.separator);
-        verify(errorRepository, never()).autoAssignProblemsToNewErrors(anyLong(), anyList());
+        verify(executionRepository).findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(1L, "/execution/folder/location/in/disk" + File.separator);
+        verify(errorService, never()).autoAssignProblemsToNewErrors(anyLong(), anyList());
         verify(problemDenormalizationService, never()).updateFirstAndLastSeenDateTimes(anyCollection());
         verify(transactionService, never()).doAfterCommit(any(Runnable.class));
     }
 
     @Test
-    public void indexExecution_saveIndexedExecution_whenExecutionIndexed() {
+    void indexExecution_saveIndexedExecution_whenExecutionIndexed() {
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
         File executionFile = mock(File.class);
@@ -194,13 +194,13 @@ public class ExecutionIndexerServiceTest {
         verify(executionFilesProcessorService).getExecution(plannedIndexation);
         verify(executionRepository).save(indexedExecution);
         verify(executionRepository).findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(1L, "/execution/folder/location/in/disk" + File.separator);
-        verify(errorRepository, never()).autoAssignProblemsToNewErrors(anyLong(), anyList());
+        verify(errorService, never()).autoAssignProblemsToNewErrors(anyLong(), anyList());
         verify(problemDenormalizationService, never()).updateFirstAndLastSeenDateTimes(anyCollection());
         verify(transactionService, never()).doAfterCommit(any(Runnable.class));
     }
 
     @Test
-    public void indexExecution_manageErrors_whenErrorsFound() {
+    void indexExecution_manageErrors_whenErrorsFound() {
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
         File executionFile = mock(File.class);
@@ -285,7 +285,7 @@ public class ExecutionIndexerServiceTest {
         when(savedError221.getId()).thenReturn(221L);
         when(savedError222.getId()).thenReturn(222L);
 
-        when(errorRepository.autoAssignProblemsToNewErrors(anyLong(), anyList())).thenReturn(problems);
+        when(errorService.autoAssignProblemsToNewErrors(anyLong(), anyList())).thenReturn(problems);
 
         // Then
         cut.indexExecution(plannedIndexation);
@@ -293,13 +293,13 @@ public class ExecutionIndexerServiceTest {
         verify(executionFilesProcessorService).getExecution(plannedIndexation);
         verify(executionRepository).save(indexedExecution);
         verify(executionRepository).findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(1L, "/execution/folder/location/in/disk" + File.separator);
-        verify(errorRepository).autoAssignProblemsToNewErrors(1L, Arrays.asList(111L, 113L, 211L, 221L, 222L));
+        verify(errorService).autoAssignProblemsToNewErrors(1L, Arrays.asList(111L, 113L, 211L, 221L, 222L));
         verify(problemDenormalizationService).updateFirstAndLastSeenDateTimes(problems);
         verify(transactionService, never()).doAfterCommit(any(Runnable.class));
     }
 
     @Test
-    public void indexExecution_sendEmail_whenExecutionStatusIsDone() {
+    void indexExecution_sendEmail_whenExecutionStatusIsDone() {
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
         File executionFile = mock(File.class);
@@ -384,7 +384,7 @@ public class ExecutionIndexerServiceTest {
         when(savedError221.getId()).thenReturn(221L);
         when(savedError222.getId()).thenReturn(222L);
 
-        when(errorRepository.autoAssignProblemsToNewErrors(anyLong(), anyList())).thenReturn(problems);
+        when(errorService.autoAssignProblemsToNewErrors(anyLong(), anyList())).thenReturn(problems);
 
         // Then
         cut.indexExecution(plannedIndexation);
@@ -392,7 +392,7 @@ public class ExecutionIndexerServiceTest {
         verify(executionFilesProcessorService).getExecution(plannedIndexation);
         verify(executionRepository).save(indexedExecution);
         verify(executionRepository).findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(1L, "/execution/folder/location/in/disk" + File.separator);
-        verify(errorRepository).autoAssignProblemsToNewErrors(1L, Arrays.asList(111L, 113L, 211L, 221L, 222L));
+        verify(errorService).autoAssignProblemsToNewErrors(1L, Arrays.asList(111L, 113L, 211L, 221L, 222L));
         verify(problemDenormalizationService).updateFirstAndLastSeenDateTimes(problems);
         verify(transactionService).doAfterCommit(any(Runnable.class));
     }

@@ -17,21 +17,26 @@
 
 package com.decathlon.ara.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 
-import javax.persistence.*;
-import java.io.Serializable;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
-public class ExecutionCompletionRequest implements Serializable {
+public class ExecutionCompletionRequest {
 
     @Id
     @Column(length = 512)
     private String jobUrl;
+
+    public ExecutionCompletionRequest() {
+    }
+
+    public ExecutionCompletionRequest(String jobUrl) {
+        this.jobUrl = jobUrl;
+    }
+
+    public String getJobUrl() {
+        return jobUrl;
+    }
 
 }

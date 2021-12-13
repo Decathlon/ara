@@ -17,34 +17,36 @@
 
 package com.decathlon.ara.scenario.cucumber.asset;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Service;
+
 import com.decathlon.ara.configuration.AraConfiguration;
 import com.decathlon.ara.scenario.cucumber.asset.ssh.SshClientHelper;
 import com.decathlon.ara.scenario.cucumber.asset.ssh.SshException;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Service;
 
 /**
  * Upload to SSH parts of the data from Cucumber and Postman reports.
  */
 @Service
-@Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @ConditionalOnProperty(name = "ara.adapter.asset.name", havingValue = "ssh")
 public class SshAssetService implements AssetService {
 
-    @NonNull
+    private static final Logger LOG = LoggerFactory.getLogger(SshAssetService.class);
+
     private final AraConfiguration araConfiguration;
 
-    @NonNull
     private final FileNameService fileNameService;
 
     // Not thread-safe booleans, but we're good: they protect a lazy-loaded idempotent process (directory creation)
     private boolean screenshotsFolderCreated;
     private boolean httpLogsFolderCreated;
+
+    public SshAssetService(AraConfiguration araConfiguration, FileNameService fileNameService) {
+        this.araConfiguration = araConfiguration;
+        this.fileNameService = fileNameService;
+    }
 
     /**
      * Upload a Cucumber scenario screenshot to a SSH server.
@@ -73,7 +75,7 @@ public class SshAssetService implements AssetService {
 
             return araConfiguration.getSshHttpAccess() + subFolder + "/" + fileName;
         } catch (SshException e) {
-            log.warn("SCENARIO|cucumber|Screenshot upload failed: {}", e.getMessage(), e);
+            LOG.warn("SCENARIO|cucumber|Screenshot upload failed: {}", e.getMessage(), e);
             return null;
         }
     }
@@ -103,7 +105,7 @@ public class SshAssetService implements AssetService {
 
             return araConfiguration.getSshHttpAccess() + subFolder + "/" + fileName;
         } catch (SshException e) {
-            log.warn("SCENARIO|cucumber|HTTP log upload failed: {}", e.getMessage(), e);
+            LOG.warn("SCENARIO|cucumber|HTTP log upload failed: {}", e.getMessage(), e);
             return null;
         }
     }

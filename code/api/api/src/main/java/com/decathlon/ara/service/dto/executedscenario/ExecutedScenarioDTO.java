@@ -18,13 +18,7 @@
 package com.decathlon.ara.service.dto.executedscenario;
 
 import java.util.Date;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class ExecutedScenarioDTO {
 
     private Long id;
@@ -66,5 +60,85 @@ public class ExecutedScenarioDTO {
     private String apiServer;
 
     private String seleniumNode;
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getFeatureFile() {
+        return featureFile;
+    }
+
+    public String getFeatureName() {
+        return featureName;
+    }
+
+    public String getFeatureTags() {
+        return featureTags;
+    }
+
+    public String getTags() {
+        return tags;
+    }
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getCucumberId() {
+        return cucumberId;
+    }
+
+    public int getLine() {
+        return line;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public Date getStartDateTime() {
+        return startDateTime;
+    }
+
+    public String getScreenshotUrl() {
+        return screenshotUrl;
+    }
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public String getLogsUrl() {
+        return logsUrl;
+    }
+
+    public String getHttpRequestsUrl() {
+        return httpRequestsUrl;
+    }
+
+    public String getJavaScriptErrorsUrl() {
+        return javaScriptErrorsUrl;
+    }
+
+    public String getDiffReportUrl() {
+        return diffReportUrl;
+    }
+
+    public String getCucumberReportUrl() {
+        return cucumberReportUrl;
+    }
+
+    public String getApiServer() {
+        return apiServer;
+    }
+
+    public String getSeleniumNode() {
+        return seleniumNode;
+    }
 
 }

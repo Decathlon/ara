@@ -3,9 +3,6 @@ package com.decathlon.ara.coreapi.domain;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 
-import lombok.Data;
-
-@Data
 @Entity
 public class AraScenario {
 
@@ -13,5 +10,13 @@ public class AraScenario {
     private CodeWithProjectId id;
 
     private String name;
+
+    protected CodeWithProjectId getId() {
+        return id;
+    }
+
+    protected String getName() {
+        return name;
+    }
 
 }

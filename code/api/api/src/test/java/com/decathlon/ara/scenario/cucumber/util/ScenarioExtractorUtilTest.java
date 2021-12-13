@@ -31,9 +31,10 @@ import com.decathlon.ara.domain.Scenario;
 import com.decathlon.ara.domain.Source;
 import com.decathlon.ara.scenario.cucumber.bean.Feature;
 import com.decathlon.ara.util.TestUtil;
+import com.decathlon.ara.util.builder.FunctionalityBuilder;
 
 @SuppressWarnings("static-method")
-public class ScenarioExtractorUtilTest {
+class ScenarioExtractorUtilTest {
 
     private static void removeFunctionalitiesFromScenarioCucumberId(String cucumberId, String expected) {
         assertThat(ScenarioExtractorUtil.removeFunctionalitiesFromScenarioCucumberId(cucumberId)).isEqualTo(expected);
@@ -93,9 +94,11 @@ public class ScenarioExtractorUtilTest {
     }
 
     @Test
-    public void testExtractScenarios() throws IOException {
+    void testExtractScenarios() throws IOException {
         List<Feature> features = CucumberReportUtil.parseReportJson(TestUtil.loadUtf8ResourceAsString("reports/tests/dry-report.json"));
-        List<Scenario> scenarios = ScenarioExtractorUtil.extractScenarios(new Source().withCode("B"), features);
+        Source source = new Source();
+        source.setCode("B");
+        List<Scenario> scenarios = ScenarioExtractorUtil.extractScenarios(source, features);
 
         assertThat(scenarios.size()).isEqualTo(19);
         assertScenario1(scenarios.get(0));
@@ -137,7 +140,7 @@ public class ScenarioExtractorUtilTest {
     }
 
     @Test
-    public void testExtractFunctionalityIds() {
+    void testExtractFunctionalityIds() {
         // Correct single
         assertFunctionalityIds("Functionality 42: Title", 42);
 
@@ -194,10 +197,10 @@ public class ScenarioExtractorUtilTest {
     }
 
     @Test
-    public void testExtractWrongFunctionalityIds() {
+    void testExtractWrongFunctionalityIds() {
         List<Functionality> functionalities = Arrays.asList(
-                new Functionality().withId(Long.valueOf(42)),
-                new Functionality().withId(Long.valueOf(43)));
+                new FunctionalityBuilder().withId(Long.valueOf(42)).build(),
+                new FunctionalityBuilder().withId(Long.valueOf(43)).build());
 
         assertWrongFunctionalityIds("Functionality 42: OK", functionalities);
         assertWrongFunctionalityIds("Functionality 42, 43: OK", functionalities);
@@ -211,7 +214,7 @@ public class ScenarioExtractorUtilTest {
     }
 
     @Test
-    public void testRemoveFunctionalitiesFromScenarioCucumberId() {
+    void testRemoveFunctionalitiesFromScenarioCucumberId() {
         // Remove single functionality
         removeFunctionalitiesFromScenarioCucumberId("feature-1;functionality-113:-fail-with-name-\u003cname\u003e;;2", "feature-1;fail-with-name-\u003cname\u003e;;2");
 
@@ -230,7 +233,7 @@ public class ScenarioExtractorUtilTest {
     }
 
     @Test
-    public void testRemoveFunctionalitiesFromScenarioName() {
+    void testRemoveFunctionalitiesFromScenarioName() {
         // Correct single
         removeFunctionalitiesFromScenarioName("Functionality 42: Title");
 

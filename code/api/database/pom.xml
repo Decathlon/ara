@@ -41,7 +41,6 @@
         <diffChangeLogFile>src/main/resources/db/changelog/changes/XX/to-be-changed.yaml</diffChangeLogFile>
         <liquibasePropertyFile>src/main/resources/liquibase-XX.properties</liquibasePropertyFile>
 
-        <delombok.phase>generate-sources</delombok.phase>
         <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
     </properties>
 
@@ -49,12 +48,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
         </dependency>
 
         <!-- Database -->
@@ -94,20 +87,6 @@
             <version>2.6.11</version>
         </dependency>
 
-        <!-- Querydsl -->
-        <dependency>
-            <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-apt</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-sql-spring</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -123,32 +102,9 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok-maven-plugin</artifactId>
-                <version>1.18.20.0</version>
-                <executions>
-                    <execution>
-                        <id>delombok</id>
-                        <phase>${delombok.phase}</phase>
-                        <goals>
-                            <goal>delombok</goal>
-                        </goals>
-                        <configuration>
-                            <formatPreferences>
-                                <javaLangAsFQN>skip</javaLangAsFQN>
-                            </formatPreferences>
-                            <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
-                            <outputDirectory>${project.build.directory}/delombokified-sources-for-javadoc</outputDirectory>
-                            <addOutputDirectory>false</addOutputDirectory>                            <!-- Only delombokify for JavaDoc -->
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
-                    <sourcepath>${project.build.directory}/delombokified-sources-for-javadoc;${project.build.directory}/generated-sources/annotations</sourcepath>
                     <source>${java.version}</source>
                 </configuration>
             </plugin>
@@ -207,12 +163,10 @@
         <profile>
             <id>dev</id>
             <properties>
-                <!-- skip javadoc, tests, jacoco, lombok for dev profile -->
+                <!-- skip javadoc, tests, jacoco for dev profile -->
                 <maven.javadoc.skip>true</maven.javadoc.skip>
                 <!-- skip tests, but need to define it on each sub module-->
                 <maven.test.skip>true</maven.test.skip>
-                <!-- skip some lombok stuff for dev profile -->
-                <delombok.phase>none</delombok.phase>
             </properties>
         </profile>
     </profiles>

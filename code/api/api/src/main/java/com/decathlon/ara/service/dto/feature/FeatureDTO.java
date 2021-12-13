@@ -17,18 +17,26 @@
 
 package com.decathlon.ara.service.dto.feature;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
 /**
  * Contains the basic informations (code, state) of a Feature Flipping.
  *
  * @author Sylvain Nieuwlandt
  */
-@Data
-@AllArgsConstructor
 public class FeatureDTO {
 
     private String code;
     private boolean enabled;
+
+    public FeatureDTO(String code, boolean enabled) {
+        this.code = code;
+        this.enabled = enabled;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
 }

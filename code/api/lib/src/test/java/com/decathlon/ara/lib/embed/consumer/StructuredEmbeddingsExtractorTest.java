@@ -17,15 +17,14 @@
 
 package com.decathlon.ara.lib.embed.consumer;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class StructuredEmbeddingsExtractorTest {
 

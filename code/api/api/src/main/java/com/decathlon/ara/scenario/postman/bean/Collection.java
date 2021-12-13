@@ -18,15 +18,7 @@
 package com.decathlon.ara.scenario.postman.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Collection {
 
@@ -39,5 +31,13 @@ public class Collection {
      * Contains the name of the Postman collection.
      */
     private Info info;
+
+    public Item[] getItem() {
+        return item;
+    }
+
+    public Info getInfo() {
+        return info;
+    }
 
 }

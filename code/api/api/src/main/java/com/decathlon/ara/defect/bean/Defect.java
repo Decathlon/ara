@@ -17,14 +17,10 @@
 
 package com.decathlon.ara.defect.bean;
 
-import com.decathlon.ara.domain.enumeration.ProblemStatus;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
 import java.util.Date;
 
-@Data
-@AllArgsConstructor
+import com.decathlon.ara.domain.enumeration.ProblemStatus;
+
 public class Defect {
 
     /**
@@ -41,5 +37,23 @@ public class Defect {
      * The date and time of the last closing of the defect,
      */
     private Date closeDateTime;
+    
+    public Defect(String id, ProblemStatus status, Date closeDateTime) {
+        this.id = id;
+        this.status = status;
+        this.closeDateTime = closeDateTime;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public ProblemStatus getStatus() {
+        return status;
+    }
+
+    public Date getCloseDateTime() {
+        return closeDateTime;
+    }
 
 }

@@ -30,11 +30,12 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.decathlon.ara.util.TestUtil;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
-public class GithubMapperTest {
+class GithubMapperTest {
 
     @Mock
     private ObjectMapper objectMapper;
@@ -43,13 +44,10 @@ public class GithubMapperTest {
     private GithubMapper cut;
 
     @Test
-    public void jsonToIssue_should_return_object() throws IOException {
+    void jsonToIssue_should_return_object() throws IOException {
         // Given
         String json = "{\"key\": 42 }";
-        GithubIssue issue = new GithubIssue();
-        issue.setNumber(42);
-        issue.setTitle("Test");
-        issue.setState("open");
+        GithubIssue issue = githubIssue(42, "Test", "open");
         Mockito.doReturn(issue).when(this.objectMapper).readValue(json, GithubMapper.TYPE_REFERENCE_TO_GITHUB_ISSUE);
         // When
         Optional<GithubIssue> result = this.cut.jsonToIssue(json);
@@ -62,7 +60,7 @@ public class GithubMapperTest {
     }
 
     @Test
-    public void jsonToIssue_should_return_empty_on_error() throws IOException {
+    void jsonToIssue_should_return_empty_on_error() throws IOException {
         // Given
         String json = "{\"key\": 42 }";
         Mockito.doThrow(JsonParseException.class).when(this.objectMapper).readValue(json, GithubMapper.TYPE_REFERENCE_TO_GITHUB_ISSUE);
@@ -73,15 +71,11 @@ public class GithubMapperTest {
     }
 
     @Test
-    public void jsonToIssueList_should_return_a_filled_list() throws IOException {
+    void jsonToIssueList_should_return_a_filled_list() throws IOException {
         // Given
         String json = "[ {\"key\": 42 }, {\"key\": 24 } ]";
-        GithubIssue issue1 = new GithubIssue();
-        issue1.setNumber(42);
-        issue1.setState("open");
-        GithubIssue issue2 = new GithubIssue();
-        issue2.setNumber(24);
-        issue2.setState("closed");
+        GithubIssue issue1 = githubIssue(42, null, "open");
+        GithubIssue issue2 = githubIssue(24, null, "closed");
         List<GithubIssue> issueList = Lists.list(issue1, issue2);
         Mockito.doReturn(issueList).when(this.objectMapper).readValue(json, GithubMapper.TYPE_REFERENCE_TO_LIST_GITHUB_ISSUE);
         // When
@@ -94,7 +88,7 @@ public class GithubMapperTest {
     }
 
     @Test
-    public void jsonToIssueList_should_return_an_empty_list_on_error() throws IOException {
+    void jsonToIssueList_should_return_an_empty_list_on_error() throws IOException {
         // Given
         String json = "[ {\"key\": 42 }, {\"key\": 24 } ]";
         Mockito.doThrow(JsonParseException.class).when(this.objectMapper).readValue(json, GithubMapper.TYPE_REFERENCE_TO_LIST_GITHUB_ISSUE);
@@ -103,5 +97,13 @@ public class GithubMapperTest {
         // Then
         Assertions.assertThat(githubIssues).isNotNull();
         Assertions.assertThat(githubIssues).isEmpty();
+    }
+
+    private GithubIssue githubIssue(long number, String title, String state) {
+        GithubIssue githubIssue = new GithubIssue();
+        TestUtil.setField(githubIssue, "number", number);
+        TestUtil.setField(githubIssue, "title", title);
+        TestUtil.setField(githubIssue, "state", state);
+        return githubIssue;
     }
 }

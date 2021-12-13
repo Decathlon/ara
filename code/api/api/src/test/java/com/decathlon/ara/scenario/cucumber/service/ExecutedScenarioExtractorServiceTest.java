@@ -28,7 +28,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.assertj.core.api.AutoCloseableSoftAssertions;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,7 +45,7 @@ import com.decathlon.ara.util.TestUtil;
 
 @ExtendWith(MockitoExtension.class)
 @Disabled
-public class ExecutedScenarioExtractorServiceTest {
+class ExecutedScenarioExtractorServiceTest {
 
     private static final String STEP_DEF_ERROR = "^A step number (\\d+) that fails with error \"([^\"]*)\"$";
 
@@ -60,10 +59,8 @@ public class ExecutedScenarioExtractorServiceTest {
     private ExecutedScenarioExtractorService cut;
 
     @Test
-    public void testErrorsGeneration() throws IOException {
-        when(assetService.saveScreenshot(any(), anyString())).thenAnswer(call ->
-                "http://fake.screenshot.server/" + call.getArguments()[1] + ".png"
-        );
+    void testErrorsGeneration() throws IOException {
+        when(assetService.saveScreenshot(any(), anyString())).thenAnswer(call -> "http://fake.screenshot.server/" + call.getArguments()[1] + ".png");
 
         List<Feature> features = CucumberReportUtil.parseReportJson(TestUtil.loadUtf8ResourceAsString("reports/tests/report.json"));
         List<String> stepDefinitions = StepDefinitionUtil.parseStepDefinitionsJson(TestUtil.loadUtf8ResourceAsString("reports/tests/stepDefinitions.json"));

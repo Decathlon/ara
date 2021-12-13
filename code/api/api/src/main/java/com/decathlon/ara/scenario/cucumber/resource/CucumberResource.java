@@ -17,35 +17,40 @@
 
 package com.decathlon.ara.scenario.cucumber.resource;
 
+import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+
+import javax.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.decathlon.ara.scenario.cucumber.upload.CucumberScenarioUploader;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
-
-@Slf4j
 @RestController
 @RequestMapping(CucumberResource.PATH)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CucumberResource {
+
+    private static final Logger LOG = LoggerFactory.getLogger(CucumberResource.class);
 
     static final String PATH = PROJECT_API_PATH + "/cucumber";
 
-    @NonNull
     private final ProjectService projectService;
 
-    @NonNull
     private final CucumberScenarioUploader cucumberScenarioUploader;
+
+    public CucumberResource(ProjectService projectService, CucumberScenarioUploader cucumberScenarioUploader) {
+        this.projectService = projectService;
+        this.cucumberScenarioUploader = cucumberScenarioUploader;
+    }
 
     /**
      * POST to move upload the scenario set of a test code.
@@ -57,12 +62,12 @@ public class CucumberResource {
      */
     @PostMapping("scenarios/upload/{sourceCode}")
     public ResponseEntity<Void> uploadScenarios(@PathVariable String projectCode, @PathVariable String sourceCode, @Valid @RequestBody String json) {
-        log.info("SCENARIO|Uploading Cucumber scenarios (source: {}) for project {}", sourceCode, projectCode);
+        LOG.info("SCENARIO|Uploading Cucumber scenarios (source: {}) for project {}", sourceCode, projectCode);
         try {
             cucumberScenarioUploader.uploadCucumber(projectService.toId(projectCode), sourceCode, json);
             return ResponseEntity.ok().build();
         } catch (BadRequestException e) {
-            log.error("SCENARIO|Failed to upload Cucumber scenarios for source code {}", sourceCode, e);
+            LOG.error("SCENARIO|Failed to upload Cucumber scenarios for source code {}", sourceCode, e);
             return ResponseUtil.handle(e);
         }
     }

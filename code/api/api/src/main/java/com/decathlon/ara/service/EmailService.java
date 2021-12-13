@@ -17,11 +17,16 @@
 
 package com.decathlon.ara.service;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.Optional;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+
 import org.apache.commons.io.FilenameUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.server.MimeMappings;
 import org.springframework.core.io.Resource;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -30,21 +35,19 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.Optional;
-
-@Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class EmailService {
 
-    @NonNull
+    private static final Logger LOG = LoggerFactory.getLogger(EmailService.class);
+
     private final TemplateEngine templateEngine;
 
     private final Optional<JavaMailSender> emailSender;
+
+    public EmailService(TemplateEngine templateEngine, Optional<JavaMailSender> emailSender) {
+        this.templateEngine = templateEngine;
+        this.emailSender = emailSender;
+    }
 
     /**
      * Send an HTML mail message.
@@ -70,7 +73,7 @@ public class EmailService {
 
             emailSenderInit.send(message);
         } catch (MessagingException e) {
-            log.error("EMAIL|Cannot send email", e);
+            LOG.error("EMAIL|Cannot send email", e);
         }
     }
 

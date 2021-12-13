@@ -17,33 +17,44 @@
 
 package com.decathlon.ara.domain;
 
-import com.decathlon.ara.domain.enumeration.Handling;
-import com.querydsl.core.annotations.QueryInit;
-import lombok.*;
-import org.hibernate.annotations.*;
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.nullsFirst;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.Table;
-import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static java.util.Comparator.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.SortNatural;
+
+import com.decathlon.ara.domain.enumeration.Handling;
+
 @Entity
-// Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
-@EqualsAndHashCode(of = { "runId", "featureFile", "name", "line" })
 @Table(indexes = @Index(columnList = "run_id"))
-public class ExecutedScenario implements Comparable<ExecutedScenario>, Serializable {
+public class ExecutedScenario implements Comparable<ExecutedScenario> {
 
     public static final int CUCUMBER_ID_MAX_SIZE = 640;
 
@@ -52,15 +63,8 @@ public class ExecutedScenario implements Comparable<ExecutedScenario>, Serializa
     @SequenceGenerator(name = "executed_scenario_id", sequenceName = "executed_scenario_id", allocationSize = 1)
     private Long id;
 
-    // 1/2 for @EqualsAndHashCode to work: used when an entity is fetched by JPA
-    @Column(name = "run_id", insertable = false, updatable = false)
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
-    private Long runId;
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "run_id")
-    @QueryInit("*.*") // Requires Q* class regeneration https://github.com/querydsl/querydsl/issues/255
     private Run run;
 
     private String featureFile;
@@ -123,10 +127,8 @@ public class ExecutedScenario implements Comparable<ExecutedScenario>, Serializa
     @Fetch(FetchMode.SUBSELECT)
     private Set<Error> errors = new TreeSet<>();
 
-    // 2/2 for @EqualsAndHashCode to work: used for entities created outside of JPA
     public void setRun(Run run) {
         this.run = run;
-        this.runId = (run == null ? null : run.getId());
     }
 
     public void addError(Error error) {
@@ -172,7 +174,7 @@ public class ExecutedScenario implements Comparable<ExecutedScenario>, Serializa
     @Override
     public int compareTo(ExecutedScenario other) {
         // Keep business key in sync with @EqualsAndHashCode
-        Comparator<ExecutedScenario> runIdComparator = comparing(e -> e.runId, nullsFirst(naturalOrder()));
+        Comparator<ExecutedScenario> runIdComparator = comparing(ExecutedScenario::getRunId, nullsFirst(naturalOrder()));
         Comparator<ExecutedScenario> featureFileComparator = comparing(ExecutedScenario::getFeatureFile, nullsFirst(naturalOrder()));
         Comparator<ExecutedScenario> nameComparator = comparing(ExecutedScenario::getName, nullsFirst(naturalOrder()));
         Comparator<ExecutedScenario> lineComparator = comparing(e -> Long.valueOf(e.getLine()), nullsFirst(naturalOrder()));
@@ -180,6 +182,196 @@ public class ExecutedScenario implements Comparable<ExecutedScenario>, Serializa
                 .thenComparing(featureFileComparator)
                 .thenComparing(nameComparator)
                 .thenComparing(lineComparator)).compare(this, other);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(featureFile, line, name, getRunId());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ExecutedScenario)) {
+            return false;
+        }
+        ExecutedScenario other = (ExecutedScenario) obj;
+        return Objects.equals(featureFile, other.featureFile) && line == other.line && Objects.equals(name, other.name)
+                && Objects.equals(getRunId(), other.getRunId());
+    }
+
+    public static int getCucumberIdMaxSize() {
+        return CUCUMBER_ID_MAX_SIZE;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Long getRunId() {
+        return run == null ? null : run.getId();
+    }
+
+    public String getFeatureFile() {
+        return featureFile;
+    }
+
+    public void setFeatureFile(String featureFile) {
+        this.featureFile = featureFile;
+    }
+
+    public String getFeatureName() {
+        return featureName;
+    }
+
+    public void setFeatureName(String featureName) {
+        this.featureName = featureName;
+    }
+
+    public String getFeatureTags() {
+        return featureTags;
+    }
+
+    public void setFeatureTags(String featureTags) {
+        this.featureTags = featureTags;
+    }
+
+    public String getTags() {
+        return tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
+    }
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(String severity) {
+        this.severity = severity;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCucumberId() {
+        return cucumberId;
+    }
+
+    public void setCucumberId(String cucumberId) {
+        this.cucumberId = cucumberId;
+    }
+
+    public int getLine() {
+        return line;
+    }
+
+    public void setLine(int line) {
+        this.line = line;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public Date getStartDateTime() {
+        return startDateTime;
+    }
+
+    public void setStartDateTime(Date startDateTime) {
+        this.startDateTime = startDateTime;
+    }
+
+    public String getScreenshotUrl() {
+        return screenshotUrl;
+    }
+
+    public void setScreenshotUrl(String screenshotUrl) {
+        this.screenshotUrl = screenshotUrl;
+    }
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
+    }
+
+    public String getLogsUrl() {
+        return logsUrl;
+    }
+
+    public void setLogsUrl(String logsUrl) {
+        this.logsUrl = logsUrl;
+    }
+
+    public String getHttpRequestsUrl() {
+        return httpRequestsUrl;
+    }
+
+    public void setHttpRequestsUrl(String httpRequestsUrl) {
+        this.httpRequestsUrl = httpRequestsUrl;
+    }
+
+    public String getJavaScriptErrorsUrl() {
+        return javaScriptErrorsUrl;
+    }
+
+    public void setJavaScriptErrorsUrl(String javaScriptErrorsUrl) {
+        this.javaScriptErrorsUrl = javaScriptErrorsUrl;
+    }
+
+    public String getDiffReportUrl() {
+        return diffReportUrl;
+    }
+
+    public void setDiffReportUrl(String diffReportUrl) {
+        this.diffReportUrl = diffReportUrl;
+    }
+
+    public String getCucumberReportUrl() {
+        return cucumberReportUrl;
+    }
+
+    public void setCucumberReportUrl(String cucumberReportUrl) {
+        this.cucumberReportUrl = cucumberReportUrl;
+    }
+
+    public String getApiServer() {
+        return apiServer;
+    }
+
+    public void setApiServer(String apiServer) {
+        this.apiServer = apiServer;
+    }
+
+    public String getSeleniumNode() {
+        return seleniumNode;
+    }
+
+    public void setSeleniumNode(String seleniumNode) {
+        this.seleniumNode = seleniumNode;
+    }
+
+    public Set<Error> getErrors() {
+        return errors;
+    }
+
+    public Run getRun() {
+        return run;
     }
 
 }

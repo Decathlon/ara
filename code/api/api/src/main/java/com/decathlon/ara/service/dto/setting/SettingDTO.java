@@ -17,20 +17,12 @@
 
 package com.decathlon.ara.service.dto.setting;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class SettingDTO {
 
     /**
@@ -82,7 +74,7 @@ public class SettingDTO {
      * validation.
      */
     @JsonIgnore
-    private Function<String, String> validate;
+    private UnaryOperator<String> validate;
 
     /**
      * Called when a setting value has been changed by a user, to apply side-effects (clear a cache, update dependent
@@ -90,5 +82,143 @@ public class SettingDTO {
      */
     @JsonIgnore
     private Consumer<String> applyChange;
+
+    public List<SettingOptionDTO> getOptions() {
+        return options;
+    }
+
+    public void setOptions(List<SettingOptionDTO> options) {
+        this.options = options;
+    }
+
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public UnaryOperator<String> getValidate() {
+        return validate;
+    }
+
+    public void setValidate(UnaryOperator<String> validate) {
+        this.validate = validate;
+    }
+
+    public Consumer<String> getApplyChange() {
+        return applyChange;
+    }
+
+    public void setApplyChange(Consumer<String> applyChange) {
+        this.applyChange = applyChange;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public SettingType getType() {
+        return type;
+    }
+
+    public boolean isRequired() {
+        return required;
+    }
+
+    public String getHelp() {
+        return help;
+    }
+
+    public static class SettingDTOBuilder {
+        private String code;
+        private String name;
+        private SettingType type;
+        private List<SettingOptionDTO> options;
+        private boolean required;
+        private String help;
+        private String defaultValue;
+        private String value;
+        UnaryOperator<String> validate;
+        Consumer<String> applyChange;
+
+        public SettingDTOBuilder withCode(String code) {
+            this.code = code;
+            return this;
+        }
+
+        public SettingDTOBuilder withName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public SettingDTOBuilder withType(SettingType type) {
+            this.type = type;
+            return this;
+        }
+
+        public SettingDTOBuilder withOptions(List<SettingOptionDTO> options) {
+            this.options = options;
+            return this;
+        }
+
+        public SettingDTOBuilder withRequired(boolean required) {
+            this.required = required;
+            return this;
+        }
+
+        public SettingDTOBuilder withHelp(String help) {
+            this.help = help;
+            return this;
+        }
+
+        public SettingDTOBuilder withDefaultValue(String defaultValue) {
+            this.defaultValue = defaultValue;
+            return this;
+        }
+
+        public SettingDTOBuilder withValue(String value) {
+            this.value = value;
+            return this;
+        }
+
+        public SettingDTOBuilder withValidate(UnaryOperator<String> validate) {
+            this.validate = validate;
+            return this;
+        }
+
+        public SettingDTOBuilder withApplyChange(Consumer<String> applyChange) {
+            this.applyChange = applyChange;
+            return this;
+        }
+
+        public SettingDTO build() {
+            SettingDTO settings = new SettingDTO();
+            settings.code = code;
+            settings.name = name;
+            settings.type = type;
+            settings.options = options;
+            settings.required = required;
+            settings.help = help;
+            settings.defaultValue = defaultValue;
+            settings.value = value;
+            settings.validate = validate;
+            settings.applyChange = applyChange;
+            return settings;
+        }
+    }
 
 }

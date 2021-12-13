@@ -18,15 +18,7 @@
 package com.decathlon.ara.service.dto.request;
 
 import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 public class NewFunctionalityDTO {
 
     private FunctionalityDTO functionality;
@@ -34,5 +26,27 @@ public class NewFunctionalityDTO {
     private Long referenceId;
 
     private FunctionalityPosition relativePosition;
+
+    public NewFunctionalityDTO() {
+    }
+
+    public NewFunctionalityDTO(FunctionalityDTO functionality, Long referenceId,
+            FunctionalityPosition relativePosition) {
+        this.functionality = functionality;
+        this.referenceId = referenceId;
+        this.relativePosition = relativePosition;
+    }
+
+    public FunctionalityDTO getFunctionality() {
+        return functionality;
+    }
+
+    public Long getReferenceId() {
+        return referenceId;
+    }
+
+    public FunctionalityPosition getRelativePosition() {
+        return relativePosition;
+    }
 
 }

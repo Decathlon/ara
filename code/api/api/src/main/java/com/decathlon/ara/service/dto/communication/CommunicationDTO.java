@@ -17,22 +17,15 @@
 
 package com.decathlon.ara.service.dto.communication;
 
-import com.decathlon.ara.domain.enumeration.CommunicationType;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-
 import static com.decathlon.ara.service.support.DtoConstants.CODE_MESSAGE;
 import static com.decathlon.ara.service.support.DtoConstants.CODE_PATTERN;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
+import com.decathlon.ara.domain.enumeration.CommunicationType;
+
 public class CommunicationDTO {
 
     @NotNull(message = "The code is required.")
@@ -47,5 +40,41 @@ public class CommunicationDTO {
     private CommunicationType type;
 
     private String message;
+
+    private Long projectId;
+
+    public CommunicationDTO() {
+    }
+
+    public CommunicationDTO(String code, String name, CommunicationType type, String message) {
+        this.code = code;
+        this.name = name;
+        this.type = type;
+        this.message = message;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public CommunicationType getType() {
+        return type;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public Long getProjectId() {
+        return projectId;
+    }
 
 }

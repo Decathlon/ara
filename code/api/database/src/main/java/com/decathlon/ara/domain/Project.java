@@ -17,26 +17,24 @@
 
 package com.decathlon.ara.domain;
 
-import lombok.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import javax.persistence.*;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-
-import static java.util.Comparator.*;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 @Entity
-// Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
-@EqualsAndHashCode(of = { "code" })
-public class Project implements Comparable<Project>, Serializable {
+public class Project {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "project_id")
@@ -49,13 +47,21 @@ public class Project implements Comparable<Project>, Serializable {
     @Column(length = 64, nullable = false)
     private String name;
 
+    public Project() {
+    }
+
+    public Project(String code, String name) {
+        this.code = code;
+        this.name = name;
+    }
+
     /**
      * True to use that project as the default one appearing at ARA's client startup when no project code is present in
      * URL. Only one project can be declared as the default.
      */
     private boolean defaultAtStartup;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "projectId", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "project", orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Communication> communications = new ArrayList<>();
 
@@ -67,11 +73,32 @@ public class Project implements Comparable<Project>, Serializable {
         communications.add(communication);
     }
 
-    @Override
-    public int compareTo(Project other) {
-        // Keep business key in sync with @EqualsAndHashCode
-        Comparator<Project> codeComparator = comparing(Project::getCode, nullsFirst(naturalOrder()));
-        return nullsFirst(codeComparator).compare(this, other);
+    public Long getId() {
+        return id;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isDefaultAtStartup() {
+        return defaultAtStartup;
+    }
+
+    public void setDefaultAtStartup(boolean defaultAtStartup) {
+        this.defaultAtStartup = defaultAtStartup;
+    }
+
+    public List<Communication> getCommunications() {
+        return communications;
+    }
+
+    public void setCommunications(List<Communication> communications) {
+        this.communications = communications;
     }
 
 }

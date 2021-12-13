@@ -39,6 +39,7 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
 import com.decathlon.ara.service.dto.executedscenario.ExecutedScenarioDTO;
 import com.decathlon.ara.service.dto.executedscenario.ExecutedScenarioWithRunAndTeamIdsAndExecutionAndErrorsAndProblemsDTO;
 import com.decathlon.ara.service.dto.request.ExecutedScenarioHistoryInputDTO;
+import com.decathlon.ara.util.TestUtil;
 import com.decathlon.ara.web.rest.util.HeaderUtil;
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
@@ -46,43 +47,41 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 @Disabled
 @SpringBootTest
 @TestExecutionListeners({
-    TransactionalTestExecutionListener.class,
-    DependencyInjectionTestExecutionListener.class,
-    DbUnitTestExecutionListener.class
+        TransactionalTestExecutionListener.class,
+        DependencyInjectionTestExecutionListener.class,
+        DbUnitTestExecutionListener.class
 })
 @TestPropertySource(
-		locations = "classpath:application-db-h2.properties")
+        locations = "classpath:application-db-h2.properties")
 @Transactional
 @DatabaseSetup("/dbunit/scenario-history.xml")
-public class ExecutedScenarioResourceIT {
+class ExecutedScenarioResourceIT {
 
     private static final String PROJECT_CODE = "p";
 
     @Autowired
     private ExecutedScenarioResource cut;
 
-    private static ExecutedScenarioHistoryInputDTO input(String cucumberId) {
-        return new ExecutedScenarioHistoryInputDTO().withCucumberId(cucumberId);
+    private static ExecutedScenarioHistoryInputDTO input(String cucumberId, String cycleName, String branch, String countryCode, String runTypeCode) {
+        ExecutedScenarioHistoryInputDTO executedScenarioHistoryInputDTO = new ExecutedScenarioHistoryInputDTO();
+        TestUtil.setField(executedScenarioHistoryInputDTO, "cucumberId", cucumberId);
+        return executedScenarioHistoryInputDTO;
     }
 
     @Test
-    public void testGetHistoryWithoutFilter() {
+    void testGetHistoryWithoutFilter() {
         final ResponseEntity<List<ExecutedScenarioWithRunAndTeamIdsAndExecutionAndErrorsAndProblemsDTO>> response = cut.getHistory(
                 PROJECT_CODE,
-                input("a;scenario-a"));
+                input("a;scenario-a", null, null, null, null));
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).hasSize(18); // Do not check order: it will be checked in tests below
     }
 
     @Test
-    public void testGetHistoryWithFilterCombinationAndResultHasAllInformationFilled() {
+    void testGetHistoryWithFilterCombinationAndResultHasAllInformationFilled() {
         final ResponseEntity<List<ExecutedScenarioWithRunAndTeamIdsAndExecutionAndErrorsAndProblemsDTO>> response = cut.getHistory(
                 PROJECT_CODE,
-                input("a;scenario-a")
-                        .withCycleName("night")
-                        .withBranch("stab")
-                        .withCountryCode("be")
-                        .withRunTypeCode("api"));
+                input("a;scenario-a", "night", "stab", "be", "api"));
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).hasSize(3);
@@ -123,48 +122,48 @@ public class ExecutedScenarioResourceIT {
     }
 
     @Test
-    public void testGetHistoryWithCycleNameFilter() {
+    void testGetHistoryWithCycleNameFilter() {
         assertOkWithSize(
-                input("a;scenario-a").withCycleName("day"),
+                input("a;scenario-a", "day", null, null, null),
                 longs(2131, 2121, 2111, 1131, 1111));
     }
 
     @Test
-    public void testGetHistoryWithBranchFilter() {
+    void testGetHistoryWithBranchFilter() {
         assertOkWithSize(
-                input("a;scenario-a").withBranch("stab"),
+                input("a;scenario-a", null, "stab", null, null),
                 longs(2331, 2333, 2321, 2311, 1331, 1321, 1311));
     }
 
     @Test
-    public void testGetHistoryWithCountryCodeFilter() {
+    void testGetHistoryWithCountryCodeFilter() {
         assertOkWithSize(
-                input("a;scenario-a").withCountryCode("be"),
+                input("a;scenario-a", null, null, null, null),
                 longs(2331, 2333, 2231, 2131, 1331, 1231, 1131));
     }
 
     @Test
-    public void testGetHistoryWithRunTypeCodeFilter() {
+    void testGetHistoryWithRunTypeCodeFilter() {
         assertOkWithSize(
-                input("a;scenario-a").withRunTypeCode("firefox"),
+                input("a;scenario-a", null, null, null, "firefox"),
                 longs(2311, 2211, 2111, 1311, 1211, 1111));
     }
 
     @Test
-    public void testGetHistoryWithTooRestrictiveFilters() {
+    void testGetHistoryWithTooRestrictiveFilters() {
         assertOkWithSize(
-                input("a;scenario-a").withCountryCode("404"),
+                input("a;scenario-a", null, null, "404", null),
                 longs());
     }
 
     @Test
-    public void testGetHistoryWithNullCucumberId() {
-        assertCucumberIdIsMandatory(input(null));
+    void testGetHistoryWithNullCucumberId() {
+        assertCucumberIdIsMandatory(input(null, null, null, null, null));
     }
 
     @Test
-    public void testGetHistoryWithEmptyCucumberId() {
-        assertCucumberIdIsMandatory(input(""));
+    void testGetHistoryWithEmptyCucumberId() {
+        assertCucumberIdIsMandatory(input("", null, null, null, null));
     }
 
     private void assertCucumberIdIsMandatory(ExecutedScenarioHistoryInputDTO input) {

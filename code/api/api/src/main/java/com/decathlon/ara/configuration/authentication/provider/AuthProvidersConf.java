@@ -1,20 +1,25 @@
 package com.decathlon.ara.configuration.authentication.provider;
 
-import lombok.Data;
+import java.util.List;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
-
-@Data
 @Configuration
 @ConfigurationProperties("oauth2providers")
 public class AuthProvidersConf {
 
-
     private List<Oauth2ProvidersInfos> conf;
 
-    public static class Oauth2ProvidersInfos{
+    public List<Oauth2ProvidersInfos> getConf() {
+        return conf;
+    }
+
+    public void setConf(List<Oauth2ProvidersInfos> conf) {
+        this.conf = conf;
+    }
+
+    public static class Oauth2ProvidersInfos {
 
         private String displayName;
         private String providerType;

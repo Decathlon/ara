@@ -17,11 +17,8 @@
 
 package com.decathlon.ara.scenario.cypress.bean.media;
 
-import lombok.Data;
-
 import java.util.List;
 
-@Data
 public class CypressMedia {
 
     private String feature;
@@ -29,4 +26,17 @@ public class CypressMedia {
     private CypressVideo video;
 
     private List<CypressSnapshot> snapshots;
+
+    public String getFeature() {
+        return feature;
+    }
+
+    public CypressVideo getVideo() {
+        return video;
+    }
+
+    public List<CypressSnapshot> getSnapshots() {
+        return snapshots;
+    }
+
 }

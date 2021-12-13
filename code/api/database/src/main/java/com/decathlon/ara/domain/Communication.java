@@ -17,23 +17,24 @@
 
 package com.decathlon.ara.domain;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
+
 import com.decathlon.ara.domain.enumeration.CommunicationType;
-import lombok.*;
 
-import javax.persistence.*;
-import java.io.Serializable;
-import java.util.Comparator;
-
-import static java.util.Comparator.*;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 @Entity
 // Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
-@EqualsAndHashCode(of = { "projectId", "code" })
-public class Communication implements Comparable<Communication>, Serializable {
+public class Communication {
 
     public static final String EXECUTIONS = "executions";
     public static final String SCENARIO_WRITING_HELPS = "scenario-writing-helps";
@@ -43,12 +44,6 @@ public class Communication implements Comparable<Communication>, Serializable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "communication_id")
     @SequenceGenerator(name = "communication_id", sequenceName = "communication_id", allocationSize = 1)
     private Long id;
-
-    // 1/2 for @EqualsAndHashCode to work: used when an entity is fetched by JPA
-    @Column(name = "project_id", insertable = false, updatable = false)
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
-    private Long projectId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "project_id")
@@ -68,19 +63,51 @@ public class Communication implements Comparable<Communication>, Serializable {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.TextType")
     private String message;
 
-    // 2/2 for @EqualsAndHashCode to work: used for entities created outside of JPA
-    public void setProject(Project project) {
-        this.project = project;
-        this.projectId = (project == null ? null : project.getId());
+    public Communication() {
     }
 
-    @Override
-    public int compareTo(Communication other) {
-        // Keep business key in sync with @EqualsAndHashCode
-        Comparator<Communication> projectIdComparator = comparing(c -> c.projectId, nullsFirst(naturalOrder()));
-        Comparator<Communication> codeComparator = comparing(Communication::getCode, nullsFirst(naturalOrder()));
-        return nullsFirst(projectIdComparator
-                .thenComparing(codeComparator)).compare(this, other);
+    public Communication(Project project, String code, String name, CommunicationType type, String message) {
+        this.project = project;
+        this.code = code;
+        this.name = name;
+        this.type = type;
+        this.message = message;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public CommunicationType getType() {
+        return type;
+    }
+
+    public void setType(CommunicationType type) {
+        this.type = type;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
 }

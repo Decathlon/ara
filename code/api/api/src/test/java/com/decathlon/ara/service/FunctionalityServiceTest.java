@@ -17,6 +17,25 @@
 
 package com.decathlon.ara.service;
 
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyIterable;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.decathlon.ara.domain.Functionality;
 import com.decathlon.ara.domain.enumeration.FunctionalityType;
 import com.decathlon.ara.repository.CountryRepository;
@@ -30,27 +49,10 @@ import com.decathlon.ara.service.dto.team.TeamDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
-import com.decathlon.ara.service.mapper.FunctionalityMapper;
-import com.decathlon.ara.service.mapper.FunctionalityWithChildrenMapper;
-import com.decathlon.ara.service.mapper.ScenarioMapper;
-import org.junit.runner.RunWith;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.Assert.assertThrows;
-import static org.mockito.Mockito.*;
+import com.decathlon.ara.service.mapper.GenericMapper;
 
 @ExtendWith(MockitoExtension.class)
-public class FunctionalityServiceTest {
+class FunctionalityServiceTest {
 
     @Mock
     private FunctionalityRepository repository;
@@ -68,29 +70,21 @@ public class FunctionalityServiceTest {
     private ProjectService projectService;
 
     @Mock
-    private FunctionalityMapper mapper;
-
-    @Mock
-    private FunctionalityWithChildrenMapper mapperWithChildren;
-
-    @Mock
-    private ScenarioMapper scenarioMapper;
+    private GenericMapper mapper;
 
     @InjectMocks
     private FunctionalityService functionalityService;
 
     @Test
-    public void create_throwBadRequestException_whenNoReferenceIdAndRelativePositionIsNotLastChild() throws BadRequestException {
+    void create_throwBadRequestException_whenNoReferenceIdAndRelativePositionIsNotLastChild() throws BadRequestException {
         // Given
 
         Long projectId = 1L;
 
-        FunctionalityDTO functionality = mock(FunctionalityDTO.class);
         NewFunctionalityDTO newFunctionalityDTO = mock(NewFunctionalityDTO.class);
         FunctionalityPosition position = FunctionalityPosition.BELOW;
 
         // When
-        when(newFunctionalityDTO.getFunctionality()).thenReturn(functionality);
         when(newFunctionalityDTO.getReferenceId()).thenReturn(null);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
@@ -100,18 +94,16 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void create_throwNotFoundException_whenReferenceIdNotNullButNotFound() throws BadRequestException {
+    void create_throwNotFoundException_whenReferenceIdNotNullButNotFound() throws BadRequestException {
         // Given
 
         Long projectId = 1L;
 
         Long referenceId = 10L;
 
-        FunctionalityDTO functionality = mock(FunctionalityDTO.class);
         NewFunctionalityDTO newFunctionalityDTO = mock(NewFunctionalityDTO.class);
 
         // When
-        when(newFunctionalityDTO.getFunctionality()).thenReturn(functionality);
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
 
         when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.empty());
@@ -122,21 +114,19 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void create_throwBadRequestException_whenReferenceIdFoundAndPositionIsLastChildAndParentIdIsFunctionality() throws BadRequestException {
+    void create_throwBadRequestException_whenReferenceIdFoundAndPositionIsLastChildAndParentIdIsFunctionality() throws BadRequestException {
         // Given
 
         Long projectId = 1L;
 
         Long referenceId = 10L;
 
-        FunctionalityDTO functionality = mock(FunctionalityDTO.class);
         NewFunctionalityDTO newFunctionalityDTO = mock(NewFunctionalityDTO.class);
         FunctionalityPosition position = FunctionalityPosition.LAST_CHILD;
 
         Functionality referenceFunctionality = mock(Functionality.class);
 
         // When
-        when(newFunctionalityDTO.getFunctionality()).thenReturn(functionality);
         when(newFunctionalityDTO.getReferenceId()).thenReturn(referenceId);
         when(newFunctionalityDTO.getRelativePosition()).thenReturn(position);
 
@@ -149,7 +139,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void create_throwBadRequestException_whenFunctionalityTypeDoesNotExist() throws BadRequestException {
+    void create_throwBadRequestException_whenFunctionalityTypeDoesNotExist() throws BadRequestException {
         // Given
 
         Long projectId = 1L;
@@ -184,8 +174,7 @@ public class FunctionalityServiceTest {
         when(repository.findAllByProjectIdAndParentIdOrderByOrder(projectId, parentId)).thenReturn(Arrays.asList(
                 functionalitySibling2,
                 functionalitySibling3,
-                functionalitySibling1
-        ));
+                functionalitySibling1));
         when(functionalitySibling1.getId()).thenReturn(referenceId);
         when(functionalitySibling2.getId()).thenReturn(siblingId2);
         when(functionalitySibling3.getId()).thenReturn(siblingId3);
@@ -198,7 +187,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void create_throwBadRequestException_whenFunctionalityHasNoName() throws BadRequestException {
+    void create_throwBadRequestException_whenFunctionalityHasNoName() throws BadRequestException {
         // Given
 
         Long projectId = 1L;
@@ -233,8 +222,7 @@ public class FunctionalityServiceTest {
         when(repository.findAllByProjectIdAndParentIdOrderByOrder(projectId, parentId)).thenReturn(Arrays.asList(
                 functionalitySibling2,
                 functionalitySibling3,
-                functionalitySibling1
-        ));
+                functionalitySibling1));
         when(functionalitySibling1.getId()).thenReturn(referenceId);
         when(functionalitySibling2.getId()).thenReturn(siblingId2);
         when(functionalitySibling3.getId()).thenReturn(siblingId3);
@@ -248,7 +236,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void create_throwNotUniqueException_whenFunctionalityNameAlreadyExists() throws BadRequestException {
+    void create_throwNotUniqueException_whenFunctionalityNameAlreadyExists() throws BadRequestException {
         // Given
 
         Long projectId = 1L;
@@ -289,8 +277,7 @@ public class FunctionalityServiceTest {
         when(repository.findAllByProjectIdAndParentIdOrderByOrder(projectId, parentId)).thenReturn(Arrays.asList(
                 functionalitySibling2,
                 functionalitySibling3,
-                functionalitySibling1
-        ));
+                functionalitySibling1));
         when(functionalitySibling1.getId()).thenReturn(referenceId);
         when(functionalitySibling2.getId()).thenReturn(siblingId2);
         when(functionalitySibling3.getId()).thenReturn(siblingId3);
@@ -310,7 +297,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void create_throwBadRequestException_whenFunctionalityIsAnInvalidFolder() throws BadRequestException {
+    void create_throwBadRequestException_whenFunctionalityIsAnInvalidFolder() throws BadRequestException {
         // Given
 
         Long projectId = 1L;
@@ -351,8 +338,7 @@ public class FunctionalityServiceTest {
         when(repository.findAllByProjectIdAndParentIdOrderByOrder(projectId, parentId)).thenReturn(Arrays.asList(
                 functionalitySibling2,
                 functionalitySibling3,
-                functionalitySibling1
-        ));
+                functionalitySibling1));
         when(functionalitySibling1.getId()).thenReturn(referenceId);
         when(functionalitySibling2.getId()).thenReturn(siblingId2);
         when(functionalitySibling3.getId()).thenReturn(siblingId3);
@@ -372,7 +358,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void create_throwBadRequestException_whenFunctionalityHasNoTeam() throws BadRequestException {
+    void create_throwBadRequestException_whenFunctionalityHasNoTeam() throws BadRequestException {
         // Given
 
         Long projectId = 1L;
@@ -411,8 +397,7 @@ public class FunctionalityServiceTest {
         when(repository.findAllByProjectIdAndParentIdOrderByOrder(projectId, parentId)).thenReturn(Arrays.asList(
                 functionalitySibling2,
                 functionalitySibling3,
-                functionalitySibling1
-        ));
+                functionalitySibling1));
         when(functionalitySibling1.getId()).thenReturn(referenceId);
         when(functionalitySibling2.getId()).thenReturn(siblingId2);
         when(functionalitySibling3.getId()).thenReturn(siblingId3);
@@ -432,7 +417,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void create_throwBadRequestException_whenFunctionalityHasNoSeverity() throws BadRequestException {
+    void create_throwBadRequestException_whenFunctionalityHasNoSeverity() throws BadRequestException {
         // Given
 
         Long projectId = 1L;
@@ -473,8 +458,7 @@ public class FunctionalityServiceTest {
         when(repository.findAllByProjectIdAndParentIdOrderByOrder(projectId, parentId)).thenReturn(Arrays.asList(
                 functionalitySibling2,
                 functionalitySibling3,
-                functionalitySibling1
-        ));
+                functionalitySibling1));
         when(functionalitySibling1.getId()).thenReturn(referenceId);
         when(functionalitySibling2.getId()).thenReturn(siblingId2);
         when(functionalitySibling3.getId()).thenReturn(siblingId3);
@@ -495,7 +479,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void create_throwBadRequestException_whenFunctionalityHasNoCountryCodes() throws BadRequestException {
+    void create_throwBadRequestException_whenFunctionalityHasNoCountryCodes() throws BadRequestException {
         // Given
 
         Long projectId = 1L;
@@ -537,8 +521,7 @@ public class FunctionalityServiceTest {
         when(repository.findAllByProjectIdAndParentIdOrderByOrder(projectId, parentId)).thenReturn(Arrays.asList(
                 functionalitySibling2,
                 functionalitySibling3,
-                functionalitySibling1
-        ));
+                functionalitySibling1));
         when(functionalitySibling1.getId()).thenReturn(referenceId);
         when(functionalitySibling2.getId()).thenReturn(siblingId2);
         when(functionalitySibling3.getId()).thenReturn(siblingId3);
@@ -560,7 +543,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void create_throwBadRequestException_whenFunctionalityHasStartedAndIsNotAutomatable() throws BadRequestException {
+    void create_throwBadRequestException_whenFunctionalityHasStartedAndIsNotAutomatable() throws BadRequestException {
         // Given
 
         Long projectId = 1L;
@@ -603,8 +586,7 @@ public class FunctionalityServiceTest {
         when(repository.findAllByProjectIdAndParentIdOrderByOrder(projectId, parentId)).thenReturn(Arrays.asList(
                 functionalitySibling2,
                 functionalitySibling3,
-                functionalitySibling1
-        ));
+                functionalitySibling1));
         when(functionalitySibling1.getId()).thenReturn(referenceId);
         when(functionalitySibling2.getId()).thenReturn(siblingId2);
         when(functionalitySibling3.getId()).thenReturn(siblingId3);
@@ -628,7 +610,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void create_throwNotFoundException_whenACountryCodeNotFound() throws BadRequestException {
+    void create_throwNotFoundException_whenACountryCodeNotFound() throws BadRequestException {
         // Given
 
         Long projectId = 1L;
@@ -675,8 +657,7 @@ public class FunctionalityServiceTest {
         when(repository.findAllByProjectIdAndParentIdOrderByOrder(projectId, parentId)).thenReturn(Arrays.asList(
                 functionalitySibling2,
                 functionalitySibling3,
-                functionalitySibling1
-        ));
+                functionalitySibling1));
         when(functionalitySibling1.getId()).thenReturn(referenceId);
         when(functionalitySibling2.getId()).thenReturn(siblingId2);
         when(functionalitySibling3.getId()).thenReturn(siblingId3);
@@ -702,7 +683,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void create_throwBadRequestException_whenFunctionalityTeamIsNotAssignable() throws BadRequestException {
+    void create_throwBadRequestException_whenFunctionalityTeamIsNotAssignable() throws BadRequestException {
         // Given
 
         Long projectId = 1L;
@@ -750,8 +731,7 @@ public class FunctionalityServiceTest {
         when(repository.findAllByProjectIdAndParentIdOrderByOrder(projectId, parentId)).thenReturn(Arrays.asList(
                 functionalitySibling2,
                 functionalitySibling3,
-                functionalitySibling1
-        ));
+                functionalitySibling1));
         when(functionalitySibling1.getId()).thenReturn(referenceId);
         when(functionalitySibling2.getId()).thenReturn(siblingId2);
         when(functionalitySibling3.getId()).thenReturn(siblingId3);
@@ -780,7 +760,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void create_throwBadRequestException_whenFunctionalitySeverityDoesNotExist() throws BadRequestException {
+    void create_throwBadRequestException_whenFunctionalitySeverityDoesNotExist() throws BadRequestException {
         // Given
 
         Long projectId = 1L;
@@ -828,8 +808,7 @@ public class FunctionalityServiceTest {
         when(repository.findAllByProjectIdAndParentIdOrderByOrder(projectId, parentId)).thenReturn(Arrays.asList(
                 functionalitySibling2,
                 functionalitySibling3,
-                functionalitySibling1
-        ));
+                functionalitySibling1));
         when(functionalitySibling1.getId()).thenReturn(referenceId);
         when(functionalitySibling2.getId()).thenReturn(siblingId2);
         when(functionalitySibling3.getId()).thenReturn(siblingId3);
@@ -858,7 +837,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void create_saveFunctionality_whenNoError() throws BadRequestException {
+    void create_saveFunctionality_whenNoError() throws BadRequestException {
         // Given
 
         Long projectId = 1L;
@@ -908,8 +887,7 @@ public class FunctionalityServiceTest {
         when(repository.findAllByProjectIdAndParentIdOrderByOrder(projectId, parentId)).thenReturn(Arrays.asList(
                 functionalitySibling2,
                 functionalitySibling3,
-                functionalitySibling1
-        ));
+                functionalitySibling1));
         when(functionalitySibling1.getId()).thenReturn(referenceId);
         when(functionalitySibling2.getId()).thenReturn(siblingId2);
         when(functionalitySibling3.getId()).thenReturn(siblingId3);
@@ -932,7 +910,7 @@ public class FunctionalityServiceTest {
         when(teamService.findOne(projectId, teamId)).thenReturn(teamDTO);
         when(teamDTO.isAssignableToFunctionalities()).thenReturn(true);
 
-        when(mapper.toEntity(functionality)).thenReturn(mappedFunctionality);
+        when(mapper.map(functionality, Functionality.class)).thenReturn(mappedFunctionality);
 
         // Then
         functionalityService.create(projectId, newFunctionalityDTO);
@@ -940,7 +918,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void moveList_throwBadRequestException_whenMoveRequestIsNull() throws BadRequestException {
+    void moveList_throwBadRequestException_whenMoveRequestIsNull() throws BadRequestException {
         // Given
         Long projectId = 1L;
 
@@ -951,7 +929,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void moveList_throwBadRequestException_whenReferenceIdIsNull() throws BadRequestException {
+    void moveList_throwBadRequestException_whenReferenceIdIsNull() throws BadRequestException {
         // Given
         Long projectId = 1L;
 
@@ -965,7 +943,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void moveList_throwBadRequestException_whenSourceIdsIsNull() throws BadRequestException {
+    void moveList_throwBadRequestException_whenSourceIdsIsNull() throws BadRequestException {
         // Given
         Long projectId = 1L;
 
@@ -981,7 +959,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void moveList_throwBadRequestException_whenSourceIdsIsEmpty() throws BadRequestException {
+    void moveList_throwBadRequestException_whenSourceIdsIsEmpty() throws BadRequestException {
         // Given
         Long projectId = 1L;
 
@@ -997,7 +975,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void moveList_throwNotFoundException_whenReferenceFunctionalityIsNotFound() throws BadRequestException {
+    void moveList_throwNotFoundException_whenReferenceFunctionalityIsNotFound() throws BadRequestException {
         // Given
         Long projectId = 1L;
 
@@ -1019,7 +997,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void moveList_throwNotFoundException_whenSomeOfTheSourceFunctionalitiesAreNotFound() throws BadRequestException {
+    void moveList_throwNotFoundException_whenSomeOfTheSourceFunctionalitiesAreNotFound() throws BadRequestException {
         // Given
         Long projectId = 1L;
 
@@ -1039,15 +1017,14 @@ public class FunctionalityServiceTest {
         when(moveDetails.getSourceIds()).thenReturn(Arrays.asList(sourceId1, sourceId2, sourceId3));
         when(repository.findByProjectIdAndId(projectId, referenceId)).thenReturn(Optional.of(referenceFunctionality));
         when(repository.findByProjectIdAndIdIn(projectId, Arrays.asList(sourceId1, sourceId2, sourceId3))).thenReturn(
-                Arrays.asList(sourceFunctionality1, sourceFunctionality2)
-        );
+                Arrays.asList(sourceFunctionality1, sourceFunctionality2));
 
         // Then
         assertThrows(NotFoundException.class, () -> functionalityService.moveList(projectId, moveDetails));
     }
 
     @Test
-    public void delete_throwBadRequestException_whenIdIsNull() throws BadRequestException {
+    void delete_throwBadRequestException_whenIdIsNull() throws BadRequestException {
         // Given
         Long projectId = 1L;
 
@@ -1059,7 +1036,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void delete_throwNotFoundException_whenIdIsUnknown() throws BadRequestException {
+    void delete_throwNotFoundException_whenIdIsUnknown() throws BadRequestException {
         // Given
         Long projectId = 1L;
         Long id = 10L;
@@ -1073,7 +1050,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void delete_deleteFunctionality_whenIdExists() throws BadRequestException {
+    void delete_deleteFunctionality_whenIdExists() throws BadRequestException {
         // Given
         Long projectId = 1L;
         Long id = 10L;
@@ -1089,7 +1066,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void deleteList_throwBadRequestException_whenIdsNull() throws BadRequestException {
+    void deleteList_throwBadRequestException_whenIdsNull() throws BadRequestException {
         // Given
         Long projectId = 1L;
 
@@ -1101,7 +1078,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void deleteList_throwBadRequestException_whenIdsEmpty() throws BadRequestException {
+    void deleteList_throwBadRequestException_whenIdsEmpty() throws BadRequestException {
         // Given
         Long projectId = 1L;
 
@@ -1113,7 +1090,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void deleteList_throwNotFoundException_whenSomeIdsNotFound() throws BadRequestException {
+    void deleteList_throwNotFoundException_whenSomeIdsNotFound() throws BadRequestException {
         // Given
         Long projectId = 1L;
 
@@ -1128,8 +1105,7 @@ public class FunctionalityServiceTest {
 
         // When
         when(repository.findByProjectIdAndIdIn(projectId, functionalityIds)).thenReturn(
-                Arrays.asList(functionality1, functionality2)
-        );
+                Arrays.asList(functionality1, functionality2));
 
         // Then
         assertThrows(NotFoundException.class, () -> functionalityService.deleteList(projectId, functionalityIds));
@@ -1137,7 +1113,7 @@ public class FunctionalityServiceTest {
     }
 
     @Test
-    public void deleteList_deleteFunctionalities_whenAllIdsFound() throws BadRequestException {
+    void deleteList_deleteFunctionalities_whenAllIdsFound() throws BadRequestException {
         // Given
         Long projectId = 1L;
 

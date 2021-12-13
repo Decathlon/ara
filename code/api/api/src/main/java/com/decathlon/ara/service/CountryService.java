@@ -17,7 +17,14 @@
 
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.domain.QCountry;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.decathlon.ara.Entities;
+import com.decathlon.ara.Messages;
+import com.decathlon.ara.domain.Country;
 import com.decathlon.ara.repository.CountryDeploymentRepository;
 import com.decathlon.ara.repository.CountryRepository;
 import com.decathlon.ara.repository.FunctionalityRepository;
@@ -30,46 +37,41 @@ import com.decathlon.ara.service.dto.support.UpsertResultDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
-import com.decathlon.ara.service.mapper.CountryMapper;
-import com.decathlon.ara.Entities;
-import com.decathlon.ara.Messages;
-import com.decathlon.ara.domain.Country;
-import com.decathlon.ara.service.util.ObjectUtil;
-import java.util.List;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.decathlon.ara.service.mapper.GenericMapper;
 
 /**
  * Service for managing Country.
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CountryService {
 
-    @NonNull
     private final CountryRepository repository;
 
-    @NonNull
     private final CountryDeploymentRepository countryDeploymentRepository;
 
-    @NonNull
     private final RunRepository runRepository;
 
-    @NonNull
     private final ProblemPatternRepository problemPatternRepository;
 
-    @NonNull
     private final FunctionalityRepository functionalityRepository;
 
-    @NonNull
     private final ScenarioRepository scenarioRepository;
 
-    @NonNull
-    private final CountryMapper mapper;
+    private final GenericMapper mapper;
+
+    public CountryService(CountryRepository repository, CountryDeploymentRepository countryDeploymentRepository,
+            RunRepository runRepository, ProblemPatternRepository problemPatternRepository,
+            FunctionalityRepository functionalityRepository, ScenarioRepository scenarioRepository,
+            GenericMapper mapper) {
+        this.repository = repository;
+        this.countryDeploymentRepository = countryDeploymentRepository;
+        this.runRepository = runRepository;
+        this.problemPatternRepository = problemPatternRepository;
+        this.functionalityRepository = functionalityRepository;
+        this.scenarioRepository = scenarioRepository;
+        this.mapper = mapper;
+    }
 
     /**
      * Create a new entity.
@@ -81,19 +83,17 @@ public class CountryService {
      * @throws NotFoundException  when the given project does not exist
      */
     public CountryDTO create(long projectId, CountryDTO dtoToCreate) throws BadRequestException {
-        ObjectUtil.trimStringValues(dtoToCreate);
-
         Country existingEntityWithSameCode = repository.findByProjectIdAndCode(projectId, dtoToCreate.getCode());
         if (existingEntityWithSameCode != null) {
             throw new NotUniqueException(Messages.NOT_UNIQUE_COUNTRY_CODE, Entities.COUNTRY,
-                    QCountry.country.code.getMetadata().getName(), existingEntityWithSameCode.getCode());
+                    "code", existingEntityWithSameCode.getCode());
         }
 
         validateBusinessRules(projectId, dtoToCreate);
 
-        final Country entity = mapper.toEntity(dtoToCreate);
+        final Country entity = mapper.map(dtoToCreate, Country.class);
         entity.setProjectId(projectId);
-        return mapper.toDto(repository.save(entity));
+        return mapper.map(repository.save(entity), CountryDTO.class);
     }
 
     /**
@@ -105,16 +105,15 @@ public class CountryService {
      * @throws NotUniqueException when the given name is already used by another entity
      */
     public UpsertResultDTO<CountryDTO> createOrUpdate(long projectId, CountryDTO dtoToCreateOrUpdate) throws NotUniqueException {
-        ObjectUtil.trimStringValues(dtoToCreateOrUpdate);
         validateBusinessRules(projectId, dtoToCreateOrUpdate);
 
         Country dataBaseEntity = repository.findByProjectIdAndCode(projectId, dtoToCreateOrUpdate.getCode());
         final Upsert operation = (dataBaseEntity == null ? Upsert.INSERT : Upsert.UPDATE);
 
-        final Country entity = mapper.toEntity(dtoToCreateOrUpdate);
+        final Country entity = mapper.map(dtoToCreateOrUpdate, Country.class);
         entity.setId(dataBaseEntity == null ? null : dataBaseEntity.getId());
         entity.setProjectId(projectId);
-        final CountryDTO dto = mapper.toDto(repository.save(entity));
+        final CountryDTO dto = mapper.map(repository.save(entity), CountryDTO.class);
         return new UpsertResultDTO<>(dto, operation);
     }
 
@@ -126,7 +125,7 @@ public class CountryService {
      */
     @Transactional(readOnly = true)
     public List<CountryDTO> findAll(long projectId) {
-        return mapper.toDto(repository.findAllByProjectIdOrderByCode(projectId));
+        return mapper.mapCollection(repository.findAllByProjectIdOrderByCode(projectId), CountryDTO.class);
     }
 
     /**
@@ -151,7 +150,7 @@ public class CountryService {
     private void validateBusinessRules(long projectId, CountryDTO dto) throws NotUniqueException {
         Country existingEntityWithSameName = repository.findByProjectIdAndName(projectId, dto.getName());
         if (existingEntityWithSameName != null && !existingEntityWithSameName.getCode().equals(dto.getCode())) {
-            throw new NotUniqueException(Messages.NOT_UNIQUE_COUNTRY_NAME, Entities.COUNTRY, QCountry.country.name.getMetadata().getName(), existingEntityWithSameName.getCode());
+            throw new NotUniqueException(Messages.NOT_UNIQUE_COUNTRY_NAME, Entities.COUNTRY, "name", existingEntityWithSameName.getCode());
         }
     }
 

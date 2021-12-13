@@ -20,12 +20,11 @@ package com.decathlon.ara.features;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.annotation.PostConstruct;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -35,20 +34,20 @@ import org.springframework.stereotype.Component;
  *
  * @author Sylvain Nieuwlandt
  */
-@Slf4j
 @Component
 @Scope("singleton")
-@AllArgsConstructor
-@NoArgsConstructor
 public class FeatureActivator {
 
-    @Autowired
+    private static final Logger LOG = LoggerFactory.getLogger(FeatureActivator.class);
+
     private Environment environment;
 
-    @NonNull
     private Map<String, Boolean> currentStates = new HashMap<>();
-    @NonNull
     private Map<String, Boolean> defaultStates = new HashMap<>();
+
+    public FeatureActivator(Environment environment) {
+        this.environment = environment;
+    }
 
     /**
      * Load the current activator with a default FeatureCollection.
@@ -68,7 +67,7 @@ public class FeatureActivator {
      * @param collection the collection which will contains the available features.
      */
     public void load(FeatureCollection collection) {
-        log.info("Loading features states...");
+        LOG.info("Loading features states...");
         this.currentStates.clear();
         this.defaultStates.clear();
         int enabledCounter = 0;
@@ -89,7 +88,7 @@ public class FeatureActivator {
             this.defaultStates.put(feature.getCode(), status);
             this.currentStates.put(feature.getCode(), status);
         }
-        log.info("Features states loaded ( {} enabled on {} ).", enabledCounter, allFeatures.size());
+        LOG.info("Features states loaded ( {} enabled on {} ).", enabledCounter, allFeatures.size());
     }
 
     /**
@@ -116,7 +115,7 @@ public class FeatureActivator {
      */
     public void changeStateOf(String code, boolean newState) {
         if (this.currentStates.containsKey(code)) {
-            log.info("Switching state of {} to {}.", code, newState ? "ENABLED" : "DISABLED");
+            LOG.info("Switching state of {} to {}.", code, newState ? "ENABLED" : "DISABLED");
             this.currentStates.put(code, newState);
         }
     }

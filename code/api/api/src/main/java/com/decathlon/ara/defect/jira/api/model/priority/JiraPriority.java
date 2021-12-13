@@ -17,9 +17,6 @@
 
 package com.decathlon.ara.defect.jira.api.model.priority;
 
-import lombok.Data;
-
-@Data
 public class JiraPriority {
 
     private String self;
@@ -29,5 +26,21 @@ public class JiraPriority {
     private String name;
 
     private String id;
+
+    public String getSelf() {
+        return self;
+    }
+
+    public String getIconUrl() {
+        return iconUrl;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getId() {
+        return id;
+    }
 
 }

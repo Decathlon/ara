@@ -55,7 +55,7 @@ import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 
 @ExtendWith(MockitoExtension.class)
-public class SettingServiceTest {
+class SettingServiceTest {
 
     private static final long A_PROJECT_ID = 42;
 
@@ -70,7 +70,7 @@ public class SettingServiceTest {
     private SettingService cut;
 
     @Test
-    public void getTree_ShouldReturnSettingDefinitionsAndValues_WhenCalledForAProject() {
+    void getTree_ShouldReturnSettingDefinitionsAndValues_WhenCalledForAProject() {
         // GIVEN
         Map<String, String> values = new HashMap<>();
         doReturn(values).when(cut).getValues(A_PROJECT_ID);
@@ -87,7 +87,7 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void get_ShouldReturnValue_WhenValuePresentInDatabase() {
+    void get_ShouldReturnValue_WhenValuePresentInDatabase() {
         // GIVEN
         Map<String, String> values = new HashMap<>();
         values.put("code", "value");
@@ -101,17 +101,16 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void get_ShouldReturnDefaultValue_WhenValueIsEmptyInDatabase() {
+    void get_ShouldReturnDefaultValue_WhenValueIsEmptyInDatabase() {
         // GIVEN
         Map<String, String> values = new HashMap<>();
         values.put("code", "");
         doReturn(values).when(cut).getValues(A_PROJECT_ID);
         when(settingProviderService.getDefinitions(eq(A_PROJECT_ID), same(values))).thenReturn(
-                Collections.singletonList(new SettingGroupDTO()
-                        .withSettings(Collections.singletonList(
-                                new SettingDTO()
-                                        .withCode("code")
-                                        .withDefaultValue("default-value")))));
+                Collections.singletonList(new SettingGroupDTO(null, Collections.singletonList(
+                        new SettingDTO.SettingDTOBuilder()
+                                .withCode("code")
+                                .withDefaultValue("default-value").build()))));
 
         // WHEN
         final String value = cut.get(A_PROJECT_ID, "code");
@@ -121,16 +120,15 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void get_ShouldReturnDefaultValue_WhenValueIsAbsentInDatabase() {
+    void get_ShouldReturnDefaultValue_WhenValueIsAbsentInDatabase() {
         // GIVEN
         Map<String, String> values = new HashMap<>();
         doReturn(values).when(cut).getValues(A_PROJECT_ID);
         when(settingProviderService.getDefinitions(eq(A_PROJECT_ID), same(values))).thenReturn(
-                Collections.singletonList(new SettingGroupDTO()
-                        .withSettings(Collections.singletonList(
-                                new SettingDTO()
-                                        .withCode("code")
-                                        .withDefaultValue("default-value")))));
+                Collections.singletonList(new SettingGroupDTO(null, Collections.singletonList(
+                        new SettingDTO.SettingDTOBuilder()
+                                .withCode("code")
+                                .withDefaultValue("default-value").build()))));
 
         // WHEN
         final String value = cut.get(A_PROJECT_ID, "code");
@@ -140,7 +138,7 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void update_ShouldFailAsNotFound_WhenSettingCodeIsUnknown() {
+    void update_ShouldFailAsNotFound_WhenSettingCodeIsUnknown() {
         // GIVEN
         doReturn(Optional.empty()).when(cut).getSettingDefinition(A_PROJECT_ID, "code");
 
@@ -158,7 +156,7 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void update_ShouldFail_WhenCalledWithAKnownSettingButWithAValueNotPassingValidation() throws BadRequestException {
+    void update_ShouldFail_WhenCalledWithAKnownSettingButWithAValueNotPassingValidation() throws BadRequestException {
         // GIVEN
         SettingDTO settingDefinition = new SettingDTO();
         doReturn(Optional.of(settingDefinition)).when(cut).getSettingDefinition(A_PROJECT_ID, "code");
@@ -170,7 +168,7 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void update_ShouldUpdateSetting_WhenSettingExistingInDatabase() throws BadRequestException {
+    void update_ShouldUpdateSetting_WhenSettingExistingInDatabase() throws BadRequestException {
         // GIVEN
         SettingDTO settingDefinition = new SettingDTO();
         doReturn(Optional.of(settingDefinition)).when(cut).getSettingDefinition(A_PROJECT_ID, "code");
@@ -187,7 +185,7 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void update_ShouldInsertSetting_WhenSettingNonexistentInDatabase() throws BadRequestException {
+    void update_ShouldInsertSetting_WhenSettingNonexistentInDatabase() throws BadRequestException {
         // GIVEN
         SettingDTO settingDefinition = new SettingDTO();
         doReturn(Optional.of(settingDefinition)).when(cut).getSettingDefinition(A_PROJECT_ID, "code");
@@ -206,7 +204,7 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void update_ShouldPutNewValueInCache_WhenUpsertFinished() throws BadRequestException {
+    void update_ShouldPutNewValueInCache_WhenUpsertFinished() throws BadRequestException {
         // GIVEN
         doReturn(Optional.of(new SettingDTO())).when(cut).getSettingDefinition(A_PROJECT_ID, "code");
         doNothing().when(cut).validateNewValue(any(), any());
@@ -224,7 +222,7 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void getValues_ShouldReturnValuesFromRepository_WhenCalledForAProject() {
+    void getValues_ShouldReturnValuesFromRepository_WhenCalledForAProject() {
         // GIVEN
         final Map<String, String> expectedValues = new HashMap<>();
         expectedValues.put("key", "value");
@@ -238,7 +236,7 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void getValues_ShouldCallRepositoryOnlyOnce_WhenCalledForAProject() {
+    void getValues_ShouldCallRepositoryOnlyOnce_WhenCalledForAProject() {
         // GIVEN
         final Map<String, String> expectedValues = new HashMap<>();
         expectedValues.put("key", "value");
@@ -254,12 +252,12 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void validateNewValue_ShouldPass_WhenEmptyValueButNotRequiredSetting() throws BadRequestException {
+    void validateNewValue_ShouldPass_WhenEmptyValueButNotRequiredSetting() throws BadRequestException {
         // GIVEN
-        final SettingDTO setting = new SettingDTO()
+        final SettingDTO setting = new SettingDTO.SettingDTOBuilder()
                 .withRequired(false)
                 .withType(SettingType.PASSWORD)
-                .withValidate(value -> "should-not-happen");
+                .withValidate(value -> "should-not-happen").build();
 
         // WHEN
         cut.validateNewValue("", setting);
@@ -269,12 +267,12 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void validateNewValue_ShouldFailAsBadRequest_WhenRequiredSettingIsEmpty() {
+    void validateNewValue_ShouldFailAsBadRequest_WhenRequiredSettingIsEmpty() {
         // GIVEN
-        final SettingDTO setting = new SettingDTO()
+        final SettingDTO setting = new SettingDTO.SettingDTOBuilder()
                 .withRequired(true)
                 .withType(SettingType.STRING)
-                .withDefaultValue(null);
+                .withDefaultValue(null).build();
 
         // WHEN
         try {
@@ -290,12 +288,12 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void validateNewValue_ShouldPass_WhenRequiredSettingIsEmptyButHasDefaultValue() throws BadRequestException {
+    void validateNewValue_ShouldPass_WhenRequiredSettingIsEmptyButHasDefaultValue() throws BadRequestException {
         // GIVEN
-        final SettingDTO setting = new SettingDTO()
+        final SettingDTO setting = new SettingDTO.SettingDTOBuilder()
                 .withRequired(true)
                 .withType(SettingType.STRING)
-                .withDefaultValue("default");
+                .withDefaultValue("default").build();
 
         // WHEN
         cut.validateNewValue("", setting);
@@ -305,13 +303,13 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void validateNewValue_ShouldPass_WhenValueIsInAllowedSelectOptions() throws BadRequestException {
+    void validateNewValue_ShouldPass_WhenValueIsInAllowedSelectOptions() throws BadRequestException {
         // GIVEN
-        final SettingDTO setting = new SettingDTO()
+        final SettingDTO setting = new SettingDTO.SettingDTOBuilder()
                 .withRequired(true)
                 .withType(SettingType.SELECT)
                 .withOptions(Collections.singletonList(
-                        new SettingOptionDTO("value", "label")));
+                        new SettingOptionDTO("value", "label"))).build();
 
         // WHEN
         cut.validateNewValue("value", setting);
@@ -321,13 +319,13 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void validateNewValue_ShouldFailAsNotFound_WhenValueIsNotInAllowedSelectOptions() throws BadRequestException {
+    void validateNewValue_ShouldFailAsNotFound_WhenValueIsNotInAllowedSelectOptions() throws BadRequestException {
         // GIVEN
-        final SettingDTO setting = new SettingDTO()
+        final SettingDTO setting = new SettingDTO.SettingDTOBuilder()
                 .withRequired(true)
                 .withType(SettingType.SELECT)
                 .withOptions(Collections.singletonList(
-                        new SettingOptionDTO("value", "label")));
+                        new SettingOptionDTO("value", "label"))).build();
 
         // WHEN
         try {
@@ -343,11 +341,11 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void validateNewValue_ShouldPass_WhenValueIsTrueForBooleanOptions() throws BadRequestException {
+    void validateNewValue_ShouldPass_WhenValueIsTrueForBooleanOptions() throws BadRequestException {
         // GIVEN
-        final SettingDTO setting = new SettingDTO()
+        final SettingDTO setting = new SettingDTO.SettingDTOBuilder()
                 .withRequired(true)
-                .withType(SettingType.BOOLEAN);
+                .withType(SettingType.BOOLEAN).build();
 
         // WHEN
         cut.validateNewValue("true", setting);
@@ -357,11 +355,11 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void validateNewValue_ShouldPass_WhenValueIsFalseForBooleanOptions() throws BadRequestException {
+    void validateNewValue_ShouldPass_WhenValueIsFalseForBooleanOptions() throws BadRequestException {
         // GIVEN
-        final SettingDTO setting = new SettingDTO()
+        final SettingDTO setting = new SettingDTO.SettingDTOBuilder()
                 .withRequired(true)
-                .withType(SettingType.BOOLEAN);
+                .withType(SettingType.BOOLEAN).build();
 
         // WHEN
         cut.validateNewValue("false", setting);
@@ -371,11 +369,11 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void validateNewValue_ShouldFailAsNotFound_WhenValueIsNotTrueNorFalseForBooleanOptions() {
+    void validateNewValue_ShouldFailAsNotFound_WhenValueIsNotTrueNorFalseForBooleanOptions() {
         // GIVEN
-        final SettingDTO setting = new SettingDTO()
+        final SettingDTO setting = new SettingDTO.SettingDTOBuilder()
                 .withRequired(true)
-                .withType(SettingType.BOOLEAN);
+                .withType(SettingType.BOOLEAN).build();
 
         // WHEN
         try {
@@ -391,11 +389,11 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void validateNewValue_ShouldPass_WhenValueIsAnIntegerForIntOptions() throws BadRequestException {
+    void validateNewValue_ShouldPass_WhenValueIsAnIntegerForIntOptions() throws BadRequestException {
         // GIVEN
-        final SettingDTO setting = new SettingDTO()
+        final SettingDTO setting = new SettingDTO.SettingDTOBuilder()
                 .withRequired(true)
-                .withType(SettingType.INT);
+                .withType(SettingType.INT).build();
 
         // WHEN
         cut.validateNewValue("42", setting);
@@ -405,11 +403,11 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void validateNewValue_ShouldFailAsBadRequest_WhenValueIsAlphabeticForIntOptions() {
+    void validateNewValue_ShouldFailAsBadRequest_WhenValueIsAlphabeticForIntOptions() {
         // GIVEN
-        final SettingDTO setting = new SettingDTO()
+        final SettingDTO setting = new SettingDTO.SettingDTOBuilder()
                 .withRequired(true)
-                .withType(SettingType.INT);
+                .withType(SettingType.INT).build();
 
         // WHEN
         try {
@@ -425,12 +423,12 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void validateNewValue_ShouldFailAsBadRequest_WhenValueIsOutsideIntegerRangeForIntOptions() {
+    void validateNewValue_ShouldFailAsBadRequest_WhenValueIsOutsideIntegerRangeForIntOptions() {
         // GIVEN
         final String maxIntegerPlusOne = "2147483648";
-        final SettingDTO setting = new SettingDTO()
+        final SettingDTO setting = new SettingDTO.SettingDTOBuilder()
                 .withRequired(true)
-                .withType(SettingType.INT);
+                .withType(SettingType.INT).build();
 
         // WHEN
         try {
@@ -446,12 +444,12 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void validateNewValue_ShouldPass_WhenCustomValidatorReturnsNull() throws BadRequestException {
+    void validateNewValue_ShouldPass_WhenCustomValidatorReturnsNull() throws BadRequestException {
         // GIVEN
-        final SettingDTO setting = new SettingDTO()
+        final SettingDTO setting = new SettingDTO.SettingDTOBuilder()
                 .withRequired(true)
                 .withType(SettingType.TEXTAREA)
-                .withValidate(value -> "value".equals(value) ? null : "should-not-happen");
+                .withValidate(value -> "value".equals(value) ? null : "should-not-happen").build();
 
         // WHEN
         cut.validateNewValue("value", setting);
@@ -461,12 +459,12 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void validateNewValue_ShouldFailAsBadRequest_WhenCustomValidatorReturnsAnErrorMessageOptions() {
+    void validateNewValue_ShouldFailAsBadRequest_WhenCustomValidatorReturnsAnErrorMessageOptions() {
         // GIVEN
-        final SettingDTO setting = new SettingDTO()
+        final SettingDTO setting = new SettingDTO.SettingDTOBuilder()
                 .withRequired(true)
                 .withType(SettingType.STRING)
-                .withValidate(value -> "value".equals(value) ? "custom-error" : "should-not-happen");
+                .withValidate(value -> "value".equals(value) ? "custom-error" : "should-not-happen").build();
 
         // WHEN
         try {
@@ -482,16 +480,15 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void getSettingDefinition_ShouldReturnSetting_WhenAskedForAnExistingSetting() {
+    void getSettingDefinition_ShouldReturnSetting_WhenAskedForAnExistingSetting() {
         // GIVEN
         Map<String, String> values = new HashMap<>();
         doReturn(values).when(cut).getValues(A_PROJECT_ID);
-        final SettingDTO setting = new SettingDTO().withCode("code");
+        final SettingDTO setting = new SettingDTO.SettingDTOBuilder().withCode("code").build();
         when(settingProviderService.getDefinitions(eq(A_PROJECT_ID), same(values))).thenReturn(
-                Collections.singletonList(new SettingGroupDTO()
-                        .withSettings(Arrays.asList(
-                                new SettingDTO().withCode("anotherCode"),
-                                setting))));
+                Collections.singletonList(new SettingGroupDTO(null, Arrays.asList(
+                        new SettingDTO.SettingDTOBuilder().withCode("anotherCode").build(),
+                        setting))));
 
         // WHEN
         final Optional<SettingDTO> foundSetting = cut.getSettingDefinition(A_PROJECT_ID, "code");
@@ -501,14 +498,13 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void getSettingDefinition_ShouldReturnEmpty_WhenAskedForAnNonexistentSetting() {
+    void getSettingDefinition_ShouldReturnEmpty_WhenAskedForAnNonexistentSetting() {
         // GIVEN
         Map<String, String> values = new HashMap<>();
         doReturn(values).when(cut).getValues(A_PROJECT_ID);
-        final SettingDTO setting = new SettingDTO().withCode("code");
+        final SettingDTO setting = new SettingDTO.SettingDTOBuilder().withCode("code").build();
         when(settingProviderService.getDefinitions(eq(A_PROJECT_ID), same(values))).thenReturn(
-                Collections.singletonList(new SettingGroupDTO()
-                        .withSettings(Collections.singletonList(setting))));
+                Collections.singletonList(new SettingGroupDTO(null, Collections.singletonList(setting))));
 
         // WHEN
         final Optional<SettingDTO> foundSetting = cut.getSettingDefinition(A_PROJECT_ID, "nonexistent");
@@ -518,17 +514,15 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void populateValues_ShouldSetValuesForProvidedSettings_WhenProvidedWithSomeValues() {
+    void populateValues_ShouldSetValuesForProvidedSettings_WhenProvidedWithSomeValues() {
         // GIVEN
         final List<SettingGroupDTO> groups = Arrays.asList(
-                new SettingGroupDTO()
-                        .withSettings(Arrays.asList(
-                                new SettingDTO().withCode("code1"),
-                                new SettingDTO().withCode("code2"))),
-                new SettingGroupDTO()
-                        .withSettings(Arrays.asList(
-                                new SettingDTO().withCode("code3"),
-                                new SettingDTO().withCode("code4"))));
+                new SettingGroupDTO(null, Arrays.asList(
+                        new SettingDTO.SettingDTOBuilder().withCode("code1").build(),
+                        new SettingDTO.SettingDTOBuilder().withCode("code2").build())),
+                new SettingGroupDTO(null, Arrays.asList(
+                        new SettingDTO.SettingDTOBuilder().withCode("code3").build(),
+                        new SettingDTO.SettingDTOBuilder().withCode("code4").build())));
         final Map<String, String> values = new HashMap<>();
         values.put("code1", "value1");
         values.put("code2", "value2");
@@ -546,14 +540,13 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void populateValues_ShouldSetDefaultValues_WhenValuesNotProvided() {
+    void populateValues_ShouldSetDefaultValues_WhenValuesNotProvided() {
         // GIVEN
         final List<SettingGroupDTO> groups = Collections.singletonList(
-                new SettingGroupDTO()
-                        .withSettings(Collections.singletonList(
-                                new SettingDTO()
-                                        .withCode("code1")
-                                        .withDefaultValue("defaultValue"))));
+                new SettingGroupDTO(null, Collections.singletonList(
+                        new SettingDTO.SettingDTOBuilder()
+                                .withCode("code1")
+                                .withDefaultValue("defaultValue").build())));
         final Map<String, String> values = new HashMap<>();
         values.put("another", "value");
 
@@ -565,15 +558,14 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void populateValues_ShouldHideValue_WhenTypeIsPasswordWithSomeValue() {
+    void populateValues_ShouldHideValue_WhenTypeIsPasswordWithSomeValue() {
         // GIVEN
         final List<SettingGroupDTO> groups = Collections.singletonList(
-                new SettingGroupDTO()
-                        .withSettings(Collections.singletonList(
-                                new SettingDTO()
-                                        .withCode("code1")
-                                        .withType(SettingType.PASSWORD)
-                                        .withValue("initialValue"))));
+                new SettingGroupDTO(null, (Collections.singletonList(
+                        new SettingDTO.SettingDTOBuilder()
+                                .withCode("code1")
+                                .withType(SettingType.PASSWORD)
+                                .withValue("initialValue").build()))));
         final Map<String, String> values = new HashMap<>();
         values.put("code1", "secretPassword");
 
@@ -585,15 +577,14 @@ public class SettingServiceTest {
     }
 
     @Test
-    public void populateValues_ShouldSetNullValue_WhenTypeIsPasswordWithoutAnyValue() {
+    void populateValues_ShouldSetNullValue_WhenTypeIsPasswordWithoutAnyValue() {
         // GIVEN
         final List<SettingGroupDTO> groups = Collections.singletonList(
-                new SettingGroupDTO()
-                        .withSettings(Collections.singletonList(
-                                new SettingDTO()
-                                        .withCode("code1")
-                                        .withType(SettingType.PASSWORD)
-                                        .withValue("initialValue"))));
+                new SettingGroupDTO(null, Collections.singletonList(
+                        new SettingDTO.SettingDTOBuilder()
+                                .withCode("code1")
+                                .withType(SettingType.PASSWORD)
+                                .withValue("initialValue").build())));
         final Map<String, String> values = new HashMap<>();
         values.put("code1", null);
 

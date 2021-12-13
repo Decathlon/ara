@@ -17,21 +17,13 @@
 
 package com.decathlon.ara.service.dto.country;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-
 import static com.decathlon.ara.service.support.DtoConstants.CODE_MESSAGE;
 import static com.decathlon.ara.service.support.DtoConstants.CODE_PATTERN;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
 public class CountryDTO {
 
     @NotNull(message = "The code is required.")
@@ -42,5 +34,27 @@ public class CountryDTO {
     @NotNull(message = "The name is required.")
     @Size(min = 1, max = 40, message = "The name is required and must not exceed {max} characters.")
     private String name;
+
+    public CountryDTO() {
+    }
+
+    public CountryDTO(
+            String code,
+            String name) {
+        this.code = code;
+        this.name = name;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getName() {
+        return name;
+    }
 
 }

@@ -26,66 +26,74 @@ import java.util.HashSet;
 import org.junit.jupiter.api.Test;
 
 import com.decathlon.ara.domain.enumeration.CoverageLevel;
+import com.decathlon.ara.util.builder.FunctionalityBuilder;
 
-public class FunctionalityTest {
+class FunctionalityTest {
 
     @Test
-    public void getCoverageLevel_should_return_COVERED() {
+    void getCoverageLevel_should_return_COVERED() {
         // GIVEN
-        Functionality functionality = new Functionality()
-                .withScenarios(Collections.singleton(new Scenario()));
+        Functionality functionality = new FunctionalityBuilder()
+                .withScenarios(Collections.singleton(new Scenario())).build();
 
         // WHEN/THEN
         assertThat(functionality.getCoverageLevel()).isEqualTo(CoverageLevel.COVERED);
     }
 
     @Test
-    public void getCoverageLevel_should_return_PARTIALLY_COVERED() {
+    void getCoverageLevel_should_return_PARTIALLY_COVERED() {
         // GIVEN
-        Functionality functionality = new Functionality()
+        Functionality functionality = new FunctionalityBuilder()
                 .withScenarios(new HashSet<>(Arrays.asList(
-                        new Scenario().withLine(1),
-                        new Scenario().withLine(2).withIgnored(true))));
+                        scenario(false, 1),
+                        scenario(true, 2)))).build();
 
         // WHEN/THEN
         assertThat(functionality.getCoverageLevel()).isEqualTo(CoverageLevel.PARTIALLY_COVERED);
     }
 
     @Test
-    public void getCoverageLevel_should_return_IGNORED_COVERAGE() {
+    void getCoverageLevel_should_return_IGNORED_COVERAGE() {
         // GIVEN
-        Functionality functionality = new Functionality()
-                .withScenarios(Collections.singleton(new Scenario().withIgnored(true)));
+        Functionality functionality = new FunctionalityBuilder()
+                .withScenarios(Collections.singleton(scenario(true, 0))).build();
 
         // WHEN/THEN
         assertThat(functionality.getCoverageLevel()).isEqualTo(CoverageLevel.IGNORED_COVERAGE);
     }
 
     @Test
-    public void getCoverageLevel_should_return_STARTED() {
+    void getCoverageLevel_should_return_STARTED() {
         // GIVEN
-        Functionality functionality = new Functionality().withStarted(Boolean.TRUE);
+        Functionality functionality = new FunctionalityBuilder().withStarted(Boolean.TRUE).build();
 
         // WHEN/THEN
         assertThat(functionality.getCoverageLevel()).isEqualTo(CoverageLevel.STARTED);
     }
 
     @Test
-    public void getCoverageLevel_should_return_NOT_AUTOMATABLE() {
+    void getCoverageLevel_should_return_NOT_AUTOMATABLE() {
         // GIVEN
-        Functionality functionality = new Functionality().withNotAutomatable(Boolean.TRUE);
+        Functionality functionality = new FunctionalityBuilder().withNotAutomatable(Boolean.TRUE).build();
 
         // WHEN/THEN
         assertThat(functionality.getCoverageLevel()).isEqualTo(CoverageLevel.NOT_AUTOMATABLE);
     }
 
     @Test
-    public void getCoverageLevel_should_return_NOT_COVERED() {
+    void getCoverageLevel_should_return_NOT_COVERED() {
         // GIVEN
         Functionality functionality = new Functionality();
 
         // WHEN/THEN
         assertThat(functionality.getCoverageLevel()).isEqualTo(CoverageLevel.NOT_COVERED);
+    }
+
+    private Scenario scenario(boolean ignored, int line) {
+        Scenario scenario = new Scenario();
+        scenario.setIgnored(ignored);
+        scenario.setLine(line);
+        return scenario;
     }
 
 }

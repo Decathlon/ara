@@ -17,47 +17,52 @@
 
 package com.decathlon.ara.scenario.cypress.indexer;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.util.Pair;
+import org.springframework.stereotype.Component;
+
 import com.decathlon.ara.domain.ExecutedScenario;
 import com.decathlon.ara.domain.Run;
 import com.decathlon.ara.scenario.common.indexer.ScenariosIndexer;
 import com.decathlon.ara.scenario.cucumber.indexer.CucumberScenariosIndexer;
 import com.decathlon.ara.scenario.cucumber.service.ExecutedScenarioExtractorService;
 import com.decathlon.ara.scenario.cypress.bean.media.CypressMedia;
+import com.decathlon.ara.scenario.cypress.bean.media.CypressSnapshot;
 import com.decathlon.ara.scenario.cypress.bean.media.CypressVideo;
 import com.decathlon.ara.scenario.cypress.settings.CypressSettings;
 import com.decathlon.ara.service.FileProcessorService;
 import com.decathlon.ara.service.TechnologySettingService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Component;
-
-import java.io.File;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Slf4j
 public class CypressScenariosIndexer implements ScenariosIndexer {
 
-    @NonNull
-    private final ObjectMapper objectMapper;
+    private static final Logger LOG = LoggerFactory.getLogger(CypressScenariosIndexer.class);
 
-    @NonNull
     private final TechnologySettingService technologySettingService;
 
-    @NonNull
     private final FileProcessorService fileProcessorService;
 
-    @NonNull
     private final CucumberScenariosIndexer cucumberScenariosIndexer;
-
-    @NonNull
+    
     private final ExecutedScenarioExtractorService executedScenarioExtractorService;
+
+    public CypressScenariosIndexer(TechnologySettingService technologySettingService,
+            FileProcessorService fileProcessorService, CucumberScenariosIndexer cucumberScenariosIndexer,
+            ExecutedScenarioExtractorService executedScenarioExtractorService) {
+        this.technologySettingService = technologySettingService;
+        this.fileProcessorService = fileProcessorService;
+        this.cucumberScenariosIndexer = cucumberScenariosIndexer;
+        this.executedScenarioExtractorService = executedScenarioExtractorService;
+    }
 
     @Override
     public List<ExecutedScenario> getExecutedScenarios(File parentFolder, Run run, Long projectId) {
@@ -98,12 +103,9 @@ public class CypressScenariosIndexer implements ScenariosIndexer {
 
         executedScenarios = cucumberReportFiles.stream()
                 .map(file -> Pair.of(file, getStepDefinitionsFile(file, stepDefinitionFiles)))
-                .map(pair ->
-                        Pair.of(
-                                cucumberScenariosIndexer.getCucumberFeaturesFromReport(pair.getFirst()),
-                                pair.getSecond().isPresent() ? cucumberScenariosIndexer.getCucumberStepDefinitions(pair.getSecond().get()) : new ArrayList<String>()
-                        )
-                )
+                .map(pair -> Pair.of(
+                        cucumberScenariosIndexer.getCucumberFeaturesFromReport(pair.getFirst()),
+                        pair.getSecond().isPresent() ? cucumberScenariosIndexer.getCucumberStepDefinitions(pair.getSecond().get()) : new ArrayList<String>()))
                 .map(pair -> executedScenarioExtractorService.extractExecutedScenarios(pair.getFirst(), pair.getSecond(), run.getJobUrl()))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
@@ -132,10 +134,9 @@ public class CypressScenariosIndexer implements ScenariosIndexer {
      * @return a step definitions file, if any
      */
     private Optional<File> getStepDefinitionsFile(File cucumberReportFile, List<File> stepDefinitionsFiles) {
-        Optional<File> matchingStepDefinition = stepDefinitionsFiles.stream()
+        return stepDefinitionsFiles.stream()
                 .filter(stepDefinitionsFile -> filesHaveTheSamePrefix(cucumberReportFile, stepDefinitionsFile))
                 .findFirst();
-        return matchingStepDefinition;
     }
 
     /**
@@ -146,7 +147,7 @@ public class CypressScenariosIndexer implements ScenariosIndexer {
      */
     private Boolean filesHaveTheSamePrefix(File file1, File file2) {
         if (file1.getName().equals(file2.getName())) {
-            log.info("The 2 compared files share the same name ({})!", file1.getName());
+            LOG.info("The 2 compared files share the same name ({})!", file1.getName());
             return false;
         }
 
@@ -160,11 +161,10 @@ public class CypressScenariosIndexer implements ScenariosIndexer {
      * @param file the file to get the prefix from
      * @return the prefix
      */
-    private String getPrefixFromFile(File file){
+    private String getPrefixFromFile(File file) {
         String name = file.getName();
         String[] splitName = name.split("\\.");
-        String prefix = splitName[0];
-        return prefix;
+        return splitName[0];
     }
 
     /**
@@ -180,7 +180,7 @@ public class CypressScenariosIndexer implements ScenariosIndexer {
                 .map(media -> {
                     Optional<String> snapshotUrl = media.getSnapshots().stream()
                             .filter(image -> executedScenario.getCucumberId().equals(image.getId()))
-                            .map(image -> image.getUrl())
+                            .map(CypressSnapshot::getUrl)
                             .findFirst();
                     CypressVideo video = media.getVideo();
                     String videoUrl = video.getUrl();

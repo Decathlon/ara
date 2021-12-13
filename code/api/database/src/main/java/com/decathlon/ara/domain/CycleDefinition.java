@@ -17,19 +17,15 @@
 
 package com.decathlon.ara.domain;
 
-import lombok.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 
-import javax.persistence.*;
-import java.io.Serializable;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 @Entity
-// Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
-@EqualsAndHashCode(of = { "projectId", "branch", "name" })
-public class CycleDefinition implements Serializable {
+public class CycleDefinition {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cycle_definition_id")
@@ -47,4 +43,31 @@ public class CycleDefinition implements Serializable {
     @Column(nullable = false)
     private int branchPosition;
 
+    public Long getId() {
+        return id;
+    }
+
+    public long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(long projectId) {
+        this.projectId = projectId;
+    }
+
+    public String getBranch() {
+        return branch;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getBranchPosition() {
+        return branchPosition;
+    }
+
+    public void setBranchPosition(int branchPosition) {
+        this.branchPosition = branchPosition;
+    }
 }

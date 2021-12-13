@@ -18,13 +18,14 @@
 package com.decathlon.ara.service.support;
 
 import com.decathlon.ara.domain.Setting;
-import lombok.experimental.UtilityClass;
 
 /**
  * Holds {@link Setting}'s codes standard in ARA core application. Other custom adapters are free to provide other ones.
  */
-@UtilityClass
 public class Settings {
+
+    private Settings() {
+    }
 
     // IMPORTANT: Once in production, do not change these IDs, as they are stored in user databases.
     // If name is really required to change, you must provide a Liquibase migration change-set.

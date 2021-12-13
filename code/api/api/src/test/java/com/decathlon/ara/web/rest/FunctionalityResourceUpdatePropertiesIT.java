@@ -54,15 +54,15 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 @Disabled
 @SpringBootTest
 @TestExecutionListeners({
-    TransactionalTestExecutionListener.class,
-    DependencyInjectionTestExecutionListener.class,
-    DbUnitTestExecutionListener.class
+        TransactionalTestExecutionListener.class,
+        DependencyInjectionTestExecutionListener.class,
+        DbUnitTestExecutionListener.class
 })
 @TestPropertySource(
-		locations = "classpath:application-db-h2.properties")
+        locations = "classpath:application-db-h2.properties")
 @Transactional
 @DatabaseSetup("/dbunit/functionality.xml")
-public class FunctionalityResourceUpdatePropertiesIT {
+class FunctionalityResourceUpdatePropertiesIT {
 
     private static final String PROJECT_CODE = "p";
     private static final Long A_FOLDER_ID = 1L;
@@ -78,7 +78,7 @@ public class FunctionalityResourceUpdatePropertiesIT {
     private FunctionalityResource cut;
 
     @Test
-    public void testUpdateFolder() {
+    void testUpdateFolder() {
         Long id = 12L;
         ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, id, folder("F 1.2 renamed"));
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -91,7 +91,7 @@ public class FunctionalityResourceUpdatePropertiesIT {
 
         entityManager.flush();
 
-        Functionality reloadedFolder = functionalityRepository.getOne(id);
+        Functionality reloadedFolder = functionalityRepository.getById(id);
         assertThat(reloadedFolder.getId()).isEqualTo(id);
         assertThat(reloadedFolder.getParentId()).isEqualTo(1);
         assertThat(reloadedFolder.getOrder()).isEqualTo(2000);
@@ -100,7 +100,7 @@ public class FunctionalityResourceUpdatePropertiesIT {
     }
 
     @Test
-    public void testUpdateFunctionality() {
+    void testUpdateFunctionality() {
         FunctionalityDTO functionality = new FunctionalityDTO();
 
         // These properties must be ignored, and not updated in database
@@ -146,7 +146,7 @@ public class FunctionalityResourceUpdatePropertiesIT {
 
         entityManager.flush();
 
-        Functionality reloadedFunctionality = functionalityRepository.getOne(id);
+        Functionality reloadedFunctionality = functionalityRepository.getById(id);
         assertThat(reloadedFunctionality.getId()).isEqualTo(id);
         assertThat(reloadedFunctionality.getParentId()).isEqualTo(2);
         assertThat(reloadedFunctionality.getOrder()).isEqualTo(2000);
@@ -166,7 +166,7 @@ public class FunctionalityResourceUpdatePropertiesIT {
     }
 
     @Test
-    public void testUpdateNonexistentFolder() {
+    void testUpdateNonexistentFolder() {
         ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, NONEXISTENT, folder("N"));
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_found");
@@ -175,7 +175,7 @@ public class FunctionalityResourceUpdatePropertiesIT {
     }
 
     @Test
-    public void testUpdateNonexistentFunctionality() {
+    void testUpdateNonexistentFunctionality() {
         ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, NONEXISTENT, functionality());
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_found");
@@ -184,7 +184,7 @@ public class FunctionalityResourceUpdatePropertiesIT {
     }
 
     @Test
-    public void testUpdateFolderWithoutName() {
+    void testUpdateFolderWithoutName() {
         ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, A_FOLDER_ID, folder("")); // Testing both ""...
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.mandatory_name");
@@ -193,8 +193,10 @@ public class FunctionalityResourceUpdatePropertiesIT {
     }
 
     @Test
-    public void testUpdateFunctionalityWithoutName() {
-        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, A_FUNCTIONALITY_ID, functionality().withName(null)); // ... and null
+    void testUpdateFunctionalityWithoutName() {
+        FunctionalityDTO functionality = functionality();
+        functionality.setName(null);
+        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, A_FUNCTIONALITY_ID, functionality); // ... and null
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.mandatory_name");
         assertThat(header(response, HeaderUtil.MESSAGE)).isEqualTo("A functionality must have a name.");
@@ -202,8 +204,10 @@ public class FunctionalityResourceUpdatePropertiesIT {
     }
 
     @Test
-    public void testUpdateFunctionalityWithoutTeamId() {
-        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, A_FUNCTIONALITY_ID, functionality().withTeamId(null));
+    void testUpdateFunctionalityWithoutTeamId() {
+        FunctionalityDTO functionality = functionality();
+        functionality.setTeamId(null);
+        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, A_FUNCTIONALITY_ID, functionality);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.mandatory_team_id");
         assertThat(header(response, HeaderUtil.MESSAGE)).isEqualTo("A functionality must have a team.");
@@ -211,8 +215,10 @@ public class FunctionalityResourceUpdatePropertiesIT {
     }
 
     @Test
-    public void testUpdateFunctionalityWithoutSeverity() {
-        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, A_FUNCTIONALITY_ID, functionality().withSeverity(null));
+    void testUpdateFunctionalityWithoutSeverity() {
+        FunctionalityDTO functionality = functionality();
+        functionality.setSeverity(null);
+        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, A_FUNCTIONALITY_ID, functionality);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.mandatory_severity");
         assertThat(header(response, HeaderUtil.MESSAGE)).isEqualTo("A functionality must have a severity.");
@@ -220,14 +226,18 @@ public class FunctionalityResourceUpdatePropertiesIT {
     }
 
     @Test
-    public void testUpdateFunctionalityWithoutCountryCode() {
-        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, A_FUNCTIONALITY_ID, functionality().withCountryCodes("")); // Empty string...
+    void testUpdateFunctionalityWithoutCountryCode() {
+        FunctionalityDTO functionality = functionality();
+        functionality.setCountryCodes("");// Empty string...
+        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, A_FUNCTIONALITY_ID, functionality);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.mandatory_country_codes");
         assertThat(header(response, HeaderUtil.MESSAGE)).isEqualTo("A functionality must have at least one country.");
         assertThat(header(response, HeaderUtil.PARAMS)).isEqualTo("functionality");
 
-        response = cut.updateProperties(PROJECT_CODE, A_FUNCTIONALITY_ID, functionality().withCountryCodes(null)); // ... and null
+        functionality = functionality();
+        functionality.setCountryCodes(null);
+        response = cut.updateProperties(PROJECT_CODE, A_FUNCTIONALITY_ID, functionality); // ... and null
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.mandatory_country_codes");
         assertThat(header(response, HeaderUtil.MESSAGE)).isEqualTo("A functionality must have at least one country.");
@@ -235,8 +245,11 @@ public class FunctionalityResourceUpdatePropertiesIT {
     }
 
     @Test
-    public void testUpdateFunctionalityBothStartedAndNotAutomatable() {
-        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, A_FUNCTIONALITY_ID, functionality().withStarted(Boolean.TRUE).withNotAutomatable(Boolean.TRUE));
+    void testUpdateFunctionalityBothStartedAndNotAutomatable() {
+        FunctionalityDTO functionality = functionality();
+        functionality.setStarted(Boolean.TRUE);
+        functionality.setNotAutomatable(Boolean.TRUE);
+        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, A_FUNCTIONALITY_ID, functionality);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.exclusive_started_and_not_automatable");
         assertThat(header(response, HeaderUtil.MESSAGE)).isEqualTo("A functionality cannot be both non-automatable and started.");
@@ -244,8 +257,10 @@ public class FunctionalityResourceUpdatePropertiesIT {
     }
 
     @Test
-    public void testUpdateFunctionalityWithNonexistentCountry() {
-        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, A_FUNCTIONALITY_ID, functionality().withCountryCodes("nl,xx"));
+    void testUpdateFunctionalityWithNonexistentCountry() {
+        FunctionalityDTO functionality = functionality();
+        functionality.setCountryCodes("nl,xx");
+        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, A_FUNCTIONALITY_ID, functionality);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_found");
         assertThat(header(response, HeaderUtil.MESSAGE)).isEqualTo("The country does not exist: it has perhaps been removed.");
@@ -253,8 +268,10 @@ public class FunctionalityResourceUpdatePropertiesIT {
     }
 
     @Test
-    public void testUpdateFunctionalityWithNonexistentTeam() {
-        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, A_FUNCTIONALITY_ID, functionality().withTeamId(NONEXISTENT));
+    void testUpdateFunctionalityWithNonexistentTeam() {
+        FunctionalityDTO functionality = functionality();
+        functionality.setTeamId(NONEXISTENT);
+        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, A_FUNCTIONALITY_ID, functionality);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_found");
         assertThat(header(response, HeaderUtil.MESSAGE)).isEqualTo("The team does not exist: it has perhaps been removed.");
@@ -262,8 +279,10 @@ public class FunctionalityResourceUpdatePropertiesIT {
     }
 
     @Test
-    public void testUpdateFunctionalityWithNonexistentSeverity() {
-        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, A_FUNCTIONALITY_ID, functionality().withSeverity("NONEXISTENT"));
+    void testUpdateFunctionalityWithNonexistentSeverity() {
+        FunctionalityDTO functionality = functionality();
+        functionality.setSeverity("NONEXISTENT");
+        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, A_FUNCTIONALITY_ID, functionality);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.wrong_severity");
         assertThat(header(response, HeaderUtil.MESSAGE)).isEqualTo("Wrong severity: it does not exist.");
@@ -271,8 +290,10 @@ public class FunctionalityResourceUpdatePropertiesIT {
     }
 
     @Test
-    public void testUpdateFunctionalityWithNonAssignableTeam() {
-        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, A_FUNCTIONALITY_ID, functionality().withTeamId(TEAM_ID_NOT_ASSIGNABLE_TO_FUNCTIONALITIES));
+    void testUpdateFunctionalityWithNonAssignableTeam() {
+        FunctionalityDTO functionality = functionality();
+        functionality.setTeamId(TEAM_ID_NOT_ASSIGNABLE_TO_FUNCTIONALITIES);
+        ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, A_FUNCTIONALITY_ID, functionality);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_assignable_team");
@@ -281,7 +302,7 @@ public class FunctionalityResourceUpdatePropertiesIT {
     }
 
     @Test
-    public void testUpdateWithExistingNameOfFolder() {
+    void testUpdateWithExistingNameOfFolder() {
         ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, 1L, folder("F 2"));
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_unique");
@@ -292,7 +313,7 @@ public class FunctionalityResourceUpdatePropertiesIT {
     }
 
     @Test
-    public void testUpdateWithExistingNameOfFunctionality() {
+    void testUpdateWithExistingNameOfFunctionality() {
         ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, 113L, folder("F 1.1.1"));
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_unique");
@@ -303,7 +324,7 @@ public class FunctionalityResourceUpdatePropertiesIT {
     }
 
     @Test
-    public void testUpdateWithExistingNameInAnotherFolder() {
+    void testUpdateWithExistingNameInAnotherFolder() {
         final Long id = 2L;
         ResponseEntity<FunctionalityDTO> response = cut.updateProperties(PROJECT_CODE, id, folder("F 1.1.1"));
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -312,7 +333,7 @@ public class FunctionalityResourceUpdatePropertiesIT {
     }
 
     @Test
-    public void testUpdateShouldSetUpdateDateTimeWhileNotUpdatingCreationDate() {
+    void testUpdateShouldSetUpdateDateTimeWhileNotUpdatingCreationDate() {
         // GIVEN
         final Long id = 2L;
         Date startDate = new Date();
@@ -329,23 +350,35 @@ public class FunctionalityResourceUpdatePropertiesIT {
     }
 
     @Test
-    public void testUpdateFolderWithContent() {
-        FunctionalityDTO folder = folder("Renamed").withId(A_FOLDER_ID);
-        assertFolderWithContent(folder.withCountryCodes("nl"));
-        assertFolderWithContent(folder.withTeamId(1L));
-        assertFolderWithContent(folder.withSeverity("HIGH"));
-        assertFolderWithContent(folder.withCreated("18.02"));
-        assertFolderWithContent(folder.withStarted(Boolean.TRUE));
-        assertFolderWithContent(folder.withNotAutomatable(Boolean.TRUE));
-        assertFolderWithContent(folder.withCoveredScenarios(42));
-        assertFolderWithContent(folder.withIgnoredScenarios(42));
-        assertFolderWithContent(folder.withCoveredCountryScenarios("some-content"));
-        assertFolderWithContent(folder.withIgnoredCountryScenarios("some-content"));
-        assertFolderWithContent(folder.withComment("Comment"));
+    void testUpdateFolderWithContent() {
+        FunctionalityDTO folder = folder("Renamed");
+        folder.setId(A_FOLDER_ID);
+        folder.setCountryCodes("nl");
+        assertFolderWithContent(folder);
+        folder.setTeamId(1L);
+        assertFolderWithContent(folder);
+        folder.setSeverity("HIGH");
+        assertFolderWithContent(folder);
+        folder.setCreated("18.02");
+        assertFolderWithContent(folder);
+        folder.setStarted(Boolean.TRUE);
+        assertFolderWithContent(folder);
+        folder.setNotAutomatable(Boolean.TRUE);
+        assertFolderWithContent(folder);
+        folder.setCoveredScenarios(42);
+        assertFolderWithContent(folder);
+        folder.setIgnoredScenarios(42);
+        assertFolderWithContent(folder);
+        folder.setCoveredCountryScenarios("some-content");
+        assertFolderWithContent(folder);
+        folder.setIgnoredCountryScenarios("some-content");
+        assertFolderWithContent(folder);
+        folder.setComment("Comment");
+        assertFolderWithContent(folder);
     }
 
     @Test
-    public void testUpdateRemoveCommentShouldReturnEmptyString() {
+    void testUpdateRemoveCommentShouldReturnEmptyString() {
         FunctionalityDTO functionality = new FunctionalityDTO();
 
         // These properties must be ignored, and not updated in database
@@ -377,13 +410,13 @@ public class FunctionalityResourceUpdatePropertiesIT {
 
         entityManager.flush();
 
-        Functionality reloadedFunctionality = functionalityRepository.getOne(id);
+        Functionality reloadedFunctionality = functionalityRepository.getById(id);
         assertThat(reloadedFunctionality.getId()).isEqualTo(id);
         assertThat(reloadedFunctionality.getComment()).isEqualTo("");
     }
 
     @Test
-    public void testUpdateRemoveCreatedShouldReturnEmptyString() {
+    void testUpdateRemoveCreatedShouldReturnEmptyString() {
         FunctionalityDTO functionality = new FunctionalityDTO();
 
         // These properties must be ignored, and not updated in database
@@ -415,7 +448,7 @@ public class FunctionalityResourceUpdatePropertiesIT {
 
         entityManager.flush();
 
-        Functionality reloadedFunctionality = functionalityRepository.getOne(id);
+        Functionality reloadedFunctionality = functionalityRepository.getById(id);
         assertThat(reloadedFunctionality.getId()).isEqualTo(id);
         assertThat(reloadedFunctionality.getCreated()).isEqualTo("");
     }

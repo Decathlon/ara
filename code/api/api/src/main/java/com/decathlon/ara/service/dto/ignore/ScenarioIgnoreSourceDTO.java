@@ -17,18 +17,11 @@
 
 package com.decathlon.ara.service.dto.ignore;
 
-import com.decathlon.ara.service.dto.source.SourceDTO;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
+import com.decathlon.ara.service.dto.source.SourceDTO;
+
 public class ScenarioIgnoreSourceDTO {
 
     /**
@@ -41,5 +34,17 @@ public class ScenarioIgnoreSourceDTO {
      * grand totals per severities.
      */
     private SourceDTO source;
+
+    public SourceDTO getSource() {
+        return source;
+    }
+
+    public void setSource(SourceDTO source) {
+        this.source = source;
+    }
+
+    public List<ScenarioIgnoreSeverityDTO> getSeverities() {
+        return severities;
+    }
 
 }

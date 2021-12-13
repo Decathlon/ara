@@ -19,20 +19,32 @@ package com.decathlon.ara.service.dto.ignore;
 
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 public class ScenarioIgnoreFeatureDTO {
 
     private final List<String> scenarios = new ArrayList<>();
 
     private String file;
     private String name;
+
+    public List<String> getScenarios() {
+        return scenarios;
+    }
+
+    public String getFile() {
+        return file;
+    }
+
+    public void setFile(String file) {
+        this.file = file;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
 }

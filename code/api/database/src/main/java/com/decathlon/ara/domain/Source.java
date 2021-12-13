@@ -17,23 +17,26 @@
 
 package com.decathlon.ara.domain;
 
-import com.decathlon.ara.domain.enumeration.Technology;
-import lombok.*;
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.nullsFirst;
 
-import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Comparator;
+import java.util.Objects;
 
-import static java.util.Comparator.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
+import com.decathlon.ara.domain.enumeration.Technology;
+
 @Entity
-// Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
-@EqualsAndHashCode(of = { "projectId", "code" })
-public class Source implements Comparable<Source>, Serializable {
+public class Source implements Comparable<Source> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "source_id")
@@ -99,6 +102,71 @@ public class Source implements Comparable<Source>, Serializable {
         Comparator<Source> codeComparator = comparing(Source::getCode, nullsFirst(naturalOrder()));
         return nullsFirst(projectIdComparator
                 .thenComparing(codeComparator)).compare(this, other);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(code, projectId);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Source)) {
+            return false;
+        }
+        Source other = (Source) obj;
+        return Objects.equals(code, other.code) && projectId == other.projectId;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(long projectId) {
+        this.projectId = projectId;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public char getLetter() {
+        return letter;
+    }
+
+    public Technology getTechnology() {
+        return technology;
+    }
+
+    public String getVcsUrl() {
+        return vcsUrl;
+    }
+
+    public String getDefaultBranch() {
+        return defaultBranch;
+    }
+
+    public boolean isPostmanCountryRootFolders() {
+        return postmanCountryRootFolders;
     }
 
 }

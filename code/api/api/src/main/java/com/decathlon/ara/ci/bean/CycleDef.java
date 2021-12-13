@@ -17,18 +17,11 @@
 
 package com.decathlon.ara.ci.bean;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Map;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class CycleDef {
 
     /**
@@ -46,5 +39,26 @@ public class CycleDef {
      * Eg. { "high": { "failure": 80, "warning": 85 }, "sanity-check": { "failure": 90, "warning": 95 } }
      */
     private Map<String, QualityThreshold> qualityThresholds;
+    
+    public CycleDef() {
+    }
+
+    public CycleDef(boolean blockingValidation, Map<String, List<PlatformRule>> platformsRules, Map<String, QualityThreshold> qualityThresholds) {
+        this.blockingValidation = blockingValidation;
+        this.platformsRules = platformsRules;
+        this.qualityThresholds = qualityThresholds;
+    }
+
+    public boolean isBlockingValidation() {
+        return blockingValidation;
+    }
+
+    public Map<String, List<PlatformRule>> getPlatformsRules() {
+        return platformsRules;
+    }
+
+    public Map<String, QualityThreshold> getQualityThresholds() {
+        return qualityThresholds;
+    }
 
 }

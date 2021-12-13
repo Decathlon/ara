@@ -17,19 +17,17 @@
 
 package com.decathlon.ara.configuration;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.servers.Server;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SwaggerConfiguration {
 
     @Value("${ara.clientBaseUrl}")
@@ -48,14 +46,11 @@ public class SwaggerConfiguration {
                                         new Contact()
                                                 .name("Decathlon")
                                                 .url("https://github.com/decathlon")
-                                                .email("developers@decathlon.com")
-                                )
+                                                .email("developers@decathlon.com"))
                                 .license(
                                         new License()
                                                 .name("Apache 2.0")
-                                                .url("http://www.apache.org/licenses/")
-                                )
-                );
+                                                .url("http://www.apache.org/licenses/")));
 
     }
 

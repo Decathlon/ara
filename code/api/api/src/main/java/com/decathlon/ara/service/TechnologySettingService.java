@@ -17,6 +17,20 @@
 
 package com.decathlon.ara.service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.util.Pair;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.domain.TechnologySetting;
@@ -24,36 +38,26 @@ import com.decathlon.ara.domain.enumeration.Technology;
 import com.decathlon.ara.repository.TechnologySettingRepository;
 import com.decathlon.ara.scenario.common.settings.AvailableTechnologySettings;
 import com.decathlon.ara.service.dto.setting.SettingDTO;
+import com.decathlon.ara.service.dto.setting.SettingDTO.SettingDTOBuilder;
 import com.decathlon.ara.service.dto.setting.TechnologySettingGroupDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.WordUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-@Slf4j
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TechnologySettingService {
 
-    @NonNull
+    private static final Logger LOG = LoggerFactory.getLogger(TechnologySettingService.class);
+
     private final TechnologySettingRepository technologySettingRepository;
 
-    @NonNull
     private final SettingService settingService;
+
+    public TechnologySettingService(TechnologySettingRepository technologySettingRepository,
+            SettingService settingService) {
+        this.technologySettingRepository = technologySettingRepository;
+        this.settingService = settingService;
+    }
 
     /**
      * Get all the available technology setting groups.
@@ -85,13 +89,12 @@ public class TechnologySettingService {
         List<Technology> availableTechnologies = Arrays.asList(Technology.values());
         List<TechnologySettingGroupDTO> groups = availableTechnologies.stream()
                 .map(technology -> Pair.of(technology, getAvailableTechnologySettings(technology)))
-                .map(pair ->
-                        Pair.of(
-                                pair.getFirst(),
-                                pair.getSecond()
-                                        .stream()
-                                        .map(this::getSettingDTOFromAvailableTechnologySetting)
-                                        .collect(Collectors.toList())))
+                .map(pair -> Pair.of(
+                        pair.getFirst(),
+                        pair.getSecond()
+                                .stream()
+                                .map(this::getSettingDTOFromAvailableTechnologySetting)
+                                .collect(Collectors.toList())))
                 .map(this::getTechnologySettingGroup)
                 .collect(Collectors.toList());
         return groups;
@@ -114,9 +117,9 @@ public class TechnologySettingService {
                 return Arrays.asList(availableSettings);
             }
         } catch (ClassNotFoundException e) {
-            log.warn("SETTING|technology|The class {} was not found", enumName, e);
+            LOG.warn("SETTING|technology|The class {} was not found", enumName, e);
         } catch (ClassCastException e) {
-            log.warn("SETTING|technology|The class {} should be an instance of {}", enumName, AvailableTechnologySettings.class.getName(), e);
+            LOG.warn("SETTING|technology|The class {} should be an instance of {}", enumName, AvailableTechnologySettings.class.getName(), e);
         }
         return availableTechnologySettings;
     }
@@ -143,14 +146,14 @@ public class TechnologySettingService {
      */
     private SettingDTO getSettingDTOFromAvailableTechnologySetting(AvailableTechnologySettings availableSetting) {
         String defaultValue = availableSetting.getDefaultValue();
-        return new SettingDTO()
+        return new SettingDTOBuilder()
                 .withCode(availableSetting.getCode())
                 .withName(availableSetting.getName())
                 .withHelp(availableSetting.getHelp())
                 .withType(availableSetting.getType())
                 .withDefaultValue(defaultValue)
                 .withRequired(availableSetting.isRequired())
-                .withValue(defaultValue);
+                .withValue(defaultValue).build();
     }
 
     /**
@@ -162,10 +165,7 @@ public class TechnologySettingService {
         Technology technology = pair.getFirst();
         String groupName = WordUtils.capitalizeFully(technology.toString());
         List<SettingDTO> settings = pair.getSecond();
-        TechnologySettingGroupDTO group = new TechnologySettingGroupDTO(technology);
-        group.setName(groupName);
-        group.setSettings(settings);
-        return group;
+        return new TechnologySettingGroupDTO(groupName, settings, technology);
     }
 
     /**
@@ -247,11 +247,7 @@ public class TechnologySettingService {
 
         TechnologySetting settingToSave = technologySettingRepository.findByProjectIdAndCodeAndTechnology(projectId, code, technology)
                 .orElse(
-                        new TechnologySetting()
-                                .withProjectId(projectId)
-                                .withCode(code)
-                                .withTechnology(technology)
-                );
+                        new TechnologySetting(projectId, code, technology));
         settingToSave.setValue(newValue);
         technologySettingRepository.save(settingToSave);
     }

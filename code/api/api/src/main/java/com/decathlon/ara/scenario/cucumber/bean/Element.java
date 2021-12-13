@@ -17,16 +17,14 @@
 
 package com.decathlon.ara.scenario.cucumber.bean;
 
-import com.decathlon.ara.lib.embed.consumer.StructuredEmbeddingsHolder;
-import com.decathlon.ara.scenario.cucumber.support.ResultsWithMatch;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Data;
-
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Data
+import com.decathlon.ara.lib.embed.consumer.StructuredEmbeddingsHolder;
+import com.decathlon.ara.scenario.cucumber.support.ResultsWithMatch;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Element {
 
@@ -146,6 +144,50 @@ public class Element {
         // The id starts with 2, so we can detect if the occurrence is the first one (or if it is not from an outline)
         final Matcher matcher = SCENARIO_OUTLINE_PATTERN.matcher(id);
         return !matcher.matches() || Integer.parseInt(matcher.group(1)) <= 2;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getKeyword() {
+        return keyword;
+    }
+
+    public Step[] getSteps() {
+        return steps;
+    }
+
+    public Hook[] getBefore() {
+        return before;
+    }
+
+    public Hook[] getAfter() {
+        return after;
+    }
+
+    public Tag[] getTags() {
+        return tags;
+    }
+
+    public Integer getLine() {
+        return line;
+    }
+
+    public Comment[] getComments() {
+        return comments;
     }
 
 }

@@ -17,9 +17,6 @@
 
 package com.decathlon.ara.defect.jira.api.model.worklog;
 
-import lombok.Data;
-
-@Data
 public class JiraWorklog {
 
     private Integer startAt;
@@ -27,5 +24,17 @@ public class JiraWorklog {
     private Integer maxResults;
 
     private Integer total;
+
+    public Integer getStartAt() {
+        return startAt;
+    }
+
+    public Integer getMaxResults() {
+        return maxResults;
+    }
+
+    public Integer getTotal() {
+        return total;
+    }
 
 }

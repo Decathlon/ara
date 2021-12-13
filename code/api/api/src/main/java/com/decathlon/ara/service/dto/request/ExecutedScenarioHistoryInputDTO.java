@@ -17,18 +17,9 @@
 
 package com.decathlon.ara.service.dto.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-
 import java.time.Period;
 import java.util.Optional;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 public class ExecutedScenarioHistoryInputDTO {
 
     private String cucumberId;
@@ -50,7 +41,26 @@ public class ExecutedScenarioHistoryInputDTO {
         return duration.getDuration();
     }
 
-    @Data
+    public String getCucumberId() {
+        return cucumberId;
+    }
+
+    public String getCycleName() {
+        return cycleName;
+    }
+
+    public String getBranch() {
+        return branch;
+    }
+
+    public String getCountryCode() {
+        return countryCode;
+    }
+
+    public String getRunTypeCode() {
+        return runTypeCode;
+    }
+
     private class ExecutedScenarioHistoryDuration {
         private int value;
         private ExecutedScenarioHistoryDurationType type;
@@ -77,6 +87,14 @@ public class ExecutedScenarioHistoryInputDTO {
                     period = Period.ZERO;
             }
             return Optional.of(period);
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public ExecutedScenarioHistoryDurationType getType() {
+            return type;
         }
     }
 

@@ -17,9 +17,13 @@
 
 package com.decathlon.ara.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
-import com.decathlon.ara.domain.QType;
 import com.decathlon.ara.domain.Source;
 import com.decathlon.ara.domain.Type;
 import com.decathlon.ara.repository.ProblemPatternRepository;
@@ -32,37 +36,47 @@ import com.decathlon.ara.service.dto.type.TypeWithSourceCodeDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
-import com.decathlon.ara.service.mapper.TypeWithSourceCodeMapper;
-import com.decathlon.ara.service.util.ObjectUtil;
-import java.util.List;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.decathlon.ara.service.mapper.GenericMapper;
 
 /**
  * Service for managing Type.
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TypeService {
 
-    @NonNull
     private final TypeRepository repository;
 
-    @NonNull
     private final SourceRepository sourceRepository;
 
-    @NonNull
-    private final TypeWithSourceCodeMapper mapper;
+    private final GenericMapper mapper;
 
-    @NonNull
     private final ProblemPatternRepository problemPatternRepository;
 
-    @NonNull
     private final RunRepository runRepository;
+
+    public TypeService(TypeRepository repository, SourceRepository sourceRepository, GenericMapper mapper,
+            ProblemPatternRepository problemPatternRepository, RunRepository runRepository) {
+        this.repository = repository;
+        this.sourceRepository = sourceRepository;
+        this.mapper = mapper;
+        this.problemPatternRepository = problemPatternRepository;
+        this.runRepository = runRepository;
+    }
+
+    private void mapSourceCode(Type entity, TypeWithSourceCodeDTO dto) {
+        if (entity.getSource() != null) {
+            dto.setSourceCode(entity.getSource().getCode());
+        }
+    }
+
+    private void mapSourceCode(TypeWithSourceCodeDTO dto, Type entity) {
+        if (dto.getSourceCode() != null) {
+            Source source = new Source();
+            source.setCode(dto.getSourceCode());
+            entity.setSource(source);
+        }
+    }
 
     /**
      * Create a new entity.
@@ -74,20 +88,18 @@ public class TypeService {
      * @throws NotFoundException  when the given type has a source with a code not existing on the project
      */
     public TypeWithSourceCodeDTO create(long projectId, TypeWithSourceCodeDTO dtoToCreate) throws BadRequestException {
-        ObjectUtil.trimStringValues(dtoToCreate);
-
         Type existingEntityWithSameCode = repository.findByProjectIdAndCode(projectId, dtoToCreate.getCode());
         if (existingEntityWithSameCode != null) {
             throw new NotUniqueException(Messages.NOT_UNIQUE_TYPE_CODE, Entities.TYPE,
-                    QType.type.code.getMetadata().getName(), existingEntityWithSameCode.getCode());
+                    "code", existingEntityWithSameCode.getCode());
         }
 
         validateBusinessRules(projectId, dtoToCreate);
 
-        final Type entity = mapper.toEntity(dtoToCreate);
+        final Type entity = mapper.map(dtoToCreate, Type.class, this::mapSourceCode);
         entity.setProjectId(projectId);
         assignExistingSource(projectId, entity);
-        return mapper.toDto(repository.save(entity));
+        return mapper.map(repository.save(entity), TypeWithSourceCodeDTO.class, this::mapSourceCode);
     }
 
     /**
@@ -100,17 +112,16 @@ public class TypeService {
      * @throws NotFoundException  when the given type has a source with a code not existing on the project
      */
     public UpsertResultDTO<TypeWithSourceCodeDTO> createOrUpdate(long projectId, TypeWithSourceCodeDTO dtoToCreateOrUpdate) throws BadRequestException {
-        ObjectUtil.trimStringValues(dtoToCreateOrUpdate);
         validateBusinessRules(projectId, dtoToCreateOrUpdate);
 
         Type dataBaseEntity = repository.findByProjectIdAndCode(projectId, dtoToCreateOrUpdate.getCode());
         final Upsert operation = (dataBaseEntity == null ? Upsert.INSERT : Upsert.UPDATE);
 
-        final Type entity = mapper.toEntity(dtoToCreateOrUpdate);
+        final Type entity = mapper.map(dtoToCreateOrUpdate, Type.class, this::mapSourceCode);
         entity.setId(dataBaseEntity == null ? null : dataBaseEntity.getId());
         entity.setProjectId(projectId);
         assignExistingSource(projectId, entity);
-        final TypeWithSourceCodeDTO dto = mapper.toDto(repository.save(entity));
+        final TypeWithSourceCodeDTO dto = mapper.map(repository.save(entity), TypeWithSourceCodeDTO.class, this::mapSourceCode);
         return new UpsertResultDTO<>(dto, operation);
     }
 
@@ -122,7 +133,7 @@ public class TypeService {
      */
     @Transactional(readOnly = true)
     public List<TypeWithSourceCodeDTO> findAll(long projectId) {
-        return mapper.toDto(repository.findAllByProjectIdOrderByCode(projectId));
+        return mapper.mapCollection(repository.findAllByProjectIdOrderByCode(projectId), TypeWithSourceCodeDTO.class, this::mapSourceCode);
     }
 
     /**
@@ -147,7 +158,7 @@ public class TypeService {
     private void validateBusinessRules(long projectId, TypeWithSourceCodeDTO dto) throws NotUniqueException {
         Type dataBaseEntityWithSameName = repository.findByProjectIdAndName(projectId, dto.getName());
         if (dataBaseEntityWithSameName != null && !dataBaseEntityWithSameName.getCode().equals(dto.getCode())) {
-            throw new NotUniqueException(Messages.NOT_UNIQUE_TYPE_NAME, Entities.TYPE, QType.type.name.getMetadata().getName(), dataBaseEntityWithSameName.getCode());
+            throw new NotUniqueException(Messages.NOT_UNIQUE_TYPE_NAME, Entities.TYPE, "name", dataBaseEntityWithSameName.getCode());
         }
     }
 

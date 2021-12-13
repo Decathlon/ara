@@ -17,16 +17,11 @@
 
 package com.decathlon.ara.service.dto.feature;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
 /**
  * Contains the detailled informations (code, state, name, description) of a FeatureFlipping.
  *
  * @author Sylvain Nieuwlandt
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
 public class DetailledFeatureDTO extends FeatureDTO {
 
     private String name;
@@ -36,5 +31,13 @@ public class DetailledFeatureDTO extends FeatureDTO {
         super(code, enabled);
         this.description = description;
         this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
     }
 }

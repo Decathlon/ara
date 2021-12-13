@@ -17,10 +17,10 @@
 
 package com.decathlon.ara;
 
-import lombok.experimental.UtilityClass;
-
-@UtilityClass
 public final class Messages {
+
+    private Messages() {
+    }
 
     public static final String PARAMETER_IS_MISSING = "One or more parameters is missing or null";
     public static final String PARAMETER_HAS_ONE_OR_MORE_MISSING_FIELDS = "A parameter has one or more missing field";

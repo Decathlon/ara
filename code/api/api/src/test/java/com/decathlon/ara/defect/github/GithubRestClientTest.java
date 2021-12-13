@@ -17,20 +17,6 @@
 
 package com.decathlon.ara.defect.github;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.util.Lists;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -42,9 +28,29 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.assertj.core.api.Assertions;
+import org.assertj.core.util.Lists;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+
+import com.decathlon.ara.util.TestUtil;
+
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class GithubRestClientTest {
+class GithubRestClientTest {
     @Mock
     private GithubMapper mapper;
 
@@ -55,17 +61,15 @@ public class GithubRestClientTest {
     @InjectMocks
     private GithubRestClient cut;
 
-
     @Test
-    public void requestIssue_should_return_the_issue() throws IOException, URISyntaxException {
+    void requestIssue_should_return_the_issue() throws IOException, URISyntaxException {
         // Given
         String owner = "owner";
         String repo = "test";
         String token = "token";
         long issue = 42L;
         String jsonResponse = "{\"key\": \"value\"}";
-        GithubIssue expectedIssue = new GithubIssue();
-        expectedIssue.setNumber(issue);
+        GithubIssue expectedIssue = githubIssue(issue);
         HttpResponse mockedResponse = this.given_an_issue_response(200, jsonResponse);
         Mockito.doReturn(Optional.of(expectedIssue)).when(this.mapper).jsonToIssue(jsonResponse);
         Mockito.doReturn(mockedResponse).when(this.httpClient).execute(Mockito.any());
@@ -80,7 +84,7 @@ public class GithubRestClientTest {
     }
 
     @Test
-    public void requestIssue_should_empty_on_404() throws IOException, URISyntaxException {
+    void requestIssue_should_empty_on_404() throws IOException, URISyntaxException {
         // Given
         String owner = "owner";
         String repo = "test";
@@ -97,9 +101,8 @@ public class GithubRestClientTest {
         Assertions.assertThat(result).isNotPresent();
     }
 
-
     @Test
-    public void requestIssue_should_empty_on_410() throws IOException, URISyntaxException {
+    void requestIssue_should_empty_on_410() throws IOException, URISyntaxException {
         // Given
         String owner = "owner";
         String repo = "test";
@@ -117,7 +120,7 @@ public class GithubRestClientTest {
     }
 
     @Test
-    public void requestIssue_should_throw_exception_on_500() throws IOException {
+    void requestIssue_should_throw_exception_on_500() throws IOException {
         // Given
         String owner = "owner";
         String repo = "test";
@@ -138,7 +141,7 @@ public class GithubRestClientTest {
     }
 
     @Test
-    public void requestIssues_should_request_all_the_issues() throws IOException, URISyntaxException {
+    void requestIssues_should_request_all_the_issues() throws IOException, URISyntaxException {
         // Given
         String owner = "owner";
         String repo = "test";
@@ -153,7 +156,7 @@ public class GithubRestClientTest {
     }
 
     @Test
-    public void getIssuesUpdatedSince_should_return_the_list_of_issues_after_date() throws IOException, URISyntaxException, ParseException {
+    void getIssuesUpdatedSince_should_return_the_list_of_issues_after_date() throws IOException, URISyntaxException, ParseException {
         // Given
         String owner = "owner";
         String repo = "test";
@@ -162,10 +165,8 @@ public class GithubRestClientTest {
         String expectedDate = "2019-04-04T04:21:00";
         Date date = format.parse(expectedDate);
         String jsonResponse = "[ {\"key\": \"value\"}, {\"key\": \"value2\" } ]";
-        GithubIssue issue1 = new GithubIssue();
-        issue1.setNumber(42L);
-        GithubIssue issue2 = new GithubIssue();
-        issue2.setNumber(24L);
+        GithubIssue issue1 = githubIssue(42L);
+        GithubIssue issue2 = githubIssue(24L);
         HttpResponse mockedResponse = this.given_an_issue_response(200, jsonResponse);
         Mockito.doReturn(Lists.list(issue1, issue2)).when(this.mapper).jsonToIssueList(jsonResponse);
         Mockito.doReturn(mockedResponse).when(this.httpClient).execute(Mockito.any());
@@ -180,7 +181,7 @@ public class GithubRestClientTest {
     }
 
     @Test
-    public void getIssuesUpdatedSince_should_return_empty_list_on_404() throws IOException, URISyntaxException, ParseException {
+    void getIssuesUpdatedSince_should_return_empty_list_on_404() throws IOException, URISyntaxException, ParseException {
         // Given
         String owner = "owner";
         String repo = "test";
@@ -200,7 +201,7 @@ public class GithubRestClientTest {
     }
 
     @Test
-    public void getIssuesUpdatedSince_should_throw_error_on_500() throws IOException, URISyntaxException, ParseException {
+    void getIssuesUpdatedSince_should_throw_error_on_500() throws IOException, URISyntaxException, ParseException {
         // Given
         String owner = "owner";
         String repo = "test";
@@ -253,5 +254,11 @@ public class GithubRestClientTest {
         expectedPath += "?filter=all&state=all&since=" + time.replace(":", "%3A");
         Assertions.assertThat(request.getValue().getURI()).isEqualTo(new URI(expectedPath));
         Assertions.assertThat(request.getValue().containsHeader("Authorization")).isTrue();
+    }
+
+    private GithubIssue githubIssue(long number) {
+        GithubIssue githubIssue = new GithubIssue();
+        TestUtil.setField(githubIssue, "number", number);
+        return githubIssue;
     }
 }

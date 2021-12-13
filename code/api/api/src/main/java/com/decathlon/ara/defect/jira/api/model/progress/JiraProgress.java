@@ -17,13 +17,18 @@
 
 package com.decathlon.ara.defect.jira.api.model.progress;
 
-import lombok.Data;
-
-@Data
 public class JiraProgress {
 
     private Integer progress;
 
     private Integer total;
+
+    public Integer getProgress() {
+        return progress;
+    }
+
+    public Integer getTotal() {
+        return total;
+    }
 
 }

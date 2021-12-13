@@ -17,22 +17,19 @@
 
 package com.decathlon.ara.domain;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
+
 import com.decathlon.ara.domain.enumeration.Technology;
-import lombok.*;
 
-import javax.persistence.*;
-import java.io.Serializable;
-import java.util.Comparator;
-
-import static java.util.Comparator.*;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 @Entity
-@EqualsAndHashCode(of = { "projectId", "code", "technology" })
-public class TechnologySetting implements Comparable<TechnologySetting>, Serializable {
+public class TechnologySetting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "technology_setting_id")
@@ -50,13 +47,36 @@ public class TechnologySetting implements Comparable<TechnologySetting>, Seriali
     @Enumerated(EnumType.STRING)
     private Technology technology;
 
-    @Override
-    public int compareTo(TechnologySetting other) {
-        Comparator<TechnologySetting> projectIdComparator = comparing(e -> Long.valueOf(e.projectId), nullsFirst(naturalOrder()));
-        Comparator<TechnologySetting> technologyComparator = comparing(e -> e.technology, nullsFirst(naturalOrder()));
-        Comparator<TechnologySetting> codeComparator = comparing(e -> e.code, nullsFirst(naturalOrder()));
-        return nullsFirst(projectIdComparator
-                .thenComparing(technologyComparator)
-                .thenComparing(codeComparator)).compare(this, other);
+    public TechnologySetting() {
+    }
+
+    public TechnologySetting(Long projectId, String code, Technology technology) {
+        this.projectId = projectId;
+        this.code = code;
+        this.technology = technology;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public Technology getTechnology() {
+        return technology;
     }
 }

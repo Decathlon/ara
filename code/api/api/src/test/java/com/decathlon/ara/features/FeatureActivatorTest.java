@@ -30,8 +30,10 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.env.Environment;
 
+import com.decathlon.ara.util.TestUtil;
+
 @ExtendWith(MockitoExtension.class)
-public class FeatureActivatorTest {
+class FeatureActivatorTest {
 
     @Mock
     private Environment environment;
@@ -45,12 +47,14 @@ public class FeatureActivatorTest {
     private FeatureActivator cut;
 
     @BeforeEach
-    public void setup() {
-        this.cut = new FeatureActivator(environment, currentStateMock, defaultStatesMock);
+    void setup() {
+        this.cut = new FeatureActivator(environment);
+        TestUtil.setField(cut, "currentStates", currentStateMock);
+        TestUtil.setField(cut, "defaultStates", defaultStatesMock);
     }
 
     @Test
-    public void getState_should_return_the_current_state_of_a_feature() {
+    void getState_should_return_the_current_state_of_a_feature() {
         // Given
         String feature1 = "my-feature";
         String feature2 = "second-one";
@@ -69,18 +73,18 @@ public class FeatureActivatorTest {
     }
 
     @Test
-    public void getState_should_throw_exception_if_not_found() {
+    void getState_should_throw_exception_if_not_found() {
         // Given
         String feature1 = "feature-1";
         Mockito.doReturn(false).when(currentStateMock).containsKey(feature1);
         // When
-        assertThrows(IllegalArgumentException.class,() -> cut.getState("feature-1"));
+        assertThrows(IllegalArgumentException.class, () -> cut.getState("feature-1"));
         // Then
         // Assertions made in the annotation.
     }
 
     @Test
-    public void changeStateOf_should_change_current_state_of_feature() {
+    void changeStateOf_should_change_current_state_of_feature() {
         // Given
         String feature1 = "feature-2";
         Mockito.doReturn(true).when(currentStateMock).containsKey(feature1);
@@ -91,7 +95,7 @@ public class FeatureActivatorTest {
     }
 
     @Test
-    public void changeStateOf_should_not_change_state_if_bad_code() {
+    void changeStateOf_should_not_change_state_if_bad_code() {
         // Given
         String feature1 = "feature-3";
         Mockito.doReturn(false).when(currentStateMock).containsKey(feature1);
@@ -102,7 +106,7 @@ public class FeatureActivatorTest {
     }
 
     @Test
-    public void changeStateOf_should_erase_and_not_flip() {
+    void changeStateOf_should_erase_and_not_flip() {
         // Given
         String feature1 = "feature-4";
         Mockito.doReturn(true).when(currentStateMock).containsKey(feature1);
@@ -113,7 +117,7 @@ public class FeatureActivatorTest {
     }
 
     @Test
-    public void isEnabledByDefault_should_return_the_default_state_of_a_feature() {
+    void isEnabledByDefault_should_return_the_default_state_of_a_feature() {
         // Given
         String feature1 = "feature-5";
         String feature2 = "feature-6";
@@ -132,7 +136,7 @@ public class FeatureActivatorTest {
     }
 
     @Test
-    public void isEnabledByDefault_should_throw_exception_if_not_found() {
+    void isEnabledByDefault_should_throw_exception_if_not_found() {
         // Given
         String feature1 = "feature-7";
         Mockito.doReturn(false).when(defaultStatesMock).containsKey(feature1);

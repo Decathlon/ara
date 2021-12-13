@@ -17,22 +17,12 @@
 
 package com.decathlon.ara.web.rest;
 
+import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 
-import com.decathlon.ara.Entities;
-import com.decathlon.ara.service.ProjectService;
-import com.decathlon.ara.service.dto.severity.SeverityDTO;
-import com.decathlon.ara.service.dto.support.Upsert;
-import com.decathlon.ara.service.dto.support.UpsertResultDTO;
-import com.decathlon.ara.service.exception.BadRequestException;
-import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.web.rest.util.HeaderUtil;
-import com.decathlon.ara.web.rest.util.ResponseUtil;
-import com.decathlon.ara.service.SeverityService;
 import java.util.List;
+
 import javax.validation.Valid;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -44,24 +34,35 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import com.decathlon.ara.Entities;
+import com.decathlon.ara.service.ProjectService;
+import com.decathlon.ara.service.SeverityService;
+import com.decathlon.ara.service.dto.severity.SeverityDTO;
+import com.decathlon.ara.service.dto.support.Upsert;
+import com.decathlon.ara.service.dto.support.UpsertResultDTO;
+import com.decathlon.ara.service.exception.BadRequestException;
+import com.decathlon.ara.service.exception.NotFoundException;
+import com.decathlon.ara.web.rest.util.HeaderUtil;
+import com.decathlon.ara.web.rest.util.ResponseUtil;
 
 /**
  * REST controller for managing Severity.
  */
 @RestController
 @RequestMapping(SeverityResource.PATH)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SeverityResource {
 
     static final String PATH = PROJECT_API_PATH + "/severities";
     private static final String NAME = Entities.SEVERITY;
 
-    @NonNull
     private final SeverityService service;
 
-    @NonNull
     private final ProjectService projectService;
+
+    public SeverityResource(SeverityService service, ProjectService projectService) {
+        this.service = service;
+        this.projectService = projectService;
+    }
 
     /**
      * POST to create a new entity.

@@ -17,20 +17,8 @@
 
 package com.decathlon.ara.loader;
 
-import com.decathlon.ara.common.NotGonnaHappenException;
-import com.decathlon.ara.service.exception.BadRequestException;
-import com.decathlon.ara.scenario.cucumber.upload.CucumberScenarioUploader;
-import com.decathlon.ara.scenario.postman.upload.PostmanScenarioUploader;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import static com.decathlon.ara.loader.DemoLoaderConstants.SOURCE_CODE_API;
+import static com.decathlon.ara.loader.DemoLoaderConstants.SOURCE_CODE_WEB;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -41,26 +29,41 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static com.decathlon.ara.loader.DemoLoaderConstants.SOURCE_CODE_API;
-import static com.decathlon.ara.loader.DemoLoaderConstants.SOURCE_CODE_WEB;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.decathlon.ara.common.NotGonnaHappenException;
+import com.decathlon.ara.scenario.cucumber.upload.CucumberScenarioUploader;
+import com.decathlon.ara.scenario.postman.upload.PostmanScenarioUploader;
+import com.decathlon.ara.service.exception.BadRequestException;
 
 /**
  * Load scenarios into the Demo project.
  */
-@Slf4j
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DemoScenarioLoader {
 
-    @NonNull
+    private static final Logger LOG = LoggerFactory.getLogger(DemoScenarioLoader.class);
+
     private final PostmanScenarioUploader postmanScenarioUploader;
 
-    @NonNull
     private final CucumberScenarioUploader cucumberScenarioUploader;
 
-    @NonNull
     private final DemoLoaderService demoLoaderService;
+
+    public DemoScenarioLoader(PostmanScenarioUploader postmanScenarioUploader,
+            CucumberScenarioUploader cucumberScenarioUploader, DemoLoaderService demoLoaderService) {
+        this.postmanScenarioUploader = postmanScenarioUploader;
+        this.cucumberScenarioUploader = cucumberScenarioUploader;
+        this.demoLoaderService = demoLoaderService;
+    }
 
     public void createScenarios(long projectId, Map<String, Long> functionalityIds) throws BadRequestException {
         cucumberScenarioUploader.uploadCucumber(projectId, SOURCE_CODE_WEB,
@@ -71,7 +74,7 @@ public class DemoScenarioLoader {
         try {
             postmanScenariosZip = getPostmanScenariosZip(functionalityIds);
         } catch (IOException e) {
-            log.warn("DEMO|postman|Cannot generate the ZIP of Postman scenarios: doing without functionality coverage for them", e);
+            LOG.warn("DEMO|postman|Cannot generate the ZIP of Postman scenarios: doing without functionality coverage for them", e);
             return;
         }
 
@@ -125,7 +128,7 @@ public class DemoScenarioLoader {
         try (final InputStream stream = getClass().getClassLoader().getResourceAsStream(name)) {
             return IOUtils.toString(stream, StandardCharsets.UTF_8);
         } catch (IOException | NullPointerException e) {
-            log.error("DEMO|Cannot read demo resource file in classpath: {}", name, e);
+            LOG.error("DEMO|Cannot read demo resource file in classpath: {}", name, e);
             throw new NotGonnaHappenException("Demo file should exist and be valid in classpath: " + name);
         }
     }

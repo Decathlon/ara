@@ -17,16 +17,14 @@
 
 package com.decathlon.ara.lib.embed.producer.type;
 
-import lombok.Data;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-public class ObjectEmbeddingTest {
+class ObjectEmbeddingTest {
 
     @Test
-    public void toHtml_ShouldReturnEmpty_WhenDataIsNull() {
+    void toHtml_ShouldReturnEmpty_WhenDataIsNull() {
         // GIVEN
         final Object nullData = null;
         final ObjectEmbedding cut = new ObjectEmbedding(null, null, nullData, null);
@@ -39,7 +37,7 @@ public class ObjectEmbeddingTest {
     }
 
     @Test
-    public void toHtml_ShouldEncodeDataAsJsonAndEscapeHtmlCharacters_WhenDataIsPresent() {
+    void toHtml_ShouldEncodeDataAsJsonAndEscapeHtmlCharacters_WhenDataIsPresent() {
         // GIVEN
         final SomeClass data = new SomeClass();
         data.child = new SomeClass();
@@ -58,12 +56,23 @@ public class ObjectEmbeddingTest {
                 "&quot;child&quot;:{&quot;number&quot;:0,&quot;text&quot;:&quot;sub-text&quot;,&quot;child&quot;:null}}");
     }
 
-    @Data
-    public static class SomeClass {
+    static class SomeClass {
 
         SomeClass child;
         String text;
         int number;
+
+        public SomeClass getChild() {
+            return child;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public int getNumber() {
+            return number;
+        }
 
     }
 

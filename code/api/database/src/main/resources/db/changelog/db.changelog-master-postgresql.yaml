@@ -19,3 +19,5 @@ databaseChangeLog:
       file: classpath*:db/changelog/changes/postgresql/20211125164648-not_null_constraints.yaml
   - include:
       file: classpath*:db/changelog/changes/postgresql/20220125164557-remove-unexpected-index.yaml
+  - include:
+      file: classpath*:db/changelog/changes/postgresql/20220318151922-not_null_constraints.yaml

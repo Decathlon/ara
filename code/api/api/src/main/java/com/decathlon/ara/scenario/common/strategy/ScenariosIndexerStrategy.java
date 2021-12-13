@@ -1,35 +1,39 @@
 package com.decathlon.ara.scenario.common.strategy;
 
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.decathlon.ara.domain.enumeration.Technology;
+import com.decathlon.ara.scenario.common.indexer.ScenariosIndexer;
 import com.decathlon.ara.scenario.cucumber.indexer.CucumberScenariosIndexer;
 import com.decathlon.ara.scenario.cypress.indexer.CypressScenariosIndexer;
 import com.decathlon.ara.scenario.generic.indexer.GenericScenariosIndexer;
 import com.decathlon.ara.scenario.postman.indexer.PostmanScenariosIndexer;
-import com.decathlon.ara.scenario.common.indexer.ScenariosIndexer;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Slf4j
 public class ScenariosIndexerStrategy {
 
-    @NonNull
+    private static final Logger LOG = LoggerFactory.getLogger(ScenariosIndexerStrategy.class);
+
     private final GenericScenariosIndexer genericScenariosIndexer;
 
-    @NonNull
     private final PostmanScenariosIndexer postmanScenariosIndexerService;
 
-    @NonNull
     private final CucumberScenariosIndexer cucumberScenariosIndexerService;
 
-    @NonNull
     private final CypressScenariosIndexer cypressScenariosIndexer;
+
+    public ScenariosIndexerStrategy(GenericScenariosIndexer genericScenariosIndexer,
+            PostmanScenariosIndexer postmanScenariosIndexerService,
+            CucumberScenariosIndexer cucumberScenariosIndexerService, CypressScenariosIndexer cypressScenariosIndexer) {
+        this.genericScenariosIndexer = genericScenariosIndexer;
+        this.postmanScenariosIndexerService = postmanScenariosIndexerService;
+        this.cucumberScenariosIndexerService = cucumberScenariosIndexerService;
+        this.cypressScenariosIndexer = cypressScenariosIndexer;
+    }
 
     /**
      * Get the scenarios indexer from the technology
@@ -38,7 +42,7 @@ public class ScenariosIndexerStrategy {
      */
     public Optional<ScenariosIndexer> getScenariosIndexer(Technology technology) {
         if (technology == null) {
-            log.info("The technology can not be null");
+            LOG.info("The technology can not be null");
             return Optional.empty();
         }
         switch (technology) {
@@ -51,7 +55,7 @@ public class ScenariosIndexerStrategy {
             case CYPRESS:
                 return Optional.of(cypressScenariosIndexer);
             default:
-                log.info("The technology {} is not handled yet. It may be a great feature request ;)", technology);
+                LOG.info("The technology {} is not handled yet. It may be a great feature request ;)", technology);
                 return Optional.empty();
         }
     }

@@ -18,15 +18,7 @@
 package com.decathlon.ara.scenario.postman.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Event {
 
@@ -39,5 +31,13 @@ public class Event {
      * The JavaScript content.
      */
     private Script script;
+
+    public Listen getListen() {
+        return listen;
+    }
+
+    public Script getScript() {
+        return script;
+    }
 
 }

@@ -17,36 +17,33 @@
 
 package com.decathlon.ara.domain;
 
-import lombok.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import javax.persistence.*;
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
-@With
-// Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
-@EqualsAndHashCode(of = { "problemId", "featureFile", "featureName", "scenarioName", "scenarioNameStartsWith", "step",
-        "stepStartsWith", "stepDefinition", "stepDefinitionStartsWith", "exception", "release", "country", "type",
-        "typeIsBrowser", "typeIsMobile", "platform" })
-public class ProblemPattern implements Serializable {
+public class ProblemPattern {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "problem_pattern_id")
     @SequenceGenerator(name = "problem_pattern_id", sequenceName = "problem_pattern_id", allocationSize = 1)
     private Long id;
-
-    // 1/2 for @EqualsAndHashCode to work: used when an entity is fetched by JPA
-    @Column(name = "problem_id", insertable = false, updatable = false)
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
-    private Long problemId;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "problem_id")
@@ -150,14 +147,130 @@ public class ProblemPattern implements Serializable {
     @Column(length = 32)
     private String platform;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "problemOccurrenceId.problemPattern", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "problemPattern", orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<ProblemOccurrence> problemOccurrences = new HashSet<>();
 
-    // 2/2 for @EqualsAndHashCode to work: used for entities created outside of JPA
+    public ProblemPattern() {
+        this.id = 0l;
+    }
+
+    public boolean equals(ProblemPattern other, Long problemId) {
+        return Objects.equals(country, other.country) && Objects.equals(exception, other.exception)
+                && Objects.equals(featureFile, other.featureFile) && Objects.equals(featureName, other.featureName)
+                && Objects.equals(platform, other.platform) && Objects.equals(problemId, other.getProblemId())
+                && Objects.equals(release, other.release) && Objects.equals(scenarioName, other.scenarioName)
+                && scenarioNameStartsWith == other.scenarioNameStartsWith && Objects.equals(step, other.step)
+                && Objects.equals(stepDefinition, other.stepDefinition)
+                && stepDefinitionStartsWith == other.stepDefinitionStartsWith && Objects.equals(type, other.type)
+                && Objects.equals(typeIsBrowser, other.typeIsBrowser)
+                && Objects.equals(typeIsMobile, other.typeIsMobile);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(country, exception, featureFile, featureName, platform, getProblemId(), release, scenarioName,
+                scenarioNameStartsWith, step, stepDefinition, stepDefinitionStartsWith, type, typeIsBrowser,
+                typeIsMobile);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ProblemPattern)) {
+            return false;
+        }
+        return equals((ProblemPattern) obj, this.getProblemId());
+    }
+
     public void setProblem(Problem problem) {
         this.problem = problem;
-        this.problemId = (problem == null ? null : problem.getId());
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Long getProblemId() {
+        return (problem == null ? null : problem.getId());
+    }
+
+    public Problem getProblem() {
+        return problem;
+    }
+
+    public String getFeatureFile() {
+        return featureFile;
+    }
+
+    public String getFeatureName() {
+        return featureName;
+    }
+
+    public String getScenarioName() {
+        return scenarioName;
+    }
+
+    public boolean isScenarioNameStartsWith() {
+        return scenarioNameStartsWith;
+    }
+
+    public String getStep() {
+        return step;
+    }
+
+    public boolean isStepStartsWith() {
+        return stepStartsWith;
+    }
+
+    public String getStepDefinition() {
+        return stepDefinition;
+    }
+
+    public boolean isStepDefinitionStartsWith() {
+        return stepDefinitionStartsWith;
+    }
+
+    public String getException() {
+        return exception;
+    }
+
+    public String getRelease() {
+        return release;
+    }
+
+    public Country getCountry() {
+        return country;
+    }
+
+    public void setCountry(Country country) {
+        this.country = country;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    public Boolean getTypeIsBrowser() {
+        return typeIsBrowser;
+    }
+
+    public Boolean getTypeIsMobile() {
+        return typeIsMobile;
+    }
+
+    public String getPlatform() {
+        return platform;
+    }
+
+    public Set<ProblemOccurrence> getProblemOccurrences() {
+        return problemOccurrences;
     }
 
 }

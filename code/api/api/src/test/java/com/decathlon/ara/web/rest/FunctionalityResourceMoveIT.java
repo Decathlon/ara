@@ -42,6 +42,7 @@ import com.decathlon.ara.repository.FunctionalityRepository;
 import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
 import com.decathlon.ara.service.dto.request.FunctionalityPosition;
 import com.decathlon.ara.service.dto.request.MoveFunctionalityDTO;
+import com.decathlon.ara.util.TestUtil;
 import com.decathlon.ara.web.rest.util.HeaderUtil;
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
@@ -49,15 +50,15 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 @Disabled
 @SpringBootTest
 @TestExecutionListeners({
-    TransactionalTestExecutionListener.class,
-    DependencyInjectionTestExecutionListener.class,
-    DbUnitTestExecutionListener.class
+        TransactionalTestExecutionListener.class,
+        DependencyInjectionTestExecutionListener.class,
+        DbUnitTestExecutionListener.class
 })
 @TestPropertySource(
-		locations = "classpath:application-db-h2.properties")
+        locations = "classpath:application-db-h2.properties")
 @Transactional
 @DatabaseSetup("/dbunit/functionality.xml")
-public class FunctionalityResourceMoveIT {
+class FunctionalityResourceMoveIT {
 
     private static final String PROJECT_CODE = "p";
 
@@ -68,7 +69,7 @@ public class FunctionalityResourceMoveIT {
     private FunctionalityResource cut;
 
     @Test
-    public void testMoveNonexistentSource() {
+    void testMoveNonexistentSource() {
         ResponseEntity<FunctionalityDTO> response = move(NONEXISTENT.longValue(), Long.valueOf(1), FunctionalityPosition.LAST_CHILD);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_found");
@@ -77,7 +78,7 @@ public class FunctionalityResourceMoveIT {
     }
 
     @Test
-    public void testMoveNonexistentDestination() {
+    void testMoveNonexistentDestination() {
         ResponseEntity<FunctionalityDTO> response = move(1, NONEXISTENT, FunctionalityPosition.LAST_CHILD);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_found");
@@ -86,7 +87,7 @@ public class FunctionalityResourceMoveIT {
     }
 
     @Test
-    public void testMoveIntoAFunctionality() {
+    void testMoveIntoAFunctionality() {
         ResponseEntity<FunctionalityDTO> response = move(1, Long.valueOf(31), FunctionalityPosition.LAST_CHILD);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.functionalities_cannot_have_children");
@@ -95,7 +96,7 @@ public class FunctionalityResourceMoveIT {
     }
 
     @Test
-    public void testMoveIntoItself() {
+    void testMoveIntoItself() {
         ResponseEntity<FunctionalityDTO> response = move(1, Long.valueOf(1), FunctionalityPosition.LAST_CHILD);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.cannot_move_to_itself_or_sub_folder");
@@ -104,7 +105,7 @@ public class FunctionalityResourceMoveIT {
     }
 
     @Test
-    public void testMoveIntoASubFolderOfItself() {
+    void testMoveIntoASubFolderOfItself() {
         ResponseEntity<FunctionalityDTO> response = move(1, Long.valueOf(11), FunctionalityPosition.LAST_CHILD);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.cannot_move_to_itself_or_sub_folder");
@@ -113,7 +114,7 @@ public class FunctionalityResourceMoveIT {
     }
 
     @Test
-    public void testMoveToTopOfFolder() {
+    void testMoveToTopOfFolder() {
         final long id = 113;
         ResponseEntity<FunctionalityDTO> response = move(id, Long.valueOf(111), FunctionalityPosition.ABOVE);
         assertMoved(response, id, Long.valueOf(11), 500);
@@ -121,7 +122,7 @@ public class FunctionalityResourceMoveIT {
     }
 
     @Test
-    public void testMoveBelowFirstOfFolder() {
+    void testMoveBelowFirstOfFolder() {
         final long id = 113;
         ResponseEntity<FunctionalityDTO> response = move(id, Long.valueOf(111), FunctionalityPosition.BELOW);
         assertMoved(response, id, Long.valueOf(11), 1500);
@@ -129,7 +130,7 @@ public class FunctionalityResourceMoveIT {
     }
 
     @Test
-    public void testMoveAboveLastOfFolder() {
+    void testMoveAboveLastOfFolder() {
         final long id = 111;
         ResponseEntity<FunctionalityDTO> response = move(id, Long.valueOf(113), FunctionalityPosition.ABOVE);
         assertMoved(response, id, Long.valueOf(11), 2500);
@@ -137,7 +138,7 @@ public class FunctionalityResourceMoveIT {
     }
 
     @Test
-    public void testMoveToBottomOfFolder() {
+    void testMoveToBottomOfFolder() {
         final long id = 111;
         ResponseEntity<FunctionalityDTO> response = move(id, Long.valueOf(113), FunctionalityPosition.BELOW);
         assertMoved(response, id, Long.valueOf(11), 1500 + Double.MAX_VALUE / 2);
@@ -145,7 +146,7 @@ public class FunctionalityResourceMoveIT {
     }
 
     @Test
-    public void testMoveFunctionalityIntoAnotherFolder() {
+    void testMoveFunctionalityIntoAnotherFolder() {
         final long id = 111;
         ResponseEntity<FunctionalityDTO> response = move(id, Long.valueOf(21), FunctionalityPosition.LAST_CHILD);
         assertMoved(response, id, Long.valueOf(21), Double.MAX_VALUE / 2);
@@ -154,7 +155,7 @@ public class FunctionalityResourceMoveIT {
     }
 
     @Test
-    public void testMoveFunctionalityNextToAnotherFolderInRoot() {
+    void testMoveFunctionalityNextToAnotherFolderInRoot() {
         final long id = 112;
         ResponseEntity<FunctionalityDTO> response = move(id, Long.valueOf(2), FunctionalityPosition.ABOVE);
         assertMoved(response, id, null, 1500);
@@ -163,7 +164,7 @@ public class FunctionalityResourceMoveIT {
     }
 
     @Test
-    public void testMoveFunctionalityAppendingItToRoot() {
+    void testMoveFunctionalityAppendingItToRoot() {
         final long id = 112;
         ResponseEntity<FunctionalityDTO> response = move(id, null, FunctionalityPosition.LAST_CHILD);
         assertMoved(response, id, null, 1500 + Double.MAX_VALUE / 2);
@@ -172,7 +173,7 @@ public class FunctionalityResourceMoveIT {
     }
 
     @Test
-    public void testPositionNullIsLastChild() {
+    void testPositionNullIsLastChild() {
         final long id = 112;
         ResponseEntity<FunctionalityDTO> response = move(id, null, null);
         assertMoved(response, id, null, 1500 + Double.MAX_VALUE / 2);
@@ -181,7 +182,7 @@ public class FunctionalityResourceMoveIT {
     }
 
     @Test
-    public void testMoveFolderWithItsChildren() {
+    void testMoveFolderWithItsChildren() {
         final long id = 1;
         ResponseEntity<FunctionalityDTO> response = move(id, Long.valueOf(31), FunctionalityPosition.BELOW);
         assertMoved(response, id, Long.valueOf(3), 500 + Double.MAX_VALUE / 2);
@@ -192,7 +193,7 @@ public class FunctionalityResourceMoveIT {
     }
 
     @Test
-    public void testMoveAboveWithNullReference() {
+    void testMoveAboveWithNullReference() {
         ResponseEntity<FunctionalityDTO> response = move(1, null, FunctionalityPosition.ABOVE);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.no_reference");
@@ -201,7 +202,7 @@ public class FunctionalityResourceMoveIT {
     }
 
     @Test
-    public void testMoveBelowWithNullReference() {
+    void testMoveBelowWithNullReference() {
         ResponseEntity<FunctionalityDTO> response = move(1, null, FunctionalityPosition.BELOW);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.no_reference");
@@ -210,7 +211,11 @@ public class FunctionalityResourceMoveIT {
     }
 
     private ResponseEntity<FunctionalityDTO> move(long sourceId, Long referenceId, FunctionalityPosition relativePosition) {
-        return cut.move(PROJECT_CODE, new MoveFunctionalityDTO(sourceId, referenceId, relativePosition));
+        MoveFunctionalityDTO moveFunctionalityDTO = new MoveFunctionalityDTO();
+        TestUtil.setField(moveFunctionalityDTO, "sourceId", sourceId);
+        TestUtil.setField(moveFunctionalityDTO, "referenceId", referenceId);
+        TestUtil.setField(moveFunctionalityDTO, "relativePosition", relativePosition);
+        return cut.move(PROJECT_CODE, moveFunctionalityDTO);
     }
 
     private void assertMoved(ResponseEntity<FunctionalityDTO> response, long id, Long parentId, double newOrder) {

@@ -17,43 +17,46 @@
 
 package com.decathlon.ara.coverage;
 
-import com.decathlon.ara.repository.FunctionalityRepository;
-import com.decathlon.ara.domain.Functionality;
-import com.decathlon.ara.domain.enumeration.FunctionalityType;
-import com.decathlon.ara.common.NotGonnaHappenException;
-import com.decathlon.ara.service.dto.coverage.AxisDTO;
-import com.decathlon.ara.service.dto.coverage.AxisPointDTO;
-import com.decathlon.ara.service.dto.coverage.CoverageDTO;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.decathlon.ara.common.NotGonnaHappenException;
+import com.decathlon.ara.domain.Functionality;
+import com.decathlon.ara.domain.enumeration.FunctionalityType;
+import com.decathlon.ara.repository.FunctionalityRepository;
+import com.decathlon.ara.service.dto.coverage.AxisDTO;
+import com.decathlon.ara.service.dto.coverage.AxisPointDTO;
+import com.decathlon.ara.service.dto.coverage.CoverageDTO;
+
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CoverageService {
 
-    @NonNull
     private final FunctionalityRepository functionalityRepository;
 
-    @NonNull
     private final CountryAxisGenerator countryAxisGenerator;
 
-    @NonNull
     private final SeverityAxisGenerator severityAxisGenerator;
 
-    @NonNull
     private final TeamAxisGenerator teamAxisGenerator;
 
-    @NonNull
     private final CoverageAxisGenerator coverageAxisGenerator;
+
+    public CoverageService(FunctionalityRepository functionalityRepository, CountryAxisGenerator countryAxisGenerator,
+            SeverityAxisGenerator severityAxisGenerator, TeamAxisGenerator teamAxisGenerator,
+            CoverageAxisGenerator coverageAxisGenerator) {
+        this.functionalityRepository = functionalityRepository;
+        this.countryAxisGenerator = countryAxisGenerator;
+        this.severityAxisGenerator = severityAxisGenerator;
+        this.teamAxisGenerator = teamAxisGenerator;
+        this.coverageAxisGenerator = coverageAxisGenerator;
+    }
 
     public CoverageDTO computeCoverage(long projectId) {
         List<AxisGenerator> generators = new ArrayList<>();
@@ -69,8 +72,7 @@ public class CoverageService {
                 .map(generator -> new AxisDTO(
                         generator.getCode(),
                         generator.getName(),
-                        getAllPoints(generator, projectId))
-                ).collect(Collectors.toList()));
+                        getAllPoints(generator, projectId))).collect(Collectors.toList()));
 
         coverage.setValues(computeValues(functionalities, coverage.getAxes(), generators));
 

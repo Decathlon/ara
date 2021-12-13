@@ -1,11 +1,12 @@
 package com.decathlon.ara.coreapi.domain;
 
-import lombok.Data;
-
-import javax.persistence.*;
 import java.io.Serializable;
 
-@Data
+import javax.persistence.Embeddable;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
+
 @Entity
 public class AraRepository {
 
@@ -15,12 +16,31 @@ public class AraRepository {
     private String name;
     private String description;
 
-    @Data
+    protected AraRepositoryId getId() {
+        return id;
+    }
+
+    protected String getName() {
+        return name;
+    }
+
+    protected String getDescription() {
+        return description;
+    }
+
     @Embeddable
     public static class AraRepositoryId implements Serializable {
         @ManyToOne
         private AraProject project;
         private String url;
+
+        protected AraProject getProject() {
+            return project;
+        }
+
+        protected String getUrl() {
+            return url;
+        }
     }
 
 }

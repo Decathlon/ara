@@ -18,15 +18,7 @@
 package com.decathlon.ara.ci.bean;
 
 import com.decathlon.ara.domain.enumeration.QualityStatus;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 public class QualityThreshold {
 
     /**
@@ -41,6 +33,15 @@ public class QualityThreshold {
      */
     private int warning;
 
+    public QualityThreshold() {
+
+    }
+
+    public QualityThreshold(int failure, int warning) {
+        this.failure = failure;
+        this.warning = warning;
+    }
+
     /**
      * @param percent given a percentage and this threshold configuration, compute the status
      * @return the status, depending on the percent and this threshold configuration
@@ -52,6 +53,14 @@ public class QualityThreshold {
             return QualityStatus.WARNING;
         }
         return QualityStatus.PASSED;
+    }
+
+    public int getFailure() {
+        return failure;
+    }
+
+    public int getWarning() {
+        return warning;
     }
 
 }
