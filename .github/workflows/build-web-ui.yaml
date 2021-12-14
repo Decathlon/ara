@@ -39,6 +39,9 @@ jobs:
     needs: code_app_change
     if: ${{ needs.code_app_change.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
+    outputs:
+      new_release_published: ${{ steps.semantic.outputs.new_release_published }}
+      new_release_version: ${{ steps.semantic.outputs.new_release_version }}
     steps:
       -
         name: Checkout
@@ -63,6 +66,7 @@ jobs:
           chmod +x .git/hooks/pre-push
 
       - name: Semantic Release
+        id: semantic
         uses: cycjimmy/semantic-release-action@v2
         with:
           working_directory: ./code/web-ui
@@ -147,3 +151,24 @@ jobs:
         uses: github/codeql-action/analyze@v1
         with:
           category: "ara_web-ui"
+  next-candidate:
+    needs: build-web-ui
+    if: ${{ needs.build-web-ui.outputs.new_release_published == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - shell: python
+        working-directory: .github/scripts
+        run: -m pip install -r requirements.txt
+      - name: Upgrade web-ui
+        shell: python
+        run: .github/scripts/upgrade-component.py charts/candidate -c ui -v ${{ needs.build-web-ui.outputs.new_release_version }}
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          commit-message: "chore(charts): upgrade web-ui ${{ needs.build-web-ui.outputs.new_release_version }} for candidate chart"
+          title: "chore(charts): upgrade web-ui ${{ needs.build-web-ui.outputs.new_release_version }} for candidate chart"
+          branch: next
+        
