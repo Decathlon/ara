@@ -58,7 +58,7 @@ jobs:
         run: |
           cat << EOF > .git/hooks/pre-push
           #!/bin/bash
-          git pull --rebase
+          git pull --rebase --autostash
           EOF
           chmod +x .git/hooks/pre-push
 

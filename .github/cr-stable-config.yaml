@@ -1,1 +1,2 @@
 release-notes-file: charts/stable/CHANGELOG.md
+release-name-template: "{{ .Name }}-v{{ .Version }}"
