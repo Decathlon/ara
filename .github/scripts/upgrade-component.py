@@ -10,7 +10,7 @@ def upgrade_component_version(args):
     values_path = os.path.join(args.path, 'values.yaml')
     with open(values_path) as stream:
         loaded = yaml.load(stream)
-    loaded[args.component]['image']['tags'] = args.version
+    loaded[args.component]['image']['tag'] = args.version
     with open(values_path, 'wb') as stream:
         yaml.dump(loaded, stream)
 
