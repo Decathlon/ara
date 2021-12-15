@@ -54,11 +54,13 @@ jobs:
             @semantic-release/release-notes-generator@10.0.3
             @semantic-release/exec@6.0.2
             @semantic-release/changelog@6.0.1
-            semantic-release-helm@2.1.0
             @semantic-release/git@10.0.1
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Remove pre-push hook for chart releaser
+        if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
+        run: rm -rf .git/hooks/pre-push
       - name: Configure Git
         if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
         run: |

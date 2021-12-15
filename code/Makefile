@@ -165,6 +165,9 @@ update-%-version: ## Update module version. VERSION required
 	@echo '-- Update $* version --'
 	@$(MAKE) -C $* update-version VERSION=$(VERSION)
 
+update-chart: ## Update chart version. VERSION required. TARGET_CHART to specify another (default candidate)
+	@sed -i'.old' 's/^version:.*$\/version: $(VERSION)/' ../charts/$(TARGET_CHART)/Chart.yaml
+
 install-python-dep:
 	@python3 -m pip install -r ../.github/scripts/requirements.txt
 

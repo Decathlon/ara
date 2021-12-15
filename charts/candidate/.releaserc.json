@@ -7,15 +7,11 @@
         "@semantic-release/commit-analyzer",
         "@semantic-release/release-notes-generator",
         ["@semantic-release/exec", {
-            "verifyConditionsCmd": "git pull"
+            "verifyConditionsCmd": "git pull",
+            "prepareCmd": "make -C ../../code update-chart TARGET_CHART=candidate VERSION=${nextRelease.version}"
         }],
         ["@semantic-release/changelog", {
             "changelogFile": "CHANGELOG.md"
-        }],
-        ["semantic-release-helm", {
-            "chartPath": ".",
-            "crPublish": false,
-            "onlyUpdateVersion": true
         }],
         ["@semantic-release/git", {
             "assets": ["Chart.yaml"],
