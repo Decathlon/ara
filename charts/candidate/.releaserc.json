@@ -1,5 +1,5 @@
 {
-    "tagFormat": "ara-candidate-${version}",
+    "tagFormat": "ara-candidate-v${version}",
     "branches": [
         {"name": "main"}
     ],
@@ -12,14 +12,14 @@
         ["@semantic-release/changelog", {
             "changelogFile": "CHANGELOG.md"
         }],
-        ["@semantic-release/git", {
-            "assets": ["Chart.yaml"],
-            "message": "chore(release-candidate): ara-candidate ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
-          }],
         ["semantic-release-helm", {
             "chartPath": ".",
             "crPublish": false,
             "onlyUpdateVersion": true
+        }],
+        ["@semantic-release/git", {
+            "assets": ["Chart.yaml"],
+            "message": "chore(release-candidate): ara-candidate ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
         }]
     ]
 }
