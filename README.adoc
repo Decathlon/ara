@@ -79,7 +79,7 @@ helm repo update
 * Install it with custom values
 
 ```shell
-helm install -f values.yaml --create-namespace --namespace ara my-ara ara/ara
+helm install -f values.yaml --create-namespace --namespace ara my-ara ara/ara-stable
 ```
 
 A sample `values.yaml` could be like this one:
