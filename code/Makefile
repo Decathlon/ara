@@ -20,7 +20,7 @@ OADS_IMAGE=${DOCKER_REGISTRY}/${OADS_SHORT_IMAGE}
 
 PUBLISH?=FALSE
 
-TARGET_CHART?=stable
+TARGET_CHART?=candidate
 
 #####################################
 ##           QUICK START           ##
@@ -143,7 +143,7 @@ get-versions: ## Give ARA version
 get-chart-version:
 	@echo $$(cat ../charts/$(TARGET_CHART)/Chart.yaml | grep version | sed -e 's/version: //')
 
-update-chart-version: ## Update chart version. VERSION required TARGET_CHART optional default stable
+update-chart-version: ## Update chart version. VERSION required TARGET_CHART optional default candidate
 	@echo '-- Update Helm Chart version --'
 	@sed -i'.old' 's/^version:.*$\/version: $(VERSION)/' ../charts/$(TARGET_CHART)/Chart.yaml
 	@$(MAKE) get-chart-version TARGET_CHART=$(TARGET_CHART)
@@ -164,6 +164,17 @@ get-%-version: ## Get module version
 update-%-version: ## Update module version. VERSION required
 	@echo '-- Update $* version --'
 	@$(MAKE) -C $* update-version VERSION=$(VERSION)
+
+install-python-dep:
+	@python3 -m pip install -r ../.github/scripts/requirements.txt
+
+update-ui-component: install-python-dep ## Update web-ui component version. TARGET_CHART to specify another (default candidate)
+	@echo '-- Update $(WEB_UI_VERSION) web-ui in $(TARGET_CHART) --'
+	@python3 ../.github/scripts/upgrade-component.py ../charts/$(TARGET_CHART) -c ui -v $(WEB_UI_VERSION)
+
+update-api-component: install-python-dep ## Update web-ui component version. TARGET_CHART to specify another (default candidate)
+	@echo '-- Update $(API_VERSION) api in $(TARGET_CHART) --'
+	@python3 ../.github/scripts/upgrade-component.py ../charts/$(TARGET_CHART) -c api -v $(API_VERSION)
 
 #####################################
 ##            HELM PART            ##
