@@ -1,0 +1,21 @@
+{
+    "tagFormat": "ara-stable-v${version}",
+    "branches": [
+        {"name": "main"}
+    ],
+    "plugins": [
+        "@semantic-release/commit-analyzer",
+        "@semantic-release/release-notes-generator",
+        ["@semantic-release/exec", {
+            "verifyConditionsCmd": "git pull",
+            "prepareCmd": "make -C ../../code update-chart TARGET_CHART=candidate VERSION=${nextRelease.version}"
+        }],
+        ["@semantic-release/changelog", {
+            "changelogFile": "CHANGELOG.md"
+        }],
+        ["@semantic-release/git", {
+            "assets": ["Chart.yaml"],
+            "message": "chore(release-stable): ara-stable ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        }]
+    ]
+}
