@@ -8,7 +8,7 @@
         "@semantic-release/release-notes-generator",
         ["@semantic-release/exec", {
             "verifyConditionsCmd": "git pull",
-            "prepareCmd": "make -C ../../code update-chart TARGET_CHART=candidate VERSION=${nextRelease.version}"
+            "prepareCmd": "make -C ../../code update-chart TARGET_CHART=stable VERSION=${nextRelease.version}"
         }],
         ["@semantic-release/changelog", {
             "changelogFile": "CHANGELOG.md"

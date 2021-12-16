@@ -155,7 +155,7 @@ copy-candidate-to-stable: ## Copy Candidate chart to Stable chart
 	@rm -rf ../charts/stable && cp -r ../charts/candidate ../charts/stable
 	@$(eval CHART_VERSION=$(shell make get-chart-version TARGET_CHART=candidate | sed -e 's/-rc.*//'))
 	@sed -i'.old' 's/^name:.*$\/name: ara-stable/' ../charts/stable/Chart.yaml
-	@sed -i'.old' 's/-candidate/-stable/g' ../charts/stable/.releaserc.json
+	@sed -i'.old' 's/candidate/stable/g' ../charts/stable/.releaserc.json
 	@$(MAKE) update-chart-version VERSION=$(CHART_VERSION) TARGET_CHART=stable
 
 get-%-version: ## Get module version
