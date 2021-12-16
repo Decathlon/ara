@@ -70,7 +70,7 @@ jobs:
         if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
         uses: Thomgrus/chart-releaser-action@feat/manage-chart-by-chart-diff
         with:
-          config: .github/cr-${{ matrix.chart }}-config.yaml
+          config: .github/cr-config.yaml
           charts_dir: charts/${{ matrix.chart }}
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

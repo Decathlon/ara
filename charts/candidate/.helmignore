@@ -3,7 +3,6 @@
 # negation (prefixed with !). Only one pattern per line.
 .DS_Store
 .releaserc.json
-CHANGELOG.md
 # Common VCS dirs
 .git/
 .gitignore

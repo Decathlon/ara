@@ -1,2 +1,2 @@
-release-notes-file: charts/candidate/CHANGELOG.md
+release-notes-file: CHANGELOG.md
 release-name-template: "{{ .Name }}-v{{ .Version }}"
