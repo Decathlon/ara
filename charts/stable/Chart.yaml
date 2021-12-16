@@ -1,6 +1,6 @@
 apiVersion: v2
 name: ara-stable
-version: 11.1.2
+version: 9.5.1
 home: https://github.com/Decathlon/ara
 description: >
   ARA helps you to fight against regressions by letting it preanalyze your
