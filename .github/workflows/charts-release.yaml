@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'charts/stable'
+      - 'charts/stable/**'
 
 jobs:
   release:

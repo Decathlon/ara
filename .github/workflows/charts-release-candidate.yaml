@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'charts/candidate'
+      - 'charts/candidate/**'
 
 jobs:
   release:
