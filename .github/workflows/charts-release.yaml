@@ -71,6 +71,7 @@ jobs:
         uses: Thomgrus/chart-releaser-action@feat/manage-chart-by-chart-diff
         with:
           config: .github/cr-config.yaml
+          version: v1.3.0
           charts_dir: charts/${{ matrix.chart }}
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
