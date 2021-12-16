@@ -1,18 +1,17 @@
-name: Release Charts
+name: Release Candidate Charts
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'charts/stable'
+      - 'charts/candidate'
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
@@ -31,7 +30,7 @@ jobs:
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v2
         with:
-          working_directory: ./charts/stable
+          working_directory: ./charts/candidate
           semantic_version: 18
           dry_run: false
           extra_plugins: |
@@ -54,6 +53,6 @@ jobs:
         with:
           config: .github/cr-config.yaml
           version: v1.3.0
-          charts_dir: charts/stable
+          charts_dir: charts/candidate
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
