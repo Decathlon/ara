@@ -276,7 +276,7 @@ jobs:
         with:
           category: "ara_web-ui"
   bump-candidate:
-    need: 
+    needs: 
       - build-api
       - build-web-ui
     runs-on: ubuntu-latest
@@ -307,7 +307,7 @@ jobs:
       - id: check
         run: echo ::set-output name=bump::true
   release-candidate:
-    need: bump-candidate
+    needs: bump-candidate
     runs-on: ubuntu-latest
     steps:
       - id: skip_check
