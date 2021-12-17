@@ -48,7 +48,7 @@ jobs:
         run: ct lint --check-version-increment=false --target-branch main 
   lint-docs:
     runs-on: ubuntu-latest
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    if: ${{ needs.chart_change.outputs.should_skip != 'true' }}
     needs: lint-chart
     steps:
       - name: Checkout
@@ -57,7 +57,7 @@ jobs:
         run: .github/helm-docs.sh
   kubeval-chart:
     runs-on: ubuntu-latest
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    if: ${{ needs.chart_change.outputs.should_skip != 'true' }}
     needs:
       - lint-chart
       - lint-docs
