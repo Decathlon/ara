@@ -12,39 +12,44 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          persist-credentials: false # To use github token provide for semantic release
       - name: Install Helm
         uses: azure/setup-helm@v1
         with:
           version: v3.4.0
-      - name: Add pre-push hook for semantic release git
+      - id: version
+        name: Get version
+        working-directory: code
         run: |
-          cat << EOF > .git/hooks/pre-push
-          #!/bin/bash
-          git pull --rebase --autostash
-          EOF
-          chmod +x .git/hooks/pre-push
-      - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@v2
-        with:
-          working_directory: ./charts/stable
-          semantic_version: 18
-          dry_run: false
-          extra_plugins: |
-            @semantic-release/commit-analyzer@9.0.2
-            @semantic-release/release-notes-generator@10.0.3
-            @semantic-release/exec@6.0.2
-            @semantic-release/changelog@6.0.1
-            @semantic-release/git@10.0.1
+          FROM_TAG=$(git describe --tags --abbrev=0  --match "ara-stable-v*")
+          CHART_VERSION=$(make -s get-chart-version TARGET_CHART=stable)
+          echo ::set-output name=stable::${CHART_VERSION}
+          echo ::set-output name=fromTag::${FROM_TAG}
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
         env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ara-stable-${{ steps.version.outputs.stable }}
+          release_name: ara-stable-${{ steps.version.outputs.stable }}
+          draft: true
+          prerelease: false
+      - name: Build Changelog
+        id: github_release
+        uses: mikepenz/release-changelog-builder-action@v1
+        with:
+          fromTag: "${{ steps.version.outputs.fromTag }}"
+          toTag: "ara-stable-${{ steps.version.outputs.stable }}"
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Remove pre-push hook for chart releaser
-        run: rm -rf .git/hooks/pre-push
+      - name: Create Changelog file
+        uses: finnp/create-file-action@v1.0.0
+        env:
+          FILE_NAME: "charts/stable/CHANGELOG.md"
+          FILE_DATA: "${{steps.github_release.outputs.changelog}}"
       - name: Configure Git
         run: |
           git config user.name "$GITHUB_ACTOR"
