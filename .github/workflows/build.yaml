@@ -19,64 +19,47 @@ on:
     #        │  │ │ │ │
     #        *  * * * *
     - cron: '30 1 * * 0'
+  repository_dispatch:
 jobs:
-  build-api:
+  prepare:
     runs-on: ubuntu-latest
     outputs:
-      new_release_published: ${{ steps.semantic.outputs.new_release_published }}
-      new_release_version: ${{ steps.semantic.outputs.new_release_version }}
+      skip_api: ${{ steps.skip_api.outputs.should_skip }}
+      skip_web-ui: ${{ steps.skip_web-ui.outputs.should_skip }}
+      api_new_release_published: ${{ steps.semantic_api.outputs.new_release_published }}
+      api_new_release_version: ${{ steps.semantic_api.outputs.new_release_version }}
+      web-ui_new_release_published: ${{ steps.semantic_web-ui.outputs.new_release_published }}
+      web-ui_new_release_version: ${{ steps.semantic_web-ui.outputs.new_release_version }}
     steps:
-      - id: skip_check
+      - id: skip_api
         uses: fkirc/skip-duplicate-actions@v3.4.0
         with:
           github_token: ${{ github.token }}
           paths: '["code/api/**", ".github/workflows/build.yaml"]'
           cancel_others: 'true'
-          do_not_skip: '["push", "workflow_dispatch", "schedule"]'
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: Checkout
+          do_not_skip: '["push", "repository_dispatch", "schedule"]'
+      - id: skip_web-ui
+        uses: fkirc/skip-duplicate-actions@v3.4.0
+        with:
+          github_token: ${{ github.token }}
+          paths: '["code/web-ui/**", ".github/workflows/build.yaml"]'
+          cancel_others: 'true'
+          do_not_skip: '["push", "repository_dispatch", "schedule"]'
+      - name: Checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
           persist-credentials: false # To use github token provide for semantic release
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: Set up JDK
-        uses: actions/setup-java@v2.3.1
-        with:
-          distribution: 'adopt'
-          java-version: '17'
-          cache: 'maven'
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: Initialize CodeQL
-        uses: github/codeql-action/init@v1
-        with:
-          languages: java
-          config-file: ./.github/codeql/codeql-api-config.yml
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: Cache SonarCloud packages
-        uses: actions/cache@v2
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
+      - if: ${{ steps.skip_api.outputs.should_skip != 'true' }}
         name: Ensure package json for semantic-release-monorepo
-        working-directory: ./code/api
+        working-directory: code/api
         run: test -e package.json || echo '{"name":"ara-api"}' > package.json
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: Add pre-push hook for semantic release git
-        run: |
-          cat << EOF > .git/hooks/pre-push
-          #!/bin/bash
-          git pull --rebase --autostash
-          EOF
-          chmod +x .git/hooks/pre-push
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: Semantic Release
-        id: semantic
+      - if: ${{ steps.skip_api.outputs.should_skip != 'true' }}
+        name: Semantic Release api
+        id: semantic_api
         uses: cycjimmy/semantic-release-action@v2
         with:
-          working_directory: ./code/api
+          working_directory: code/api
           semantic_version: 18
           dry_run: false
           extra_plugins: |
@@ -89,35 +72,72 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: Add host binding
+      - if: ${{ steps.skip_web-ui.outputs.should_skip != 'true' }}
+        name: Semantic Release web-ui
+        id: semantic_web-ui
+        uses: cycjimmy/semantic-release-action@v2
+        with:
+          working_directory: code/web-ui
+          semantic_version: 18
+          dry_run: false
+          extra_plugins: |
+            @semantic-release/commit-analyzer@9.0.2
+            @semantic-release/release-notes-generator@10.0.3
+            @semantic-release/exec@6.0.2
+            @semantic-release/npm@8.0.3
+            @semantic-release/git@10.0.1
+          extends: |
+            semantic-release-monorepo
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  build-api:
+    needs: preprare
+    if: ${{ needs.prepare.outputs.skip_api != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - 
+        name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Set up JDK
+        uses: actions/setup-java@v2.3.1
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+          cache: 'maven'
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+        with:
+          languages: java
+          config-file: .github/codeql/codeql-api-config.yml
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Add host binding
         run: sudo echo "127.0.0.1 oauth2.dev.localhost" >> sudo tee -a /etc/hosts
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: Set up QEMU
+      - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: Set up Docker Buildx
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: start oauth2-dev-server
+      - name: start oauth2-dev-server
         run: docker-compose -f code/docker-compose.dev.yaml up -d oauth2-dev-server
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: check oauth2-dev-server is running
+      - name: check oauth2-dev-server is running
         run: docker run --rm --network host aligor/wait-for-url --url http://oauth2.dev.localhost:9001/actuator/health
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }} 
-        name: Build and analyze
+      - name: Build and analyze
+        run: mvn -f code/api -B clean install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -f code/api -B clean install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }} 
-        name: stop oauth2-dev-server
+      - name: stop oauth2-dev-server
         run: docker-compose -f code/docker-compose.dev.yaml down
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }} 
-        name: Install xmllint
+      - name: Install xmllint
         run: sudo apt-get install libxml2-utils
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: Prepare
+      - name: Prepare
         id: prep
         run: |
           PUSH=FALSE
@@ -140,25 +160,22 @@ jobs:
           fi
           echo ::set-output name=push::${PUSH}
           echo ::set-output name=suffix::${SUFFIX}
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' && steps.prep.outputs.push == 'true' }}
+      - if: ${{ steps.prep.outputs.push == 'true' }}
         name: Login to DockerHub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: Build and push
+      - name: Build and push
         run: |
           pushd code
           make build-api SUFFIX=${{ steps.prep.outputs.suffix }} PUBLISH=${{ steps.prep.outputs.push }}
           popd
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: Perform CodeQL Analysis
+      - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v1
         with:
           category: "ara_api"
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: Integration tests
+      - name: Integration tests
         run: |
           pushd code/tests
           make start-local
@@ -167,59 +184,27 @@ jobs:
           popd
           cat code/tests/target/results.txt | grep SUCCESS
   build-web-ui:
+    needs: preprare
+    if: ${{ needs.prepare.outputs.skip_web-ui != 'true' }}
     runs-on: ubuntu-latest
-    outputs:
-      new_release_published: ${{ steps.semantic.outputs.new_release_published }}
-      new_release_version: ${{ steps.semantic.outputs.new_release_version }}
     steps:
-      - id: skip_check
-        uses: fkirc/skip-duplicate-actions@v3.4.0
-        with:
-          github_token: ${{ github.token }}
-          paths: '["code/web-ui/**", ".github/workflows/build.yaml"]'
-          cancel_others: 'true'
-          do_not_skip: '["push", "workflow_dispatch", "schedule"]'
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-          persist-credentials: false # To use github token provide for semantic release
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: Initialize CodeQL
+      - name: Initialize CodeQL
         uses: github/codeql-action/init@v1
         with:
           languages: javascript
-          config-file: ./.github/codeql/codeql-web-ui-config.yml
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: Semantic Release
-        id: semantic
-        uses: cycjimmy/semantic-release-action@v2
-        with:
-          working_directory: ./code/web-ui
-          semantic_version: 18
-          dry_run: false
-          extra_plugins: |
-            @semantic-release/commit-analyzer@9.0.2
-            @semantic-release/release-notes-generator@10.0.3
-            @semantic-release/exec@6.0.2
-            @semantic-release/npm@8.0.3
-            @semantic-release/git@10.0.1
-          extends: |
-            semantic-release-monorepo
-        env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: Get project version
+          config-file: .github/codeql/codeql-web-ui-config.yml
+      - name: Get project version
         id: getVersion
         run: |
           pushd code
           PROJECT_VERSION=$(make -s get-web-ui-version)
           popd
           echo ::set-output name=projectVersion::${PROJECT_VERSION}
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: SonarCloud Scan
+      - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         with:
           projectBaseDir: code/web-ui
@@ -228,8 +213,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: Prepare
+      - name: Prepare
         id: prep
         run: |
           PUSH=FALSE
@@ -252,37 +236,31 @@ jobs:
           fi
           echo ::set-output name=push::${PUSH}
           echo ::set-output name=suffix::${SUFFIX}
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: Set up QEMU
+      - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: Set up Docker Buildx
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' && steps.prep.outputs.push == 'true' }}
+      - if: ${{ steps.prep.outputs.push == 'true' }}
         name: Login to DockerHub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: Build and push
+      - name: Build and push
         run: |
           pushd code
           make build-web-ui SUFFIX=${{ steps.prep.outputs.suffix }} PUBLISH=${{ steps.prep.outputs.push }}
           popd
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        name: Perform CodeQL Analysis
+      - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v1
         with:
           category: "ara_web-ui"
   bump-candidate:
-    needs: 
-      - build-api
-      - build-web-ui
+    needs: prepare
+    if: ${{ needs.prepare.outputs.api_new_release_published == 'true' || needs.prepare.outputs.web-ui_new_release_published == 'true' }}
     runs-on: ubuntu-latest
     outputs:
       bump: ${{ steps.check.outputs.bump }}
-    if: ${{ needs.build-api.outputs.new_release_published == 'true' || needs.build-web-ui.outputs.new_release_published == 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -315,7 +293,7 @@ jobs:
         with:
           github_token: ${{ github.token }}
           paths: '["charts/candidate/**"]'
-          do_not_skip: '["workflow_dispatch"]'
+          do_not_skip: '["repository_dispatch"]'
       - if: ${{ needs.bump-candidate.outputs.bump == 'true' || steps.skip_check.outputs.should_skip != 'true' }}
         name: Checkout
         uses: actions/checkout@v2
