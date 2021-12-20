@@ -6,9 +6,34 @@ on:
       - main
     paths:
       - 'charts/stable/**'
-
+  workflow_dispatch:
+    inputs:
+      copy:
+        description: 'Copy candidate before running the release pipeline'     
+        required: true
+        default: 'true'
 jobs:
+  copy-candidate:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.copy == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+      - name: Copy candidate to stable version
+        working-directory: code
+        run: make copy-candidate-to-stable
+      - uses: EndBug/add-and-commit@v7
+        with:
+          add: 'charts/stable'
+          branch_mode: throw
+          message: 'chore(charts): candidate to stable [skip ci]'
+          pathspec_error_handling: exitImmediately
+          pull: '--rebase --autostash'
+          default_author: github_actions
   release:
+    needs: copy-candidate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
