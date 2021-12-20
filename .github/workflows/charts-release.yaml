@@ -34,6 +34,7 @@ jobs:
           default_author: github_actions
   release:
     needs: copy-candidate
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
