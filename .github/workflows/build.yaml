@@ -284,6 +284,7 @@ jobs:
           message: 'chore(release-candidate): bump components versions'
           pathspec_error_handling: exitImmediately
           pull: '--rebase --autostash'
+          default_author: github_actions
       - id: check
         run: echo ::set-output name=bump::true
   release-candidate:
