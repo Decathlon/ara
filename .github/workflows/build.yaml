@@ -265,7 +265,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          persist-credentials: false
           token: ${{ secrets.PAT_TOKEN }}
       - uses: actions/setup-python@v2
         with:
