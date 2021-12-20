@@ -120,7 +120,7 @@
           </DropdownMenu>
         </Dropdown>
         <Tooltip content="What's new in ARA?" placement="bottom-end" :transfer="false">
-          <a :href="$sanitizeUrl('https://github.com/Decathlon/ara/releases/tag/ara-' + appVersion)"
+          <a :href="$sanitizeUrl('https://github.com/Decathlon/ara/releases/tag/ara-' + channel + '-v' + appVersion)"
              @click="setLatestChangelogVersion"
              rel="noopener" target="_blank"><Badge dot :count="changelogCount"><Icon type="md-notifications" size="24"/></Badge></a>
         </Tooltip>
@@ -193,6 +193,7 @@
           ]
         },
         appVersion: undefined,
+        channel: undefined,
         apiVersion: undefined,
         webUIVersion: process.env.VERSION,
         latestChangelogVersion: this.getCookie(LATEST_CHANGELOG_VERSION_COOKIE_NAME),
@@ -353,6 +354,12 @@
         }
       },
 
+      extractChannel (data) {
+        if (data?.hasOwnProperty('app')) {
+          return data['app'].channel
+        }
+      },
+
       logout () {
         AuthenticationService.logout()
       }
@@ -365,6 +372,7 @@
         .then((response) => {
           const data = response?.data
           this.appVersion = this.extractVersion(data, 'app')
+          this.channel = this.extractChannel(data)
           this.apiVersion = this.extractVersion(data, 'api')
           // If it is the first time the user opens ARA, make sure to remember the current version for future notification badge
           if (!this.latestChangelogVersion) {
