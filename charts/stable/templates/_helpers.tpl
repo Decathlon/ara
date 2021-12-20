@@ -20,6 +20,14 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{/*
+Create chart channel.
+*/}}
+{{- define "ara.channel" -}}
+{{- $parts := split "-" .Chart.Name -}}
+{{ $parts._1 }}
+{{- end -}}
+
+{{/*
 Create configmap name.
 */}}
 {{- define "ara.configmap.name" -}}
