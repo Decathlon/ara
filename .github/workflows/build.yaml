@@ -270,6 +270,8 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: 3.7
+      - name: Install xmllint
+        run: sudo apt-get install libxml2-utils
       - name: Bump version
         working-directory: code
         run: |
