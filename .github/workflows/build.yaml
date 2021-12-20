@@ -258,7 +258,7 @@ jobs:
           category: "ara_web-ui"
   bump-candidate:
     needs: prepare
-    if: ${{ needs.prepare.outputs.api_new_release_published == 'true' || needs.prepare.outputs.web-ui_new_release_published == 'true' }}
+    if: ${{ needs.prepare.outputs.api_new_release_published == 'true' || needs.prepare.outputs.web-ui_new_release_published == 'true' || github.event_name == 'repository_dispatch' }}
     runs-on: ubuntu-latest
     outputs:
       bump: ${{ steps.check.outputs.bump }}
