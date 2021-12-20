@@ -280,7 +280,7 @@ jobs:
         with:
           add: 'charts/candidate'
           branch_mode: throw
-          message: 'chore(release-candidate): bump components versions'
+          message: 'chore(release-candidate): bump components versions [skip ci]'
           pathspec_error_handling: exitImmediately
           pull: '--rebase --autostash'
           default_author: github_actions
