@@ -41,6 +41,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          ref: ${{ github.ref }}
       - name: Install Helm
         uses: azure/setup-helm@v1
         with:
@@ -61,21 +62,23 @@ jobs:
         with:
           tag_name: ara-stable-v${{ steps.version.outputs.stable }}
           release_name: ara-stable-v${{ steps.version.outputs.stable }}
-          draft: true
+          draft: false
           prerelease: false
-      - name: Build Changelog
-        id: github_release
-        uses: mikepenz/release-changelog-builder-action@v2.7.1
+      - uses: octokit/request-action@v2
+        id: generate_changelog
         with:
-          fromTag: "${{ steps.version.outputs.fromTag }}"
-          toTag: "ara-stable-v${{ steps.version.outputs.stable }}"
+          route: POST /repos/{owner}/{repo}/releases/generate-notes
+          owner: Decathlon
+          repo: ara
+          tag_name: ara-stable-v${{ steps.version.outputs.stable }}
+          previous_tag_name: ${{ steps.version.outputs.fromTag }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Changelog file
         working-directory: charts/stable
         run: |
           cat <<EOF >CHANGELOG.md
-          ${{steps.github_release.outputs.changelog}}
+          ${{ fromJson(steps.create_check_run.outputs.data).body }}
           EOF
       - name: Configure Git
         run: |
