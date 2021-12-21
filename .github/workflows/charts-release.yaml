@@ -59,16 +59,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          tag_name: ara-stable-${{ steps.version.outputs.stable }}
-          release_name: ara-stable-${{ steps.version.outputs.stable }}
+          tag_name: ara-stable-v${{ steps.version.outputs.stable }}
+          release_name: ara-stable-v${{ steps.version.outputs.stable }}
           draft: true
           prerelease: false
       - name: Build Changelog
         id: github_release
-        uses: mikepenz/release-changelog-builder-action@v1
+        uses: mikepenz/release-changelog-builder-action@v2.7.1
         with:
           fromTag: "${{ steps.version.outputs.fromTag }}"
-          toTag: "ara-stable-${{ steps.version.outputs.stable }}"
+          toTag: "ara-stable-v${{ steps.version.outputs.stable }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Changelog file
