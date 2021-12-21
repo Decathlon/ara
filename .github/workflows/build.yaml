@@ -37,14 +37,14 @@ jobs:
           github_token: ${{ github.token }}
           paths: '["code/api/**", ".github/workflows/build.yaml"]'
           cancel_others: 'true'
-          do_not_skip: '["push", "workflow_dispatch", "schedule"]'
+          do_not_skip: '["workflow_dispatch", "schedule"]'
       - id: skip_web-ui
         uses: fkirc/skip-duplicate-actions@v3.4.0
         with:
           github_token: ${{ github.token }}
           paths: '["code/web-ui/**", ".github/workflows/build.yaml"]'
           cancel_others: 'true'
-          do_not_skip: '["push", "workflow_dispatch", "schedule"]'
+          do_not_skip: '["workflow_dispatch", "schedule"]'
       - name: Checkout
         uses: actions/checkout@v2
         with:
@@ -93,7 +93,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   build-api:
     needs: prepare
-    if: ${{ needs.prepare.outputs.skip_api != 'true' }}
+    if: ${{ needs.prepare.outputs.skip_api != 'true' || needs.prepare.outputs.api_new_release_published == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - 
@@ -185,7 +185,7 @@ jobs:
           cat code/tests/target/results.txt | grep SUCCESS
   build-web-ui:
     needs: prepare
-    if: ${{ needs.prepare.outputs.skip_web-ui != 'true' }}
+    if: ${{ needs.prepare.outputs.skip_web-ui != 'true' || needs.prepare.outputs.web-ui_new_release_published == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

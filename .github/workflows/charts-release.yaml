@@ -72,10 +72,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Changelog file
-        uses: finnp/create-file-action@v1.0.0
-        env:
-          FILE_NAME: "charts/stable/CHANGELOG.md"
-          FILE_DATA: "${{steps.github_release.outputs.changelog}}"
+        working-directory: charts/stable
+        run: |
+          cat <<EOF >CHANGELOG.md
+          ${{steps.github_release.outputs.changelog}}
+          EOF
       - name: Configure Git
         run: |
           git config user.name "$GITHUB_ACTOR"
