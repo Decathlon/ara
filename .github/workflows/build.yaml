@@ -291,6 +291,7 @@ jobs:
         run: echo ::set-output name=bump::true
   release-candidate:
     needs: bump-candidate
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
       - id: skip_check
