@@ -64,7 +64,7 @@ jobs:
           release_name: ara-stable-v${{ steps.version.outputs.stable }}
           draft: false
           prerelease: false
-      - uses: octokit/request-action@v2
+      - uses: octokit/request-action@v2.x
         id: generate_changelog
         with:
           route: POST /repos/{owner}/{repo}/releases/generate-notes
