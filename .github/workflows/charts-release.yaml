@@ -77,9 +77,7 @@ jobs:
       - name: Create Changelog file
         working-directory: charts/stable
         run: |
-          cat <<EOF >CHANGELOG.md
-          ${{ fromJson(steps.create_check_run.outputs.data).body }}
-          EOF
+          "${{ fromJson(steps.create_check_run.outputs.data).body }}" > CHANGELOG.md
       - name: Configure Git
         run: |
           git config user.name "$GITHUB_ACTOR"
