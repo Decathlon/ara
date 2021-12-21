@@ -54,16 +54,6 @@ jobs:
           CHART_VERSION=$(make -s get-chart-version TARGET_CHART=stable)
           echo ::set-output name=stable::${CHART_VERSION}
           echo ::set-output name=fromTag::${FROM_TAG}
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-        with:
-          tag_name: ara-stable-v${{ steps.version.outputs.stable }}
-          release_name: ara-stable-v${{ steps.version.outputs.stable }}
-          draft: false
-          prerelease: false
       - uses: octokit/request-action@v2.x
         id: generate_changelog
         with:
