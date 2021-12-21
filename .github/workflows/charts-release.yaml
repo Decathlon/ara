@@ -65,7 +65,7 @@ jobs:
           prerelease: false
       - name: Build Changelog
         id: github_release
-        uses: mikepenz/release-changelog-builder-action@v1
+        uses: mikepenz/release-changelog-builder-action@v2.7.1
         with:
           fromTag: "${{ steps.version.outputs.fromTag }}"
           toTag: "ara-stable-${{ steps.version.outputs.stable }}"
