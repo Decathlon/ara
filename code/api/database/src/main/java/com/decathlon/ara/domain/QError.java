@@ -17,13 +17,22 @@
 
 package com.decathlon.ara.domain;
 
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.PathMetadata;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.*;
+
+import org.apache.commons.lang3.StringUtils;
 
 import static com.querydsl.core.types.PathMetadataFactory.forVariable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class QError extends EntityPathBase<Error> {
+
+    private static final String LIKE_MARK = "%";
 
     private static final long serialVersionUID = -1215962177L;
 
@@ -66,6 +75,103 @@ public class QError extends EntityPathBase<Error> {
     public QError(Class<? extends Error> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.executedScenario = inits.isInitialized("executedScenario") ? new QExecutedScenario(forProperty("executedScenario"), inits.get("executedScenario")) : null;
+    }
+
+    public Predicate toFilterPredicate(long projectId, ProblemPattern pattern) {
+        List<Predicate> predicates = new ArrayList<>();
+
+        predicates.add(error.executedScenario.run.execution.cycleDefinition.projectId.eq(Long.valueOf(projectId)));
+
+        appendPredicateFeatureFile(pattern, predicates);
+        appendPredicateFeatureName(pattern, predicates);
+        appendPredicateScenarioName(pattern, predicates);
+        appendPredicateStep(pattern, predicates);
+        appendPredicateStepDefinition(pattern, predicates);
+        appendPredicateException(pattern, predicates);
+        appendPredicateRelease(pattern, predicates);
+        appendPredicateCountry(pattern, predicates);
+        appendPredicatePlatform(pattern, predicates);
+        appendPredicateType(pattern, predicates);
+
+        return ExpressionUtils.allOf(predicates);
+    }
+
+    private void appendPredicateFeatureFile(ProblemPattern pattern, List<Predicate> predicates) {
+        if (StringUtils.isNotEmpty(pattern.getFeatureFile())) {
+            predicates.add(executedScenario.featureFile.eq(pattern.getFeatureFile()));
+        }
+    }
+
+    private void appendPredicateFeatureName(ProblemPattern pattern, List<Predicate> predicates) {
+        if (StringUtils.isNotEmpty(pattern.getFeatureName())) {
+            predicates.add(executedScenario.featureName.eq(pattern.getFeatureName()));
+        }
+    }
+
+    public void appendPredicateScenarioName(ProblemPattern pattern, List<Predicate> predicates) {
+        if (StringUtils.isNotEmpty(pattern.getScenarioName())) {
+            if (pattern.isScenarioNameStartsWith()) {
+                predicates.add(executedScenario.name.like(pattern.getScenarioName() + LIKE_MARK));
+            } else {
+                predicates.add(executedScenario.name.eq(pattern.getScenarioName()));
+            }
+        }
+    }
+
+    public void appendPredicateStep(ProblemPattern pattern, List<Predicate> predicates) {
+        if (StringUtils.isNotEmpty(pattern.getStep())) {
+            if (pattern.isStepStartsWith()) {
+                predicates.add(step.like(pattern.getStep() + LIKE_MARK));
+            } else {
+                predicates.add(step.eq(pattern.getStep()));
+            }
+        }
+    }
+
+    public void appendPredicateStepDefinition(ProblemPattern pattern, List<Predicate> predicates) {
+        if (StringUtils.isNotEmpty(pattern.getStepDefinition())) {
+            if (pattern.isStepDefinitionStartsWith()) {
+                predicates.add(stepDefinition.like(pattern.getStepDefinition() + LIKE_MARK));
+            } else {
+                predicates.add(stepDefinition.eq(pattern.getStepDefinition()));
+            }
+        }
+    }
+
+    private void appendPredicateException(ProblemPattern pattern, List<Predicate> predicates) {
+        if (StringUtils.isNotEmpty(pattern.getException())) {
+            predicates.add(exception.like(pattern.getException() + LIKE_MARK));
+        }
+    }
+
+    private void appendPredicateRelease(ProblemPattern pattern, List<Predicate> predicates) {
+        if (StringUtils.isNotEmpty(pattern.getRelease())) {
+            predicates.add(executedScenario.run.execution.release.eq(pattern.getRelease()));
+        }
+    }
+
+    private void appendPredicateCountry(ProblemPattern pattern, List<Predicate> predicates) {
+        if (pattern.getCountry() != null && StringUtils.isNotEmpty(pattern.getCountry().getCode())) {
+            predicates.add(executedScenario.run.country.code.eq(pattern.getCountry().getCode()));
+        }
+    }
+
+    private void appendPredicatePlatform(ProblemPattern pattern, List<Predicate> predicates) {
+        if (StringUtils.isNotEmpty(pattern.getPlatform())) {
+            predicates.add(executedScenario.run.platform.eq(pattern.getPlatform()));
+        }
+    }
+
+    private void appendPredicateType(ProblemPattern pattern, List<Predicate> predicates) {
+        if (pattern.getType() != null && StringUtils.isNotEmpty(pattern.getType().getCode())) {
+            predicates.add(executedScenario.run.type.code.eq(pattern.getType().getCode()));
+        }
+        if (pattern.getTypeIsBrowser() != null) {
+            predicates.add(executedScenario.run.type.isBrowser.eq(pattern.getTypeIsBrowser()));
+        }
+        if (pattern.getTypeIsMobile() != null) {
+            predicates.add(executedScenario.run.type.isMobile.eq(pattern.getTypeIsMobile()));
+        }
     }
 
 }

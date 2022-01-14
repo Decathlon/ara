@@ -39,7 +39,6 @@ services:
       - 7000:7000
   oauth2-dev-server:
     image: "decathlon/ara-oads:${OADS_VERSION:-latest}"
-    pull_policy: always
     restart: unless-stopped
     networks:
       web_net:

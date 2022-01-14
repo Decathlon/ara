@@ -37,6 +37,9 @@ import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.domain.Error;
 import com.decathlon.ara.domain.Problem;
+import com.decathlon.ara.domain.ProblemPattern;
+import com.decathlon.ara.domain.QError;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +48,9 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -107,9 +112,26 @@ public class ErrorService {
         return errorWithExecutedScenarioAndRunAndExecutionMapper.toDto(error);
     }
 
+    private Page<Error> findMatchingErrors(long projectId, ProblemPattern pattern, Pageable pageable) {
+        var eSort = Sort.by(Sort.Direction.ASC,
+            QError.error.executedScenarioId.getMetadata().getName(),
+            QError.error.stepLine.getMetadata().getName());
+        Pageable effectivePageable;
+        if (pageable == null) {
+            effectivePageable = PageRequest.of(0, 10, eSort);
+        } else if (pageable.getSort().isUnsorted()) {
+            effectivePageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), eSort);
+        } else {
+            effectivePageable = pageable;
+        }
+
+        // toPredicate will append the projectId
+        return errorRepository.findAll(QError.error.toFilterPredicate(projectId, pattern), effectivePageable);
+    }
+
     @Transactional(readOnly = true)
     public Page<ErrorWithExecutedScenarioAndRunAndExecutionAndProblemsDTO> findMatchingErrors(long projectId, ProblemPatternDTO pattern, Pageable pageable) {
-        Page<Error> errors = errorRepository.findMatchingErrors(projectId, problemPatternMapper.toEntity(pattern), pageable);
+        Page<Error> errors = findMatchingErrors(projectId, problemPatternMapper.toEntity(pattern), pageable);
 
         Map<Error, List<Problem>> errorsProblems = errorRepository.getErrorsProblems(errors.getContent());
 

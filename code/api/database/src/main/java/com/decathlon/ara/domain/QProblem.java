@@ -19,19 +19,28 @@ package com.decathlon.ara.domain;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.querydsl.core.types.dsl.*;
 
 import com.querydsl.core.types.PathMetadata;
-import javax.annotation.Generated;
+import com.querydsl.core.types.Predicate;
+
+import com.decathlon.ara.domain.enumeration.ProblemStatus;
+import com.decathlon.ara.domain.enumeration.ProblemStatusFilter;
+import com.decathlon.ara.domain.filter.ProblemFilter;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.PathInits;
 
+import org.apache.commons.lang3.StringUtils;
 public class QProblem extends EntityPathBase<Problem> {
-
+    
     private static final long serialVersionUID = 860897942L;
-
+    
     private static final PathInits INITS = PathInits.DIRECT2;
-
+    
     public static final QProblem problem = new QProblem("problem");
 
     public final QTeam blamedTeam;
@@ -84,6 +93,74 @@ public class QProblem extends EntityPathBase<Problem> {
         super(type, metadata, inits);
         this.blamedTeam = inits.isInitialized("blamedTeam") ? new QTeam(forProperty("blamedTeam")) : null;
         this.rootCause = inits.isInitialized("rootCause") ? new QRootCause(forProperty("rootCause")) : null;
+    }
+
+    public Predicate toFilterPredicate(ProblemFilter filter) {
+        List<Predicate> predicates = new ArrayList<>();
+
+        predicates.add(projectId.eq(Long.valueOf(filter.getProjectId())));
+
+        if (StringUtils.isNotEmpty(filter.getName())) {
+            predicates.add(name.likeIgnoreCase("%" + filter.getName() + "%"));
+        }
+
+        if (filter.getStatus() != null) {
+            predicates.add(computeStatusPredicate(filter.getStatus()));
+        }
+
+        if (filter.getBlamedTeamId() != null) {
+            predicates.add(blamedTeam.id.eq(filter.getBlamedTeamId()));
+        }
+
+        if (StringUtils.isNotEmpty(filter.getDefectId())) {
+            if ("none".equalsIgnoreCase(filter.getDefectId())) {
+                predicates.add(defectId.isNull().or(defectId.isEmpty()));
+            } else {
+                predicates.add(defectId.likeIgnoreCase("%" + filter.getDefectId() + "%"));
+            }
+        }
+
+        if (filter.getDefectExistence() != null) {
+            predicates.add(defectExistence.eq(filter.getDefectExistence()));
+        }
+
+        if (filter.getRootCauseId() != null) {
+            predicates.add(rootCause.id.eq(filter.getRootCauseId()));
+        }
+
+        return ExpressionUtils.allOf(predicates);
+    }
+
+    /**
+     * Compute a predicate to filter problems by their status, depending the filtering choice picked from the list of
+     * filtering options. Filter is performed through the {@link Problem#getEffectiveStatus()} and some filter options
+     * are a combination of several statuses.
+     *
+     * @param statusFilter the choosen filter for problem statuses
+     * @return a predicate to use in a QueryDsl request
+     */
+    private Predicate computeStatusPredicate(ProblemStatusFilter statusFilter) {
+        final BooleanExpression open = status.eq(ProblemStatus.OPEN);
+        final BooleanExpression closed = status.eq(ProblemStatus.CLOSED);
+
+        // This business logic is also present in another form in Problem.getEffectiveStatus()
+        final BooleanExpression reappeared = problem.status.eq(ProblemStatus.CLOSED)
+                .and(closingDateTime.isNotNull())
+                .and(lastSeenDateTime.isNotNull())
+                .and(closingDateTime.before(lastSeenDateTime));
+
+        switch (statusFilter) {
+            case OPEN:
+                return open;
+            case CLOSED:
+                return closed.and(reappeared.not());
+            case REAPPEARED:
+                return reappeared;
+            case OPEN_OR_REAPPEARED:
+                return open.or(reappeared);
+            default :
+                return closed; // CLOSED status includes the REAPPEARED effectiveStatus
+        }
     }
 
 }

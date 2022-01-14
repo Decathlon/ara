@@ -53,7 +53,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -470,7 +472,7 @@ public class ProblemService {
     public Page<ProblemWithAggregateDTO> findMatchingProblems(long projectId, ProblemFilterDTO filter, Pageable pageable) {
         // Find problems
         Page<ProblemWithAggregateDTO> page = problemRepository
-                .findMatchingProblems(problemFilterMapper.toEntity(filter).withProjectId(projectId), pageable)
+                .findAll(QProblem.problem.toFilterPredicate(problemFilterMapper.toEntity(filter).withProjectId(projectId)), getEffectivePageable(pageable))
                 .map(this::toProblemWithAggregate);
 
         // Compute and assign aggregates of each problem
@@ -485,6 +487,19 @@ public class ProblemService {
         assignProblemStabilities(projectId, page.getContent());
 
         return page;
+    }
+
+    private Pageable getEffectivePageable(Pageable pageable) {
+        var pSort = Sort.by(Sort.Direction.DESC, QProblem.problem.creationDateTime.getMetadata().getName());
+        Pageable effectivePageable;
+        if (pageable == null) {
+            effectivePageable = PageRequest.of(0, 10, pSort);
+        } else if (pageable.getSort().isUnsorted()) {
+            effectivePageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pSort);
+        } else {
+            effectivePageable = pageable;
+        }
+        return effectivePageable;
     }
 
     private ProblemWithAggregateDTO toProblemWithAggregate(Problem entity) {
