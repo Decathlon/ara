@@ -18,7 +18,7 @@
 package com.decathlon.ara.configuration;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.querydsl.sql.MySQLTemplates;
+import com.querydsl.sql.PostgreSQLTemplates;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.SQLTemplates;
 import com.querydsl.sql.spring.SpringConnectionProvider;
@@ -45,7 +45,7 @@ public class QueryDslConfiguration {
     @Bean
     @SuppressWarnings("static-method")
     public com.querydsl.sql.Configuration querydslConfiguration() {
-        SQLTemplates templates = MySQLTemplates.builder().build();
+        SQLTemplates templates = PostgreSQLTemplates.builder().build();
         com.querydsl.sql.Configuration configuration = new com.querydsl.sql.Configuration(templates);
         configuration.setExceptionTranslator(new SpringExceptionTranslator());
         return configuration;
@@ -53,7 +53,7 @@ public class QueryDslConfiguration {
 
     @Bean
     public SQLQueryFactory sqlQueryFactory(DataSource dataSource) {
-        Provider<Connection> provider = new SpringConnectionProvider(dataSource);
+        var provider = new SpringConnectionProvider(dataSource);
         return new SQLQueryFactory(querydslConfiguration(), provider);
     }
 

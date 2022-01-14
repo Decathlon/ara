@@ -110,6 +110,9 @@ server:
         max-age: 43200
 
 management:
+  info:
+    env:
+      enabled: true
   server:
     port: 8001
   endpoints:

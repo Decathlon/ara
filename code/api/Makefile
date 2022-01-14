@@ -14,6 +14,11 @@ VERSION=$(shell make -s get-version)
 mvn-install: ## Install project
 	@./mvnw clean install -Pdev
 
+mvn-tests: ## Run tests
+	@docker compose -f ../docker-compose.dev.yaml up -d oauth2-dev-server
+	@docker run --rm --network host aligor/wait-for-url --url http://oauth2.dev.localhost:9001/actuator/health
+	@./mvnw clean verify
+
 mvn-run: ## DEV - run api
 	@./mvnw -Pdev spring-boot:run -pl api
 

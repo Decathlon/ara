@@ -47,18 +47,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ErrorRepositoryImpl implements ErrorRepositoryCustom {
 
-    private static final Sort ERROR_SORTING = Sort.by(Sort.Direction.ASC,
-            QError.error.executedScenarioId.getMetadata().getName(),
-            QError.error.stepLine.getMetadata().getName());
-
-    private static final String LIKE_MARK = "%";
-
     @Autowired
     private EntityManager entityManager;
-
-    // Cannot use constructor injection: would cause circular dependency injection
-    @Autowired
-    private ErrorRepository errorRepository;
 
     @Autowired
     private JPAQueryFactory jpaQueryFactory;
@@ -75,118 +65,6 @@ public class ErrorRepositoryImpl implements ErrorRepositoryCustom {
     @Autowired
     private TransactionAppenderUtil transactionAppenderUtil;
 
-    private Predicate toPredicate(long projectId, QError error, ProblemPattern pattern) {
-        List<Predicate> predicates = new ArrayList<>();
-
-        predicates.add(error.executedScenario.run.execution.cycleDefinition.projectId.eq(Long.valueOf(projectId)));
-
-        appendPredicateFeatureFile(error, pattern, predicates);
-        appendPredicateFeatureName(error, pattern, predicates);
-        appendPredicateScenarioName(error, pattern, predicates);
-        appendPredicateStep(error, pattern, predicates);
-        appendPredicateStepDefinition(error, pattern, predicates);
-        appendPredicateException(error, pattern, predicates);
-        appendPredicateRelease(error, pattern, predicates);
-        appendPredicateCountry(error, pattern, predicates);
-        appendPredicatePlatform(error, pattern, predicates);
-        appendPredicateType(error, pattern, predicates);
-
-        return ExpressionUtils.allOf(predicates);
-    }
-
-    private void appendPredicateFeatureFile(QError error, ProblemPattern pattern, List<Predicate> predicates) {
-        if (StringUtils.isNotEmpty(pattern.getFeatureFile())) {
-            predicates.add(error.executedScenario.featureFile.eq(pattern.getFeatureFile()));
-        }
-    }
-
-    private void appendPredicateFeatureName(QError error, ProblemPattern pattern, List<Predicate> predicates) {
-        if (StringUtils.isNotEmpty(pattern.getFeatureName())) {
-            predicates.add(error.executedScenario.featureName.eq(pattern.getFeatureName()));
-        }
-    }
-
-    void appendPredicateScenarioName(QError error, ProblemPattern pattern, List<Predicate> predicates) {
-        if (StringUtils.isNotEmpty(pattern.getScenarioName())) {
-            if (pattern.isScenarioNameStartsWith()) {
-                predicates.add(error.executedScenario.name.like(pattern.getScenarioName() + LIKE_MARK));
-            } else {
-                predicates.add(error.executedScenario.name.eq(pattern.getScenarioName()));
-            }
-        }
-    }
-
-    void appendPredicateStep(QError error, ProblemPattern pattern, List<Predicate> predicates) {
-        if (StringUtils.isNotEmpty(pattern.getStep())) {
-            if (pattern.isStepStartsWith()) {
-                predicates.add(error.step.like(pattern.getStep() + LIKE_MARK));
-            } else {
-                predicates.add(error.step.eq(pattern.getStep()));
-            }
-        }
-    }
-
-    void appendPredicateStepDefinition(QError error, ProblemPattern pattern, List<Predicate> predicates) {
-        if (StringUtils.isNotEmpty(pattern.getStepDefinition())) {
-            if (pattern.isStepDefinitionStartsWith()) {
-                predicates.add(error.stepDefinition.like(pattern.getStepDefinition() + LIKE_MARK));
-            } else {
-                predicates.add(error.stepDefinition.eq(pattern.getStepDefinition()));
-            }
-        }
-    }
-
-    private void appendPredicateException(QError error, ProblemPattern pattern, List<Predicate> predicates) {
-        if (StringUtils.isNotEmpty(pattern.getException())) {
-            predicates.add(error.exception.like(pattern.getException() + LIKE_MARK));
-        }
-    }
-
-    private void appendPredicateRelease(QError error, ProblemPattern pattern, List<Predicate> predicates) {
-        if (StringUtils.isNotEmpty(pattern.getRelease())) {
-            predicates.add(error.executedScenario.run.execution.release.eq(pattern.getRelease()));
-        }
-    }
-
-    private void appendPredicateCountry(QError error, ProblemPattern pattern, List<Predicate> predicates) {
-        if (pattern.getCountry() != null && StringUtils.isNotEmpty(pattern.getCountry().getCode())) {
-            predicates.add(error.executedScenario.run.country.code.eq(pattern.getCountry().getCode()));
-        }
-    }
-
-    private void appendPredicatePlatform(QError error, ProblemPattern pattern, List<Predicate> predicates) {
-        if (StringUtils.isNotEmpty(pattern.getPlatform())) {
-            predicates.add(error.executedScenario.run.platform.eq(pattern.getPlatform()));
-        }
-    }
-
-    private void appendPredicateType(QError error, ProblemPattern pattern, List<Predicate> predicates) {
-        if (pattern.getType() != null && StringUtils.isNotEmpty(pattern.getType().getCode())) {
-            predicates.add(error.executedScenario.run.type.code.eq(pattern.getType().getCode()));
-        }
-        if (pattern.getTypeIsBrowser() != null) {
-            predicates.add(error.executedScenario.run.type.isBrowser.eq(pattern.getTypeIsBrowser()));
-        }
-        if (pattern.getTypeIsMobile() != null) {
-            predicates.add(error.executedScenario.run.type.isMobile.eq(pattern.getTypeIsMobile()));
-        }
-    }
-
-    @Override
-    public Page<Error> findMatchingErrors(long projectId, ProblemPattern pattern, Pageable pageable) {
-        Pageable effectivePageable;
-        if (pageable == null) {
-            effectivePageable = PageRequest.of(0, 10, ERROR_SORTING);
-        } else if (pageable.getSort().isUnsorted()) {
-            effectivePageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), ERROR_SORTING);
-        } else {
-            effectivePageable = pageable;
-        }
-
-        // toPredicate will append the projectId
-        return errorRepository.findAll(toPredicate(projectId, QError.error, pattern), effectivePageable);
-    }
-
     @Override
     public void assignPatternToErrors(long projectId, ProblemPattern pattern) {
         // If the pattern has just been inserted by Hibernate, issue the real SQL command, because we will issue direct-SQL queries with F.K.
@@ -194,7 +72,7 @@ public class ErrorRepositoryImpl implements ErrorRepositoryCustom {
 
         List<Long> matchingErrorIds = jpaQueryFactory.select(QError.error.id)
                 .from(QError.error)
-                .where(toPredicate(projectId, QError.error, pattern)).fetch();
+                .where(QError.error.toFilterPredicate(projectId, pattern)).fetch();
 
         SProblemOccurrence problemOccurrence = SProblemOccurrence.problemOccurrence;
         SQLInsertClause insert = sqlQueryFactory.insert(problemOccurrence);
@@ -251,7 +129,7 @@ public class ErrorRepositoryImpl implements ErrorRepositoryCustom {
             List<Long> matchingErrorIds = jpaQueryFactory.select(QError.error.id)
                     .from(QError.error)
                     .where(QError.error.id.in(errorIds))
-                    .where(toPredicate(projectId, QError.error, pattern)).fetch();
+                    .where(QError.error.toFilterPredicate(projectId, pattern)).fetch();
 
             if (!matchingErrorIds.isEmpty()) {
                 updatedProblems.add(pattern.getProblem());

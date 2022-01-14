@@ -21,50 +21,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 
-import javax.persistence.EntityManager;
-
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.decathlon.ara.domain.ProblemPattern;
 import com.decathlon.ara.domain.QError;
-import com.decathlon.ara.repository.ErrorRepository;
-import com.decathlon.ara.repository.ProblemPatternRepository;
-import com.decathlon.ara.repository.custom.util.JpaCacheManager;
-import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
 import com.querydsl.core.types.Predicate;
-import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.querydsl.sql.SQLQueryFactory;
 
-@ExtendWith(MockitoExtension.class)
-public class ErrorRepositoryImplTest {
-
-    @Mock
-    private EntityManager entityManager;
-
-    @Mock
-    private ErrorRepository errorRepository;
-
-    @Mock
-    private JPAQueryFactory jpaQueryFactory;
-
-    @Mock
-    private SQLQueryFactory sqlQueryFactory;
-
-    @Mock
-    private ProblemPatternRepository problemPatternRepository;
-
-    @Mock
-    private JpaCacheManager jpaCacheManager;
-
-    @Mock
-    private TransactionAppenderUtil transactionService;
-
-    @InjectMocks
-    private ErrorRepositoryImpl cut;
+public class QErrorTest {
 
     @Test
     public void appendPredicateScenarioName_ShouldNotFilter_WhenScenarioNameIsNotProvided() {
@@ -74,7 +37,7 @@ public class ErrorRepositoryImplTest {
         final ArrayList<Predicate> predicates = new ArrayList<>();
 
         // WHEN
-        cut.appendPredicateScenarioName(error, patternWithoutScenarioName, predicates);
+        error.appendPredicateScenarioName(patternWithoutScenarioName, predicates);
 
         // THEN
         assertThat(predicates.toString()).isEqualTo("[]");
@@ -89,7 +52,7 @@ public class ErrorRepositoryImplTest {
         final ArrayList<Predicate> predicates = new ArrayList<>();
 
         // WHEN
-        cut.appendPredicateScenarioName(error, patternWithoutScenarioName, predicates);
+        error.appendPredicateScenarioName(patternWithoutScenarioName, predicates);
 
         // THEN
         assertThat(predicates.toString()).isEqualTo("[]");
@@ -104,7 +67,7 @@ public class ErrorRepositoryImplTest {
         final ArrayList<Predicate> predicates = new ArrayList<>();
 
         // WHEN
-        cut.appendPredicateScenarioName(error, patternWithScenarioName, predicates);
+        error.appendPredicateScenarioName(patternWithScenarioName, predicates);
 
         // THEN
         assertThat(predicates.toString()).isEqualTo("[error.executedScenario.name = Name]");
@@ -120,7 +83,7 @@ public class ErrorRepositoryImplTest {
         final ArrayList<Predicate> predicates = new ArrayList<>();
 
         // WHEN
-        cut.appendPredicateScenarioName(error, patternWithScenarioName, predicates);
+        error.appendPredicateScenarioName(patternWithScenarioName, predicates);
 
         // THEN
         assertThat(predicates.toString()).isEqualTo("[error.executedScenario.name like Start%]");
@@ -134,7 +97,7 @@ public class ErrorRepositoryImplTest {
         final ArrayList<Predicate> predicates = new ArrayList<>();
 
         // WHEN
-        cut.appendPredicateStep(error, patternWithoutStep, predicates);
+        error.appendPredicateStep(patternWithoutStep, predicates);
 
         // THEN
         assertThat(predicates.toString()).isEqualTo("[]");
@@ -149,7 +112,7 @@ public class ErrorRepositoryImplTest {
         final ArrayList<Predicate> predicates = new ArrayList<>();
 
         // WHEN
-        cut.appendPredicateStep(error, patternWithoutStep, predicates);
+        error.appendPredicateStep(patternWithoutStep, predicates);
 
         // THEN
         assertThat(predicates.toString()).isEqualTo("[]");
@@ -164,7 +127,7 @@ public class ErrorRepositoryImplTest {
         final ArrayList<Predicate> predicates = new ArrayList<>();
 
         // WHEN
-        cut.appendPredicateStep(error, patternWithStep, predicates);
+        error.appendPredicateStep(patternWithStep, predicates);
 
         // THEN
         assertThat(predicates.toString()).isEqualTo("[error.step = Name]");
@@ -180,7 +143,7 @@ public class ErrorRepositoryImplTest {
         final ArrayList<Predicate> predicates = new ArrayList<>();
 
         // WHEN
-        cut.appendPredicateStep(error, patternWithStep, predicates);
+        error.appendPredicateStep(patternWithStep, predicates);
 
         // THEN
         assertThat(predicates.toString()).isEqualTo("[error.step like Start%]");
@@ -194,7 +157,7 @@ public class ErrorRepositoryImplTest {
         final ArrayList<Predicate> predicates = new ArrayList<>();
 
         // WHEN
-        cut.appendPredicateStepDefinition(error, patternWithoutStepDefinition, predicates);
+        error.appendPredicateStepDefinition(patternWithoutStepDefinition, predicates);
 
         // THEN
         assertThat(predicates.toString()).isEqualTo("[]");
@@ -209,7 +172,7 @@ public class ErrorRepositoryImplTest {
         final ArrayList<Predicate> predicates = new ArrayList<>();
 
         // WHEN
-        cut.appendPredicateStepDefinition(error, patternWithoutStepDefinition, predicates);
+        error.appendPredicateStepDefinition(patternWithoutStepDefinition, predicates);
 
         // THEN
         assertThat(predicates.toString()).isEqualTo("[]");
@@ -224,7 +187,7 @@ public class ErrorRepositoryImplTest {
         final ArrayList<Predicate> predicates = new ArrayList<>();
 
         // WHEN
-        cut.appendPredicateStepDefinition(error, patternWithStepDefinition, predicates);
+        error.appendPredicateStepDefinition(patternWithStepDefinition, predicates);
 
         // THEN
         assertThat(predicates.toString()).isEqualTo("[error.stepDefinition = Name]");
@@ -240,7 +203,7 @@ public class ErrorRepositoryImplTest {
         final ArrayList<Predicate> predicates = new ArrayList<>();
 
         // WHEN
-        cut.appendPredicateStepDefinition(error, patternWithStepDefinition, predicates);
+        error.appendPredicateStepDefinition(patternWithStepDefinition, predicates);
 
         // THEN
         assertThat(predicates.toString()).isEqualTo("[error.stepDefinition like Start%]");

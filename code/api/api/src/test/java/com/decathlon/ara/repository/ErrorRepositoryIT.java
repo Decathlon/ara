@@ -56,33 +56,6 @@ public class ErrorRepositoryIT {
     }
 
     @Test
-    public void findMatchingErrors_ShouldReturnTheOnlyMatchingError_WhenPatternCriteriaAreVeryRestrictive() {
-        // GIVEN
-        long projectId = 1;
-        ProblemPattern pattern = new ProblemPattern();
-        pattern.setFeatureFile("a.feature");
-        pattern.setFeatureName("Feature A");
-        pattern.setScenarioName("Scenario a");
-        pattern.setStep("Step 1");
-        pattern.setStepDefinition("^Step 1$");
-        pattern.setException("Exception 1");
-        pattern.setRelease("1711");
-        pattern.setCountry(new Country().withCode("cn"));
-        pattern.setType(new Type().withCode("firefox"));
-        pattern.setTypeIsBrowser(Boolean.TRUE);
-        pattern.setTypeIsMobile(Boolean.FALSE);
-        pattern.setPlatform("euin");
-
-        // WHEN
-        Page<Error> errors = cut.findMatchingErrors(projectId, pattern, firstPageOf10());
-
-        // THEN
-        assertThat(errors.getNumberOfElements()).isEqualTo(1);
-        assertThat(errors.getContent().get(0).getExecutedScenario().getFeatureName()).isEqualTo("Feature A");
-        assertThat(errors.getContent().get(0).getExecutedScenario().getRun().getExecution().getJobUrl()).isEqualTo("http://execution.jobs.org/1/");
-    }
-
-    @Test
     @DatabaseSetup({"/dbunit/new-errors.xml"})
     public void autoAssignProblemsToNewErrors_ShouldAttachExistingProblemPatternsToNewlyAddedErrors() {
         // GIVEN

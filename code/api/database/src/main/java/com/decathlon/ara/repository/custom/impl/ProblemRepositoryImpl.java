@@ -18,28 +18,17 @@
 package com.decathlon.ara.repository.custom.impl;
 
 import com.decathlon.ara.domain.*;
-import com.decathlon.ara.domain.enumeration.ProblemStatus;
-import com.decathlon.ara.domain.enumeration.ProblemStatusFilter;
-import com.decathlon.ara.domain.filter.ProblemFilter;
 import com.decathlon.ara.domain.projection.FirstAndLastProblemOccurrence;
 import com.decathlon.ara.domain.projection.ProblemAggregate;
 import com.decathlon.ara.repository.CountryRepository;
-import com.decathlon.ara.repository.ProblemRepository;
 import com.decathlon.ara.repository.TypeRepository;
 import com.decathlon.ara.repository.custom.ProblemRepositoryCustom;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.ExpressionUtils;
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -47,13 +36,6 @@ import java.util.stream.Collectors;
 
 @Component
 public class ProblemRepositoryImpl implements ProblemRepositoryCustom {
-
-    private static final Sort PROBLEM_CREATION_DATE_TIME_DESC =
-            Sort.by(Sort.Direction.DESC, QProblem.problem.creationDateTime.getMetadata().getName());
-
-    // Cannot use constructor injection: would cause circular dependency injection
-    @Autowired
-    private ProblemRepository problemRepository;
 
     @Autowired
     private CountryRepository countryRepository;
@@ -63,75 +45,6 @@ public class ProblemRepositoryImpl implements ProblemRepositoryCustom {
 
     @Autowired
     private JPAQueryFactory jpaQueryFactory;
-
-    private static Predicate toPredicate(QProblem problem, ProblemFilter filter) {
-        List<Predicate> predicates = new ArrayList<>();
-
-        predicates.add(problem.projectId.eq(Long.valueOf(filter.getProjectId())));
-
-        if (StringUtils.isNotEmpty(filter.getName())) {
-            predicates.add(problem.name.likeIgnoreCase("%" + filter.getName() + "%"));
-        }
-
-        if (filter.getStatus() != null) {
-            predicates.add(computeStatusPredicate(problem, filter.getStatus()));
-        }
-
-        if (filter.getBlamedTeamId() != null) {
-            predicates.add(problem.blamedTeam.id.eq(filter.getBlamedTeamId()));
-        }
-
-        if (StringUtils.isNotEmpty(filter.getDefectId())) {
-            if ("none".equalsIgnoreCase(filter.getDefectId())) {
-                predicates.add(problem.defectId.isNull().or(problem.defectId.isEmpty()));
-            } else {
-                predicates.add(problem.defectId.likeIgnoreCase("%" + filter.getDefectId() + "%"));
-            }
-        }
-
-        if (filter.getDefectExistence() != null) {
-            predicates.add(problem.defectExistence.eq(filter.getDefectExistence()));
-        }
-
-        if (filter.getRootCauseId() != null) {
-            predicates.add(problem.rootCause.id.eq(filter.getRootCauseId()));
-        }
-
-        return ExpressionUtils.allOf(predicates);
-    }
-
-    /**
-     * Compute a predicate to filter problems by their status, depending the filtering choice picked from the list of
-     * filtering options. Filter is performed through the {@link Problem#getEffectiveStatus()} and some filter options
-     * are a combination of several statuses.
-     *
-     * @param problem the problem table variable to use in the query
-     * @param statusFilter the choosen filter for problem statuses
-     * @return a predicate to use in a QueryDsl request
-     */
-    private static Predicate computeStatusPredicate(QProblem problem, ProblemStatusFilter statusFilter) {
-        final BooleanExpression open = problem.status.eq(ProblemStatus.OPEN);
-        final BooleanExpression closed = problem.status.eq(ProblemStatus.CLOSED);
-
-        // This business logic is also present in another form in Problem.getEffectiveStatus()
-        final BooleanExpression reappeared = problem.status.eq(ProblemStatus.CLOSED)
-                .and(problem.closingDateTime.isNotNull())
-                .and(problem.lastSeenDateTime.isNotNull())
-                .and(problem.closingDateTime.before(problem.lastSeenDateTime));
-
-        switch (statusFilter) {
-            case OPEN:
-                return open;
-            case CLOSED:
-                return closed.and(reappeared.not());
-            case REAPPEARED:
-                return reappeared;
-            case OPEN_OR_REAPPEARED:
-                return open.or(reappeared);
-            default :
-                return closed; // CLOSED status includes the REAPPEARED effectiveStatus
-        }
-    }
 
     /**
      * @param execution an execution
@@ -168,28 +81,6 @@ public class ProblemRepositoryImpl implements ProblemRepositoryCustom {
                 .collect(Collectors.groupingBy(tuple -> tuple.get(QProblem.problem.id),
                         Collectors.mapping(tuple -> tuple.get(QError.error.executedScenario.run.execution.id),
                                 Collectors.toList())));
-    }
-
-    /**
-     * GET all problems matching the given filter.
-     *
-     * @param filter   the search terms
-     * @param pageable the pagination information
-     * @return a page of matching problems
-     */
-    @Override
-    public Page<Problem> findMatchingProblems(ProblemFilter filter, Pageable pageable) {
-        Pageable effectivePageable;
-        if (pageable == null) {
-            effectivePageable = PageRequest.of(0, 10, PROBLEM_CREATION_DATE_TIME_DESC);
-        } else if (pageable.getSort().isUnsorted()) {
-            effectivePageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), PROBLEM_CREATION_DATE_TIME_DESC);
-        } else {
-            effectivePageable = pageable;
-        }
-
-        // toPredicate will append the projectId
-        return problemRepository.findAll(toPredicate(QProblem.problem, filter), effectivePageable);
     }
 
     /**

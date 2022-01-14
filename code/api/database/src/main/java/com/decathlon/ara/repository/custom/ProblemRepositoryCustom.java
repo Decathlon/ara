@@ -46,16 +46,6 @@ public interface ProblemRepositoryCustom {
     Map<Long, List<Long>> findProblemIdsToExecutionIdsAssociations(List<Long> problemIds, List<Long> executionIds);
 
     /**
-     * GET all problems matching the given filter.
-     *
-     * @param filter   the search terms (including the projectId in which to restrain the search)
-     * @param pageable the pagination information
-     * @return a page of matching problems
-     */
-    // NO projectId: filter.problemId will be used to restrain to the correct project
-    Page<Problem> findMatchingProblems(ProblemFilter filter, Pageable pageable);
-
-    /**
      * @param projectId  the ID of the project in which to work
      * @param problemIds a list of IDs of problems
      * @return for each problem ID, an aggregate object listing various counts and statistics about this problem
