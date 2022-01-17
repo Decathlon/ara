@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.decathlon.ara</groupId>
     <artifactId>core-api</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <name>core-api</name>
     <description>Demo project for Spring Boot</description>
     <properties>
