@@ -32,17 +32,19 @@ jobs:
       web-ui_new_release_version: ${{ steps.semantic_web-ui.outputs.new_release_version }}
     steps:
       - id: skip_api
-        uses: fkirc/skip-duplicate-actions@v3.4.0
+        uses: fkirc/skip-duplicate-actions@v3.4.1
         with:
           github_token: ${{ github.token }}
           paths: '["code/api/**", ".github/workflows/build.yaml"]'
           cancel_others: 'true'
+          skip_after_successful_duplicate: 'false'
           do_not_skip: '["workflow_dispatch", "schedule"]'
       - id: skip_web-ui
-        uses: fkirc/skip-duplicate-actions@v3.4.0
+        uses: fkirc/skip-duplicate-actions@v3.4.1
         with:
           github_token: ${{ github.token }}
           paths: '["code/web-ui/**", ".github/workflows/build.yaml"]'
+          skip_after_successful_duplicate: 'false'
           cancel_others: 'true'
           do_not_skip: '["workflow_dispatch", "schedule"]'
       - name: Checkout
@@ -295,10 +297,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: skip_check
-        uses: fkirc/skip-duplicate-actions@v3.4.0
+        uses: fkirc/skip-duplicate-actions@v3.4.1
         with:
           github_token: ${{ github.token }}
           paths: '["charts/candidate/**"]'
+          skip_after_successful_duplicate: 'false'
           do_not_skip: '["workflow_dispatch"]'
       - if: ${{ needs.bump-candidate.outputs.bump == 'true' || steps.skip_check.outputs.should_skip != 'true' }}
         name: Checkout
