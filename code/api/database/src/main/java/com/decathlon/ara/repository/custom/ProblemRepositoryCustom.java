@@ -19,14 +19,11 @@ package com.decathlon.ara.repository.custom;
 
 import com.decathlon.ara.domain.Execution;
 import com.decathlon.ara.domain.Problem;
-import com.decathlon.ara.domain.filter.ProblemFilter;
 import com.decathlon.ara.domain.projection.ProblemAggregate;
 import com.decathlon.ara.domain.projection.FirstAndLastProblemOccurrence;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 public interface ProblemRepositoryCustom {
 
