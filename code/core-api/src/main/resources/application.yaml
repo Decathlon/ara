@@ -16,10 +16,12 @@ springdoc:
     pathsToMatch: /api/**
     use-management-port: true
 management:
+    info:
+        env:
+            enabled: true
     server:
         port: 9090
     endpoints:
         web:
             exposure:
                 include: health, info, openapi, swaggerui
-
