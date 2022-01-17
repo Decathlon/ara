@@ -27,10 +27,10 @@ import com.decathlon.ara.domain.ProblemPattern;
 import com.decathlon.ara.domain.QError;
 import com.querydsl.core.types.Predicate;
 
-public class QErrorTest {
+class QErrorTest {
 
     @Test
-    public void appendPredicateScenarioName_ShouldNotFilter_WhenScenarioNameIsNotProvided() {
+    void appendPredicateScenarioName_ShouldNotFilter_WhenScenarioNameIsNotProvided() {
         // GIVEN
         final QError error = QError.error;
         final ProblemPattern patternWithoutScenarioName = new ProblemPattern();
@@ -40,11 +40,11 @@ public class QErrorTest {
         error.appendPredicateScenarioName(patternWithoutScenarioName, predicates);
 
         // THEN
-        assertThat(predicates.toString()).isEqualTo("[]");
+        assertThat(predicates).hasToString("[]");
     }
 
     @Test
-    public void appendPredicateScenarioName_ShouldNotFilter_WhenScenarioNameIsNotProvidedEvenIfStartsWithIsTrue() {
+    void appendPredicateScenarioName_ShouldNotFilter_WhenScenarioNameIsNotProvidedEvenIfStartsWithIsTrue() {
         // GIVEN
         final QError error = QError.error;
         final ProblemPattern patternWithoutScenarioName = new ProblemPattern()
@@ -55,11 +55,11 @@ public class QErrorTest {
         error.appendPredicateScenarioName(patternWithoutScenarioName, predicates);
 
         // THEN
-        assertThat(predicates.toString()).isEqualTo("[]");
+        assertThat(predicates).hasToString("[]");
     }
 
     @Test
-    public void appendPredicateScenarioName_ShouldFilterByExactScenarioName_WhenScenarioNameIsProvided() {
+    void appendPredicateScenarioName_ShouldFilterByExactScenarioName_WhenScenarioNameIsProvided() {
         // GIVEN
         final QError error = QError.error;
         final ProblemPattern patternWithScenarioName = new ProblemPattern()
@@ -70,11 +70,11 @@ public class QErrorTest {
         error.appendPredicateScenarioName(patternWithScenarioName, predicates);
 
         // THEN
-        assertThat(predicates.toString()).isEqualTo("[error.executedScenario.name = Name]");
+        assertThat(predicates).hasToString("[error.executedScenario.name = Name]");
     }
 
     @Test
-    public void appendPredicateScenarioName_ShouldFilterByScenarioNameStart_WhenScenarioNameIsProvidedWithStartsWith() {
+    void appendPredicateScenarioName_ShouldFilterByScenarioNameStart_WhenScenarioNameIsProvidedWithStartsWith() {
         // GIVEN
         final QError error = QError.error;
         final ProblemPattern patternWithScenarioName = new ProblemPattern()
@@ -86,11 +86,11 @@ public class QErrorTest {
         error.appendPredicateScenarioName(patternWithScenarioName, predicates);
 
         // THEN
-        assertThat(predicates.toString()).isEqualTo("[error.executedScenario.name like Start%]");
+        assertThat(predicates).hasToString("[error.executedScenario.name like Start%]");
     }
 
     @Test
-    public void appendPredicateStep_ShouldNotFilter_WhenStepIsNotProvided() {
+    void appendPredicateStep_ShouldNotFilter_WhenStepIsNotProvided() {
         // GIVEN
         final QError error = QError.error;
         final ProblemPattern patternWithoutStep = new ProblemPattern();
@@ -100,11 +100,11 @@ public class QErrorTest {
         error.appendPredicateStep(patternWithoutStep, predicates);
 
         // THEN
-        assertThat(predicates.toString()).isEqualTo("[]");
+        assertThat(predicates).hasToString("[]");
     }
 
     @Test
-    public void appendPredicateStep_ShouldNotFilter_WhenStepIsNotProvidedEvenIfStartsWithIsTrue() {
+    void appendPredicateStep_ShouldNotFilter_WhenStepIsNotProvidedEvenIfStartsWithIsTrue() {
         // GIVEN
         final QError error = QError.error;
         final ProblemPattern patternWithoutStep = new ProblemPattern()
@@ -115,11 +115,11 @@ public class QErrorTest {
         error.appendPredicateStep(patternWithoutStep, predicates);
 
         // THEN
-        assertThat(predicates.toString()).isEqualTo("[]");
+        assertThat(predicates).hasToString("[]");
     }
 
     @Test
-    public void appendPredicateStep_ShouldFilterByExactStep_WhenStepIsProvided() {
+    void appendPredicateStep_ShouldFilterByExactStep_WhenStepIsProvided() {
         // GIVEN
         final QError error = QError.error;
         final ProblemPattern patternWithStep = new ProblemPattern()
@@ -130,11 +130,11 @@ public class QErrorTest {
         error.appendPredicateStep(patternWithStep, predicates);
 
         // THEN
-        assertThat(predicates.toString()).isEqualTo("[error.step = Name]");
+        assertThat(predicates).hasToString("[error.step = Name]");
     }
 
     @Test
-    public void appendPredicateStep_ShouldFilterByStepStart_WhenStepIsProvidedWithStartsWith() {
+    void appendPredicateStep_ShouldFilterByStepStart_WhenStepIsProvidedWithStartsWith() {
         // GIVEN
         final QError error = QError.error;
         final ProblemPattern patternWithStep = new ProblemPattern()
@@ -146,11 +146,11 @@ public class QErrorTest {
         error.appendPredicateStep(patternWithStep, predicates);
 
         // THEN
-        assertThat(predicates.toString()).isEqualTo("[error.step like Start%]");
+        assertThat(predicates).hasToString("[error.step like Start%]");
     }
 
     @Test
-    public void appendPredicateStepDefinition_ShouldNotFilter_WhenStepDefinitionIsNotProvided() {
+    void appendPredicateStepDefinition_ShouldNotFilter_WhenStepDefinitionIsNotProvided() {
         // GIVEN
         final QError error = QError.error;
         final ProblemPattern patternWithoutStepDefinition = new ProblemPattern();
@@ -160,11 +160,11 @@ public class QErrorTest {
         error.appendPredicateStepDefinition(patternWithoutStepDefinition, predicates);
 
         // THEN
-        assertThat(predicates.toString()).isEqualTo("[]");
+        assertThat(predicates).hasToString("[]");
     }
 
     @Test
-    public void appendPredicateStepDefinition_ShouldNotFilter_WhenStepDefinitionIsNotProvidedEvenIfStartsWithIsTrue() {
+    void appendPredicateStepDefinition_ShouldNotFilter_WhenStepDefinitionIsNotProvidedEvenIfStartsWithIsTrue() {
         // GIVEN
         final QError error = QError.error;
         final ProblemPattern patternWithoutStepDefinition = new ProblemPattern()
@@ -175,11 +175,11 @@ public class QErrorTest {
         error.appendPredicateStepDefinition(patternWithoutStepDefinition, predicates);
 
         // THEN
-        assertThat(predicates.toString()).isEqualTo("[]");
+        assertThat(predicates).hasToString("[]");
     }
 
     @Test
-    public void appendPredicateStepDefinition_ShouldFilterByExactStepDefinition_WhenStepDefinitionIsProvided() {
+    void appendPredicateStepDefinition_ShouldFilterByExactStepDefinition_WhenStepDefinitionIsProvided() {
         // GIVEN
         final QError error = QError.error;
         final ProblemPattern patternWithStepDefinition = new ProblemPattern()
@@ -190,11 +190,11 @@ public class QErrorTest {
         error.appendPredicateStepDefinition(patternWithStepDefinition, predicates);
 
         // THEN
-        assertThat(predicates.toString()).isEqualTo("[error.stepDefinition = Name]");
+        assertThat(predicates).hasToString("[error.stepDefinition = Name]");
     }
 
     @Test
-    public void appendPredicateStepDefinition_ShouldFilterByStepDefinitionStart_WhenStepDefinitionIsProvidedWithStartsWith() {
+    void appendPredicateStepDefinition_ShouldFilterByStepDefinitionStart_WhenStepDefinitionIsProvidedWithStartsWith() {
         // GIVEN
         final QError error = QError.error;
         final ProblemPattern patternWithStepDefinition = new ProblemPattern()
@@ -206,7 +206,7 @@ public class QErrorTest {
         error.appendPredicateStepDefinition(patternWithStepDefinition, predicates);
 
         // THEN
-        assertThat(predicates.toString()).isEqualTo("[error.stepDefinition like Start%]");
+        assertThat(predicates).hasToString("[error.stepDefinition like Start%]");
     }
 
 }
