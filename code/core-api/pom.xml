@@ -28,6 +28,7 @@
         <sonar.language>java</sonar.language>
         <jacoco.phase.agent>test-compile</jacoco.phase.agent>
         <jacoco.phase.report>verify</jacoco.phase.report>
+        <springdoc.version>1.6.4</springdoc.version>
     </properties>
     <dependencies>
         <dependency>
@@ -51,8 +52,13 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.5.10</version>
+            <version>${springdoc.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-data-rest</artifactId>
+            <version>${springdoc.version}</version>
+         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
