@@ -13,7 +13,7 @@ spring:
         import: config-database.yaml,optional:config-custom.yaml
 springdoc:
     packagesToScan: com.decathlon.ara
-    pathsToMatch: /api/**
+    pathsToMatch: /**
     use-management-port: true
 management:
     info:
