@@ -24,39 +24,38 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
-      skip_api: ${{ steps.skip_api.outputs.should_skip }}
-      skip_web-ui: ${{ steps.skip_web-ui.outputs.should_skip }}
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+      paths_result: ${{ steps.skip_check.outputs.paths_result }}
       api_new_release_published: ${{ steps.semantic_api.outputs.new_release_published }}
       api_new_release_version: ${{ steps.semantic_api.outputs.new_release_version }}
       web-ui_new_release_published: ${{ steps.semantic_web-ui.outputs.new_release_published }}
       web-ui_new_release_version: ${{ steps.semantic_web-ui.outputs.new_release_version }}
     steps:
-      - id: skip_api
+      - id: skip_check
         uses: fkirc/skip-duplicate-actions@v3.4.1
         with:
-          github_token: ${{ github.token }}
-          paths: '["code/api/**", ".github/workflows/build.yaml"]'
-          cancel_others: 'true'
+          paths_filter: |
+            api:
+              paths:
+                - 'code/api/**/*'
+                - '.github/workflows/build.yaml'
+            webui:
+              paths:
+                - 'code/web-ui/**/*'
+                - '.github/workflows/build.yaml'
           skip_after_successful_duplicate: 'false'
-          do_not_skip: '["workflow_dispatch", "schedule"]'
-      - id: skip_web-ui
-        uses: fkirc/skip-duplicate-actions@v3.4.1
-        with:
-          github_token: ${{ github.token }}
-          paths: '["code/web-ui/**", ".github/workflows/build.yaml"]'
-          skip_after_successful_duplicate: 'false'
           cancel_others: 'true'
-          do_not_skip: '["workflow_dispatch", "schedule"]'
       - name: Checkout
+        if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
         uses: actions/checkout@v2
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
           persist-credentials: false # To use github token provide for semantic release
-      - if: ${{ steps.skip_api.outputs.should_skip != 'true' }}
+      - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).api.should_skip }}
         name: Ensure package json for semantic-release-monorepo
         working-directory: code/api
         run: test -e package.json || echo '{"name":"ara-api"}' > package.json
-      - if: ${{ steps.skip_api.outputs.should_skip != 'true' }}
+      - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).api.should_skip }}
         name: Semantic Release api
         id: semantic_api
         uses: cycjimmy/semantic-release-action@v2
@@ -74,7 +73,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - if: ${{ steps.skip_web-ui.outputs.should_skip != 'true' }}
+      - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).webui.should_skip }}
         name: Semantic Release web-ui
         id: semantic_web-ui
         uses: cycjimmy/semantic-release-action@v2
@@ -95,7 +94,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   build-api:
     needs: prepare
-    if: ${{ needs.prepare.outputs.skip_api != 'true' || needs.prepare.outputs.api_new_release_published == 'true' }}
+    if: ${{ needs.prepare.outputs.should_skip != 'true' || !fromJSON(needs.prepare.outputs.paths_result).api.should_skip || needs.prepare.outputs.api_new_release_published == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - 
@@ -188,7 +187,7 @@ jobs:
           cat code/tests/target/results.txt | grep SUCCESS
   build-web-ui:
     needs: prepare
-    if: ${{ needs.prepare.outputs.skip_web-ui != 'true' || needs.prepare.outputs.web-ui_new_release_published == 'true' }}
+    if: ${{ needs.prepare.outputs.should_skip != 'true' || !fromJSON(needs.prepare.outputs.paths_result).webui.should_skip || needs.prepare.outputs.web-ui_new_release_published == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -299,7 +298,6 @@ jobs:
       - id: skip_check
         uses: fkirc/skip-duplicate-actions@v3.4.1
         with:
-          github_token: ${{ github.token }}
           paths: '["charts/candidate/**"]'
           skip_after_successful_duplicate: 'false'
           do_not_skip: '["workflow_dispatch"]'
