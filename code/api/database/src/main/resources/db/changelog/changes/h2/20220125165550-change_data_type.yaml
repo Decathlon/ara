@@ -1,0 +1,56 @@
+databaseChangeLog:
+- changeSet:
+    id: 1643126215856-7
+    author: '? (generated)'
+    changes:
+    - createSequence:
+        sequenceName: EXECUTION_COMPLETION_REQUEST_ID
+- changeSet:
+    id: 1643126215856-1
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: COMMENT
+        newDataType: clob
+        tableName: FUNCTIONALITY
+- changeSet:
+    id: 1643126215856-2
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: COMMENT
+        newDataType: clob
+        tableName: PROBLEM
+- changeSet:
+    id: 1643126215856-3
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: CONTENT
+        newDataType: clob
+        tableName: EXECUTED_SCENARIO
+- changeSet:
+    id: 1643126215856-4
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: CONTENT
+        newDataType: clob
+        tableName: SCENARIO
+- changeSet:
+    id: 1643126215856-5
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: EXCEPTION
+        newDataType: clob
+        tableName: PROBLEM_PATTERN
+- changeSet:
+    id: 1643126215856-6
+    author: '? (generated)'
+    changes:
+    - modifyDataType:
+        columnName: MESSAGE
+        newDataType: clob
+        tableName: COMMUNICATION
+
