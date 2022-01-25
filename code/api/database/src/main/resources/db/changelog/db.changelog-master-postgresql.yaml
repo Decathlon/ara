@@ -17,3 +17,5 @@ databaseChangeLog:
       file: classpath*:db/changelog/changes/postgresql/20211129100011-delete_cascade_on_problem_occurrences.yaml
   - include:
       file: classpath*:db/changelog/changes/postgresql/20211125164648-not_null_constraints.yaml
+  - include:
+      file: classpath*:db/changelog/changes/postgresql/20220125164557-remove-unexpected-index.yaml
