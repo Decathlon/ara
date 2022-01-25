@@ -1,0 +1,9 @@
+databaseChangeLog:
+- changeSet:
+    id: 1643125674608-1
+    author: '? (generated)'
+    changes:
+    - dropIndex:
+        indexName: idxgom365xdjsepb9rc36xcuafur
+        tableName: problem_occurrence
+
