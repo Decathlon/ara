@@ -32,7 +32,7 @@ jobs:
       web-ui_new_release_version: ${{ steps.semantic_web-ui.outputs.new_release_version }}
     steps:
       - id: skip_check
-        uses: fkirc/skip-duplicate-actions@v3.4.1
+        uses: fkirc/skip-duplicate-actions@master
         with:
           paths_filter: |
             api:
@@ -43,6 +43,9 @@ jobs:
               paths:
                 - 'code/web-ui/**/*'
                 - '.github/workflows/build.yaml'
+            candidate:
+              paths:
+                - 'charts/candidate/**/*'
           skip_after_successful_duplicate: 'false'
           cancel_others: 'true'
       - name: Checkout
@@ -291,30 +294,23 @@ jobs:
       - id: check
         run: echo ::set-output name=bump::true
   release-candidate:
-    needs: bump-candidate
-    if: ${{ always() && github.event_name != 'pull_request' }}
+    needs: 
+      - prepare
+      - bump-candidate
+    if: ${{ always() && github.event_name != 'pull_request' && (needs.bump-candidate.outputs.bump == 'true' || needs.prepare.outputs.should_skip != 'true' || !fromJSON(needs.prepare.outputs.paths_result).candidate.should_skip) }}
     runs-on: ubuntu-latest
     steps:
-      - id: skip_check
-        uses: fkirc/skip-duplicate-actions@v3.4.1
-        with:
-          paths: '["charts/candidate/**"]'
-          skip_after_successful_duplicate: 'false'
-          do_not_skip: '["workflow_dispatch"]'
-      - if: ${{ needs.bump-candidate.outputs.bump == 'true' || steps.skip_check.outputs.should_skip != 'true' }}
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
           persist-credentials: false # To use github token provide for semantic release
           ref: ${{ github.ref }}
-      - if: ${{ needs.bump-candidate.outputs.bump == 'true' || steps.skip_check.outputs.should_skip != 'true' }}
-        name: Install Helm
+      - name: Install Helm
         uses: azure/setup-helm@v1
         with:
           version: v3.4.0
-      - if: ${{ needs.bump-candidate.outputs.bump == 'true' || steps.skip_check.outputs.should_skip != 'true' }}
-        name: Semantic Release
+      - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v2
         with:
           working_directory: charts/candidate
@@ -329,13 +325,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - if: ${{ needs.bump-candidate.outputs.bump == 'true' || steps.skip_check.outputs.should_skip != 'true' }}
-        name: Configure Git
+      - name: Configure Git
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-      - if: ${{ needs.bump-candidate.outputs.bump == 'true' || steps.skip_check.outputs.should_skip != 'true' }}
-        name: Run chart-releaser
+      - name: Run chart-releaser
         uses: Thomgrus/chart-releaser-action@feat/manage-chart-by-chart-diff
         with:
           config: .github/cr-config.yaml
