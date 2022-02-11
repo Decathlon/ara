@@ -1,6 +1,6 @@
 = image:code/web-ui/src/assets/favicon.png[Logo,64,64] ARA - Agile Regression Analyzer
 
-image:https://github.com/Decathlon/ara/actions/workflows/build.yaml/badge.svg[BUILD] image:https://github.com/Decathlon/ara/actions/workflows/charts-release.yaml/badge.svg[CHARTS]
+image:https://github.com/Decathlon/ara/actions/workflows/build.yaml/badge.svg?branch=main&event=push[BUILD] image:https://github.com/Decathlon/ara/actions/workflows/charts-release.yaml/badge.svg?branch=main&event=push[CHARTS]
 
 image:https://img.shields.io/badge/commitizen-friendly-brightgreen.svg[link="http://commitizen.github.io/cz-cli/"] image:https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release[link="https://github.com/semantic-release/semantic-release"]
 
