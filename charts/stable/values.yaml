@@ -8,7 +8,7 @@ api:
   image:
     registry: docker.io
     repository: decathlon/ara-api
-    tag: 12.1.3
+    tag: 12.1.4
     imagePullPolicy: IfNotPresent
   loggingMode:
   - logging-console
@@ -98,6 +98,7 @@ ingress:
   host: ara.test
   annotations: {}
   tls: {}
+  class: ""
 
 loadBalancer:
   enabled: true
