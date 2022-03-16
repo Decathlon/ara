@@ -1,0 +1,4 @@
+name: "CodeQL web-ux config"
+
+paths:
+  - code/web-ux
