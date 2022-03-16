@@ -1,12 +1,7 @@
 <script>
-import Mgr from "../services/SecurityService";
-import Api from "../services/ApiService";
-
 export default {
   data: () => {
     return {
-      mgr: new Mgr(),
-      api: new Api(),
       userData: false,
       errorMessage: "",
       user: {
@@ -14,115 +9,6 @@ export default {
         password: "",
       },
     };
-  },
-
-  methods: {
-    async getAll(api) {
-      let self = this;
-      let result = await this.api.getAll(api);
-      self.logApi(result);
-    },
-    getToken() {
-      let self = this;
-      this.mgr.getUser().then(
-        (token) => {
-          self.logToken(token);
-        },
-        (err) => {
-          console.log(err);
-        }
-      );
-    },
-    getTokenId() {
-      let self = this;
-      this.mgr.getIdToken().then(
-        (tokenId) => {
-          self.logToken(tokenId);
-        },
-        (err) => {
-          console.log(err);
-        }
-      );
-    },
-    getTokenSessionState() {
-      let self = this;
-      this.mgr.getSessionState().then(
-        (sessionState) => {
-          self.logToken(sessionState);
-        },
-        (err) => {
-          console.log(err);
-        }
-      );
-    },
-    getAccessToken() {
-      let self = this;
-      this.mgr.getAcessToken().then(
-        (acessToken) => {
-          self.logToken(acessToken);
-        },
-        (err) => {
-          console.log(err);
-        }
-      );
-    },
-    getTokenScopes() {
-      let self = this;
-      this.mgr.getScopes().then(
-        (scopes) => {
-          self.logToken(scopes);
-        },
-        (err) => {
-          console.log(err);
-        }
-      );
-    },
-    getTokenProfile() {
-      let self = this;
-      this.mgr.getProfile().then(
-        (tokenProfile) => {
-          self.logToken(tokenProfile);
-        },
-        (err) => {
-          console.log(err);
-        }
-      );
-    },
-    renewToken() {
-      let self = this;
-      this.mgr.renewToken().then(
-        (newToken) => {
-          self.logToken(newToken);
-        },
-        (err) => {
-          console.log(err);
-        }
-      );
-    },
-    logApi() {
-      document.getElementById("resultsApi").innerText = "";
-
-      Array.prototype.forEach.call(arguments, function (msg) {
-        if (msg instanceof Error) {
-          msg = "Error: " + msg.message;
-        } else if (typeof msg !== "string") {
-          msg = JSON.stringify(msg, null, 2);
-        }
-        document.getElementById("resultsApi").innerHTML += msg + "\r\n";
-      });
-    },
-    logToken() {
-      document.getElementById("resultsToken").innerText = "";
-
-      Array.prototype.forEach.call(arguments, function (msg) {
-        if (msg instanceof Error) {
-          msg = "Error: " + msg.message;
-        } else if (typeof msg !== "string") {
-          msg = JSON.stringify(msg, null, 2);
-        }
-        document.getElementById("resultsToken").innerHTML += msg + "\r\n";
-      });
-    },
   },
 };
 </script>
@@ -186,7 +72,6 @@ export default {
               <div style="width: 400px; display: flex; justify-content: center">
                 <button
                   class="vtmn-btn vtmn-btn_variant--primary vtmn-btn_size--medium"
-                  @click="getAll('values')"
                 >
                   Sign in
                 </button>
