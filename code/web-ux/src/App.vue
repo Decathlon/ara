@@ -1,14 +1,12 @@
 <script>
 import headerNav from "./components/headerNav.vue";
 import sideNav from "./components/sideNav.vue";
-import Mgr from "./services/SecurityService";
 
 export default {
   name: "App",
 
   data() {
     return {
-      mgr: new Mgr(),
       signedIn: true,
       sideOpen: false,
     };
@@ -17,17 +15,6 @@ export default {
   components: {
     headerNav,
     sideNav,
-  },
-
-  mounted() {
-    this.mgr.getSignedIn().then(
-      (signIn) => {
-        this.signedIn = signIn;
-      },
-      (err) => {
-        console.log(err);
-      }
-    );
   },
 
   methods: {
