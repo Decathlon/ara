@@ -25,7 +25,7 @@ export default {
         <span class="vtmx-menu-line" role="presentation"></span>
       </button>
       <RouterLink to="/">
-        <img src="../assets/img/logo.png" width="30" />
+        <img src="../assets/img/logo.png" alt="ara logo" width="30" />
         <h5 class="vtmn-typo_title-5 vtmn-pl-1">ARA</h5>
       </RouterLink>
     </div>

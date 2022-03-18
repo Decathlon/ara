@@ -3,18 +3,15 @@
 @import '@vtmn/css-utilities/dist/index.css'; /* import Vitamin utilities CSS classes (required) */
 @import 'tailwindcss/screens'; /* import screens CSS classes from Tailwind CSS (optional) */
 @import '@vtmn/css/dist/components.css'; /* import Vitamin components CSS classes (required) */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss/components'; /* import base CSS classes from Tailwind CSS (optional) */
+@import 'tailwindcss/utilities'; /* import base CSS classes from Tailwind CSS (optional) */
 
-@layer components {
-    .vtmn-text-input.nav-search {
-        position: relative;
-        background-color: var(--vtmn-semantic-color_background-secondary);
-        box-shadow: none;
-    }
+.vtmn-text-input.nav-search {
+    position: relative;
+    background-color: var(--vtmn-semantic-color_background-secondary);
+    box-shadow: none;
+}
 
-    .vtmn-text-input.nav-search:hover, .vtmn-text-input.nav-search:focus {
-        box-shadow: none !important;
-    }
+.vtmn-text-input.nav-search:hover, .vtmn-text-input.nav-search:focus {
+    box-shadow: none !important;
 }
