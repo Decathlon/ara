@@ -24,4 +24,4 @@ Please make sure your PullRequest respect all those items :
 * [ ] If your PR is related to an issue, add the issue's number in it.
 * [ ] All the code you added is documented.
 * [ ] All the code you added is tested and the  tests are in success.
-* [ ] You already signed the [Contributor License Agreement](https://github.com/Decathlon/ara/blob/main/doc/contributing/contributor-licence-agreement.adoc) and give us the document
+* [ ] You already signed the [Contributor License Agreement](https://cla-assistant.io/Decathlon/ara) and give us the document
