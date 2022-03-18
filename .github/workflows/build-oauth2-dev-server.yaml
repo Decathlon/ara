@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v2
       - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
         name: Install xmllint
-        run: sudo apt-get install libxml2-utils
+        run: sudo apt-get update && sudo apt-get install libxml2-utils
       - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
         name: Set up JDK
         uses: actions/setup-java@v2.3.1

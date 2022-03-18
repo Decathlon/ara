@@ -141,7 +141,7 @@ jobs:
       - name: stop oauth2-dev-server
         run: docker-compose -f code/docker-compose.dev.yaml down
       - name: Install xmllint
-        run: sudo apt-get install libxml2-utils
+        run: sudo apt-get update && sudo apt-get install libxml2-utils
       - name: Prepare
         id: prep
         run: |
@@ -277,7 +277,7 @@ jobs:
         with:
           python-version: 3.7
       - name: Install xmllint
-        run: sudo apt-get install libxml2-utils
+        run: sudo apt-get update && sudo apt-get install libxml2-utils
       - name: Bump version
         working-directory: code
         run: |
