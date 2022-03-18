@@ -147,12 +147,21 @@ To enable this tools, `node` is required. You can follow this step to use it:
 
 ```
 npm install
-npm run prepare
 ```
+
+Then `git commit` command will trigger a prompt to build a proper commit message.
 
 And that's all !
 
 You can now use the standard `git commit` to interact with a prompt to build your conventional commits.
+
+In order to disable the commitizen hook if needed, you can fill a specific environment variable:
+
+```
+export COMMITIZEN_HOOK_DISABLED=true
+```
+
+With this, commitizen promp will be skiped.
 
 [NOTE]
 .Tools used
