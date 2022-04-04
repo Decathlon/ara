@@ -1,0 +1,106 @@
+name: build web-ux
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+  workflow_dispatch:
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@v3.4.1
+        with:
+          paths: '["code/web-ux/**", ".github/workflows/build-web-ux.yaml"]'
+          cancel_others: 'true'
+          do_not_skip: '["workflow_dispatch", "push"]'
+  semantic-release:
+    needs: prepare
+    if: ${{ needs.prepare.outputs.should_skip != 'true' }}
+    runs-on: ubuntu-latest
+    concurrency: 
+      group: ci-${{ github.ref }}
+      cancel-in-progress: false
+    outputs:
+      new_release_published: ${{ steps.release.outputs.new_release_published }}
+      new_release_version: ${{ steps.release.outputs.new_release_version }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Semantic Release web-ux
+        id: release
+        uses: cycjimmy/semantic-release-action@v2
+        with:
+          working_directory: code/web-ux
+          semantic_version: 18
+          dry_run: false
+          extra_plugins: |
+            @semantic-release/commit-analyzer@9.0.2
+            @semantic-release/release-notes-generator@10.0.3
+            @semantic-release/exec@6.0.2
+            @semantic-release/npm@8.0.3
+            @semantic-release/git@10.0.1
+          extends: |
+            semantic-release-monorepo
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  build-web-ux:
+    needs: 
+      - prepare
+      - semantic-release
+    if: ${{ needs.prepare.outputs.should_skip != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          ref: ${{ github.ref }}
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+        with:
+          languages: javascript
+          config-file: .github/codeql/codeql-web-ux-config.yml
+      - name: Get project version
+        id: getVersion
+        working-directory: code/web-ux
+        run: |
+          PROJECT_VERSION=$(make -s get-version)
+          echo ::set-output name=projectVersion::${PROJECT_VERSION}
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        with:
+          projectBaseDir: code/web-ux
+          args: >
+            -Dsonar.projectVersion=${{ steps.getVersion.outputs.projectVersion }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Build
+        working-directory: code/web-ux
+        run: make build  
+      - name: Login to DockerHub
+        if: ${{ needs.semantic-release.outputs.new_release_published == 'true' }}
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Push
+        if: ${{ needs.semantic-release.outputs.new_release_published == 'true' }}
+        working-directory: code/web-ux
+        run: make push VERSION=${{ needs.semantic-release.outputs.new_release_version }}
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1
+        with:
+          category: "ara_web-ux"

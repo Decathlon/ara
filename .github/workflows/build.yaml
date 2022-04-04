@@ -23,6 +23,9 @@ on:
 jobs:
   prepare:
     runs-on: ubuntu-latest
+    concurrency: 
+      group: ci-${{ github.ref }}
+      cancel-in-progress: false
     outputs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
       paths_result: ${{ steps.skip_check.outputs.paths_result }}
