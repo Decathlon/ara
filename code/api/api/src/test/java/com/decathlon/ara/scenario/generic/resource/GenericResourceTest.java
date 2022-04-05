@@ -55,7 +55,7 @@ class GenericResourceTest {
 
         Long projectId = 1L;
 
-        BadRequestException exception = mock(BadRequestException.class);
+        BadRequestException exception = new BadRequestException("message", "resource", "key");
 
         // When
         when(projectService.toId(projectCode)).thenReturn(projectId);
