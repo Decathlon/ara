@@ -24,7 +24,7 @@
     "vuex": "^4.0.2"
   },
   "devDependencies": {
-    "@rushstack/eslint-patch": "^1.1.0",
+    "@rushstack/eslint-patch": "^1.1.2",
     "@vitejs/plugin-vue": "^2.1.0",
     "@vue/eslint-config-prettier": "^7.0.0",
     "@vue/test-utils": "^2.0.0-rc.18",
