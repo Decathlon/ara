@@ -22,10 +22,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-public class ImageEmbeddingTest {
+class ImageEmbeddingTest {
 
     @Test
-    public void toHtml_ShouldReturnEmpty_WhenUrlIsNull() {
+    void toHtml_ShouldReturnEmpty_WhenUrlIsNull() {
         // GIVEN
         final String nullUrl = null;
         final ImageEmbedding cut = new ImageEmbedding(null, null, nullUrl, null);
@@ -38,7 +38,7 @@ public class ImageEmbeddingTest {
     }
 
     @Test
-    public void toHtml_ShouldEscapeHtmlCharacters_WhenUrlContainsHtmlCharacters() {
+    void toHtml_ShouldEscapeHtmlCharacters_WhenUrlContainsHtmlCharacters() {
         // GIVEN
         final String urlWithHtml = "Escaping<test> &amp; \"checked'";
         final ImageEmbedding cut = new ImageEmbedding(null, null, urlWithHtml, null);

@@ -17,9 +17,16 @@
 
 package com.decathlon.ara.defect.jira.api.mapper;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import com.decathlon.ara.defect.bean.Defect;
+import com.decathlon.ara.defect.jira.api.model.JiraFields;
+import com.decathlon.ara.defect.jira.api.model.JiraIssue;
+import com.decathlon.ara.defect.jira.api.model.status.JiraStatus;
+import com.decathlon.ara.defect.jira.api.model.status.JiraStatusCategory;
+import com.decathlon.ara.domain.enumeration.ProblemStatus;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -29,26 +36,18 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import com.decathlon.ara.defect.bean.Defect;
-import com.decathlon.ara.defect.jira.api.model.JiraFields;
-import com.decathlon.ara.defect.jira.api.model.JiraIssue;
-import com.decathlon.ara.defect.jira.api.model.status.JiraStatus;
-import com.decathlon.ara.defect.jira.api.model.status.JiraStatusCategory;
-import com.decathlon.ara.domain.enumeration.ProblemStatus;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class JiraMapperTest {
+class JiraMapperTest {
 
     @InjectMocks
     private JiraMapper jiraMapper;
 
     @Test
-    public void toDefect_returnDefectWithId_whenJiraIssueHasKey() {
+    void toDefect_returnDefectWithId_whenJiraIssueHasKey() {
         // Given
         JiraIssue jiraIssue = mock(JiraIssue.class);
         String key = "PRJ-XX";
@@ -63,7 +62,7 @@ public class JiraMapperTest {
     }
 
     @Test
-    public void toDefect_returnDefectWithoutCloseDateTime_whenJiraIssueHasNoResolutionDate() {
+    void toDefect_returnDefectWithoutCloseDateTime_whenJiraIssueHasNoResolutionDate() {
         // Given
         JiraIssue jiraIssue = mock(JiraIssue.class);
         JiraFields jiraFields = mock(JiraFields.class);
@@ -79,7 +78,7 @@ public class JiraMapperTest {
     }
 
     @Test
-    public void toDefect_returnDefectWithCloseDateTime_whenJiraIssueHasAResolutionDate() throws ParseException {
+    void toDefect_returnDefectWithCloseDateTime_whenJiraIssueHasAResolutionDate() throws ParseException {
         // Given
         JiraIssue jiraIssue = mock(JiraIssue.class);
         JiraFields jiraFields = mock(JiraFields.class);
@@ -101,7 +100,7 @@ public class JiraMapperTest {
     }
 
     @Test
-    public void toDefect_returnOpenDefect_whenJiraIssueHasUndefinedStatus() {
+    void toDefect_returnOpenDefect_whenJiraIssueHasUndefinedStatus() {
         // Given
         JiraIssue jiraIssue = mock(JiraIssue.class);
         JiraFields jiraFields = mock(JiraFields.class);
@@ -122,7 +121,7 @@ public class JiraMapperTest {
     }
 
     @Test
-    public void toDefect_returnOpenDefect_whenJiraIssueHasIndeterminateStatus() {
+    void toDefect_returnOpenDefect_whenJiraIssueHasIndeterminateStatus() {
         // Given
         JiraIssue jiraIssue = mock(JiraIssue.class);
         JiraFields jiraFields = mock(JiraFields.class);
@@ -143,7 +142,7 @@ public class JiraMapperTest {
     }
 
     @Test
-    public void toDefect_returnOpenDefect_whenJiraIssueHasNewStatus() {
+    void toDefect_returnOpenDefect_whenJiraIssueHasNewStatus() {
         // Given
         JiraIssue jiraIssue = mock(JiraIssue.class);
         JiraFields jiraFields = mock(JiraFields.class);
@@ -164,7 +163,7 @@ public class JiraMapperTest {
     }
 
     @Test
-    public void toDefect_returnClosedDefect_whenJiraIssueHasDoneStatus() {
+    void toDefect_returnClosedDefect_whenJiraIssueHasDoneStatus() {
         // Given
         JiraIssue jiraIssue = mock(JiraIssue.class);
         JiraFields jiraFields = mock(JiraFields.class);
@@ -185,7 +184,7 @@ public class JiraMapperTest {
     }
 
     @Test
-    public void toDefects_returnEmptyList_whenJiraIssuesEmpty() {
+    void toDefects_returnEmptyList_whenJiraIssuesEmpty() {
         // Given
 
         // When
@@ -198,7 +197,7 @@ public class JiraMapperTest {
     }
 
     @Test
-    public void toDefects_returnDefects_whenJiraIssuesNotEmpty() {
+    void toDefects_returnDefects_whenJiraIssuesNotEmpty() {
         // Given
         JiraIssue jiraIssue1 = mock(JiraIssue.class);
         String key1 = "PRJ-1";

@@ -17,6 +17,12 @@
 
 package com.decathlon.ara.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -25,14 +31,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class FileProcessorService {
@@ -132,7 +130,7 @@ public class FileProcessorService {
                 .map(file -> getMappedObjectFromRawFile(file, objectClass))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

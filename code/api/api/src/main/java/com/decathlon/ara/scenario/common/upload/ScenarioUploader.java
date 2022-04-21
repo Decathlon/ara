@@ -1,38 +1,22 @@
 package com.decathlon.ara.scenario.common.upload;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
-
-import javax.persistence.EntityManager;
-
+import com.decathlon.ara.Entities;
+import com.decathlon.ara.Messages;
+import com.decathlon.ara.domain.*;
+import com.decathlon.ara.domain.enumeration.FunctionalityType;
+import com.decathlon.ara.domain.enumeration.Technology;
+import com.decathlon.ara.repository.*;
+import com.decathlon.ara.scenario.cucumber.bean.Tag;
+import com.decathlon.ara.scenario.cucumber.util.ScenarioExtractorUtil;
+import com.decathlon.ara.service.exception.BadRequestException;
+import com.decathlon.ara.service.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.decathlon.ara.Entities;
-import com.decathlon.ara.Messages;
-import com.decathlon.ara.domain.Country;
-import com.decathlon.ara.domain.Functionality;
-import com.decathlon.ara.domain.Scenario;
-import com.decathlon.ara.domain.Severity;
-import com.decathlon.ara.domain.Source;
-import com.decathlon.ara.domain.enumeration.FunctionalityType;
-import com.decathlon.ara.domain.enumeration.Technology;
-import com.decathlon.ara.repository.CountryRepository;
-import com.decathlon.ara.repository.FunctionalityRepository;
-import com.decathlon.ara.repository.ScenarioRepository;
-import com.decathlon.ara.repository.SeverityRepository;
-import com.decathlon.ara.repository.SourceRepository;
-import com.decathlon.ara.scenario.cucumber.bean.Tag;
-import com.decathlon.ara.scenario.cucumber.util.ScenarioExtractorUtil;
-import com.decathlon.ara.service.exception.BadRequestException;
-import com.decathlon.ara.service.exception.NotFoundException;
+import javax.persistence.EntityManager;
+import java.util.*;
 
 @Component
 @Transactional
@@ -162,7 +146,7 @@ public class ScenarioUploader {
         return severityRepository.findAllByProjectIdOrderByPosition(projectId).stream()
                 .map(Severity::getCode)
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -243,7 +227,7 @@ public class ScenarioUploader {
                 .map(Scenario::getSource)
                 .distinct()
                 .sorted()
-                .collect(Collectors.toList());
+                .toList();
 
         String coverage = null;
         for (Source source : sortedDistinctSources) {

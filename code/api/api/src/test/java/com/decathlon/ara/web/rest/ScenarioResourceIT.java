@@ -17,13 +17,13 @@
 
 package com.decathlon.ara.web.rest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import java.util.List;
-
-import javax.transaction.Transactional;
-
+import com.decathlon.ara.domain.Functionality;
+import com.decathlon.ara.domain.Scenario;
+import com.decathlon.ara.repository.FunctionalityRepository;
+import com.decathlon.ara.repository.ScenarioRepository;
+import com.decathlon.ara.util.TestUtil;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseSetup;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,13 +33,11 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
-import com.decathlon.ara.domain.Functionality;
-import com.decathlon.ara.domain.Scenario;
-import com.decathlon.ara.repository.FunctionalityRepository;
-import com.decathlon.ara.repository.ScenarioRepository;
-import com.decathlon.ara.util.TestUtil;
-import com.github.springtestdbunit.DbUnitTestExecutionListener;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
+import javax.transaction.Transactional;
+import java.io.IOException;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Disabled
 @SpringBootTest
@@ -52,7 +50,7 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 		locations = "classpath:application-db-h2.properties")
 @Transactional
 @DatabaseSetup("/dbunit/functionality.xml")
-public class ScenarioResourceIT {
+class ScenarioResourceIT {
 
     private static final String PROJECT_CODE = "p";
 
@@ -76,7 +74,7 @@ public class ScenarioResourceIT {
 
     @Deprecated
     @Test
-    public void testUploadCucumber() throws IOException {
+    void testUploadCucumber() throws IOException {
         String reportJson = TestUtil.loadUtf8ResourceAsString("reports/tests/dry-report.json");
 
         cut.uploadCucumber(PROJECT_CODE, "sourceB", reportJson);

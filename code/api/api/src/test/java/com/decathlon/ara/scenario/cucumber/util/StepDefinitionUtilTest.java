@@ -24,10 +24,10 @@ import org.junit.jupiter.api.Test;
 import com.decathlon.ara.scenario.cucumber.bean.Argument;
 
 @SuppressWarnings("static-method")
-public class StepDefinitionUtilTest {
+class StepDefinitionUtilTest {
 
     @Test
-    public void testSimulateMatchingStepDefinition() {
+    void testSimulateMatchingStepDefinition() {
         String stepName = "A step number 1 that fails with error \"string parameter 1\"";
         Argument[] arguments = { new Argument("1", 14), new Argument("string parameter 1", 39) };
         String simulatedStepDefinition = StepDefinitionUtil.simulateMatchingStepDefinition(stepName, arguments);
@@ -35,7 +35,7 @@ public class StepDefinitionUtilTest {
     }
 
     @Test
-    public void testArgumentAtStart() {
+    void testArgumentAtStart() {
         String stepName = "A1";
         Argument[] arguments = { new Argument("1", 1) };
         String simulatedStepDefinition = StepDefinitionUtil.simulateMatchingStepDefinition(stepName, arguments);
@@ -43,7 +43,7 @@ public class StepDefinitionUtilTest {
     }
 
     @Test
-    public void testArgumentAtEnd() {
+    void testArgumentAtEnd() {
         String stepName = "1A";
         Argument[] arguments = { new Argument("1", 0) };
         String simulatedStepDefinition = StepDefinitionUtil.simulateMatchingStepDefinition(stepName, arguments);
@@ -51,7 +51,7 @@ public class StepDefinitionUtilTest {
     }
 
     @Test
-    public void testIntegerArgumentAsString() {
+    void testIntegerArgumentAsString() {
         String stepName = "A\"1\"B";
         Argument[] arguments = { new Argument("1", 2) };
         String simulatedStepDefinition = StepDefinitionUtil.simulateMatchingStepDefinition(stepName, arguments);
@@ -59,13 +59,13 @@ public class StepDefinitionUtilTest {
     }
 
     @Test
-    public void testNoArgument() {
+    void testNoArgument() {
         String simulatedStepDefinition = StepDefinitionUtil.simulateMatchingStepDefinition("abc", new Argument[0]);
         assertThat(simulatedStepDefinition).isEqualTo("^abc$");
     }
 
     @Test
-    public void testSpecialCharacters() {
+    void testSpecialCharacters() {
         String original = "Test <([{\\^-=$!|]})?*+.>";
         String replaced = "Test " +
                 "\\<" +

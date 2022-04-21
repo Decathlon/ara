@@ -17,13 +17,10 @@
 
 package com.decathlon.ara.web.rest;
 
-import static com.decathlon.ara.util.TestUtil.header;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
-
-import javax.transaction.Transactional;
-
+import com.decathlon.ara.service.dto.type.TypeWithSourceCodeDTO;
+import com.decathlon.ara.web.rest.util.HeaderUtil;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseSetup;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,10 +32,11 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
-import com.decathlon.ara.service.dto.type.TypeWithSourceCodeDTO;
-import com.decathlon.ara.web.rest.util.HeaderUtil;
-import com.github.springtestdbunit.DbUnitTestExecutionListener;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
+import javax.transaction.Transactional;
+import java.util.List;
+
+import static com.decathlon.ara.util.TestUtil.header;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Disabled
 @SpringBootTest
@@ -51,7 +49,7 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 		locations = "classpath:application-db-h2.properties")
 @Transactional
 @DatabaseSetup("/dbunit/type.xml")
-public class TypeResourceIT {
+class TypeResourceIT {
 
     private static final String PROJECT_CODE = "p";
 
@@ -59,7 +57,7 @@ public class TypeResourceIT {
     private TypeResource cut;
 
     @Test
-    public void getAll_ShouldReturnAllTypesOfTheProject_WhenCallingWithAnExistingProject() {
+    void getAll_ShouldReturnAllTypesOfTheProject_WhenCallingWithAnExistingProject() {
         // WHEN
         ResponseEntity<List<TypeWithSourceCodeDTO>> response = cut.getAll(PROJECT_CODE);
 
@@ -73,7 +71,7 @@ public class TypeResourceIT {
     }
 
     @Test
-    public void create_ShouldInsertNewType_WhenAllBusinessRulesAreMet() {
+    void create_ShouldInsertNewType_WhenAllBusinessRulesAreMet() {
         // GIVEN
         final TypeWithSourceCodeDTO type = new TypeWithSourceCodeDTO("TYPE-05", "TEST5", true, false, "code1");
 
@@ -93,7 +91,7 @@ public class TypeResourceIT {
     }
 
     @Test
-    public void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingCode() {
+    void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingCode() {
         // GIVEN
         final TypeWithSourceCodeDTO type = new TypeWithSourceCodeDTO("TYPE-01", "TEST7", true, false, "code1");
 
@@ -109,7 +107,7 @@ public class TypeResourceIT {
     }
 
     @Test
-    public void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingName() {
+    void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingName() {
         // GIVEN
         final TypeWithSourceCodeDTO type = new TypeWithSourceCodeDTO("TYPE-11", "TEST", true, false, "code1");
 
@@ -125,7 +123,7 @@ public class TypeResourceIT {
     }
 
     @Test
-    public void createOrUpdate_ShouldUpdateAType_WhenAllBusinessRulesAreMet() {
+    void createOrUpdate_ShouldUpdateAType_WhenAllBusinessRulesAreMet() {
         // GIVEN
         final String code = "TYPE-03";
         final TypeWithSourceCodeDTO type = new TypeWithSourceCodeDTO(code, "updated", true, false, "code3");
@@ -145,7 +143,7 @@ public class TypeResourceIT {
     }
 
     @Test
-    public void createOrUpdate_ShouldNotFailAsNotUnique_WhenChangingNothing() {
+    void createOrUpdate_ShouldNotFailAsNotUnique_WhenChangingNothing() {
         // GIVEN
         String code = "TYPE-02";
         final TypeWithSourceCodeDTO type = new TypeWithSourceCodeDTO(code, "TEST2", true, false, "code2");
@@ -161,7 +159,7 @@ public class TypeResourceIT {
     }
 
     @Test
-    public void createOrUpdate_ShouldFailAsNotUnique_WhenCreatingWithAnExistingName() {
+    void createOrUpdate_ShouldFailAsNotUnique_WhenCreatingWithAnExistingName() {
         // GIVEN
         String code = "TYPE-02";
         final TypeWithSourceCodeDTO type = new TypeWithSourceCodeDTO("TYPE-11", "TEST", true, false, "code1");
@@ -178,7 +176,7 @@ public class TypeResourceIT {
     }
 
     @Test
-    public void delete_ShouldRemoveType_WhenTypeExists() {
+    void delete_ShouldRemoveType_WhenTypeExists() {
         // WHEN
         ResponseEntity<Void> response = cut.delete(PROJECT_CODE, "TYPE-04");
 
@@ -193,7 +191,7 @@ public class TypeResourceIT {
     }
 
     @Test
-    public void delete_ShouldFailAsNotFound_WhenCalledWithNonexistentCode() {
+    void delete_ShouldFailAsNotFound_WhenCalledWithNonexistentCode() {
         // GIVEN
         String nonexistentCode = "NONEXISTENT";
 
@@ -209,7 +207,7 @@ public class TypeResourceIT {
     }
 
     @Test
-    public void delete_ShouldFailAsBadRequest_WhenTypeIsUsedByProblemPattern() {
+    void delete_ShouldFailAsBadRequest_WhenTypeIsUsedByProblemPattern() {
         // GIVEN
         String codeOfTypeUsedByProblemPattern = "TYPE-01";
 
@@ -225,7 +223,7 @@ public class TypeResourceIT {
     }
 
     @Test
-    public void delete_ShouldFailAsBadRequest_WhenTypeIsUsedByRun() {
+    void delete_ShouldFailAsBadRequest_WhenTypeIsUsedByRun() {
         // GIVEN
         String codeOfTypeUsedByRun = "TYPE-03";
 

@@ -17,28 +17,6 @@
 
 package com.decathlon.ara.scenario.cypress.indexer;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import com.decathlon.ara.domain.ExecutedScenario;
 import com.decathlon.ara.domain.Run;
 import com.decathlon.ara.scenario.cucumber.bean.Feature;
@@ -51,9 +29,23 @@ import com.decathlon.ara.scenario.cypress.settings.CypressSettings;
 import com.decathlon.ara.service.FileProcessorService;
 import com.decathlon.ara.service.TechnologySettingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class CypressScenariosIndexerTest {
+class CypressScenariosIndexerTest {
 
     @Mock
     private ObjectMapper objectMapper;
@@ -74,7 +66,7 @@ public class CypressScenariosIndexerTest {
     private CypressScenariosIndexer cypressScenariosIndexer;
 
     @Test
-    public void getExecutedScenarios_returnEmptyList_whenNoCucumberFolderFound(){
+    void getExecutedScenarios_returnEmptyList_whenNoCucumberFolderFound(){
         // Given
         File parentFolder = mock(File.class);
         Run run = mock(Run.class);
@@ -99,7 +91,7 @@ public class CypressScenariosIndexerTest {
     }
 
     @Test
-    public void getExecutedScenarios_returnEmptyList_whenCucumberFolderIsEmpty(){
+    void getExecutedScenarios_returnEmptyList_whenCucumberFolderIsEmpty(){
         // Given
         File parentFolder = mock(File.class);
         Run run = mock(Run.class);
@@ -130,7 +122,7 @@ public class CypressScenariosIndexerTest {
     }
 
     @Test
-    public void getExecutedScenarios_returnEmptyList_whenCucumberFolderHasNoReportMatchingCucumberSettingSuffix(){
+    void getExecutedScenarios_returnEmptyList_whenCucumberFolderHasNoReportMatchingCucumberSettingSuffix(){
         // Given
         File parentFolder = mock(File.class);
         Run run = mock(Run.class);
@@ -170,7 +162,7 @@ public class CypressScenariosIndexerTest {
     }
 
     @Test
-    public void getExecutedScenarios_returnExecutedScenarios_whenCucumberReportsButStepDefinitionsFolderEmpty(){
+    void getExecutedScenarios_returnExecutedScenarios_whenCucumberReportsButStepDefinitionsFolderEmpty(){
         // Given
         File parentFolder = mock(File.class);
         Run run = mock(Run.class);
@@ -253,7 +245,7 @@ public class CypressScenariosIndexerTest {
     }
 
     @Test
-    public void getExecutedScenarios_returnExecutedScenarios_whenStepDefinitionsFolderHasNoFileMatchingStepDefinitionsSettingSuffix(){
+    void getExecutedScenarios_returnExecutedScenarios_whenStepDefinitionsFolderHasNoFileMatchingStepDefinitionsSettingSuffix(){
         // Given
         File parentFolder = mock(File.class);
         Run run = mock(Run.class);
@@ -350,7 +342,7 @@ public class CypressScenariosIndexerTest {
     }
 
     @Test
-    public void getExecutedScenarios_returnExecutedScenarios_whenAStepDefinitionsFileIsMissing(){
+    void getExecutedScenarios_returnExecutedScenarios_whenAStepDefinitionsFileIsMissing(){
         // Given
         File parentFolder = mock(File.class);
         Run run = mock(Run.class);
@@ -450,7 +442,7 @@ public class CypressScenariosIndexerTest {
     }
 
     @Test
-    public void getExecutedScenarios_returnExecutedScenarios_whenThereIsAStepDefinitionsFileTooMany(){
+    void getExecutedScenarios_returnExecutedScenarios_whenThereIsAStepDefinitionsFileTooMany(){
         // Given
         File parentFolder = mock(File.class);
         Run run = mock(Run.class);
@@ -564,7 +556,7 @@ public class CypressScenariosIndexerTest {
     }
 
     @Test
-    public void getExecutedScenarios_returnExecutedScenarios_whenAllCucumberReportsMatchStepDefinitions(){
+    void getExecutedScenarios_returnExecutedScenarios_whenAllCucumberReportsMatchStepDefinitions(){
         // Given
         File parentFolder = mock(File.class);
         Run run = mock(Run.class);

@@ -89,7 +89,7 @@ class ExecutionRepositoryIT {
     private List<Long> getIds(List<Execution> latestExecutions) {
         return latestExecutions.stream()
                 .map(Execution::getId)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Test

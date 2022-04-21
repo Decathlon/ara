@@ -1,11 +1,6 @@
 package com.decathlon.ara.cartography;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
-
+import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,10 +8,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
 
 @ExtendWith(MockitoExtension.class)
-public class ExporterTest {
+class ExporterTest {
     private static String TEST_STR = "This is a test string";
 
     private Exporter sut;
@@ -27,7 +26,7 @@ public class ExporterTest {
     }
 
     @Test
-    public void generateAndEncodeB64_should_return_the_encoded_generated_byte_array() {
+    void generateAndEncodeB64_should_return_the_encoded_generated_byte_array() {
         // Given
         List<FunctionalityDTO> functionalities = new ArrayList<>();
         byte[] decodedArray = TEST_STR.getBytes(StandardCharsets.UTF_8);
@@ -40,7 +39,7 @@ public class ExporterTest {
     }
 
     @Test
-    public void suitableFor_should_return_false_when_export_name_is_null() {
+    void suitableFor_should_return_false_when_export_name_is_null() {
         // When
         boolean result = this.sut.suitableFor(null);
         // Then
@@ -48,7 +47,7 @@ public class ExporterTest {
     }
 
     @Test
-    public void suitableFor_should_check_that_export_name_is_equal_to_id() {
+    void suitableFor_should_check_that_export_name_is_equal_to_id() {
         // Given
         String exportName = TEST_STR.toLowerCase().replace(" ", "_");
         // When
@@ -58,7 +57,7 @@ public class ExporterTest {
     }
 
     @Test
-    public void getId_should_return_the_name_in_lowercase_and_replace_space_by_underscores() {
+    void getId_should_return_the_name_in_lowercase_and_replace_space_by_underscores() {
         // Given
         String expected = TEST_STR.toLowerCase().replace(" ", "_");
         // When
@@ -68,7 +67,7 @@ public class ExporterTest {
     }
 
     @Test
-    public void listRequiredFields_should_return_an_empty_list_by_default() {
+    void listRequiredFields_should_return_an_empty_list_by_default() {
         // When
         List<ExportField> actual = this.sut.listRequiredFields();
         // Then

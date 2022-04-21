@@ -17,24 +17,6 @@
 
 package com.decathlon.ara.service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.decathlon.ara.ci.util.FetchException;
 import com.decathlon.ara.common.NotGonnaHappenException;
 import com.decathlon.ara.defect.DefectAdapter;
@@ -48,6 +30,17 @@ import com.decathlon.ara.repository.ProjectRepository;
 import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
 import com.decathlon.ara.service.support.Settings;
 import com.decathlon.ara.service.util.DateService;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Handles synchronization of problem statuses with their external defects.<br>
@@ -124,7 +117,7 @@ public class DefectService {
                     .values()
                     .stream()
                     .sorted(Comparator.comparing(DefectAdapter::getName))
-                    .collect(Collectors.toList());
+                    .toList();
         }
         return adapters;
     }
@@ -179,7 +172,7 @@ public class DefectService {
         final long projectId = project.getId();
         final List<Problem> problems = problemRepository.findAllByProjectIdAndDefectIdIsNotEmpty(projectId);
 
-        final List<String> defectIds = problems.stream().map(Problem::getDefectId).collect(Collectors.toList());
+        final List<String> defectIds = problems.stream().map(Problem::getDefectId).toList();
         final List<Defect> statuses = defectAdapter.getStatuses(projectId, defectIds);
         updateDefectAssignations(problems, statuses);
     }
@@ -232,10 +225,10 @@ public class DefectService {
         // Force indexing UNKNOWN for defects assigned while the defect tracking system was down
         final List<Problem> unknownProblems = problems.stream()
                 .filter(p -> p.getDefectExistence() == DefectExistence.UNKNOWN)
-                .collect(Collectors.toList());
+                .toList();
         final List<String> unknownDefectIds = unknownProblems.stream()
                 .map(Problem::getDefectId)
-                .collect(Collectors.toList());
+                .toList();
         if (!unknownDefectIds.isEmpty()) {
             updateDefectAssignations(unknownProblems, defectAdapter.getStatuses(projectId, unknownDefectIds));
         }

@@ -46,7 +46,7 @@ import com.decathlon.ara.service.dto.setting.SettingDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 
 @ExtendWith(MockitoExtension.class)
-public class JiraDefectAdapterTest {
+class JiraDefectAdapterTest {
 
     @Mock
     private SettingProviderService settingProviderService;
@@ -61,7 +61,7 @@ public class JiraDefectAdapterTest {
     private JiraDefectAdapter jiraDefectAdapter;
 
     @Test
-    public void getStatuses_throwFetchException_whenBadRequestExceptionRaised() throws BadRequestException, FetchException {
+    void getStatuses_throwFetchException_whenBadRequestExceptionRaised() throws BadRequestException, FetchException {
         // Given
         Long projectId = 1L;
         List<String> jiraIssueKeys = Arrays.asList("PRJ-1", "PRJ-2", "PRJ-3");
@@ -74,7 +74,7 @@ public class JiraDefectAdapterTest {
     }
 
     @Test
-    public void getStatuses_returnDefects_whenNoErrorFound() throws BadRequestException, FetchException {
+    void getStatuses_returnDefects_whenNoErrorFound() throws BadRequestException, FetchException {
         // Given
         Long projectId = 1L;
         List<String> jiraIssueKeys = Arrays.asList("PRJ-1", "PRJ-2", "PRJ-3");
@@ -106,7 +106,7 @@ public class JiraDefectAdapterTest {
     }
 
     @Test
-    public void getStatuses_returnFilteredDefects_whenSomeKeysAreInvalid() throws BadRequestException, FetchException {
+    void getStatuses_returnFilteredDefects_whenSomeKeysAreInvalid() throws BadRequestException, FetchException {
         // Given
         Long projectId = 1L;
         List<String> jiraIssueKeys = Arrays.asList("INVALID_KEY", "PRJ-1", "PRJ-2", "42", "PRJ-3");
@@ -139,7 +139,7 @@ public class JiraDefectAdapterTest {
     }
 
     @Test
-    public void getChangedDefects_throwFetchException_whenBadRequestExceptionRaised() throws BadRequestException, FetchException, ParseException {
+    void getChangedDefects_throwFetchException_whenBadRequestExceptionRaised() throws BadRequestException, FetchException, ParseException {
         // Given
         Long projectId = 1L;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -153,7 +153,7 @@ public class JiraDefectAdapterTest {
     }
 
     @Test
-    public void getChangedDefects_returnDefects_whenNoErrorFound() throws BadRequestException, FetchException, ParseException {
+    void getChangedDefects_returnDefects_whenNoErrorFound() throws BadRequestException, FetchException, ParseException {
         // Given
         Long projectId = 1L;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -185,7 +185,7 @@ public class JiraDefectAdapterTest {
     }
 
     @Test
-    public void getCode_returnCode() {
+    void getCode_returnCode() {
         // Given
         String expectedCode = "jira";
 
@@ -197,7 +197,7 @@ public class JiraDefectAdapterTest {
     }
 
     @Test
-    public void getName_returnName() {
+    void getName_returnName() {
         // Given
         String expectedName = "Jira";
 
@@ -209,7 +209,7 @@ public class JiraDefectAdapterTest {
     }
 
     @Test
-    public void getSettingDefinitions_returnSettings() {
+    void getSettingDefinitions_returnSettings() {
         // Given
         SettingDTO setting1 = mock(SettingDTO.class);
         SettingDTO setting2 = mock(SettingDTO.class);

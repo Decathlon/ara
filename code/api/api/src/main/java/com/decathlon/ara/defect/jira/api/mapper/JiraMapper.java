@@ -31,7 +31,6 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class JiraMapper {
@@ -79,6 +78,6 @@ public class JiraMapper {
         }
         return jiraIssues.stream()
                 .map(this::toDefect)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

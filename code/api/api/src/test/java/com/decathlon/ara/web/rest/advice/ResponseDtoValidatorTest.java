@@ -17,9 +17,6 @@
 
 package com.decathlon.ara.web.rest.advice;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,8 +24,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.context.request.WebRequest;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
-public class ResponseDtoValidatorTest {
+class ResponseDtoValidatorTest {
 
     @Mock
     private WebRequest request;
@@ -37,7 +37,7 @@ public class ResponseDtoValidatorTest {
     private ResponseDtoValidator cut;
 
     @Test
-    public void getResourceName_ShouldReturnSubResourceOfProject_WhenUrlHasASubResourceOfProject() {
+    void getResourceName_ShouldReturnSubResourceOfProject_WhenUrlHasASubResourceOfProject() {
         // GIVEN
         when(request.getDescription(false))
                 .thenReturn("uri=/api/projects/some-project/some-resources/api");
@@ -50,7 +50,7 @@ public class ResponseDtoValidatorTest {
     }
 
     @Test
-    public void getResourceName_ShouldReturnProjects_WhenUrlIsAProjectUrl() {
+    void getResourceName_ShouldReturnProjects_WhenUrlIsAProjectUrl() {
         // GIVEN
         when(request.getDescription(false))
                 .thenReturn("uri=/api/projects/some-project");

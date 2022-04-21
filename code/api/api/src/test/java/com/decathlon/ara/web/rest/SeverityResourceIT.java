@@ -17,14 +17,10 @@
 
 package com.decathlon.ara.web.rest;
 
-import static com.decathlon.ara.util.TestUtil.NONEXISTENT;
-import static com.decathlon.ara.util.TestUtil.header;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
-
-import javax.transaction.Transactional;
-
+import com.decathlon.ara.service.dto.severity.SeverityDTO;
+import com.decathlon.ara.web.rest.util.HeaderUtil;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseSetup;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,10 +32,12 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
-import com.decathlon.ara.service.dto.severity.SeverityDTO;
-import com.decathlon.ara.web.rest.util.HeaderUtil;
-import com.github.springtestdbunit.DbUnitTestExecutionListener;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
+import javax.transaction.Transactional;
+import java.util.List;
+
+import static com.decathlon.ara.util.TestUtil.NONEXISTENT;
+import static com.decathlon.ara.util.TestUtil.header;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Disabled
 @SpringBootTest
@@ -52,7 +50,7 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 		locations = "classpath:application-db-h2.properties")
 @Transactional
 @DatabaseSetup("/dbunit/severity.xml")
-public class SeverityResourceIT {
+class SeverityResourceIT {
 
     private static final String PROJECT_CODE = "p";
 
@@ -60,7 +58,7 @@ public class SeverityResourceIT {
     private SeverityResource cut;
 
     @Test
-    public void getAll_ShouldReturnAllSeveritiesOfTheProject_WhenCallingWithAnExistingProject() {
+    void getAll_ShouldReturnAllSeveritiesOfTheProject_WhenCallingWithAnExistingProject() {
         // WHEN
         ResponseEntity<List<SeverityDTO>> response = cut.getAll(PROJECT_CODE);
 
@@ -73,7 +71,7 @@ public class SeverityResourceIT {
     }
 
     @Test
-    public void create_ShouldInsertNewSeverity_WhenAllBusinessRulesAreMet() {
+    void create_ShouldInsertNewSeverity_WhenAllBusinessRulesAreMet() {
         // GIVEN
         final SeverityDTO newSeverity = new SeverityDTO("code4", Integer.valueOf(4), "test4", "P4", "G", false);
 
@@ -97,7 +95,7 @@ public class SeverityResourceIT {
     }
 
     @Test
-    public void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingCode() {
+    void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingCode() {
         // GIVEN
         final SeverityDTO newSeverityWithExistingCode = new SeverityDTO("code1", Integer.valueOf(4), "test4", "P0", "G", false);
 
@@ -113,7 +111,7 @@ public class SeverityResourceIT {
     }
 
     @Test
-    public void create_ShouldFailAsNotUnique_WhenCreatingWithAnotherDefaultOnMissing() {
+    void create_ShouldFailAsNotUnique_WhenCreatingWithAnotherDefaultOnMissing() {
         // GIVEN
         final SeverityDTO newSeverityWithAnotherDefaultOnMissing = new SeverityDTO("code7", Integer.valueOf(7), "test7", "P7", PROJECT_CODE, true);
 
@@ -129,7 +127,7 @@ public class SeverityResourceIT {
     }
 
     @Test
-    public void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingShortName() {
+    void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingShortName() {
         // GIVEN
         final SeverityDTO newSeverityWithExistingShortName = new SeverityDTO("code9", Integer.valueOf(10), "test10", "P2", "Z", true);
 
@@ -145,7 +143,7 @@ public class SeverityResourceIT {
     }
 
     @Test
-    public void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingName() {
+    void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingName() {
         // GIVEN
         final SeverityDTO newSeverityWithExistingName = new SeverityDTO("code9", Integer.valueOf(10), "test1", "P10", "Z", false);
 
@@ -161,7 +159,7 @@ public class SeverityResourceIT {
     }
 
     @Test
-    public void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingPosition() {
+    void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingPosition() {
         // GIVEN
         final SeverityDTO newSeverityWithExistingPosition = new SeverityDTO("code9", Integer.valueOf(1), "test10", "P10", "x", false);
 
@@ -177,7 +175,7 @@ public class SeverityResourceIT {
     }
 
     @Test
-    public void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingInitials() {
+    void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingInitials() {
         // GIVEN
         final SeverityDTO newSeverityWithExistingInitials = new SeverityDTO("code9", Integer.valueOf(10), "test10", "P10", "A", false);
 
@@ -193,7 +191,7 @@ public class SeverityResourceIT {
     }
 
     @Test
-    public void createOrUpdate_ShouldUpdateSeverity_WhenAllBusinessRulesAreMet() {
+    void createOrUpdate_ShouldUpdateSeverity_WhenAllBusinessRulesAreMet() {
         // GIVEN
         final String existingSeverityCode = "code2";
         final SeverityDTO updatedProperties = new SeverityDTO("code2", Integer.valueOf(5), "updated1", "updated2", "updated3", false);
@@ -212,7 +210,7 @@ public class SeverityResourceIT {
     }
 
     @Test
-    public void createOrUpdate_ShouldNotFailAsNotUnique_WhenChangingNothing() {
+    void createOrUpdate_ShouldNotFailAsNotUnique_WhenChangingNothing() {
         // GIVEN
         final String existingSeverityCode = "code2";
         final SeverityDTO unchangedProperties = new SeverityDTO("code2", Integer.valueOf(2), "test2", "P2", "C", false);
@@ -228,7 +226,7 @@ public class SeverityResourceIT {
     }
 
     @Test
-    public void createOrUpdate_ShouldFailAsNotUnique_WhenCreatingWithAnExistingShortName() {
+    void createOrUpdate_ShouldFailAsNotUnique_WhenCreatingWithAnExistingShortName() {
         // GIVEN
         final SeverityDTO severityWithExistingShortName = new SeverityDTO("code9", Integer.valueOf(10), "test10", "P2", "Z", false);
 
@@ -244,7 +242,7 @@ public class SeverityResourceIT {
     }
 
     @Test
-    public void createOrUpdate_ShouldFailAsNotUnique_WhenCreatingWithAnExistingName() {
+    void createOrUpdate_ShouldFailAsNotUnique_WhenCreatingWithAnExistingName() {
         // GIVEN
         final SeverityDTO severityWithExistingName = new SeverityDTO("code9", Integer.valueOf(10), "test1", "P10", "Z", false);
 
@@ -260,7 +258,7 @@ public class SeverityResourceIT {
     }
 
     @Test
-    public void createOrUpdate_ShouldFailAsNotUnique_WhenCreatingWithAnExistingPosition() {
+    void createOrUpdate_ShouldFailAsNotUnique_WhenCreatingWithAnExistingPosition() {
         // GIVEN
         final SeverityDTO severityWithExistingPosition = new SeverityDTO("code9", Integer.valueOf(1), "test10", "P10", "x", false);
 
@@ -276,7 +274,7 @@ public class SeverityResourceIT {
     }
 
     @Test
-    public void createOrUpdate_ShouldFailAsNotUnique_WhenCreatingWithExistingInitials() {
+    void createOrUpdate_ShouldFailAsNotUnique_WhenCreatingWithExistingInitials() {
         // GIVEN
         final SeverityDTO severityWithExistingInitials = new SeverityDTO("SEV-10", Integer.valueOf(10), "test10", "P10", "A", false);
 
@@ -292,7 +290,7 @@ public class SeverityResourceIT {
     }
 
     @Test
-    public void delete_ShouldDeleteSeverity_WhenCodeIsFound() {
+    void delete_ShouldDeleteSeverity_WhenCodeIsFound() {
         // WHEN
         ResponseEntity<Void> response = cut.delete(PROJECT_CODE, "code3");
 
@@ -306,7 +304,7 @@ public class SeverityResourceIT {
     }
 
     @Test
-    public void delete_ShouldFailAsNotFound_WhenCodeIsNonexistent() {
+    void delete_ShouldFailAsNotFound_WhenCodeIsNonexistent() {
         // WHEN
         ResponseEntity<Void> response = cut.delete(PROJECT_CODE, String.valueOf(NONEXISTENT));
 

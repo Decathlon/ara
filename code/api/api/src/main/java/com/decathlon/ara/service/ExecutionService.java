@@ -409,7 +409,7 @@ public class ExecutionService {
         if (null != entries) {
             executionDirectories = Arrays.asList(entries).stream()
                     .filter(f -> isExecutionDirectory(f, buildInformationFilePath))
-                    .collect(Collectors.toList());
+                    .toList();
         }
         return executionDirectories;
     }

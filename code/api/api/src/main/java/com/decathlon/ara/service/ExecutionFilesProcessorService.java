@@ -17,41 +17,13 @@
 
 package com.decathlon.ara.service;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.decathlon.ara.ci.bean.Build;
 import com.decathlon.ara.ci.bean.CycleDef;
 import com.decathlon.ara.ci.bean.PlannedIndexation;
 import com.decathlon.ara.ci.bean.PlatformRule;
 import com.decathlon.ara.ci.service.QualityService;
 import com.decathlon.ara.common.NotGonnaHappenException;
-import com.decathlon.ara.domain.Country;
-import com.decathlon.ara.domain.CountryDeployment;
-import com.decathlon.ara.domain.CycleDefinition;
-import com.decathlon.ara.domain.ExecutedScenario;
-import com.decathlon.ara.domain.Execution;
-import com.decathlon.ara.domain.ExecutionCompletionRequest;
-import com.decathlon.ara.domain.Run;
-import com.decathlon.ara.domain.Source;
-import com.decathlon.ara.domain.Type;
+import com.decathlon.ara.domain.*;
 import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
 import com.decathlon.ara.domain.enumeration.JobStatus;
 import com.decathlon.ara.domain.enumeration.QualityStatus;
@@ -65,6 +37,17 @@ import com.decathlon.ara.scenario.common.strategy.ScenariosIndexerStrategy;
 import com.decathlon.ara.service.support.Settings;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.File;
+import java.util.*;
+import java.util.Map.Entry;
 
 @Service
 @Transactional
@@ -301,7 +284,7 @@ public class ExecutionFilesProcessorService {
             final List<PlatformRule> enabledRules = entry.getValue()
                     .stream()
                     .filter(PlatformRule::isEnabled)
-                    .collect(Collectors.toList());
+                    .toList();
             for (final PlatformRule rule : enabledRules) {
                 final String countryCode = rule.getCountry().toLowerCase();
                 final Optional<Country> country = getCountryFromCodeAndCountries(countryCode, allCountries);

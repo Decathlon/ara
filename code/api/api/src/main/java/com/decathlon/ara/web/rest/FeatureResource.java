@@ -17,20 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.FeatureService;
 import com.decathlon.ara.service.dto.feature.DetailledFeatureDTO;
@@ -38,6 +24,11 @@ import com.decathlon.ara.service.dto.feature.FeatureDTO;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
 import com.decathlon.ara.web.rest.util.RestConstants;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * This REST resource will handle the Feature flipping of ARA, to enable or disable experimental features.
@@ -146,7 +137,7 @@ public class FeatureResource {
         }
         List<FeatureDTO> updatedList = this.featureService.retrieveStateOf(featuresToUpdate.stream()
                 .map(FeatureDTO::getCode)
-                .collect(Collectors.toList()));
+                .toList());
         return ResponseEntity.ok(updatedList);
     }
 

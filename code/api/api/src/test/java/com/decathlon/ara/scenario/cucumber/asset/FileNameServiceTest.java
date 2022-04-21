@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class FileNameServiceTest {
+class FileNameServiceTest {
 
     @Mock
     private DateService dateService;
@@ -38,7 +38,7 @@ public class FileNameServiceTest {
     private FileNameService cut;
 
     @Test
-    public void generateReportFileName_ShouldGenerateADatedFileName_WhenCalledWithAnExtension() {
+    void generateReportFileName_ShouldGenerateADatedFileName_WhenCalledWithAnExtension() {
         // GIVEN
         when(dateService.now()).thenReturn(timestamp(2018, 1, 1, 1, 1, 1));
 
@@ -50,7 +50,7 @@ public class FileNameServiceTest {
     }
 
     @Test
-    public void generateReportFileName_ShouldGenerateADatedDirectoryName_WhenCalledWithoutExtension() {
+    void generateReportFileName_ShouldGenerateADatedDirectoryName_WhenCalledWithoutExtension() {
         // GIVEN
         when(dateService.now()).thenReturn(timestamp(2018, 1, 1, 1, 1, 1));
 
@@ -62,7 +62,7 @@ public class FileNameServiceTest {
     }
 
     @Test
-    public void generateReportFileName_ShouldTruncateName_WhenCalledWithALargeScenarioName() {
+    void generateReportFileName_ShouldTruncateName_WhenCalledWithALargeScenarioName() {
         // GIVEN
         when(dateService.now()).thenReturn(timestamp(2018, 1, 1, 1, 1, 1));
 
@@ -77,7 +77,7 @@ public class FileNameServiceTest {
     }
 
     @Test
-    public void generateReportFileName_ShouldReplaceSpacesWithDashes_WhenScenarioNameHasSpaces() {
+    void generateReportFileName_ShouldReplaceSpacesWithDashes_WhenScenarioNameHasSpaces() {
         // GIVEN
         when(dateService.now()).thenReturn(timestamp(2018, 1, 1, 1, 1, 1));
 
@@ -89,7 +89,7 @@ public class FileNameServiceTest {
     }
 
     @Test
-    public void generateReportFileName_ShouldRemoveNonAlphaNumericCharacters_WhenScenarioNameHasSpecialCharacters() {
+    void generateReportFileName_ShouldRemoveNonAlphaNumericCharacters_WhenScenarioNameHasSpecialCharacters() {
         // GIVEN
         when(dateService.now()).thenReturn(timestamp(2018, 1, 1, 1, 1, 1));
 

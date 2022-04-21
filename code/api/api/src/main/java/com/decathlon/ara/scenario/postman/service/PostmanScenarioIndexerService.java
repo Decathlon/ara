@@ -340,7 +340,7 @@ public class PostmanScenarioIndexerService {
                 jsonFilePaths.addAll(walker
                         .filter(path -> path.toString().endsWith(".json"))
                         .sorted()
-                        .collect(Collectors.toList()));
+                        .toList());
             }
         }
 

@@ -17,16 +17,6 @@
 
 package com.decathlon.ara.scenario.generic.bean;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
-
 import com.decathlon.ara.scenario.generic.bean.description.GenericExecutedScenarioDescription;
 import com.decathlon.ara.scenario.generic.bean.display.GenericExecutedScenarioResultsDisplay;
 import com.decathlon.ara.scenario.generic.bean.error.GenericExecutedScenarioError;
@@ -35,6 +25,15 @@ import com.decathlon.ara.scenario.generic.bean.log.GenericExecutedScenarioLogs;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GenericExecutedScenarioReport {
@@ -135,7 +134,7 @@ public class GenericExecutedScenarioReport {
         return Stream.of(countryCodesFromTags, countryCodesFromFeatureTags)
                 .flatMap(Collection::stream)
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -151,7 +150,7 @@ public class GenericExecutedScenarioReport {
                 .filter(tag -> tag.startsWith("country-"))
                 .map(tag -> tag.substring("country-".length()))
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public String getCode() {

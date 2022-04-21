@@ -17,15 +17,6 @@
 
 package com.decathlon.ara.scenario.generic.indexer;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
 import com.decathlon.ara.domain.Error;
 import com.decathlon.ara.domain.ExecutedScenario;
 import com.decathlon.ara.domain.Run;
@@ -39,6 +30,13 @@ import com.decathlon.ara.scenario.generic.bean.log.GenericExecutedScenarioLogs;
 import com.decathlon.ara.scenario.generic.settings.GenericSettings;
 import com.decathlon.ara.service.FileProcessorService;
 import com.decathlon.ara.service.TechnologySettingService;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 public class GenericScenariosIndexer implements ScenariosIndexer {
@@ -61,7 +59,7 @@ public class GenericScenariosIndexer implements ScenariosIndexer {
         return CollectionUtils.isEmpty(reports) ? new ArrayList<>() : reports
                 .stream()
                 .map(report -> getExecutedScenarioFromGenericExecutedScenarioReport(report, run))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -89,7 +87,7 @@ public class GenericScenariosIndexer implements ScenariosIndexer {
                         .map(this::getErrorFromGenericExecutedScenarioError)
                         .filter(Optional::isPresent)
                         .map(Optional::get)
-                        .collect(Collectors.toList());
+                        .toList();
                 executedScenario.addErrors(errors);
             }
 

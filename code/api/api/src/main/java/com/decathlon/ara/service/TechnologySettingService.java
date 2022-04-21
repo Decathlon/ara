@@ -17,20 +17,6 @@
 
 package com.decathlon.ara.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.WordUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.domain.TechnologySetting;
@@ -42,6 +28,18 @@ import com.decathlon.ara.service.dto.setting.SettingDTO.SettingDTOBuilder;
 import com.decathlon.ara.service.dto.setting.TechnologySettingGroupDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.util.Pair;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -94,9 +92,9 @@ public class TechnologySettingService {
                         pair.getSecond()
                                 .stream()
                                 .map(this::getSettingDTOFromAvailableTechnologySetting)
-                                .collect(Collectors.toList())))
+                                .toList()))
                 .map(this::getTechnologySettingGroup)
-                .collect(Collectors.toList());
+                .toList();
         return groups;
     }
 

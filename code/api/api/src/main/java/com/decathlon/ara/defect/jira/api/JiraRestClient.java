@@ -17,39 +17,27 @@
 
 package com.decathlon.ara.defect.jira.api;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-import org.springframework.web.client.RestTemplate;
-
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.defect.jira.api.model.JiraIssue;
 import com.decathlon.ara.defect.jira.api.model.JiraIssueSearchResults;
 import com.decathlon.ara.service.SettingService;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.support.Settings;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.RestTemplate;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Service
 public class JiraRestClient {
@@ -179,6 +167,9 @@ public class JiraRestClient {
 
         HttpHeaders header = getHeader(projectId);
         JiraIssueSearchResults searchResult = getSearchResultsFromHeaderAndUrl(header, finalUrl);
+        if (searchResult == null) {
+            return new ArrayList<>();
+        }
 
         // It is not possible to get all the results at once if their number is greater than a threshold Jira sets.
         // The maxResults field can't be greater than this threshold:
@@ -203,16 +194,18 @@ public class JiraRestClient {
                     .map(page -> firstResultsNumber + (page * actualMaxResults))
                     .mapToObj(String::valueOf)
                     .map(startIndex -> String.format("%s&startAt=%s&maxResults=%d", urlWithJQL, startIndex, actualMaxResults))
-                    .collect(Collectors.toList());
+                    .toList();
             LOG.debug("DEFECT|jira|[Jira] {} API calls required", paginatedUrls.size());
             for (String paginatedUrl : paginatedUrls) {
                 JiraIssueSearchResults paginatedSearchResult = getSearchResultsFromHeaderAndUrl(header, paginatedUrl);
-                List<JiraIssue> paginatedIssues = paginatedSearchResult.getIssues();
-                LOG.debug("DEFECT|jira|[Jira] Pagination: loaded {} issues from url [{}]", paginatedIssues.size(), paginatedUrl);
-                allIssues = Stream.of(allIssues, paginatedIssues)
-                        .flatMap(Collection::stream)
-                        .collect(Collectors.toList());
-                LOG.debug("DEFECT|jira|[Jira] Pagination: Now reaching {} issues", allIssues.size());
+                if (paginatedSearchResult != null) {
+                    List<JiraIssue> paginatedIssues = paginatedSearchResult.getIssues();
+                    LOG.debug("DEFECT|jira|[Jira] Pagination: loaded {} issues from url [{}]", paginatedIssues.size(), paginatedUrl);
+                    allIssues = Stream.of(allIssues, paginatedIssues)
+                            .flatMap(Collection::stream)
+                            .toList();
+                    LOG.debug("DEFECT|jira|[Jira] Pagination: Now reaching {} issues", allIssues.size());
+                }
             }
         }
 

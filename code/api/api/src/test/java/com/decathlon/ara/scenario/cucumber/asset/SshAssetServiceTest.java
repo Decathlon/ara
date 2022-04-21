@@ -33,7 +33,7 @@ import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class SshAssetServiceTest {
+class SshAssetServiceTest {
 
     @Mock
     private AraConfiguration araConfiguration;
@@ -49,7 +49,7 @@ public class SshAssetServiceTest {
     private SshAssetService cut;
 
     @Test
-    public void saveScreenshot_should_upload_file_and_return_correct_url() throws SshException {
+    void saveScreenshot_should_upload_file_and_return_correct_url() throws SshException {
         // GIVEN
         doReturn(sshClientHelper).when(cut).connect();
         when(araConfiguration.getSshRemoteHomeFolder()).thenReturn("/home");
@@ -67,7 +67,7 @@ public class SshAssetServiceTest {
     }
 
     @Test
-    public void saveScreenshot_should_create_directories_only_once() throws SshException {
+    void saveScreenshot_should_create_directories_only_once() throws SshException {
         // GIVEN
         doReturn(sshClientHelper).when(cut).connect();
         when(araConfiguration.getSshRemoteHomeFolder()).thenReturn("/home");
@@ -83,7 +83,7 @@ public class SshAssetServiceTest {
     }
 
     @Test
-    public void saveScreenshot_should_not_fail_but_return_null_on_upload_failure() throws SshException {
+    void saveScreenshot_should_not_fail_but_return_null_on_upload_failure() throws SshException {
         // GIVEN
         doThrow(SshException.class).when(cut).connect();
         byte[] screenshot = new byte[] { 'a', 'n', 'y' };
@@ -96,7 +96,7 @@ public class SshAssetServiceTest {
     }
 
     @Test
-    public void saveHttpLogs_should_upload_file_and_return_correct_url() throws SshException {
+    void saveHttpLogs_should_upload_file_and_return_correct_url() throws SshException {
         // GIVEN
         doReturn(sshClientHelper).when(cut).connect();
         when(araConfiguration.getSshRemoteHomeFolder()).thenReturn("/home");
@@ -114,7 +114,7 @@ public class SshAssetServiceTest {
     }
 
     @Test
-    public void saveHttpLogs_should_create_directories_only_once() throws SshException {
+    void saveHttpLogs_should_create_directories_only_once() throws SshException {
         // GIVEN
         doReturn(sshClientHelper).when(cut).connect();
         when(araConfiguration.getSshRemoteHomeFolder()).thenReturn("/home");
@@ -130,7 +130,7 @@ public class SshAssetServiceTest {
     }
 
     @Test
-    public void saveHttpLogs_should_not_fail_but_return_null_on_upload_failure() throws SshException {
+    void saveHttpLogs_should_not_fail_but_return_null_on_upload_failure() throws SshException {
         // GIVEN
         doThrow(SshException.class).when(cut).connect();
         String html = "any";
