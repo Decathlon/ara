@@ -17,14 +17,11 @@
 
 package com.decathlon.ara.service;
 
-import static com.decathlon.ara.util.TestUtil.NONEXISTENT;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertThrows;
-
-import java.util.List;
-
-import javax.transaction.Transactional;
-
+import com.decathlon.ara.service.dto.execution.ExecutionHistoryPointDTO;
+import com.decathlon.ara.service.dto.run.RunWithQualitiesDTO;
+import com.decathlon.ara.service.exception.NotFoundException;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseSetup;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,11 +31,12 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
-import com.decathlon.ara.service.dto.execution.ExecutionHistoryPointDTO;
-import com.decathlon.ara.service.dto.run.RunWithQualitiesDTO;
-import com.decathlon.ara.service.exception.NotFoundException;
-import com.github.springtestdbunit.DbUnitTestExecutionListener;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
+import javax.transaction.Transactional;
+import java.util.List;
+
+import static com.decathlon.ara.util.TestUtil.NONEXISTENT;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
 
 @Disabled
 @SpringBootTest
@@ -50,14 +48,14 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 @TestPropertySource(
 		locations = "classpath:application-db-h2.properties")
 @Transactional
-public class ExecutionHistoryServiceIT {
+class ExecutionHistoryServiceIT {
 
     @Autowired
     private ExecutionHistoryService cut;
 
     @Test
     @DatabaseSetup({ "/dbunit/ExecutionHistoryServiceIT-getLatestExecutionHistories.xml" })
-    public void getLatestExecutionHistories_should_return_executions_with_teamIds_and_counts() {
+    void getLatestExecutionHistories_should_return_executions_with_teamIds_and_counts() {
         // GIVEN
         long projectId = 1;
 
@@ -80,7 +78,7 @@ public class ExecutionHistoryServiceIT {
 
     @Test
     @DatabaseSetup({ "/dbunit/ExecutionHistoryServiceIT-getLatestExecutionHistories.xml" })
-    public void getExecution_should_return_execution_with_teamIds_and_counts() throws NotFoundException {
+    void getExecution_should_return_execution_with_teamIds_and_counts() throws NotFoundException {
         // GIVEN
         long projectId = 1;
         long executionId = 1;
@@ -94,7 +92,7 @@ public class ExecutionHistoryServiceIT {
 
     @Test
     @DatabaseSetup({ "/dbunit/ExecutionHistoryServiceIT-getLatestExecutionHistories.xml" })
-    public void getExecution_should_throw_NotFoundException_when_not_found() throws NotFoundException {
+    void getExecution_should_throw_NotFoundException_when_not_found() throws NotFoundException {
         // GIVEN
         long projectId = 1;
         long nonexistentExecutionId = NONEXISTENT.longValue();

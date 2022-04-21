@@ -17,15 +17,10 @@
 
 package com.decathlon.ara.web.rest;
 
-import static com.decathlon.ara.util.TestUtil.NONEXISTENT;
-import static com.decathlon.ara.util.TestUtil.header;
-import static com.decathlon.ara.util.TestUtil.longs;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
-
-import javax.transaction.Transactional;
-
+import com.decathlon.ara.service.dto.scenario.ScenarioDTO;
+import com.decathlon.ara.web.rest.util.HeaderUtil;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseSetup;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,10 +32,11 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
-import com.decathlon.ara.service.dto.scenario.ScenarioDTO;
-import com.decathlon.ara.web.rest.util.HeaderUtil;
-import com.github.springtestdbunit.DbUnitTestExecutionListener;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
+import javax.transaction.Transactional;
+import java.util.List;
+
+import static com.decathlon.ara.util.TestUtil.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Disabled
 @SpringBootTest
@@ -53,7 +49,7 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 		locations = "classpath:application-db-h2.properties")
 @Transactional
 @DatabaseSetup("/dbunit/functionality.xml")
-public class FunctionalityResourceGetScenariosIT {
+class FunctionalityResourceGetScenariosIT {
 
     private static final String PROJECT_CODE = "p";
 
@@ -61,7 +57,7 @@ public class FunctionalityResourceGetScenariosIT {
     private FunctionalityResource cut;
 
     @Test
-    public void testGetScenarios() {
+    void testGetScenarios() {
         // Ordered by feature file and then scenario name
         assertFoundScenarios(111, longs(111011201, 11101, 11102, 111011202, 111011203, 11103, 11104));
         assertFoundScenarios(112, longs(111011201, 111011202, 111011203, 11201));
@@ -69,7 +65,7 @@ public class FunctionalityResourceGetScenariosIT {
     }
 
     @Test
-    public void testGetScenariosOfNonExistentFunctionality() {
+    void testGetScenariosOfNonExistentFunctionality() {
         final ResponseEntity<List<ScenarioDTO>> response = cut.getScenarios(PROJECT_CODE, NONEXISTENT.longValue());
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_found");
@@ -78,7 +74,7 @@ public class FunctionalityResourceGetScenariosIT {
     }
 
     @Test
-    public void testGetScenariosOfFolder() {
+    void testGetScenariosOfFolder() {
         final ResponseEntity<List<ScenarioDTO>> response = cut.getScenarios(PROJECT_CODE, 1);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.folders_have_no_coverage");

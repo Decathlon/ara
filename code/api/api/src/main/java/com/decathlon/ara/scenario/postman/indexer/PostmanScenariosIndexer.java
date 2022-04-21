@@ -17,22 +17,6 @@
 
 package com.decathlon.ara.scenario.postman.indexer;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.decathlon.ara.ci.util.JsonParserConsumer;
 import com.decathlon.ara.domain.ExecutedScenario;
 import com.decathlon.ara.domain.Run;
@@ -44,6 +28,16 @@ import com.decathlon.ara.service.FileProcessorService;
 import com.decathlon.ara.service.TechnologySettingService;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class PostmanScenariosIndexer implements ScenariosIndexer {
@@ -84,7 +78,7 @@ public class PostmanScenariosIndexer implements ScenariosIndexer {
         if (containsResult) {
             List<File> postmanReportsWithoutResultFile = postmanReports.stream()
                     .filter(file -> !resultFileName.equals(file.getName().toLowerCase()))
-                    .collect(Collectors.toList());
+                    .toList();
 
             AtomicInteger requestPosition = new AtomicInteger(0);
 
@@ -107,7 +101,7 @@ public class PostmanScenariosIndexer implements ScenariosIndexer {
         }
         return allExecutedScenarios.stream()
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

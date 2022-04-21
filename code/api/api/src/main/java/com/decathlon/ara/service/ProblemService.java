@@ -504,7 +504,7 @@ public class ProblemService {
                 .map(this::toProblemWithAggregate);
 
         // Compute and assign aggregates of each problem
-        List<Long> problemIds = page.getContent().stream().map(ProblemDTO::getId).collect(Collectors.toList());
+        List<Long> problemIds = page.getContent().stream().map(ProblemDTO::getId).toList();
         Map<Long, ProblemAggregate> aggregates = findProblemAggregates(projectId, problemIds);
         for (ProblemWithAggregateDTO problem : page.getContent()) {
             ProblemAggregate aggregate = aggregates.get(problem.getId());
@@ -812,13 +812,13 @@ public class ProblemService {
         int lastExecutionCount = 10;
 
         // Given the problem IDs
-        List<Long> problemIds = problems.stream().map(ProblemDTO::getId).collect(Collectors.toList());
+        List<Long> problemIds = problems.stream().map(ProblemDTO::getId).toList();
 
         for (CycleDefinition cycleDefinition : cycleDefinitionRepository.findAllByProjectIdOrderByBranchPositionAscBranchAscNameAsc(projectId)) {
             List<Execution> lastExecutions = executionRepository
                     .findTop10ByCycleDefinitionProjectIdAndCycleDefinitionBranchAndCycleDefinitionNameOrderByTestDateTimeDesc(
                             cycleDefinition.getProjectId(), cycleDefinition.getBranch(), cycleDefinition.getName());
-            List<Long> lastExecutionIds = lastExecutions.stream().map(Execution::getId).collect(Collectors.toList());
+            List<Long> lastExecutionIds = lastExecutions.stream().map(Execution::getId).toList();
             Map<Long, List<Long>> problemIdsToExecutionIds = problemRepository
                     .findProblemIdsToExecutionIdsAssociations(problemIds, lastExecutionIds);
 

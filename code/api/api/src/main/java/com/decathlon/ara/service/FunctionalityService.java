@@ -413,11 +413,11 @@ public class FunctionalityService {
         List<String> countries = countryRepository.findAllByProjectIdOrderByCode(projectId)
                 .stream()
                 .map(Country::getCode)
-                .collect(Collectors.toList());
+                .toList();
         List<Long> teams = teamRepository.findAllByProjectIdOrderByName(projectId)
                 .stream()
                 .map(Team::getId)
-                .collect(Collectors.toList());
+                .toList();
         List<FunctionalityDTO> functionalityDTOS = CARTOGRAPHY_MAPPER.asFunctionalities(jsonFunctionalities);
         if (functionalityDTOS.isEmpty()) {
             throw new BadRequestException(Messages.IMPORT_FUNCTIONALITY_BAD_INPUT, Entities.FUNCTIONALITY, "import_bad_input");
@@ -439,7 +439,7 @@ public class FunctionalityService {
         // Extract the root ones from the list (ie. the ones with no parent) and save them directly.
         List<Functionality> rootFunctionalities = functionalities.stream()
                 .filter(f -> f.getParentId() == null)
-                .collect(Collectors.toList());
+                .toList();
         functionalities.removeAll(rootFunctionalities);
         LOG.info("FEATURE|import|Saving {} root functionalities into the project {}", rootFunctionalities.size(), projectCode);
         rootFunctionalities.forEach(f -> this.saveNewFunctionality(f, oldIdsToNewIds, false));
@@ -449,7 +449,7 @@ public class FunctionalityService {
             // Retrieve all the functionalities which have parents already saved & save them.
             List<Functionality> childFunctionalities = functionalities.stream()
                     .filter(f -> f.getParentId() != null && oldIdsToNewIds.containsKey(f.getParentId()))
-                    .collect(Collectors.toList());
+                    .toList();
             functionalities.removeAll(childFunctionalities);
             LOG.info("FEATURE|import|Saving {} child functionalities into the project {}", childFunctionalities.size(), projectCode);
             childFunctionalities.forEach(f -> this.saveNewFunctionality(f, oldIdsToNewIds, true));

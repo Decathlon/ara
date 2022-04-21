@@ -143,7 +143,7 @@ class ExecutionResourceIntegration {
     private List<String> getARADataFilesAndFoldersPaths() throws IOException {
         List<String> araDataContent = Files.walk(Paths.get(ARA_DATA_BASE_FOLDER_PATH))
                 .map(Path::toString)
-                .collect(Collectors.toList());
+                .toList();
 
         return araDataContent;
     }
@@ -171,7 +171,7 @@ class ExecutionResourceIntegration {
         executions = executionRepository.findAll()
                 .stream()
                 .filter(execution -> "34910c9971abebce9f633920d8f8cf90853f38ea".equals(execution.getVersion()))
-                .collect(Collectors.toList());
+                .toList();
         assertThat(executions)
                 .hasSize(1)
                 .extracting(
@@ -1819,7 +1819,7 @@ class ExecutionResourceIntegration {
                 .flatMap(Collection::stream)
                 .map(ExecutedScenario::getErrors)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .toList();
         assertThat(errors).isEmpty();
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
@@ -1892,7 +1892,7 @@ class ExecutionResourceIntegration {
 
         executions = executionRepository.findAll().stream()
                 .filter(execution -> "e10b1c9c9a6a9f478d10dd90109c467fd0974c1c".equals(execution.getVersion()))
-                .collect(Collectors.toList());
+                .toList();
         assertThat(executions)
                 .hasSize(1)
                 .extracting(
@@ -2452,7 +2452,7 @@ class ExecutionResourceIntegration {
                 .flatMap(Collection::stream)
                 .map(ExecutedScenario::getErrors)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .toList();
         assertThat(errors)
                 .hasSize(10)
                 .extracting(
@@ -3726,7 +3726,7 @@ class ExecutionResourceIntegration {
         executions = executionRepository.findAll()
                 .stream()
                 .filter(execution -> "34910c9971abebce9f633920d8f8cf90853f38ea".equals(execution.getVersion()))
-                .collect(Collectors.toList());
+                .toList();
         assertThat(executions)
                 .hasSize(1)
                 .extracting(
@@ -3951,7 +3951,7 @@ class ExecutionResourceIntegration {
                 .flatMap(Collection::stream)
                 .map(ExecutedScenario::getErrors)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .toList();
         assertThat(errors).isEmpty();
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
@@ -4025,7 +4025,7 @@ class ExecutionResourceIntegration {
         executions = executionRepository.findAll()
                 .stream()
                 .filter(execution -> "34910c9971abebce9f633920d8f8cf90853f38ea".equals(execution.getVersion()))
-                .collect(Collectors.toList());
+                .toList();
         assertThat(executions)
                 .hasSize(1)
                 .extracting(
@@ -4250,7 +4250,7 @@ class ExecutionResourceIntegration {
                 .flatMap(Collection::stream)
                 .map(ExecutedScenario::getErrors)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .toList();
         assertThat(errors).isEmpty();
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
@@ -4324,7 +4324,7 @@ class ExecutionResourceIntegration {
         executions = executionRepository.findAll()
                 .stream()
                 .filter(execution -> "34910c9971abebce9f633920d8f8cf90853f38ea".equals(execution.getVersion()))
-                .collect(Collectors.toList());
+                .toList();
         assertThat(executions)
                 .hasSize(1)
                 .extracting(
@@ -4549,7 +4549,7 @@ class ExecutionResourceIntegration {
                 .flatMap(Collection::stream)
                 .map(ExecutedScenario::getErrors)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .toList();
         assertThat(errors).isEmpty();
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
@@ -4624,7 +4624,7 @@ class ExecutionResourceIntegration {
         executions = executionRepository.findAll()
                 .stream()
                 .filter(execution -> "34910c9971abebce9f633920d8f8cf90853f38ea".equals(execution.getVersion()))
-                .collect(Collectors.toList());
+                .toList();
         assertThat(executions)
                 .hasSize(1)
                 .extracting(
@@ -4944,7 +4944,7 @@ class ExecutionResourceIntegration {
         executions = executionRepository.findAll()
                 .stream()
                 .filter(execution -> "34910c9971abebce9f633920d8f8cf90853f38ea".equals(execution.getVersion()))
-                .collect(Collectors.toList());
+                .toList();
         assertThat(executions)
                 .hasSize(1)
                 .extracting(
@@ -5237,7 +5237,7 @@ class ExecutionResourceIntegration {
         executions = executionRepository.findAll()
                 .stream()
                 .filter(execution -> "34910c9971abebce9f633920d8f8cf90853f38ea".equals(execution.getVersion()))
-                .collect(Collectors.toList());
+                .toList();
         assertThat(executions)
                 .hasSize(1)
                 .extracting(
@@ -5530,7 +5530,7 @@ class ExecutionResourceIntegration {
         executions = executionRepository.findAll()
                 .stream()
                 .filter(execution -> "34910c9971abebce9f633920d8f8cf90853f38ea".equals(execution.getVersion()))
-                .collect(Collectors.toList());
+                .toList();
         assertThat(executions)
                 .hasSize(1)
                 .extracting(
@@ -5823,7 +5823,7 @@ class ExecutionResourceIntegration {
         executions = executionRepository.findAll()
                 .stream()
                 .filter(execution -> "34910c9971abebce9f633920d8f8cf90853f38ea".equals(execution.getVersion()))
-                .collect(Collectors.toList());
+                .toList();
         assertThat(executions)
                 .hasSize(1)
                 .extracting(
@@ -8978,7 +8978,7 @@ class ExecutionResourceIntegration {
                 .flatMap(Collection::stream)
                 .map(ExecutedScenario::getErrors)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .toList();
         assertThat(errors)
                 .hasSize(2)
                 .extracting(
@@ -9281,7 +9281,7 @@ class ExecutionResourceIntegration {
                 .flatMap(Collection::stream)
                 .map(ExecutedScenario::getErrors)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .toList();
         assertThat(errors)
                 .hasSize(2)
                 .extracting(

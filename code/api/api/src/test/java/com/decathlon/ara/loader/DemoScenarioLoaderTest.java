@@ -17,21 +17,20 @@
 
 package com.decathlon.ara.loader;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertThrows;
-
+import com.decathlon.ara.common.NotGonnaHappenException;
+import com.decathlon.ara.scenario.cucumber.upload.CucumberScenarioUploader;
+import com.decathlon.ara.scenario.postman.upload.PostmanScenarioUploader;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.decathlon.ara.common.NotGonnaHappenException;
-import com.decathlon.ara.scenario.cucumber.upload.CucumberScenarioUploader;
-import com.decathlon.ara.scenario.postman.upload.PostmanScenarioUploader;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
-public class DemoScenarioLoaderTest {
+class DemoScenarioLoaderTest {
 
     @Mock
     private PostmanScenarioUploader postmanScenarioUploader;
@@ -46,7 +45,7 @@ public class DemoScenarioLoaderTest {
     private DemoScenarioLoader cut;
 
     @Test
-    public void getResourceAsUtf8String_ShouldReturnUtf8Content_WhenResourceExists() {
+    void getResourceAsUtf8String_ShouldReturnUtf8Content_WhenResourceExists() {
         // GIVEN
         String resource = "demo/resource";
 
@@ -58,7 +57,7 @@ public class DemoScenarioLoaderTest {
     }
 
     @Test
-    public void getResourceAsUtf8String_ShouldThrowNotGonnaHappenException_WhenDeveloperFucksUpCodeOrPackaging() {
+    void getResourceAsUtf8String_ShouldThrowNotGonnaHappenException_WhenDeveloperFucksUpCodeOrPackaging() {
         assertThrows(NotGonnaHappenException.class, () -> cut.getResourceAsUtf8String("nonexistent"));
     }
 

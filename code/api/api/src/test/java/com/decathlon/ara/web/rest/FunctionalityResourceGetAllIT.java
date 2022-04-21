@@ -17,12 +17,11 @@
 
 package com.decathlon.ara.web.rest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
-
-import javax.transaction.Transactional;
-
+import com.decathlon.ara.domain.enumeration.FunctionalitySeverity;
+import com.decathlon.ara.domain.enumeration.FunctionalityType;
+import com.decathlon.ara.service.dto.functionality.FunctionalityWithChildrenDTO;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseSetup;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,11 +32,10 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
-import com.decathlon.ara.domain.enumeration.FunctionalitySeverity;
-import com.decathlon.ara.domain.enumeration.FunctionalityType;
-import com.decathlon.ara.service.dto.functionality.FunctionalityWithChildrenDTO;
-import com.github.springtestdbunit.DbUnitTestExecutionListener;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
+import javax.transaction.Transactional;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Disabled
 @SpringBootTest
@@ -50,7 +48,7 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 		locations = "classpath:application-db-h2.properties")
 @Transactional
 @DatabaseSetup("/dbunit/functionality.xml")
-public class FunctionalityResourceGetAllIT {
+class FunctionalityResourceGetAllIT {
 
     private static final String PROJECT_CODE = "p";
 
@@ -58,7 +56,7 @@ public class FunctionalityResourceGetAllIT {
     private FunctionalityResource cut;
 
     @Test
-    public void testGetAll() {
+    void testGetAll() {
         ResponseEntity<List<FunctionalityWithChildrenDTO>> response = cut.getAll(PROJECT_CODE);
         final List<FunctionalityWithChildrenDTO> tree = response.getBody();
 

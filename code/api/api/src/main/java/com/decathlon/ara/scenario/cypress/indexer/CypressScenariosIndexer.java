@@ -17,19 +17,6 @@
 
 package com.decathlon.ara.scenario.cypress.indexer;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Component;
-
 import com.decathlon.ara.domain.ExecutedScenario;
 import com.decathlon.ara.domain.Run;
 import com.decathlon.ara.scenario.common.indexer.ScenariosIndexer;
@@ -41,6 +28,13 @@ import com.decathlon.ara.scenario.cypress.bean.media.CypressVideo;
 import com.decathlon.ara.scenario.cypress.settings.CypressSettings;
 import com.decathlon.ara.service.FileProcessorService;
 import com.decathlon.ara.service.TechnologySettingService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.util.Pair;
+import org.springframework.stereotype.Component;
+
+import java.io.File;
+import java.util.*;
 
 @Component
 public class CypressScenariosIndexer implements ScenariosIndexer {
@@ -81,7 +75,7 @@ public class CypressScenariosIndexer implements ScenariosIndexer {
         List<File> cucumberReportFiles = Arrays.stream(cucumberFolderContent)
                 .filter(File::isFile)
                 .filter(file -> file.getName().endsWith(cucumberReportFileNameSuffix))
-                .collect(Collectors.toList());
+                .toList();
 
         if (cucumberReportFiles.isEmpty()) {
             return executedScenarios;
@@ -97,7 +91,7 @@ public class CypressScenariosIndexer implements ScenariosIndexer {
                     return Arrays.stream(files)
                             .filter(File::isFile)
                             .filter(file -> file.getName().endsWith(stepDefinitionFileNameSuffix))
-                            .collect(Collectors.toList());
+                            .toList();
                 })
                 .orElse(new ArrayList<>());
 
@@ -108,7 +102,7 @@ public class CypressScenariosIndexer implements ScenariosIndexer {
                         pair.getSecond().isPresent() ? cucumberScenariosIndexer.getCucumberStepDefinitions(pair.getSecond().get()) : new ArrayList<String>()))
                 .map(pair -> executedScenarioExtractorService.extractExecutedScenarios(pair.getFirst(), pair.getSecond(), run.getJobUrl()))
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .toList();
 
         String mediaPath = technologySettingService.getSettingValue(projectId, CypressSettings.MEDIA_FILE_PATH).orElse("");
         List<CypressMedia> medias = fileProcessorService.getMappedObjectListFromFile(parentFolder, mediaPath, CypressMedia.class);
@@ -122,7 +116,7 @@ public class CypressScenariosIndexer implements ScenariosIndexer {
                     });
                     return scenario;
                 })
-                .collect(Collectors.toList());
+                .toList();
 
         return executedScenarios;
     }

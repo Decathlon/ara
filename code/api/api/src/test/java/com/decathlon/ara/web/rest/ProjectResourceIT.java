@@ -17,15 +17,14 @@
 
 package com.decathlon.ara.web.rest;
 
-import static com.decathlon.ara.util.TestUtil.NONEXISTENT;
-import static com.decathlon.ara.util.TestUtil.header;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
-
-import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
-
+import com.decathlon.ara.domain.Communication;
+import com.decathlon.ara.domain.RootCause;
+import com.decathlon.ara.repository.CommunicationRepository;
+import com.decathlon.ara.repository.RootCauseRepository;
+import com.decathlon.ara.service.dto.project.ProjectDTO;
+import com.decathlon.ara.web.rest.util.HeaderUtil;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseSetup;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,14 +36,13 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
-import com.decathlon.ara.domain.Communication;
-import com.decathlon.ara.domain.RootCause;
-import com.decathlon.ara.repository.CommunicationRepository;
-import com.decathlon.ara.repository.RootCauseRepository;
-import com.decathlon.ara.service.dto.project.ProjectDTO;
-import com.decathlon.ara.web.rest.util.HeaderUtil;
-import com.github.springtestdbunit.DbUnitTestExecutionListener;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
+import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
+import java.util.List;
+
+import static com.decathlon.ara.util.TestUtil.NONEXISTENT;
+import static com.decathlon.ara.util.TestUtil.header;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Disabled
 @SpringBootTest
@@ -57,7 +55,7 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 		locations = "classpath:application-db-h2.properties")
 @Transactional
 @DatabaseSetup("/dbunit/project.xml")
-public class ProjectResourceIT {
+class ProjectResourceIT {
 
     @Autowired
     private ProjectResource cut;
@@ -72,7 +70,7 @@ public class ProjectResourceIT {
     private EntityManager entityManager;
 
     @Test
-    public void create_ShouldInsertEntity_WhenAllRulesAreRespected() {
+    void create_ShouldInsertEntity_WhenAllRulesAreRespected() {
         // GIVEN
         final ProjectDTO project = new ProjectDTO(null, "new-code", "New name", false);
 
@@ -94,7 +92,7 @@ public class ProjectResourceIT {
     }
 
     @Test
-    public void create_ShouldFailAsBadRequest_WhenIdProvided() {
+    void create_ShouldFailAsBadRequest_WhenIdProvided() {
         // GIVEN
         final ProjectDTO projectWithId = new ProjectDTO(NONEXISTENT, "is...", "...provided", false);
 
@@ -108,7 +106,7 @@ public class ProjectResourceIT {
     }
 
     @Test
-    public void create_ShouldFailAsNotUnique_WhenCodeAlreadyExists() {
+    void create_ShouldFailAsNotUnique_WhenCodeAlreadyExists() {
         // GIVEN
         final ProjectDTO projectWithExistingCode = new ProjectDTO(null, "project-y", "any", false);
 
@@ -126,7 +124,7 @@ public class ProjectResourceIT {
     }
 
     @Test
-    public void create_ShouldFailAsNotUnique_WhenNameAlreadyExists() {
+    void create_ShouldFailAsNotUnique_WhenNameAlreadyExists() {
         // GIVEN
         final ProjectDTO projectWithExistingName = new ProjectDTO(null, "new-code", "Project A", false);
 
@@ -144,7 +142,7 @@ public class ProjectResourceIT {
     }
 
     @Test
-    public void create_ShouldInsertCommunications_WhenCreatingAProject() {
+    void create_ShouldInsertCommunications_WhenCreatingAProject() {
         // GIVEN
         final ProjectDTO project = new ProjectDTO(null, "new-code", "any", false);
 
@@ -163,7 +161,7 @@ public class ProjectResourceIT {
     }
 
     @Test
-    public void create_ShouldInsertDefaultRootCauses_WhenCreatingAProject() {
+    void create_ShouldInsertDefaultRootCauses_WhenCreatingAProject() {
         // GIVEN
         final ProjectDTO project = new ProjectDTO(null, "new-code", "any", false);
 
@@ -182,7 +180,7 @@ public class ProjectResourceIT {
     }
 
     @Test
-    public void getAll_ShouldReturnAllEntitiesOrderedByName() {
+    void getAll_ShouldReturnAllEntitiesOrderedByName() {
         // WHEN
         List<ProjectDTO> projects = cut.getAll();
 
@@ -194,7 +192,7 @@ public class ProjectResourceIT {
     }
 
     @Test
-    public void update_ShouldUpdateEntity_WhenAllRulesAreRespected() {
+    void update_ShouldUpdateEntity_WhenAllRulesAreRespected() {
         // GIVEN
         final Long existingId = Long.valueOf(1);
         final ProjectDTO project = new ProjectDTO(null, "renamed-code", "Renamed name", false);
@@ -213,7 +211,7 @@ public class ProjectResourceIT {
     }
 
     @Test
-    public void update_ShouldNotFailAsNameNotUnique_WhenUpdatingWithoutAnyChange() {
+    void update_ShouldNotFailAsNameNotUnique_WhenUpdatingWithoutAnyChange() {
         // GIVEN
         Long existingId = Long.valueOf(1);
         final ProjectDTO project = new ProjectDTO(existingId, "project-y", "Project A", false);
@@ -229,7 +227,7 @@ public class ProjectResourceIT {
     }
 
     @Test
-    public void update_ShouldFailAsNotFound_WhenUpdatingNonexistentEntity() {
+    void update_ShouldFailAsNotFound_WhenUpdatingNonexistentEntity() {
         // GIVEN
         final ProjectDTO anyProject = new ProjectDTO(null, "Trying to...", "... update nonexistent", false);
 
@@ -245,7 +243,7 @@ public class ProjectResourceIT {
     }
 
     @Test
-    public void update_ShouldFailAsNotUnique_WhenCodeAlreadyExists() {
+    void update_ShouldFailAsNotUnique_WhenCodeAlreadyExists() {
         // GIVEN
         final Long id = Long.valueOf(2);
         final ProjectDTO projectWithExistingCode = new ProjectDTO(null, "project-y", "any", false);
@@ -264,7 +262,7 @@ public class ProjectResourceIT {
     }
 
     @Test
-    public void update_ShouldFailAsNotUnique_WhenNameAlreadyExists() {
+    void update_ShouldFailAsNotUnique_WhenNameAlreadyExists() {
         // GIVEN
         final Long id = Long.valueOf(2);
         final ProjectDTO projectWithExistingName = new ProjectDTO(null, "any", "Project A", false);
@@ -283,7 +281,7 @@ public class ProjectResourceIT {
     }
 
     @Test
-    public void update_ShouldNotDeleteCommunications_WhenCalled() {
+    void update_ShouldNotDeleteCommunications_WhenCalled() {
         // GIVEN
         final Long id = Long.valueOf(1);
         final ProjectDTO updatedProjectProperties = new ProjectDTO(null, "any", "any", false);

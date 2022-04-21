@@ -17,14 +17,12 @@
 
 package com.decathlon.ara.web.rest;
 
-import static org.mockito.Mockito.mock;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import javax.transaction.Transactional;
-
+import com.decathlon.ara.features.FeatureActivator;
+import com.decathlon.ara.features.FeatureCollection;
+import com.decathlon.ara.features.IFeature;
+import com.decathlon.ara.service.dto.feature.DetailledFeatureDTO;
+import com.decathlon.ara.service.dto.feature.FeatureDTO;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -44,12 +42,12 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
-import com.decathlon.ara.features.FeatureActivator;
-import com.decathlon.ara.features.FeatureCollection;
-import com.decathlon.ara.features.IFeature;
-import com.decathlon.ara.service.dto.feature.DetailledFeatureDTO;
-import com.decathlon.ara.service.dto.feature.FeatureDTO;
-import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static org.mockito.Mockito.mock;
 
 @Disabled
 @SpringBootTest
@@ -62,7 +60,7 @@ import com.github.springtestdbunit.DbUnitTestExecutionListener;
 		locations = "classpath:application-db-h2.properties")
 @Transactional
 @ExtendWith(MockitoExtension.class)
-public class FeatureResourceIT {
+class FeatureResourceIT {
 
     @Autowired
     private FeatureResource cut;
@@ -103,7 +101,7 @@ public class FeatureResourceIT {
     }
 
     @Test
-    public void test_should_manipulate_the_feature_flipping() {
+    void test_should_manipulate_the_feature_flipping() {
         FeatureDTO feature1 = new FeatureDTO("my-feature", false);
         FeatureDTO feature2 = new FeatureDTO("my-feature-in-test", true);
         FeatureDTO feature3 = new FeatureDTO("an-old-feature", true);
@@ -180,7 +178,7 @@ public class FeatureResourceIT {
     }
 
     @Test
-    public void test_should_send_error_when_default_of_not_existing_one() {
+    void test_should_send_error_when_default_of_not_existing_one() {
         ResponseEntity<FeatureDTO> defaultSettingResponse = cut.retrieveDefaultSetting("nope");
         Assertions.assertThat(defaultSettingResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         Assertions.assertThat(defaultSettingResponse.getHeaders()).containsKey("X-ara-error");
@@ -192,7 +190,7 @@ public class FeatureResourceIT {
     }
 
     @Test
-    public void test_should_not_update_feature_if_not_exists() {
+    void test_should_not_update_feature_if_not_exists() {
         // Try to update a not existing feature
         ResponseEntity<DetailledFeatureDTO> failedUpdateResponse = cut.update("nope", false);
         Assertions.assertThat(failedUpdateResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -223,7 +221,7 @@ public class FeatureResourceIT {
     }
 
     @Test
-    public void test_should_not_reset_feature_if_not_exists() {
+    void test_should_not_reset_feature_if_not_exists() {
         // Try to reset a not existing feature
         ResponseEntity<DetailledFeatureDTO> failedUpdateResponse = cut.reset("nope");
         Assertions.assertThat(failedUpdateResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);

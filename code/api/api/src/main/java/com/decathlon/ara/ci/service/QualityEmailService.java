@@ -17,26 +17,6 @@
 
 package com.decathlon.ara.ci.service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.decathlon.ara.configuration.AraConfiguration;
 import com.decathlon.ara.domain.Project;
 import com.decathlon.ara.domain.Team;
@@ -52,6 +32,19 @@ import com.decathlon.ara.service.dto.quality.QualitySeverityDTO;
 import com.decathlon.ara.service.dto.run.ExecutedScenarioHandlingCountsDTO;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.support.Settings;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Service
 @Transactional
@@ -91,7 +84,7 @@ public class QualityEmailService {
         if (from != null && to.isPresent()) {
             final List<Team> teamsAssignableToProblems = teamRepository.findAllByProjectIdOrderByName(projectId).stream()
                     .filter(Team::isAssignableToProblems)
-                    .collect(Collectors.toList());
+                    .toList();
 
             Map<String, Object> variables = new HashMap<>();
             variables.put("execution", execution);

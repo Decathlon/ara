@@ -59,7 +59,7 @@ public class FeatureService {
     public List<FeatureDTO> listAll() {
         return this.featureCollection.list().stream()
                 .map(feature -> new FeatureDTO(feature.getCode(), this.featureActivator.getState(feature.getCode())))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -103,7 +103,7 @@ public class FeatureService {
         return codes.stream()
                 .filter(code -> this.featureCollection.get(code).isPresent())
                 .map(code -> new FeatureDTO(code, this.featureActivator.getState(code)))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

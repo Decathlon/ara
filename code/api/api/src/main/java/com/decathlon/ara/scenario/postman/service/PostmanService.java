@@ -699,7 +699,7 @@ public class PostmanService {
 
         return newmanScenarios.stream()
                 .map(NewmanScenario::getScenario)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

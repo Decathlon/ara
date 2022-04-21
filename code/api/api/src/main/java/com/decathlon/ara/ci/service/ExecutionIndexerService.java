@@ -17,18 +17,6 @@
 
 package com.decathlon.ara.ci.service;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.decathlon.ara.ci.bean.PlannedIndexation;
 import com.decathlon.ara.domain.CycleDefinition;
 import com.decathlon.ara.domain.Error;
@@ -40,6 +28,17 @@ import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
 import com.decathlon.ara.service.ErrorService;
 import com.decathlon.ara.service.ExecutionFilesProcessorService;
 import com.decathlon.ara.service.ProblemDenormalizationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.File;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional

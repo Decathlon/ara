@@ -17,48 +17,6 @@
 
 package com.decathlon.ara.loader;
 
-import static com.decathlon.ara.loader.DemoLoaderConstants.BRANCH_DEVELOP;
-import static com.decathlon.ara.loader.DemoLoaderConstants.BRANCH_MASTER;
-import static com.decathlon.ara.loader.DemoLoaderConstants.CYCLE_DAY;
-import static com.decathlon.ara.loader.DemoLoaderConstants.CYCLE_NIGHT;
-import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiPredicate;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
-
-import javax.persistence.EntityManager;
-
-import org.apache.commons.collections4.map.HashedMap;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.decathlon.ara.ci.bean.Build;
 import com.decathlon.ara.ci.bean.CycleDef;
 import com.decathlon.ara.ci.bean.PlatformRule;
@@ -73,6 +31,39 @@ import com.decathlon.ara.service.dto.cycledefinition.CycleDefinitionDTO;
 import com.decathlon.ara.service.support.Settings;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.collections4.map.HashedMap;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityManager;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
+
+import static com.decathlon.ara.loader.DemoLoaderConstants.*;
 
 /**
  * Service for loading executions into the Demo project.
@@ -292,7 +283,7 @@ public class DemoExecutionLoader {
         final PathMatchingResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
         String parentFolder = "newman-reports-" + Math.min(failingLevel, 1) + "/";
         final String newmanReportsLocation = "classpath:demo/" + parentFolder;
-        final Resource reportsFolderResource = resourceResolver.getResource(newmanReportsLocation);
+        resourceResolver.getResource(newmanReportsLocation);
         Resource[] jsonResources = resourceResolver.getResources(newmanReportsLocation + "**/*.json");
         for (Resource resource : jsonResources) {
             final String relativePath = resource.getFilename();
@@ -315,7 +306,12 @@ public class DemoExecutionLoader {
     }
 
     private String randomGitCommitId() {
-        Random random = new Random();
+        Random random;
+        try {
+            random = SecureRandom.getInstanceStrong();
+        } catch (NoSuchAlgorithmException e) {
+            random = new SecureRandom();
+        }
         char[] id = new char[40];
         for (int i = 0; i < id.length; i++) {
             id[i] = Integer.toHexString(random.nextInt(16)).charAt(0);

@@ -17,13 +17,11 @@
 
 package com.decathlon.ara.web.rest;
 
-import static com.decathlon.ara.util.TestUtil.header;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
-
-import javax.transaction.Transactional;
-
+import com.decathlon.ara.domain.enumeration.CommunicationType;
+import com.decathlon.ara.service.dto.communication.CommunicationDTO;
+import com.decathlon.ara.web.rest.util.HeaderUtil;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseSetup;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +33,11 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
-import com.decathlon.ara.domain.enumeration.CommunicationType;
-import com.decathlon.ara.service.dto.communication.CommunicationDTO;
-import com.decathlon.ara.web.rest.util.HeaderUtil;
-import com.github.springtestdbunit.DbUnitTestExecutionListener;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
+import javax.transaction.Transactional;
+import java.util.List;
+
+import static com.decathlon.ara.util.TestUtil.header;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Disabled
 @SpringBootTest
@@ -52,7 +50,7 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 		locations = "classpath:application-db-h2.properties")
 @Transactional
 @DatabaseSetup("/dbunit/communication.xml")
-public class CommunicationResourceIT {
+class CommunicationResourceIT {
 
     private static final String PROJECT_CODE = "p";
 
@@ -60,7 +58,7 @@ public class CommunicationResourceIT {
     private CommunicationResource cut;
 
     @Test
-    public void testFindAll() {
+    void testFindAll() {
         // WHEN
         ResponseEntity<List<CommunicationDTO>> response = cut.getAll(PROJECT_CODE);
 
@@ -73,7 +71,7 @@ public class CommunicationResourceIT {
     }
 
     @Test
-    public void getOneByCode_ShouldReturnTheRequestedCommunication_WhenRequestingAnExistingCode() {
+    void getOneByCode_ShouldReturnTheRequestedCommunication_WhenRequestingAnExistingCode() {
         // GIVEN
         String code = "code1";
 
@@ -88,7 +86,7 @@ public class CommunicationResourceIT {
     }
 
     @Test
-    public void getOneByCode_ShouldFailAsNotFound_WhenGettingANonExistentCode() {
+    void getOneByCode_ShouldFailAsNotFound_WhenGettingANonExistentCode() {
         // GIVEN
         String nonexistentCode = "nonexistent";
 
@@ -103,7 +101,7 @@ public class CommunicationResourceIT {
     }
 
     @Test
-    public void update_ShouldOnlyUpdateTypeAndMessage_WhenCodeIsFound() {
+    void update_ShouldOnlyUpdateTypeAndMessage_WhenCodeIsFound() {
         // GIVEN
         String codeToUpdate = "code2";
         CommunicationDTO dtoToUpdate = new CommunicationDTO("any", "any", CommunicationType.TEXT, "updated");
@@ -120,7 +118,7 @@ public class CommunicationResourceIT {
     }
 
     @Test
-    public void update_ShouldFailAsNotFound_WhenUpdatingANonExistentCode() {
+    void update_ShouldFailAsNotFound_WhenUpdatingANonExistentCode() {
         // GIVEN
         final String nonexistentCode = "nonexistent";
         CommunicationDTO anyCommunication = new CommunicationDTO();

@@ -17,16 +17,6 @@
 
 package com.decathlon.ara.defect.jira.adapter;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.atlassian.jira.issue.IssueKey;
 import com.decathlon.ara.ci.util.FetchException;
 import com.decathlon.ara.defect.DefectAdapter;
@@ -37,6 +27,14 @@ import com.decathlon.ara.defect.jira.api.model.JiraIssue;
 import com.decathlon.ara.service.SettingProviderService;
 import com.decathlon.ara.service.dto.setting.SettingDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 
 @Service
 public class JiraDefectAdapter implements DefectAdapter {
@@ -60,8 +58,8 @@ public class JiraDefectAdapter implements DefectAdapter {
     public List<Defect> getStatuses(long projectId, List<String> ids) throws FetchException {
         try {
             List<String> validJiraKeys = ids.stream()
-                    .filter(id -> isValidId(id))
-                    .collect(Collectors.toList());
+                    .filter(this::isValidId)
+                    .toList();
             List<JiraIssue> jiraIssues = jiraRestClient.getIssuesFromKeys(projectId, validJiraKeys);
             List<Defect> defects = jiraMapper.toDefects(jiraIssues);
             return defects;

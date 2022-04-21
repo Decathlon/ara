@@ -17,12 +17,6 @@
 
 package com.decathlon.ara.features;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,8 +25,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.*;
+
 @ExtendWith(MockitoExtension.class)
-public class FeatureCollectionTest {
+class FeatureCollectionTest {
 
     @Mock
     private Map<String, IFeature> availableFeaturesMock;
@@ -45,7 +41,7 @@ public class FeatureCollectionTest {
     }
 
     @Test
-    public void list_should_return_all_features_available() {
+    void list_should_return_all_features_available() {
         // Given
         IFeature feature1 = Mockito.mock(IFeature.class);
         IFeature feature2 = Mockito.mock(IFeature.class);
@@ -63,7 +59,7 @@ public class FeatureCollectionTest {
     }
 
     @Test
-    public void get_should_return_the_feature() {
+    void get_should_return_the_feature() {
         // Given
         IFeature wantedFeature = Mockito.mock(IFeature.class);
         Mockito.doReturn(true).when(availableFeaturesMock).containsKey("my-feature");
@@ -77,7 +73,7 @@ public class FeatureCollectionTest {
     }
 
     @Test
-    public void get_should_return_empty_if_not_found() {
+    void get_should_return_empty_if_not_found() {
         // Given
         IFeature wantedFeature = Mockito.mock(IFeature.class);
         Mockito.doReturn(false).when(availableFeaturesMock).containsKey("nope");

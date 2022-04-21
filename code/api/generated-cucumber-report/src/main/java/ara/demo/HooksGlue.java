@@ -58,7 +58,7 @@ public class HooksGlue {
      */
     static void simulateExecution() {
         try {
-            Thread.sleep(5 + random.nextInt(10));
+            Thread.sleep((long)5 + random.nextInt(10));
         } catch (@SuppressWarnings("unused") final InterruptedException e) {
             Thread.currentThread().interrupt();
         }

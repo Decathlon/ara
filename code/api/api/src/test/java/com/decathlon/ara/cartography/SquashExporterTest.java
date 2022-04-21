@@ -1,10 +1,7 @@
 package com.decathlon.ara.cartography;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.decathlon.ara.domain.enumeration.FunctionalityType;
+import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,17 +9,19 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.decathlon.ara.domain.enumeration.FunctionalityType;
-import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @ExtendWith(MockitoExtension.class)
-public class SquashExporterTest {
+class SquashExporterTest {
 
     @Spy
     private SquashExporter sut;
 
     @Test
-    public void getName() {
+    void getName() {
         // Given
         final String expected = "SquashTM";
         // When
@@ -32,7 +31,7 @@ public class SquashExporterTest {
     }
 
     @Test
-    public void getDescription() {
+    void getDescription() {
         // Given
         final String expected = "Export this cartography to import it as requirements in SquashTM";
         // When
@@ -42,7 +41,7 @@ public class SquashExporterTest {
     }
 
     @Test
-    public void getFormat() {
+    void getFormat() {
         // Given
         final String expected = "xls";
         // When
@@ -52,7 +51,7 @@ public class SquashExporterTest {
     }
 
     @Test
-    public void generate_should_create_a_header_row_even_when_no_functionalities() {
+    void generate_should_create_a_header_row_even_when_no_functionalities() {
         // Given
         List<FunctionalityDTO> functionalities = new ArrayList<>();
         Map<String, String> requiredInfos = new HashMap<>();
@@ -69,7 +68,7 @@ public class SquashExporterTest {
 
 
     @Test
-    public void generate_should_generate_one_line_per_functionality() {
+    void generate_should_generate_one_line_per_functionality() {
         // Given
         List<FunctionalityDTO> functionalities = new ArrayList<>();
         functionalities.add(this.create_dummy_functionality(1));
@@ -87,7 +86,7 @@ public class SquashExporterTest {
     }
 
     @Test
-    public void listRequiredFields() {
+    void listRequiredFields() {
         // When
         List<ExportField> fields = this.sut.listRequiredFields();
         // Then

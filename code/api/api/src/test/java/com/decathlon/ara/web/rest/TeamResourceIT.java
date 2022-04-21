@@ -17,14 +17,10 @@
 
 package com.decathlon.ara.web.rest;
 
-import static com.decathlon.ara.util.TestUtil.NONEXISTENT;
-import static com.decathlon.ara.util.TestUtil.header;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
-
-import javax.transaction.Transactional;
-
+import com.decathlon.ara.service.dto.team.TeamDTO;
+import com.decathlon.ara.web.rest.util.HeaderUtil;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseSetup;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,10 +32,12 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
-import com.decathlon.ara.service.dto.team.TeamDTO;
-import com.decathlon.ara.web.rest.util.HeaderUtil;
-import com.github.springtestdbunit.DbUnitTestExecutionListener;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
+import javax.transaction.Transactional;
+import java.util.List;
+
+import static com.decathlon.ara.util.TestUtil.NONEXISTENT;
+import static com.decathlon.ara.util.TestUtil.header;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Disabled
 @SpringBootTest
@@ -52,7 +50,7 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 		locations = "classpath:application-db-h2.properties")
 @Transactional
 @DatabaseSetup("/dbunit/team.xml")
-public class TeamResourceIT {
+class TeamResourceIT {
 
     private static final String PROJECT_CODE = "p";
 
@@ -60,7 +58,7 @@ public class TeamResourceIT {
     private TeamResource cut;
 
     @Test
-    public void create_ShouldInsertEntity_WhenAllRulesAreRespected() {
+    void create_ShouldInsertEntity_WhenAllRulesAreRespected() {
         // GIVEN
         final TeamDTO team = new TeamDTO(null, " A Trimmed Team \t ", true, false);
 
@@ -82,7 +80,7 @@ public class TeamResourceIT {
     }
 
     @Test
-    public void create_ShouldFailAsBadRequest_WhenIdProvided() {
+    void create_ShouldFailAsBadRequest_WhenIdProvided() {
         // GIVEN
         final TeamDTO teamWithId = new TeamDTO(NONEXISTENT, "Id should not be provided", true, true);
 
@@ -98,7 +96,7 @@ public class TeamResourceIT {
     }
 
     @Test
-    public void create_ShouldFailAsNotUnique_WhenNameAlreadyExists() {
+    void create_ShouldFailAsNotUnique_WhenNameAlreadyExists() {
         // GIVEN
         final TeamDTO teamWithExistingName = new TeamDTO(null, "Team A", false, false);
 
@@ -116,7 +114,7 @@ public class TeamResourceIT {
     }
 
     @Test
-    public void getAll_ShouldReturnAllEntitiesOrderedByName() {
+    void getAll_ShouldReturnAllEntitiesOrderedByName() {
         // WHEN
         ResponseEntity<List<TeamDTO>> response = cut.getAll(PROJECT_CODE);
 
@@ -129,7 +127,7 @@ public class TeamResourceIT {
     }
 
     @Test
-    public void update_ShouldUpdateEntity_WhenAllRulesAreRespected() {
+    void update_ShouldUpdateEntity_WhenAllRulesAreRespected() {
         // GIVEN
         final Long existingId = Long.valueOf(1);
         final TeamDTO team = new TeamDTO(null, "Renamed", false, false);
@@ -148,7 +146,7 @@ public class TeamResourceIT {
     }
 
     @Test
-    public void update_ShouldNotFailAsNameNotUnique_WhenUpdatingWithoutAnyChange() {
+    void update_ShouldNotFailAsNameNotUnique_WhenUpdatingWithoutAnyChange() {
         // GIVEN
         Long existingId = Long.valueOf(1);
         final TeamDTO team = new TeamDTO(existingId, "Team A", true, true);
@@ -164,7 +162,7 @@ public class TeamResourceIT {
     }
 
     @Test
-    public void update_ShouldFailAsNotFound_WhenUpdatingNonexistentEntity() {
+    void update_ShouldFailAsNotFound_WhenUpdatingNonexistentEntity() {
         // GIVEN
         final TeamDTO anyTeam = new TeamDTO(null, "Trying to update nonexistent", false, true);
 
@@ -180,7 +178,7 @@ public class TeamResourceIT {
     }
 
     @Test
-    public void update_ShouldFailAsNotUnique_WhenNameAlreadyExists() {
+    void update_ShouldFailAsNotUnique_WhenNameAlreadyExists() {
         // GIVEN
         final Long id = Long.valueOf(2);
         final TeamDTO teamWithExistingName = new TeamDTO(null, "Team A", true, false);
@@ -199,7 +197,7 @@ public class TeamResourceIT {
     }
 
     @Test
-    public void update_ShouldFailAsBadRequest_WhenRemovingAssignableToFunctionalitiesButWithOneAssignation() {
+    void update_ShouldFailAsBadRequest_WhenRemovingAssignableToFunctionalitiesButWithOneAssignation() {
         // GIVEN
         final Long id = Long.valueOf(3);
         final TeamDTO teamWithRemovedAssignableToFunctionalities =
@@ -216,7 +214,7 @@ public class TeamResourceIT {
     }
 
     @Test
-    public void update_ShouldFailAsBadRequest_WhenRemovingAssignableToProblemsButWithOneAssignation() {
+    void update_ShouldFailAsBadRequest_WhenRemovingAssignableToProblemsButWithOneAssignation() {
         // GIVEN
         final Long id = Long.valueOf(3);
         final TeamDTO teamWithRemovedAssignableToProblems = new TeamDTO(null, "Team B", false, true);
@@ -232,7 +230,7 @@ public class TeamResourceIT {
     }
 
     @Test
-    public void delete_ShouldDeleteEntity_WhenRulesAreRespected() {
+    void delete_ShouldDeleteEntity_WhenRulesAreRespected() {
         // GIVEN
         final long existingId = 1;
 
@@ -249,7 +247,7 @@ public class TeamResourceIT {
     }
 
     @Test
-    public void delete_ShouldFailAsNotFound_WhenDeletingNonexistentEntity() {
+    void delete_ShouldFailAsNotFound_WhenDeletingNonexistentEntity() {
         // WHEN
         ResponseEntity<Void> response = cut.delete(PROJECT_CODE, NONEXISTENT.longValue());
 

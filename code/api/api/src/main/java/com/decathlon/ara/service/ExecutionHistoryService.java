@@ -154,7 +154,7 @@ public class ExecutionHistoryService {
     private void fillExecutionHistoryPoint(ExecutionHistoryPointDTO execution, List<ExecutedScenarioWithErrorAndProblemJoin> allErrorCounts, Map<Long, Long> functionalityTeamIds) {
         List<SeverityDTO> activeSeverities = execution.getQualitySeverities().stream()
                 .map(QualitySeverityDTO::getSeverity)
-                .collect(Collectors.toList());
+                .toList();
         String defaultSeverityCode = severityService.getDefaultSeverityCode(activeSeverities);
 
         for (RunWithQualitiesDTO run : execution.getRuns()) {
@@ -180,7 +180,7 @@ public class ExecutionHistoryService {
         final List<ExecutedScenarioWithErrorAndProblemJoin> allExecutedScenarioJoinOfRun = allExecutedScenarioJoin
                 .stream()
                 .filter(e -> run.getId().longValue() == e.getRunId())
-                .collect(Collectors.toList());
+                .toList();
         for (ExecutedScenarioWithErrorAndProblemJoin executedScenarioJoin : allExecutedScenarioJoinOfRun) {
             // Count the scenario for its severity and for global
             addScenario(executedScenarioJoin, run.getQualitiesPerSeverity(), defaultSeverityCode);

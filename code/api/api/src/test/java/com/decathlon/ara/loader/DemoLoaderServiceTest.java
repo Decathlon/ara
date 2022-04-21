@@ -17,24 +17,24 @@
 
 package com.decathlon.ara.loader;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 @ExtendWith(MockitoExtension.class)
-public class DemoLoaderServiceTest {
+class DemoLoaderServiceTest {
 
     @InjectMocks
     private DemoLoaderService cut;
 
     @Test
-    public void replaceFunctionalityIdPlaceholders_ShouldReplaceIds_WhenSomeOfThemArePresent() {
+    void replaceFunctionalityIdPlaceholders_ShouldReplaceIds_WhenSomeOfThemArePresent() {
         // GIVEN
         Map<String, Long> functionalityIds = new HashMap<>();
         functionalityIds.put("A", Long.valueOf(21));

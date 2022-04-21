@@ -17,48 +17,6 @@
 
 package com.decathlon.ara.defect.rtc;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.X509TrustManager;
-
-import org.apache.commons.collections4.ListUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
-
 import com.decathlon.ara.ci.util.FetchException;
 import com.decathlon.ara.common.NotGonnaHappenException;
 import com.decathlon.ara.defect.DefectAdapter;
@@ -70,6 +28,36 @@ import com.decathlon.ara.service.SettingProviderService;
 import com.decathlon.ara.service.SettingService;
 import com.decathlon.ara.service.dto.setting.SettingDTO;
 import com.decathlon.ara.service.support.Settings;
+import org.apache.commons.collections4.ListUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.*;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.X509TrustManager;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class RtcDefectAdapter implements DefectAdapter {
@@ -117,8 +105,8 @@ public class RtcDefectAdapter implements DefectAdapter {
         final Map<String, String> cookies = authenticate(projectId);
 
         List<String> realIds = ids.stream()
-                .filter(id -> isValidId(id))
-                .collect(Collectors.toList());
+                .filter(this::isValidId)
+                .toList();
         if (!realIds.isEmpty()) {
             final int batchSize = settingService.getInt(projectId, Settings.DEFECT_RTC_BATCH_SIZE);
             for (List<String> idsPartition : ListUtils.partition(realIds, batchSize)) {
@@ -218,7 +206,7 @@ public class RtcDefectAdapter implements DefectAdapter {
         final List<String> workItemTypes = settingService.getList(projectId, Settings.DEFECT_RTC_WORK_ITEM_TYPES);
         final String typeFilter = toFilter("type/id", workItemTypes.stream()
                 .map(t -> "'" + t.toLowerCase() + "'")
-                .collect(Collectors.toList()));
+                .toList());
         String fullFilters = "(" + typeFilter + ") and (" + filter + ")";
         final String fields = "work" + "item/workItem[" + fullFilters + "]/(id|state/name|resolutionDate)";
         final String rootUrl = settingService.get(projectId, Settings.DEFECT_RTC_ROOT_URL);

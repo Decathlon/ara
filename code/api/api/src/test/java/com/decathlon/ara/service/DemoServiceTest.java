@@ -17,30 +17,25 @@
 
 package com.decathlon.ara.service;
 
-import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
-import static org.junit.Assert.assertThrows;
-import static org.mockito.Mockito.when;
-
-import java.util.Optional;
-
+import com.decathlon.ara.loader.*;
+import com.decathlon.ara.repository.ProjectRepository;
+import com.decathlon.ara.service.dto.project.ProjectDTO;
+import com.decathlon.ara.service.exception.BadRequestException;
+import com.decathlon.ara.service.exception.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.decathlon.ara.loader.DemoExecutionLoader;
-import com.decathlon.ara.loader.DemoFunctionalityLoader;
-import com.decathlon.ara.loader.DemoProblemLoader;
-import com.decathlon.ara.loader.DemoScenarioLoader;
-import com.decathlon.ara.loader.DemoSettingsLoader;
-import com.decathlon.ara.repository.ProjectRepository;
-import com.decathlon.ara.service.dto.project.ProjectDTO;
-import com.decathlon.ara.service.exception.BadRequestException;
-import com.decathlon.ara.service.exception.NotFoundException;
+import java.util.Optional;
+
+import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class DemoServiceTest {
+class DemoServiceTest {
 
     @Mock
     private ProjectRepository projectRepository;
@@ -70,7 +65,7 @@ public class DemoServiceTest {
     private DemoService cut;
 
     @Test
-    public void create_ShouldFail_WhenDemoProjectAlreadyExists() throws BadRequestException {
+    void create_ShouldFail_WhenDemoProjectAlreadyExists() {
         // GIVEN
         when(projectService.findOne(PROJECT_CODE_DEMO)).thenReturn(Optional.of(new ProjectDTO()));
 
@@ -79,7 +74,7 @@ public class DemoServiceTest {
     }
 
     @Test
-    public void delete_ShouldFail_WhenDemoProjectDoesNotExist() throws NotFoundException {
+    void delete_ShouldFail_WhenDemoProjectDoesNotExist() {
         // GIVEN
         when(projectRepository.findOneByCode(PROJECT_CODE_DEMO)).thenReturn(null);
 

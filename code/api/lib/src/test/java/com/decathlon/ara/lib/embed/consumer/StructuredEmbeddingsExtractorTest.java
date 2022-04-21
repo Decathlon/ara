@@ -26,12 +26,12 @@ import org.junit.jupiter.api.Test;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
-public class StructuredEmbeddingsExtractorTest {
+class StructuredEmbeddingsExtractorTest {
 
     private StructuredEmbeddingsExtractor cut = new StructuredEmbeddingsExtractor();
 
     @Test
-    public void extractStringData_ShouldReturnTheFirstMatchingEmbeddingValue() {
+    void extractStringData_ShouldReturnTheFirstMatchingEmbeddingValue() {
         // GIVEN
         final String html = "" +
                 "<!--StructuredEmbeddings_v1.0.0=[" +
@@ -54,7 +54,7 @@ public class StructuredEmbeddingsExtractorTest {
     }
 
     @Test
-    public void extract_ShouldParseAllMainFields_WhenAStructuredEmbeddingIsPresent() {
+    void extract_ShouldParseAllMainFields_WhenAStructuredEmbeddingIsPresent() {
         // GIVEN
         final String html = "" +
                 "<!--StructuredEmbeddings_v1.0.0=[" +
@@ -81,7 +81,7 @@ public class StructuredEmbeddingsExtractorTest {
     }
 
     @Test
-    public void extract_ShouldReturnDataAsString_WhenATextDataStructuredEmbeddingIsPresent() {
+    void extract_ShouldReturnDataAsString_WhenATextDataStructuredEmbeddingIsPresent() {
         // GIVEN
         final String html = "" +
                 "<!--StructuredEmbeddings_v1.0.0=[" +
@@ -98,7 +98,7 @@ public class StructuredEmbeddingsExtractorTest {
     }
 
     @Test
-    public void extract_ShouldReturnDataAsJsonObject_WhenAnObjectDataStructuredEmbeddingIsPresent() {
+    void extract_ShouldReturnDataAsJsonObject_WhenAnObjectDataStructuredEmbeddingIsPresent() {
         // GIVEN
         final String html = "" +
                 "<!--StructuredEmbeddings_v1.0.0=[" +
@@ -127,7 +127,7 @@ public class StructuredEmbeddingsExtractorTest {
     }
 
     @Test
-    public void extract_ShouldUnescapeStringData_WhenAStructuredEmbeddingHasHtmlCharacters() {
+    void extract_ShouldUnescapeStringData_WhenAStructuredEmbeddingHasHtmlCharacters() {
         // GIVEN
         final String html = "" +
                 "<!--StructuredEmbeddings_v1.0.0=[" +

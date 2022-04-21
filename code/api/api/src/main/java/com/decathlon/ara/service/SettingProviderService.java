@@ -17,6 +17,18 @@
 
 package com.decathlon.ara.service;
 
+import com.decathlon.ara.defect.DefectAdapter;
+import com.decathlon.ara.service.dto.setting.SettingDTO;
+import com.decathlon.ara.service.dto.setting.SettingDTO.SettingDTOBuilder;
+import com.decathlon.ara.service.dto.setting.SettingGroupDTO;
+import com.decathlon.ara.service.dto.setting.SettingOptionDTO;
+import com.decathlon.ara.service.dto.setting.SettingType;
+import com.decathlon.ara.service.support.Settings;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,20 +37,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import com.decathlon.ara.defect.DefectAdapter;
-import com.decathlon.ara.service.dto.setting.SettingDTO;
-import com.decathlon.ara.service.dto.setting.SettingDTO.SettingDTOBuilder;
-import com.decathlon.ara.service.dto.setting.SettingGroupDTO;
-import com.decathlon.ara.service.dto.setting.SettingOptionDTO;
-import com.decathlon.ara.service.dto.setting.SettingType;
-import com.decathlon.ara.service.support.Settings;
 
 /**
  * Service for providing setting definitions. It is ignored from code coverage, as it's merely a configuration file.
@@ -288,7 +286,7 @@ public class SettingProviderService {
         indexers.add(new SettingOptionDTO("", ""));
         indexers.addAll(defectAdapters.stream()
                 .map(f -> new SettingOptionDTO(f.getCode(), f.getName()))
-                .collect(Collectors.toList()));
+                .toList());
         group.getSettings().add(new SettingDTOBuilder()
                 .withCode(Settings.DEFECT_INDEXER)
                 .withName("System")
@@ -325,7 +323,7 @@ public class SettingProviderService {
                     defectAdapters.stream()
                             .filter(f -> f.getCode().equals(currentDefectAdapter))
                             .flatMap(f -> f.getSettingDefinitions().stream())
-                            .collect(Collectors.toList()));
+                            .toList());
         }
 
         return group;

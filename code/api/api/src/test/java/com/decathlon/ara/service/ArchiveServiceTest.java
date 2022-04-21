@@ -35,7 +35,7 @@ import java.nio.file.Paths;
 import java.util.Date;
 
 @ExtendWith(MockitoExtension.class)
-public class ArchiveServiceTest {
+class ArchiveServiceTest {
 
     private static final String ZIP_TYPE = "application/zip";
 
@@ -43,7 +43,7 @@ public class ArchiveServiceTest {
     private ArchiveService cut;
 
     @Test
-    public void unzip_ShouldUnzipTheGivenZip() throws IOException, URISyntaxException {
+    void unzip_ShouldUnzipTheGivenZip() throws IOException, URISyntaxException {
         // GIVEN
         File targetDir = new File(System.getProperty("java.io.tmpdir"),
                 "ara-unzip_ShouldUnzipTheGivenZip_" + new Date().getTime());
@@ -68,7 +68,7 @@ public class ArchiveServiceTest {
     }
 
     @Test
-    public void unzip_ShouldNotSendIOException_IfZipFileEmpty() throws IOException {
+    void unzip_ShouldNotSendIOException_IfZipFileEmpty() throws IOException {
         File targetDir = new File(System.getProperty("java.io.tmpdir"),
                 "ara-unzip_ShouldSendIOException_IfZipFileEmpty-" + new Date().getTime());
         MultipartFile zipFile = new MockMultipartFile("zip", "not-exisiting.zip", ZIP_TYPE, new byte[0]);
@@ -82,7 +82,7 @@ public class ArchiveServiceTest {
     }
 
     @Test
-    public void unzip_should_unzip_even_on_empty_file() throws IOException {
+    void unzip_should_unzip_even_on_empty_file() throws IOException {
         File targetDir = new File(System.getProperty("java.io.tmpdir"),
                 "ara-unzip-empty-file-" + new Date().getTime());
         targetDir.mkdir();

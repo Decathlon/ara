@@ -17,14 +17,7 @@
 
 package com.decathlon.ara.dbunit;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.sql.SQLException;
-
-import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
-
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.database.DatabaseConnection;
 import org.dbunit.database.IDatabaseConnection;
@@ -39,7 +32,12 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
-import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.sql.SQLException;
 
 /**
  * The class name does not start nor end with "Test" because it's not supposed to be run during build. This class is to be run on a development
@@ -54,7 +52,7 @@ import com.github.springtestdbunit.DbUnitTestExecutionListener;
 @TestPropertySource(
 		locations = "classpath:application-db-h2.properties")
 @Transactional
-public class DbUnitExporter {
+class DbUnitExporter {
 
     private static final String XML_PATH = "src/test/resources/dbunit/freshly-created-dataset-to-rename.xml";
 
@@ -62,7 +60,7 @@ public class DbUnitExporter {
     private EntityManager entityManager;
 
     @Test
-    public void export() {
+    void export() {
         try (Session session = entityManager.unwrap(Session.class)) {
             session.doWork(jdbcConnection -> {
                 // Can be launched in "ara" parent-module or in "ara/server" sub-module

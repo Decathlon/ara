@@ -17,8 +17,6 @@
 
 package com.decathlon.ara.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,8 +25,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.thymeleaf.TemplateEngine;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @ExtendWith(MockitoExtension.class)
-public class EmailServiceTest {
+class EmailServiceTest {
 
     @Mock
     private TemplateEngine templateEngine;
@@ -40,7 +40,7 @@ public class EmailServiceTest {
     private EmailService cut;
 
     @Test
-    public void testCompressHtmlSpaces() {
+    void testCompressHtmlSpaces() {
         // GIVEN
         String html = "" +
                 "<b>\n" +

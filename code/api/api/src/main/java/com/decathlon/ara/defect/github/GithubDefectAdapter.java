@@ -17,16 +17,6 @@
 
 package com.decathlon.ara.defect.github;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.decathlon.ara.ci.util.FetchException;
 import com.decathlon.ara.defect.DefectAdapter;
 import com.decathlon.ara.defect.bean.Defect;
@@ -35,6 +25,14 @@ import com.decathlon.ara.service.SettingProviderService;
 import com.decathlon.ara.service.SettingService;
 import com.decathlon.ara.service.dto.setting.SettingDTO;
 import com.decathlon.ara.service.support.Settings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Implementation of {@link DefectAdapter} for Github issues system.
@@ -68,7 +66,7 @@ public class GithubDefectAdapter implements DefectAdapter {
         String authorizationToken = this.settingService.get(projectId, Settings.DEFECT_GITHUB_TOKEN);
         List<Long> issueIds = ids.stream()
                 .map(Long::valueOf)
-                .collect(Collectors.toList());
+                .toList();
 
         try {
             return this.restClient
@@ -77,7 +75,7 @@ public class GithubDefectAdapter implements DefectAdapter {
                     .requestIssues(issueIds)
                     .stream()
                     .map(this::toDefect)
-                    .collect(Collectors.toList());
+                    .toList();
         } catch (IOException | URISyntaxException ex) {
             LOG.error(UNABLE_TO_ACCESS_GITHUB, ex);
             throw new FetchException(UNABLE_TO_ACCESS_GITHUB, ex);
@@ -96,7 +94,7 @@ public class GithubDefectAdapter implements DefectAdapter {
                     .getIssuesUpdatedSince(since)
                     .stream()
                     .map(this::toDefect)
-                    .collect(Collectors.toList());
+                    .toList();
         } catch (IOException | URISyntaxException ex) {
             LOG.error(UNABLE_TO_ACCESS_GITHUB, ex);
             throw new FetchException(UNABLE_TO_ACCESS_GITHUB, ex);

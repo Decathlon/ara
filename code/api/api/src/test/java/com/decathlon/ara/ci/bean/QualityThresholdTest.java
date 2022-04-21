@@ -17,16 +17,15 @@
 
 package com.decathlon.ara.ci.bean;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
+import com.decathlon.ara.domain.enumeration.QualityStatus;
 import org.junit.jupiter.api.Test;
 
-import com.decathlon.ara.domain.enumeration.QualityStatus;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public class QualityThresholdTest {
+class QualityThresholdTest {
 
     @Test
-    public void toStatus_should_return_FAILED_when_under_failure_threshold() {
+    void toStatus_should_return_FAILED_when_under_failure_threshold() {
         // GIVEN
         QualityThreshold threshold = new QualityThreshold(50, 75);
 
@@ -38,7 +37,7 @@ public class QualityThresholdTest {
     }
 
     @Test
-    public void toStatus_should_return_WARNING_when_over_failure_threshold_and_under_warning_threshold() {
+    void toStatus_should_return_WARNING_when_over_failure_threshold_and_under_warning_threshold() {
         // GIVEN
         QualityThreshold threshold = new QualityThreshold(50, 75);
 
@@ -50,7 +49,7 @@ public class QualityThresholdTest {
     }
 
     @Test
-    public void toStatus_should_return_PASSED_when_over_warning_threshold() {
+    void toStatus_should_return_PASSED_when_over_warning_threshold() {
         // GIVEN
         QualityThreshold threshold = new QualityThreshold(50, 75);
 

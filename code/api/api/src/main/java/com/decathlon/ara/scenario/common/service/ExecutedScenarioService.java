@@ -133,7 +133,7 @@ public class ExecutedScenarioService {
     private List<Error> flattenErrors(Collection<ExecutedScenario> executedScenarios) {
         return executedScenarios.stream()
                 .flatMap(s -> s.getErrors().stream())
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private List<Problem> getErrorProblems(Map<Error, List<Problem>> errorsProblems, Long errorId) {
