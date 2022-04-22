@@ -61,8 +61,7 @@ public class JiraDefectAdapter implements DefectAdapter {
                     .filter(this::isValidId)
                     .toList();
             List<JiraIssue> jiraIssues = jiraRestClient.getIssuesFromKeys(projectId, validJiraKeys);
-            List<Defect> defects = jiraMapper.toDefects(jiraIssues);
-            return defects;
+            return jiraMapper.toDefects(jiraIssues);
         } catch (BadRequestException e) {
             String jiraIds = String.join(", ", ids);
             String errorMessage = String.format("DEFECT|jira|Error while fetching the following ids from Jira: [%s]", jiraIds);
@@ -75,8 +74,7 @@ public class JiraDefectAdapter implements DefectAdapter {
     public List<Defect> getChangedDefects(long projectId, Date startDate) throws FetchException {
         try {
             List<JiraIssue> jiraIssues = jiraRestClient.getUpdatedIssues(projectId, startDate);
-            List<Defect> defects = jiraMapper.toDefects(jiraIssues);
-            return defects;
+            return jiraMapper.toDefects(jiraIssues);
         } catch (BadRequestException e) {
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
             String formattedDate = dateFormat.format(startDate);

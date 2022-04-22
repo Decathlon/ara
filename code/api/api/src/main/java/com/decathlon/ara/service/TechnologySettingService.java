@@ -85,7 +85,7 @@ public class TechnologySettingService {
      */
     private List<TechnologySettingGroupDTO> getTechnologySettingGroupDefinition() {
         List<Technology> availableTechnologies = Arrays.asList(Technology.values());
-        List<TechnologySettingGroupDTO> groups = availableTechnologies.stream()
+        return availableTechnologies.stream()
                 .map(technology -> Pair.of(technology, getAvailableTechnologySettings(technology)))
                 .map(pair -> Pair.of(
                         pair.getFirst(),
@@ -95,7 +95,6 @@ public class TechnologySettingService {
                                 .toList()))
                 .map(this::getTechnologySettingGroup)
                 .toList();
-        return groups;
     }
 
     /**
@@ -133,8 +132,7 @@ public class TechnologySettingService {
         String technologyName = technology.toString();
         String packageName = String.format("com.decathlon.ara.scenario.%s.settings", technologyName.toLowerCase());
         String className = String.format("%sSettings", WordUtils.capitalizeFully(technologyName));
-        String fullClassName = String.format("%s.%s", packageName, className);
-        return fullClassName;
+        return String.format("%s.%s", packageName, className);
     }
 
     /**
@@ -220,11 +218,9 @@ public class TechnologySettingService {
             return Optional.empty();
         }
 
-        Optional<SettingDTO> matchingSetting = technologyGroup.get().getSettings().stream()
+        return technologyGroup.get().getSettings().stream()
                 .filter(setting -> setting.getCode().equals(code))
                 .findFirst();
-
-        return matchingSetting;
     }
 
     /**

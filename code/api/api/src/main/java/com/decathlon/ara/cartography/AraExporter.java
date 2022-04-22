@@ -17,7 +17,7 @@ import java.util.Map;
 @Service
 public class AraExporter extends Exporter {
 
-    private final static AraCartographyMapper MAPPER = new AraCartographyMapper();
+    private static final AraCartographyMapper MAPPER = new AraCartographyMapper();
 
     @Override
     public String getName() {
