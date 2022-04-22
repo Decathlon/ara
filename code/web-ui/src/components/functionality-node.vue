@@ -490,7 +490,6 @@
     background-color: #EBF7FF;
     box-shadow: 0 0 6px -2px gray;
     z-index: 1;
-    background: #EBF7FF;
     line-height: 30px;
   }
   .hoverSummary {
