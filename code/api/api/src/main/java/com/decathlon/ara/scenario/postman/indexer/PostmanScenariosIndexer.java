@@ -73,7 +73,7 @@ public class PostmanScenariosIndexer implements ScenariosIndexer {
         String postmanReportFolderName = technologySettingService.getSettingValue(projectId, PostmanSettings.REPORTS_PATH).orElse("");
         List<File> postmanReports = getNewmanReportFiles(postmanFolder, postmanReportFolderName);
         String resultFileName = technologySettingService.getSettingValue(projectId, PostmanSettings.RESULT_FILE_NAME).orElse("").toLowerCase();
-        Boolean containsResult = postmanReports.stream()
+        boolean containsResult = postmanReports.stream()
                 .anyMatch(file -> resultFileName.equals(file.getName().toLowerCase()));
         if (containsResult) {
             List<File> postmanReportsWithoutResultFile = postmanReports.stream()

@@ -17,18 +17,6 @@
 
 package com.decathlon.ara.scenario.cucumber.indexer;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.decathlon.ara.domain.ExecutedScenario;
 import com.decathlon.ara.domain.Run;
 import com.decathlon.ara.scenario.common.indexer.ScenariosIndexer;
@@ -38,6 +26,17 @@ import com.decathlon.ara.scenario.cucumber.settings.CucumberSettings;
 import com.decathlon.ara.service.FileProcessorService;
 import com.decathlon.ara.service.TechnologySettingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 public class CucumberScenariosIndexer implements ScenariosIndexer {
@@ -86,12 +85,7 @@ public class CucumberScenariosIndexer implements ScenariosIndexer {
             stepDefinitions = getCucumberStepDefinitions(stepDefinitionsFile.get());
         }
 
-        List<ExecutedScenario> executedScenarios = executedScenarioExtractorService.extractExecutedScenarios(
-                features,
-                stepDefinitions,
-                run.getJobUrl());
-
-        return executedScenarios;
+        return executedScenarioExtractorService.extractExecutedScenarios(features, stepDefinitions, run.getJobUrl());
     }
 
     /**

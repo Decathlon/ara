@@ -26,8 +26,9 @@ import com.decathlon.ara.lib.embed.producer.type.VideoEmbedding;
 import cucumber.api.Scenario;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
+
 import java.nio.charset.StandardCharsets;
-import java.util.Random;
+import java.security.SecureRandom;
 
 public class HooksGlue {
 
@@ -48,7 +49,7 @@ public class HooksGlue {
      */
     static String failedScenario = null;
 
-    private static Random random = new Random();
+    private static SecureRandom random = new SecureRandom();
 
     private StructuredEmbeddingsBuilder embeddings;
 

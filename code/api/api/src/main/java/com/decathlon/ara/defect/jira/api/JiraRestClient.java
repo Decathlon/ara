@@ -78,7 +78,7 @@ public class JiraRestClient {
             LOG.warn(infoMessage);
             return Optional.empty();
         }
-        Boolean responseIsNotOK = !HttpStatus.OK.equals(httpStatus);
+        boolean responseIsNotOK = !HttpStatus.OK.equals(httpStatus);
         if (responseIsNotOK) {
             String errorMessage = String.format("DEFECT|jira|The Jira request [%s] %s returned an error status code -> %s", HttpMethod.GET, url, httpStatus);
             LOG.warn(errorMessage);
@@ -229,7 +229,7 @@ public class JiraRestClient {
         ResponseEntity<JiraIssueSearchResults> response = restTemplate.exchange(url, HttpMethod.GET, request, responseType);
 
         HttpStatus httpStatus = response.getStatusCode();
-        Boolean responseIsNotOK = !HttpStatus.OK.equals(httpStatus);
+        boolean responseIsNotOK = !HttpStatus.OK.equals(httpStatus);
         if (responseIsNotOK) {
             String errorMessage = String.format("DEFECT|jira|[Jira] The Jira request [%s] %s returned an error status code -> %s", HttpMethod.GET, url, httpStatus);
             LOG.warn(errorMessage);
