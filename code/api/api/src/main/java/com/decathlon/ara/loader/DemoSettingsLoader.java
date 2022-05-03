@@ -17,33 +17,10 @@
 
 package com.decathlon.ara.loader;
 
-import static com.decathlon.ara.loader.DemoLoaderConstants.BRANCH_DEVELOP;
-import static com.decathlon.ara.loader.DemoLoaderConstants.BRANCH_MASTER;
-import static com.decathlon.ara.loader.DemoLoaderConstants.CYCLE_DAY;
-import static com.decathlon.ara.loader.DemoLoaderConstants.CYCLE_NIGHT;
-import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
-import static com.decathlon.ara.loader.DemoLoaderConstants.SOURCE_CODE_API;
-import static com.decathlon.ara.loader.DemoLoaderConstants.SOURCE_CODE_WEB;
-import static com.decathlon.ara.loader.DemoLoaderConstants.TYPE_CODE_FIREFOX_DESKTOP;
-
-import java.util.Arrays;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.decathlon.ara.domain.Communication;
 import com.decathlon.ara.domain.enumeration.CommunicationType;
 import com.decathlon.ara.domain.enumeration.Technology;
-import com.decathlon.ara.service.CommunicationService;
-import com.decathlon.ara.service.CountryService;
-import com.decathlon.ara.service.CycleDefinitionService;
-import com.decathlon.ara.service.ProjectService;
-import com.decathlon.ara.service.SeverityService;
-import com.decathlon.ara.service.SourceService;
-import com.decathlon.ara.service.TeamService;
-import com.decathlon.ara.service.TypeService;
+import com.decathlon.ara.service.*;
 import com.decathlon.ara.service.dto.communication.CommunicationDTO;
 import com.decathlon.ara.service.dto.country.CountryDTO;
 import com.decathlon.ara.service.dto.cycledefinition.CycleDefinitionDTO;
@@ -55,6 +32,14 @@ import com.decathlon.ara.service.dto.type.TypeWithSourceCodeDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static com.decathlon.ara.loader.DemoLoaderConstants.*;
 
 /**
  * Load project with its settings as the Demo project.
@@ -114,7 +99,7 @@ public class DemoSettingsLoader {
                         "   style=\"font-size: 32px; float: left; margin-right: 4px\"></i>\n" +
                         "FEELING LOST?<br>" +
                         "Read " +
-                        link("https://github.com/Decathlon/ara/blob/master/doc/demo/DemoWalkthrough.adoc",
+                        link("https://github.com/Decathlon/ara/blob/main/doc/usage/demo/DemoWalkthrough.adoc",
                                 "how to play with the demo project") +
                         " while learning how to use ARA and how it can help your team." +
                         "</div>"));

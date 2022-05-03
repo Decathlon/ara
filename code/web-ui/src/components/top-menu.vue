@@ -79,7 +79,7 @@
         </Tooltip>
         <!-- Keep the same width as logo+select: this is to center the menu when space is available -->
         <Tooltip content="How to use ARA?" placement="bottom-end" :transfer="true">
-          <a href="https://github.com/decathlon/ara/blob/master/doc/user/main/UserDocumentation.adoc"
+          <a href="https://github.com/Decathlon/ara/blob/main/doc/usage/main/UserDocumentation.adoc"
              rel="noopener" target="_blank"><Icon type="md-help-circle" size="24" style="padding: 0;"/></a>
         </Tooltip><!-- No space between items -->
         <Dropdown trigger="click" placement="bottom-end">
