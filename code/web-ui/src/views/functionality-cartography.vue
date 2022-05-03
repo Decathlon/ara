@@ -226,9 +226,11 @@
             v-on:edit="startEditing"
             v-on:duplicate="startDuplicating"
             v-on:move="startMoving"
+            v-on:moveSelection="startMovingSelection"
             v-on:completeMove="completeMove"
             v-on:create="create"
             v-on:delete="deleteNode"
+            v-on:deleteSelection="deleteSelection"
             v-on:showCoverage="showCoverage"/>
         </template>
       </virtual-scroller>
