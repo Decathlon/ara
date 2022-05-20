@@ -12,6 +12,7 @@ import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,21 +63,15 @@ public class ScenarioUploader {
             throw new BadRequestException(message, Entities.SCENARIO, "wrong_technology");
         }
 
-        // Remove the previous scenarios from the same source => the database will remove the associations between functionalities and these scenarios
-        var allScenarios = scenarioRepository.findAllBySourceId(source.getId());
-        LOG.debug("SCENARIO|{} scenarios found for source {}", allScenarios.size(), sourceCode);
-        allScenarios.forEach(this::removeScenarioAssociationSafely);
-        scenarioRepository.deleteAll(allScenarios);
-
-        // Let Hibernate make the DELETE SQL statements now, because we will add the same scenarios below: don't mess with old and new instances
-        entityManager.flush();
-        entityManager.clear();
-
         List<Scenario> newScenarios = scenarioExtractor.get(source);
 
         // Check functionality IDs
         // (first get all functionalities with their remaining scenarios eagerly-fetched)
         Set<Functionality> functionalities = functionalityRepository.findAllByProjectIdAndType(projectId, FunctionalityType.FUNCTIONALITY);
+
+        deleteScenariosFromSameSource(source, functionalities);
+
+
         assignWrongFunctionalityIds(functionalities, newScenarios);
         assignWrongSeverityCode(getSeverityCodes(projectId), newScenarios);
         assignWrongCountryCodes(getCountryCodes(projectId), newScenarios);
@@ -93,19 +88,19 @@ public class ScenarioUploader {
         LOG.info("SCENARIO|Coverage complete!");
     }
 
-    public void removeScenarioAssociationSafely(Scenario scenario) {
-        var scenarioFunctionalities = scenario.getFunctionalities();
-        while (!scenarioFunctionalities.isEmpty()) {
-            var initialSize = scenarioFunctionalities.size();
-            scenarioFunctionalities.stream()
-                    .findFirst()
-                    .ifPresent(scenario::removeFunctionality);
-            if (scenarioFunctionalities.size() >= initialSize) {
-                // Check implementation of removeFunctionality decrease the size of functionalities set
-                throw new IllegalStateException(
-                        "Error during scenario-functionality link deletion: prevent infinite loop");
-            }
-        }
+    private void deleteScenariosFromSameSource(Source source, Set<Functionality> functionalities) {
+        var functionalitiesWithoutSourceScenarios = functionalities.stream()
+                .map(f -> Pair.of(f, f.getScenarios().stream().filter(s -> !s.getSource().equals(source)).toList()))
+                .map(p -> Pair.of(p.getFirst(), new TreeSet(p.getSecond())))
+                .map(p -> {
+                    var f = p.getFirst();
+                    var s = p.getSecond();
+                    f.setScenarios(s);
+                    return f;
+                })
+                .toList();
+        functionalityRepository.saveAll(functionalitiesWithoutSourceScenarios);
+        scenarioRepository.deleteAllBySource(source);
     }
 
     @FunctionalInterface

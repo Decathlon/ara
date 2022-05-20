@@ -17,18 +17,18 @@
 
 package com.decathlon.ara.repository;
 
-import java.util.List;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
-
 import com.decathlon.ara.domain.Country;
 import com.decathlon.ara.domain.Scenario;
+import com.decathlon.ara.domain.Source;
 import com.decathlon.ara.domain.projection.CountryCodeCheck;
 import com.decathlon.ara.domain.projection.IgnoredScenario;
 import com.decathlon.ara.domain.projection.ScenarioIgnoreCount;
 import com.decathlon.ara.domain.projection.ScenarioSummary;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * Spring Data JPA repository for the Scenario entity.
@@ -37,6 +37,8 @@ import com.decathlon.ara.domain.projection.ScenarioSummary;
 public interface ScenarioRepository extends JpaRepository<Scenario, Long> {
 
     List<Scenario> findAllBySourceId(Long sourceId);
+
+    void deleteAllBySource(Source source);
 
     boolean existsBySourceId(Long sourceId);
 
