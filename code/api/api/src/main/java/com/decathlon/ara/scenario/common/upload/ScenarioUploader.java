@@ -91,7 +91,7 @@ public class ScenarioUploader {
     private void deleteScenariosFromSameSource(Source source, Set<Functionality> functionalities) {
         var functionalitiesWithoutSourceScenarios = functionalities.stream()
                 .map(f -> Pair.of(f, f.getScenarios().stream().filter(s -> !s.getSource().equals(source)).toList()))
-                .map(p -> Pair.of(p.getFirst(), new TreeSet(p.getSecond())))
+                .map(p -> Pair.of(p.getFirst(), new TreeSet<>(p.getSecond())))
                 .map(p -> {
                     var f = p.getFirst();
                     var s = p.getSecond();
