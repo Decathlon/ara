@@ -1,5 +1,18 @@
 package com.decathlon.ara.repository.util;
 
+import com.decathlon.ara.domain.Error;
+import com.decathlon.ara.domain.*;
+import com.decathlon.ara.domain.enumeration.DefectExistence;
+import com.decathlon.ara.domain.enumeration.ProblemStatus;
+import com.decathlon.ara.domain.enumeration.ProblemStatusFilter;
+import com.decathlon.ara.domain.filter.ProblemFilter;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.jpa.domain.Specification;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.ZoneId;
@@ -9,29 +22,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.jpa.domain.Specification;
-
-import com.decathlon.ara.domain.Country;
-import com.decathlon.ara.domain.Error;
-import com.decathlon.ara.domain.ExecutedScenario;
-import com.decathlon.ara.domain.Execution;
-import com.decathlon.ara.domain.Problem;
-import com.decathlon.ara.domain.ProblemPattern;
-import com.decathlon.ara.domain.Run;
-import com.decathlon.ara.domain.Type;
-import com.decathlon.ara.domain.enumeration.DefectExistence;
-import com.decathlon.ara.domain.enumeration.ProblemStatus;
-import com.decathlon.ara.domain.enumeration.ProblemStatusFilter;
-import com.decathlon.ara.domain.filter.ProblemFilter;
-
-import liquibase.util.StringUtil;
 
 public class SpecificationUtil {
 
@@ -82,7 +72,7 @@ public class SpecificationUtil {
     }
 
     private static void addEqualsPredicate(List<Predicate> predicates, CriteriaBuilder criteriaBuilder, Expression<String> expression, String value) {
-        if (StringUtil.isNotEmpty(value)) {
+        if (StringUtils.isNotEmpty(value)) {
             predicates.add(criteriaBuilder.equal(expression, value));
         }
     }
@@ -197,7 +187,7 @@ public class SpecificationUtil {
             addEqualsOrStartWithPredicate(predicates, criteriaBuilder, executedScenario.get(NAME_ATTRIBUTE), problemPattern.getScenarioName(), problemPattern.isScenarioNameStartsWith());
             addEqualsOrStartWithPredicate(predicates, criteriaBuilder, root.get("step"), problemPattern.getStep(), problemPattern.isStepStartsWith());
             addEqualsOrStartWithPredicate(predicates, criteriaBuilder, root.get("stepDefinition"), problemPattern.getStepDefinition(), problemPattern.isStepDefinitionStartsWith());
-            addEqualsPredicate(predicates, criteriaBuilder, root.get("exception"), problemPattern.getException());
+            addEqualsOrStartWithPredicate(predicates, criteriaBuilder, root.get("exception"), problemPattern.getException(), true);
             addEqualsPredicate(predicates, criteriaBuilder, execution.get("release"), problemPattern.getRelease());
             Country country = problemPattern.getCountry();
             if (country != null && StringUtils.isNotEmpty(country.getCode())) {
@@ -219,7 +209,7 @@ public class SpecificationUtil {
                 predicates.add(criteriaBuilder.equal(typePath.get("isMobile"), typeIsMobile));
             }
             if (errorIds != null) {
-                predicates.add(run.get("id").in(errorIds));
+                predicates.add(root.get("id").in(errorIds));
             }
             return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
         };
