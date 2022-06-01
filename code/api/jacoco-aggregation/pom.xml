@@ -3,14 +3,14 @@
     <parent>
         <artifactId>ara-parent</artifactId>
         <groupId>com.decathlon.ara</groupId>
-        <version>12.1.6</version>
+        <version>12.1.7</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.decathlon.ara</groupId>
     <artifactId>jacoco-aggregation</artifactId>
     <packaging>pom</packaging>
-    <version>12.1.6</version>
+    <version>12.1.7</version>
 
     <name>Jacoco Report Aggregation</name>
 
