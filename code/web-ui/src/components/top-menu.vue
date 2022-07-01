@@ -22,7 +22,7 @@
       So we use Menu classes with router-links.
     -->
     <div style="background-color: #0082C3; display: flex;">
-      <div style="flex: 0 0 auto;">
+      <div style="flex: 0 0 auto;" v-if="!adminRight">
         <router-link :to="{ name: 'redirecter' }" id="home-logo">
           <Tooltip placement="bottom-start" :transfer="true">
             <div slot="content">
@@ -42,8 +42,14 @@
 
       <div style="flex: 1 0 auto;">
         <!-- After deleting the demo project, if no other project exists, `projectCode` still exists but we should hide the menu anyway  -->
-        <ul v-if="projectCode && projects && projects.length" class="ivu-menu ivu-menu-primary ivu-menu-horizontal">
-          <router-link v-for="link in links" :key="link.name" :to="to(link)" class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected">
+        <ul v-if="projectCode && projects && projects.length && !adminRight" class="ivu-menu ivu-menu-primary ivu-menu-horizontal">
+          <router-link v-for="link in links" @click.native="changeAdminState(link.routeName)" :key="link.name" :to="to(link)" class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected">
+            {{link.name}}
+          </router-link>
+        </ul>
+
+        <ul v-else class="ivu-menu ivu-menu-primary ivu-menu-horizontal">
+          <router-link v-for="link in adminMenu" @click.native="changeAdminState(link.routeName)" :key="link.name" :to="to(link)" class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected">
             {{link.name}}
           </router-link>
         </ul>
@@ -198,7 +204,8 @@
         webUIVersion: process.env.VERSION,
         latestChangelogVersion: this.getCookie(LATEST_CHANGELOG_VERSION_COOKIE_NAME),
         projectCode: this.$route.params.projectCode || this.defaultProjectCode,
-        isLoggedIn: AuthenticationService.isAlreadyLoggedIn()
+        isLoggedIn: AuthenticationService.isAlreadyLoggedIn(),
+        adminRight: false
       }
     },
 
@@ -249,7 +256,16 @@
           { params: { projectCode: this.projectCode }, name: 'PROBLEMS', routeName: 'problems' },
           { params: { projectCode: this.projectCode }, name: 'FUNCTIONALITIES', routeName: 'functionalities' },
           { params: { projectCode: this.projectCode }, name: 'SCENARIOS', routeName: 'scenario-writing-helps' },
-          { params: { projectCode: this.projectCode }, name: 'SETTINGS', routeName: 'management' }
+          { params: { projectCode: this.projectCode }, name: 'SETTINGS', routeName: 'admin-management' }
+        ]
+      },
+
+      adminMenu () {
+        return [
+          { params: { projectCode: this.projectCode }, name: 'PROJECTS', routeName: 'admin-management' },
+          { params: { projectCode: this.projectCode }, name: 'MEMBERS', routeName: 'members' },
+          { params: { projectCode: this.projectCode }, name: 'CONFIGURATION', routeName: 'management' },
+          { params: { projectCode: this.projectCode }, name: 'DASHBOARD', routeName: 'dashboard' }
         ]
       },
 
@@ -360,6 +376,12 @@
         }
       },
 
+      changeAdminState  (routeName) {
+        if (this.adminRight === true && routeName === 'dashboard') {
+          this.adminRight = false
+        } else { this.adminRight = true }
+      },
+
       logout () {
         AuthenticationService.logout()
       }
@@ -400,6 +422,10 @@
   .ivu-menu-horizontal .ivu-menu-item {
     float: none;
     display: inline-block;
+  }
+
+  .ivu-menu-horizontal .ivu-menu-item:last-child {
+    float: right;
   }
 
   .selected-project-management div {
