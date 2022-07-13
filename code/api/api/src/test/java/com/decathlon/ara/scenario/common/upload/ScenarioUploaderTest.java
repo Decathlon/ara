@@ -32,9 +32,6 @@ class ScenarioUploaderTest {
     private SourceRepository sourceRepository;
 
     @Mock
-    private EntityManager entityManager;
-
-    @Mock
     private SeverityRepository severityRepository;
 
     @Mock

@@ -17,7 +17,6 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -36,19 +35,16 @@ public class ScenarioUploader {
 
     private final SourceRepository sourceRepository;
 
-    private final EntityManager entityManager;
-
     private final SeverityRepository severityRepository;
 
     private final CountryRepository countryRepository;
 
     public ScenarioUploader(ScenarioRepository scenarioRepository, FunctionalityRepository functionalityRepository,
-            SourceRepository sourceRepository, EntityManager entityManager, SeverityRepository severityRepository,
+            SourceRepository sourceRepository, SeverityRepository severityRepository,
             CountryRepository countryRepository) {
         this.scenarioRepository = scenarioRepository;
         this.functionalityRepository = functionalityRepository;
         this.sourceRepository = sourceRepository;
-        this.entityManager = entityManager;
         this.severityRepository = severityRepository;
         this.countryRepository = countryRepository;
     }
