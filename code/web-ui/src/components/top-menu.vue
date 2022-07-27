@@ -22,7 +22,7 @@
       So we use Menu classes with router-links.
     -->
     <div style="background-color: #0082C3; display: flex;">
-      <div style="flex: 0 0 auto;">
+      <div style="flex: 0 0 auto;" v-if="!adminRight">
         <router-link :to="{ name: 'redirecter' }" id="home-logo">
           <Tooltip placement="bottom-start" :transfer="true">
             <div slot="content">
@@ -204,8 +204,7 @@
         webUIVersion: process.env.VERSION,
         latestChangelogVersion: this.getCookie(LATEST_CHANGELOG_VERSION_COOKIE_NAME),
         projectCode: this.$route.params.projectCode || this.defaultProjectCode,
-        isLoggedIn: AuthenticationService.isAlreadyLoggedIn(),
-        isAdmin: false
+        isLoggedIn: AuthenticationService.isAlreadyLoggedIn()
       }
     },
 
@@ -394,6 +393,7 @@
     },
 
     mounted () {
+      console.log(this)
       this.loadLocalParameters()
       Vue.http
         .get(api.paths.info(), api.REQUEST_OPTIONS)

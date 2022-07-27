@@ -17,40 +17,15 @@
 
 package com.decathlon.ara.domain;
 
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.nullsFirst;
-
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.Lob;
-import javax.persistence.ManyToMany;
-import javax.persistence.NamedAttributeNode;
-import javax.persistence.NamedEntityGraph;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-
-import org.hibernate.annotations.SortNatural;
-
 import com.decathlon.ara.domain.enumeration.CoverageLevel;
 import com.decathlon.ara.domain.enumeration.FunctionalitySeverity;
 import com.decathlon.ara.domain.enumeration.FunctionalityType;
+import org.hibernate.annotations.SortNatural;
+
+import javax.persistence.*;
+import java.util.*;
+
+import static java.util.Comparator.*;
 
 @Entity
 @NamedEntityGraph(name = "Functionality.scenarios", attributeNodes = @NamedAttributeNode("scenarios"))
@@ -352,4 +327,7 @@ public class Functionality implements Comparable<Functionality> {
         return scenarios;
     }
 
+    public void setScenarios(Set<Scenario> scenarios) {
+        this.scenarios = scenarios;
+    }
 }

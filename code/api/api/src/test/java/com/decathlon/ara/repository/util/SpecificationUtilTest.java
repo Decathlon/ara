@@ -1,30 +1,12 @@
 package com.decathlon.ara.repository.util;
 
-import static org.mockito.ArgumentMatchers.any;
-
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.Period;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Selection;
-
+import com.decathlon.ara.domain.Error;
+import com.decathlon.ara.domain.*;
+import com.decathlon.ara.domain.enumeration.DefectExistence;
+import com.decathlon.ara.domain.enumeration.ProblemStatus;
+import com.decathlon.ara.domain.enumeration.ProblemStatusFilter;
+import com.decathlon.ara.domain.filter.ProblemFilter;
+import com.decathlon.ara.util.TestUtil;
 import org.hibernate.query.criteria.internal.PathImplementor;
 import org.hibernate.query.criteria.internal.expression.function.ParameterizedFunctionExpression;
 import org.junit.jupiter.api.Assertions;
@@ -38,17 +20,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.jpa.domain.Specification;
 
-import com.decathlon.ara.domain.Country;
-import com.decathlon.ara.domain.Error;
-import com.decathlon.ara.domain.ExecutedScenario;
-import com.decathlon.ara.domain.Problem;
-import com.decathlon.ara.domain.ProblemPattern;
-import com.decathlon.ara.domain.Type;
-import com.decathlon.ara.domain.enumeration.DefectExistence;
-import com.decathlon.ara.domain.enumeration.ProblemStatus;
-import com.decathlon.ara.domain.enumeration.ProblemStatusFilter;
-import com.decathlon.ara.domain.filter.ProblemFilter;
-import com.decathlon.ara.util.TestUtil;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.Period;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.mockito.ArgumentMatchers.any;
 
 @DataJpaTest
 @ExtendWith(MockitoExtension.class)
@@ -505,7 +486,7 @@ class SpecificationUtilTest {
         CriteriaQuery<Error> criteriaQuery = criteriaBuilder.createQuery(Error.class);
         Root<Error> root = criteriaQuery.from(Error.class);
         criteriaBuilder = Mockito.spy(criteriaBuilder);
-        prepareTest(criteriaBuilder);
+        prepareTest(criteriaBuilder, PredicateType.LIKE);
         ProblemPattern problemPattern = new ProblemPattern();
         TestUtil.setField(problemPattern, "exception", "exception");
         Specification<Error> errorSpecification = SpecificationUtil.toErrorSpecification(1, problemPattern, null);
@@ -516,9 +497,9 @@ class SpecificationUtilTest {
         Assertions.assertEquals(1l, predicates.get(0).value());
         Assertions.assertEquals("root.executedScenario.run.execution.cycleDefinition.projectId", predicates.get(0).getName());
         Assertions.assertEquals(PredicateType.EQUAL, predicates.get(0).type());
-        Assertions.assertEquals(problemPattern.getException(), predicates.get(1).value());
+        Assertions.assertEquals(problemPattern.getException() + "%", predicates.get(1).value());
         Assertions.assertEquals("root.exception", predicates.get(1).getName());
-        Assertions.assertEquals(PredicateType.EQUAL, predicates.get(1).type());
+        Assertions.assertEquals(PredicateType.LIKE, predicates.get(1).type());
     }
 
     @Test
@@ -744,35 +725,16 @@ class SpecificationUtilTest {
         Root<Error> root = criteriaQuery.from(Error.class);
         criteriaBuilder = Mockito.spy(criteriaBuilder);
         prepareTest(criteriaBuilder);
-        Path<Object> executedScenario = root.get("executedScenario");
-        Path<Object> run = executedScenario.get("run");
-        Path<Object> idPath = run.get("id");
+        Path<Object> idPath = root.get("id");
         root = Mockito.spy(root);
-        Path<Object> executedScenarioSpy = Mockito.spy(executedScenario);
-        Path<Object> runSpy = Mockito.spy(run);
         Path<Object> idPathSpy = Mockito.spy(idPath);
-        Mockito.doAnswer(invocationOnMock -> {
-            if ("executedScenario".equals(invocationOnMock.getArgument(0))) {
-                return executedScenarioSpy;
-            } else {
-                return invocationOnMock.callRealMethod();
-            }
-        }).when(root).get(Mockito.anyString());
-        Mockito.doAnswer(invocationOnMock -> {
-            if ("run".equals(invocationOnMock.getArgument(0))) {
-                return runSpy;
-            } else {
-                return invocationOnMock.callRealMethod();
-            }
-        }).when(executedScenarioSpy).get(Mockito.anyString());
-        ;
         Mockito.doAnswer(invocationOnMock -> {
             if ("id".equals(invocationOnMock.getArgument(0))) {
                 return idPathSpy;
             } else {
                 return invocationOnMock.callRealMethod();
             }
-        }).when(runSpy).get(Mockito.anyString());
+        }).when(root).get(Mockito.anyString());
         Mockito.doAnswer(invocationOnMock -> {
             List<Long> value = invocationOnMock.getArgument(0);
             Predicate predicate = (Predicate) invocationOnMock.callRealMethod();
@@ -788,7 +750,7 @@ class SpecificationUtilTest {
         Assertions.assertEquals("root.executedScenario.run.execution.cycleDefinition.projectId", predicates.get(0).getName());
         Assertions.assertEquals(PredicateType.EQUAL, predicates.get(0).type());
         Assertions.assertEquals(errorIds, predicates.get(1).value());
-        Assertions.assertEquals("root.executedScenario.run.id", predicates.get(1).getName());
+        Assertions.assertEquals("root.id", predicates.get(1).getName());
         Assertions.assertEquals(PredicateType.IN, predicates.get(1).type());
     }
 
