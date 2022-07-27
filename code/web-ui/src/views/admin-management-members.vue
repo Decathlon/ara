@@ -33,7 +33,7 @@
             <td>{{ member.name }}</td>
             <td>{{ member.users ? member.users : '' }}</td>
             <td>
-              <Icon type="md-close-circle" size="24" @click="openProjectDetails(project)"/>
+              <Icon type="md-close-circle" size="24" @click="removeGroup(member)"/>
               <Icon type="md-create" size="24" @click="showGroupInfo(member.name)"/>
             </td>
           </tr>
@@ -45,7 +45,7 @@
     </div>
 
     <div v-if="showGroup" class="tableContent groupManagement">
-      <h2>{{ groupName.name }}</h2>
+      <h2>{{ groupName }}</h2>
       <table>
         <div class="tabTitle">
           <p>Identity</p>
@@ -54,7 +54,7 @@
           <tr>
             <td>
               <span>Name</span>
-              <input type="text" :value="groupName.name">
+              <input type="text" :value="groupName">
             </td>
           </tr>
         </tbody>
@@ -64,14 +64,20 @@
         <div class="tabTitle">
           <p>Users</p>
         </div>
-        <tbody>
+        <tbody v-if="groupMembers.length > 0">
           <tr v-for="member in groupMembers" :key="member">
             <td>{{ member.name }}</td>
             <td>{{ member.role }}</td>
             <td>
-              <Icon type="md-close-circle" size="24"/>
+              <Icon type="md-close-circle" size="24" @click="removeGroupMember(member)"/>
               <Icon type="md-create" size="24"/>
             </td>
+          </tr>
+        </tbody>
+
+        <tbody v-else>
+          <tr>
+            <td class="alert-msg">No member(s) to display</td>
           </tr>
         </tbody>
         <button class="addMember" @click="memberToGroup = true">
@@ -140,7 +146,7 @@
         groupFields: [
           {
             code: 'name',
-            name: 'Group name',
+            name: 'Member name',
             columnTitle: 'Name',
             type: 'string',
             required: true,
@@ -155,8 +161,8 @@
             columnTitle: 'Role',
             type: 'select',
             options: [
-              { value: 'Member', label: 'Member' },
-              { value: 'Maintainer', label: 'Maintainer' }
+              { value: 'MEMBER', label: 'Member' },
+              { value: 'MAINTAINER', label: 'Maintainer' }
             ],
             required: true,
             newValue: '',
@@ -207,57 +213,75 @@
         Vue.http
           .get('/api/groups/' + name + '/members')
           .then((response) => {
-            console.log(response)
             this.groupMembers = response.body
           })
         this.showGroup = !this.showGroup
         this.groupName = name
-        console.log(this.groupName.name)
-        this.$http.get('/api/groups/MaintainerGroup', api.REQUEST_OPTIONS).then((response) => {
-          this.groupDetails = response.body
-        })
       },
 
       createMember () {
         Vue.http
           .post('/api/groups', this.editingData, api.REQUEST_OPTIONS)
+          .then(setTimeout(() => this.getMember(), 50))
+      },
+
+      async getMember () {
+        this.members = []
+        await Vue.http
+          .get('api/groups', api.REQUEST_OPTIONS)
+          .then((groupList) => {
+            if (groupList.body.length > 0) {
+              for (let i = 0; i < groupList.body.length; i++) {
+                this.members.push({
+                  'name': groupList.body[i].name,
+                  'users': ''
+                })
+                Vue.http
+                  .get('/api/groups/' + groupList.body[i].name + '/members')
+                  .then((response) => {
+                    for (let j = 0; j < response.body.length; j++) {
+                      this.members[i].users = response.body[j].name
+                    }
+                  })
+              }
+            }
+
+            return this.members
+          })
+
+        Vue.http
+          .get('api/users', api.REQUEST_OPTIONS)
+          .then((response) => {
+            this.members.push(response.body[0])
+
+            return { ...this.members }
+          })
       },
 
       addMemberToGroup () {
         Vue.http
-          .post('/api/groups/' + this.groupName + '/members', this.editingData, api.REQUEST_OPTIONS)
+          .post('/api/groups/' + this.groupName + '/members', JSON.parse(JSON.stringify(this.editingData)), api.REQUEST_OPTIONS)
+      },
+
+      removeGroup (memberInfo) {
+        if (confirm('Do you really want to delete this member?')) {
+          Vue.http
+            .delete('/api/groups/' + memberInfo.name, api.REQUEST_OPTIONS)
+            .then(setTimeout(() => this.getMember(), 50))
+        }
+      },
+
+      removeGroupMember (groupMemberInfo) {
+        if (confirm('Do you really want to delete this group member?')) {
+          Vue.http
+            .delete('/api/groups/' + this.groupName + '/members/' + groupMemberInfo.name, api.REQUEST_OPTIONS)
+            .then(setTimeout(() => this.showGroupInfo(), 50))
+        }
       }
     },
 
     created () {
-      Vue.http
-        .get('api/groups', api.REQUEST_OPTIONS)
-        .then((response) => {
-          if (response.body.length > 0) {
-            for (let i = 0; i < response.body.length; i++) {
-              this.members.push({
-                'name': response.body[i].name,
-                'users': ''
-              })
-              Vue.http
-                .get('/api/groups/' + response.body[i].name + '/members')
-                .then((response) => {
-                  for (let j = 0; j < response.body.length; j++) {
-                    this.members[i].users = response.body[j].name
-                  }
-                })
-            }
-          }
-
-          return this.members
-        })
-      Vue.http
-        .get('api/users', api.REQUEST_OPTIONS)
-        .then((response) => {
-          this.members.push(response.body[0])
-
-          return { ...this.members }
-        })
+      this.getMember()
     },
 
     computed: {

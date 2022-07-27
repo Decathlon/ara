@@ -22,7 +22,7 @@
       So we use Menu classes with router-links.
     -->
     <div style="background-color: #0082C3; display: flex;">
-      <div style="flex: 0 0 auto;" v-if="!adminRight">
+      <div style="flex: 0 0 auto;">
         <router-link :to="{ name: 'redirecter' }" id="home-logo">
           <Tooltip placement="bottom-start" :transfer="true">
             <div slot="content">
@@ -30,8 +30,8 @@
               Fighting Against Regressions All Together
             </div>
             <img src="../assets/favicon-white.png" width="32" height="32"/></Tooltip></router-link><!-- No space between!
-     --><projects-select :ghost="true" v-on:projectSelection="projectSelection" style="flex: 1 0 auto; margin-right: 10px;"/>
-        <router-link :to="{ name: 'management-projects' }" active-class="selected-project-management">
+     --><projects-select :ghost="true" v-if="!savedSingleUserConnections" v-on:projectSelection="projectSelection" style="flex: 1 0 auto; margin-right: 10px;"/>
+        <router-link :to="{ name: 'management-projects' }" v-if="!savedSingleUserConnections" active-class="selected-project-management">
           <Tooltip placement="bottom" content="Add or edit a project">
             <div>
               <Icon type="md-add" size="24" style="color: white;"/>
@@ -42,13 +42,13 @@
 
       <div style="flex: 1 0 auto;">
         <!-- After deleting the demo project, if no other project exists, `projectCode` still exists but we should hide the menu anyway  -->
-        <ul v-if="projectCode && projects && projects.length && !adminRight" class="ivu-menu ivu-menu-primary ivu-menu-horizontal">
+        <ul v-if="projectCode && projects && projects.length && !savedSingleUserConnections" class="ivu-menu ivu-menu-primary ivu-menu-horizontal dashboardHeader">
           <router-link v-for="link in links" @click.native="changeAdminState(link.routeName)" :key="link.name" :to="to(link)" class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected">
             {{link.name}}
           </router-link>
         </ul>
 
-        <ul v-else class="ivu-menu ivu-menu-primary ivu-menu-horizontal">
+        <ul v-else-if="projectCode && projects && projects.length && savedSingleUserConnections" class="ivu-menu ivu-menu-primary ivu-menu-horizontal dashboardHeader">
           <router-link v-for="link in adminMenu" @click.native="changeAdminState(link.routeName)" :key="link.name" :to="to(link)" class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected">
             {{link.name}}
           </router-link>
@@ -205,7 +205,7 @@
         latestChangelogVersion: this.getCookie(LATEST_CHANGELOG_VERSION_COOKIE_NAME),
         projectCode: this.$route.params.projectCode || this.defaultProjectCode,
         isLoggedIn: AuthenticationService.isAlreadyLoggedIn(),
-        adminRight: false
+        isAdmin: false
       }
     },
 
@@ -245,6 +245,8 @@
         }
       },
 
+      ...mapState('admin', ['savedSingleUserConnections']),
+
       ...mapState('projects', [
         'projects',
         'defaultProjectCode'
@@ -256,13 +258,13 @@
           { params: { projectCode: this.projectCode }, name: 'PROBLEMS', routeName: 'problems' },
           { params: { projectCode: this.projectCode }, name: 'FUNCTIONALITIES', routeName: 'functionalities' },
           { params: { projectCode: this.projectCode }, name: 'SCENARIOS', routeName: 'scenario-writing-helps' },
-          { params: { projectCode: this.projectCode }, name: 'SETTINGS', routeName: 'admin-management' }
+          { params: { projectCode: this.projectCode }, name: 'SETTINGS', routeName: 'active-admin' }
         ]
       },
 
       adminMenu () {
         return [
-          { params: { projectCode: this.projectCode }, name: 'PROJECTS', routeName: 'admin-management' },
+          { params: { projectCode: this.projectCode }, name: 'PROJECTS', routeName: 'active-admin' },
           { params: { projectCode: this.projectCode }, name: 'MEMBERS', routeName: 'members' },
           { params: { projectCode: this.projectCode }, name: 'CONFIGURATION', routeName: 'management' },
           { params: { projectCode: this.projectCode }, name: 'DASHBOARD', routeName: 'dashboard' }
@@ -376,14 +378,18 @@
         }
       },
 
-      changeAdminState  (routeName) {
-        if (this.adminRight === true && routeName === 'dashboard') {
-          this.adminRight = false
-        } else { this.adminRight = true }
+      changeAdminState (data) {
+        this.$store.dispatch('admin/enableAdmin', data)
       },
 
       logout () {
         AuthenticationService.logout()
+      }
+    },
+
+    beforeUpdate () {
+      if (localStorage.adminRight === 'true') {
+        this.$store.dispatch('admin/enableAdmin', 'active-admin')
       }
     },
 
@@ -408,6 +414,11 @@
 </script>
 
 <style scoped>
+  @keyframes loadHeader {
+    from { transform: translateY(65px); }
+    to   { transform: translateY(0); }
+  }
+
   #home-logo {
     display: inline-block;
     margin: 0 8px;
@@ -515,5 +526,13 @@
 
   .parameter-inputs .parameter-inputs-input {
     margin-right: 5px;
+  }
+
+  .dashboardHeader {
+    overflow: hidden;
+  }  
+
+  .dashboardHeader a {
+    animation: loadHeader .3s ease-in-out;
   }
 </style>

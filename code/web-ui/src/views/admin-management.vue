@@ -37,7 +37,7 @@
             {{ member.name }}
           </td>
           <td>
-            <input type="radio" :checked="project.defaultAtStartup === true ? true : false">
+            <input type="radio" name="defautProject" @change="changeDefaultProject(project)" :checked="project.defaultAtStartup === true ? true : false">
           </td>
           <td>
             <Icon type="md-eye" size="24" @click="openProjectDetails(project)"/>
@@ -92,12 +92,10 @@
             columnTitle: 'Code',
             type: 'string',
             required: true,
-            createOnly: true,
             createOnlyBecause: 'the code ends-up in URLs of ARA, and people should be allowed to bookmark fixed URLs or copy/past them in other services (defect tracking system, wiki, etc.)',
             newValue: '',
             width: undefined,
-            help: 'The technical code of the project, to use in ARA URLs (as well as API URLs used by continuous integration to push data to ARA). Eg. "phoenix-front".',
-            primaryKey: true
+            help: 'The technical code of the project, to use in ARA URLs (as well as API URLs used by continuous integration to push data to ARA). Eg. "phoenix-front".'
           },
           {
             code: 'name',
@@ -115,8 +113,8 @@
             name: 'Default',
             columnTitle: 'Default',
             type: 'boolean',
-            required: false,
-            newValue: false,
+            required: true,
+            newValue: '',
             width: 96,
             help: '' +
               'Check to use that project as the default one when arriving at ARA homepage without any specified project. ' +
@@ -183,25 +181,40 @@
 
       openProjectDetails (projectInfo) {
         this.$router.push({ name: 'admin-project-details', params: { projectInfo } })
+      },
+
+      getProjectList () {
+        Vue.http
+          .get('api/projects', api.REQUEST_OPTIONS)
+          .then((response) => {
+            const project = response.body
+
+            for (let i = 0; i < project.length; i++) {
+              Vue.http
+                .get('/api/projects/' + project[i].code + '/members/users')
+                .then((response) => {
+                  project[i].members = response.body
+                  this.projects = Array.from(project)
+                })
+            }
+            return this.projects
+          })
+      },
+
+      changeDefaultProject (project) {
+        const defaultInfo = {
+          'code': project.code,
+          'name': project.name,
+          'defaultAtStartup': true
+        }
+
+        Vue.http
+          .put('api/projects/' + project.code, defaultInfo, api.REQUEST_OPTIONS)
       }
     },
 
     mounted () {
-      Vue.http
-        .get('api/admin/projects', api.REQUEST_OPTIONS)
-        .then((response) => {
-          const project = response.body
-
-          for (let i = 0; i < project.length; i++) {
-            Vue.http
-              .get('/api/projects/' + project[i].code + '/members/users')
-              .then((response) => {
-                project[i].members = response.body
-                this.projects = Array.from(project)
-              })
-          }
-          return this.projects
-        })
+      this.getProjectList()
     },
 
     computed: {
@@ -261,6 +274,8 @@
 
   tbody tr td i {
     color: #AC8DAF;
+    float: right;
+    margin-right: 1rem;
   }
 
   i {

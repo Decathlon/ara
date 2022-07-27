@@ -165,6 +165,7 @@ class AuthenticationServiceClass {
 
   clearDetails = () => {
     localStorage.removeItem(USER_DETAILS)
+    localStorage.setItem('adminRight', false)
   }
 }
 

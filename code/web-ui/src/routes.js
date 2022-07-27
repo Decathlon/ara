@@ -174,8 +174,8 @@ const routes = [
     redirect: '/projects/:projectCode/management/communications' // First tab
   },
   {
-    path: '/projects/:projectCode/admin-management',
-    name: 'admin-management',
+    path: '/projects/:projectCode/active-admin',
+    name: 'active-admin',
     meta: {
       title: 'Admin Management'
     },

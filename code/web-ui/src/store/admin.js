@@ -14,23 +14,34 @@
  * limitations under the License.                                             *
  *                                                                            *
  ******************************************************************************/
-import Vue from 'vue'
-import Vuex from 'vuex'
+export default ({
+  namespaced: true,
 
-import projects from './projects'
-import rootCauses from './root-causes'
-import severities from './severities'
-import teams from './teams'
-import admin from './admin'
+  state: {
+    savedSingleUserConnections: false
+  },
 
-Vue.use(Vuex)
+  mutations: {
+    saveSingleUserConnections: (state, adminRight) => {
+      state.savedSingleUserConnections = adminRight
+    },
 
-export default new Vuex.Store({
-  modules: {
-    projects,
-    rootCauses,
-    severities,
-    teams,
-    admin
+    initialiseStore (state) {
+      if (localStorage.getItem('adminRight')) {
+        state.savedSingleUserConnections = true
+      }
+    }
+  },
+
+  actions: {
+    enableAdmin ({ state, commit }, payload) {
+      if (!this.savedSingleUserConnections && payload === 'active-admin') {
+        commit('saveSingleUserConnections', true)
+        localStorage.setItem('adminRight', true)
+      } else if (payload === 'dashboard') {
+        commit('saveSingleUserConnections', false)
+        localStorage.setItem('adminRight', false)
+      }
+    }
   }
 })

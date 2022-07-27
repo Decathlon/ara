@@ -46,14 +46,14 @@
       </table>
     </div>
 
-    <Modal v-model="memberToAdd" title="Add Member" okText="Add" @on-ok="createMember" @close="memberToAdd = false" :width="900"
+    <Modal v-model="memberToAdd" title="Add Member" okText="Add" @on-ok="addMemberToProject" @close="memberToAdd = false" :width="900"
       :loading="loadingSaving" ref="editPopup">
       <Form :label-width="128">
         <Form-item v-for="field in fields"
                    :key="field.code"
                    :label="(field.type === 'boolean' ? '' : field.name + ':')"
                    :required="field.required && (editingNew || (!field.primaryKey && !field.createOnly))">
-          <form-field :field="field" v-model="editingData[field.code]" :editingNew="editingNew" :ref="field.code" v-on:enter="createMember"/>
+          <form-field :field="field" v-model="editingData[field.code]" :editingNew="editingNew" :ref="field.code" v-on:enter="addMemberToProject"/>
         </Form-item>
       </Form>
     </Modal>
@@ -148,23 +148,14 @@
         throw new Error('The table ' + this.name + ' has no field, or they are all either of type hidden, selects, read-only or non-modifiable primary key')
       },
 
-      createMember () {
-        console.log(this)
-        let row = {
-          name: 'MEMBER 1',
-          role: 'MEMBER'
-        }
+      addMemberToProject () {
         Vue.http
-          .post('/api/projects/' + this.projectInfo.code + '/members/users', row, api.REQUEST_OPTIONS)
-          .then((response) => {
-            console.log(response)
-          })
+          .post('/api/projects/' + this.projectInfo.code + '/members/users', this.editingData, api.REQUEST_OPTIONS)
       }
     },
 
     created () {
       this.projectInfo = this.$route.params.projectInfo
-      console.log(this.projectInfo)
     }
   }
 </script>
