@@ -1,14 +1,15 @@
 package com.decathlon.ara.domain;
 
-import java.util.UUID;
+import com.decathlon.ara.domain.security.member.Member;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import java.util.UUID;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "name", "issuer" }))
+@Table(name = "user_profil", uniqueConstraints = @UniqueConstraint(columnNames = { "name", "issuer" }))
 public class User implements Member {
 
     @Id
