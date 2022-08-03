@@ -190,6 +190,14 @@ const routes = [
     component: (resolve) => require(['./views/admin-management-members.vue'], resolve)
   },
   {
+    path: '/projects/:projectCode/members/groupDetails',
+    name: 'group-member',
+    meta: {
+      title: 'Group details'
+    },
+    component: (resolve) => require(['./views/admin-management-members-details.vue'], resolve)
+  },
+  {
     path: '/projects/:projectCode/dashboard',
     name: 'dashboard',
     redirect: '/projects/:projectCode/executions'

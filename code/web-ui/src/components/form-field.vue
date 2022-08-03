@@ -34,6 +34,13 @@
             @on-change="value => $emit('input', value)">
       <Option v-for="option in field.options" :value="option.value" :key="option.value">{{!option.label || option.label === ' ' ? '\u00A0' : option.label}}</Option>
     </Select>
+    <AutoComplete v-else-if="field.type === 'autocomplete'"
+           :type="field.type === 'textarea' ? 'textarea' : field.type === 'password' ? 'password' : 'text'"
+           :autosize="{ minRows: 2, maxRows: 15 }"
+           :value="value"
+           :data="data"
+           @on-change="value => $emit('input', value)"
+           ref="fieldInput"/>
     <InputNumber v-else-if="field.type === 'int'"
                  :value="value"
                  @on-change="value => $emit('input', value)"
@@ -67,6 +74,12 @@
       hideCheckboxLabel: {
         // True to hide the label of a checkbox field (if it is already present elsewhere, for instance)
         type: Boolean
+      }
+    },
+
+    data () {
+      return {
+        data: this.$store.state.users.usersList
       }
     },
 

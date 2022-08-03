@@ -14,25 +14,24 @@
  * limitations under the License.                                             *
  *                                                                            *
  ******************************************************************************/
-import Vue from 'vue'
-import Vuex from 'vuex'
+export default ({
+  namespaced: true,
 
-import projects from './projects'
-import rootCauses from './root-causes'
-import severities from './severities'
-import teams from './teams'
-import admin from './admin'
-import users from './users'
+  state: {
+    usersList: []
+  },
 
-Vue.use(Vuex)
+  mutations: {
+    storeAllUsers: (state, usersList) => {
+      for (var i = 0; i < usersList.length; i++) {
+        state.usersList.push(usersList[i].memberName)
+      }
+    }
+  },
 
-export default new Vuex.Store({
-  modules: {
-    projects,
-    rootCauses,
-    severities,
-    teams,
-    admin,
-    users
+  actions: {
+    getAllUsers ({ commit }, payload) {
+      commit('storeAllUsers', payload)
+    }
   }
 })

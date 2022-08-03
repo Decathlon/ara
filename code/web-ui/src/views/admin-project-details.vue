@@ -16,10 +16,12 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
   <div>
-    <h1>Projects details</h1>
+    <h1>Project details</h1>
 
     <div class="tableContent">
-      <h2>{{ projectInfo.name }}</h2>
+      <span class="breadcrumbLink" @click="$router.go(-1)">Project list</span>
+
+      <h2>{{ projectName }}</h2>
 
       <table>
         <thead>
@@ -30,8 +32,8 @@
           </tr>
         </thead>
 
-        <tbody>
-          <tr v-for="member in projectInfo.members" :key="member.name" :class="member.name %2 !== 0 ? 'darkGrey' : 'lightGrey'">
+        <tbody v-if="projectInfo">
+          <tr v-for="(member, index) in projectInfo" :key="index" :class="index %2 !== 0 ? 'lightGrey' : 'darkGrey'">
             <td >{{ member.name }}</td>
             <td>{{ member.role }}</td>
             <td>
@@ -75,6 +77,8 @@
     data () {
       return {
         projectInfo: [],
+        projectName: '',
+        projectCode: '',
         currentMember: [],
         newMember: {
           name: '',
@@ -150,12 +154,27 @@
 
       addMemberToProject () {
         Vue.http
-          .post('/api/projects/' + this.projectInfo.code + '/members/users', this.editingData, api.REQUEST_OPTIONS)
+          .post('/api/projects/' + this.projectCode + '/members/users', this.editingData, api.REQUEST_OPTIONS)
       }
     },
 
-    created () {
-      this.projectInfo = this.$route.params.projectInfo
+    mounted () {
+      this.projectName = this.$route.query.projectName
+      this.projectCode = this.$route.query.projectCode
+      Vue.http
+        .get('/api/projects/' + this.projectCode + '/members/users')
+        .then((response) => {
+          for (var i = 0; i < response.body.length; i++) {
+            this.projectInfo.push({
+              name: response.body[i].name,
+              role: response.body[i].role
+            })
+          }
+        })
+    },
+
+    beforeDestroy () {
+      this.projectInfo = this.$route.query
     }
   }
 </script>

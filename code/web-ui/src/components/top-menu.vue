@@ -22,22 +22,15 @@
       So we use Menu classes with router-links.
     -->
     <div style="background-color: #0082C3; display: flex;">
-      <div style="flex: 0 0 auto;" v-if="!adminRight">
-        <router-link :to="{ name: 'redirecter' }" id="home-logo">
+      <div style="flex: 0 0 auto;">
+        <router-link v-if="!adminRight" :to="{ name: 'redirecter' }" id="home-logo">
           <Tooltip placement="bottom-start" :transfer="true">
             <div slot="content">
               ARA - AGILE REGRESSION ANALYZER<br>
               Fighting Against Regressions All Together
             </div>
             <img src="../assets/favicon-white.png" width="32" height="32"/></Tooltip></router-link><!-- No space between!
-     --><projects-select :ghost="true" v-if="!savedSingleUserConnections" v-on:projectSelection="projectSelection" style="flex: 1 0 auto; margin-right: 10px;"/>
-        <router-link :to="{ name: 'management-projects' }" v-if="!savedSingleUserConnections" active-class="selected-project-management">
-          <Tooltip placement="bottom" content="Add or edit a project">
-            <div>
-              <Icon type="md-add" size="24" style="color: white;"/>
-            </div>
-          </Tooltip>
-        </router-link>
+     --><projects-select :ghost="true" v-on:projectSelection="projectSelection" style="flex: 1 0 auto; margin-right: 10px;"/>
       </div>
 
       <div style="flex: 1 0 auto;">
@@ -362,6 +355,7 @@
       },
 
       getAuthenticationDetails () {
+        this.$store.dispatch('admin/setRole', AuthenticationService.getDetails().user.id)
         return AuthenticationService.getDetails()
       },
 
@@ -393,7 +387,10 @@
     },
 
     mounted () {
-      console.log(this)
+      Vue.http.get('api/users')
+        .then((response) => {
+          this.$store.dispatch('users/getAllUsers', response.body)
+        })
       this.loadLocalParameters()
       Vue.http
         .get(api.paths.info(), api.REQUEST_OPTIONS)

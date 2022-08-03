@@ -67,6 +67,21 @@ h2 {
 .alert-msg {
   text-align: center;
 }
+.layout-content {
+  position: relative;
+}
+.breadcrumbLink {
+  position: absolute;
+  top: 30px;
+  left: 110px;
+  cursor: pointer;
+  font-weight: 800;
+  color: #747474;
+}
+.breadcrumbLink::before {
+  content: '<';
+  margin-right: 5px;
+}
 
 /* DROPDOWNS */
 

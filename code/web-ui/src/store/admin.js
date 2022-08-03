@@ -18,12 +18,17 @@ export default ({
   namespaced: true,
 
   state: {
-    savedSingleUserConnections: false
+    savedSingleUserConnections: false,
+    userRole: ''
   },
 
   mutations: {
     saveSingleUserConnections: (state, adminRight) => {
       state.savedSingleUserConnections = adminRight
+    },
+
+    saveUserRole: (state, userRole) => {
+      state.userRole = userRole
     },
 
     initialiseStore (state) {
@@ -42,6 +47,10 @@ export default ({
         commit('saveSingleUserConnections', false)
         localStorage.setItem('adminRight', false)
       }
+    },
+
+    setRole ({ commit }, userInfo) {
+      commit('saveUserRole', userInfo)
     }
   }
 })

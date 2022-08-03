@@ -33,8 +33,10 @@
         <tr v-for="project in sortedProjects" :class="project.id %2 !== 0 ? 'darkGrey' : 'lightGrey'" :key="project.id">
           <td>{{ project.code }}</td>
           <td>{{ project.name }}</td>
-          <td v-for="member in project.members" :key="member.name">
-            {{ member.name }}
+          <td>
+            <ul>
+              <li v-for="member in project.members" :key="member.name">{{ member.name }}</li>
+            </ul>
           </td>
           <td>
             <input type="radio" name="defautProject" @change="changeDefaultProject(project)" :checked="project.defaultAtStartup === true ? true : false">
@@ -180,12 +182,12 @@
       },
 
       openProjectDetails (projectInfo) {
-        this.$router.push({ name: 'admin-project-details', params: { projectInfo } })
+        this.$router.push({ name: 'admin-project-details', path: '/projectDetails/', query: { projectCode: projectInfo.code, projectName: projectInfo.name } })
       },
 
       getProjectList () {
         Vue.http
-          .get('api/projects', api.REQUEST_OPTIONS)
+          .get(this.$store.state.admin.userRole === 'admin' ? 'api/admin/projects' : 'api/projects', api.REQUEST_OPTIONS)
           .then((response) => {
             const project = response.body
 
@@ -203,13 +205,14 @@
 
       changeDefaultProject (project) {
         const defaultInfo = {
+          'id': project.id,
           'code': project.code,
           'name': project.name,
           'defaultAtStartup': true
         }
 
         Vue.http
-          .put('api/projects/' + project.code, defaultInfo, api.REQUEST_OPTIONS)
+          .put(this.$store.state.admin.userRole === 'admin' ? 'api/admin/projects' : 'api/projects' + project.code, defaultInfo, api.REQUEST_OPTIONS)
       }
     },
 
@@ -270,6 +273,10 @@
 
   tbody tr td {
     padding: 10px;
+  }
+
+  tbody tr td li {
+    list-style: none;
   }
 
   tbody tr td i {
