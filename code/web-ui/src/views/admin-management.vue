@@ -18,6 +18,8 @@
   <div>
     <h1>Projects management</h1>
 
+    <Button v-if="!(projects.find(project => project.code === 'the-demo-project'))" class="demoProjectButton" data-nrt="createDemo" :loading="loadingDemoProject" icon="md-add" @click="createDemoProject">CREATE THE DEMO PROJECT</Button>
+
     <table>
       <thead>
         <tr>
@@ -43,6 +45,7 @@
           </td>
           <td>
             <Icon type="md-eye" size="24" @click="openProjectDetails(project)"/>
+            <Icon v-if="project.code === 'the-demo-project'" class="binIcon" type="md-trash" size="24" @click="deleteDemoProject()"/>
           </td>
         </tr>
       </tbody>
@@ -84,8 +87,10 @@
 
     data () {
       return {
+        demoProjectCode: 'the-demo-project',
         projects: [],
         addOrChangeProject: false,
+        loadingDemoProject: false,
         introduction: 'Projects are isolated areas in ARA to manage test reports of several applications or standalone components.',
         fields: [
           {
@@ -196,6 +201,9 @@
                 .get('/api/projects/' + project[i].code + '/members/users')
                 .then((response) => {
                   project[i].members = response.body
+                  if (project[i].code === this.$store.state.projects.defaultProjectCode) {
+                    project[i].defaultAtStartup = true
+                  }
                   this.projects = Array.from(project)
                 })
             }
@@ -212,7 +220,42 @@
         }
 
         Vue.http
-          .put(this.$store.state.admin.userRole === 'admin' ? 'api/admin/projects' : 'api/projects' + project.code, defaultInfo, api.REQUEST_OPTIONS)
+          .put('api/projects/' + project.code, defaultInfo, api.REQUEST_OPTIONS)
+      },
+
+      deleteDemoProject () {
+        let self = this
+        this.$Modal.confirm({
+          title: 'Delete the Demo Project',
+          content: `<p>Delete the demo project?</p>`,
+          okText: 'Delete',
+          loading: true,
+          onOk () {
+            self.$store.commit('teams/unloadTeams', { projectCode: self.demoProjectCode })
+            Vue.http
+              .delete(api.paths.demo(), api.REQUEST_OPTIONS)
+              .then(() => {
+                self.$Modal.remove()
+                self.getProjectList()
+              }, (error) => {
+                api.handleError(error)
+              })
+          }
+        })
+      },
+
+      createDemoProject () {
+        this.loadingDemoProject = true
+        Vue.http
+          .post(api.paths.demo(), null, api.REQUEST_OPTIONS)
+          .then(() => {
+            this.loadingDemoProject = false
+            this.getProjectList()
+            this.$store.dispatch('teams/ensureTeamsLoaded', this.demoProjectCode)
+          }, (error) => {
+            this.loadingDemoProject = false
+            api.handleError(error)
+          })
       }
     },
 
@@ -222,7 +265,7 @@
 
     computed: {
       sortedProjects () {
-        return this.projects.map(item => item).sort((a, b) => a.id - b.id)
+        return this.projects.map(item => item).sort((a, b) => a.code - b.code)
       }
     }
   }
@@ -285,8 +328,17 @@
     margin-right: 1rem;
   }
 
+  tbody tr td .binIcon {
+    color: #687787;
+  }
+
   i {
     cursor: pointer;
+  }
+
+  .demoProjectButton {
+    position: absolute;
+    left: 7rem;
   }
 
   .addProject {

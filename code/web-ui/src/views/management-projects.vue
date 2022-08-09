@@ -152,6 +152,7 @@
       },
 
       projectsLoaded (data) {
+        localStorage.setItem('adminRight', false)
         this.$store.commit('projects/setProjects', data)
       }
     }
