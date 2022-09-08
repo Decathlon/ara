@@ -1,0 +1,45 @@
+### Metrics
+# management:
+#   metrics:
+#     export:
+#       influx:
+#         enabled: false
+#         db: ${INFLUX_DATABASE_NAME}
+#         user-name: ${INFLUX_DATABASE_USERNAME}
+#         password: ${INFLUX_DATABASE_PASSWORD}
+#         uri: ${INFLUX_DATABASE_URI}
+#         step: 15s
+#         autoCreateDb: false
+
+spring:
+  security:
+    oauth2:
+      # >> the authorization_code conf
+      client:
+        registration:
+          # fed
+          fedid:
+            client-name: ${OAUTH2_CLIENT_NAME}
+            client-id: ${OAUTH2_CLIENT_ID}
+            client-secret: ${OAUTH2_CLIENT_SECRET}
+            authorization-grant-type: authorization_code
+            redirect-uri: "${ara.clientBaseUrl}/${ara.loginProcessingUrl}/{registrationId}"
+            scope: openid, profile
+        provider:
+          fedid:
+            issuer-uri: ${OAUTH2_ISSUER_URI}
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${OAUTH2_JWK_URI}
+
+oauth2providers:
+  conf:
+    - display-name: ${OAUTH2_DISPLAY_NAME}
+      provider-type: custom
+      code: ${OAUTH2_CLIENT_NAME}
+server:
+  servlet:
+    session:
+      timeout: 14400s
+      cookie:
+        max-age: 43200
