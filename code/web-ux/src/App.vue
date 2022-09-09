@@ -26,8 +26,13 @@ export default {
 </script>
 
 <template>
-  <headerNav @opened-menu="openSidemenu" v-if="this.$route.name !== 'login'" />
-  <sideNav :sideOpen="sideOpen" v-if="this.$route.name !== 'login'" />
+  <div>
+    <headerNav
+      @opened-menu="openSidemenu"
+      v-if="this.$route.name !== 'login'"
+    />
+    <sideNav :sideOpen="sideOpen" v-if="this.$route.name !== 'login'" />
 
-  <RouterView />
+    <RouterView />
+  </div>
 </template>

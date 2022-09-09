@@ -10,11 +10,13 @@ export default {
   data() {
     return {
       menuElements: [
-        { name: "Dashboard" },
+        { name: "Quality validation" },
         { name: "Issues" },
         { name: "Features" },
         { name: "Settings" },
         { name: "Projects" },
+        { name: "Labels" },
+        { name: "Regressions" },
         { name: "FAQ" },
       ],
     };
@@ -33,17 +35,21 @@ export default {
         :key="item"
       >
         <a
-          @click="this.$router.push(`/${item.name.toLowerCase()}`)"
+          @click="
+            this.$router.push(
+              `/${item.name.replace(/\s+/g, '-').toLowerCase()}`
+            )
+          "
           :class="
             this.$route.name === item.name.toLowerCase() ? 'active' : null
           "
-          class="icon-tile vtmn-flex vtmn-flex-1"
+          class="icon-tile vtmn-flex vtmn-flex-1 sideLine"
           href=""
         >
           <span
             class="vtmn-m-3 vtmn-mb-3 vtmn-mt-3"
             :class="
-              item.name === 'Dashboard'
+              item.name === 'Quality validation'
                 ? 'vtmx-bar-chart-line'
                 : item.name === 'Issues'
                 ? 'vtmx-lightbulb-line'
@@ -53,6 +59,10 @@ export default {
                 ? 'vtmx-settings-line'
                 : item.name === 'Projects'
                 ? 'vtmx-counter-line'
+                : item.name === 'Labels'
+                ? 'vtmx-mist-line'
+                : item.name === 'Regressions'
+                ? 'vtmx-return-line'
                 : item.name === 'FAQ'
                 ? 'vtmx-question-line'
                 : null
@@ -60,8 +70,8 @@ export default {
             role="presentation"
           ></span>
           <p
-            class="vtmn-typo_text-2 vtmn-flex vtmn-items-center vtmn-ml-6 vtmn-mr-10"
-            v-if="sideOpen"
+            class="vtmn-typo_text-2 vtmn-flex vtmn-items-center vtmn-ml-6 vtmn-mr-6 vtmn-w-max"
+            :class="sideOpen === true ? 'openedSide' : 'closedSide'"
           >
             {{ item.name }}
           </p>
@@ -100,5 +110,25 @@ export default {
 
 .vtmn-typo_text-2 {
   color: var(--vtmn-semantic-color_content-active);
+}
+
+.sideLine {
+  overflow: hidden;
+}
+
+.closedSide {
+  display: flex;
+  margin: 0;
+  width: 0;
+  transition: 500ms;
+}
+
+.openedSide {
+  display: flex;
+  transition: 500ms;
+}
+
+.side-nav {
+  position: fixed;
 }
 </style>

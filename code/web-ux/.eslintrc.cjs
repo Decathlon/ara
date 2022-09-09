@@ -12,4 +12,7 @@ module.exports = {
     "vue/setup-compiler-macros": true,
     node: true,
   },
+  parserOptions: {
+    ecmaVersion: 2020,
+  },
 };

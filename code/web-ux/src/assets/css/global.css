@@ -1,10 +1,13 @@
-@import 'tailwindcss/base'; /* import base CSS classes from Tailwind CSS (optional) */
-@import '@vtmn/css-design-tokens/dist/index.css'; /* import Vitamin design tokens CSS classes (required) */
-@import '@vtmn/css-utilities/dist/index.css'; /* import Vitamin utilities CSS classes (required) */
-@import 'tailwindcss/screens'; /* import screens CSS classes from Tailwind CSS (optional) */
-@import '@vtmn/css/dist/components.css'; /* import Vitamin components CSS classes (required) */
-@import 'tailwindcss/components'; /* import base CSS classes from Tailwind CSS (optional) */
-@import 'tailwindcss/utilities'; /* import base CSS classes from Tailwind CSS (optional) */
+/* @import 'tailwindcss/base'; */ /* import base CSS classes from Tailwind CSS (optional) */
+/* @import '@vtmn/css-design-tokens/dist/index.css'; */ /* import Vitamin design tokens CSS classes (required) */
+/* @import 'tailwindcss/screens'; */ /* import screens CSS classes from Tailwind CSS (optional) */
+/* @import '@vtmn/css/dist/components.css'; */ /* import Vitamin components CSS classes (required) */
+/* @import 'tailwindcss/components'; */ /* import base CSS classes from Tailwind CSS (optional) */
+/* @import 'tailwindcss/utilities'; */ /* import base CSS classes from Tailwind CSS (optional) */
+
+body {
+    background-color: var(--vtmn-semantic-color_background-secondary);
+}
 
 .vtmn-text-input.nav-search {
     position: relative;
@@ -14,4 +17,35 @@
 
 .vtmn-text-input.nav-search:hover, .vtmn-text-input.nav-search:focus {
     box-shadow: none !important;
+}
+
+.cardSimple {
+    background-color: var(--vtmn-semantic-color_background-primary);
+    position: relative;
+}
+
+.cardProfile {
+    background-color: var(--vtmn-semantic-color_content-tertiary);
+    color: var(--vtmn-semantic-color_content-action-reversed);
+    position: absolute;
+}
+
+.cardId {
+    background-color: var(--vtmn-semantic-color_border-secondary);
+    position: absolute;
+}
+
+.cardStatus {
+    background-color: var(--vtmn-semantic-color_content-visited);
+}
+
+.cardStatus p {
+    color: var(--vtmn-semantic-color_content-action-reversed);
+}
+
+.cardStatus.statusPending {
+    background-image: url(../img/logo_white.png);
+    background-repeat: no-repeat;
+    background-size: 100px;
+    background-position: -15px -14px;
 }

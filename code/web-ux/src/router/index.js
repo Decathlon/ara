@@ -4,6 +4,7 @@ import Dashboard from "../views/dashboardHome.vue";
 import Issues from "../views/issues.vue";
 import Features from "../views/features.vue";
 import Settings from "../views/settings.vue";
+import qualitySettings from "../views/qualitySettings.vue";
 import Projects from "../views/projects.vue";
 import FAQ from "../views/faq.vue";
 
@@ -16,8 +17,8 @@ const router = createRouter({
       component: Login,
     },
     {
-      path: "/dashboard",
-      name: "dashboard",
+      path: "/quality-validation",
+      name: "quality validation",
       component: Dashboard,
     },
     {
@@ -34,6 +35,11 @@ const router = createRouter({
       path: "/settings",
       name: "settings",
       component: Settings,
+    },
+    {
+      path: "/settings/qualitySettings",
+      name: "qualitySettings",
+      component: qualitySettings,
     },
     {
       path: "/projects",
