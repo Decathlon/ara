@@ -16,45 +16,96 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
   <div>
-    <h1>Members management</h1>
+    <div v-if="showGroup && !showMembersTypeChoice" class="tableContent">
+      <span class="breadcrumbLink" @click="$router.go(-1)">
+        <Icon type="md-home" />
+        {{ memberType }} list
+      </span>
 
-    <div v-if="!showGroup" class="tableContent">
-      <table>
+      <h1 class="adminTitle">{{ memberType }} management</h1>
+
+      <div v-if="memberType == 'Users'" class="searchButton">
+        <AutoComplete
+          v-model="value"
+          placeholder="Search a member..."
+          icon="ios-search"
+          size="default">
+            <Option v-for="(item, index) in members" :value="item" :key="index">{{ item.name }}</Option>
+        </AutoComplete>
+      </div>
+
+      <table class="adminTable">
         <thead>
           <tr>
             <th>Name</th>
-            <th>Users</th>
+            <th>Role</th>
+            <th v-if="memberType == 'Users'">Restriction</th>
             <th></th>
           </tr>
         </thead>
 
         <tbody v-if="members">
           <tr v-for="(member, index) in sortedMembers" :key="index" :class="index %2 !== 0 ? 'lightGrey' : 'darkGrey'">
-            <td v-if="member.users" class="userType">
-              <Icon type="ios-people" size="24"/>
+            <td class="userType">
               {{ member.name }}
             </td>
-            <td v-else class="userType">
-              <Icon type="ios-person" size="24"/>
-              {{ member.name }}
+
+            <td class="userType">
+              {{ member.role }}
             </td>
-            <td>
-              <ul>
-                <li v-for="members in member.users" :key="members">{{ members }}</li>
-              </ul>
+
+            <td v-if="memberType == 'Users'" class="userType">
+              {{ member.blockReason }}
             </td>
+
             <td>
-              <Icon type="md-close-circle" size="24" @click="removeGroup(member)"/>
-              <router-link :to="{ name: 'group-member', path:'/:groupName', query: { groupName: member.name }}">
-                <Icon type="md-create" size="24"/>
+              <Icon v-if="!member.blockReason && memberType == 'Users'" type="ios-checkmark-circle" size="24" @click="showUserBlock(member, index)"/>
+              <Icon v-if="member.blockReason && memberType == 'Users'" type="md-remove-circle" size="24" @click="unblockUser(index)"/>
+              <Icon v-if="memberType == 'Groups'" type="md-close-circle" size="24" @click="removeGroup(member)"/>
+              <router-link :to="{ name: 'member-details', path: '/:memberDetails', query: member }">
+                <Icon type="md-eye" size="24"/>
               </router-link>
             </td>
           </tr>
         </tbody>
-        <button class="addMember" @click="memberToAdd = true">
+        <button v-if="memberType == 'Groups'" class="addBtn" @click="memberToAdd = true">
           <Icon type="md-add" size="24"/>
         </button>
       </table>
+    </div>
+
+    <div v-else-if="showMembersTypeChoice">
+      <div v-if="typeSelected === 'individual'" class="membersTypeChoice">
+        <div @click="getMember('Users'), showGroup = true">
+          <p>
+            <span><Icon type="md-person" /></span>
+            <strong>Users</strong>
+          </p>
+        </div>
+
+        <div @click="getMember('Groups'), showGroup = true">
+          <p>
+            <span><Icon type="md-people" /></span>
+            <strong>Groups</strong>
+          </p>
+        </div>
+      </div>
+
+      <div v-else class="membersTypeChoice">
+        <div @click="getMember('Users'), showGroup = true">
+          <p>
+            <span><Icon type="md-person" /></span>
+            <strong>Single Machine</strong>
+          </p>
+        </div>
+
+        <div @click="getMember('Groups'), showGroup = true">
+          <p>
+            <span><Icon type="md-people" /></span>
+            <strong>Machine Groups</strong>
+          </p>
+        </div>
+      </div>
     </div>
 
     <Modal v-model="memberToAdd" title="Add Group" okText="Add" @on-ok="createMember" @close="memberToAdd = false" :width="900"
@@ -67,6 +118,19 @@
           <form-field :field="field" v-model="editingData[field.code]" :editingNew="editingNew" :ref="field.code" v-on:enter="createMember"/>
         </Form-item>
       </Form>
+    </Modal>
+
+    <Modal v-model="blockPopup" title="Block user" okText="Block user" @on-ok="confirmBlockUser" @close="memberToAdd = false" :width="900"
+      :loading="loadingSaving" :footer-hide="!selectedBlockOption" ref="editPopup">
+      <p>Select what the user will be banned from:</p>
+
+      <div class="banOptions">
+        <RadioGroup v-model="selectedBlockOption" type="button">
+          <Radio label="ARA"></Radio>
+          <Radio label="Projects creation"></Radio>
+          <Radio label="Groups creation"></Radio>
+        </RadioGroup>
+      </div>
     </Modal>
   </div>
 </template>
@@ -87,7 +151,6 @@
     data () {
       return {
         members: [],
-        groups: [],
         memberToAdd: false,
         fields: [
           {
@@ -105,8 +168,15 @@
         editingNew: false,
         editing: false,
         showGroup: false,
-        groupName: '',
-        groupMembers: []
+        memberType: '',
+        userRole: '',
+        blockPopup: false,
+        memberToBlock: {
+          'member': '',
+          'index': '',
+          'blockReason': ''
+        },
+        selectedBlockOption: ''
       }
     },
 
@@ -114,49 +184,65 @@
       createMember () {
         Vue.http
           .post('/api/groups', this.editingData, api.REQUEST_OPTIONS)
-          .then(setTimeout(() => this.getMember(), 100))
+          .then(() => { return this.members })
       },
 
-      async getMember () {
+      async getMember (memberType) {
         this.members = []
+        this.memberType = memberType
+        localStorage.setItem('memberType', memberType)
+        this.$store.dispatch('admin/showChoice', false)
         await Vue.http
-          .get('api/groups', api.REQUEST_OPTIONS)
+          .get(memberType === 'Users' ? 'api/users' : 'api/groups', api.REQUEST_OPTIONS)
           .then((groupList) => {
             if (groupList.body.length > 0) {
               for (let i = 0; i < groupList.body.length; i++) {
-                this.members.push({
-                  'name': groupList.body[i].name,
-                  'users': []
-                })
-                Vue.http
-                  .get('/api/groups/' + groupList.body[i].name + '/members')
-                  .then((response) => {
-                    for (let j = 0; j < response.body.length; j++) {
-                      this.members[i].users.push(response.body[j].name)
-                    }
-                  })
+                this.members = []
+                this.members = groupList.body
+              }
+
+              for (let j = 0; j < this.members.length; j++) {
+                if (this.members[j].memberName) {
+                  Vue.http
+                    .get('/api/users/' + this.members[j].memberName, api.REQUEST_OPTIONS)
+                    .then((response) => {
+                      this.members[j].role = response.body.roles[0]
+                    })
+                }
               }
             }
-
             return this.members
-          })
-
-        await Vue.http
-          .get('api/users', api.REQUEST_OPTIONS)
-          .then((response) => {
-            for (let i = 0; i < response.body.length; i++) {
-              this.members.push(response.body[i])
-            }
-
-            return { ...this.members }
           })
       },
 
-      removeGroup (memberInfo) {
+      showUserBlock (member, index) {
+        this.blockPopup = true
+        this.memberToBlock.member = member
+        this.memberToBlock.index = index
+      },
+
+      unblockUser (index) {
+        delete this.members[index].blockReason
+
+        this.getMember('Users')
+      },
+
+      confirmBlockUser () {
+        this.memberToBlock.blockReason = 'Banned from ' + this.selectedBlockOption
+        this.members[this.memberToBlock.index].blockReason = this.memberToBlock.blockReason
+      },
+
+      removeGroup (member) {
         if (confirm('Do you really want to delete this member?')) {
           Vue.http
-            .delete('/api/groups/' + memberInfo.name, api.REQUEST_OPTIONS)
-            .then(setTimeout(() => this.getMember(), 50))
+            .delete('/api/groups/' + member.name, api.REQUEST_OPTIONS)
+            .then(() => {
+              for (let k = 0; k < this.members.length; k++) {
+                if (this.members[k].name === member.name) {
+                  this.members.splice(k, 1)
+                }
+              }
+            })
         }
       }
     },
@@ -167,139 +253,22 @@
 
     computed: {
       sortedMembers () {
+        this.$store.dispatch('admin/showSubMenuMembers', false)
         return this.members.map(item => item).sort((a, b) => a.id - b.id)
       },
 
-      ...mapState('users', ['getAllUsers'])
+      ...mapState('admin', ['showMembersTypeChoice', 'typeSelected'])
     }
   }
 </script>
 
 <style scoped>
-  h1 {
-    text-align: center;
-    font-weight: bold;
-    margin-top: 3rem;
-  }
-
-  h2 {
-    text-align: left;
-    top: 0;
-    margin: 1rem auto;
-    width: 90%;
-  } 
-
-  table {
-    width: 90%;
-    margin: 0 auto;
-    border-collapse: collapse;
-    position: relative;
-  }
-
-  thead tr {
-    background-color: #3880BE;
-  }
-
-  thead tr th {
-    padding: 10px;
-    text-align: center;
-    color: #ffffff;
-  }
-
-  thead tr th:first-child {
-    border-radius: 10px 0 0 0;
-  }
-
-  thead tr th:last-child {
-    border-radius: 0 10px 0 0;
-  }
-
-  tbody {
-    text-align: center;
-    font-weight: bold;
-  }
-
-  tbody tr td {
-    padding: 10px;
-  }
-
-  tbody tr .userType i {
-    float: none;
-  }
-
-  tbody tr td li {
-    list-style: none;
-  }
-
-  tbody tr td i {
-    float: right;
-    margin-right: 1rem;
-  }
-
-  i {
-    cursor: pointer;
-  }
-
-  .ivu-icon-md-close-circle {
-    color: rgb(188, 188, 188);
-  }
-
-  .ivu-icon-md-create {
-    color: #AC8DAF;
-  }
-
-  .tableContent {
-    margin-top: 3rem;
-  }
-
-  .addMember {
-    position: absolute;
-    top: -20px;
-    right: 20px;
-    background-color: #ffffff;
-    padding: 8px;
-    border-radius: 100px;
-    border: 2px solid #3780be;
-    color: #ff5600;
-  }
-
-  .groupManagement table {
-    margin: 3rem auto;
-    position: relative;
-  }
-
-  .tabTitle {
-    position: absolute;
-    top: -28px;
-    background-color: #ffffff;
-    padding: 5px 15px;
-    border-radius: 5px 5px 0 0;
-    font-weight: 900;
-  }
-
-  .groupManagement tbody {
-    background-color: #ffffff;
-    box-shadow: 1px 1px 1px 1px #cfcfcf;
-    text-align: left;
-  }
-
-  .groupManagement tbody td {
-    padding: 34px 25px;
-  }
-
-  .groupManagement tbody td span {
+  .searchButton {
     display: flex;
+    justify-content: center;
   }
 
-  .groupManagement tbody td input {
-    padding: 8px 15px;
-    border: 1px solid #d8d8d8;
-    border-radius: 5px;
-  }
-
-  .groupManagement .addMember {
-    background-color: #ff7d00;
-    border: none;
-    color: #ffffff;
+  .searchButton .ivu-select {
+    width: 40%;
   }
 </style>

@@ -16,17 +16,32 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
   <div>
-    <h1>Project details</h1>
+    <div class="projectHeader">
+      <div class="adminTitle">
+        <h1>{{ projectName }}</h1>
+        <p class="projectCode" align="center"><strong>{{ projectCode }}</strong></p>
+      </div>
+
+      <Button title="Edit" class="editBtn" type="primary" ghost>Edit project</Button>
+      <Button title="Delete project" class="removeBtn" type="error">Remove project</Button>
+    </div>
 
     <div class="tableContent">
-      <span class="breadcrumbLink" @click="$router.go(-1)">Project list</span>
+      <span class="breadcrumbLink" @click="$router.go(-1)">
+        <Icon type="md-home" />
+        Project list
+      </span>
 
-      <h2>{{ projectName }}</h2>
+      <div class="projectMemberFilter">
+        <h3>Project's members</h3>
+        <Button type="primary" shape="circle" icon="md-checkmark">Users</Button>
+        <Button type="primary" shape="circle" icon="md-checkmark">Groups</Button>
+      </div>
 
-      <table>
+      <table class="adminTable">
         <thead>
           <tr>
-            <th>Members</th>
+            <th>Name</th>
             <th>Role</th>
             <th></th>
           </tr>
@@ -37,25 +52,33 @@
             <td >{{ member.name }}</td>
             <td>{{ member.role }}</td>
             <td>
-              <Icon type="md-close-circle" size="24" @click="openProjectDetails(project)"/>
+              <Icon type="md-close-circle" class="crossIcon" size="24" @click="removeUserFromProject()"/>
               <Icon type="md-create" size="24" @click="openProjectDetails(project)"/>
             </td>
           </tr>
         </tbody>
-        <button class="addMember" @click="addMember">
+        <button class="addBtn" @click="addMember">
           <Icon type="md-add" size="24"/>
         </button>
       </table>
+
+      <Button class="saveProjectChange" type="primary" :disabled="!changesTab">Save changes</Button>
     </div>
 
-    <Modal v-model="memberToAdd" title="Add Member" okText="Add" @on-ok="addMemberToProject" @close="memberToAdd = false" :width="900"
+    <Modal v-model="memberToAdd" title="Add Member" okText="Add" :footer-hide="!memberTypeSelected" @on-ok="addMemberToProject" @close="memberToAdd = false" :width="900"
       :loading="loadingSaving" ref="editPopup">
-      <Form :label-width="128">
+      <Form v-if="!memberTypeSelected" :label-width="128">
+        <div class="memberType">
+          <span @click="memberTypeSelected = 'Users'">Users</span>
+          <span @click="memberTypeSelected = 'Groups'">Groups</span>
+        </div>
+      </Form>
+      <Form v-else :label-width="128">
         <Form-item v-for="field in fields"
                    :key="field.code"
                    :label="(field.type === 'boolean' ? '' : field.name + ':')"
                    :required="field.required && (editingNew || (!field.primaryKey && !field.createOnly))">
-          <form-field :field="field" v-model="editingData[field.code]" :editingNew="editingNew" :ref="field.code" v-on:enter="addMemberToProject"/>
+          <form-field :field="field" v-model="editingData[field.code]" :editingNew="editingNew" :ref="field.code" v-on:enter="addMemberToProject(memberTypeSelected)"/>
         </Form-item>
       </Form>
     </Modal>
@@ -79,18 +102,13 @@
         projectInfo: [],
         projectName: '',
         projectCode: '',
-        currentMember: [],
-        newMember: {
-          name: '',
-          role: ''
-        },
         memberToAdd: false,
         fields: [
           {
             code: 'name',
             name: 'Name',
             columnTitle: 'Name',
-            type: 'string',
+            type: 'autocomplete',
             required: true,
             createOnly: true,
             createOnlyBecause: 'the code ends-up in URLs of ARA, and people should be allowed to bookmark fixed URLs or copy/past them in other services (defect tracking system, wiki, etc.)',
@@ -118,7 +136,8 @@
         ],
         editingData: {},
         editingNew: false,
-        editing: false
+        editing: false,
+        memberTypeSelected: ''
       }
     },
 
@@ -140,7 +159,9 @@
         this.editingData = { ...row }
         this.editingNew = editingNew
         this.editing = true
-        this.$nextTick(() => this.$refs[this.firstVisibleFieldCode(editingNew)][0].focus())
+        if (this.memberTypeSelected) {
+          this.$nextTick(() => this.$refs[this.firstVisibleFieldCode(editingNew)][0].focus())
+        }
       },
 
       firstVisibleFieldCode (editingNew) {
@@ -152,9 +173,14 @@
         throw new Error('The table ' + this.name + ' has no field, or they are all either of type hidden, selects, read-only or non-modifiable primary key')
       },
 
-      addMemberToProject () {
-        Vue.http
-          .post('/api/projects/' + this.projectCode + '/members/users', this.editingData, api.REQUEST_OPTIONS)
+      addMemberToProject (memberType) {
+        if (memberType === 'Users') {
+          Vue.http
+            .post('/api/projects/' + this.projectCode + '/members/users', this.editingData, api.REQUEST_OPTIONS)
+        } else {
+          Vue.http
+            .post('/api/projects/' + this.projectCode + '/members/groups', this.editingData, api.REQUEST_OPTIONS)
+        }
       }
     },
 
@@ -178,84 +204,3 @@
     }
   }
 </script>
-
-<style scoped>
-  h1 {
-    text-align: center;
-    font-weight: bold;
-    margin-top: 3rem;
-  }
-
-  h2 {
-    text-align: left;
-    top: 0;
-    margin: 1rem auto;
-    width: 90%;
-  } 
-
-  table {
-    width: 90%;
-    margin: 0 auto;
-    border-collapse: collapse;
-    position: relative;
-  }
-
-  thead tr {
-    background-color: #3880BE;
-  }
-
-  thead tr th {
-    padding: 10px;
-    text-align: center;
-    color: #ffffff;
-  }
-
-  thead tr th:first-child {
-    border-radius: 10px 0 0 0;
-  }
-
-  thead tr th:last-child {
-    border-radius: 0 10px 0 0;
-  }
-
-  tbody {
-    text-align: center;
-    font-weight: bold;
-  }
-
-  tbody tr td {
-    padding: 10px;
-  }
-
-  tbody tr td i {
-    float: right;
-    margin-right: 1rem;
-  }
-
-  i {
-    cursor: pointer;
-  }
-
-  .ivu-icon-md-close-circle {
-    color: rgb(188, 188, 188);
-  }
-
-  .ivu-icon-md-create {
-    color: #AC8DAF;
-  }
-
-  .tableContent {
-    margin-top: 3rem;
-  }
-
-  .addMember {
-    position: absolute;
-    top: -20px;
-    right: 20px;
-    background-color: #ffffff;
-    padding: 8px;
-    border-radius: 100px;
-    border: 2px solid #3780be;
-    color: #ff5600;
-  }
-</style>

@@ -39,6 +39,7 @@
            :autosize="{ minRows: 2, maxRows: 15 }"
            :value="value"
            :data="data"
+           :filter-method="filterMethod"
            @on-change="value => $emit('input', value)"
            ref="fieldInput"/>
     <InputNumber v-else-if="field.type === 'int'"
@@ -79,7 +80,8 @@
 
     data () {
       return {
-        data: this.$store.state.users.usersList
+        data: ['Vincent Pierin', 'Romain Chabaud', 'Quentin Dengreville']
+        // data: this.$store.state.users.usersList
       }
     },
 
@@ -97,6 +99,10 @@
 
       escape () {
         this.$emit('escape')
+      },
+
+      filterMethod (value, option) {
+        return option.toUpperCase().indexOf(value.toUpperCase()) !== -1
       }
     }
   }

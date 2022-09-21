@@ -18,46 +18,72 @@
   <div>
     <span class="breadcrumbLink" @click="$router.go(-1)">Members list</span>
 
-    <h1>Members management</h1>
-
-    <div class="tableContent groupManagement">
-      <h2>{{ groupName }}</h2>
-      <table>
-        <div class="tabTitle">
-          <p>Identity</p>
+    <div class="adminTitle">
+      <h1>{{ memberInfo.name }}</h1>
+      <div class="memberRole">
+        {{ memberInfo.role }}
+        <div v-if="memberType == 'Users'">
+          <Icon type="md-create" />
         </div>
-        <tbody>
+        <div v-else>
+          <p>Group description</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <table class="adminTable">
+        <thead>
           <tr>
-            <td>
-              <span>Name</span>
-              <input type="text" :value="groupName">
+            <th>Projects</th>
+            <th>Role</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody v-if="members">
+          <tr v-for="(member, index) in sortedMembers" :key="index" :class="index %2 !== 0 ? 'lightGrey' : 'darkGrey'">
+            <td class="userType">
+              {{ member.name }}
+            </td>
+
+            <td class="userType">
+              {{ member.role }}
+            </td>
+
+            <td class="userType">
+              {{ member.blockReason }}
             </td>
           </tr>
         </tbody>
+        <button class="showBtn" @click="memberToAdd = true">
+          <Icon type="md-eye" size="24"/>
+        </button>
+        <button class="addBtn" @click="memberToAdd = true">
+          <Icon type="md-add" size="24"/>
+        </button>
       </table>
 
-      <table>
-        <div class="tabTitle">
-          <p>Group member(s)</p>
-        </div>
-        <tbody v-if="groupMembers.length > 0">
-          <tr v-for="member in groupMembers" :key="member">
-            <td>{{ member.name }}</td>
-            <td>{{ member.role }}</td>
-            <td>
-              <Icon type="md-close-circle" size="24" @click="removeGroupMember(member)"/>
-              <Icon type="md-create" size="24"/>
+      <table class="adminTable">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Admin(s)</th>
+          </tr>
+        </thead>
+
+        <tbody v-if="members">
+          <tr v-for="(member, index) in sortedMembers" :key="index" :class="index %2 !== 0 ? 'lightGrey' : 'darkGrey'">
+            <td class="userType">
+              {{ member.name }}
+            </td>
+
+            <td class="userType">
+              {{ member.role }}
             </td>
           </tr>
         </tbody>
-
-        <tbody v-else>
-          <tr>
-            <td>There is no members in this group</td>
-          </tr>
-        </tbody>
-
-        <button class="addMember" @click="memberToGroup = true">
+        <button v-if="memberType == 'Groups'" class="addBtn" @click="memberToAdd = true">
           <Icon type="md-add" size="24"/>
         </button>
       </table>
@@ -92,8 +118,8 @@
 
     data () {
       return {
+        memberInfo: [],
         members: [],
-        groups: [],
         memberToGroup: false,
         groupFields: [
           {
@@ -125,7 +151,8 @@
         editingNew: false,
         editing: false,
         groupName: this.$route.query.groupName,
-        groupMembers: []
+        groupMembers: [],
+        memberType: localStorage.getItem('memberType')
       }
     },
 
@@ -154,7 +181,7 @@
     },
 
     created () {
-      this.showGroupInfo(this.groupName)
+      this.memberInfo = this.$route.query
     },
 
     computed: {
@@ -168,122 +195,18 @@
 </script>
 
 <style scoped>
-  h1 {
+  .memberRole {
     text-align: center;
-    font-weight: bold;
-    margin-top: 3rem;
-  }
-
-  h2 {
-    text-align: left;
-    top: 0;
-    margin: 1rem auto;
-    width: 90%;
-  } 
-
-  table {
-    width: 90%;
-    margin: 0 auto;
-    border-collapse: collapse;
-    position: relative;
-  }
-
-  thead tr {
-    background-color: #3880BE;
-  }
-
-  thead tr th {
-    padding: 10px;
-    text-align: center;
-    color: #ffffff;
-  }
-
-  thead tr th:first-child {
-    border-radius: 10px 0 0 0;
-  }
-
-  thead tr th:last-child {
-    border-radius: 0 10px 0 0;
-  }
-
-  tbody {
-    text-align: center;
-    font-weight: bold;
-  }
-
-  tbody tr td {
-    padding: 10px;
-  }
-
-  tbody tr td i {
-    float: right;
-    margin-right: 1rem;
-  }
-
-  i {
-    cursor: pointer;
-  }
-
-  .ivu-icon-md-close-circle {
-    color: rgb(188, 188, 188);
-  }
-
-  .ivu-icon-md-create {
     color: #AC8DAF;
-  }
-
-  .tableContent {
-    margin-top: 3rem;
-  }
-
-  .addMember {
-    position: absolute;
-    top: -20px;
-    right: 20px;
-    background-color: #ffffff;
-    padding: 8px;
-    border-radius: 100px;
-    border: 2px solid #3780be;
-    color: #ff5600;
-  }
-
-  .groupManagement table {
-    margin: 3rem auto;
-    position: relative;
-  }
-
-  .tabTitle {
-    position: absolute;
-    top: -28px;
-    background-color: #ffffff;
-    padding: 5px 15px;
-    border-radius: 5px 5px 0 0;
-    font-weight: 900;
-  }
-
-  .groupManagement tbody {
-    background-color: #ffffff;
-    box-shadow: 1px 1px 1px 1px #cfcfcf;
-    text-align: left;
-  }
-
-  .groupManagement tbody td {
-    padding: 34px 25px;
-  }
-
-  .groupManagement tbody td span {
+    font-weight: bold;
     display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
-  .groupManagement tbody td input {
-    padding: 8px 15px;
-    border: 1px solid #d8d8d8;
-    border-radius: 5px;
-  }
-
-  .groupManagement .addMember {
-    background-color: #ff7d00;
-    border: none;
-    color: #ffffff;
+  .memberRole i {
+    color: #ff7d00;
+    font-size: 14px;
+    margin-left: 5px;
   }
 </style>

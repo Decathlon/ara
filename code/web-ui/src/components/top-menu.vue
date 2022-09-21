@@ -42,10 +42,14 @@
         </ul>
 
         <ul v-else-if="projectCode && projects && projects.length && savedSingleUserConnections" class="ivu-menu ivu-menu-primary ivu-menu-horizontal dashboardHeader">
-          <router-link v-for="link in adminMenu" @click.native="changeAdminState(link.routeName)" :key="link.name" :to="to(link)" class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected">
+          <router-link v-for="link in adminMenu" class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected" @click.native="changeAdminState(link.routeName)" :key="link.name" :to="to(link)" :class="link.name">
             {{link.name}}
           </router-link>
         </ul>
+        <div :class="showSubMenuMembers ? 'membersSubMenu active' : 'membersSubMenu'">
+          <p @click="showMembersType('individual')" :class="typeSelected == 'individual' ? 'selected' : ''">INDIVIDUAL</p>
+          <p @click="showMembersType('machine')" :class="typeSelected == 'machine' ? 'selected' : ''">MACHINE</p>
+        </div>
       </div>
 
       <div id="helps">
@@ -202,6 +206,10 @@
     },
 
     computed: {
+      ...mapState('admin', ['savedSingleUserConnections', 'showSubMenuMembers', 'typeSelected']),
+
+      ...mapState('projects', ['projects', 'defaultProjectCode']),
+
       executedScenariosHistoryDurationIsApplied () {
         return this.duration.applied && this.duration.value && this.duration.type
       },
@@ -236,13 +244,6 @@
           return authenticationDetails.user
         }
       },
-
-      ...mapState('admin', ['savedSingleUserConnections']),
-
-      ...mapState('projects', [
-        'projects',
-        'defaultProjectCode'
-      ]),
 
       links () {
         return [
@@ -372,7 +373,21 @@
       },
 
       changeAdminState (data) {
-        this.$store.dispatch('admin/enableAdmin', data)
+        if (data === 'members') {
+          this.$store.dispatch('admin/setTypeSelected', '')
+          this.$store.dispatch('admin/showSubMenuMembers', true)
+          this.$store.dispatch('admin/showChoice', false)
+        } else {
+          this.$store.dispatch('admin/showSubMenuMembers', false)
+          this.$store.dispatch('admin/enableAdmin', data)
+        }
+      },
+
+      showMembersType (data) {
+        this.$store.dispatch('admin/setTypeSelected', data)
+        if (data) {
+          this.$store.dispatch('admin/showChoice', data)
+        }
       },
 
       logout () {
@@ -531,5 +546,42 @@
 
   .dashboardHeader a {
     animation: loadHeader .3s ease-in-out;
+  }
+
+  .membersSubMenu {
+    position: absolute;
+    display: flex;
+    background-color: #ffffff;
+    top: 0;
+    left: 0;
+    right: 0;
+    left: -160px;
+    margin: 0 auto;
+    justify-content: center;
+    width: 200px;
+    height: 60px;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 1px 1px 3px 0px #cacaca;
+    transition: 200ms;
+  }
+
+  .membersSubMenu.active {
+    top: 60px;
+    transition: 200ms;
+  }
+
+  .membersSubMenu p {
+    line-height: 1;
+    align-self: center;
+    width: 100%;
+    text-align: center;
+    color: #8c8c8c;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .membersSubMenu .selected {
+    color: #007DBC;
+    font-weight: 900;
   }
 </style>

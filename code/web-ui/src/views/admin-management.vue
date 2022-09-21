@@ -16,40 +16,41 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
   <div>
-    <h1>Projects management</h1>
+    <h1 class="adminTitle">Projects management</h1>
 
     <Button v-if="!(projects.find(project => project.code === 'the-demo-project'))" class="demoProjectButton" data-nrt="createDemo" :loading="loadingDemoProject" icon="md-add" @click="createDemoProject">CREATE THE DEMO PROJECT</Button>
 
-    <table>
+    <table class="adminTable">
+      <Select class="filterSelect" v-model="projectFilter" clearable filterable placeholder="Filter">
+        <Option v-for="(filters, index) in filterType" :value="index" :key="index" :label="filters" />
+      </Select>
       <thead>
         <tr>
-          <th>Code</th>
           <th>Name</th>
-          <th>Member(s)</th>
+          <th>Creation date</th>
+          <th>Update date</th>
+          <th>Author</th>
           <th>Default</th>
           <th></th>
         </tr>
       </thead>
 
       <tbody>
-        <tr v-for="project in sortedProjects" :class="project.id %2 !== 0 ? 'darkGrey' : 'lightGrey'" :key="project.id">
-          <td>{{ project.code }}</td>
+        <tr v-for="(project, index) in sortedProjects" :class="index %2 !== 0 ? 'darkGrey' : 'lightGrey'" :key="project.id">
           <td>{{ project.name }}</td>
-          <td>
-            <ul>
-              <li v-for="member in project.members" :key="member.name">{{ member.name }}</li>
-            </ul>
-          </td>
+          <td>Creation date</td>
+          <td>Update date</td>
+          <td>Created by</td>
           <td>
             <input type="radio" name="defautProject" @change="changeDefaultProject(project)" :checked="project.defaultAtStartup === true ? true : false">
           </td>
           <td>
+            <Icon type="md-close-circle" size="24" @click="deleteDemoProject()"/>
             <Icon type="md-eye" size="24" @click="openProjectDetails(project)"/>
-            <Icon v-if="project.code === 'the-demo-project'" class="binIcon" type="md-trash" size="24" @click="deleteDemoProject()"/>
           </td>
         </tr>
       </tbody>
-      <button class="addProject" @click="add">
+      <button class="addBtn" @click="add()">
         <Icon type="md-add" size="24"/>
       </button>
     </table>
@@ -91,7 +92,6 @@
         projects: [],
         addOrChangeProject: false,
         loadingDemoProject: false,
-        introduction: 'Projects are isolated areas in ARA to manage test reports of several applications or standalone components.',
         fields: [
           {
             code: 'code',
@@ -99,7 +99,6 @@
             columnTitle: 'Code',
             type: 'string',
             required: true,
-            createOnlyBecause: 'the code ends-up in URLs of ARA, and people should be allowed to bookmark fixed URLs or copy/past them in other services (defect tracking system, wiki, etc.)',
             newValue: '',
             width: undefined,
             help: 'The technical code of the project, to use in ARA URLs (as well as API URLs used by continuous integration to push data to ARA). Eg. "phoenix-front".'
@@ -111,9 +110,8 @@
             type: 'string',
             required: true,
             newValue: '',
-            businessKey: true,
             width: undefined,
-            help: 'The name of the project, visible in the top-left combobox in ARA\'s header. Eg. "Phoenix - Front".'
+            help: 'The name of the project, visible in the top-left combobox in ARA\'s header.' + 'Eg. "Phoenix - Front".'
           },
           {
             code: 'defaultAtStartup',
@@ -123,12 +121,12 @@
             required: true,
             newValue: '',
             width: 96,
-            help: '' +
-              'Check to use that project as the default one when arriving at ARA homepage without any specified project. ' +
+            help: 'Check to use that project as the default one when arriving at ARA homepage without any specified project. ' +
               'Only one project can be declared as the default.'
           }
         ],
         editingData: {},
+        filterType: ['Name', 'Creation Date', 'Update Date', 'Author'],
         editingNew: false,
         editing: false
       }
@@ -270,85 +268,3 @@
     }
   }
 </script>
-
-<style scoped>
-  h1 {
-    text-align: center;
-    font-weight: bold;
-    margin-top: 3rem;
-  }
-
-  h2 {
-    text-align: left;
-    top: 0;
-    margin: 0 0 2rem;
-  } 
-
-  table {
-    width: 90%;
-    margin: 3rem auto;
-    border-collapse: collapse;
-    position: relative;
-  }
-
-  thead tr {
-    background-color: #3880BE;
-  }
-
-  thead tr th {
-    padding: 10px;
-    text-align: center;
-    color: #ffffff;
-  }
-
-  thead tr th:first-child {
-    border-radius: 10px 0 0 0;
-  }
-
-  thead tr th:last-child {
-    border-radius: 0 10px 0 0;
-  }
-
-  tbody {
-    text-align: center;
-    font-weight: bold;
-  }
-
-  tbody tr td {
-    padding: 10px;
-  }
-
-  tbody tr td li {
-    list-style: none;
-  }
-
-  tbody tr td i {
-    color: #AC8DAF;
-    float: right;
-    margin-right: 1rem;
-  }
-
-  tbody tr td .binIcon {
-    color: #687787;
-  }
-
-  i {
-    cursor: pointer;
-  }
-
-  .demoProjectButton {
-    position: absolute;
-    left: 7rem;
-  }
-
-  .addProject {
-    position: absolute;
-    top: -20px;
-    right: 20px;
-    background-color: #ffffff;
-    padding: 8px;
-    border-radius: 100px;
-    border: 2px solid #3780be;
-    color: #ff5600;
-  }
-</style>

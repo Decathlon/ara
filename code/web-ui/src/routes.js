@@ -190,10 +190,10 @@ const routes = [
     component: (resolve) => require(['./views/admin-management-members.vue'], resolve)
   },
   {
-    path: '/projects/:projectCode/members/groupDetails',
-    name: 'group-member',
+    path: '/projects/:projectCode/members/memberDetails',
+    name: 'member-details',
     meta: {
-      title: 'Group details'
+      title: 'Member details'
     },
     component: (resolve) => require(['./views/admin-management-members-details.vue'], resolve)
   },
@@ -203,7 +203,7 @@ const routes = [
     redirect: '/projects/:projectCode/executions'
   },
   {
-    path: '/projects/:projectCode/admin-project-details',
+    path: '/projects/:projectCode/active-admin/admin-project-details',
     name: 'admin-project-details',
     meta: {
       title: 'Admin project details'

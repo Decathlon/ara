@@ -19,7 +19,11 @@ export default ({
 
   state: {
     savedSingleUserConnections: false,
-    userRole: ''
+    userRole: '',
+    showMembersTypeChoice: false,
+    membersType: '',
+    showSubMenuMembers: false,
+    typeSelected: ''
   },
 
   mutations: {
@@ -32,9 +36,21 @@ export default ({
     },
 
     initialiseStore (state) {
-      if (localStorage.getItem('adminRight')) {
-        state.savedSingleUserConnections = true
-      }
+      state.savedSingleUserConnections = false
+    },
+
+    activeMembersChoice (state, memberType) {
+      if (memberType === false) {
+        state.showMembersTypeChoice = false
+      } else state.showMembersTypeChoice = true
+    },
+
+    activeSubMenuMembers (state, memberType) {
+      state.showSubMenuMembers = memberType
+    },
+
+    saveSelectedType (state, type) {
+      state.typeSelected = type
     }
   },
 
@@ -47,6 +63,18 @@ export default ({
         commit('saveSingleUserConnections', false)
         localStorage.setItem('adminRight', false)
       }
+    },
+
+    showChoice ({ commit }, payload) {
+      commit('activeMembersChoice', payload)
+    },
+
+    showSubMenuMembers ({ commit }, payload) {
+      commit('activeSubMenuMembers', payload)
+    },
+
+    setTypeSelected ({ commit }, type) {
+      commit('saveSelectedType', type)
     },
 
     setRole ({ commit }, userInfo) {
