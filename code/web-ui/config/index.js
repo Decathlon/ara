@@ -3,7 +3,7 @@ var path = require('path')
 
 var araAPIHost = process.env.ARA_API_HOST || 'localhost'
 var araAPIPort = process.env.ARA_API_PORT || 8000
-var araManagementPort = process.env.ARA_MANAGEMENT_PORT || 8001
+var araManagementPort = process.env.ARA_MANAGEMENT_PORT || 8000
 
 var araAPIURL = 'http://' + araAPIHost + ':' + araAPIPort
 var araManagementURL = 'http://' + araAPIHost + ':' + araManagementPort
