@@ -29,7 +29,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.UUID;
 
 @Configuration(proxyBeanMethods = false)
-public class AuthorizationServerConfig {
+public class AuthorizationServerConfiguration {
 
     @Value("${provider.url}")
     private String providerUrl;

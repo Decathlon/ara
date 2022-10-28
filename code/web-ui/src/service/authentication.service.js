@@ -61,14 +61,14 @@ class AuthenticationServiceClass {
       .then(response => response.body)
       .then(content => {
         const res = {
-          loginStartingUrl: content.loginStartingUrl,
-          logoutProcessingUrl: content.logoutProcessingUrl,
+          loginStartingUrl: content.loginUrl,
+          logoutProcessingUrl: content.logoutUrl,
           providers: content.providers.reduce((previous, current) => {
-            previous[current.providerType] = {
-              uri: `${content.loginStartingUrl}/${current.code}`,
-              display: current.displayName,
-              icon: current.providerType === 'custom' ? 'building' : current.providerType,
-              name: current.code
+            previous[current.type] = {
+              uri: `${content.loginUrl}/${current.name}`,
+              display: current.displayValue,
+              icon: current.type === 'custom' ? 'building' : current.type,
+              name: current.name
             }
             return previous
           }, {})

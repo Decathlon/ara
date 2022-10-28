@@ -18,9 +18,12 @@
 package com.decathlon.ara.repository;
 
 import com.decathlon.ara.domain.Project;
-import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Spring Data JPA repository for the Project entity.
@@ -32,8 +35,12 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     Project findOneByCode(String code);
 
+    Optional<Project> findByCode(String code);
+
     Project findOneByName(String name);
 
     Project findByDefaultAtStartup(boolean defaultAtStartup);
+
+    List<Project> findByCodeIn(Collection<String> codes);
 
 }

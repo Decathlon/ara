@@ -88,14 +88,17 @@ A sample `values.yaml` could be like this one:
 api:
   authentication: oauth2-github # Put a friendly value to disable default authentication
   customConfig:
-    # Active providers
-    # provider-type has to be one of custom / github / google
-    # code refers to the provider key ( spring.security.oauth2.client.registration.<code>)
     oauth2providers:
-      conf:
-      - display-name: Github
-        provider-type: github
-        code: github
+      setup:
+        -
+          # Used for front login:
+          provider:
+            # Value displayed on the login front page button.
+            display-value: Github
+            # Value below can only be one of the following: custom, github or google
+            type: github
+            # Refers to the registration code (i.e. spring.security.oauth2.client.registration.<code>)
+            registration: github
 
     # Oauth
     spring:

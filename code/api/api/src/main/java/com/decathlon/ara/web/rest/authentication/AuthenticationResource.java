@@ -17,8 +17,8 @@
 
 package com.decathlon.ara.web.rest.authentication;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.AUTH_PATH;
-
+import com.decathlon.ara.security.dto.provider.AuthenticationProvidersDTO;
+import com.decathlon.ara.security.service.AuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -27,8 +27,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.decathlon.ara.service.authentication.AuthenticationService;
-import com.decathlon.ara.service.authentication.AuthenticationService.AuthenticationConf;
+import static com.decathlon.ara.web.rest.util.RestConstants.AUTH_PATH;
 
 @RestController
 @RequestMapping(AUTH_PATH)
@@ -53,7 +52,7 @@ public class AuthenticationResource {
     }
 
     @GetMapping("/configuration")
-    public AuthenticationConf getAuthenticationConfiguration() {
-        return this.authenticationService.getAuthenticationConf();
+    public AuthenticationProvidersDTO getAuthenticationConfiguration() {
+        return this.authenticationService.getAuthenticationConfiguration();
     }
 }

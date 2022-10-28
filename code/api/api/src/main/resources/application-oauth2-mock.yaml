@@ -19,11 +19,46 @@ spring:
         jwt:
           issuer-uri: http://oauth2.dev.localhost:9000
 
-# Active providers
-# provider-type has to be one of custom / github / google
-# code refers to the provider key ( spring.security.oauth2.client.registration.<code>)
 oauth2providers:
-  conf:
-  - display-name: Spring
-    provider-type: custom
-    code: ara-client-oidc
+  setup:
+    -
+      # Used for front login:
+      provider:
+        # Value displayed on the login front page button.
+        display-value: Local server
+        # Value below can only be one of the following: custom, github or google
+        type: custom
+        # Refers to the registration code (i.e. spring.security.oauth2.client.registration.<code>)
+        registration: ara-client-oidc
+      # Users init when login for the first time (via this OAuth2 provider)
+      users:
+        # When set to true, new projects are created when their codes are not found (false by default)
+        create-new-project-on-init: true
+        # Those are used to locate OAuth2 user email, givenName and familyName if the attributes/claims holding these details are not standard (e.g. 'mail' instead of 'email')
+        custom-attributes:
+          email: mail
+        # Profiles to init the user with
+        # It is advised to create only super admins and scoped user admins on projects: the goals is to initialize, admins can manage permissions later.
+        profiles:
+          -
+            login: admin
+            profile: super_admin
+          -
+            login: audit
+            profile: auditor
+          -
+            login: user1
+            profile: scoped_user
+            # Project scopes to init the (scoped) user with
+            scopes:
+              - scope: admin
+                projects:
+                  - project1
+                  - project2
+                  - project3
+              - scope: maintainer
+                projects:
+                  - project4
+              - scope: member
+                projects:
+                  - project5

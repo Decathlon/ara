@@ -15,7 +15,7 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.service.dto.authentication;
+package com.decathlon.ara.security.dto.user;
 
 public class AuthenticationUserDetailsDTO {
 

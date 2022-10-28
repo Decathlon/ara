@@ -1,7 +1,7 @@
 package com.decathlon.ara.oauth2devserver.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
@@ -16,10 +16,8 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
-import org.springframework.beans.factory.annotation.Value;
-
 @EnableWebSecurity
-public class DefaultSecurityConfig {
+public class DefaultSecurityConfiguration {
 
     @Value("${provider.url}")
     private String providerUrl;
@@ -35,12 +33,15 @@ public class DefaultSecurityConfig {
     public UserDetailsService userDetailsService() {
         var uds = new InMemoryUserDetailsManager();
 
-        var user = User.withDefaultPasswordEncoder().username("user").password("user").roles("USER").build();
+        var scopedUser1 = User.withDefaultPasswordEncoder().username("user1").password("user").roles("USER").build();
+        var scopedUser2 = User.withDefaultPasswordEncoder().username("user2").password("user").roles("USER").build();
+        var auditor = User.withDefaultPasswordEncoder().username("audit").password("audit").roles("AUDIT").build();
+        var superAdmin = User.withDefaultPasswordEncoder().username("admin").password("admin").roles("ADMIN").build();
 
-        var admin = User.withDefaultPasswordEncoder().username("admin").password("admin").roles("ADMIN").build();
-
-        uds.createUser(user);
-        uds.createUser(admin);
+        uds.createUser(scopedUser1);
+        uds.createUser(scopedUser2);
+        uds.createUser(auditor);
+        uds.createUser(superAdmin);
 
         return uds;
     }
@@ -50,10 +51,14 @@ public class DefaultSecurityConfig {
         return context -> {
             if (context.getTokenType().getValue().equals(OidcParameterNames.ID_TOKEN)) {
                 Authentication principal = context.getPrincipal();
-                context.getClaims().claim(StandardClaimNames.PICTURE,
-                        "%s/user/%s.png".formatted(providerUrl, principal.getName()));
-                context.getClaims().claim(StandardClaimNames.EMAIL,
-                        "%s@oauth2-dev-server.localhost".formatted(principal.getName()));
+                context.getClaims().claim(
+                        StandardClaimNames.PICTURE,
+                        "%s/user/%s.png".formatted(providerUrl, principal.getName())
+                );
+                context.getClaims().claim(
+                        StandardClaimNames.EMAIL,
+                        "%s@oauth2-dev-server.localhost".formatted(principal.getName())
+                );
             }
         };
     }
