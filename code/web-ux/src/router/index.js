@@ -1,10 +1,13 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Login from "../components/loginForm.vue";
 import Dashboard from "../views/dashboardHome.vue";
+import cardDetails from "../views/qualityDetails.vue";
 import Issues from "../views/issues.vue";
 import Features from "../views/features.vue";
-import Settings from "../views/settings.vue";
 import qualitySettings from "../views/qualitySettings.vue";
+import qualityPositions from "../views/qualityPositions.vue";
+import qualityConfiguration from "../views/qualityConfiguration.vue";
+import qualityCompletion from "../views/qualityCompletion.vue";
 import Projects from "../views/projects.vue";
 import FAQ from "../views/faq.vue";
 
@@ -18,8 +21,13 @@ const router = createRouter({
     },
     {
       path: "/quality-validation",
-      name: "quality validation",
+      name: "qualityvalidation",
       component: Dashboard,
+    },
+    {
+      path: "/quality-details",
+      name: "qualityDetails",
+      component: cardDetails,
     },
     {
       path: "/issues",
@@ -34,13 +42,26 @@ const router = createRouter({
     {
       path: "/settings",
       name: "settings",
-      component: Settings,
-    },
-    {
-      path: "/settings/qualitySettings",
-      name: "qualitySettings",
       component: qualitySettings,
+      children: [
+        {
+          path: "qualityconfiguration",
+          name: "qualityConfiguration",
+          component: qualityConfiguration,
+        },
+        {
+          path: "qualitypositions",
+          name: "qualityPositions",
+          component: qualityPositions,
+        },
+        {
+          path: "completion&success",
+          name: "qualityCompletion",
+          component: qualityCompletion,
+        },
+      ],
     },
+
     {
       path: "/projects",
       name: "projects",

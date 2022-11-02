@@ -13,20 +13,32 @@ export default {
         { name: "Quality validation" },
         { name: "Issues" },
         { name: "Features" },
-        { name: "Settings" },
+        {
+          name: "Settings",
+          subElements: [
+            "Quality validation settings",
+            "Feature settings",
+            "Notification settings",
+          ],
+        },
         { name: "Projects" },
         { name: "Labels" },
         { name: "Regressions" },
         { name: "FAQ" },
       ],
+      showSub: false,
     };
   },
 };
 </script>
 
 <template>
-  <div class="side-nav vtmn-block vtmn-w-min vtmn-float-left">
-    <ul class="vtmn-list vtmn-h-screen" role="listbox">
+  <div class="side-nav vtmn-block vtmn-w-min vtmn-float-left vtmn-z-20">
+    <ul
+      class="vtmn-list vtmn-h-screen sideLine"
+      :class="sideOpen ? 'openedSide' : 'closedSide'"
+      role="listbox"
+    >
       <li
         v-for="item in menuElements"
         class="vtmn-list_item-size--small"
@@ -34,48 +46,61 @@ export default {
         tabindex="0"
         :key="item"
       >
-        <a
+        <router-link
+          active-class="active"
           @click="
-            this.$router.push(
-              `/${item.name.replace(/\s+/g, '-').toLowerCase()}`
-            )
+            item.name === 'Settings' && sideOpen ? (showSub = !showSub) : ''
           "
-          :class="
-            this.$route.name === item.name.toLowerCase() ? 'active' : null
-          "
-          class="icon-tile vtmn-flex vtmn-flex-1 sideLine"
-          href=""
+          :to="{ path: `/${item.name.replace(/\s+/g, '-').toLowerCase()}` }"
+          :class="showSub ? 'showSub' : 'hideSub'"
+          class="icon-tile vtmn-flex vtmn-flex-1 vtmn-flex-col"
         >
-          <span
-            class="vtmn-m-3 vtmn-mb-3 vtmn-mt-3"
-            :class="
-              item.name === 'Quality validation'
-                ? 'vtmx-bar-chart-line'
-                : item.name === 'Issues'
-                ? 'vtmx-lightbulb-line'
-                : item.name === 'Features'
-                ? 'vtmx-list-settings-line'
-                : item.name === 'Settings'
-                ? 'vtmx-settings-line'
-                : item.name === 'Projects'
-                ? 'vtmx-counter-line'
-                : item.name === 'Labels'
-                ? 'vtmx-mist-line'
-                : item.name === 'Regressions'
-                ? 'vtmx-return-line'
-                : item.name === 'FAQ'
-                ? 'vtmx-question-line'
-                : null
-            "
-            role="presentation"
-          ></span>
-          <p
-            class="vtmn-typo_text-2 vtmn-flex vtmn-items-center vtmn-ml-6 vtmn-mr-6 vtmn-w-max"
-            :class="sideOpen === true ? 'openedSide' : 'closedSide'"
+          <div class="vtmn-flex">
+            <span
+              class="vtmn-m-3 vtmn-mb-3 vtmn-mt-3"
+              :class="
+                item.name === 'Quality validation'
+                  ? 'vtmx-bar-chart-line'
+                  : item.name === 'Issues'
+                  ? 'vtmx-lightbulb-line'
+                  : item.name === 'Features'
+                  ? 'vtmx-list-settings-line'
+                  : item.name === 'Settings'
+                  ? 'vtmx-settings-line'
+                  : item.name === 'Projects'
+                  ? 'vtmx-counter-line'
+                  : item.name === 'Labels'
+                  ? 'vtmx-mist-line'
+                  : item.name === 'Regressions'
+                  ? 'vtmx-return-line'
+                  : item.name === 'FAQ'
+                  ? 'vtmx-question-line'
+                  : null
+              "
+              role="presentation"
+            ></span>
+            <p
+              class="vtmn-typo_text-2 vtmn-flex vtmn-items-center vtmn-ml-6 vtmn-mr-6 vtmn-w-max"
+            >
+              {{ item.name }}
+            </p>
+            <span
+              class="vtmn-m-3 vtmn-mb-3 vtmn-mt-3 vtmn-w-6"
+              :class="item.name === 'Settings' ? 'vtmx-chevron-up-line' : ''"
+            ></span>
+          </div>
+
+          <ul
+            v-if="item.name === 'Settings'"
+            class="vtmn-typo_text-2 vtmn-flex-col vtmn-flex"
           >
-            {{ item.name }}
-          </p>
-        </a>
+            <router-link to="/settings/qualitypositions">
+              <li class="vtmn-my-2 vtmn-justify-center">Quality settings</li>
+            </router-link>
+            <li class="vtmn-my-2 vtmn-justify-center">Feature settings</li>
+            <li class="vtmn-my-2 vtmn-justify-center">Notification settings</li>
+          </ul>
+        </router-link>
       </li>
     </ul>
   </div>
@@ -117,18 +142,44 @@ export default {
 }
 
 .closedSide {
-  display: flex;
-  margin: 0;
-  width: 0;
+  width: 55px;
   transition: 500ms;
 }
 
 .openedSide {
-  display: flex;
+  width: 250px;
   transition: 500ms;
 }
 
 .side-nav {
   position: fixed;
+}
+
+.hideSub .vtmx-chevron-up-line::before {
+  transform-origin: center;
+  transform: rotate(0deg);
+  transition: 500ms;
+}
+
+.hideSub ul {
+  background-color: var(--vtmn-semantic-color_background-brand-secondary);
+  height: 0px;
+  transition: 500ms;
+}
+
+.showSub .vtmx-chevron-up-line::before {
+  transform-origin: center;
+  transform: rotate(180deg);
+  transition: 500ms;
+}
+
+.showSub ul {
+  background-color: var(--vtmn-semantic-color_background-brand-secondary);
+  height: 120px;
+  transition: 500ms;
+}
+
+.showSub ul li:hover {
+  font-weight: 900;
 }
 </style>

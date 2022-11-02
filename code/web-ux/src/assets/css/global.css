@@ -1,9 +1,18 @@
-/* @import 'tailwindcss/base'; */ /* import base CSS classes from Tailwind CSS (optional) */
-/* @import '@vtmn/css-design-tokens/dist/index.css'; */ /* import Vitamin design tokens CSS classes (required) */
-/* @import 'tailwindcss/screens'; */ /* import screens CSS classes from Tailwind CSS (optional) */
-/* @import '@vtmn/css/dist/components.css'; */ /* import Vitamin components CSS classes (required) */
-/* @import 'tailwindcss/components'; */ /* import base CSS classes from Tailwind CSS (optional) */
-/* @import 'tailwindcss/utilities'; */ /* import base CSS classes from Tailwind CSS (optional) */
+@media screen and (max-width: 1400px) {
+    .cardHeader {
+        flex-direction: column;
+    }
+}
+
+@media screen and (max-width: 1370px) {
+    .cardHeader {
+        flex-direction: row;
+    }
+
+    .cardBlock {
+        width: 100% !important;
+    }
+}
 
 body {
     background-color: var(--vtmn-semantic-color_background-secondary);
@@ -26,7 +35,7 @@ body {
 
 .cardProfile {
     background-color: var(--vtmn-semantic-color_content-tertiary);
-    color: var(--vtmn-semantic-color_content-action-reversed);
+    color: var(--vtmn-semantic-color_content-action-reversed) !important;
     position: absolute;
 }
 
@@ -35,17 +44,175 @@ body {
     position: absolute;
 }
 
-.cardStatus {
-    background-color: var(--vtmn-semantic-color_content-visited);
-}
-
 .cardStatus p {
     color: var(--vtmn-semantic-color_content-action-reversed);
 }
 
+.fullCard .miniStatus {
+    height: 107px;
+    width: 90px;
+    padding-top: 20px;
+    justify-content: center;
+    display: flex;
+    border-radius: 5px;
+    background-size: 38px;
+    background-position: -6px 70px;
+    color: #ffffff;
+}
+
+.miniStatus.statusFailure {
+    background-color: var(--vtmn-semantic-color_background-alert);
+    background-image: url(../img/logo_white.png);
+    background-repeat: no-repeat;
+}
+
 .cardStatus.statusPending {
+    background-color: var(--vtmn-semantic-color_content-visited);
     background-image: url(../img/logo_white.png);
     background-repeat: no-repeat;
     background-size: 100px;
     background-position: -15px -14px;
+}
+
+.cardStatus.statusFailure {
+    background-color: var(--vtmn-semantic-color_background-alert);
+    background-image: url(../img/logo_white.png);
+    background-repeat: no-repeat;
+    background-size: 100px;
+    background-position: -15px -14px;
+}
+
+.fullStatus.statusPending {
+    background-color: var(--vtmn-semantic-color_content-visited);
+    background-image: url(../img/logo_white.png);
+    background-repeat: no-repeat;
+    background-size: 50px;
+    background-position: bottom left -3px;
+    color: var(--vtmn-semantic-color_content-action-reversed);
+}
+
+.saveConfiguration {
+    background-color: var(--vtmn-semantic-color_content-warning)!important;
+}
+
+.columnType {
+    color: var(--vtmn-semantic-color_content-inactive) !important;
+}
+
+.validTasks {
+    color: var(--vtmn-semantic-color_content-positive) !important;
+}
+
+.errorTasks {
+    color: var(--vtmn-semantic-color_content-negative) !important;
+}
+
+.lineCountry {
+    color: var(--vtmn-semantic-color_content-inactive);
+}
+
+.lineCountry * {
+    transition: 200ms;
+    margin: 0 3px;
+    cursor: pointer;
+}
+
+.lineCountry.lineOpen i {
+    transform: rotate(90deg); transition: 200ms
+}
+
+.cellsCard .individualCell {
+    position: relative;
+    width: 115px;
+    border: 1px solid #cecece;
+    height: 35px;
+    border-radius: 4px;
+    margin: 15px .2em;
+    transition: 200ms;
+    cursor: pointer;
+}
+
+.cellsCard .individualCell p {
+    position: absolute;
+    font-size: 12px;
+    bottom: 12px;
+    font-weight: 700;
+}
+
+.cellsCard .individualCell p.checkedIssues {
+    left: 5px;
+    color: #22a942;
+}
+
+.cellsCard .individualCell p.warningIssues {
+    right: 20px;
+    color: #bc5b00;
+}
+
+.cellsCard .individualCell p.errorIssues {
+    right: 5px;
+    color: #e71818;
+}
+
+.cellsCard .individualCell span {
+    position: relative;
+    background-color: #22a942;
+    width: 92%;
+    height: 5px;
+    display: block;
+    border-radius: 100px;
+}
+
+.cellsCard .individualCell span::after {
+    content: '';
+    display: block;
+    background-color: #ff5800;
+    width: 18px;
+    height: 5px;
+    right: 6px;
+    position: absolute;
+    border-radius: 100px;
+}
+
+.cellsCard .individualCell span::before {
+    content: '';
+    position: absolute;
+    display: block;
+    background-color: #ff0000;
+    width: 8px;
+    height: 5px;
+    right: 0;
+    border-radius: 100px;
+}
+
+.vtmn-progressbar_container.approvedSeverity span, .vtmn-progressbar_container.approvedSeverity .vtmn-progressbar_indicator {
+    stroke: #22a942;
+    color: #22a942;
+}
+
+.lastProgressBar svg > .vtmn-progressbar_indicator{
+    stroke: #8996A2!important;
+}
+
+.cancelBtn {
+    background-color: var(--vtmn-semantic-color_background-tertiary) !important;
+    color: var(--vtmn-semantic-color_content-inactive) !important;
+}
+
+.confirmBtn {
+    background-color: var(--vtmn-semantic-color_content-positive) !important;
+}
+
+.searchContent {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 4px;
+    box-shadow: 1px 1px 1px 1px #dddddd;
+}
+
+.searchContent li {
+    cursor: pointer;
 }

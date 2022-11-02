@@ -60,7 +60,6 @@ export default {
 
   methods: {
     saveCondition(label) {
-      console.log(label);
       this.chosenCondition.push(label);
       this.conditionArray.push(label);
       this.searchList = false;
@@ -87,15 +86,16 @@ export default {
     },
 
     confirmCondition() {
-      this.counter = parseInt(this.positionSelected) + 1;
+      this.counter = Number(this.positionSelected) + 1;
       let arrayToSend = {
         conditions: this.conditionArray,
         position: this.positionSelected,
+        status: "Pending",
         args: this.args,
       };
       this.$store.dispatch("cardsPosition/checkout", arrayToSend);
       this.showConfigureModal = false;
-      this.incrementCounter(parseInt(this.positionSelected) + 1);
+      this.incrementCounter(Number(this.positionSelected) + 1);
     },
 
     savePosition() {
@@ -117,8 +117,6 @@ export default {
         confirm("Are you sure you want to save this thing into the database?")
       ) {
         localStorage.removeItem("conditionStored", position);
-      } else {
-        // Do nothing!
       }
     },
   },
@@ -235,9 +233,7 @@ export default {
           </template>
         </VtmnToast>
 
-        <VtmnButton
-          @click="savePosition()"
-          class="saveConfiguration vtmn-flex vtmn-m-auto"
+        <VtmnButton @click="savePosition()" class="vtmn-flex vtmn-m-auto"
           >Save configuration</VtmnButton
         >
       </div>
@@ -282,7 +278,6 @@ export default {
 
             <div class="positionInput vtmn-mb-6">
               <VtmnSelect
-                style="width: 200px; display: flex; justify-content: center"
                 labelText="Filter type"
                 id="vtmn-select"
                 v-model="args"
@@ -469,30 +464,12 @@ export default {
   margin-top: 24px;
 }
 
-.searchContent {
-  position: fixed;
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-  background-color: #ffffff;
-  border-radius: 4px;
-  box-shadow: 1px 1px 1px 1px #dddddd;
-}
-
-.searchContent li {
-  cursor: pointer;
-}
-
 .searchPart {
   position: relative;
 }
 
 .filterType {
   color: var(--vtmn-semantic-color_content-visited-reversed);
-}
-
-.saveConfiguration {
-  background-color: var(--vtmn-semantic-color_content-warning);
 }
 
 .cardSaveToast {

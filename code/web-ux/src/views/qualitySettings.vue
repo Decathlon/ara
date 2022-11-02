@@ -1,26 +1,42 @@
 <script>
-import cardsPosition from "../components/cardsPosition.vue";
-
 export default {
-  name: "quality-settings",
-
-  components: {
-    cardsPosition,
-  },
-
   data() {
     return {
-      pageLoaded: false,
-      configureCards: false,
+      xTabPosition: "",
+      yTabPosition: "",
+      widthTabPosition: "",
+      heightTabPosition: "",
     };
   },
 
-  mounted() {
-    this.pageLoaded = true;
+  methods: {
+    getPosition() {
+      this.selectedTab;
+      this.xTabPosition = event.target.getBoundingClientRect().x + "px";
+      this.yTabPosition = event.target.getBoundingClientRect().y + "px";
+      this.widthTabPosition = event.target.getBoundingClientRect().width + "px";
+    },
+  },
 
-    if (this.$route.query.firstConnexion === "true") {
-      this.configureCards = true;
-    }
+  computed: {
+    selectedTab() {
+      return this.$route.name;
+    },
+  },
+
+  mounted() {
+    this.xTabPosition =
+      document.getElementsByClassName(" activeTab")[0].getBoundingClientRect()
+        .x + "px";
+    this.yTabPosition =
+      document.getElementsByClassName(" activeTab")[0].getBoundingClientRect()
+        .y + "px";
+    this.widthTabPosition =
+      document.getElementsByClassName(" activeTab")[0].getBoundingClientRect()
+        .width + "px";
+    this.heightTabPosition =
+      document.getElementsByClassName(" activeTab")[0].getBoundingClientRect()
+        .height + "px";
   },
 };
 </script>
@@ -30,36 +46,43 @@ export default {
     <div class="block vtmn-pt-10 vtmn-ml-10">
       <h1 class="vtmn-text-center vtmn-typo_title-1">Quality validation</h1>
 
-      <div v-if="!pageLoaded" class="vtmn-loader">
-        <span class="vtmn-sr-only">Loading</span>
-      </div>
-
       <div
         class="settingsNav vtmn-flex vtmn-justify-left vtmn-ml-10 vtmn-mt-10"
       >
-        <ul>
-          <li class="vtmn-mx-6">Cards configuration</li>
-          <li
-            class="settingsTab vtmn-mx-6"
-            :class="this.configureCards === true ? 'active' : 'non-active'"
+        <ul class="settingsTab">
+          <router-link
+            to="/settings/qualityconfiguration"
+            :class="
+              this.selectedTab === 'qualityConfiguration'
+                ? 'activeTab'
+                : this.selectedTab !== 'qualityConfiguration' &&
+                  this.selectedTab === 'settings'
+                ? 'activeTab'
+                : ''
+            "
+            @click="getPosition()"
           >
-            Cards position
-          </li>
-          <li class="vtmn-mx-6">Completion and success</li>
+            <li class="vtmn-mx-6">Cards configuration</li>
+          </router-link>
+          <router-link
+            to="/settings/qualitypositions"
+            :class="this.selectedTab === 'qualityPositions' ? 'activeTab' : ''"
+            @click="getPosition()"
+          >
+            <li class="vtmn-mx-6">Cards position</li>
+          </router-link>
+          <router-link
+            to="/settings/completion&success"
+            :class="this.selectedTab === 'qualityCompletion' ? 'activeTab' : ''"
+            @click="getPosition()"
+          >
+            <li class="vtmn-mx-6">Completion and success</li>
+            <li class="backgroundTab"></li>
+          </router-link>
         </ul>
       </div>
 
-      <div class="qualityPosition">
-        <p
-          class="vtmn-typo_text-1 vtmn-flex vtmn-justify-left vtmn-ml-10 vtmn-mt-6"
-        >
-          This part allow you to choose wich cards, grouped by labels, you want
-          to display and the position and those cards. Click on a position below
-          to begin.
-        </p>
-
-        <cards-position />
-      </div>
+      <router-view></router-view>
     </div>
   </div>
 </template>
@@ -79,12 +102,22 @@ export default {
   color: var(--vtmn-semantic-color_border-secondary);
 }
 
-.settingsTab.active {
-  color: #ffffff;
-  background-color: var(--vtmn-semantic-color_content-active);
+.settingsTab a {
+  cursor: pointer;
 }
 
-.vtmn-typo_text-1 {
-  color: var(--vtmn-semantic-color_content-tertiary);
+.activeTab li {
+  color: #ffffff !important;
+}
+
+.backgroundTab {
+  z-index: -1;
+  position: absolute;
+  background-color: var(--vtmn-semantic-color_content-active);
+  width: v-bind(widthTabPosition);
+  height: v-bind(heightTabPosition);
+  left: v-bind(xTabPosition);
+  top: v-bind(yTabPosition);
+  transition: 200ms;
 }
 </style>

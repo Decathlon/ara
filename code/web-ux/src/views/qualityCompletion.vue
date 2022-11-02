@@ -3,5 +3,7 @@ export default {};
 </script>
 
 <template>
-  <div></div>
+  <div>
+    <p>Completion</p>
+  </div>
 </template>
