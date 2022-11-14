@@ -43,3 +43,18 @@ server:
       timeout: 14400s
       cookie:
         max-age: 43200
+management:
+  info:
+    env:
+      enabled: true
+  server:
+    port: 8000
+  endpoints:
+    web:
+      exposure:
+        include: health, info, openapi, swaggerui
+  # Metrics
+  metrics:
+    export:
+      influx:
+        enabled: false

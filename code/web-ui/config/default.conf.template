@@ -5,17 +5,17 @@ server {
     #charset koi8-r;
     #access_log  /var/log/nginx/host.access.log  main;
 
-    #location /oauth {
-    #  proxy_pass https://${ARA_API_HOST}:${ARA_API_PORT}/oauth;
-    #}
+    location /oauth {
+      proxy_pass https://${ARA_API_HOST}:${ARA_API_PORT}/oauth;
+    }
 
-    #location /api {
-    #  proxy_pass https://${ARA_API_HOST}:${ARA_API_PORT}/api;
-    #}
+    location /api {
+      proxy_pass https://${ARA_API_HOST}:${ARA_API_PORT}/api;
+    }
 
-    #location /actuator {
-    #  proxy_pass https://${ARA_API_HOST}:${ARA_MANAGEMENT_PORT}/actuator;
-    #}
+    location /actuator {
+      proxy_pass https://${ARA_API_HOST}:${ARA_MANAGEMENT_PORT}/actuator;
+    }
 
     location / {
         root   /usr/share/nginx/html;
