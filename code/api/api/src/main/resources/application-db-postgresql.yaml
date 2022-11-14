@@ -23,14 +23,8 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${ara.database.host}/${ara.database.name}
-    properties:
-      maxActive: 5 
-      maxIdle: 5 
-      minIdle: 5 
-      initialSize: 5
   jpa:
     database: postgresql
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        
