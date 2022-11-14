@@ -114,7 +114,7 @@ management:
     env:
       enabled: true
   server:
-    port: 8000
+    port: 8001
   endpoints:
     web:
       exposure:
