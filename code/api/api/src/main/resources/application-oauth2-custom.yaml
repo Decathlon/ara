@@ -10,7 +10,6 @@
 #         uri: ${INFLUX_DATABASE_URI}
 #         step: 15s
 #         autoCreateDb: false
-
 spring:
   security:
     oauth2:
