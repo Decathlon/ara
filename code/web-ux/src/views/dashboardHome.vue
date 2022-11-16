@@ -61,8 +61,8 @@ export default {
 </script>
 
 <template>
-  <div class="block vtmn-pt-10 vtmn-ml-10">
-    <div class="block">
+  <div class="vtmn-pt-10 vtmn-ml-10">
+    <div>
       <VtmnBreadcrumb aria-label="Breadcrumb">
         <VtmnBreadcrumbItem icon="home-line" @click="qualityView()">
           Home
@@ -125,24 +125,21 @@ export default {
           </div>
         </div>
 
-        <p
-          v-if="!configurationCards"
-          class="vtmn-typo_text-1 vtmn-m-auto vtmn-w-max vtmn-mt-10"
-        >
-          <svg width="24" height="24">
-            <use
-              xlink:href="/node_modules/@vtmn/icons/dist/vitamix/sprite/vitamix.svg#information-fill"
-            />
-          </svg>
-          Configure cards position in settings to display other cards
-        </p>
-
         <div
-          class="block vtmn-flex vtmn-flex-row vtmn-flex-wrap vtmn-justify-center vtmn-mt-6"
-          v-if="!configurationCards"
+          v-if="configurationCards.length === 0"
+          class="vtmn-flex vtmn-items-center vtmn-flex-col vtmn-mt-10"
         >
+          <p class="vtmn-typo_text-1">
+            <svg width="24" height="24">
+              <use
+                xlink:href="/node_modules/@vtmn/icons/dist/vitamix/sprite/vitamix.svg#information-fill"
+              />
+            </svg>
+            Configure cards position in settings to display other cards
+          </p>
+
           <button
-            class="vtmn-btn vtmn-btn_size--large"
+            class="vtmn-btn vtmn-btn_size--large vtmn-mt-6"
             @click="
               this.$router.push({
                 path: 'settings/qualityPositions/:firstConnexion',

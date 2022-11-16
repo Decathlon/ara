@@ -204,10 +204,9 @@ body {
 }
 
 .searchContent {
-    position: fixed;
-    display: flex;
-    flex-direction: column;
     padding: 20px;
+    top: 76px;
+    width: 90%;
     background-color: #ffffff;
     border-radius: 4px;
     box-shadow: 1px 1px 1px 1px #dddddd;
@@ -215,4 +214,26 @@ body {
 
 .searchContent li {
     cursor: pointer;
+}
+
+.modalTitle {
+    color: var(--vtmn-semantic-color_content-active);
+}
+
+.modalContent {
+    overflow-y: visible;
+}
+
+.modalDesc {
+    color: var(--vtmn-semantic-color_content-tertiary);
+}
+
+.cancelModalBtn, .cancelModalBtn:hover, .confirmModalBtn {
+    background-color: var(--vtmn-semantic-color_background-tertiary) !important;
+    color: var(--vtmn-semantic-color_content-inactive) !important;
+}
+
+.confirmModalBtn.active {
+    background-color: var(--vtmn-semantic-color_content-positive)!important;
+    color: var(--vtmn-semantic-color_content-action-reversed)!important;
 }

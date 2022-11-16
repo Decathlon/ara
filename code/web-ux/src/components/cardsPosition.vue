@@ -1,158 +1,85 @@
-<script>
-import {
-  VtmnSelect,
-  VtmnSearch,
-  VtmnButton,
-  VtmnToast,
-  VtmnIcon,
-} from "@vtmn/vue";
-import { mapState } from "vuex";
+<script setup>
+import { VtmnButton, VtmnToast, VtmnIcon } from "@vtmn/vue";
+import { onMounted, ref } from "vue";
+import { useCardsPositionsStore } from "../stores/cardsPositions";
+import positionsModal from "../views/positionsModal.vue";
 
-export default {
-  components: {
-    VtmnSelect,
-    VtmnSearch,
-    VtmnButton,
-    VtmnToast,
-    VtmnIcon,
-  },
-
-  data() {
-    return {
-      showConfigureModal: false,
-      options: [
-        { label: "Select", value: "", disabled: true },
-        { label: "Feature", value: "Feature" },
-        { label: "Severity", value: "Severity" },
-        { label: "Team", value: "Team" },
-        { label: "Status", value: "Status" },
-        { label: "Labels", value: "Labels" },
-      ],
-      conditions: [
-        { label: "Develop", value: "", disabled: true },
-        { label: "Master", value: "feature" },
-        { label: "Stab", value: "severity" },
-        { label: "Day", value: "team" },
-        { label: "Night", value: "status" },
-      ],
-      args: "",
-      searchList: false,
-      activeSearch: true,
-      searchedCondition: "",
-      positionSelected: 0,
-      identifier: "vtmnSelect",
-      conditionArray: [],
-      chosenCondition: [],
-      counter: 1,
-      selectedCondition: {
-        1: {},
-        2: {},
-        3: {},
-        4: {},
-        5: {},
-        6: {},
-      },
-      storedConditions: [],
-      showToast: false,
-      showConditionCTA: false,
-    };
-  },
-
-  methods: {
-    saveCondition(label) {
-      this.chosenCondition.push(label);
-      this.conditionArray.push(label);
-      this.searchList = false;
-      this.showToast = false;
-    },
-
-    openModal() {
-      this.chosenCondition = [];
-      this.conditionArray = [];
-      this.showConfigureModal = true;
-    },
-
-    incrementCounter(index) {
-      if (this.counter > 6) {
-        this.counter = 0;
-      } else {
-        if (index == this.counter) {
-          this.positionSelected = index;
-          return true;
-        } else {
-          return false;
-        }
-      }
-    },
-
-    confirmCondition() {
-      this.counter = Number(this.positionSelected) + 1;
-      let arrayToSend = {
-        conditions: this.conditionArray,
-        position: this.positionSelected,
-        status: "Pending",
-        args: this.args,
-      };
-      this.$store.dispatch("cardsPosition/checkout", arrayToSend);
-      this.showConfigureModal = false;
-      this.incrementCounter(Number(this.positionSelected) + 1);
-    },
-
-    savePosition() {
-      localStorage.setItem(
-        "conditionStored",
-        JSON.stringify(this.conditionsPositions)
-      );
-      this.showToast = true;
-    },
-
-    editCondition(conditions) {
-      this.conditionArray = conditions;
-      this.chosenCondition = conditions;
-      this.showConfigureModal = true;
-    },
-
-    removeCondition(position) {
-      if (
-        confirm("Are you sure you want to save this thing into the database?")
-      ) {
-        localStorage.removeItem("conditionStored", position);
-      }
-    },
-  },
-
-  computed: {
-    ...mapState("cardsPosition", ["conditionsPositions"]),
-
-    filteredProducts() {
-      return this.conditions.filter((p) => {
-        return (
-          p.label.toLowerCase().indexOf(this.searchedCondition.toLowerCase()) !=
-          -1
-        );
-      });
-    },
-  },
-
-  created() {
-    const tab = JSON.parse(localStorage.getItem("conditionStored"));
-    if (tab) {
-      for (var i = 0; i < tab.length; i++) {
-        this.$store.dispatch("cardsPosition/checkout", tab[i]);
-      }
-    }
-    this.storedConditions.push(tab);
-    if (this.storedConditions[0]) {
-      this.counter = this.storedConditions[0].length + 1;
-    }
-  },
-
-  watch: {
-    args: function () {
-      this.activeSearch = false;
-    },
-  },
+const cardsPositionsStore = useCardsPositionsStore();
+let filterInfo = ref(null);
+let activeSearch = ref(null);
+let searchedCondition = ref("");
+let positionSelected = ref(0);
+let chosenCondition = ref([]);
+let counter = ref(1);
+let editPosition = ref(false);
+const selectedCondition = {
+  1: {},
+  2: {},
+  3: {},
+  4: {},
+  5: {},
+  6: {},
 };
+const storedConditions = [];
+let showToast = ref(false);
+
+let showConfigureModal = ref(false);
+let showConditionCTA = ref(false);
+let prevPosition = ref("");
+
+const openModal = (index) => {
+  positionSelected.value = Number(index);
+  filterInfo.value = "";
+  chosenCondition.value = [];
+  searchedCondition.value = "";
+  showConfigureModal.value = true;
+};
+
+const savePosition = () => {
+  localStorage.setItem(
+    "conditionStored",
+    JSON.stringify(cardsPositionsStore.conditionsPositions)
+  );
+  showToast.value = true;
+};
+
+const newPosition = (val) => {
+  showConfigureModal.value = false;
+  if (val === counter.value) {
+    counter.value = val + 1;
+  }
+
+  return cardsPositionsStore;
+};
+
+const editCondition = (conditions, index) => {
+  prevPosition.value = index;
+  filterInfo.value = conditions.filterInfo;
+  activeSearch.value = false;
+  editPosition.value = true;
+  positionSelected.value = Number(conditions.position);
+  chosenCondition.value = conditions.conditions;
+  showConfigureModal.value = true;
+};
+
+const removeCondition = (position) => {
+  if (confirm("Are you sure you want to remove this condition?")) {
+    localStorage.removeItem("conditionStored", position);
+  }
+};
+
+onMounted(() => {
+  const tab = JSON.parse(localStorage.getItem("conditionStored"));
+  if (tab) {
+    for (var i = 0; i < tab.length; i++) {
+      cardsPositionsStore.setCartItems(tab[i]);
+    }
+  }
+  storedConditions.push(tab);
+  if (storedConditions[0]) {
+    counter.value = storedConditions[0].length + 1;
+  }
+});
 </script>
 
 <template>
@@ -163,29 +90,30 @@ export default {
           class="positionSquare vtmn-flex vtmn-float-left"
           v-for="(positions, index) in selectedCondition"
           @mouseenter="showConditionCTA = index"
-          @mouseleave="showConditionCTA = ''"
+          @mouseleave="showConditionCTA = false"
           :key="positions"
           :class="
-            conditionsPositions[index - 1]?.conditions
+            cardsPositionsStore.conditionsPositions[index - 1]?.conditions
               ? 'filledPosition vtmn-content-center'
               : ''
           "
         >
           <div
-            v-if="incrementCounter(index) && !positions.length"
+            v-if="counter == index"
             class="card active"
             @click="openModal(index)"
           >
-            <svg class="vtmn-m-auto" width="32" height="32" fill="#000000">
-              <use
-                xlink:href="/node_modules/@vtmn/icons/dist/vitamix/sprite/vitamix.svg#add-fill"
-              />
-            </svg>
+            <VtmnIcon
+              value="add-fill"
+              variant="information"
+              class="vtmn-m-auto"
+              :size="32"
+            ></VtmnIcon>
           </div>
 
-          <ul v-else-if="conditionsPositions.length > 0">
+          <ul v-else-if="cardsPositionsStore.conditionsPositions.length > 0">
             <li
-              v-for="conditionName in conditionsPositions"
+              v-for="conditionName in cardsPositionsStore.conditionsPositions"
               :key="conditionName.position"
               :class="
                 showConditionCTA == conditionName.position
@@ -193,14 +121,14 @@ export default {
                   : 'hideBtn'
               "
             >
-              <div v-if="conditionName.position === index">
+              <div v-if="conditionName.position === Number(index)">
                 <div
                   class="conditionCTA vtmn-absolute vtmn-w-2/3 vtmn-h-8 vtmn-rounded-full vtmn-left-0 vtmn-right-0 vtmn-mx-auto"
                 >
                   <VtmnIcon
                     value="edit-fill"
                     class="editConditionIcon vtmn-mx-2"
-                    @click="editCondition(conditionName.conditions)"
+                    @click="editCondition(conditionName, counter)"
                   ></VtmnIcon>
                   <VtmnIcon
                     value="delete-bin-fill"
@@ -233,114 +161,26 @@ export default {
           </template>
         </VtmnToast>
 
-        <VtmnButton @click="savePosition()" class="vtmn-flex vtmn-m-auto"
-          >Save configuration</VtmnButton
+        <VtmnButton
+          class="vtmn-flex vtmn-m-auto"
+          @click="savePosition()"
+          :disabled="!cardsPositionsStore.conditionsPositions.length"
+        >
+          Save configuration</VtmnButton
         >
       </div>
     </div>
 
-    <div>
-      <div
-        v-if="showConfigureModal"
-        class="vtmn-modal"
-        id="modal-1"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="vtmn-modal-title"
-        aria-describedby="vtmn-modal-description"
-      >
-        <div class="vtmn-modal_content">
-          <div class="vtmn-modal_content_title">
-            <span id="vtmn-modal-title" class="vtmn-modal_content_title--text"
-              >Configure position</span
-            >
-            <button
-              class="vtmn-btn vtmn-btn_variant--ghost vtmn-btn--icon-alone"
-            >
-              <span
-                class="vtmx-close-line"
-                aria-hidden="true"
-                @click="showConfigureModal = false"
-              ></span>
-              <span class="vtmn-sr-only" @click="showConfigureModal = false"
-                >Close modal</span
-              >
-            </button>
-          </div>
-          <div class="vtmn-modal_content_body">
-            <p
-              id="vtmn-modal-description"
-              class="vtmn-modal_content_body--text"
-            >
-              The execution displayed at this position will be filter by the two
-              conditions below.
-            </p>
-
-            <div class="positionInput vtmn-mb-6">
-              <VtmnSelect
-                labelText="Filter type"
-                id="vtmn-select"
-                v-model="args"
-                :options="options"
-                :identifier="identifier"
-              ></VtmnSelect>
-              <div class="searchPart">
-                <VtmnSearch
-                  :disabled="activeSearch"
-                  v-model="searchedCondition"
-                  @input="searchList = true"
-                />
-                <ul class="searchContent" v-if="searchList">
-                  <li
-                    v-for="condition in filteredProducts"
-                    @click="saveCondition(condition.label)"
-                    :key="condition.label"
-                  >
-                    {{ condition.label }}
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <div v-if="conditionArray.length > 0" class="selectedConditions">
-              <p class="filterType">
-                {{ args }}
-              </p>
-              <div
-                v-for="conditions in chosenCondition"
-                :key="conditions"
-                class="vtmn-chip vtmn-chip_variant--input vtmn-flex vtmn-float-left vtmn-ml-4 vtmn-mt-4"
-                role="button"
-                tabindex="0"
-                aria-pressed="true"
-              >
-                {{ conditions }}
-                <button
-                  class="vtmn-btn vtmn-btn--icon-alone vtmn-btn_size--small vtmn-btn_variant--ghost-reversed"
-                >
-                  <span class="vtmn-sr-only">Unselect this chip</span>
-                  <span class="vtmx-close-line" aria-hidden="true"></span>
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="vtmn-modal_content_actions">
-            <button
-              @click="showConfigureModal = false"
-              class="vtmn-btn vtmn-btn_variant--secondary"
-            >
-              Cancel
-            </button>
-            <button
-              class="vtmn-btn vtmn-btn_variant--primary"
-              @click="confirmCondition"
-            >
-              Confirm
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <positions-modal
+      @close-modal="showConfigureModal = false"
+      @condition-added="newPosition"
+      :showConfigureModal="showConfigureModal"
+      :filterInfo="filterInfo"
+      :activeSearch="activeSearch"
+      :editPosition="editPosition"
+      :positionSelected="positionSelected"
+      :chosenCondition="chosenCondition"
+    />
   </div>
 </template>
 
@@ -442,6 +282,7 @@ export default {
   background-color: var(--vtmn-semantic-color_background-primary);
   margin: auto;
   border-radius: 100px;
+  z-index: -1;
 }
 
 .card:hover {
@@ -451,28 +292,11 @@ export default {
   transition: 500ms;
 }
 
-.positionInput {
-  display: flex;
-  justify-content: space-around;
-}
-
-.positionInput div {
-  margin-left: 10px;
-}
-
-.vtmn-search {
-  margin-top: 24px;
-}
-
-.searchPart {
-  position: relative;
-}
-
-.filterType {
-  color: var(--vtmn-semantic-color_content-visited-reversed);
-}
-
 .cardSaveToast {
   background-color: var(--vtmn-semantic-color_content-positive);
+}
+
+.ctaBlock .vtmn-btn {
+  background-color: var(--vtmn-semantic-color_content-warning);
 }
 </style>

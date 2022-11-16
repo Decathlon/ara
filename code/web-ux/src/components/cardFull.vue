@@ -111,7 +111,7 @@ export default {
 
               <div
                 class="vtmn-flex vtmn-items-center vtmn-justify-evenly"
-                :class="!cardActive ? 'vtmn-w-1/3' : 'vtmn-w-2/12'"
+                :class="!cardActive ? 'vtmn-w-2/5' : 'vtmn-w-2/12'"
               >
                 <VtmnChip
                   v-for="(cardLabel, index) in cardInfo?.conditions"
@@ -121,7 +121,7 @@ export default {
                   :selected="index < 2"
                   :key="index"
                 >
-                  {{ 2 > index ? cardLabel : "+" + index }}
+                  {{ 2 > index ? cardLabel : "+" + (index - 1) }}
                 </VtmnChip>
               </div>
 

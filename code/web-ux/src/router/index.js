@@ -21,7 +21,7 @@ const router = createRouter({
     },
     {
       path: "/quality-validation",
-      name: "qualityvalidation",
+      name: "qualityValidation",
       component: Dashboard,
     },
     {

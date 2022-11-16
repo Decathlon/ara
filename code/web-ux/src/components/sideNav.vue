@@ -40,16 +40,18 @@ export default {
       role="listbox"
     >
       <li
-        v-for="item in menuElements"
+        v-for="(item, index) in menuElements"
         class="vtmn-list_item-size--small"
         role="option"
         tabindex="0"
-        :key="item"
+        :key="index"
       >
         <router-link
           active-class="active"
           @click="
-            item.name === 'Settings' && sideOpen ? (showSub = !showSub) : ''
+            item.name === 'Settings' && sideOpen
+              ? (this.showSub = !this.showSub)
+              : (showSub = false)
           "
           :to="{ path: `/${item.name.replace(/\s+/g, '-').toLowerCase()}` }"
           :class="showSub ? 'showSub' : 'hideSub'"
@@ -91,7 +93,7 @@ export default {
           </div>
 
           <ul
-            v-if="item.name === 'Settings'"
+            v-if="item.name === 'Settings' && sideOpen"
             class="vtmn-typo_text-2 vtmn-flex-col vtmn-flex"
           >
             <router-link to="/settings/qualitypositions">

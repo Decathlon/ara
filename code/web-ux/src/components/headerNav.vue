@@ -71,7 +71,7 @@ export default {
   box-shadow: 0px 0px 4px 0px #c1c1c1;
   padding: 0;
   height: 48px;
-  z-index: 9999;
+  z-index: 300;
 }
 .vtmn-typo_title-5 {
   color: var(--vtmn-semantic-color_content-inactive);
