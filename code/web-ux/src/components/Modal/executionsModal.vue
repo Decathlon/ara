@@ -1,4 +1,4 @@
-<script>
+<script setup lang="ts">
 import {
   VtmnRadioButton,
   VtmnIcon,
@@ -8,125 +8,98 @@ import {
   VtmnChip,
 } from "@vtmn/vue";
 import modalForm from "./modalForm.vue";
+import { ref, reactive, onMounted, watch, computed } from "vue";
 
-export default {
-  components: {
-    VtmnRadioButton,
-    VtmnIcon,
-    modalForm,
-    VtmnButton,
-    VtmnSelect,
-    VtmnSearch,
-    VtmnChip,
-  },
+let showModal = ref(false);
+let searchList = ref(false);
+const execType = reactive([
+  { label: "Select", value: "", disabled: true },
+  { label: "Teams", value: "Teams" },
+  { label: "Features", value: "Features" },
+  { label: "Labels", value: "Labels" },
+  { label: "Severities", value: "Severities" },
+  { label: "Discarded", value: "Discarded" },
+  { label: "Success", value: "Success" },
+  { label: "Regressions", value: "Regressions" },
+]);
+let tableExec = reactive([]);
+let executionFilterType = ref("");
+let typeSelected = ref("");
+const labelsType = reactive([
+  { label: "France", value: "France" },
+  { label: "Belgium", value: "Belgium" },
+  { label: "Integ. Other", value: "Integ. Other" },
+  { label: "Day", value: "team" },
+  { label: "Night", value: "status" },
+]);
+let searchedCondition = ref("");
+let sameType = ref(false);
 
-  data() {
-    return {
-      showModal: false,
-      searchList: false,
-      execType: [
-        { label: "Select", value: "", disabled: true },
-        { label: "Teams", value: "Teams" },
-        { label: "Features", value: "Features" },
-        { label: "Labels", value: "Labels" },
-        { label: "Severities", value: "Severities" },
-        { label: "Discarded", value: "Discarded" },
-        { label: "Success", value: "Success" },
-        { label: "Regressions", value: "Regressions" },
-      ],
-      tableExec: [],
-      executionFilterType: "",
-      typeSelected: "",
-      labelsType: [
-        { label: "France", value: "France" },
-        { label: "Belgium", value: "Belgium" },
-        { label: "Integ. Other", value: "Integ. Other" },
-        { label: "Day", value: "team" },
-        { label: "Night", value: "status" },
-      ],
-      teamsType: [
-        { label: "Get / DELIEVERY Lille", value: "Delievery" },
-        { label: "Get / OMARE", value: "Omare" },
-        { label: "Get / Supply & log", value: "SupplyLog" },
-      ],
-      searchedCondition: "",
-      sameType: false,
-    };
-  },
-
-  methods: {
-    saveCondition(data) {
-      this.searchList = false;
-      if (this.tableExec.length > 0) {
-        for (var i = 0; i <= this.tableExec.length; i++) {
-          if (this.tableExec[i]?.type === this.typeSelected) {
-            this.tableExec[i].value.push(data);
-          }
-        }
-      } else if (data) {
-        this.tableExec.push({
-          value: [data],
-          type: this.typeSelected,
-        });
+const saveCondition = (data) => {
+  searchList.value = false;
+  if (tableExec.length > 0) {
+    for (var i = 0; i <= tableExec.length; i++) {
+      if (tableExec[i]?.type === typeSelected.value) {
+        tableExec[i].push(data);
       }
-    },
-
-    removeFilter(filter, filterToRemove) {
-      for (var k = 0; k < this.tableExec.length; k++) {
-        if (this.tableExec[k].type === filter.type) {
-          const indexToRemove = this.tableExec[k].value.indexOf(filterToRemove);
-
-          if (indexToRemove) {
-            this.tableExec[k].value.splice(indexToRemove, 1);
-          }
-        }
-      }
-    },
-
-    confirmFilter() {
-      this.showModal = false;
-      localStorage.setItem("executionFilters", JSON.stringify(this.tableExec));
-    },
-  },
-
-  computed: {
-    filteredProducts() {
-      return this.labelsType.filter((p) => {
-        return (
-          p.label.toLowerCase().indexOf(this.searchedCondition.toLowerCase()) !=
-          -1
-        );
-      });
-    },
-
-    filterSelected() {
-      return JSON.parse(localStorage.getItem("executionFilters")).length;
-    },
-  },
-
-  created() {
-    if (localStorage.getItem("executionFilters")) {
-      this.tableExec = JSON.parse(localStorage.getItem("executionFilters"));
     }
-  },
-
-  watch: {
-    typeSelected: function () {
-      for (var j = 0; j < this.tableExec.length; j++) {
-        if (this.tableExec[j].type === this.typeSelected) {
-          return (this.similar = true);
-        }
-      }
-
-      if (this.sameType || !this.tableExec) {
-        this.tableExec.push({
-          value: [],
-          type: this.typeSelected,
-        });
-      }
-    },
-  },
+  } else if (data) {
+    tableExec.push({
+      value: [data],
+      type: typeSelected,
+    });
+  }
 };
+
+const removeFilter = (filter, filterToRemove) => {
+  for (var k = 0; k < tableExec.length; k++) {
+    if (tableExec[k].type === filter.type) {
+      const indexToRemove = tableExec[k].indexOf(filterToRemove);
+
+      if (indexToRemove) {
+        tableExec[k].splice(indexToRemove, 1);
+      }
+    }
+  }
+};
+
+const confirmFilter = () => {
+  showModal.value = false;
+  localStorage.setItem("executionFilters", JSON.stringify(tableExec));
+};
+
+const filteredLabels = computed(() => {
+  return labelsType.filter((p) => {
+    return (
+      p.label.toLowerCase().indexOf(searchedCondition.value.toLowerCase()) != -1
+    );
+  });
+});
+
+const filterSelected = computed(() => {
+  return JSON.parse(localStorage.getItem("executionFilters")).length;
+});
+
+onMounted(() => {
+  if (localStorage.getItem("executionFilters")) {
+    tableExec = JSON.parse(localStorage.getItem("executionFilters"));
+  }
+});
+
+watch(typeSelected, (typeSelected) => {
+  for (var j = 0; j < tableExec.length; j++) {
+    if (tableExec[j].type === typeSelected) {
+      return true;
+    }
+  }
+
+  if (sameType || !tableExec) {
+    tableExec.push({
+      value: [],
+      type: typeSelected,
+    });
+  }
+});
 </script>
 
 <template>
@@ -192,7 +165,7 @@ export default {
                 />
                 <ul v-if="searchList" class="searchContent vtmn-z-10">
                   <li
-                    v-for="condition in filteredProducts"
+                    v-for="condition in filteredLabels"
                     @click="saveCondition(condition.label)"
                     :key="condition.label"
                   >

@@ -1,51 +1,42 @@
-<script>
-import { VtmnButton, VtmnSelect } from "@vtmn/vue";
+<script setup>
+import { VtmnButton, VtmnSelect, VtmnToast } from "@vtmn/vue";
+import { ref } from "vue";
 
-export default {
-  components: {
-    VtmnButton,
-    VtmnSelect,
-  },
+let displayRadios = ref(false);
+let columnCheck = ref(false);
+let linesCheck = ref(false);
+let cellsCheck = ref(false);
+let selectCount = ref(0);
+let confToSave = ref({});
+let showToast = ref(false);
 
-  data() {
-    return {
-      displayRadios: false,
-      columnCheck: false,
-      linesCheck: false,
-      cellsCheck: false,
-      columnsTable: [
-        { label: "Select", value: "", disabled: true },
-        { label: "Feature", value: "feature" },
-        { label: "Severity", value: "severity" },
-        { label: "Teams", value: "teams" },
-      ],
-      linesTable: [
-        { label: "Select", value: "", disabled: true },
-        { label: "Country", value: "country" },
-        { label: "Type", value: "type" },
-        { label: "Team", value: "team" },
-        { label: "Label", value: "label" },
-      ],
-      cellsTable: [
-        { label: "Select", value: "", disabled: true },
-        { label: "Country", value: "country" },
-        { label: "Type", value: "type" },
-        { label: "Team", value: "team" },
-        { label: "Label", value: "label" },
-      ],
-      selectCount: 0,
-      confToSave: {},
-    };
-  },
+const columnsTable = [
+  { label: "Select", value: "", disabled: true },
+  { label: "Feature", value: "feature" },
+  { label: "Severity", value: "severity" },
+  { label: "Teams", value: "teams" },
+];
+const linesTable = [
+  { label: "Select", value: "", disabled: true },
+  { label: "Country", value: "country" },
+  { label: "Type", value: "type" },
+  { label: "Team", value: "team" },
+  { label: "Label", value: "label" },
+];
+const cellsTable = [
+  { label: "Select", value: "", disabled: true },
+  { label: "Country", value: "country" },
+  { label: "Type", value: "type" },
+  { label: "Team", value: "team" },
+  { label: "Label", value: "label" },
+];
 
-  methods: {
-    saveConf() {
-      localStorage.setItem(
-        "qualityConfiguration",
-        JSON.stringify(this.confToSave)
-      );
-    },
-  },
+const saveConf = () => {
+  localStorage.setItem(
+    "qualityConfiguration",
+    JSON.stringify(confToSave.value)
+  );
+  showToast.value = true;
 };
 </script>
 
@@ -90,6 +81,7 @@ export default {
                 labelText="Column type"
                 id="vtmn-select"
                 :options="columnsTable"
+                identifier="columnType"
                 v-model="confToSave.column"
                 @change="columnCheck ? (selectCount += 1) : (selectCount -= 1)"
               ></VtmnSelect>
@@ -111,6 +103,7 @@ export default {
                   labelText="Label group 1"
                   id="vtmn-select"
                   :options="linesTable"
+                  identifier="firstLabelGroup"
                   v-model="confToSave.line1"
                   @change="linesCheck ? (selectCount += 1) : (selectCount -= 1)"
                 ></VtmnSelect>
@@ -119,6 +112,7 @@ export default {
                   labelText="Label group 2 (Optional)"
                   id="vtmn-select"
                   :options="linesTable"
+                  identifier="secondLabelGroup"
                   v-model="confToSave.line2"
                   @change="linesCheck ? (selectCount += 1) : (selectCount -= 1)"
                 ></VtmnSelect>
@@ -141,6 +135,7 @@ export default {
                   labelText="Cell"
                   id="vtmn-select"
                   :options="cellsTable"
+                  identifier="cellsValue"
                   v-model="confToSave.cell"
                   @change="cellsCheck ? (selectCount += 1) : (selectCount -= 1)"
                 ></VtmnSelect>
@@ -148,12 +143,25 @@ export default {
             </div>
           </div>
 
-          <VtmnButton
-            class="vtmn-flex vtmn-m-auto saveConfiguration"
-            :disabled="!selectCount > 0"
-            @click="saveConf"
-            >Save configuration</VtmnButton
-          >
+          <div>
+            <VtmnToast
+              v-if="showToast"
+              class="cardSaveToast"
+              withCloseButton
+              withIcon
+            >
+              <template v-slot:content>
+                Cards configuration successfully saved!
+              </template>
+            </VtmnToast>
+
+            <VtmnButton
+              class="vtmn-flex vtmn-m-auto saveConfiguration"
+              :disabled="!selectCount > 0"
+              @click="saveConf"
+              >Save configuration</VtmnButton
+            >
+          </div>
         </div>
       </div>
     </div>

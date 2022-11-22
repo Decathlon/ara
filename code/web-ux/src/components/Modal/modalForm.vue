@@ -1,14 +1,12 @@
-<script>
-export default {
-  props: {
-    show: Boolean,
-  },
-};
+<script setup>
+import { defineProps } from "vue";
+
+const props = defineProps(["show"]);
 </script>
 
 <template>
   <Transition name="modal">
-    <div v-if="show" class="modal-mask">
+    <div v-if="props.show" class="modal-mask">
       <div class="modal-wrapper">
         <div class="modal-container">
           <div class="modal-header">
@@ -22,7 +20,7 @@ export default {
           <div class="modal-footer vtmn-flex vtmn-w-full vtmn-justify-center">
             <slot name="footer">
               <button class="modal-default-button" @click="$emit('close')">
-                OK
+                Confirm
               </button>
             </slot>
           </div>
@@ -94,5 +92,24 @@ export default {
 .modal-leave-to .modal-container {
   -webkit-transform: scale(1.1);
   transform: scale(1.1);
+}
+
+.modalDesc {
+  color: var(--vtmn-semantic-color_content-tertiary);
+}
+
+.cancelModalBtn,
+.cancelModalBtn:hover {
+  background-color: var(--vtmn-semantic-color_background-tertiary) !important;
+  color: var(--vtmn-semantic-color_content-inactive) !important;
+}
+
+.confirmModalBtn {
+  background-color: var(--vtmn-semantic-color_content-tertiary);
+}
+
+.confirmModalBtn.active {
+  background-color: var(--vtmn-semantic-color_content-positive) !important;
+  color: var(--vtmn-semantic-color_content-action-reversed) !important;
 }
 </style>

@@ -1,28 +1,18 @@
-<script>
+<script setup>
 import { VtmnChip, VtmnIcon } from "@vtmn/vue";
+import { ref, reactive } from "vue";
 
-export default {
-  components: {
-    VtmnChip,
-    VtmnIcon,
+const scenarioCount = reactive([
+  {
+    scenar1: "some",
+    status: "SUCCESS",
   },
-
-  data() {
-    return {
-      scenarioCount: [
-        {
-          scenar1: "some",
-          status: "SUCCESS",
-        },
-        {
-          scenar2: "some",
-          status: "ERROR",
-        },
-      ],
-      showPopMenu: false,
-    };
+  {
+    scenar2: "some",
+    status: "ERROR",
   },
-};
+]);
+let showPopMenu = ref(false);
 </script>
 
 <template>
@@ -87,13 +77,13 @@ export default {
         <VtmnIcon
           class="vtmn-mr-2 vtmn-cursor-pointer"
           value="more-2-line"
-          @click="showPopMenu = index"
+          @click="showPopMenu.value = index"
           :size="24"
         />
         <ul
           class="popMenu vtmn-absolute vtmn-right-0 vtmn-py-2 vtmn-px-4 vtmn-z-10 vtmn-rounded vtmn-items-around"
-          @click="showPopMenu = false"
-          :class="showPopMenu === index ? 'active' : ''"
+          @click="showPopMenu.value = false"
+          :class="showPopMenu.value === index ? 'active' : ''"
         >
           <li class="vtmn-flex vtmn-py-2">
             <VtmnIcon class="vtmn-mr-2" value="camera-line" :size="24" />

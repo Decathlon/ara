@@ -1,63 +1,59 @@
-<script>
-import cardStarter from "../components/cardStarter.vue";
-import cardFull from "../components/cardFull.vue";
+<script setup>
+import { ref, onBeforeMount } from "vue";
+import cardStarter from "../components/QualityCards/cardStarter.vue";
+import cardFull from "../components/QualityCards/cardFull.vue";
 import { VtmnBreadcrumb, VtmnBreadcrumbItem } from "@vtmn/vue";
+import { useRouter, useRoute } from "vue-router";
 
-export default {
-  components: {
-    cardStarter,
-    cardFull,
-    VtmnBreadcrumb,
-    VtmnBreadcrumbItem,
-  },
+let configurationCards = ref([
+  JSON.parse(localStorage.getItem("conditionStored")),
+]);
+let customCards = ref([
+  JSON.parse(localStorage.getItem("qualityConfiguration")),
+]);
+let cardActive = ref("");
+const router = useRouter();
+const route = useRoute();
 
-  data() {
-    return {
-      firstConnexion: false,
-      configurationCards: [],
-      customCards: [],
-      cardActive: "",
-    };
-  },
-
-  methods: {
-    selectedCard(data) {
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
-      window.history.replaceState(
-        null,
-        null,
-        "/quality-validation/?cardID=" + data.position
-      );
-      this.cardActive = data.position;
-    },
-
-    qualityView() {
-      this.cardActive = "";
-      this.$router.push("/quality-validation");
-    },
-  },
-
-  created() {
-    if (this.$route.query.cardID) {
-      this.cardActive = this.$route.query.cardID;
-    }
-
-    if (localStorage.getItem("conditionStored")) {
-      this.configurationCards = JSON.parse(
-        localStorage.getItem("conditionStored")
-      );
-    }
-
-    if (localStorage.getItem("qualityConfiguration")) {
-      this.customCards.push(
-        JSON.parse(localStorage.getItem("qualityConfiguration"))
-      );
-    }
-  },
+const selectedCard = (data) => {
+  localStorage.setItem(
+    "executionFilters",
+    JSON.stringify([{ value: ["Sanity Check"], type: "Labels" }])
+  );
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+  window.history.replaceState(
+    history.state,
+    "",
+    "/quality-validation/?cardID=" + data.position
+  );
+  cardActive.value = data.position;
 };
+
+const qualityView = () => {
+  cardActive.value = "";
+  router.push("/quality-validation");
+};
+
+onBeforeMount(() => {
+  if (route.query.cardID) {
+    cardActive.value = route.query.cardID;
+  }
+
+  if (localStorage.getItem("conditionStored")) {
+    configurationCards.value = JSON.parse(
+      localStorage.getItem("conditionStored")
+    );
+  }
+
+  if (localStorage.getItem("qualityConfiguration")) {
+    customCards.value.push(
+      JSON.parse(localStorage.getItem("qualityConfiguration"))
+    );
+  }
+});
 </script>
 
 <template>
@@ -71,7 +67,7 @@ export default {
       <div :class="cardActive ? 'singleCardDisplay' : ''">
         <h1 class="vtmn-text-center vtmn-typo_title-1">Quality validation</h1>
 
-        <div v-if="configurationCards.length === 0">
+        <div v-if="!configurationCards[0]" class="vtmn-w-1/3 vtmn-m-auto">
           <card-starter class="vtmn-mt-10" />
         </div>
 
@@ -103,9 +99,10 @@ export default {
                 Completions
               </li>
             </ul>
+
             <card-full
               :cardInfo="cards"
-              :cardDetails="customCards[0]"
+              :cardValue="customCards[0]"
               :cardActive="cardActive == cards.position"
               @cardSelected="selectedCard"
             />
@@ -113,7 +110,7 @@ export default {
         </ul>
 
         <div
-          v-else-if="configurationCards.length > 0"
+          v-else-if="configurationCards[0]"
           class="vtmn-flex vtmn-flex-wrap vtmn-justify-center"
         >
           <div
@@ -126,7 +123,7 @@ export default {
         </div>
 
         <div
-          v-if="configurationCards.length === 0"
+          v-if="!configurationCards[0]"
           class="vtmn-flex vtmn-items-center vtmn-flex-col vtmn-mt-10"
         >
           <p class="vtmn-typo_text-1">
@@ -141,7 +138,7 @@ export default {
           <button
             class="vtmn-btn vtmn-btn_size--large vtmn-mt-6"
             @click="
-              this.$router.push({
+              router.push({
                 path: 'settings/qualityPositions/:firstConnexion',
                 name: 'qualityPositions',
                 query: { firstConnexion: true },

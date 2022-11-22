@@ -1,0 +1,3 @@
+<template>
+    Issues Part
+</template>

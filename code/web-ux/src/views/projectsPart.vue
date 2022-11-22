@@ -1,0 +1,3 @@
+<template>
+    Projects view
+</template>

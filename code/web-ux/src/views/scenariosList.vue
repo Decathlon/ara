@@ -1,29 +1,14 @@
-<script>
+<script setup>
 import { VtmnSearch, VtmnChip } from "@vtmn/vue";
-import executionsModal from "../components/executionsModal.vue";
-import scenarioCard from "../components/scenarioCard.vue";
+import executionsModal from "../components/Modal/executionsModal.vue";
+import scenarioCard from "../components/QualityCards/scenarioCard.vue";
+import { ref, computed } from "vue";
 
-export default {
-  components: {
-    VtmnSearch,
-    executionsModal,
-    VtmnChip,
-    scenarioCard,
-  },
+let appliedFilters = ref(["1", "2", "3"]);
 
-  data() {
-    return {
-      showModal: false,
-      appliedFilters: ["1", "2", "3"],
-    };
-  },
-
-  computed: {
-    activeFilters() {
-      return JSON.parse(localStorage.getItem("executionFilters"));
-    },
-  },
-};
+const activeFilters = computed(() => {
+  return JSON.parse(localStorage.getItem("executionFilters"));
+});
 </script>
 
 <template>

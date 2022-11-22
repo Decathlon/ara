@@ -1,62 +1,48 @@
-<script>
-export default {
-  data() {
-    return {
-      xTabPosition: "",
-      yTabPosition: "",
-      widthTabPosition: "",
-      heightTabPosition: "",
-    };
-  },
+<script setup>
+import { ref, onMounted, computed } from "vue";
+import { useRoute } from "vue-router";
 
-  methods: {
-    getPosition() {
-      this.selectedTab;
-      this.xTabPosition = event.target.getBoundingClientRect().x + "px";
-      this.yTabPosition = event.target.getBoundingClientRect().y + "px";
-      this.widthTabPosition = event.target.getBoundingClientRect().width + "px";
-    },
-  },
+const route = useRoute();
+let xTabPosition = ref("");
+let widthTabPosition = ref("");
+let heightTabPosition = ref("");
 
-  computed: {
-    selectedTab() {
-      return this.$route.name;
-    },
-  },
-
-  mounted() {
-    this.xTabPosition =
-      document.getElementsByClassName(" activeTab")[0].getBoundingClientRect()
-        .x + "px";
-    this.yTabPosition =
-      document.getElementsByClassName(" activeTab")[0].getBoundingClientRect()
-        .y + "px";
-    this.widthTabPosition =
-      document.getElementsByClassName(" activeTab")[0].getBoundingClientRect()
-        .width + "px";
-    this.heightTabPosition =
-      document.getElementsByClassName(" activeTab")[0].getBoundingClientRect()
-        .height + "px";
-  },
+const getPosition = () => {
+  xTabPosition.value = event.target.getBoundingClientRect().x + "px";
+  widthTabPosition.value = event.target.getBoundingClientRect().width + "px";
 };
+
+const selectedTab = computed(() => route.name);
+
+onMounted(() => {
+  xTabPosition.value =
+    document.getElementsByClassName(" activeTab")[0].getBoundingClientRect().x +
+    "px";
+  widthTabPosition.value =
+    document.getElementsByClassName(" activeTab")[0].getBoundingClientRect()
+      .width + "px";
+  heightTabPosition.value =
+    document.getElementsByClassName(" activeTab")[0].getBoundingClientRect()
+      .height + "px";
+});
 </script>
 
 <template>
   <div>
-    <div class="block vtmn-pt-10 vtmn-ml-10">
+    <div class="block vtmn-pt-10">
       <h1 class="vtmn-text-center vtmn-typo_title-1">Quality validation</h1>
 
       <div
         class="settingsNav vtmn-flex vtmn-justify-left vtmn-ml-10 vtmn-mt-10"
       >
-        <ul class="settingsTab">
+        <ul class="settingsTab vtmn-ml-10">
           <router-link
             to="/settings/qualityconfiguration"
             :class="
-              this.selectedTab === 'qualityConfiguration'
+              selectedTab === 'qualityConfiguration'
                 ? 'activeTab'
-                : this.selectedTab !== 'qualityConfiguration' &&
-                  this.selectedTab === 'settings'
+                : selectedTab !== 'qualityConfiguration' &&
+                  selectedTab === 'settings'
                 ? 'activeTab'
                 : ''
             "
@@ -66,19 +52,19 @@ export default {
           </router-link>
           <router-link
             to="/settings/qualitypositions"
-            :class="this.selectedTab === 'qualityPositions' ? 'activeTab' : ''"
+            :class="selectedTab === 'qualityPositions' ? 'activeTab' : ''"
             @click="getPosition()"
           >
             <li class="vtmn-mx-6">Cards position</li>
           </router-link>
           <router-link
             to="/settings/completion&success"
-            :class="this.selectedTab === 'qualityCompletion' ? 'activeTab' : ''"
+            :class="selectedTab === 'qualityCompletion' ? 'activeTab' : ''"
             @click="getPosition()"
           >
             <li class="vtmn-mx-6">Completion and success</li>
-            <li class="backgroundTab"></li>
           </router-link>
+          <li class="backgroundTab"></li>
         </ul>
       </div>
 
@@ -99,7 +85,7 @@ export default {
 .settingsNav ul li {
   padding: 10px 15px;
   border-radius: 100px;
-  color: var(--vtmn-semantic-color_border-secondary);
+  color: var(--vtmn-semantic-color_border-primary);
 }
 
 .settingsTab a {

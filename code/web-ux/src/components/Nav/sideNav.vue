@@ -1,42 +1,33 @@
-<script>
-export default {
-  props: {
-    sideOpen: {
-      type: Boolean,
-      required: true,
-    },
-  },
+<script setup>
+import { ref, reactive, defineProps } from "vue";
 
-  data() {
-    return {
-      menuElements: [
-        { name: "Quality validation" },
-        { name: "Issues" },
-        { name: "Features" },
-        {
-          name: "Settings",
-          subElements: [
-            "Quality validation settings",
-            "Feature settings",
-            "Notification settings",
-          ],
-        },
-        { name: "Projects" },
-        { name: "Labels" },
-        { name: "Regressions" },
-        { name: "FAQ" },
-      ],
-      showSub: false,
-    };
+const props = defineProps(["sideOpen"]);
+
+const menuElements = reactive([
+  { name: "Quality validation" },
+  { name: "Issues" },
+  { name: "Features" },
+  {
+    name: "Settings",
+    subElements: [
+      "Quality validation settings",
+      "Feature settings",
+      "Notification settings",
+    ],
   },
-};
+  { name: "Projects" },
+  { name: "Labels" },
+  { name: "Regressions" },
+  { name: "FAQ" },
+]);
+let showSub = ref(false);
 </script>
 
 <template>
   <div class="side-nav vtmn-block vtmn-w-min vtmn-float-left vtmn-z-20">
     <ul
       class="vtmn-list vtmn-h-screen sideLine"
-      :class="sideOpen ? 'openedSide' : 'closedSide'"
+      :class="props.sideOpen ? 'openedSide' : 'closedSide'"
       role="listbox"
     >
       <li
@@ -49,8 +40,8 @@ export default {
         <router-link
           active-class="active"
           @click="
-            item.name === 'Settings' && sideOpen
-              ? (this.showSub = !this.showSub)
+            item.name === 'Settings' && props.sideOpen
+              ? (showSub = !showSub.value)
               : (showSub = false)
           "
           :to="{ path: `/${item.name.replace(/\s+/g, '-').toLowerCase()}` }"
@@ -93,7 +84,7 @@ export default {
           </div>
 
           <ul
-            v-if="item.name === 'Settings' && sideOpen"
+            v-if="item.name === 'Settings' && props.sideOpen"
             class="vtmn-typo_text-2 vtmn-flex-col vtmn-flex"
           >
             <router-link to="/settings/qualitypositions">

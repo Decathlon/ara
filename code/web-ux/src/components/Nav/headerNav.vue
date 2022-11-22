@@ -1,17 +1,11 @@
-<script>
-export default {
-  data() {
-    return {
-      openedMenu: false,
-    };
-  },
+<script setup>
+import { ref, watch } from "vue";
 
-  watch: {
-    openedMenu() {
-      this.$emit("opened-menu");
-    },
-  },
-};
+let openedMenu = ref(false);
+
+watch(openedMenu, () => {
+  this.$emit("opened-menu");
+});
 </script>
 
 <template>
@@ -20,12 +14,12 @@ export default {
       <button
         class="menu-btn vtmn-btn vtmn-btn--icon-alone vtmn-btn_variant--ghost vtmn-pl-0"
         aria-label="Go to menu"
-        @click="openedMenu = !openedMenu"
+        @click="openedMenu.value = !openedMenu.value"
       >
         <span class="vtmx-menu-line" role="presentation"></span>
       </button>
       <RouterLink to="/">
-        <img src="../assets/img/logo.png" alt="ara logo" width="30" />
+        <img src="../../assets/img/logo.png" alt="ara logo" width="30" />
         <h5 class="vtmn-typo_title-5 vtmn-pl-1">ARA</h5>
       </RouterLink>
     </div>

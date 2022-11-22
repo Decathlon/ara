@@ -1,16 +1,7 @@
-<script>
-export default {
-  props: {
-    cardInfo: {
-      type: Object,
-      required: false,
-    },
-  },
+<script setup>
+import { defineProps } from "vue";
 
-  data() {
-    return {};
-  },
-};
+const props = defineProps(["cardInfo"]);
 </script>
 
 <template>
@@ -32,7 +23,7 @@ export default {
             class="cardBranch vtmn-flex vtmn-justify-center vtmn-w-full vtmn-mt-10 vtmn-mb-8"
           >
             <div
-              v-for="(cardLabel, index) in cardInfo?.conditions"
+              v-for="(cardLabel, index) in props.cardInfo?.conditions"
               :key="index"
               class="vtmn-chip vtmn-chip_variant--filter vtmn-mr-2"
               role="button"
@@ -45,13 +36,13 @@ export default {
             </div>
 
             <div
-              v-if="cardInfo?.conditions.length > 3"
+              v-if="props.cardInfo?.conditions.length > 3"
               class="vtmn-chip vtmn-chip_variant--single-choice"
               role="button"
               tabindex="0"
               aria-pressed="false"
             >
-              {{ cardInfo ? "+" + (cardInfo.conditions.length - 3) : "" }}
+              {{ props.cardInfo ? "+" + (props.cardInfo.conditions.length - 3) : "" }}
             </div>
           </div>
 

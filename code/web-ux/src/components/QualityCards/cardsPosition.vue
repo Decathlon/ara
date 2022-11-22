@@ -1,8 +1,8 @@
 <script setup>
 import { VtmnButton, VtmnToast, VtmnIcon } from "@vtmn/vue";
 import { onMounted, ref } from "vue";
-import { useCardsPositionsStore } from "../stores/cardsPositions";
-import positionsModal from "../views/positionsModal.vue";
+import { useCardsPositionsStore } from "../../stores/cardsPositions";
+import positionsModal from "../../views/positionsModal.vue";
 
 const cardsPositionsStore = useCardsPositionsStore();
 let filterInfo = ref(null);
@@ -290,10 +290,6 @@ onMounted(() => {
   border-radius: 5px;
   transform: scale(1.1);
   transition: 500ms;
-}
-
-.cardSaveToast {
-  background-color: var(--vtmn-semantic-color_content-positive);
 }
 
 .ctaBlock .vtmn-btn {

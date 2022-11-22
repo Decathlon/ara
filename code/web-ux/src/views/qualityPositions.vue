@@ -1,40 +1,24 @@
-<script>
-import cardsPosition from "../components/cardsPosition.vue";
+<script setup>
+import cardsPosition from "../components/QualityCards/cardsPosition.vue";
+import { ref, onUpdated } from "vue";
+import { useRoute } from "vue-router";
 
-export default {
-  name: "qualityPositions",
+let configureCards = ref(false);
+const route = useRoute();
 
-  components: {
-    cardsPosition,
-  },
-
-  data() {
-    return {
-      pageLoaded: false,
-      configureCards: false,
-    };
-  },
-
-  mounted() {
-    this.pageLoaded = true;
-
-    if (this.$route.query.firstConnexion === "true") {
-      this.configureCards = true;
-    }
-  },
-};
+onUpdated(() => {
+  if (route.query.firstConnexion === "true") {
+    configureCards.value = true;
+  }
+});
 </script>
 
 <template>
   <div>
-    <div class="block vtmn-ml-10">
-      <div v-if="!pageLoaded" class="vtmn-loader">
-        <span class="vtmn-sr-only">Loading</span>
-      </div>
-
+    <div class="block">
       <div class="qualityPosition">
         <p
-          class="vtmn-typo_text-1 vtmn-flex vtmn-justify-left vtmn-ml-10 vtmn-mt-6"
+          class="vtmn-typo_text-1 vtmn-flex vtmn-justify-left vtmn-ml-10 vtmn-pl-8 vtmn-mt-6"
         >
           This part allow you to choose wich cards, grouped by labels, you want
           to display and the position and those cards. Click on a position below

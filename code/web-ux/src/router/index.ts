@@ -2,17 +2,17 @@ import { createRouter, createWebHistory } from "vue-router";
 import Login from "../components/loginForm.vue";
 import Dashboard from "../views/dashboardHome.vue";
 import cardDetails from "../views/qualityDetails.vue";
-import Issues from "../views/issues.vue";
+import Issues from "../views/issuesPart.vue";
 import Features from "../views/features.vue";
 import qualitySettings from "../views/qualitySettings.vue";
 import qualityPositions from "../views/qualityPositions.vue";
 import qualityConfiguration from "../views/qualityConfiguration.vue";
 import qualityCompletion from "../views/qualityCompletion.vue";
-import Projects from "../views/projects.vue";
-import FAQ from "../views/faq.vue";
+import Projects from "../views/projectsPart.vue";
+import FAQ from "../views/faqPart.vue";
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(process.env.BASE_URL),
   routes: [
     {
       path: "/",
@@ -43,6 +43,7 @@ const router = createRouter({
       path: "/settings",
       name: "settings",
       component: qualitySettings,
+      redirect: "/settings/qualityconfiguration",
       children: [
         {
           path: "qualityconfiguration",

@@ -1,8 +1,8 @@
-<script setup>
+<script setup lang="ts">
 import { VtmnButton, VtmnSelect, VtmnSearch, VtmnChip } from "@vtmn/vue";
-import { ref, defineProps, defineEmits } from "vue";
+import { ref, defineEmits, defineProps, onUpdated, reactive } from "vue";
 import { useCardsPositionsStore } from "../stores/cardsPositions";
-import modalForm from "../components/modalForm.vue";
+import modalForm from "../components/Modal/modalForm.vue";
 
 const cardsPositionsStore = useCardsPositionsStore();
 const identifier = "vtmnSelect";
@@ -20,7 +20,7 @@ const selectedCondition = {
 };
 let searchFilter = ref(true);
 let searchError = ref(false);
-const emit = defineEmits(["condition-added"]);
+const emit = defineEmits(["condition-added", "closeModal"]);
 
 const props = defineProps({
   showConfigureModal: { type: Boolean, required: false },
@@ -31,7 +31,7 @@ const props = defineProps({
   chosenCondition: { type: Array, required: false },
 });
 
-const newPosition = ref({
+const newPosition = reactive({
   chosenCondition: [],
   filterInfo: "",
 });
@@ -59,33 +59,48 @@ const filteredProducts = () => {
   );
 };
 const saveCondition = (label) => {
-  if (props.chosenCondition) {
-    newPosition.value.chosenCondition = props.chosenCondition;
-  }
+  searchList.value = false;
 
-  if (newPosition.value.chosenCondition.find((element) => element === label)) {
+  if (newPosition.chosenCondition.find((element) => element === label)) {
     searchError.value = true;
-    searchList.value = false;
   } else {
-    newPosition.value.chosenCondition.push(label);
-    newPosition.value.filterInfo = filterType.value;
+    newPosition.chosenCondition.push(label);
+    newPosition.filterInfo = filterType.value;
     searchError.value = false;
-    searchList.value = false;
     showToast.value = false;
+  }
+};
+
+const removeCondition = (label) => {
+  const conditionToRemove = newPosition.value.chosenCondition.indexOf(label);
+
+  if (conditionToRemove > -1) {
+    newPosition.chosenCondition.splice(conditionToRemove, 1);
   }
 };
 
 const confirmCondition = () => {
   let arrayToSend = {
-    conditions: newPosition.value.chosenCondition,
+    conditions: newPosition.chosenCondition,
     position: props.positionSelected,
-    filterInfo: newPosition.value.filterInfo,
+    filterInfo: newPosition.filterInfo,
     status: "Success",
   };
   selectedCondition[props.positionSelected] = arrayToSend;
   cardsPositionsStore.setCartItems(arrayToSend);
+  searchFilter.value = true;
   emit("condition-added", props.positionSelected);
 };
+
+onUpdated(() => {
+  if (props.editPosition) {
+    filterType.value = props.filterInfo;
+  }
+
+  if (props.chosenCondition) {
+    newPosition.chosenCondition = props.chosenCondition;
+  }
+});
 </script>
 
 <template>
@@ -112,12 +127,13 @@ const confirmCondition = () => {
               v-model="filterType"
               @change="searchFilter = false"
               :options="options"
+              :value="filterType"
               :identifier="identifier"
             ></VtmnSelect>
           </div>
           <div class="searchModal vtmn-relative vtmn-flex vtmn-w-full">
             <VtmnSearch
-              :disabled="props.activeSearch ? props.activeSearch : activeSearch"
+              :disabled="searchFilter"
               v-model="searchedCondition"
               class="vtmn-m-0"
               :class="searchError ? ' inputError' : ''"
@@ -139,11 +155,7 @@ const confirmCondition = () => {
         </div>
 
         <div
-          v-if="
-            chosenCondition.length > 0
-              ? chosenCondition.length > 0
-              : newPosition.chosenCondition.length > 0
-          "
+          v-if="newPosition.chosenCondition.length > 0"
           class="selectedConditions"
         >
           <p class="filterType">
@@ -157,14 +169,16 @@ const confirmCondition = () => {
           </p>
           <div class="vtmn-flex vtmn-float-left vtmn-my-4 vtmn-w-full">
             <div
-              v-for="(conditions, index) in newPosition.chosenCondition.length >
-              0
-                ? newPosition.chosenCondition
-                : chosenCondition"
+              v-for="(conditions, index) in newPosition.chosenCondition"
               class="vtmn-mr-4"
               :key="index"
             >
-              <VtmnChip variant="input" size="medium" selected>
+              <VtmnChip
+                variant="input"
+                size="medium"
+                selected
+                @cancel="removeCondition(conditions)"
+              >
                 {{ conditions }}
               </VtmnChip>
             </div>
@@ -173,28 +187,21 @@ const confirmCondition = () => {
       </template>
 
       <template #footer>
-          <VtmnButton
-            size="medium"
-            class="cancelModalBtn vtmn-mx-2"
-            @click="$emit('closeModal')"
-            >Cancel</VtmnButton
-          >
-          <VtmnButton
-            size="medium"
-            class="confirmModalBtn vtmn-mx-2"
-            :class="
-              chosenCondition.length || newPosition.chosenCondition.length
-                ? ' active'
-                : ''
-            "
-            @click="confirmCondition"
-            :disabled="
-              !chosenCondition.length === 0 ||
-              !newPosition.chosenCondition.length === 0
-            "
-          >
-            Confirm
-          </VtmnButton>
+        <VtmnButton
+          size="medium"
+          class="cancelModalBtn vtmn-mx-2"
+          @click="$emit('closeModal')"
+          >Cancel</VtmnButton
+        >
+        <VtmnButton
+          size="medium"
+          class="confirmModalBtn vtmn-mx-2"
+          :class="newPosition.chosenCondition.length ? ' active' : ''"
+          @click="confirmCondition"
+          :disabled="!newPosition.chosenCondition.length === 0"
+        >
+          Confirm
+        </VtmnButton>
       </template>
     </modal-form>
   </Teleport>

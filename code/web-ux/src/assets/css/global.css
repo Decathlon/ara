@@ -117,8 +117,19 @@ body {
     cursor: pointer;
 }
 
-.lineCountry.lineOpen i {
+.lineCountry.lineOpen span {
     transform: rotate(90deg); transition: 200ms
+}
+
+.hideLines td div {
+    max-height: 0px;
+    overflow: hidden;
+    transition: max-height 0.3s;
+  }
+
+.hideLines.active td div {
+    max-height: 100px;
+    transition: max-height 0.3s;
 }
 
 .cellsCard .individualCell {
@@ -216,24 +227,6 @@ body {
     cursor: pointer;
 }
 
-.modalTitle {
-    color: var(--vtmn-semantic-color_content-active);
-}
-
-.modalContent {
-    overflow-y: visible;
-}
-
-.modalDesc {
-    color: var(--vtmn-semantic-color_content-tertiary);
-}
-
-.cancelModalBtn, .cancelModalBtn:hover, .confirmModalBtn {
-    background-color: var(--vtmn-semantic-color_background-tertiary) !important;
-    color: var(--vtmn-semantic-color_content-inactive) !important;
-}
-
-.confirmModalBtn.active {
-    background-color: var(--vtmn-semantic-color_content-positive)!important;
-    color: var(--vtmn-semantic-color_content-action-reversed)!important;
+.cardSaveToast {
+    background-color: var(--vtmn-semantic-color_content-positive);
 }

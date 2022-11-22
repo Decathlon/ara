@@ -6,8 +6,8 @@ import App from "./App.vue";
 // VITAMIN CSS
 import "@vtmn/css/dist/index.css";
 import "@vtmn/vue/dist/style.css";
-import "@vtmn/css-utilities/dist/index.css"; /* import Vitamin utilities CSS classes (required) */
-import "@vtmn/css-chip/dist/index.css";
+// import "@vtmn/css-utilities/dist/index.css"; /* import Vitamin utilities CSS classes (required) */
+import "@vtmn/css-chip";
 
 // VITAMIN FONT
 import "typeface-roboto";
