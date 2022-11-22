@@ -42,7 +42,11 @@ const props = defineProps(["cardInfo"]);
               tabindex="0"
               aria-pressed="false"
             >
-              {{ props.cardInfo ? "+" + (props.cardInfo.conditions.length - 3) : "" }}
+              {{
+                props.cardInfo
+                  ? "+" + (props.cardInfo.conditions.length - 3)
+                  : ""
+              }}
             </div>
           </div>
 

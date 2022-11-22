@@ -1,5 +1,5 @@
 <script setup>
-import cardsPosition from "../components/QualityCards/cardsPosition.vue";
+import cardsPosition from "../components/QualityCards/CardsPosition.vue";
 import { ref, onUpdated } from "vue";
 import { useRoute } from "vue-router";
 

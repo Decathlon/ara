@@ -1,15 +1,17 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Login from "../components/loginForm.vue";
-import Dashboard from "../views/dashboardHome.vue";
-import cardDetails from "../views/qualityDetails.vue";
-import Issues from "../views/issuesPart.vue";
-import Features from "../views/features.vue";
-import qualitySettings from "../views/qualitySettings.vue";
-import qualityPositions from "../views/qualityPositions.vue";
-import qualityConfiguration from "../views/qualityConfiguration.vue";
-import qualityCompletion from "../views/qualityCompletion.vue";
-import Projects from "../views/projectsPart.vue";
-import FAQ from "../views/faqPart.vue";
+import Login from "../components/LoginForm.vue";
+import Dashboard from "../views/DashboardHome.vue";
+import cardDetails from "../views/QualityDetails.vue";
+import Issues from "../views/IssuesPart.vue";
+import Features from "../views/FeaturesPart.vue";
+import qualitySettings from "../views/QualitySettings.vue";
+import qualityPositions from "../views/QualityPositions.vue";
+import qualityConfiguration from "../views/QualityConfiguration.vue";
+import qualityCompletion from "../views/QualityCompletion.vue";
+import Projects from "../views/ProjectsPart.vue";
+import FAQ from "../views/FaqPart.vue";
+import Labels from "../views/LabelsPart.vue";
+import Regressions from "../views/RegressionsPart.vue";
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
@@ -72,6 +74,16 @@ const router = createRouter({
       path: "/faq",
       name: "faq",
       component: FAQ,
+    },
+    {
+      path: "/labels",
+      name: "labels",
+      component: Labels,
+    },
+    {
+      path: "/regressions",
+      name: "regressions",
+      component: Regressions,
     },
   ],
 });

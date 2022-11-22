@@ -1,10 +1,11 @@
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, defineEmits } from "vue";
 
 let openedMenu = ref(false);
+const emit = defineEmits(["opened-menu"]);
 
 watch(openedMenu, () => {
-  this.$emit("opened-menu");
+  emit("opened-menu");
 });
 </script>
 
@@ -14,7 +15,7 @@ watch(openedMenu, () => {
       <button
         class="menu-btn vtmn-btn vtmn-btn--icon-alone vtmn-btn_variant--ghost vtmn-pl-0"
         aria-label="Go to menu"
-        @click="openedMenu.value = !openedMenu.value"
+        @click="openedMenu = !openedMenu"
       >
         <span class="vtmx-menu-line" role="presentation"></span>
       </button>

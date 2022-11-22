@@ -7,9 +7,18 @@ import {
   VtmnSearch,
   VtmnChip,
 } from "@vtmn/vue";
-import modalForm from "./modalForm.vue";
-import { ref, reactive, onMounted, watch, computed } from "vue";
+import {
+  ref,
+  reactive,
+  onMounted,
+  watch,
+  computed,
+  defineAsyncComponent,
+} from "vue";
 
+const modalForm = defineAsyncComponent(
+  () => import("../components/Modal/TheModalForm.vue")
+);
 let showModal = ref(false);
 let searchList = ref(false);
 const execType = reactive([

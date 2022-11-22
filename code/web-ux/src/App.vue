@@ -1,6 +1,6 @@
 <script>
-import headerNav from "./components/Nav/headerNav.vue";
-import sideNav from "./components/Nav/sideNav.vue";
+import headerNav from "./components/Nav/TheHeader.vue";
+import sideNav from "./components/Nav/TheSideNav.vue";
 
 export default {
   name: "App",

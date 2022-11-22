@@ -1,7 +1,7 @@
 <script setup>
 import { VtmnSearch, VtmnChip } from "@vtmn/vue";
-import executionsModal from "../components/Modal/executionsModal.vue";
-import scenarioCard from "../components/QualityCards/scenarioCard.vue";
+import executionsModal from "../views/ExecutionsModal.vue";
+import scenarioCard from "../components/QualityCards/ScenarioCard.vue";
 import { ref, computed } from "vue";
 
 let appliedFilters = ref(["1", "2", "3"]);

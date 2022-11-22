@@ -1,11 +1,12 @@
 <script setup>
 import { VtmnChip, VtmnIcon } from "@vtmn/vue";
-import cardScenarios from "../../views/scenariosList.vue";
-import cardDetails from "./cardDetails.vue";
-import { defineProps, defineEmits } from "vue";
+import cardDetails from "./CardDetails.vue";
+import { defineProps, defineEmits, defineAsyncComponent } from "vue";
 
+const cardScenarios = defineAsyncComponent(() =>
+  import("../../views/ScenariosList.vue")
+);
 const props = defineProps(["cardInfo", "cardValue", "cardActive"]);
-
 const emit = defineEmits(["cardSelected"]);
 
 const showSelectedCard = (data) => {
@@ -38,7 +39,7 @@ const showSelectedCard = (data) => {
             </span>
           </div>
           <div
-            class="cardBranch vtmn-flex vtmn-justify-evenly vtmn-w-full vtmn-mt-6 vtmn-mb-8"
+            class="cardBranch vtmn-flex vtmn-justify-evenly vtmn-w-full vtmn-mb-6"
           >
             <div
               v-if="!props.cardActive"

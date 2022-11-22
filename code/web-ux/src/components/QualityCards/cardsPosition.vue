@@ -1,17 +1,12 @@
 <script setup>
 import { VtmnButton, VtmnToast, VtmnIcon } from "@vtmn/vue";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, defineAsyncComponent } from "vue";
 import { useCardsPositionsStore } from "../../stores/cardsPositions";
-import positionsModal from "../../views/positionsModal.vue";
 
+const positionsModal = defineAsyncComponent(() =>
+  import("../../views/PositionsModal.vue")
+);
 const cardsPositionsStore = useCardsPositionsStore();
-let filterInfo = ref(null);
-let activeSearch = ref(null);
-let searchedCondition = ref("");
-let positionSelected = ref(0);
-let chosenCondition = ref([]);
-let counter = ref(1);
-let editPosition = ref(false);
 const selectedCondition = {
   1: {},
   2: {},
@@ -21,6 +16,13 @@ const selectedCondition = {
   6: {},
 };
 const storedConditions = [];
+let filterInfo = ref(null);
+let activeSearch = ref(null);
+let searchedCondition = ref("");
+let positionSelected = ref(0);
+let chosenCondition = ref([]);
+let counter = ref(1);
+let editPosition = ref(false);
 let showToast = ref(false);
 
 let showConfigureModal = ref(false);

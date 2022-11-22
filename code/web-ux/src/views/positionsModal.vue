@@ -2,7 +2,7 @@
 import { VtmnButton, VtmnSelect, VtmnSearch, VtmnChip } from "@vtmn/vue";
 import { ref, defineEmits, defineProps, onUpdated, reactive } from "vue";
 import { useCardsPositionsStore } from "../stores/cardsPositions";
-import modalForm from "../components/Modal/modalForm.vue";
+import modalForm from "../components/Modal/TheModalForm.vue";
 
 const cardsPositionsStore = useCardsPositionsStore();
 const identifier = "vtmnSelect";

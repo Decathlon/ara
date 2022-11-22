@@ -1,12 +1,12 @@
 <script setup>
 import { VtmnButton, VtmnIcon } from "@vtmn/vue";
-import { ref, defineEmits, defineProps } from "vue";
-import cardProgressBar from "./cardProgressBar.vue";
+import { ref, defineEmits, defineProps, defineAsyncComponent } from "vue";
 
+const cardProgressBar = defineAsyncComponent(() =>
+  import("./CardProgressBar.vue")
+);
 const props = defineProps(["cardInfo", "cardValue", "cardActive"]);
-
 const sanityGroup = ref(["Sanity Check", "High", "Medium", "Global"]);
-
 const emit = defineEmits(["changeHeight", "cardSelected"]);
 
 let showFirstLines = ref(false);
