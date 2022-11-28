@@ -12,8 +12,11 @@ import Projects from "../views/ProjectsPart.vue";
 import FAQ from "../views/FaqPart.vue";
 import Labels from "../views/LabelsPart.vue";
 import Regressions from "../views/RegressionsPart.vue";
+import featuresSettings from "../views/FeaturesSettings.vue";
+import notificationSettings from "../views/NotificationSettings.vue";
 
 const router = createRouter({
+  linkActiveClass: "active",
   history: createWebHistory(process.env.BASE_URL),
   routes: [
     {
@@ -43,28 +46,43 @@ const router = createRouter({
     },
     {
       path: "/settings",
-      name: "settings",
       component: qualitySettings,
-      redirect: "/settings/qualityconfiguration",
+      redirect: "/settings/qualitysettings",
       children: [
         {
-          path: "qualityconfiguration",
-          name: "qualityConfiguration",
-          component: qualityConfiguration,
+          path: "qualitysettings",
+          name: "qualitySettings",
+          redirect: "/settings/qualitysettings/qualityconfiguration",
+          children: [
+            {
+              path: "qualityconfiguration",
+              name: "qualityConfiguration",
+              component: qualityConfiguration,
+            },
+            {
+              path: "qualitypositions",
+              name: "qualityPositions",
+              component: qualityPositions,
+            },
+            {
+              path: "qualitycompletion",
+              name: "qualityCompletion",
+              component: qualityCompletion,
+            },
+          ],
         },
         {
-          path: "qualitypositions",
-          name: "qualityPositions",
-          component: qualityPositions,
+          path: "featuressettings",
+          name: "featuresSettings",
+          component: featuresSettings,
         },
         {
-          path: "completion&success",
-          name: "qualityCompletion",
-          component: qualityCompletion,
+          path: "notificationsettings",
+          name: "notificationSettings",
+          component: notificationSettings,
         },
       ],
     },
-
     {
       path: "/projects",
       name: "projects",

@@ -1,0 +1,1 @@
+<template>Notification settings</template>

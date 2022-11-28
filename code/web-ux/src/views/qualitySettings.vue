@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, onUpdated } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
@@ -12,18 +12,27 @@ const getPosition = () => {
   widthTabPosition.value = event.target.getBoundingClientRect().width + "px";
 };
 
-const selectedTab = computed(() => route.name);
+const selectedTab = computed(() => route.fullPath);
 
 onMounted(() => {
   xTabPosition.value =
-    document.getElementsByClassName(" activeTab")[0].getBoundingClientRect().x +
+    document.getElementsByClassName("activeTab")[0].getBoundingClientRect().x +
     "px";
   widthTabPosition.value =
-    document.getElementsByClassName(" activeTab")[0].getBoundingClientRect()
+    document.getElementsByClassName("activeTab")[0].getBoundingClientRect()
       .width + "px";
   heightTabPosition.value =
-    document.getElementsByClassName(" activeTab")[0].getBoundingClientRect()
+    document.getElementsByClassName("activeTab")[0].getBoundingClientRect()
       .height + "px";
+});
+
+onUpdated(() => {
+  xTabPosition.value =
+    document.getElementsByClassName("activeTab")[0].getBoundingClientRect().x +
+    "px";
+  widthTabPosition.value =
+    document.getElementsByClassName("activeTab")[0].getBoundingClientRect()
+      .width + "px";
 });
 </script>
 
@@ -37,12 +46,10 @@ onMounted(() => {
       >
         <ul class="settingsTab vtmn-ml-10">
           <router-link
-            to="/settings/qualityconfiguration"
+            to="/settings/qualitysettings/qualityconfiguration"
             :class="
-              selectedTab === 'qualityConfiguration'
-                ? 'activeTab'
-                : selectedTab !== 'qualityConfiguration' &&
-                  selectedTab === 'settings'
+              selectedTab.includes('qualityconfiguration') ||
+              route.fullPath === '/settings'
                 ? 'activeTab'
                 : ''
             "
@@ -51,15 +58,17 @@ onMounted(() => {
             <li class="vtmn-mx-6">Cards configuration</li>
           </router-link>
           <router-link
-            to="/settings/qualitypositions"
-            :class="selectedTab === 'qualityPositions' ? 'activeTab' : ''"
+            to="/settings/qualitysettings/qualitypositions"
+            :class="selectedTab.includes('qualitypositions') ? 'activeTab' : ''"
             @click="getPosition()"
           >
             <li class="vtmn-mx-6">Cards position</li>
           </router-link>
           <router-link
-            to="/settings/completion&success"
-            :class="selectedTab === 'qualityCompletion' ? 'activeTab' : ''"
+            to="/settings/qualitysettings/qualitycompletion"
+            :class="
+              selectedTab.includes('qualitycompletion') ? 'activeTab' : ''
+            "
             @click="getPosition()"
           >
             <li class="vtmn-mx-6">Completion and success</li>

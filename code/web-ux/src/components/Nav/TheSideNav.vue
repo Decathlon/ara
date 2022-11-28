@@ -1,8 +1,9 @@
 <script setup>
 import { ref, reactive, defineProps } from "vue";
+import { useRoute } from "vue-router";
 
+const route = useRoute();
 const props = defineProps(["sideOpen"]);
-
 const menuElements = reactive([
   { name: "Quality validation" },
   { name: "Issues" },
@@ -20,6 +21,7 @@ const menuElements = reactive([
   { name: "Regressions" },
   { name: "FAQ" },
 ]);
+let subActive = ref(false);
 let showSub = ref(false);
 </script>
 
@@ -38,13 +40,18 @@ let showSub = ref(false);
         :key="index"
       >
         <router-link
-          active-class="active"
           @click="
             item.name === 'Settings' && props.sideOpen
-              ? (showSub = !showSub.value)
+              ? (showSub = !showSub)
               : (showSub = false)
           "
-          :to="{ path: `/${item.name.replace(/\s+/g, '-').toLowerCase()}` }"
+          :to="
+            item.name != 'Settings'
+              ? { path: `/${item.name.replace(/\s+/g, '-').toLowerCase()}` }
+              : route.path.includes('settings')
+              ? { path: route.path }
+              : { path: `/${item.name.replace(/\s+/g, '-').toLowerCase()}` }
+          "
           :class="showSub ? 'showSub' : 'hideSub'"
           class="icon-tile vtmn-flex vtmn-flex-1 vtmn-flex-col"
         >
@@ -82,16 +89,33 @@ let showSub = ref(false);
               :class="item.name === 'Settings' ? 'vtmx-chevron-up-line' : ''"
             ></span>
           </div>
-
           <ul
             v-if="item.name === 'Settings' && props.sideOpen"
             class="vtmn-typo_text-2 vtmn-flex-col vtmn-flex"
           >
-            <router-link to="/settings/qualitypositions">
+            <router-link
+              active-class="vtmn-font-bold"
+              @click="subActive = true"
+              :to="{ name: 'qualityConfiguration' }"
+            >
               <li class="vtmn-my-2 vtmn-justify-center">Quality settings</li>
             </router-link>
-            <li class="vtmn-my-2 vtmn-justify-center">Feature settings</li>
-            <li class="vtmn-my-2 vtmn-justify-center">Notification settings</li>
+            <router-link
+              active-class="vtmn-font-bold"
+              @click="subActive = true"
+              :to="{ name: 'featuresSettings' }"
+            >
+              <li class="vtmn-my-2 vtmn-justify-center">Feature settings</li>
+            </router-link>
+            <router-link
+              active-class="vtmn-font-bold"
+              @click="subActive = true"
+              :to="{ name: 'notificationSettings' }"
+            >
+              <li class="vtmn-my-2 vtmn-justify-center">
+                Notification settings
+              </li>
+            </router-link>
           </ul>
         </router-link>
       </li>

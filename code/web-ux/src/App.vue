@@ -1,27 +1,12 @@
-<script>
+<script setup>
 import headerNav from "./components/Nav/TheHeader.vue";
 import sideNav from "./components/Nav/TheSideNav.vue";
+import { ref } from "vue";
 
-export default {
-  name: "App",
+let sideOpen = ref(false);
 
-  data() {
-    return {
-      signedIn: true,
-      sideOpen: false,
-    };
-  },
-
-  components: {
-    headerNav,
-    sideNav,
-  },
-
-  methods: {
-    openSidemenu() {
-      this.sideOpen = !this.sideOpen;
-    },
-  },
+const openSidemenu = () => {
+  sideOpen.value = !sideOpen.value;
 };
 </script>
 
