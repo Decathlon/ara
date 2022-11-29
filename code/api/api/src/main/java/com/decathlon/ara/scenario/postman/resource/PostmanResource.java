@@ -17,29 +17,24 @@
 
 package com.decathlon.ara.scenario.postman.resource;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
-
-import java.io.File;
-import java.io.IOException;
-
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.scenario.postman.upload.PostmanScenarioUploader;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.web.rest.util.HeaderUtil;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+
+import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 
 @RestController
 @RequestMapping(PostmanResource.PATH)
@@ -48,6 +43,7 @@ public class PostmanResource {
     private static final Logger LOG = LoggerFactory.getLogger(PostmanResource.class);
 
     static final String PATH = PROJECT_API_PATH + "/postman";
+    public static final String PATHS = PATH + "/**";
 
     private final ProjectService projectService;
 

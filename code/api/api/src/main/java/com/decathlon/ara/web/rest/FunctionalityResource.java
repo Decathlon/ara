@@ -17,32 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
-
-import javax.validation.Valid;
-
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.coverage.CoverageService;
 import com.decathlon.ara.service.FunctionalityService;
@@ -59,6 +33,21 @@ import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.web.rest.util.HeaderUtil;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.validation.Valid;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+
+import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 
 /**
  * REST controller for managing Functionalities.
@@ -68,6 +57,12 @@ import com.decathlon.ara.web.rest.util.ResponseUtil;
 public class FunctionalityResource {
 
     static final String PATH = PROJECT_API_PATH + "/functionalities";
+    public static final String PATHS = PATH + "/**";
+
+    private static final String EXPORT = "/export";
+    private static final String IMPORT = "/import";
+    public static final String EXPORT_PATH = PATH + EXPORT;
+
     private static final String NAME = Entities.FUNCTIONALITY;
 
     private final FunctionalityService service;
@@ -89,7 +84,7 @@ public class FunctionalityResource {
      * @param projectCode the code of the project in which to work
      * @return the ResponseEntity with status 200 (OK) and the tree of entities in body
      */
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity<List<FunctionalityWithChildrenDTO>> getAll(@PathVariable String projectCode) {
         try {
             return ResponseEntity.ok().body(service.findAllAsTree(projectService.toId(projectCode)));
@@ -134,7 +129,7 @@ public class FunctionalityResource {
      * @return the ResponseEntity with status 201 (Created) and with body the new entity, or with status 400 (Bad Request) if the entity has
      * already an ID
      */
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity<FunctionalityDTO> create(@PathVariable String projectCode, @Valid @RequestBody NewFunctionalityDTO newDto) {
         if (newDto.getFunctionality().getId() != null) {
             return ResponseEntity.badRequest().headers(HeaderUtil.idMustBeEmpty(NAME)).build();
@@ -246,7 +241,7 @@ public class FunctionalityResource {
      * @param projectCode the current project code
      * @return the JSON of all the exporters available.
      */
-    @RequestMapping(method = RequestMethod.OPTIONS, path = "/export")
+    @RequestMapping(method = RequestMethod.OPTIONS, path = EXPORT)
     public ResponseEntity<List<ExporterInfoDTO>> getExportOptions(@PathVariable String projectCode) {
         return ResponseEntity.ok().body(service.listAvailableExporters());
     }
@@ -259,7 +254,7 @@ public class FunctionalityResource {
      * @param exportType the wanted export format
      * @return a streamable byte array which represents the exported functionalities for download.
      */
-    @GetMapping("/export")
+    @GetMapping(EXPORT)
     public ResponseEntity<Resource> export(@PathVariable String projectCode, @RequestParam List<Long> functionalities, @RequestParam String exportType, @RequestParam Map<String, String> additionalParams) {
         try {
             // Remove the already known params catched by the global mapping
@@ -282,7 +277,7 @@ public class FunctionalityResource {
      * @param jsonFunctionalities the json which represents the functionalities (ARA-format).
      * @return 200 OK if the import finished in success.
      */
-    @PostMapping("/import")
+    @PostMapping(IMPORT)
     public ResponseEntity<Resource> importFunctionalities(@PathVariable String projectCode, @RequestParam("functionalities") MultipartFile jsonFunctionalities) {
         try {
             service.importJSONFunctionalities(projectCode, new String(jsonFunctionalities.getBytes(), StandardCharsets.UTF_8));

@@ -17,22 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
-
-import java.util.List;
-
-import javax.validation.Valid;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.domain.enumeration.Technology;
@@ -44,6 +28,15 @@ import com.decathlon.ara.service.dto.setting.SettingValueDTO;
 import com.decathlon.ara.service.dto.setting.TechnologySettingGroupDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.List;
+
+import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 
 /**
  * REST controller for managing Settings.
@@ -56,6 +49,7 @@ public class SettingResource {
 
     private static final String NAME = Entities.SETTING;
     static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
+    public static final String PATHS = PATH + "/**";
 
     private final SettingService settingService;
 
@@ -105,7 +99,7 @@ public class SettingResource {
      * @return the ResponseEntity with status 200 (OK) containing the entities in the body
      * @throws NotFoundException if the project is unknown
      */
-    @GetMapping("")
+    @GetMapping
     public List<SettingGroupDTO> getAll(@PathVariable String projectCode) throws NotFoundException {
         return settingService.getTree(projectService.toId(projectCode));
     }

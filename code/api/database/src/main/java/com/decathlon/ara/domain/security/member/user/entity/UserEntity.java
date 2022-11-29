@@ -108,8 +108,8 @@ public class UserEntity {
         }
     }
 
-    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<UserEntityRoleOnProject> rolesOnProjectWhenScopedUser;
+    @OneToMany(mappedBy = "userEntity", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<UserEntityRoleOnProject> rolesOnProjectWhenScopedUser = new ArrayList<>();
 
     public UserEntity() {
         this.profile = UserEntityProfile.SCOPED_USER;

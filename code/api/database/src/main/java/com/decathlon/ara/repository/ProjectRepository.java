@@ -41,6 +41,10 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     Project findByDefaultAtStartup(boolean defaultAtStartup);
 
-    List<Project> findByCodeIn(Collection<String> codes);
+    List<Project> findByCodeInOrderByName(Collection<String> codes);
+
+    boolean existsByCode(String code);
+
+    void deleteByCode(String code);
 
 }

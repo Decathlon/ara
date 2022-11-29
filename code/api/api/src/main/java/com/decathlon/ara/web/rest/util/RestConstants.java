@@ -25,6 +25,8 @@ public final class RestConstants {
     }
 
     public static final String AUTH_PATH = "/oauth";
+    private static final String ACTUATOR_PATH = "/actuator";
+    public static final String ACTUATOR_PATHS = ACTUATOR_PATH + "/**";
 
     /**
      * The root path of all REST API resources.

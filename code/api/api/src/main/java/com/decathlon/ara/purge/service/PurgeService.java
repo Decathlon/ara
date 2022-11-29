@@ -1,10 +1,13 @@
 package com.decathlon.ara.purge.service;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.stream.IntStream;
-
+import com.decathlon.ara.domain.Execution;
+import com.decathlon.ara.repository.ExecutionRepository;
+import com.decathlon.ara.repository.ProjectRepository;
+import com.decathlon.ara.service.ProjectService;
+import com.decathlon.ara.service.SettingService;
+import com.decathlon.ara.service.exception.NotFoundException;
+import com.decathlon.ara.service.support.Settings;
+import com.decathlon.ara.service.util.DateService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,13 +15,10 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.decathlon.ara.domain.Execution;
-import com.decathlon.ara.repository.ExecutionRepository;
-import com.decathlon.ara.service.ProjectService;
-import com.decathlon.ara.service.SettingService;
-import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.service.support.Settings;
-import com.decathlon.ara.service.util.DateService;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.stream.IntStream;
 
 @Service
 @Transactional
@@ -30,14 +30,22 @@ public class PurgeService {
 
     private final ProjectService projectService;
 
+    private final ProjectRepository projectRepository;
+
     private final SettingService settingService;
 
     private final DateService dateService;
 
-    public PurgeService(ExecutionRepository executionRepository, ProjectService projectService,
-            SettingService settingService, DateService dateService) {
+    public PurgeService(
+            ExecutionRepository executionRepository,
+            ProjectService projectService,
+            ProjectRepository projectRepository,
+            SettingService settingService,
+            DateService dateService
+    ) {
         this.executionRepository = executionRepository;
         this.projectService = projectService;
+        this.projectRepository = projectRepository;
         this.settingService = settingService;
         this.dateService = dateService;
     }
@@ -116,7 +124,7 @@ public class PurgeService {
      * Purge all projects executions
      */
     public void purgeAllProjects() {
-        var projects = projectService.findAll();
+        var projects = projectRepository.findAllByOrderByName();
         var projectsSize = projects.size();
         IntStream
                 .range(0, projectsSize)

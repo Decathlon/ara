@@ -48,4 +48,6 @@ public final class Entities {
     public static final String TEAM = "team";
     public static final String TYPE = "type";
 
+    public static final String SECURITY = "security";
+
 }

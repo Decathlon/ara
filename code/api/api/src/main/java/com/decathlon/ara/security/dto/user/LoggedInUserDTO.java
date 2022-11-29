@@ -17,46 +17,81 @@
 
 package com.decathlon.ara.security.dto.user;
 
-public class AuthenticationUserDetailsDTO {
+import java.util.List;
 
-    private String id;
-
-    private String name;
+public class LoggedInUserDTO {
 
     private String login;
 
+    private String firstName;
+
+    private String lastName;
+
     private String email;
 
-    private String picture;
+    private String pictureUrl;
 
-    public AuthenticationUserDetailsDTO() {
-    }
+    private String profile;
 
-    public AuthenticationUserDetailsDTO(String id, String name, String login, String email, String picture) {
-        this.id = id;
-        this.name = name;
+    private List<LoggedInUserScopeDTO> scopes;
+
+    public LoggedInUserDTO(String login) {
         this.login = login;
-        this.email = email;
-        this.picture = picture;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public String getLogin() {
         return login;
     }
 
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
     public String getEmail() {
         return email;
     }
 
-    public String getPicture() {
-        return picture;
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPictureUrl() {
+        return pictureUrl;
+    }
+
+    public void setPictureUrl(String pictureUrl) {
+        this.pictureUrl = pictureUrl;
+    }
+
+    public String getProfile() {
+        return profile;
+    }
+
+    public void setProfile(String profile) {
+        this.profile = profile;
+    }
+
+    public List<LoggedInUserScopeDTO> getScopes() {
+        return scopes;
+    }
+
+    public void setScopes(List<LoggedInUserScopeDTO> scopes) {
+        this.scopes = scopes;
     }
 }

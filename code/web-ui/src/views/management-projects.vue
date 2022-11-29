@@ -75,14 +75,14 @@
           {
             code: 'id',
             type: 'hidden',
-            newValue: -1,
-            primaryKey: true
+            newValue: -1
           },
           {
             code: 'code',
             name: 'Code',
             columnTitle: 'Code',
             type: 'string',
+            primaryKey: true,
             required: true,
             createOnly: true,
             createOnlyBecause: 'the code ends-up in URLs of ARA, and people should be allowed to bookmark fixed URLs or copy/past them in other services (defect tracking system, wiki, etc.)',

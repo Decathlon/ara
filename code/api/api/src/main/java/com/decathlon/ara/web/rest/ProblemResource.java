@@ -17,37 +17,25 @@
 
 package com.decathlon.ara.web.rest;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
-
-import javax.validation.Valid;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.ProblemService;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
-import com.decathlon.ara.service.dto.problem.ProblemDTO;
-import com.decathlon.ara.service.dto.problem.ProblemFilterDTO;
-import com.decathlon.ara.service.dto.problem.ProblemWithAggregateDTO;
-import com.decathlon.ara.service.dto.problem.ProblemWithPatternsAndAggregateTDO;
-import com.decathlon.ara.service.dto.problem.ProblemWithPatternsDTO;
+import com.decathlon.ara.service.dto.problem.*;
 import com.decathlon.ara.service.dto.problempattern.ProblemPatternDTO;
 import com.decathlon.ara.service.dto.response.PickUpPatternDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.web.rest.util.HeaderUtil;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+
+import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 
 /**
  * REST controller for managing Problems.
@@ -58,6 +46,10 @@ public class ProblemResource {
 
     private static final String NAME = Entities.PROBLEM;
     static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
+    public static final String PATHS = PATH + "/**";
+
+    private static final String FILTER = "/filter";
+    public static final String FILTER_PATH = PATH + FILTER;
 
     private final ProblemService service;
 
@@ -76,7 +68,7 @@ public class ProblemResource {
      * @return the ResponseEntity with status 201 (Created) and with body the new entity, or with status 400 (Bad Request) if the entity has
      * already an ID
      */
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity<ProblemWithPatternsDTO> create(@PathVariable String projectCode, @Valid @RequestBody ProblemWithPatternsDTO dtoToCreate) {
         if (dtoToCreate.getId() != null) {
             return ResponseEntity.badRequest().headers(HeaderUtil.idMustBeEmpty(NAME)).build();
@@ -152,7 +144,7 @@ public class ProblemResource {
      * @param pageable the pagination information
      * @return the ResponseEntity with status 200 (OK) and with body containing a page of open problems
      */
-    @PostMapping("/filter")
+    @PostMapping(FILTER)
     public ResponseEntity<Page<ProblemWithAggregateDTO>> getMatchingOnes(@PathVariable String projectCode, @RequestBody ProblemFilterDTO filter, Pageable pageable) {
         try {
             return ResponseEntity.ok().body(service.findMatchingProblems(projectService.toId(projectCode), filter, pageable));

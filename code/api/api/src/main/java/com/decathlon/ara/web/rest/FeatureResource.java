@@ -47,6 +47,7 @@ public class FeatureResource {
      * The full path to this Rest resource from the basename.
      */
     static final String PATH = RestConstants.API_PATH + "/" + NAME + "s";
+    public static final String PATHS = PATH + "/**";
 
     private FeatureService featureService;
 
@@ -59,7 +60,7 @@ public class FeatureResource {
      *
      * @return the features available (minimum informations) in a HTTP 200 response.
      */
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity<List<FeatureDTO>> list() {
         return ResponseEntity.ok(this.featureService.listAll());
     }
@@ -128,7 +129,7 @@ public class FeatureResource {
      * @return the list of updated features with their state in a HTTP 200 response, or a HTTP 404 response if at least
      *  one feature code doesn't exists.
      */
-    @PatchMapping("")
+    @PatchMapping
     public ResponseEntity<List<FeatureDTO>> updateAll(@RequestBody List<FeatureDTO> featuresToUpdate) {
         try {
             this.featureService.update(featuresToUpdate);
@@ -175,7 +176,7 @@ public class FeatureResource {
      * @return the list of impacted features with their state in a HTTP 200 response, or a HTTP 404 response if at least
      *  one feature code doesn't exists.
      */
-    @DeleteMapping("")
+    @DeleteMapping
     public ResponseEntity<List<FeatureDTO>> resetAll(@RequestBody List<String> featuresToReset) {
         try {
             this.featureService.reset(featuresToReset);

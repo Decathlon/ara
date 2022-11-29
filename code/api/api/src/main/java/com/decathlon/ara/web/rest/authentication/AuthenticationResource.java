@@ -30,8 +30,12 @@ import org.springframework.web.bind.annotation.RestController;
 import static com.decathlon.ara.web.rest.util.RestConstants.AUTH_PATH;
 
 @RestController
-@RequestMapping(AUTH_PATH)
+@RequestMapping(AuthenticationResource.PATH)
 public class AuthenticationResource {
+
+    static final String PATH = AUTH_PATH;
+
+    public static final String PATHS = PATH + "/**";
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthenticationResource.class);
 

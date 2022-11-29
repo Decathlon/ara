@@ -1,14 +1,12 @@
 package com.decathlon.ara.web.rest.authentication;
 
-import com.decathlon.ara.security.dto.user.AuthenticationUserDetailsDTO;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+import com.decathlon.ara.security.dto.user.LoggedInUserDTO;
+import com.decathlon.ara.security.service.user.UserService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Optional;
 
 import static com.decathlon.ara.web.rest.util.RestConstants.API_PATH;
 
@@ -16,34 +14,19 @@ import static com.decathlon.ara.web.rest.util.RestConstants.API_PATH;
 @RequestMapping(UserResource.PATH)
 public class UserResource {
 
+    private final UserService userService;
+
     static final String PATH = API_PATH + "/user";
+    public static final String PATHS = PATH + "/**";
 
-    @GetMapping("/details")
-    public AuthenticationUserDetailsDTO getUserDetails(
-                                                       @AuthenticationPrincipal OidcUser oidcUser,
-                                                       @AuthenticationPrincipal OAuth2User oauth2User) {
-        if (oidcUser != null) {
-            return new AuthenticationUserDetailsDTO(
-                    oidcUser.getSubject(),
-                    oidcUser.getFullName(),
-                    oidcUser.getName(),
-                    oidcUser.getEmail(),
-                    oidcUser.getPicture());
-        }
-
-        if (oauth2User != null) {
-            return new AuthenticationUserDetailsDTO(
-                    safeStringAttribute(oauth2User, "id"),
-                    safeStringAttribute(oauth2User, "name"),
-                    safeStringAttribute(oauth2User, "login"),
-                    safeStringAttribute(oauth2User, "email"),
-                    safeStringAttribute(oauth2User, "avatar_url"));
-        }
-        return new AuthenticationUserDetailsDTO();
+    public UserResource(UserService userService) {
+        this.userService = userService;
     }
 
-    private String safeStringAttribute(OAuth2User oauth2User, String attribute) {
-        return Optional.ofNullable(oauth2User.getAttribute(attribute)).orElse("").toString();
+    @GetMapping("/details")
+    public ResponseEntity<LoggedInUserDTO> getUserDetails(OAuth2AuthenticationToken authentication) {
+        var user = userService.getLoggedInUserDTO(authentication);
+        return user.map(ResponseEntity::ok).orElse(ResponseEntity.badRequest().build());
     }
 
 }

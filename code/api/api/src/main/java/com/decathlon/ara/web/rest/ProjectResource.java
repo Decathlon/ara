@@ -17,28 +17,21 @@
 
 package com.decathlon.ara.web.rest;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.API_PATH;
-
-import java.util.List;
-
-import javax.validation.Valid;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.decathlon.ara.Entities;
+import com.decathlon.ara.domain.security.member.user.entity.UserEntityRoleOnProject;
+import com.decathlon.ara.security.service.user.UserService;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
-import com.decathlon.ara.service.exception.NotUniqueException;
 import com.decathlon.ara.web.rest.util.HeaderUtil;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.List;
+
+import static com.decathlon.ara.web.rest.util.RestConstants.*;
 
 /**
  * REST controller for managing Projects.
@@ -48,50 +41,56 @@ import com.decathlon.ara.web.rest.util.ResponseUtil;
 public class ProjectResource {
 
     private static final String NAME = Entities.PROJECT;
-    static final String PATH = API_PATH + "/" + NAME + "s";
+    public static final String PATH = API_PATH + "/" + NAME + "s";
+    public static final String CODE_PATH = PROJECT_API_PATH;
 
     private final ProjectService service;
 
-    public ProjectResource(ProjectService service) {
+    private final UserService userService;
+
+    public ProjectResource(ProjectService service, UserService userService) {
         this.service = service;
+        this.userService = userService;
     }
 
     /**
-     * POST to create a new entity.
+     * Create a new project.
+     * The logged-in user becomes admin of the project he just created.
      *
-     * @param dtoToCreate the entity to create
-     * @return the ResponseEntity with status 201 (Created) and with body the new entity, or with status 400 (Bad Request) if the entity has
+     * @param dtoToCreate the project to create
+     * @return the ResponseEntity with status 201 (Created) and with body the new project, or with status 400 (Bad Request) if the project has
      * already an ID
      */
-    @PostMapping("")
-
+    @PostMapping
     public ResponseEntity<ProjectDTO> create(@Valid @RequestBody ProjectDTO dtoToCreate) {
         if (dtoToCreate.getId() != null) {
             return ResponseEntity.badRequest().headers(HeaderUtil.idMustBeEmpty(NAME)).build();
         }
         try {
             ProjectDTO createdDto = service.create(dtoToCreate);
+            userService.updateLoggedInUserProjectScopes(createdDto.getCode(), UserEntityRoleOnProject.ScopedUserRoleOnProject.ADMIN);
             return ResponseEntity
                     .created(HeaderUtil.uri(PATH + "/" + createdDto.getId()))
                     .headers(HeaderUtil.entityCreated(NAME, createdDto.getId()))
                     .body(createdDto);
-        } catch (NotUniqueException e) {
+        } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
         }
     }
 
     /**
-     * PUT to update an existing entity.
+     * Update an existing project.
      *
-     * @param id          the ID of the entity to update
-     * @param dtoToUpdate the entity to update
-     * @return the ResponseEntity with status 200 (OK) and with body the updated entity, or with status 400 (Bad Request) if the entity is not
-     * valid, or with status 500 (Internal Server Error) if the entity couldn't be updated
+     * @param projectCode          the code of the project to update
+     * @param dtoToUpdate the project to update
+     * @return the ResponseEntity with status 200 (OK) and with body the updated project, or with status 400 (Bad Request) if the project is not
+     * valid, or with status 500 (Internal Server Error) if the project couldn't be updated
      */
-    @PutMapping("/{id:[0-9]+}")
-    public ResponseEntity<ProjectDTO> update(@PathVariable Long id, @Valid @RequestBody ProjectDTO dtoToUpdate) {
-        dtoToUpdate.setId(id); // HTTP PUT requires the URL to be the URL of the entity
+    @PutMapping(PROJECT_CODE_REQUEST_PARAMETER)
+    public ResponseEntity<ProjectDTO> update(@PathVariable String projectCode, @Valid @RequestBody ProjectDTO dtoToUpdate) {
         try {
+            var projectId = service.toId(projectCode);
+            dtoToUpdate.setId(projectId); // HTTP PUT requires the URL to be the URL of the entity
             ProjectDTO updatedDto = service.update(dtoToUpdate);
             return ResponseEntity.ok()
                     .headers(HeaderUtil.entityUpdated(NAME, updatedDto.getId()))
@@ -102,13 +101,28 @@ public class ProjectResource {
     }
 
     /**
-     * GET all entities.
+     * Get all projects (within the logged-in user scope).
      *
-     * @return the ResponseEntity with status 200 (OK) and the list of entities in body
+     * @return the ResponseEntity with status 200 (OK) and the list of projects in body
      */
-    @GetMapping("")
+    @GetMapping
     public List<ProjectDTO> getAll() {
         return service.findAll();
+    }
+
+    /**
+     * Delete a specific project
+     * @param projectCode the project to delete
+     * @return a ResponseEntity with 200 status code if the project was successfully deleted
+     */
+    @DeleteMapping(PROJECT_CODE_REQUEST_PARAMETER)
+    public ResponseEntity<Void> deleteProject(@PathVariable String projectCode) {
+        try {
+            service.delete(projectCode);
+        } catch (BadRequestException e) {
+            return ResponseUtil.handle(e);
+        }
+        return ResponseUtil.deleted(NAME, projectCode);
     }
 
 }

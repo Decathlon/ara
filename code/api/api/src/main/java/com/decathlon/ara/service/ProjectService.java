@@ -17,24 +17,27 @@
 
 package com.decathlon.ara.service;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.domain.Project;
 import com.decathlon.ara.domain.RootCause;
+import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
 import com.decathlon.ara.repository.ProjectRepository;
 import com.decathlon.ara.repository.RootCauseRepository;
+import com.decathlon.ara.security.service.AuthorityService;
+import com.decathlon.ara.security.service.user.UserService;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
 import com.decathlon.ara.service.mapper.GenericMapper;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Service for managing Project.
@@ -51,12 +54,24 @@ public class ProjectService {
 
     private final CommunicationService communicationService;
 
-    public ProjectService(ProjectRepository repository, RootCauseRepository rootCauseRepository, GenericMapper mapper,
-            CommunicationService communicationService) {
+    private final AuthorityService authorityService;
+
+    private final UserService userService;
+
+    public ProjectService(
+            ProjectRepository repository,
+            RootCauseRepository rootCauseRepository,
+            GenericMapper mapper,
+            CommunicationService communicationService,
+            AuthorityService authorityService,
+            UserService userService
+    ) {
         this.repository = repository;
         this.rootCauseRepository = rootCauseRepository;
         this.mapper = mapper;
         this.communicationService = communicationService;
+        this.authorityService = authorityService;
+        this.userService = userService;
     }
 
     /**
@@ -72,7 +87,7 @@ public class ProjectService {
         communicationService.initializeProject(entity);
         final ProjectDTO createdProject = mapper.map(repository.save(entity), ProjectDTO.class);
 
-        final long projectId = createdProject.getId().longValue();
+        final long projectId = createdProject.getId();
         rootCauseRepository.saveAll(Arrays.asList(
                 new RootCause(projectId, "Fragile test"),
                 new RootCause(projectId, "Network issue"),
@@ -105,24 +120,40 @@ public class ProjectService {
     }
 
     /**
-     * Get all the entities.
+     * Get all the projects depending on the (logged in) user profile.
      *
-     * @return the list of entities
+     * @return the list of the projects
      */
     @Transactional(readOnly = true)
     public List<ProjectDTO> findAll() {
-        return mapper.mapCollection(repository.findAllByOrderByName(), ProjectDTO.class);
+        var profile = authorityService.getProfile();
+        if (profile.isEmpty()) {
+            return new ArrayList<>();
+        }
+        var superAdmin = UserEntity.UserEntityProfile.SUPER_ADMIN;
+        var auditor = UserEntity.UserEntityProfile.AUDITOR;
+        var userHasFullAccessToProjects = superAdmin.equals(profile.get()) || auditor.equals(profile.get());
+        if (userHasFullAccessToProjects) {
+            return mapper.mapCollection(repository.findAllByOrderByName(), ProjectDTO.class);
+        }
+        var scopedUser = UserEntity.UserEntityProfile.SCOPED_USER;
+        var userHasLimitedAccessToProjects = scopedUser.equals(profile.get());
+        if (userHasLimitedAccessToProjects) {
+            var scopedProjectCodes = authorityService.getScopedProjectCodes();
+            return mapper.mapCollection(repository.findByCodeInOrderByName(scopedProjectCodes), ProjectDTO.class);
+        }
+
+        return new ArrayList<>();
     }
 
-    /**
-     * Get one project by code.
-     *
-     * @param code the code of the entity
-     * @return the entity
-     */
-    @Transactional(readOnly = true)
-    public Optional<ProjectDTO> findOne(String code) {
-        return Optional.ofNullable(repository.findOneByCode(code)).map(project -> mapper.map(project, ProjectDTO.class));
+    public boolean exists(String projectCode) {
+        return repository.existsByCode(projectCode);
+    }
+
+    @Transactional
+    public void delete(String code) throws BadRequestException {
+        repository.deleteByCode(code);
+        userService.updateAuthoritiesFromLoggedInUser();
     }
 
     /**
@@ -137,8 +168,7 @@ public class ProjectService {
         if (project == null) {
             throw new NotFoundException(Messages.NOT_FOUND_PROJECT, Entities.PROJECT);
         }
-        return project.getId().longValue();
-
+        return project.getId();
     }
 
     private void validateBusinessRules(ProjectDTO dto) throws NotUniqueException {

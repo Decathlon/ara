@@ -52,12 +52,12 @@
       <div id="helps">
         <span v-if="isLoggedIn" style="margin-right: 10px" class="user-avatar">
           <Tooltip placement="bottom">
-            <Avatar v-if="user && user.picture" :src="user.picture" size="large" />
+            <Avatar v-if="user && user.pictureUrl" :src="user.pictureUrl" size="large" />
             <Avatar v-else icon="md-person" style="color: #0082c3;background-color: white" size="large"/>
             <div slot="content">
               <p v-if="providerName">Connected via <strong>{{providerName}}</strong></p>
               <p v-if="user && user.login">> Login: <strong>{{user.login}}</strong></p>
-              <p v-if="user && user.name">> Name: <strong>{{user.name}}</strong></p>
+              <p v-if="user && user.firstName && user.lastName">> Name: <strong>{{user.firstName + " " + user.lastName}}</strong></p>
               <p v-if="user && user.email">> Email: <strong>{{user.email}}</strong></p>
             </div>
           </Tooltip>

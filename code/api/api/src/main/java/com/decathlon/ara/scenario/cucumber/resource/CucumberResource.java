@@ -17,23 +17,18 @@
 
 package com.decathlon.ara.scenario.cucumber.resource;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
-
-import javax.validation.Valid;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.decathlon.ara.scenario.cucumber.upload.CucumberScenarioUploader;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+
+import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 
 @RestController
 @RequestMapping(CucumberResource.PATH)
@@ -42,6 +37,7 @@ public class CucumberResource {
     private static final Logger LOG = LoggerFactory.getLogger(CucumberResource.class);
 
     static final String PATH = PROJECT_API_PATH + "/cucumber";
+    public static final String PATHS = PATH + "/**";
 
     private final ProjectService projectService;
 

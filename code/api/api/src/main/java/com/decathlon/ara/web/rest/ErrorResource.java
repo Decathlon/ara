@@ -17,18 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.ErrorService;
 import com.decathlon.ara.service.ProjectService;
@@ -38,6 +26,12 @@ import com.decathlon.ara.service.dto.problempattern.ProblemPatternDTO;
 import com.decathlon.ara.service.dto.response.DistinctStatisticsDTO;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 
 /**
  * REST controller for managing Unidentified Errors.
@@ -48,6 +42,10 @@ public class ErrorResource {
 
     private static final String NAME = Entities.ERROR;
     static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
+    public static final String PATHS = PATH + "/**";
+
+    private static final String MATCHING = "/matching";
+    public static final String MATCHING_PATH = PATH + MATCHING;
 
     private final ErrorService service;
 
@@ -83,7 +81,7 @@ public class ErrorResource {
      * @param pageable    the pagination information
      * @return the ResponseEntity with status 200 (OK) and with body all users
      */
-    @PostMapping("/matching")
+    @PostMapping(MATCHING)
     public ResponseEntity<Page<ErrorWithExecutedScenarioAndRunAndExecutionAndProblemsDTO>> getMatchingErrors(
                                                                                                              @PathVariable String projectCode, @RequestBody ProblemPatternDTO pattern, Pageable pageable) {
         try {

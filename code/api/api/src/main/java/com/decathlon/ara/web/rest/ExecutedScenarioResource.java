@@ -17,20 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
-
-import java.util.List;
-
-import javax.validation.Valid;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.scenario.common.service.ExecutedScenarioService;
 import com.decathlon.ara.service.ProjectService;
@@ -39,6 +25,13 @@ import com.decathlon.ara.service.dto.executedscenario.ExecutedScenarioWithRunAnd
 import com.decathlon.ara.service.dto.request.ExecutedScenarioHistoryInputDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.List;
+
+import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 
 /**
  * REST controller for managing ExecutedScenarios.
@@ -49,6 +42,10 @@ public class ExecutedScenarioResource {
 
     private static final String NAME = Entities.EXECUTED_SCENARIO;
     static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
+    public static final String PATHS = PATH + "/**";
+
+    private static final String HISTORY = "/history";
+    public static final String HISTORY_PATH = PATH + HISTORY;
 
     private final ExecutedScenarioService executedScenarioService;
 
@@ -64,7 +61,7 @@ public class ExecutedScenarioResource {
      * @param input containing the mandatory cucumberId of the scenario to get history, and optional filter parameters
      * @return history of the execution of a scenario by its cucumberId
      */
-    @PostMapping("/history")
+    @PostMapping(HISTORY)
     public ResponseEntity<List<ExecutedScenarioWithRunAndTeamIdsAndExecutionAndErrorsAndProblemsDTO>> getHistory(
                                                                                                                  @PathVariable String projectCode, @Valid @RequestBody ExecutedScenarioHistoryInputDTO input) {
         try {

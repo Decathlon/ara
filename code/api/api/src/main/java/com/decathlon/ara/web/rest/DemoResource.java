@@ -17,22 +17,21 @@
 
 package com.decathlon.ara.web.rest;
 
-import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
-import static com.decathlon.ara.web.rest.util.RestConstants.API_PATH;
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.DemoService;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.web.rest.util.HeaderUtil;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
+import static com.decathlon.ara.web.rest.util.RestConstants.API_PATH;
+import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 
 /**
  * REST controller for managing Cycle Runs.
@@ -42,6 +41,8 @@ import com.decathlon.ara.web.rest.util.ResponseUtil;
 public class DemoResource {
 
     static final String PATH = API_PATH + "/demo";
+
+    public static final String PATHS = PATH + "/**";
 
     private final DemoService service;
 

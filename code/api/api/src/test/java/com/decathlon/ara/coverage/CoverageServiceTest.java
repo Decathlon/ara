@@ -17,9 +17,16 @@
 
 package com.decathlon.ara.coverage;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertThrows;
-import static org.mockito.Mockito.when;
+import com.decathlon.ara.common.NotGonnaHappenException;
+import com.decathlon.ara.domain.Functionality;
+import com.decathlon.ara.repository.FunctionalityRepository;
+import com.decathlon.ara.service.dto.coverage.AxisDTO;
+import com.decathlon.ara.service.dto.coverage.AxisPointDTO;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,17 +34,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import com.decathlon.ara.common.NotGonnaHappenException;
-import com.decathlon.ara.domain.Functionality;
-import com.decathlon.ara.repository.FunctionalityRepository;
-import com.decathlon.ara.service.dto.coverage.AxisDTO;
-import com.decathlon.ara.service.dto.coverage.AxisPointDTO;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CoverageServiceTest {
@@ -210,7 +209,7 @@ class CoverageServiceTest {
 
     // TODO flatIndex_should_throw_MultiArrayIndexOutOfBoundsException
 
-    @Test()
+    @Test
     void indexOf_should_throw_NotGonnaHappenException_on_unknown_id_which_will_assert_false() {
         // GIVEN
         List<AxisPointDTO> points = Collections.emptyList();

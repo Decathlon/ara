@@ -17,23 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
-
-import java.util.List;
-
-import javax.validation.Valid;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.TypeService;
@@ -44,6 +27,14 @@ import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.web.rest.util.HeaderUtil;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.List;
+
+import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 
 /**
  * REST controller for managing Type.
@@ -54,6 +45,7 @@ public class TypeResource {
 
     private static final String NAME = Entities.TYPE;
     static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
+    public static final String PATHS = PATH + "/**";
 
     private final TypeService service;
 
@@ -72,7 +64,7 @@ public class TypeResource {
      * @return the ResponseEntity with status 201 (Created) and with body the new entity, or with status 400 (Bad
      * Request) if an entity with the same code or name already exists
      */
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity<TypeWithSourceCodeDTO> create(@PathVariable String projectCode, @Valid @RequestBody TypeWithSourceCodeDTO dtoToCreate) {
         try {
             TypeWithSourceCodeDTO createdDto = service.create(projectService.toId(projectCode), dtoToCreate);
@@ -116,7 +108,7 @@ public class TypeResource {
      * @param projectCode the code of the project in which to work
      * @return the ResponseEntity with status 200 (OK) and the list of entities in body
      */
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity<List<TypeWithSourceCodeDTO>> getAll(@PathVariable String projectCode) {
         try {
             return ResponseEntity.ok().body(service.findAll(projectService.toId(projectCode)));

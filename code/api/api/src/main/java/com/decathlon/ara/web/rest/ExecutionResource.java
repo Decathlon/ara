@@ -17,40 +17,28 @@
 
 package com.decathlon.ara.web.rest;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
-
-import java.io.IOException;
-import java.util.List;
-
+import com.decathlon.ara.Entities;
+import com.decathlon.ara.domain.enumeration.QualityStatus;
+import com.decathlon.ara.service.ExecutionHistoryService;
+import com.decathlon.ara.service.ExecutionService;
+import com.decathlon.ara.service.ProjectService;
+import com.decathlon.ara.service.dto.execution.*;
+import com.decathlon.ara.service.exception.BadRequestException;
+import com.decathlon.ara.service.exception.NotFoundException;
+import com.decathlon.ara.web.rest.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.decathlon.ara.Entities;
-import com.decathlon.ara.domain.enumeration.QualityStatus;
-import com.decathlon.ara.service.ExecutionHistoryService;
-import com.decathlon.ara.service.ExecutionService;
-import com.decathlon.ara.service.ProjectService;
-import com.decathlon.ara.service.dto.execution.ExecutionCriteriaDTO;
-import com.decathlon.ara.service.dto.execution.ExecutionDTO;
-import com.decathlon.ara.service.dto.execution.ExecutionHistoryPointDTO;
-import com.decathlon.ara.service.dto.execution.ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO;
-import com.decathlon.ara.service.dto.execution.ExecutionWithHandlingCountsDTO;
-import com.decathlon.ara.service.exception.BadRequestException;
-import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.web.rest.util.ResponseUtil;
+import java.io.IOException;
+import java.util.List;
+
+import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 
 /**
  * REST controller for managing Cycle Runs.
@@ -62,7 +50,11 @@ public class ExecutionResource {
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionResource.class);
 
     static final String PATH = PROJECT_API_PATH + "/" + Entities.EXECUTION + "s";
-    private static final String VALIDATION_ERRROR = "validation";
+    public static final String PATHS = PATH + "/**";
+    private static final String FILTER = "/{id:[0-9]+}/filtered";
+    public static final String FILTER_PATH = PATH + FILTER;
+
+    private static final String VALIDATION_ERROR = "validation";
 
     private final ExecutionService service;
 
@@ -84,7 +76,7 @@ public class ExecutionResource {
      * @param pageable    the pagination information
      * @return the ResponseEntity with status 200 (OK) and with body containing a page of entities
      */
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity<Page<ExecutionWithHandlingCountsDTO>> getPage(@PathVariable String projectCode, Pageable pageable) {
         try {
             return ResponseEntity.ok().body(service.findAll(projectService.toId(projectCode), pageable));
@@ -262,7 +254,7 @@ public class ExecutionResource {
             service.uploadExecutionReport(projectId, projectCode, branch, cycle, zipFile);
         } catch (NotFoundException | IllegalArgumentException e) {
             LOG.error("EXECUTION|Some parameters may not be correct");
-            result = ResponseUtil.handle(new BadRequestException(e.getMessage(), Entities.EXECUTION, VALIDATION_ERRROR));
+            result = ResponseUtil.handle(new BadRequestException(e.getMessage(), Entities.EXECUTION, VALIDATION_ERROR));
         } catch (IOException ex) {
             LOG.error("EXECUTION|Unable to index the uploaded execution.", ex);
             result = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -273,7 +265,7 @@ public class ExecutionResource {
         return result;
     }
 
-    @PostMapping("/{id:[0-9]+}/filtered")
+    @PostMapping(FILTER)
     public ResponseEntity<ExecutionWithCountryDeploymentsAndRunsAndExecutedScenariosAndTeamIdsAndErrorsAndProblemsDTO> getOneFiltered(@PathVariable String projectCode,
                                                                                                                                       @PathVariable long id,
                                                                                                                                       @RequestBody ExecutionCriteriaDTO criteria) {

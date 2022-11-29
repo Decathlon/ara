@@ -86,9 +86,9 @@ class ProjectResourceIT {
         assertThat(response.getBody().isDefaultAtStartup()).isFalse();
         assertThat(cut.getAll()).containsExactly( // Ordered by name ASC
                 new ProjectDTO(response.getBody().getId(), "new-code", "New name", false),
-                new ProjectDTO(Long.valueOf(1), "project-y", "Project A", false),
-                new ProjectDTO(Long.valueOf(3), "project-z", "Project B", false),
-                new ProjectDTO(Long.valueOf(2), "project-x", "Project C", true));
+                new ProjectDTO(1L, "project-y", "Project A", false),
+                new ProjectDTO(3L, "project-z", "Project B", false),
+                new ProjectDTO(2L, "project-x", "Project C", true));
     }
 
     @Test
@@ -186,38 +186,39 @@ class ProjectResourceIT {
 
         // THEN
         assertThat(projects).containsExactly( // Ordered by name ASC
-                new ProjectDTO(Long.valueOf(1), "project-y", "Project A", false),
-                new ProjectDTO(Long.valueOf(3), "project-z", "Project B", false),
-                new ProjectDTO(Long.valueOf(2), "project-x", "Project C", true));
+                new ProjectDTO(1L, "project-y", "Project A", false),
+                new ProjectDTO(3L, "project-z", "Project B", false),
+                new ProjectDTO(2L, "project-x", "Project C", true));
     }
 
     @Test
     void update_ShouldUpdateEntity_WhenAllRulesAreRespected() {
         // GIVEN
-        final Long existingId = Long.valueOf(1);
+        final String projectCode = "project-y";
         final ProjectDTO project = new ProjectDTO(null, "renamed-code", "Renamed name", false);
 
         // WHEN
-        ResponseEntity<ProjectDTO> response = cut.update(existingId, project);
+        ResponseEntity<ProjectDTO> response = cut.update(projectCode, project);
 
         // THEN
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(header(response, HeaderUtil.ALERT)).isEqualTo("ara.project.updated");
         assertThat(header(response, HeaderUtil.PARAMS)).isEqualTo("1");
         assertThat(cut.getAll()).containsExactly( // Ordered by name ASC
-                new ProjectDTO(Long.valueOf(3), "project-z", "Project B", false),
-                new ProjectDTO(Long.valueOf(2), "project-x", "Project C", true),
-                new ProjectDTO(Long.valueOf(1), "renamed-code", "Renamed name", false));
+                new ProjectDTO(3L, "project-z", "Project B", false),
+                new ProjectDTO(2L, "project-x", "Project C", true),
+                new ProjectDTO(1L, "renamed-code", "Renamed name", false));
     }
 
     @Test
     void update_ShouldNotFailAsNameNotUnique_WhenUpdatingWithoutAnyChange() {
         // GIVEN
-        Long existingId = Long.valueOf(1);
+        Long existingId = 1L;
+        String projectCode = "project-y";
         final ProjectDTO project = new ProjectDTO(existingId, "project-y", "Project A", false);
 
         // WHEN
-        ResponseEntity<ProjectDTO> response = cut.update(existingId, project);
+        ResponseEntity<ProjectDTO> response = cut.update(projectCode, project);
 
         // THEN
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -232,7 +233,7 @@ class ProjectResourceIT {
         final ProjectDTO anyProject = new ProjectDTO(null, "Trying to...", "... update nonexistent", false);
 
         // WHEN
-        ResponseEntity<ProjectDTO> response = cut.update(NONEXISTENT, anyProject);
+        ResponseEntity<ProjectDTO> response = cut.update("NONEXISTENT_PROJECT", anyProject);
 
         // THEN
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -245,11 +246,11 @@ class ProjectResourceIT {
     @Test
     void update_ShouldFailAsNotUnique_WhenCodeAlreadyExists() {
         // GIVEN
-        final Long id = Long.valueOf(2);
+        final String code = "project-y";
         final ProjectDTO projectWithExistingCode = new ProjectDTO(null, "project-y", "any", false);
 
         // WHEN
-        ResponseEntity<ProjectDTO> response = cut.update(id, projectWithExistingCode);
+        ResponseEntity<ProjectDTO> response = cut.update(code, projectWithExistingCode);
 
         // THEN
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -264,11 +265,11 @@ class ProjectResourceIT {
     @Test
     void update_ShouldFailAsNotUnique_WhenNameAlreadyExists() {
         // GIVEN
-        final Long id = Long.valueOf(2);
+        final String code = "project-x";
         final ProjectDTO projectWithExistingName = new ProjectDTO(null, "any", "Project A", false);
 
         // WHEN
-        ResponseEntity<ProjectDTO> response = cut.update(id, projectWithExistingName);
+        ResponseEntity<ProjectDTO> response = cut.update(code, projectWithExistingName);
 
         // THEN
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -283,14 +284,15 @@ class ProjectResourceIT {
     @Test
     void update_ShouldNotDeleteCommunications_WhenCalled() {
         // GIVEN
-        final Long id = Long.valueOf(1);
+        final Long id = 1L;
+        final String code = "project-y";
         final ProjectDTO updatedProjectProperties = new ProjectDTO(null, "any", "any", false);
 
         // WHEN
-        cut.update(id, updatedProjectProperties);
+        cut.update(code, updatedProjectProperties);
 
         // THEN
-        assertThat(communicationRepository.findAllByProjectIdOrderByCode(id.longValue())).hasSize(1);
+        assertThat(communicationRepository.findAllByProjectIdOrderByCode(id)).hasSize(1);
     }
 
     private void assertThatTableHasNotChangedInDataBase() {

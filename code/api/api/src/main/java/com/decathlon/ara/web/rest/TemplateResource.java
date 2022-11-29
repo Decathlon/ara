@@ -1,18 +1,18 @@
 package com.decathlon.ara.web.rest;
 
-import javax.transaction.Transactional;
-
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.ExecutionHistoryService;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.web.rest.util.RestConstants;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import javax.transaction.Transactional;
+
+import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 
 @Controller
 @RequestMapping(TemplateResource.PATH)
@@ -22,7 +22,8 @@ public class TemplateResource {
     /**
      * The full path to this Rest resource from the basename.
      */
-    static final String PATH = RestConstants.API_PATH + "/" + NAME + "s";
+    static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
+    public static final String PATHS = PATH + "/**";
 
     private final ExecutionHistoryService executionHistoryService;
     private final ProjectService projectService;
@@ -32,10 +33,10 @@ public class TemplateResource {
         this.projectService = projectService;
     }
 
-    @GetMapping("cycle-execution")
-    public String nrtCycle(@RequestParam("project") String projectCode,
-                           @RequestParam String branch,
-                           @RequestParam String cycle,
+    @GetMapping("/cycle-execution/branches/{branch}/cycles/{cycle}")
+    public String nrtCycle(@PathVariable String projectCode,
+                           @PathVariable String branch,
+                           @PathVariable String cycle,
                            Model model) throws NotFoundException {
         var projectId = projectService.toId(projectCode);
         var latestExecutions = executionHistoryService.getLatestExecutionHistories(projectId);

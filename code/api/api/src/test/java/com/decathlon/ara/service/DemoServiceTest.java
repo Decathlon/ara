@@ -17,9 +17,7 @@
 
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.loader.*;
 import com.decathlon.ara.repository.ProjectRepository;
-import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import org.junit.jupiter.api.Test;
@@ -27,8 +25,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Optional;
 
 import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
 import static org.junit.Assert.assertThrows;
@@ -43,31 +39,13 @@ class DemoServiceTest {
     @Mock
     private ProjectService projectService;
 
-    @Mock
-    private SettingService settingService;
-
-    @Mock
-    private DemoExecutionLoader demoExecutionLoader;
-
-    @Mock
-    private DemoFunctionalityLoader demoFunctionalityLoader;
-
-    @Mock
-    private DemoProblemLoader demoProblemLoader;
-
-    @Mock
-    private DemoScenarioLoader demoScenarioLoader;
-
-    @Mock
-    private DemoSettingsLoader demoSettingsLoader;
-
     @InjectMocks
     private DemoService cut;
 
     @Test
     void create_ShouldFail_WhenDemoProjectAlreadyExists() {
         // GIVEN
-        when(projectService.findOne(PROJECT_CODE_DEMO)).thenReturn(Optional.of(new ProjectDTO()));
+        when(projectService.exists(PROJECT_CODE_DEMO)).thenReturn(true);
 
         // WHEN
         assertThrows(BadRequestException.class, () -> cut.create());

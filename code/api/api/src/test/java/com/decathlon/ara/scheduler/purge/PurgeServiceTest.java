@@ -1,11 +1,12 @@
 package com.decathlon.ara.scheduler.purge;
 
 import com.decathlon.ara.domain.Execution;
+import com.decathlon.ara.domain.Project;
 import com.decathlon.ara.purge.service.PurgeService;
 import com.decathlon.ara.repository.ExecutionRepository;
+import com.decathlon.ara.repository.ProjectRepository;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.SettingService;
-import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.support.Settings;
 import com.decathlon.ara.service.util.DateService;
@@ -28,6 +29,9 @@ class PurgeServiceTest {
 
     @Mock
     private ProjectService projectService;
+
+    @Mock
+    private ProjectRepository projectRepository;
 
     @Mock
     private ExecutionRepository executionRepository;
@@ -178,7 +182,7 @@ class PurgeServiceTest {
         // Given
 
         // Project 1
-        var project1 = mock(ProjectDTO.class);
+        var project1 = mock(Project.class);
         var projectCode1 = "project-code-1";
         var projectId1 = 1L;
         var value1 = "1";
@@ -189,7 +193,7 @@ class PurgeServiceTest {
         List<Execution> executionsToDelete1 = List.of(executionToDelete11);
 
         // Project 2
-        var project2 = mock(ProjectDTO.class);
+        var project2 = mock(Project.class);
         var projectCode2 = "project-code-2";
         var projectId2 = 2L;
         var value2 = "2";
@@ -202,7 +206,7 @@ class PurgeServiceTest {
         List<Execution> executionsToDelete2 = List.of(executionToDelete21, executionToDelete22);
 
         // Project 3
-        var project3 = mock(ProjectDTO.class);
+        var project3 = mock(Project.class);
         var projectCode3 = "project-code-3";
         var projectId3 = 3L;
         var value3 = "3";
@@ -217,7 +221,7 @@ class PurgeServiceTest {
         List<Execution> executionsToDelete3 = List.of(executionToDelete31, executionToDelete32, executionToDelete33);
 
         // When
-        when(projectService.findAll()).thenReturn(List.of(project1, project2, project3));
+        when(projectRepository.findAllByOrderByName()).thenReturn(List.of(project1, project2, project3));
 
         when(project1.getId()).thenReturn(projectId1);
         when(project1.getCode()).thenReturn(projectCode1);
