@@ -26,7 +26,7 @@ Please note the following :
 * You'll need https://docs.docker.com/install/[Docker]
 * All the datas that you import in ARA won't be persisted.
 * The port 7000, 9000, 5432 must be available locally.
-* Add to `/etc/hosts` (Linux OS) or to `/private/etc/hosts` (MacOS) `127.0.0.1 oauth2.dev.localhost`
+* Add to `/etc/hosts` (Linux OS) or to `/private/etc/hosts` (MacOS) or to `c:\Windows\System32\drivers\etc\` (Windows) `127.0.0.1 oauth2.dev.localhost`
 
 === I've got a Windows PC !
 
