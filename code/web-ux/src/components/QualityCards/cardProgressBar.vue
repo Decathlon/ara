@@ -1,6 +1,5 @@
 <script setup>
 import { VtmnProgressbar } from "@vtmn/vue";
-import { defineEmits } from "vue";
 
 const props = defineProps(["cardActive", "index", "sanityGroup", "cardInfo"]);
 

@@ -1,7 +1,7 @@
 <script setup>
 import { VtmnChip, VtmnIcon } from "@vtmn/vue";
 import cardDetails from "./CardDetails.vue";
-import { defineProps, defineEmits, defineAsyncComponent } from "vue";
+import { defineAsyncComponent } from "vue";
 
 const cardScenarios = defineAsyncComponent(() =>
   import("../../views/ScenariosList.vue")

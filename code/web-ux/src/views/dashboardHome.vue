@@ -69,8 +69,9 @@ onBeforeMount(() => {
         </VtmnBreadcrumbItem>
       </VtmnBreadcrumb>
       <div :class="cardActive ? 'singleCardDisplay' : ''">
-        <h1 class="vtmn-text-center vtmn-typo_title-1">Quality validation</h1>
-
+        <h1 class="vtmn-text-center vtmn-typo_title-1 vtmn-mb-6">
+          Quality validation
+        </h1>
         <div v-if="!configurationCards[0]" class="vtmn-w-1/3 vtmn-m-auto">
           <card-starter class="vtmn-mt-10" />
         </div>

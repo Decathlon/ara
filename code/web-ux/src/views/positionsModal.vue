@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { VtmnButton, VtmnSelect, VtmnSearch, VtmnChip } from "@vtmn/vue";
-import { ref, defineEmits, defineProps, onUpdated, reactive } from "vue";
+import { ref, onUpdated, reactive } from "vue";
 import { useCardsPositionsStore } from "../stores/cardsPositions";
 import modalForm from "../components/Modal/TheModalForm.vue";
 

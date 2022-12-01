@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, defineProps } from "vue";
+import { ref, reactive } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();

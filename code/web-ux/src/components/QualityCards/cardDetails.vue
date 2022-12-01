@@ -1,6 +1,6 @@
 <script setup>
 import { VtmnButton, VtmnIcon } from "@vtmn/vue";
-import { ref, defineEmits, defineProps, defineAsyncComponent } from "vue";
+import { ref, defineAsyncComponent } from "vue";
 
 const cardProgressBar = defineAsyncComponent(() =>
   import("./CardProgressBar.vue")

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, defineEmits } from "vue";
+import { ref, watch } from "vue";
 
 let openedMenu = ref(false);
 const emit = defineEmits(["opened-menu"]);
