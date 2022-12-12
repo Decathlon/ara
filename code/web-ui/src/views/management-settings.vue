@@ -46,9 +46,10 @@
                 <Button icon="md-checkmark" type="primary" @click="saveEdit" :loading="savingEdit">SAVE</Button>
                 <Button icon="md-close-circle" @click="cancelEdit" :disabled="savingEdit">CANCEL</Button>
               </Button-group>
+              <span v-if="errorText" class="error-message">You don't have the rights to edit this field!</span>
             </div>
             <div v-else>
-              <Button :disabled="!!editingCode" icon="md-create" :title="(editingCode ? 'Another setting is currently being edited' : 'Edit')" @click="edit(setting)" style="margin-right: 4px;"/>
+              <Button v-if="userRole === 'ADMIN' || 'SUPER_ADMIN'" :disabled="!!editingCode" icon="md-create" :title="(editingCode ? 'Another setting is currently being edited' : 'Edit')" @click="edit(setting)" style="margin-right: 4px;"/>
               <span v-if="setting.type === 'boolean'">
                 <Icon v-if="setting.value === 'true'" type="md-checkmark" size="16"/>
                 <span v-else>-</span>
@@ -77,6 +78,7 @@
   import managementMenuComponent from '../components/management-menu'
   import formFieldComponent from '../components/form-field'
   import api from '../libs/api'
+  import { mapState } from 'vuex'
 
   export default {
     name: 'management-projects',
@@ -92,8 +94,13 @@
         settingGroups: null,
         editingCode: null,
         editingValue: null,
-        savingEdit: false
+        savingEdit: false,
+        errorText: false
       }
+    },
+
+    computed: {
+      ...mapState('users', ['userRole'])
     },
 
     methods: {
@@ -139,6 +146,7 @@
             this.editingCode = null
           }, (error) => {
             this.savingEdit = false
+            this.errorText = true
             api.handleError(error)
           })
       },
@@ -159,3 +167,11 @@
     }
   }
 </script>
+
+<style scoped>
+  .error-message {
+    display: flex;
+    color: #ed4014;
+    font-weight: 900;
+  }
+</style>

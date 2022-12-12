@@ -36,6 +36,7 @@
 
     data () {
       let currentProjectCode = this.$route.params.projectCode
+      const userInfo = JSON.parse(localStorage.getItem('user_details'))
       return {
         /**
          * The current project code: always set to a valid project code when it is possible:
@@ -45,6 +46,7 @@
          * * Changed when user selects a new project code in the UI Select list
          */
         currentProjectCode,
+        userInfo,
 
         /**
          * The current option selected in the UI list: most of the time, it is in sync with currentProjectCode. Except:
@@ -68,6 +70,7 @@
         'loaded',
         'defaultProjectCode'
       ]),
+      ...mapState('users', ['userRole']),
 
       isFramed () {
         return this.$route.matched.some(record => record.meta.isFramed)
@@ -102,6 +105,16 @@
 
       changeCurrentProject (projectCode) {
         let oldProjectCode = this.currentProjectCode
+        for (var i = 0; i < this.userInfo.scopes.length; i++) {
+          if (this.userInfo.scopes[i].project.includes(projectCode)) {
+            this.$store.dispatch('users/getUserRole', this.userInfo.scopes[i].role)
+          }
+        }
+
+        if (this.$route.meta.denied === this.userRole) {
+          this.$router.push('/403').catch(() => {})
+        }
+
         this.currentProjectCode = projectCode
         this.selectedOption = projectCode
         if (projectCode !== oldProjectCode) {

@@ -23,7 +23,8 @@
     -->
     <ul class="subMenu ivu-menu ivu-menu-light ivu-menu-horizontal">
       <router-link v-for="link in links" :key="link.name" :to="to(link)"
-                   class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected">
+                   class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected" 
+      >
         {{link.name}}
       </router-link>
     </ul>
@@ -31,6 +32,8 @@
 </template>
 
 <script>
+  import { mapState } from 'vuex'
+
   export default {
     name: 'management-menu',
 
@@ -67,6 +70,16 @@
           }
         }
       }
+    },
+
+    computed: {
+      ...mapState('users', ['userRole'])
     }
   }
 </script>
+
+<style scoped>
+  .ivu-menu-item.hide {
+    display: none;
+  }
+</style>

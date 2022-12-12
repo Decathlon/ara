@@ -23,7 +23,7 @@
     -->
     <div style="background-color: #0082C3; display: flex;">
       <div style="flex: 0 0 auto;">
-        <router-link :to="{ name: 'redirecter' }" id="home-logo">
+        <router-link v-if="!adminRight" :to="{ name: 'redirecter' }" id="home-logo">
           <Tooltip placement="bottom-start" :transfer="true">
             <div slot="content">
               ARA - AGILE REGRESSION ANALYZER<br>
@@ -31,22 +31,25 @@
             </div>
             <img src="../assets/favicon-white.png" width="32" height="32"/></Tooltip></router-link><!-- No space between!
      --><projects-select :ghost="true" v-on:projectSelection="projectSelection" style="flex: 1 0 auto; margin-right: 10px;"/>
-        <router-link :to="{ name: 'management-projects' }" active-class="selected-project-management">
-          <Tooltip placement="bottom" content="Add or edit a project">
-            <div>
-              <Icon type="md-add" size="24" style="color: white;"/>
-            </div>
-          </Tooltip>
-        </router-link>
       </div>
 
       <div style="flex: 1 0 auto;">
         <!-- After deleting the demo project, if no other project exists, `projectCode` still exists but we should hide the menu anyway  -->
-        <ul v-if="projectCode && projects && projects.length" class="ivu-menu ivu-menu-primary ivu-menu-horizontal">
-          <router-link v-for="link in links" :key="link.name" :to="to(link)" class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected">
+        <ul v-if="projectCode && projects && projects.length && !savedSingleUserConnections" class="ivu-menu ivu-menu-primary ivu-menu-horizontal dashboardHeader">
+          <router-link v-for="link in links" @click.native="changeAdminState(link.routeName)" :key="link.name" :to="to(link)" class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected">
             {{link.name}}
           </router-link>
         </ul>
+
+        <ul v-else-if="projectCode && projects && projects.length && savedSingleUserConnections" class="ivu-menu ivu-menu-primary ivu-menu-horizontal dashboardHeader">
+          <router-link v-for="link in adminMenu" class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected" @click.native="changeAdminState(link.routeName)" :key="link.name" :to="to(link)" :class="link.name">
+            {{link.name}}
+          </router-link>
+        </ul>
+        <div :class="showSubMenuMembers ? 'membersSubMenu active' : 'membersSubMenu'">
+          <p @click="showMembersType('individual')" :class="typeSelected == 'individual' ? 'selected' : ''">INDIVIDUAL</p>
+          <p @click="showMembersType('machine')" :class="typeSelected == 'machine' ? 'selected' : ''">MACHINE</p>
+        </div>
       </div>
 
       <div id="helps">
@@ -203,6 +206,10 @@
     },
 
     computed: {
+      ...mapState('admin', ['savedSingleUserConnections', 'showSubMenuMembers', 'typeSelected']),
+      ...mapState('projects', ['projects', 'defaultProjectCode']),
+      ...mapState('users', ['userRole']),
+
       executedScenariosHistoryDurationIsApplied () {
         return this.duration.applied && this.duration.value && this.duration.type
       },
@@ -238,18 +245,21 @@
         }
       },
 
-      ...mapState('projects', [
-        'projects',
-        'defaultProjectCode'
-      ]),
-
       links () {
         return [
           { params: { projectCode: this.projectCode }, name: 'EXECUTIONS & ERRORS', routeName: 'executions' },
           { params: { projectCode: this.projectCode }, name: 'PROBLEMS', routeName: 'problems' },
           { params: { projectCode: this.projectCode }, name: 'FUNCTIONALITIES', routeName: 'functionalities' },
           { params: { projectCode: this.projectCode }, name: 'SCENARIOS', routeName: 'scenario-writing-helps' },
-          { params: { projectCode: this.projectCode }, name: 'SETTINGS', routeName: 'management' }
+          { params: { projectCode: this.projectCode }, name: 'SETTINGS', routeName: 'active-admin' }
+        ]
+      },
+      adminMenu () {
+        return [
+          { params: { projectCode: this.projectCode }, name: 'PROJECTS', routeName: 'active-admin' },
+          { params: { projectCode: this.projectCode }, name: 'MEMBERS', routeName: 'members' },
+          { params: { projectCode: this.projectCode }, name: 'CONFIGURATION', routeName: 'management' },
+          { params: { projectCode: this.projectCode }, name: 'DASHBOARD', routeName: 'dashboard' }
         ]
       },
 
@@ -345,6 +355,7 @@
       },
 
       getAuthenticationDetails () {
+        this.$store.dispatch('admin/setRole', AuthenticationService.getDetails().user.id)
         return AuthenticationService.getDetails()
       },
 
@@ -360,12 +371,39 @@
         }
       },
 
+      changeAdminState (data) {
+        if (data === 'members') {
+          this.$store.dispatch('admin/setTypeSelected', '')
+          this.$store.dispatch('admin/showSubMenuMembers', true)
+          this.$store.dispatch('admin/showChoice', false)
+        } else {
+          this.$store.dispatch('admin/showSubMenuMembers', false)
+          this.$store.dispatch('admin/enableAdmin', data)
+        }
+      },
+      showMembersType (data) {
+        this.$store.dispatch('admin/setTypeSelected', data)
+        if (data) {
+          this.$store.dispatch('admin/showChoice', data)
+        }
+      },
+
       logout () {
         AuthenticationService.logout()
       }
     },
 
+    beforeUpdate () {
+      if (localStorage.adminRight === 'true') {
+        this.$store.dispatch('admin/enableAdmin', 'active-admin')
+      }
+    },
+
     mounted () {
+      Vue.http.get('api/users')
+        .then((response) => {
+          this.$store.dispatch('users/getAllUsers', response.body)
+        })
       this.loadLocalParameters()
       Vue.http
         .get(api.paths.info(), api.REQUEST_OPTIONS)
@@ -386,6 +424,11 @@
 </script>
 
 <style scoped>
+  @keyframes loadHeader {
+    from { transform: translateY(65px); }
+    to   { transform: translateY(0); }
+  }
+
   #home-logo {
     display: inline-block;
     margin: 0 8px;
@@ -400,6 +443,10 @@
   .ivu-menu-horizontal .ivu-menu-item {
     float: none;
     display: inline-block;
+  }
+
+  .ivu-menu-horizontal .ivu-menu-item:last-child {
+    float: right;
   }
 
   .selected-project-management div {
@@ -489,5 +536,45 @@
 
   .parameter-inputs .parameter-inputs-input {
     margin-right: 5px;
+  }
+
+  .dashboardHeader {
+    overflow: hidden;
+  }  
+  .dashboardHeader a {
+    animation: loadHeader .3s ease-in-out;
+  }
+  .membersSubMenu {
+    position: absolute;
+    display: flex;
+    background-color: #ffffff;
+    top: 0;
+    left: 0;
+    right: 0;
+    left: -160px;
+    margin: 0 auto;
+    justify-content: center;
+    width: 200px;
+    height: 60px;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 1px 1px 3px 0px #cacaca;
+    transition: 200ms;
+  }
+  .membersSubMenu.active {
+    top: 60px;
+    transition: 200ms;
+  }
+  .membersSubMenu p {
+    line-height: 1;
+    align-self: center;
+    width: 100%;
+    text-align: center;
+    color: #8c8c8c;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .membersSubMenu .selected {
+    color: #007DBC;
+    font-weight: 900;
   }
 </style>

@@ -73,11 +73,6 @@
         introduction: 'Projects are isolated areas in ARA to manage test reports of several applications or standalone components.',
         fields: [
           {
-            code: 'id',
-            type: 'hidden',
-            newValue: -1
-          },
-          {
             code: 'code',
             name: 'Code',
             columnTitle: 'Code',

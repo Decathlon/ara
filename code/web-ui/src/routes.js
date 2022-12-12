@@ -16,6 +16,15 @@
  ******************************************************************************/
 
 import Login from './views/login.vue'
+import store from './store/index'
+
+function requireAuth (to, from, next) {
+  if (store.state.users.userRole !== 'MEMBER') {
+    next()
+  } else {
+    next('/403')
+  }
+}
 
 const routes = [
   // Home page and other URLs without any project code
@@ -174,6 +183,43 @@ const routes = [
     redirect: '/projects/:projectCode/management/communications' // First tab
   },
   {
+    path: '/projects/:projectCode/active-admin',
+    name: 'active-admin',
+    meta: {
+      title: 'Admin Management'
+    },
+    component: (resolve) => require(['./views/admin-management.vue'], resolve)
+  },
+  {
+    path: '/projects/:projectCode/members',
+    name: 'members',
+    meta: {
+      title: 'Members'
+    },
+    component: (resolve) => require(['./views/admin-management-members.vue'], resolve)
+  },
+  {
+    path: '/projects/:projectCode/members/memberDetails',
+    name: 'member-details',
+    meta: {
+      title: 'Member details'
+    },
+    component: (resolve) => require(['./views/admin-management-members-details.vue'], resolve)
+  },
+  {
+    path: '/projects/:projectCode/dashboard',
+    name: 'dashboard',
+    redirect: '/projects/:projectCode/executions'
+  },
+  {
+    path: '/projects/:projectCode/active-admin/admin-project-details',
+    name: 'admin-project-details',
+    meta: {
+      title: 'Admin project details'
+    },
+    component: (resolve) => require(['./views/admin-project-details.vue'], resolve)
+  },
+  {
     path: '/projects/:projectCode/management/communications',
     name: 'management-communications',
     meta: {
@@ -243,23 +289,34 @@ const routes = [
     meta: {
       title: 'Projects'
     },
-    component: (resolve) => require(['./views/management-projects.vue'], resolve)
+    component: (resolve) => require(['./views/admin-management.vue'], resolve)
   },
   {
     path: '/projects/:projectCode/management/technologies',
     name: 'management-technologies',
+    beforeEnter: requireAuth,
     meta: {
-      title: 'Technologies'
+      title: 'Technologies',
+      denied: 'MEMBER'
     },
     component: (resolve) => require(['./views/management-technologies.vue'], resolve)
   },
   {
     path: '/projects/:projectCode/management/settings',
     name: 'management-settings',
+    beforeEnter: requireAuth,
     meta: {
-      title: 'Project Settings'
+      title: 'Project Settings',
+      denied: 'MEMBER'
     },
     component: (resolve) => require(['./views/management-settings.vue'], resolve)
+  },
+
+  // 403 redirect
+  {
+    path: '/403',
+    name: 'redirect-error',
+    component: (resolve) => require(['./views/403.vue'], resolve)
   },
 
   // Not found page

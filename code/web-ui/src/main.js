@@ -36,6 +36,7 @@ import VueCookies from 'vue-cookies'
 
 import { sanitizeUrl } from '@braintree/sanitize-url'
 
+Vue.config.devtools = true
 Vue.use(Vue2Filters)
 Vue.use(VueResource)
 Vue.use(VueRouter)
@@ -84,6 +85,7 @@ new Vue({
   el: '#app',
   router,
   store,
+  beforeCreate () { this.$store.commit('initialiseStore') },
   render: h => h(app)
 })
 

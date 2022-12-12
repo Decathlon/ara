@@ -112,6 +112,7 @@ class AuthenticationServiceClass {
 
     const requireLogin = !loggedIn && config.authentication.enabled
     if (!loggedIn) {
+      localStorage.setItem('adminRight', false)
       iView.Notice.open({
         title: 'Access denied',
         desc: 'You need to login first if you want to access this page.'
