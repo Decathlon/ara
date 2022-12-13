@@ -18,15 +18,18 @@
   <div>
     <h1 class="adminTitle">Projects management</h1>
 
-    <Button v-if="!(projects.find(project => project.code === 'the-demo-project'))" class="demoProjectButton" data-nrt="createDemo" :loading="loadingDemoProject" icon="md-add" @click="createDemoProject">CREATE THE DEMO PROJECT</Button>
-
-    <table class="adminTable">
-      <Select class="filterSelect" v-model="projectFilter" clearable filterable placeholder="Filter">
+    <div class="projectCTA">
+     <Select class="filterSelect" v-model="projectFilter" clearable filterable placeholder="Filter">
         <Option v-for="(filters, index) in filterType" :value="index" :key="index" :label="filters" />
       </Select>
+      <Button v-if="!(projects.find(project => project.code === 'the-demo-project'))" type="warning" class="demoProjectButton" data-nrt="createDemo" :loading="loadingDemoProject" @click="createDemoProject">CREATE THE DEMO PROJECT</Button>
+      <Button v-if="(projects.find(project => project.code === 'the-demo-project'))" class="change-view" @click="switchView = !switchView" type="primary" ghost>{{ !switchView ? 'Show Demo Project' : 'Show Projects List' }}</Button>
       <Button type="primary" class="addBtn" @click="add()">
         Add project
       </Button>
+    </div>
+
+    <table v-if="switchView" class="adminTable">
       <thead>
         <tr>
           <th>Name</th>
@@ -39,7 +42,7 @@
       </thead>
 
       <tbody>
-        <tr v-for="(project, index) in sortedProjects" :class="index %2 !== 0 ? 'darkGrey' : 'lightGrey'" :key="project.id">
+        <tr v-for="(project, index) in sortedDemoProject" :key="project.id">
           <td>{{ project.name }}</td>
           <td>Creation date</td>
           <td>Update date</td>
@@ -49,6 +52,35 @@
           </td>
           <td>
             <Icon type="md-close-circle" size="24" @click="deleteDemoProject()"/>
+            <Icon type="md-eye" size="24" @click="openProjectDetails(project)"/>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table v-if="!switchView" class="adminTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Creation date</th>
+          <th>Update date</th>
+          <th>Role</th>
+          <th>Default</th>
+          <th></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr v-for="(project, index) in sortedProjects" :class="index %2 !== 0 ? 'darkGrey' : 'lightGrey'" :key="project.id">
+          <td>{{ project.name }}</td>
+          <td>Creation date</td>
+          <td>Update date</td>
+          <td>{{ project.role }}</td>
+          <td>
+            <input type="radio" name="defautProject" @change="changeDefaultProject(project)" :checked="project.defaultAtStartup === true ? true : false">
+          </td>
+          <td>
+            <Icon v-if="project.role === 'ADMIN' || project.role === 'SUPER_ADMIN'" type="md-close-circle" size="24" @click="deleteProject(project.code)"/>
             <Icon type="md-eye" size="24" @click="openProjectDetails(project)"/>
           </td>
         </tr>
@@ -125,7 +157,8 @@
         editingData: {},
         filterType: ['Name', 'Creation Date', 'Update Date', 'Author'],
         editingNew: false,
-        editing: false
+        editing: false,
+        switchView: false
       }
     },
     methods: {
@@ -180,22 +213,29 @@
       },
       getProjectList () {
         Vue.http
-        // .get(this.$store.state.admin.userRole === 'admin' ? 'api/admin/projects' : 'api/projects', api.REQUEST_OPTIONS)
           .get('api/projects', api.REQUEST_OPTIONS)
           .then((response) => {
             const project = response.body
             this.projects = Array.from(project)
-            for (let i = 0; i < project.length; i++) {
-              Vue.http
-                .get('/api/projects/' + project[i].code + '/members/users')
-                .then((response) => {
-                  project[i].members = response.body
-                  if (project[i].code === this.$store.state.projects.defaultProjectCode) {
-                    project[i].defaultAtStartup = true
-                  }
-                  this.projects = Array.from(project)
-                })
+            for (let j = 0; j < this.projects.length; j++) {
+              if (this.projectsRole.scopes.length > 0) {
+                if (this.projectsRole.scopes[j].project === this.projects[j].code) {
+                  this.projects[j].role = this.projectsRole.scopes[j].role
+                }
+              } else this.projects[j].role = this.projectsRole.profile
             }
+            // THIS PART ADD MEMBERS TO EACH PROJECTS (WAITING FOR BACK)
+            // for (let i = 0; i < project.length; i++) {
+            //   Vue.http
+            //     .get('/api/projects/' + project[i].code + '/members/users')
+            //     .then((response) => {
+            //       project[i].members = response.body
+            //       if (project[i].code === this.$store.state.projects.defaultProjectCode) {
+            //         project[i].defaultAtStartup = true
+            //       }
+            //       this.projects = Array.from(project)
+            //     })
+            // }
             return this.projects
           })
       },
@@ -213,7 +253,7 @@
         let self = this
         this.$Modal.confirm({
           title: 'Delete the Demo Project',
-          content: `<p>Delete the demo project?</p>`,
+          content: `<p>Do you really want to delete the demo project?</p>`,
           okText: 'Delete',
           loading: true,
           onOk () {
@@ -223,11 +263,21 @@
               .then(() => {
                 self.$Modal.remove()
                 self.getProjectList()
+                self.switchView = false
               }, (error) => {
                 api.handleError(error)
               })
           }
         })
+      },
+      deleteProject (code) {
+        Vue.http
+          .delete('api/projects/' + code, api.REQUEST_OPTIONS)
+          .then(() => {
+            this.getProjectList()
+          }, (error) => {
+            api.handleError(error)
+          })
       },
       createDemoProject () {
         this.loadingDemoProject = true
@@ -248,7 +298,15 @@
     },
     computed: {
       sortedProjects () {
-        return this.projects.map(item => item).sort((a, b) => a.code - b.code)
+        return this.projects.map(item => item).sort((a, b) => a.code - b.code).filter(project => project.code !== 'the-demo-project')
+      },
+
+      sortedDemoProject () {
+        return this.projects.filter(item => item.code === 'the-demo-project')
+      },
+
+      projectsRole () {
+        return JSON.parse(localStorage.getItem('user_details'))
       }
     }
   }

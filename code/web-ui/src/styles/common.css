@@ -313,11 +313,6 @@ pre code {
 
 /* CTA */
 
-.demoProjectButton {
-  position: absolute;
-  left: 7rem;
-}
-
 .editBtn {
   position: absolute;
   right: 245px;
@@ -423,6 +418,30 @@ pre code {
 
 /* Tables */
 
+.projectCTA {
+  width: 90%;
+  position: relative;
+  margin: 0 auto;
+}
+
+.projectCTA .filterSelect {
+  width: 150px;
+  position: absolute;
+  top: -45px;
+}
+
+.projectCTA .change-view, .projectCTA .demoProjectButton {
+  position: absolute !important;
+  right: 8rem;
+  top: -45px;
+}
+
+.projectCTA .addBtn {
+  position: absolute;
+  right: 0;
+  top: -45px;
+}
+
 .tableContent {
   margin-top: 3rem;
   text-align: center;
@@ -493,12 +512,6 @@ pre code {
 
 .ivu-icon-ios-checkmark-circle {
   color: #23a9427d;
-}
-
-.adminTable .filterSelect, .adminTable .addBtn {
-  width: 150px;
-  position: absolute;
-  top: -45px;
 }
 
 .adminTable .showBtn {
