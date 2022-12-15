@@ -1,7 +1,7 @@
 package com.decathlon.ara.authentication;
 
-import com.decathlon.ara.security.dto.user.LoggedInUserDTO;
-import com.decathlon.ara.security.service.user.UserService;
+import com.decathlon.ara.security.dto.user.UserAccount;
+import com.decathlon.ara.security.service.user.UserAccountService;
 import com.decathlon.ara.web.rest.authentication.UserResource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 class UserResourceTest {
 
     @Mock
-    private UserService userService;
+    private UserAccountService userAccountService;
 
     @InjectMocks
     private UserResource userResource;
@@ -32,7 +32,7 @@ class UserResourceTest {
         var authentication = mock(OAuth2AuthenticationToken.class);
 
         // When
-        when(userService.getLoggedInUserDTO(authentication)).thenReturn(Optional.empty());
+        when(userAccountService.getCurrentUserAccount(authentication)).thenReturn(Optional.empty());
 
         // Then
         var response = userResource.getUserDetails(authentication);
@@ -44,15 +44,15 @@ class UserResourceTest {
     void getUserDetails_returnRequestResponseContainingUser_whenUserFound() {
         // Given
         var authentication = mock(OAuth2AuthenticationToken.class);
-        var user = mock(LoggedInUserDTO.class);
+        var userAccount = mock(UserAccount.class);
 
         // When
-        when(userService.getLoggedInUserDTO(authentication)).thenReturn(Optional.of(user));
+        when(userAccountService.getCurrentUserAccount(authentication)).thenReturn(Optional.of(userAccount));
 
         // Then
         var response = userResource.getUserDetails(authentication);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isSameAs(user);
+        assertThat(response.getBody()).isSameAs(userAccount);
     }
     
 }

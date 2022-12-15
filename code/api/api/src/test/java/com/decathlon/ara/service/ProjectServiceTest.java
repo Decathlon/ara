@@ -1,17 +1,20 @@
 package com.decathlon.ara.service;
 
 import com.decathlon.ara.domain.Project;
+import com.decathlon.ara.domain.RootCause;
 import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
 import com.decathlon.ara.repository.ProjectRepository;
+import com.decathlon.ara.repository.RootCauseRepository;
 import com.decathlon.ara.security.service.AuthorityService;
-import com.decathlon.ara.security.service.user.UserService;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
-import com.decathlon.ara.service.exception.BadRequestException;
+import com.decathlon.ara.service.exception.ForbiddenException;
+import com.decathlon.ara.service.exception.NotUniqueException;
 import com.decathlon.ara.service.mapper.GenericMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,13 +33,16 @@ class ProjectServiceTest {
     private ProjectRepository projectRepository;
 
     @Mock
+    private RootCauseRepository rootCauseRepository;
+
+    @Mock
     private GenericMapper genericMapper;
 
     @Mock
     private AuthorityService authorityService;
 
     @Mock
-    private UserService userService;
+    private CommunicationService communicationService;
 
     @InjectMocks
     private ProjectService projectService;
@@ -114,7 +121,7 @@ class ProjectServiceTest {
     }
 
     @Test
-    void delete_deleteProject() throws BadRequestException {
+    void delete_deleteProject() throws ForbiddenException {
         // Given
         var projectCode = "project-code";
 
@@ -123,6 +130,73 @@ class ProjectServiceTest {
         // Then
         projectService.delete(projectCode);
         verify(projectRepository, times(1)).deleteByCode(projectCode);
-        verify(userService, times(1)).updateAuthoritiesFromLoggedInUser();
+        verify(authorityService, times(1)).refreshCurrentUserAccountAuthorities();
+    }
+
+    @Test
+    void createFromCode_createProjectFromCode_whenBusinessRulesAreValid() throws NotUniqueException {
+        // Given
+        var projectCode = "unknown-project_to   save         @&:1   )%*";
+        var expectedProjectName = "Unknown Project To Save 1 (generated)";
+        var createdProjectId = 1L;
+
+        var mappedProject = mock(Project.class);
+        var savedProject = mock(Project.class);
+        var createdProjectDTO = mock(ProjectDTO.class);
+
+        // When
+        when(projectRepository.findOneByCode(projectCode)).thenReturn(null);
+        when(projectRepository.findOneByName(expectedProjectName)).thenReturn(null);
+        when(genericMapper.map(any(ProjectDTO.class), eq(Project.class))).thenReturn(mappedProject);
+        when(projectRepository.save(mappedProject)).thenReturn(savedProject);
+        when(genericMapper.map(savedProject, ProjectDTO.class)).thenReturn(createdProjectDTO);
+        when(createdProjectDTO.getId()).thenReturn(createdProjectId);
+
+        // Then
+        var createdProject = projectService.createFromCode(projectCode);
+
+        assertThat(createdProject).isSameAs(createdProjectDTO);
+
+        var mappedProjectArgumentCaptor = ArgumentCaptor.forClass(ProjectDTO.class);
+        verify(genericMapper).map(mappedProjectArgumentCaptor.capture(), eq(Project.class));
+        assertThat(mappedProjectArgumentCaptor.getValue().getName()).isEqualTo(expectedProjectName);
+
+        verify(communicationService, times(1)).initializeProject(mappedProject);
+        ArgumentCaptor<List<RootCause>> rootCausesArgumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(rootCauseRepository, times(1)).saveAll(rootCausesArgumentCaptor.capture());
+        assertThat(rootCausesArgumentCaptor.getValue())
+                .extracting("projectId", "name")
+                .containsExactlyInAnyOrder(
+                        tuple(createdProjectId, "Fragile test"),
+                        tuple(createdProjectId, "Network issue"),
+                        tuple(createdProjectId, "Regression"),
+                        tuple(createdProjectId, "Test to update")
+                );
+    }
+
+    @Test
+    void exists_returnFalse_whenProjectDoesNotExist() {
+        // Given
+        var projectCode = "project-code";
+
+        // When
+        when(projectRepository.existsByCode(projectCode)).thenReturn(false);
+
+        // Then
+        var exists = projectService.exists(projectCode);
+        assertThat(exists).isFalse();
+    }
+
+    @Test
+    void exists_returnTrue_whenProjectDoesExist() {
+        // Given
+        var projectCode = "project-code";
+
+        // When
+        when(projectRepository.existsByCode(projectCode)).thenReturn(true);
+
+        // Then
+        var exists = projectService.exists(projectCode);
+        assertThat(exists).isTrue();
     }
 }

@@ -6,7 +6,8 @@ import com.decathlon.ara.scenario.cypress.resource.CypressResource;
 import com.decathlon.ara.scenario.generic.resource.GenericResource;
 import com.decathlon.ara.scenario.postman.resource.PostmanResource;
 import com.decathlon.ara.security.service.AuthorityService;
-import com.decathlon.ara.security.service.user.UserService;
+import com.decathlon.ara.security.service.login.OAuth2UserLoginService;
+import com.decathlon.ara.security.service.login.OidcUserLoginService;
 import com.decathlon.ara.web.rest.*;
 import com.decathlon.ara.web.rest.authentication.AuthenticationResource;
 import com.decathlon.ara.web.rest.authentication.UserResource;
@@ -17,15 +18,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
-import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
-import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
-
-import java.util.Set;
 
 @Configuration
 public class SecurityConfiguration {
@@ -55,12 +53,18 @@ public class SecurityConfiguration {
     @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri:}")
     private String resourceJwkSetUri;
 
-    private final UserService userService;
+    private final OidcUserLoginService oidcUserLoginService;
+
+    private final OAuth2UserLoginService oauth2UserLoginService;
 
     private static final String SUPER_ADMIN_PROFILE_AUTHORITY = AuthorityService.AUTHORITY_USER_PROFILE_PREFIX + UserEntity.UserEntityProfile.SUPER_ADMIN.name();
 
-    public SecurityConfiguration(UserService userService) {
-        this.userService = userService;
+    public SecurityConfiguration(
+            OidcUserLoginService oidcUserLoginService,
+            OAuth2UserLoginService oauth2UserLoginService
+    ) {
+        this.oidcUserLoginService = oidcUserLoginService;
+        this.oauth2UserLoginService = oauth2UserLoginService;
     }
 
     @Bean
@@ -185,7 +189,7 @@ public class SecurityConfiguration {
                 .clearAuthentication(true).logoutSuccessUrl(redirectUrl).deleteCookies("JSESSIONID").permitAll()
                 .and()
                 .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo.oidcUserService(this.oidcUserService()))
+                        .userInfoEndpoint(userInfo -> userInfo.oidcUserService(oidcUserService()).userService(oauth2UserService()))
                         .loginProcessingUrl(this.loginProcessingUrl + "/*") // path to redirect to from auth server
                         .loginPage(String.format("%s/%s", this.clientBaseUrl, "login")) // standard spring redirection for protected resources
                         .defaultSuccessUrl(redirectUrl, true) // once logged in, redirect to
@@ -198,16 +202,12 @@ public class SecurityConfiguration {
         return http.build();
     }
 
-    private OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService() {
-        final OidcUserService delegate = new OidcUserService();
+    private OAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService() {
+        return oauth2UserLoginService::manageUserLoginRequest;
+    }
 
-        return userRequest -> {
-            var providerName = userRequest.getClientRegistration().getRegistrationId();
-            OidcUser oidcUser = delegate.loadUser(userRequest);
-            Set<GrantedAuthority> mappedAuthorities = userService.manageUserAtLogin(oidcUser, providerName);
-            oidcUser = new DefaultOidcUser(mappedAuthorities, oidcUser.getIdToken(), oidcUser.getUserInfo());
-            return oidcUser;
-        };
+    private OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService() {
+        return oidcUserLoginService::manageUserLoginRequest;
     }
 
     private boolean isResourceServerConfiguration() {

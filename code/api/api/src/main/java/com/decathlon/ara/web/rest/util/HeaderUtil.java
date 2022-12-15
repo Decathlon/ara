@@ -17,17 +17,13 @@
 
 package com.decathlon.ara.web.rest.util;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
+import com.decathlon.ara.service.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 
-import com.decathlon.ara.service.exception.BadGatewayException;
-import com.decathlon.ara.service.exception.BadRequestException;
-import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.service.exception.NotUniqueException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Utility class for HTTP headers creation.
@@ -90,11 +86,15 @@ public final class HeaderUtil {
     }
 
     public static HttpHeaders notFound(NotFoundException e) {
-        return createError(e.getResourceName(), e.getErrorKey(), e.getMessage());
+        return badRequest(e);
     }
 
     public static HttpHeaders badGateway(BadGatewayException e) {
-        return createError(e.getResourceName(), e.getErrorKey(), e.getMessage());
+        return badRequest(e);
+    }
+
+    public static HttpHeaders forbidden(ForbiddenException e) {
+        return badRequest(e);
     }
 
     public static HttpHeaders notUnique(NotUniqueException e) {

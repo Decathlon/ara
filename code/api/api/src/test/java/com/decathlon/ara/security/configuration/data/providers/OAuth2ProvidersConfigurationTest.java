@@ -1,19 +1,20 @@
 package com.decathlon.ara.security.configuration.data.providers;
 
-import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
-import com.decathlon.ara.repository.ProjectRepository;
 import com.decathlon.ara.security.configuration.data.providers.setup.ProviderSetupConfiguration;
 import com.decathlon.ara.security.configuration.data.providers.setup.provider.ProviderConfiguration;
+import com.decathlon.ara.security.configuration.data.providers.setup.users.UserProfileConfiguration;
 import com.decathlon.ara.security.configuration.data.providers.setup.users.UsersConfiguration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -24,265 +25,6 @@ class OAuth2ProvidersConfigurationTest {
 
     @InjectMocks
     private OAuth2ProvidersConfiguration providersConfiguration;
-
-    @Test
-    void getMatchingUserEntityFromProviderNameAndLogin_returnNoUser_whenProviderIsNull() {
-        // Given
-        String providerName = null;
-        var login = "user-login";
-        var projectRepository = mock(ProjectRepository.class);
-
-        // When
-
-        // Then
-        var matchingUser = providersConfiguration.getMatchingUserEntityFromProviderNameAndLogin(providerName, login, projectRepository);
-        assertThat(matchingUser).isNotPresent();
-    }
-
-    @Test
-    void getMatchingUserEntityFromProviderNameAndLogin_returnNoUser_whenLoginIsNull() {
-        // Given
-        var providerName = "provider-name";
-        String login = null;
-        var projectRepository = mock(ProjectRepository.class);
-
-        // When
-
-        // Then
-        var matchingUser = providersConfiguration.getMatchingUserEntityFromProviderNameAndLogin(providerName, login, projectRepository);
-        assertThat(matchingUser).isNotPresent();
-    }
-
-    @Test
-    void getMatchingUserEntityFromProviderNameAndLogin_returnNoUser_whenSetupIsNull() {
-        // Given
-        var providerName = "provider";
-        var login = "login";
-        var projectRepository = mock(ProjectRepository.class);
-
-        ReflectionTestUtils.setField(providersConfiguration, "setup", null);
-
-        // When
-
-        // Then
-        var matchingUser = providersConfiguration.getMatchingUserEntityFromProviderNameAndLogin(providerName, login, projectRepository);
-        assertThat(matchingUser).isNotPresent();
-    }
-
-    @Test
-    void getMatchingUserEntityFromProviderNameAndLogin_returnNoUser_whenProviderGivenButNotFound() {
-        // Given
-        var providerName = "unknown-provider";
-        var login = "login";
-        var projectRepository = mock(ProjectRepository.class);
-
-        var setup1 = mock(ProviderSetupConfiguration.class);
-        var setup2 = mock(ProviderSetupConfiguration.class);
-        var setup3 = mock(ProviderSetupConfiguration.class);
-        var setups = List.of(setup1, setup2, setup3);
-
-        var provider1 = mock(ProviderConfiguration.class);
-        var provider2 = mock(ProviderConfiguration.class);
-        var provider3 = mock(ProviderConfiguration.class);
-        var providerName1 = "registration1";
-        var providerName2 = "registration2";
-        var providerName3 = "registration3";
-
-        ReflectionTestUtils.setField(providersConfiguration, "setup", setups);
-
-        // When
-        when(setup1.getProvider()).thenReturn(provider1);
-        when(setup2.getProvider()).thenReturn(provider2);
-        when(setup3.getProvider()).thenReturn(provider3);
-        when(provider1.getRegistration()).thenReturn(providerName1);
-        when(provider2.getRegistration()).thenReturn(providerName2);
-        when(provider3.getRegistration()).thenReturn(providerName3);
-
-        // Then
-        var matchingUser = providersConfiguration.getMatchingUserEntityFromProviderNameAndLogin(providerName, login, projectRepository);
-        assertThat(matchingUser).isNotPresent();
-    }
-
-    @Test
-    void getMatchingUserEntityFromProviderNameAndLogin_returnNoUser_whenProviderFoundButNotTheUser() {
-        // Given
-        var providerName = "registration3";
-        var login = "login";
-        var projectRepository = mock(ProjectRepository.class);
-
-        var setup1 = mock(ProviderSetupConfiguration.class);
-        var setup2 = mock(ProviderSetupConfiguration.class);
-        var setup3 = mock(ProviderSetupConfiguration.class);
-        var setups = List.of(setup1, setup2, setup3);
-
-        var provider1 = mock(ProviderConfiguration.class);
-        var provider2 = mock(ProviderConfiguration.class);
-        var provider3 = mock(ProviderConfiguration.class);
-        var providerName1 = "registration1";
-        var providerName2 = "registration2";
-        var providerName3 = "registration3";
-
-        ReflectionTestUtils.setField(providersConfiguration, "setup", setups);
-
-        // When
-        when(setup1.getProvider()).thenReturn(provider1);
-        when(setup2.getProvider()).thenReturn(provider2);
-        when(setup3.getProvider()).thenReturn(provider3);
-        when(setup3.getMatchingUserEntityFromLogin(login, projectRepository)).thenReturn(Optional.empty());
-        when(provider1.getRegistration()).thenReturn(providerName1);
-        when(provider2.getRegistration()).thenReturn(providerName2);
-        when(provider3.getRegistration()).thenReturn(providerName3);
-
-        // Then
-        var matchingUser = providersConfiguration.getMatchingUserEntityFromProviderNameAndLogin(providerName, login, projectRepository);
-        assertThat(matchingUser).isNotPresent();
-    }
-
-    @Test
-    void getMatchingUserEntityFromProviderNameAndLogin_returnUser_whenProviderAndUserFound() {
-        // Given
-        var providerName = "registration3";
-        var login = "login";
-        var projectRepository = mock(ProjectRepository.class);
-
-        var setup1 = mock(ProviderSetupConfiguration.class);
-        var setup2 = mock(ProviderSetupConfiguration.class);
-        var setup3 = mock(ProviderSetupConfiguration.class);
-        var setups = List.of(setup1, setup2, setup3);
-
-        var provider1 = mock(ProviderConfiguration.class);
-        var provider2 = mock(ProviderConfiguration.class);
-        var provider3 = mock(ProviderConfiguration.class);
-        var providerName1 = "registration1";
-        var providerName2 = "registration2";
-        var providerName3 = "registration3";
-
-        ReflectionTestUtils.setField(providersConfiguration, "setup", setups);
-
-        var user = mock(UserEntity.class);
-
-        // When
-        when(setup1.getProvider()).thenReturn(provider1);
-        when(setup2.getProvider()).thenReturn(provider2);
-        when(setup3.getProvider()).thenReturn(provider3);
-        when(setup3.getMatchingUserEntityFromLogin(login, projectRepository)).thenReturn(Optional.of(user));
-        when(provider1.getRegistration()).thenReturn(providerName1);
-        when(provider2.getRegistration()).thenReturn(providerName2);
-        when(provider3.getRegistration()).thenReturn(providerName3);
-
-        // Then
-        var matchingUser = providersConfiguration.getMatchingUserEntityFromProviderNameAndLogin(providerName, login, projectRepository);
-        assertThat(matchingUser).contains(user);
-    }
-
-    @Test
-    void getMatchingUserEntityFromProviderNameAndLogin_returnUserAndIgnoreNullProviders_whenProviderAndUserFoundButSomeProvidersWereNull() {
-        // Given
-        var providerName = "registration3";
-        var login = "login";
-        var projectRepository = mock(ProjectRepository.class);
-
-        var setup1 = mock(ProviderSetupConfiguration.class);
-        var setup2 = mock(ProviderSetupConfiguration.class);
-        var setup3 = mock(ProviderSetupConfiguration.class);
-        var setups = List.of(setup1, setup2, setup3);
-
-        var provider1 = mock(ProviderConfiguration.class);
-        var provider3 = mock(ProviderConfiguration.class);
-        var providerName1 = "registration1";
-        var providerName3 = "registration3";
-
-        ReflectionTestUtils.setField(providersConfiguration, "setup", setups);
-
-        var user = mock(UserEntity.class);
-
-        // When
-        when(setup1.getProvider()).thenReturn(provider1);
-        when(setup2.getProvider()).thenReturn(null);
-        when(setup3.getProvider()).thenReturn(provider3);
-        when(setup3.getMatchingUserEntityFromLogin(login, projectRepository)).thenReturn(Optional.of(user));
-        when(provider1.getRegistration()).thenReturn(providerName1);
-        when(provider3.getRegistration()).thenReturn(providerName3);
-
-        // Then
-        var matchingUser = providersConfiguration.getMatchingUserEntityFromProviderNameAndLogin(providerName, login, projectRepository);
-        assertThat(matchingUser).contains(user);
-    }
-
-    @Test
-    void getMatchingUserEntityFromProviderNameAndLogin_returnFirstNonEmptyUser_whenManyProviderAndUserFound() {
-        // Given
-        var providerName = "registration";
-        var login = "login";
-        var projectRepository = mock(ProjectRepository.class);
-
-        var setup1 = mock(ProviderSetupConfiguration.class);
-        var setup2 = mock(ProviderSetupConfiguration.class);
-        var setup3 = mock(ProviderSetupConfiguration.class);
-        var setups = List.of(setup1, setup2, setup3);
-
-        var provider1 = mock(ProviderConfiguration.class);
-        var provider2 = mock(ProviderConfiguration.class);
-        var provider3 = mock(ProviderConfiguration.class);
-        var providerName1 = "registration";
-        var providerName2 = "another-registration";
-        var providerName3 = "registration";
-
-        ReflectionTestUtils.setField(providersConfiguration, "setup", setups);
-
-        var user = mock(UserEntity.class);
-
-        // When
-        when(setup1.getProvider()).thenReturn(provider1);
-        when(setup1.getMatchingUserEntityFromLogin(login, projectRepository)).thenReturn(Optional.empty());
-        when(setup2.getProvider()).thenReturn(provider2);
-        when(setup3.getProvider()).thenReturn(provider3);
-        when(setup3.getMatchingUserEntityFromLogin(login, projectRepository)).thenReturn(Optional.of(user));
-        when(provider1.getRegistration()).thenReturn(providerName1);
-        when(provider2.getRegistration()).thenReturn(providerName2);
-        when(provider3.getRegistration()).thenReturn(providerName3);
-
-        // Then
-        var matchingUser = providersConfiguration.getMatchingUserEntityFromProviderNameAndLogin(providerName, login, projectRepository);
-        assertThat(matchingUser).contains(user);
-    }
-
-    @Test
-    void getMatchingUserEntityFromProviderNameAndLogin_returnUser_whenProviderAndUserFoundButNotTheSameCase() {
-        // Given
-        var providerName = "ReGiStRaTiOn3";
-        var login = "login";
-        var projectRepository = mock(ProjectRepository.class);
-
-        var setup1 = mock(ProviderSetupConfiguration.class);
-        var setup2 = mock(ProviderSetupConfiguration.class);
-        var setup3 = mock(ProviderSetupConfiguration.class);
-        var setups = List.of(setup1, setup2, setup3);
-
-        var provider1 = mock(ProviderConfiguration.class);
-        var provider2 = mock(ProviderConfiguration.class);
-        var provider3 = mock(ProviderConfiguration.class);
-        var providerName1 = "registration1";
-        var providerName2 = "registration2";
-        var providerName3 = "rEgIsTrAtIoN3";
-
-        ReflectionTestUtils.setField(providersConfiguration, "setup", setups);
-
-        var user = mock(UserEntity.class);
-
-        // When
-        when(setup1.getProvider()).thenReturn(provider1);
-        when(setup2.getProvider()).thenReturn(provider2);
-        when(setup3.getProvider()).thenReturn(provider3);
-        when(setup3.getMatchingUserEntityFromLogin(login, projectRepository)).thenReturn(Optional.of(user));
-        when(provider1.getRegistration()).thenReturn(providerName1);
-        when(provider2.getRegistration()).thenReturn(providerName2);
-        when(provider3.getRegistration()).thenReturn(providerName3);
-
-        // Then
-        var matchingUser = providersConfiguration.getMatchingUserEntityFromProviderNameAndLogin(providerName, login, projectRepository);
-        assertThat(matchingUser).contains(user);
-    }
 
     @Test
     void getUsersCustomAttributesFromProviderName_returnEmptyMap_whenProviderNameIsBlank() {
@@ -512,4 +254,559 @@ class OAuth2ProvidersConfigurationTest {
         var actualCustomAttributes = providersConfiguration.getUsersCustomAttributesFromProviderName(providerName);
         assertThat(actualCustomAttributes).isSameAs(customAttributes);
     }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "\t", "\n"})
+    void getUserProfileConfiguration_returnEmptyOptional_whenProviderNameIsBlank(String providerName) {
+        // Given
+        var login = "login";
+
+        // When
+
+        // Then
+        var userProfile = providersConfiguration.getUserProfileConfiguration(providerName, login);
+        assertThat(userProfile).isNotPresent();
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "\t", "\n"})
+    void getUserProfileConfiguration_returnEmptyOptional_whenUserLoginIsBlank(String login) {
+        // Given
+        var providerName = "provider";
+
+        // When
+
+        // Then
+        var userProfile = providersConfiguration.getUserProfileConfiguration(providerName, login);
+        assertThat(userProfile).isNotPresent();
+    }
+
+    @Test
+    void getUserProfileConfiguration_returnEmptyOptional_whenSetupIsNull() {
+        // Given
+        var providerName = "provider";
+        var login = "login";
+
+        ReflectionTestUtils.setField(providersConfiguration, "setup", null);
+
+        // When
+
+        // Then
+        var userProfile = providersConfiguration.getUserProfileConfiguration(providerName, login);
+        assertThat(userProfile).isNotPresent();
+    }
+
+    @Test
+    void getUserProfileConfiguration_returnEmptyOptional_whenProviderGivenButNotFound() {
+        // Given
+        var providerName = "unknown-provider";
+        var login = "login";
+
+        var setup1 = mock(ProviderSetupConfiguration.class);
+        var setup2 = mock(ProviderSetupConfiguration.class);
+        var setup3 = mock(ProviderSetupConfiguration.class);
+        var setups = List.of(setup1, setup2, setup3);
+
+        var provider1 = mock(ProviderConfiguration.class);
+        var provider2 = mock(ProviderConfiguration.class);
+        var provider3 = mock(ProviderConfiguration.class);
+        var providerName1 = "provider1";
+        var providerName2 = "provider2";
+        var providerName3 = "provider3";
+
+        ReflectionTestUtils.setField(providersConfiguration, "setup", setups);
+
+        // When
+        when(setup1.getProvider()).thenReturn(provider1);
+        when(setup2.getProvider()).thenReturn(provider2);
+        when(setup3.getProvider()).thenReturn(provider3);
+        when(provider1.getRegistration()).thenReturn(providerName1);
+        when(provider2.getRegistration()).thenReturn(providerName2);
+        when(provider3.getRegistration()).thenReturn(providerName3);
+
+        // Then
+        var matchingUser = providersConfiguration.getUserProfileConfiguration(providerName, login);
+        assertThat(matchingUser).isNotPresent();
+    }
+
+    @Test
+    void getUserProfileConfiguration_returnEmptyOptional_whenProviderFoundButUsersConfigurationIsNull() {
+        // Given
+        var providerName = "matching-provider";
+        var login = "login";
+
+        var setup1 = mock(ProviderSetupConfiguration.class);
+        var setup2 = mock(ProviderSetupConfiguration.class);
+        var setup3 = mock(ProviderSetupConfiguration.class);
+        var setups = List.of(setup1, setup2, setup3);
+
+        var provider1 = mock(ProviderConfiguration.class);
+        var provider2 = mock(ProviderConfiguration.class);
+        var provider3 = mock(ProviderConfiguration.class);
+        var providerName1 = "another-provider-1";
+        var providerName2 = "another-provider-2";
+
+        ReflectionTestUtils.setField(providersConfiguration, "setup", setups);
+
+        // When
+        when(setup1.getProvider()).thenReturn(provider1);
+        when(provider1.getRegistration()).thenReturn(providerName1);
+        when(setup2.getProvider()).thenReturn(provider2);
+        when(provider2.getRegistration()).thenReturn(providerName2);
+        when(setup3.getProvider()).thenReturn(provider3);
+        when(provider3.getRegistration()).thenReturn(providerName);
+        when(setup3.getUsers()).thenReturn(null);
+
+        // Then
+        var matchingUser = providersConfiguration.getUserProfileConfiguration(providerName, login);
+        assertThat(matchingUser).isNotPresent();
+    }
+
+    @Test
+    void getUserProfileConfiguration_returnEmptyOptional_whenProviderFoundButProfilesAreNull() {
+        // Given
+        var providerName = "matching-provider";
+        var login = "login";
+
+        var setup1 = mock(ProviderSetupConfiguration.class);
+        var setup2 = mock(ProviderSetupConfiguration.class);
+        var setup3 = mock(ProviderSetupConfiguration.class);
+        var setups = List.of(setup1, setup2, setup3);
+
+        var provider1 = mock(ProviderConfiguration.class);
+        var provider2 = mock(ProviderConfiguration.class);
+        var provider3 = mock(ProviderConfiguration.class);
+        var providerName1 = "another-provider-1";
+        var providerName2 = "another-provider-2";
+
+        var usersConfiguration = mock(UsersConfiguration.class);
+
+        ReflectionTestUtils.setField(providersConfiguration, "setup", setups);
+
+        // When
+        when(setup1.getProvider()).thenReturn(provider1);
+        when(provider1.getRegistration()).thenReturn(providerName1);
+        when(setup2.getProvider()).thenReturn(provider2);
+        when(provider2.getRegistration()).thenReturn(providerName2);
+        when(setup3.getProvider()).thenReturn(provider3);
+        when(setup3.getUsers()).thenReturn(usersConfiguration);
+        when(provider3.getRegistration()).thenReturn(providerName);
+        when(usersConfiguration.getProfiles()).thenReturn(null);
+
+        // Then
+        var matchingUser = providersConfiguration.getUserProfileConfiguration(providerName, login);
+        assertThat(matchingUser).isNotPresent();
+    }
+
+    @Test
+    void getUserProfileConfiguration_returnEmptyOptional_whenProviderFoundButNotTheUser() {
+        // Given
+        var providerName = "matching-provider";
+        var login = "login";
+
+        var setup1 = mock(ProviderSetupConfiguration.class);
+        var setup2 = mock(ProviderSetupConfiguration.class);
+        var setup3 = mock(ProviderSetupConfiguration.class);
+        var setups = List.of(setup1, setup2, setup3);
+
+        var provider1 = mock(ProviderConfiguration.class);
+        var provider2 = mock(ProviderConfiguration.class);
+        var provider3 = mock(ProviderConfiguration.class);
+        var providerName1 = "another-provider-1";
+        var providerName2 = "another-provider-2";
+
+        var usersConfiguration = mock(UsersConfiguration.class);
+        var profile1 = mock(UserProfileConfiguration.class);
+        var profile2 = mock(UserProfileConfiguration.class);
+        var profile3 = mock(UserProfileConfiguration.class);
+        var login1 = "login-1";
+        var login2 = "login-2";
+        var login3 = "login-3";
+        var profiles = List.of(profile1, profile2, profile3);
+
+        ReflectionTestUtils.setField(providersConfiguration, "setup", setups);
+
+        // When
+        when(setup1.getProvider()).thenReturn(provider1);
+        when(provider1.getRegistration()).thenReturn(providerName1);
+        when(setup2.getProvider()).thenReturn(provider2);
+        when(provider2.getRegistration()).thenReturn(providerName2);
+        when(setup3.getProvider()).thenReturn(provider3);
+        when(setup3.getUsers()).thenReturn(usersConfiguration);
+        when(provider3.getRegistration()).thenReturn(providerName);
+        when(usersConfiguration.getProfiles()).thenReturn(profiles);
+        when(profile1.getLogin()).thenReturn(login1);
+        when(profile2.getLogin()).thenReturn(login2);
+        when(profile3.getLogin()).thenReturn(login3);
+
+        // Then
+        var matchingUser = providersConfiguration.getUserProfileConfiguration(providerName, login);
+        assertThat(matchingUser).isNotPresent();
+    }
+
+    @Test
+    void getUserProfileConfiguration_returnProfileConfiguration_whenProviderAndUserFound() {
+        // Given
+        var providerName = "matching-provider";
+        var login = "login";
+
+        var setup1 = mock(ProviderSetupConfiguration.class);
+        var setup2 = mock(ProviderSetupConfiguration.class);
+        var setup3 = mock(ProviderSetupConfiguration.class);
+        var setups = List.of(setup1, setup2, setup3);
+
+        var provider1 = mock(ProviderConfiguration.class);
+        var provider2 = mock(ProviderConfiguration.class);
+        var provider3 = mock(ProviderConfiguration.class);
+        var providerName1 = "another-provider-1";
+        var providerName2 = "another-provider-2";
+
+        var usersConfiguration = mock(UsersConfiguration.class);
+        var profile1 = mock(UserProfileConfiguration.class);
+        var profile2 = mock(UserProfileConfiguration.class);
+        var profile3 = mock(UserProfileConfiguration.class);
+        var login1 = "login-1";
+        var login2 = "login-2";
+        var profiles = List.of(profile1, profile2, profile3);
+
+        ReflectionTestUtils.setField(providersConfiguration, "setup", setups);
+
+        // When
+        when(setup1.getProvider()).thenReturn(provider1);
+        when(provider1.getRegistration()).thenReturn(providerName1);
+        when(setup2.getProvider()).thenReturn(provider2);
+        when(provider2.getRegistration()).thenReturn(providerName2);
+        when(setup3.getProvider()).thenReturn(provider3);
+        when(setup3.getUsers()).thenReturn(usersConfiguration);
+        when(provider3.getRegistration()).thenReturn(providerName);
+        when(usersConfiguration.getProfiles()).thenReturn(profiles);
+        when(profile1.getLogin()).thenReturn(login1);
+        when(profile2.getLogin()).thenReturn(login2);
+        when(profile3.getLogin()).thenReturn(login);
+
+        // Then
+        var matchingUser = providersConfiguration.getUserProfileConfiguration(providerName, login);
+        assertThat(matchingUser).contains(profile3);
+    }
+
+    @Test
+    void getUserProfileConfiguration_returnProfileConfiguration_whenProviderAndUserFoundButSomeProvidersWereNull() {
+        // Given
+        var providerName = "matching-provider";
+        var login = "login";
+
+        var setup1 = mock(ProviderSetupConfiguration.class);
+        var setup2 = mock(ProviderSetupConfiguration.class);
+        var setup3 = mock(ProviderSetupConfiguration.class);
+        var setups = List.of(setup1, setup2, setup3);
+
+        var provider1 = mock(ProviderConfiguration.class);
+        var provider3 = mock(ProviderConfiguration.class);
+        var providerName1 = "another-provider-1";
+        var providerName2 = "another-provider-2";
+
+        var usersConfiguration = mock(UsersConfiguration.class);
+        var profile1 = mock(UserProfileConfiguration.class);
+        var profile2 = mock(UserProfileConfiguration.class);
+        var profile3 = mock(UserProfileConfiguration.class);
+        var login1 = "login-1";
+        var login2 = "login-2";
+        var profiles = List.of(profile1, profile2, profile3);
+
+        ReflectionTestUtils.setField(providersConfiguration, "setup", setups);
+
+        // When
+        when(setup1.getProvider()).thenReturn(provider1);
+        when(provider1.getRegistration()).thenReturn(providerName1);
+        when(setup2.getProvider()).thenReturn(null);
+        when(setup3.getProvider()).thenReturn(provider3);
+        when(setup3.getUsers()).thenReturn(usersConfiguration);
+        when(provider3.getRegistration()).thenReturn(providerName);
+        when(usersConfiguration.getProfiles()).thenReturn(profiles);
+        when(profile1.getLogin()).thenReturn(login1);
+        when(profile2.getLogin()).thenReturn(login2);
+        when(profile3.getLogin()).thenReturn(login);
+
+        // Then
+        var matchingUser = providersConfiguration.getUserProfileConfiguration(providerName, login);
+        assertThat(matchingUser).contains(profile3);
+    }
+
+    @Test
+    void getUserProfileConfiguration_returnProfileConfiguration_whenProviderAndUserFoundButProviderNamesDoesNotShareTheSameCase() {
+        // Given
+        var providerName = "matching-provider";
+        var providerNameWithDifferentCase = "mAtChInG-PrOvIdEr";
+        var login = "login";
+
+        var setup1 = mock(ProviderSetupConfiguration.class);
+        var setup2 = mock(ProviderSetupConfiguration.class);
+        var setup3 = mock(ProviderSetupConfiguration.class);
+        var setups = List.of(setup1, setup2, setup3);
+
+        var provider1 = mock(ProviderConfiguration.class);
+        var provider2 = mock(ProviderConfiguration.class);
+        var provider3 = mock(ProviderConfiguration.class);
+        var providerName1 = "another-provider-1";
+        var providerName2 = "another-provider-2";
+
+        var usersConfiguration = mock(UsersConfiguration.class);
+        var profile1 = mock(UserProfileConfiguration.class);
+        var profile2 = mock(UserProfileConfiguration.class);
+        var profile3 = mock(UserProfileConfiguration.class);
+        var login1 = "login-1";
+        var login2 = "login-2";
+        var profiles = List.of(profile1, profile2, profile3);
+
+        ReflectionTestUtils.setField(providersConfiguration, "setup", setups);
+
+        // When
+        when(setup1.getProvider()).thenReturn(provider1);
+        when(provider1.getRegistration()).thenReturn(providerName1);
+        when(setup2.getProvider()).thenReturn(provider2);
+        when(provider2.getRegistration()).thenReturn(providerName2);
+        when(setup3.getProvider()).thenReturn(provider3);
+        when(setup3.getUsers()).thenReturn(usersConfiguration);
+        when(provider3.getRegistration()).thenReturn(providerNameWithDifferentCase);
+        when(usersConfiguration.getProfiles()).thenReturn(profiles);
+        when(profile1.getLogin()).thenReturn(login1);
+        when(profile2.getLogin()).thenReturn(login2);
+        when(profile3.getLogin()).thenReturn(login);
+
+        // Then
+        var matchingUser = providersConfiguration.getUserProfileConfiguration(providerName, login);
+        assertThat(matchingUser).contains(profile3);
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "\t", "\n"})
+    void createNewProjectsIfNotFoundAtUsersInit_returnFalse_whenProviderNameIsBlank(String providerName) {
+        // Given
+
+        // Where
+
+        // Then
+        var canCreateProject = providersConfiguration.createNewProjectsIfNotFoundAtUsersInit(providerName);
+        assertThat(canCreateProject).isFalse();
+    }
+
+    @Test
+    void createNewProjectsIfNotFoundAtUsersInit_returnFalse_whenSetupIsNull() {
+        // Given
+        var providerName = "provider";
+
+        ReflectionTestUtils.setField(providersConfiguration, "setup", null);
+
+        // When
+
+        // Then
+        var canCreateProject = providersConfiguration.createNewProjectsIfNotFoundAtUsersInit(providerName);
+        assertThat(canCreateProject).isFalse();
+    }
+
+    @Test
+    void createNewProjectsIfNotFoundAtUsersInit_returnFalse_whenProviderGivenButNotFound() {
+        // Given
+        var providerName = "unknown-provider";
+
+        var setup1 = mock(ProviderSetupConfiguration.class);
+        var setup2 = mock(ProviderSetupConfiguration.class);
+        var setup3 = mock(ProviderSetupConfiguration.class);
+        var setups = List.of(setup1, setup2, setup3);
+
+        var provider1 = mock(ProviderConfiguration.class);
+        var provider2 = mock(ProviderConfiguration.class);
+        var provider3 = mock(ProviderConfiguration.class);
+        var providerName1 = "provider1";
+        var providerName2 = "provider2";
+        var providerName3 = "provider3";
+
+        ReflectionTestUtils.setField(providersConfiguration, "setup", setups);
+
+        // When
+        when(setup1.getProvider()).thenReturn(provider1);
+        when(setup2.getProvider()).thenReturn(provider2);
+        when(setup3.getProvider()).thenReturn(provider3);
+        when(provider1.getRegistration()).thenReturn(providerName1);
+        when(provider2.getRegistration()).thenReturn(providerName2);
+        when(provider3.getRegistration()).thenReturn(providerName3);
+
+        // Then
+        var canCreateProject = providersConfiguration.createNewProjectsIfNotFoundAtUsersInit(providerName);
+        assertThat(canCreateProject).isFalse();
+    }
+
+    @Test
+    void createNewProjectsIfNotFoundAtUsersInit_returnFalse_whenProviderFoundButUsersConfigurationIsNull() {
+        // Given
+        var providerName = "matching-provider";
+
+        var setup1 = mock(ProviderSetupConfiguration.class);
+        var setup2 = mock(ProviderSetupConfiguration.class);
+        var setup3 = mock(ProviderSetupConfiguration.class);
+        var setups = List.of(setup1, setup2, setup3);
+
+        var provider1 = mock(ProviderConfiguration.class);
+        var provider2 = mock(ProviderConfiguration.class);
+        var provider3 = mock(ProviderConfiguration.class);
+        var providerName1 = "another-provider-1";
+        var providerName2 = "another-provider-2";
+
+        ReflectionTestUtils.setField(providersConfiguration, "setup", setups);
+
+        // When
+        when(setup1.getProvider()).thenReturn(provider1);
+        when(provider1.getRegistration()).thenReturn(providerName1);
+        when(setup2.getProvider()).thenReturn(provider2);
+        when(provider2.getRegistration()).thenReturn(providerName2);
+        when(setup3.getProvider()).thenReturn(provider3);
+        when(provider3.getRegistration()).thenReturn(providerName);
+        when(setup3.getUsers()).thenReturn(null);
+
+        // Then
+        var canCreateProject = providersConfiguration.createNewProjectsIfNotFoundAtUsersInit(providerName);
+        assertThat(canCreateProject).isFalse();
+    }
+
+    @Test
+    void createNewProjectsIfNotFoundAtUsersInit_returnFalse_whenProviderFoundButCannotCreateProjectOnInit() {
+        // Given
+        var providerName = "matching-provider";
+
+        var setup1 = mock(ProviderSetupConfiguration.class);
+        var setup2 = mock(ProviderSetupConfiguration.class);
+        var setup3 = mock(ProviderSetupConfiguration.class);
+        var setups = List.of(setup1, setup2, setup3);
+
+        var provider1 = mock(ProviderConfiguration.class);
+        var provider2 = mock(ProviderConfiguration.class);
+        var provider3 = mock(ProviderConfiguration.class);
+        var providerName1 = "another-provider-1";
+        var providerName2 = "another-provider-2";
+
+        var usersConfiguration = mock(UsersConfiguration.class);
+
+        ReflectionTestUtils.setField(providersConfiguration, "setup", setups);
+
+        // When
+        when(setup1.getProvider()).thenReturn(provider1);
+        when(provider1.getRegistration()).thenReturn(providerName1);
+        when(setup2.getProvider()).thenReturn(provider2);
+        when(provider2.getRegistration()).thenReturn(providerName2);
+        when(setup3.getProvider()).thenReturn(provider3);
+        when(provider3.getRegistration()).thenReturn(providerName);
+        when(setup3.getUsers()).thenReturn(usersConfiguration);
+        when(usersConfiguration.getCreateNewProjectOnInit()).thenReturn(false);
+
+        // Then
+        var canCreateProject = providersConfiguration.createNewProjectsIfNotFoundAtUsersInit(providerName);
+        assertThat(canCreateProject).isFalse();
+    }
+
+    @Test
+    void createNewProjectsIfNotFoundAtUsersInit_returnTrue_whenProviderFoundAndCanCreateProjectOnInit() {
+        // Given
+        var providerName = "matching-provider";
+
+        var setup1 = mock(ProviderSetupConfiguration.class);
+        var setup2 = mock(ProviderSetupConfiguration.class);
+        var setup3 = mock(ProviderSetupConfiguration.class);
+        var setups = List.of(setup1, setup2, setup3);
+
+        var provider1 = mock(ProviderConfiguration.class);
+        var provider2 = mock(ProviderConfiguration.class);
+        var provider3 = mock(ProviderConfiguration.class);
+        var providerName1 = "another-provider-1";
+        var providerName2 = "another-provider-2";
+
+        var usersConfiguration = mock(UsersConfiguration.class);
+
+        ReflectionTestUtils.setField(providersConfiguration, "setup", setups);
+
+        // When
+        when(setup1.getProvider()).thenReturn(provider1);
+        when(provider1.getRegistration()).thenReturn(providerName1);
+        when(setup2.getProvider()).thenReturn(provider2);
+        when(provider2.getRegistration()).thenReturn(providerName2);
+        when(setup3.getProvider()).thenReturn(provider3);
+        when(provider3.getRegistration()).thenReturn(providerName);
+        when(setup3.getUsers()).thenReturn(usersConfiguration);
+        when(usersConfiguration.getCreateNewProjectOnInit()).thenReturn(true);
+
+        // Then
+        var canCreateProject = providersConfiguration.createNewProjectsIfNotFoundAtUsersInit(providerName);
+        assertThat(canCreateProject).isTrue();
+    }
+
+    @Test
+    void createNewProjectsIfNotFoundAtUsersInit_returnTrueAndIgnoreNullProviders_whenProviderFoundAndCanCreateProjectOnInitButSomeProvidersWereNull() {
+        // Given
+        var providerName = "matching-provider";
+
+        var setup1 = mock(ProviderSetupConfiguration.class);
+        var setup2 = mock(ProviderSetupConfiguration.class);
+        var setup3 = mock(ProviderSetupConfiguration.class);
+        var setups = List.of(setup1, setup2, setup3);
+
+        var provider1 = mock(ProviderConfiguration.class);
+        var provider3 = mock(ProviderConfiguration.class);
+        var providerName1 = "another-provider-1";
+
+        var usersConfiguration = mock(UsersConfiguration.class);
+
+        ReflectionTestUtils.setField(providersConfiguration, "setup", setups);
+
+        // When
+        when(setup1.getProvider()).thenReturn(provider1);
+        when(provider1.getRegistration()).thenReturn(providerName1);
+        when(setup2.getProvider()).thenReturn(null);
+        when(setup3.getProvider()).thenReturn(provider3);
+        when(provider3.getRegistration()).thenReturn(providerName);
+        when(setup3.getUsers()).thenReturn(usersConfiguration);
+        when(usersConfiguration.getCreateNewProjectOnInit()).thenReturn(true);
+
+        // Then
+        var canCreateProject = providersConfiguration.createNewProjectsIfNotFoundAtUsersInit(providerName);
+        assertThat(canCreateProject).isTrue();
+    }
+
+    @Test
+    void createNewProjectsIfNotFoundAtUsersInit_returnTrueAndIgnoreProviderNameCase_whenProviderFoundAndCanCreateProjectOnInitButProviderNamesDoesNotShareTheSameCase() {
+        // Given
+        var providerName = "matching-provider";
+        var providerNameWithDifferentCase = "mAtChInG-PrOvIdEr";
+
+        var setup1 = mock(ProviderSetupConfiguration.class);
+        var setup2 = mock(ProviderSetupConfiguration.class);
+        var setup3 = mock(ProviderSetupConfiguration.class);
+        var setups = List.of(setup1, setup2, setup3);
+
+        var provider1 = mock(ProviderConfiguration.class);
+        var provider2 = mock(ProviderConfiguration.class);
+        var provider3 = mock(ProviderConfiguration.class);
+        var providerName1 = "another-provider-1";
+        var providerName2 = "another-provider-2";
+
+        var usersConfiguration = mock(UsersConfiguration.class);
+
+        ReflectionTestUtils.setField(providersConfiguration, "setup", setups);
+
+        // When
+        when(setup1.getProvider()).thenReturn(provider1);
+        when(provider1.getRegistration()).thenReturn(providerName1);
+        when(setup2.getProvider()).thenReturn(provider2);
+        when(provider2.getRegistration()).thenReturn(providerName2);
+        when(setup3.getProvider()).thenReturn(provider3);
+        when(provider3.getRegistration()).thenReturn(providerNameWithDifferentCase);
+        when(setup3.getUsers()).thenReturn(usersConfiguration);
+        when(usersConfiguration.getCreateNewProjectOnInit()).thenReturn(true);
+
+        // Then
+        var canCreateProject = providersConfiguration.createNewProjectsIfNotFoundAtUsersInit(providerName);
+        assertThat(canCreateProject).isTrue();
+    }
+
 }

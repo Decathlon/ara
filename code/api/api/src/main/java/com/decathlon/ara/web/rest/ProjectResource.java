@@ -18,11 +18,12 @@
 package com.decathlon.ara.web.rest;
 
 import com.decathlon.ara.Entities;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntityRoleOnProject;
-import com.decathlon.ara.security.service.user.UserService;
+import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
+import com.decathlon.ara.security.service.user.UserAccountService;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
+import com.decathlon.ara.service.exception.ForbiddenException;
 import com.decathlon.ara.web.rest.util.HeaderUtil;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
 import org.springframework.http.ResponseEntity;
@@ -44,13 +45,13 @@ public class ProjectResource {
     public static final String PATH = API_PATH + "/" + NAME + "s";
     public static final String CODE_PATH = PROJECT_API_PATH;
 
-    private final ProjectService service;
+    private final ProjectService projectService;
 
-    private final UserService userService;
+    private final UserAccountService userAccountService;
 
-    public ProjectResource(ProjectService service, UserService userService) {
-        this.service = service;
-        this.userService = userService;
+    public ProjectResource(ProjectService projectService, UserAccountService userAccountService) {
+        this.projectService = projectService;
+        this.userAccountService = userAccountService;
     }
 
     /**
@@ -67,8 +68,8 @@ public class ProjectResource {
             return ResponseEntity.badRequest().headers(HeaderUtil.idMustBeEmpty(NAME)).build();
         }
         try {
-            ProjectDTO createdDto = service.create(dtoToCreate);
-            userService.updateLoggedInUserProjectScopes(createdDto.getCode(), UserEntityRoleOnProject.ScopedUserRoleOnProject.ADMIN);
+            ProjectDTO createdDto = projectService.create(dtoToCreate);
+            userAccountService.updateCurrentUserAccountProjectScope(createdDto.getCode(), UserAccountScopeRole.ADMIN);
             return ResponseEntity
                     .created(HeaderUtil.uri(PATH + "/" + createdDto.getId()))
                     .headers(HeaderUtil.entityCreated(NAME, createdDto.getId()))
@@ -89,9 +90,9 @@ public class ProjectResource {
     @PutMapping(PROJECT_CODE_REQUEST_PARAMETER)
     public ResponseEntity<ProjectDTO> update(@PathVariable String projectCode, @Valid @RequestBody ProjectDTO dtoToUpdate) {
         try {
-            var projectId = service.toId(projectCode);
+            var projectId = projectService.toId(projectCode);
             dtoToUpdate.setId(projectId); // HTTP PUT requires the URL to be the URL of the entity
-            ProjectDTO updatedDto = service.update(dtoToUpdate);
+            ProjectDTO updatedDto = projectService.update(dtoToUpdate);
             return ResponseEntity.ok()
                     .headers(HeaderUtil.entityUpdated(NAME, updatedDto.getId()))
                     .body(updatedDto);
@@ -107,7 +108,7 @@ public class ProjectResource {
      */
     @GetMapping
     public List<ProjectDTO> getAll() {
-        return service.findAll();
+        return projectService.findAll();
     }
 
     /**
@@ -118,8 +119,8 @@ public class ProjectResource {
     @DeleteMapping(PROJECT_CODE_REQUEST_PARAMETER)
     public ResponseEntity<Void> deleteProject(@PathVariable String projectCode) {
         try {
-            service.delete(projectCode);
-        } catch (BadRequestException e) {
+            projectService.delete(projectCode);
+        } catch (ForbiddenException e) {
             return ResponseUtil.handle(e);
         }
         return ResponseUtil.deleted(NAME, projectCode);

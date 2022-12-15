@@ -25,9 +25,9 @@ import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
 import com.decathlon.ara.repository.ProjectRepository;
 import com.decathlon.ara.repository.RootCauseRepository;
 import com.decathlon.ara.security.service.AuthorityService;
-import com.decathlon.ara.security.service.user.UserService;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
+import com.decathlon.ara.service.exception.ForbiddenException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
 import com.decathlon.ara.service.mapper.GenericMapper;
@@ -38,6 +38,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 /**
  * Service for managing Project.
@@ -56,22 +58,18 @@ public class ProjectService {
 
     private final AuthorityService authorityService;
 
-    private final UserService userService;
-
     public ProjectService(
             ProjectRepository repository,
             RootCauseRepository rootCauseRepository,
             GenericMapper mapper,
             CommunicationService communicationService,
-            AuthorityService authorityService,
-            UserService userService
+            AuthorityService authorityService
     ) {
         this.repository = repository;
         this.rootCauseRepository = rootCauseRepository;
         this.mapper = mapper;
         this.communicationService = communicationService;
         this.authorityService = authorityService;
-        this.userService = userService;
     }
 
     /**
@@ -95,6 +93,26 @@ public class ProjectService {
                 new RootCause(projectId, "Test to update")));
 
         return createdProject;
+    }
+
+    /**
+     * Create a new project from a code.
+     * The project name is generated from the code given.
+     * @param projectCode the project code
+     * @return the created {@link ProjectDTO}
+     * @throws NotUniqueException thrown when project code already exists
+     */
+    public ProjectDTO createFromCode(String projectCode) throws NotUniqueException {
+        var projectName =  getProjectNameFromCode(projectCode);
+        return create(new ProjectDTO(null, projectCode, projectName, false));
+    }
+
+    private static String getProjectNameFromCode(String projectCode) {
+        UnaryOperator<String> capitalizeFirstLetter = string -> Character.toUpperCase(string.charAt(0)) + string.substring(1);
+        var projectNameFromCode = Arrays.stream(projectCode.split("[^a-zA-Z0-9]+"))
+                .map(capitalizeFirstLetter)
+                .collect(Collectors.joining(" "));
+        return String.format("%s (generated)", projectNameFromCode);
     }
 
     /**
@@ -146,14 +164,24 @@ public class ProjectService {
         return new ArrayList<>();
     }
 
+    /**
+     * Tell if a project exists
+     * @param projectCode the project code
+     * @return true iff the project exists
+     */
     public boolean exists(String projectCode) {
         return repository.existsByCode(projectCode);
     }
 
+    /**
+     * Delete a project.
+     * @param projectCode the project code
+     * @throws ForbiddenException if this operation fails
+     */
     @Transactional
-    public void delete(String code) throws BadRequestException {
-        repository.deleteByCode(code);
-        userService.updateAuthoritiesFromLoggedInUser();
+    public void delete(String projectCode) throws ForbiddenException {
+        repository.deleteByCode(projectCode);
+        authorityService.refreshCurrentUserAccountAuthorities();
     }
 
     /**

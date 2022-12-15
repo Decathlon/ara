@@ -4,7 +4,7 @@ import com.decathlon.ara.domain.Project;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.GrantedAuthority;
+import org.springframework.lang.NonNull;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -37,7 +37,7 @@ public class UserEntityRoleOnProject {
         this.role = ScopedUserRoleOnProject.MEMBER;
     }
 
-    public UserEntityRoleOnProject(UserEntity userEntity, Project project, ScopedUserRoleOnProject role) {
+    public UserEntityRoleOnProject(@NonNull UserEntity userEntity, @NonNull Project project, @NonNull ScopedUserRoleOnProject role) {
         this.userEntityRoleOnProjectId = new UserEntityRoleOnProjectId(userEntity.getLogin(), userEntity.getProviderName(), project.getId());
         this.userEntity = userEntity;
         this.project = project;
@@ -88,14 +88,6 @@ public class UserEntityRoleOnProject {
         }
     }
 
-    /**
-     * Get matching authority from project and role
-     * @return the granted authority
-     */
-    public GrantedAuthority getMatchingAuthority() {
-        return () -> String.format("USER_PROJECT_SCOPE:%s:%s", project.getCode(), role);
-    }
-
     public static class UserEntityRoleOnProjectId implements Serializable {
 
         private UserEntity.UserEntityId userEntityId;
@@ -105,7 +97,12 @@ public class UserEntityRoleOnProject {
         public UserEntityRoleOnProjectId() {
         }
 
-        public UserEntityRoleOnProjectId(String login, String providerName, Long projectId) {
+        public UserEntityRoleOnProjectId(@NonNull UserEntity userEntity, @NonNull Project project) {
+            this.userEntityId = new UserEntity.UserEntityId(userEntity.getLogin(), userEntity.getProviderName());
+            this.projectId = project.getId();
+        }
+
+        public UserEntityRoleOnProjectId(@NonNull String login, @NonNull String providerName, @NonNull Long projectId) {
             this.userEntityId = new UserEntity.UserEntityId(login, providerName);
             this.projectId = projectId;
         }

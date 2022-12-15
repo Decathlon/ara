@@ -1,7 +1,7 @@
 package com.decathlon.ara.web.rest.authentication;
 
-import com.decathlon.ara.security.dto.user.LoggedInUserDTO;
-import com.decathlon.ara.security.service.user.UserService;
+import com.decathlon.ara.security.dto.user.UserAccount;
+import com.decathlon.ara.security.service.user.UserAccountService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,18 +14,18 @@ import static com.decathlon.ara.web.rest.util.RestConstants.API_PATH;
 @RequestMapping(UserResource.PATH)
 public class UserResource {
 
-    private final UserService userService;
+    private final UserAccountService userAccountService;
 
     static final String PATH = API_PATH + "/user";
     public static final String PATHS = PATH + "/**";
 
-    public UserResource(UserService userService) {
-        this.userService = userService;
+    public UserResource(UserAccountService userAccountService) {
+        this.userAccountService = userAccountService;
     }
 
     @GetMapping("/details")
-    public ResponseEntity<LoggedInUserDTO> getUserDetails(OAuth2AuthenticationToken authentication) {
-        var user = userService.getLoggedInUserDTO(authentication);
+    public ResponseEntity<UserAccount> getUserDetails(OAuth2AuthenticationToken authentication) {
+        var user = userAccountService.getCurrentUserAccount(authentication);
         return user.map(ResponseEntity::ok).orElse(ResponseEntity.badRequest().build());
     }
 

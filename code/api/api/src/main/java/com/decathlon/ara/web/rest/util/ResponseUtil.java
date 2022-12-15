@@ -17,13 +17,9 @@
 
 package com.decathlon.ara.web.rest.util;
 
+import com.decathlon.ara.service.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import com.decathlon.ara.service.exception.BadGatewayException;
-import com.decathlon.ara.service.exception.BadRequestException;
-import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.service.exception.NotUniqueException;
 
 /**
  * Utility class for ResponseEntity creation.
@@ -42,17 +38,21 @@ public final class ResponseUtil {
     }
 
     public static <X> ResponseEntity<X> handle(BadRequestException e) {
-        if (e instanceof NotFoundException) {
+        if (e instanceof NotFoundException nfe) {
             return ResponseEntity.notFound()
-                    .headers(HeaderUtil.notFound((NotFoundException) e))
+                    .headers(HeaderUtil.notFound(nfe))
                     .build();
-        } else if (e instanceof NotUniqueException) {
+        } else if (e instanceof NotUniqueException nue) {
             return ResponseEntity.badRequest()
-                    .headers(HeaderUtil.notUnique((NotUniqueException) e))
+                    .headers(HeaderUtil.notUnique(nue))
                     .build();
-        } else if (e instanceof BadGatewayException) {
+        } else if (e instanceof BadGatewayException bge) {
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
-                    .headers(HeaderUtil.badGateway((BadGatewayException) e))
+                    .headers(HeaderUtil.badGateway(bge))
+                    .build();
+        } else if (e instanceof ForbiddenException fe) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .headers(HeaderUtil.forbidden(fe))
                     .build();
         } else {
             return ResponseEntity.badRequest()

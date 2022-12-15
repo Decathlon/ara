@@ -4,14 +4,13 @@ import com.decathlon.ara.domain.Project;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.util.CollectionUtils;
+import org.springframework.lang.NonNull;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Entity
 @IdClass(UserEntity.UserEntityId.class)
@@ -36,7 +35,7 @@ public class UserEntity {
         public UserEntityId() {
         }
 
-        public UserEntityId(String login, String providerName) {
+        public UserEntityId(@NonNull String login, @NonNull String providerName) {
             this.login = login;
             this.providerName = providerName;
         }
@@ -82,14 +81,6 @@ public class UserEntity {
         SCOPED_USER;
 
         /**
-         * Get the authority matching this user profile
-         * @return the granted authority
-         */
-        public GrantedAuthority getMatchingAuthority() {
-            return () -> String.format("USER_PROFILE:%s", this);
-        }
-
-        /**
          * Get the profile matching a string, when found
          * @param profileAsString the profile as string
          * @return the matching user profile
@@ -115,13 +106,13 @@ public class UserEntity {
         this.profile = UserEntityProfile.SCOPED_USER;
     }
 
-    public UserEntity(String login, String providerName) {
+    public UserEntity(@NonNull String login, @NonNull String providerName) {
         this.login = login;
         this.providerName = providerName;
         this.profile = UserEntityProfile.SCOPED_USER;
     }
 
-    public UserEntity(String login, String providerName, UserEntityProfile profile) {
+    public UserEntity(@NonNull String login, @NonNull String providerName, @NonNull UserEntityProfile profile) {
         this.login = login;
         this.providerName = providerName;
         this.profile = profile;
@@ -179,7 +170,7 @@ public class UserEntity {
         return profile;
     }
 
-    public void setProfile(UserEntityProfile profile) {
+    public void setProfile(@NonNull UserEntityProfile profile) {
         this.profile = profile;
     }
 
@@ -189,27 +180,5 @@ public class UserEntity {
 
     public void setRolesOnProjectWhenScopedUser(List<UserEntityRoleOnProject> rolesOnProjectWhenScopedUser) {
         this.rolesOnProjectWhenScopedUser = rolesOnProjectWhenScopedUser;
-    }
-
-    /**
-     * Get all the user's matching authorities
-     * @return the granted authorities
-     */
-    public Set<GrantedAuthority> getMatchingAuthorities() {
-        var userProfile = profile == null ? UserEntityProfile.SCOPED_USER : profile;
-        var profileAuthority = Set.of(userProfile.getMatchingAuthority());
-        if (UserEntityProfile.SCOPED_USER.equals(userProfile)) {
-            var scopedAuthorities = CollectionUtils.isEmpty(rolesOnProjectWhenScopedUser) ?
-                    new HashSet<GrantedAuthority>() :
-                    rolesOnProjectWhenScopedUser
-                            .stream()
-                            .map(UserEntityRoleOnProject::getMatchingAuthority)
-                            .collect(Collectors.toSet());
-            return Stream.of(profileAuthority, scopedAuthorities)
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toSet());
-        }
-
-        return profileAuthority;
     }
 }
