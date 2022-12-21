@@ -16,3 +16,18 @@
  ******************************************************************************/
 export default {
 }
+
+export const DEMO_PROJECT_CODE = 'the-demo-project'
+
+export const USER = {
+  PROFILE: {
+    SUPER_ADMIN: 'SUPER_ADMIN',
+    AUDITOR: 'AUDITOR',
+    SCOPED_USER: 'SCOPED_USER'
+  },
+  ROLE_ON_PROJECT: {
+    ADMIN: 'ADMIN',
+    MAINTAINER: 'MAINTAINER',
+    MEMBER: 'MEMBER'
+  }
+}

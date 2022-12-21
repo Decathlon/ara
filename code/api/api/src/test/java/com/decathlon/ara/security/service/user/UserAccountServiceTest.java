@@ -392,7 +392,7 @@ class UserAccountServiceTest {
                         Optional.of(userEmail),
                         Optional.of(userFirstName),
                         Optional.of(userLastName),
-                        UserEntity.UserEntityProfile.getProfileFromString(profileAsString).get()
+                        UserEntity.UserEntityProfile.valueOf(profileAsString.toUpperCase())
                 );
         assertThat(userToSave.getRolesOnProjectWhenScopedUser())
                 .extracting("userEntity", "project", "role")
@@ -500,7 +500,7 @@ class UserAccountServiceTest {
                         Optional.of(userEmail),
                         Optional.of(userFirstName),
                         Optional.of(userLastName),
-                        UserEntity.UserEntityProfile.getProfileFromString(profileAsString).get()
+                        UserEntity.UserEntityProfile.valueOf(profileAsString.toUpperCase())
                 );
         assertThat(userToSave.getRolesOnProjectWhenScopedUser())
                 .extracting("userEntity", "project", "role")

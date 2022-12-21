@@ -1,9 +1,6 @@
 package com.decathlon.ara.domain.security.member.user.entity;
 
 import com.decathlon.ara.domain.Project;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 
 import javax.persistence.*;
@@ -15,8 +12,6 @@ import java.util.Optional;
 @Entity
 @IdClass(UserEntity.UserEntityId.class)
 public class UserEntity {
-
-    private static final Logger LOG = LoggerFactory.getLogger(UserEntity.class);
 
     @Id
     @Column(length = 50)
@@ -78,25 +73,7 @@ public class UserEntity {
     public enum UserEntityProfile {
         SUPER_ADMIN,
         AUDITOR,
-        SCOPED_USER;
-
-        /**
-         * Get the profile matching a string, when found
-         * @param profileAsString the profile as string
-         * @return the matching user profile
-         */
-        public static Optional<UserEntityProfile> getProfileFromString(String profileAsString) {
-            if (StringUtils.isBlank(profileAsString)) {
-                return Optional.empty();
-            }
-
-            try {
-                return Optional.of(UserEntityProfile.valueOf(profileAsString.toUpperCase()));
-            } catch (IllegalArgumentException exception) {
-                LOG.warn("The user profile \"{}\" doesn't exist!", profileAsString);
-                return Optional.empty();
-            }
-        }
+        SCOPED_USER
     }
 
     @OneToMany(mappedBy = "userEntity", fetch = FetchType.EAGER, cascade = CascadeType.ALL)

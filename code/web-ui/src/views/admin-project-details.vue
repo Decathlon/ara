@@ -19,7 +19,7 @@
     <div class="projectHeader">
       <div class="adminTitle">
         <h1>{{ projectName }}</h1>
-        <p class="projectCode" align="center"><strong>{{ projectCode }}</strong></p>
+        <p class="projectCode"><strong>{{ projectCode }}</strong></p>
       </div>
 
       <Button title="Edit" class="editBtn" type="primary" ghost>Edit project</Button>
@@ -38,7 +38,7 @@
         <Button type="primary" shape="circle" icon="md-checkmark">Groups</Button>
       </div>
 
-      <table class="adminTable">
+      <table class="adminTable" aria-label="User names and roles">
         <thead>
           <tr>
             <th>Name</th>
@@ -181,10 +181,10 @@
       Vue.http
         .get('/api/projects/' + this.projectCode + '/members/users')
         .then((response) => {
-          for (var i = 0; i < response.body.length; i++) {
+          for (let user of response.body) {
             this.projectInfo.push({
-              name: response.body[i].name,
-              role: response.body[i].role
+              name: user.name,
+              role: user.role
             })
           }
         })

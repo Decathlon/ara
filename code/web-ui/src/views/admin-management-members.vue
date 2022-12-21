@@ -34,7 +34,7 @@
         </AutoComplete>
       </div>
 
-      <table class="adminTable">
+      <table class="adminTable" aria-label="Users and their roles">
         <thead>
           <tr>
             <th>Name</th>
@@ -189,18 +189,18 @@
         this.$store.dispatch('admin/showChoice', false)
         await Vue.http
           .get(memberType === 'Users' ? 'api/users' : 'api/groups', api.REQUEST_OPTIONS)
-          .then((groupList) => {
-            if (groupList.body.length > 0) {
-              for (let i = 0; i < groupList.body.length; i++) {
+          .then((groups) => {
+            if (groups.body.length > 0) {
+              for (let i = 0; i < groups.body.length; i++) {
                 this.members = []
-                this.members = groupList.body
+                this.members = groups.body
               }
-              for (let j = 0; j < this.members.length; j++) {
-                if (this.members[j].memberName) {
+              for (let member of this.members) {
+                if (member.memberName) {
                   Vue.http
-                    .get('/api/users/' + this.members[j].memberName, api.REQUEST_OPTIONS)
+                    .get('/api/users/' + member.memberName, api.REQUEST_OPTIONS)
                     .then((response) => {
-                      this.members[j].role = response.body.roles[0]
+                      member.role = response.body.roles[0]
                     })
                 }
               }

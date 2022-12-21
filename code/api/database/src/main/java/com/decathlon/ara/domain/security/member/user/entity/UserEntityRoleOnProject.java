@@ -1,19 +1,13 @@
 package com.decathlon.ara.domain.security.member.user.entity;
 
 import com.decathlon.ara.domain.Project;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Optional;
 
 @Entity
 public class UserEntityRoleOnProject {
-
-    private static final Logger LOG = LoggerFactory.getLogger(UserEntityRoleOnProject.class);
 
     @EmbeddedId
     private UserEntityRoleOnProjectId userEntityRoleOnProjectId;
@@ -67,25 +61,7 @@ public class UserEntityRoleOnProject {
     public enum ScopedUserRoleOnProject {
         ADMIN,
         MAINTAINER,
-        MEMBER;
-
-        /**
-         * Get a scope from string, when found
-         * @param scopeAsString the scope represented as string
-         * @return the scope from string
-         */
-        public static Optional<ScopedUserRoleOnProject> getScopeFromString(String scopeAsString) {
-            if (StringUtils.isBlank(scopeAsString)) {
-                return Optional.empty();
-            }
-
-            try {
-                return Optional.of(ScopedUserRoleOnProject.valueOf(scopeAsString.toUpperCase()));
-            } catch (IllegalArgumentException exception) {
-                LOG.warn("The user scope \"{}\" doesn't exist!", scopeAsString);
-                return Optional.empty();
-            }
-        }
+        MEMBER
     }
 
     public static class UserEntityRoleOnProjectId implements Serializable {

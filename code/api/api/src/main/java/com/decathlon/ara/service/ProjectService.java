@@ -21,9 +21,9 @@ import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.domain.Project;
 import com.decathlon.ara.domain.RootCause;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
 import com.decathlon.ara.repository.ProjectRepository;
 import com.decathlon.ara.repository.RootCauseRepository;
+import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.service.AuthorityService;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
@@ -148,13 +148,13 @@ public class ProjectService {
         if (profile.isEmpty()) {
             return new ArrayList<>();
         }
-        var superAdmin = UserEntity.UserEntityProfile.SUPER_ADMIN;
-        var auditor = UserEntity.UserEntityProfile.AUDITOR;
+        var superAdmin = UserAccountProfile.SUPER_ADMIN;
+        var auditor = UserAccountProfile.AUDITOR;
         var userHasFullAccessToProjects = superAdmin.equals(profile.get()) || auditor.equals(profile.get());
         if (userHasFullAccessToProjects) {
             return mapper.mapCollection(repository.findAllByOrderByName(), ProjectDTO.class);
         }
-        var scopedUser = UserEntity.UserEntityProfile.SCOPED_USER;
+        var scopedUser = UserAccountProfile.SCOPED_USER;
         var userHasLimitedAccessToProjects = scopedUser.equals(profile.get());
         if (userHasLimitedAccessToProjects) {
             var scopedProjectCodes = authorityService.getScopedProjectCodes();

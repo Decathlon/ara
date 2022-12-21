@@ -17,21 +17,13 @@
 
 package com.decathlon.ara.domain;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
-
+import com.decathlon.ara.domain.security.member.user.entity.UserEntityRoleOnProject;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Project {
@@ -41,10 +33,10 @@ public class Project {
     @SequenceGenerator(name = "project_id", sequenceName = "project_id", allocationSize = 1)
     private Long id;
 
-    @Column(length = 32, nullable = false)
+    @Column(length = 32, nullable = false, unique = true)
     private String code;
 
-    @Column(length = 64, nullable = false)
+    @Column(length = 64, nullable = false, unique = true)
     private String name;
 
     public Project() {
@@ -64,6 +56,10 @@ public class Project {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "project", orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Communication> communications = new ArrayList<>();
+
+    @OneToMany(mappedBy = "project")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<UserEntityRoleOnProject> userRoles = new ArrayList<>();
 
     public void addCommunication(Communication communication) {
         // Set the child-entity's foreign-key BEFORE adding the child-entity to the TreeSet,
@@ -101,4 +97,7 @@ public class Project {
         this.communications = communications;
     }
 
+    public List<UserEntityRoleOnProject> getUserRoles() {
+        return userRoles;
+    }
 }

@@ -345,7 +345,7 @@ pre code {
 }
 
 .saveProjectChange {
-  margin-top: 2rem; 
+  margin-top: 2rem;
 }
 
 .membersTypeChoice {
@@ -516,6 +516,9 @@ pre code {
 
 .adminTable .showBtn {
   position: absolute;
+  top: -20px;
+  right: 80px;
+  color: #ad8daf;
   background-color: #ffffff;
   padding: 8px;
   border-radius: 100px;
@@ -525,12 +528,6 @@ pre code {
 
 .adminTable .addBtn {
   right: 0;
-}
-
-.adminTable .showBtn {
-  top: -20px;
-  right: 80px;
-  color: #ad8daf;
 }
 
 /* Modal  */

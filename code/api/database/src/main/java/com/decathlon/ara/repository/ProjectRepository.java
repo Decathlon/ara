@@ -19,6 +19,8 @@ package com.decathlon.ara.repository;
 
 import com.decathlon.ara.domain.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -45,6 +47,8 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     boolean existsByCode(String code);
 
+    @Modifying
+    @Query(value = "delete from Project p where p.code = ?1")
     void deleteByCode(String code);
 
 }

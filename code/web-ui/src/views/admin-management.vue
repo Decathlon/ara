@@ -22,14 +22,14 @@
      <Select class="filterSelect" v-model="projectFilter" clearable filterable placeholder="Filter">
         <Option v-for="(filters, index) in filterType" :value="index" :key="index" :label="filters" />
       </Select>
-      <Button v-if="!(projects.find(project => project.code === 'the-demo-project'))" type="warning" class="demoProjectButton" data-nrt="createDemo" :loading="loadingDemoProject" @click="createDemoProject">CREATE THE DEMO PROJECT</Button>
-      <Button v-if="(projects.find(project => project.code === 'the-demo-project'))" class="change-view" @click="switchView = !switchView" type="primary" ghost>{{ !switchView ? 'Show Demo Project' : 'Show Projects List' }}</Button>
+      <Button v-if="demoProjectNotFound" type="warning" class="demoProjectButton" data-nrt="createDemo" :loading="loadingDemoProject" @click="createDemoProject">CREATE THE DEMO PROJECT</Button>
+      <Button v-else class="change-view" @click="switchView = !switchView" type="primary" ghost>{{ !switchView ? 'Show Demo Project' : 'Show Projects List' }}</Button>
       <Button type="primary" class="addBtn" @click="add()">
         Add project
       </Button>
     </div>
 
-    <table v-if="switchView" class="adminTable">
+    <table v-if="switchView" class="adminTable" aria-label="Current user projects">
       <thead>
         <tr>
           <th>Name</th>
@@ -48,7 +48,7 @@
           <td>Update date</td>
           <td>Created by</td>
           <td>
-            <input type="radio" name="defautProject" @change="changeDefaultProject(project)" :checked="project.defaultAtStartup === true ? true : false">
+            <input type="radio" name="defaultProject" @change="changeDefaultProject(project)" :checked="project.defaultAtStartup === true">
           </td>
           <td>
             <Icon type="md-close-circle" size="24" @click="deleteDemoProject()"/>
@@ -58,13 +58,13 @@
       </tbody>
     </table>
 
-    <table v-if="!switchView" class="adminTable">
+    <table v-if="!switchView" class="adminTable" aria-label="Current user project scopes">
       <thead>
         <tr>
           <th>Name</th>
           <th>Creation date</th>
           <th>Update date</th>
-          <th>Role</th>
+          <th v-if="isScopedUser">Role</th>
           <th>Default</th>
           <th></th>
         </tr>
@@ -75,12 +75,12 @@
           <td>{{ project.name }}</td>
           <td>Creation date</td>
           <td>Update date</td>
-          <td>{{ project.role }}</td>
+          <td v-if="isScopedUser">{{ getRoleOnProject(project.code) }}</td>
           <td>
-            <input type="radio" name="defautProject" @change="changeDefaultProject(project)" :checked="project.defaultAtStartup === true ? true : false">
+            <input type="radio" name="defaultProject" @change="changeDefaultProject(project)" :checked="project.defaultAtStartup === true">
           </td>
           <td>
-            <Icon v-if="project.role === 'ADMIN' || project.role === 'SUPER_ADMIN'" type="md-close-circle" size="24" @click="deleteProject(project.code)"/>
+            <Icon v-if="isAdminOnProject(project.code)" type="md-close-circle" size="24" @click="deleteProject(project.code)"/>
             <Icon type="md-eye" size="24" @click="openProjectDetails(project)"/>
           </td>
         </tr>
@@ -107,17 +107,19 @@
 <script>
   import Vue from 'vue'
   import api from '../libs/api'
-  import manangementProjects from '../views/management-projects.vue'
+  import managementProjects from '../views/management-projects.vue'
   import formField from '../components/form-field'
-  export default {
+  import _ from 'lodash'
+  import { DEMO_PROJECT_CODE, USER } from '../libs/constants'
+  import { AuthenticationService } from '../service/authentication.service'
+export default {
     name: 'admin-management',
     components: {
-      manangementProjects,
+      managementProjects,
       formField
     },
     data () {
       return {
-        demoProjectCode: 'the-demo-project',
         projects: [],
         addOrChangeProject: false,
         loadingDemoProject: false,
@@ -215,29 +217,15 @@
         Vue.http
           .get('api/projects', api.REQUEST_OPTIONS)
           .then((response) => {
-            const project = response.body
-            this.projects = Array.from(project)
-            for (let j = 0; j < this.projects.length; j++) {
-              if (this.projectsRole.scopes.length > 0) {
-                if (this.projectsRole.scopes[j].project === this.projects[j].code) {
-                  this.projects[j].role = this.projectsRole.scopes[j].role
-                }
-              } else this.projects[j].role = this.projectsRole.profile
-            }
-            // THIS PART ADD MEMBERS TO EACH PROJECTS (WAITING FOR BACK)
-            // for (let i = 0; i < project.length; i++) {
-            //   Vue.http
-            //     .get('/api/projects/' + project[i].code + '/members/users')
-            //     .then((response) => {
-            //       project[i].members = response.body
-            //       if (project[i].code === this.$store.state.projects.defaultProjectCode) {
-            //         project[i].defaultAtStartup = true
-            //       }
-            //       this.projects = Array.from(project)
-            //     })
-            // }
+            this.projects = response.body
             return this.projects
           })
+      },
+      isAdminOnProject (projectCode) {
+        return this.isSuperAdmin || (this.isScopedUser && (this.getRoleOnProject(projectCode) === USER.ROLE_ON_PROJECT.ADMIN))
+      },
+      getRoleOnProject (projectCode) {
+        return _(this.userDetails.scopes).filter({ 'project': projectCode }).map('role').first()
       },
       changeDefaultProject (project) {
         const defaultInfo = {
@@ -257,7 +245,7 @@
           okText: 'Delete',
           loading: true,
           onOk () {
-            self.$store.commit('teams/unloadTeams', { projectCode: self.demoProjectCode })
+            self.$store.commit('teams/unloadTeams', { projectCode: DEMO_PROJECT_CODE })
             Vue.http
               .delete(api.paths.demo(), api.REQUEST_OPTIONS)
               .then(() => {
@@ -286,7 +274,7 @@
           .then(() => {
             this.loadingDemoProject = false
             this.getProjectList()
-            this.$store.dispatch('teams/ensureTeamsLoaded', this.demoProjectCode)
+            this.$store.dispatch('teams/ensureTeamsLoaded', DEMO_PROJECT_CODE)
           }, (error) => {
             this.loadingDemoProject = false
             api.handleError(error)
@@ -297,16 +285,28 @@
       this.getProjectList()
     },
     computed: {
+      demoProjectNotFound () {
+        return !_(this.projects).some({ 'code': DEMO_PROJECT_CODE })
+      },
+
       sortedProjects () {
-        return this.projects.map(item => item).sort((a, b) => a.code - b.code).filter(project => project.code !== 'the-demo-project')
+        return this.projects.map(item => item).sort((a, b) => a.code - b.code).filter(project => project.code !== DEMO_PROJECT_CODE)
       },
 
       sortedDemoProject () {
-        return this.projects.filter(item => item.code === 'the-demo-project')
+        return this.projects.filter(item => item.code === DEMO_PROJECT_CODE)
       },
 
-      projectsRole () {
-        return JSON.parse(localStorage.getItem('user_details'))
+      userDetails () {
+        return AuthenticationService.getDetails().user
+      },
+
+      isSuperAdmin () {
+        return this.userDetails?.profile === USER.PROFILE.SUPER_ADMIN
+      },
+
+      isScopedUser () {
+        return this.userDetails?.profile === USER.PROFILE.SCOPED_USER
       }
     }
   }

@@ -27,7 +27,7 @@
           ref="crud"/>
 
     <div v-if="loaded" style="margin-top: 16px; text-align: center;">
-      <div v-if="projects.find(project => project.code === demoProjectCode)">
+      <div v-if="demoProjectAlreadyCreated">
         <Button data-nrt="deleteDemo" icon="md-trash" type="error" @click="deleteDemoProject">DELETE THE DEMO PROJECT</Button>
       </div>
       <div v-else>
@@ -38,7 +38,7 @@
 
     <Alert v-if="justCreatedDemoProject" style="margin-top: 16px; text-align: center;" type="success">
       The demo project has been created: you can access its
-      <router-link :to="{ name: 'executions', params: { projectCode: this.demoProjectCode } }">executions</router-link>.
+      <router-link :to="demoProjectExecutions">executions</router-link>.
     </Alert>
   </div>
 </template>
@@ -50,8 +50,10 @@
   import api from '../libs/api'
 
   import crudComponent from '../components/crud'
+  import { DEMO_PROJECT_CODE } from '../libs/constants'
+  import _ from 'lodash'
 
-  export default {
+export default {
     name: 'management-projects',
 
     components: {
@@ -62,12 +64,17 @@
       ...mapState('projects', [
         'projects',
         'loaded'
-      ])
+      ]),
+      demoProjectAlreadyCreated () {
+        return _(this.projects).some({ 'code': DEMO_PROJECT_CODE })
+      },
+      demoProjectExecutions () {
+        return { name: 'executions', params: { projectCode: DEMO_PROJECT_CODE } }
+      }
     },
 
     data () {
       return {
-        demoProjectCode: 'the-demo-project',
         loadingDemoProject: false,
         justCreatedDemoProject: false,
         introduction: 'Projects are isolated areas in ARA to manage test reports of several applications or standalone components.',
@@ -121,7 +128,7 @@
             this.loadingDemoProject = false
             this.$refs.crud.load()
             this.justCreatedDemoProject = true
-            this.$store.dispatch('teams/ensureTeamsLoaded', this.demoProjectCode)
+            this.$store.dispatch('teams/ensureTeamsLoaded', DEMO_PROJECT_CODE)
           }, (error) => {
             this.loadingDemoProject = false
             api.handleError(error)
@@ -137,7 +144,7 @@
           loading: true,
           onOk () {
             self.justCreatedDemoProject = false
-            self.$store.commit('teams/unloadTeams', { projectCode: self.demoProjectCode })
+            self.$store.commit('teams/unloadTeams', { projectCode: DEMO_PROJECT_CODE })
             Vue.http
               .delete(api.paths.demo(), api.REQUEST_OPTIONS)
               .then((response) => {

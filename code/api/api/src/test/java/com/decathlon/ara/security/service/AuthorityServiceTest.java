@@ -1,9 +1,10 @@
 package com.decathlon.ara.security.service;
 
 import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntityRoleOnProject;
+import com.decathlon.ara.loader.DemoLoaderConstants;
 import com.decathlon.ara.repository.security.member.user.entity.UserEntityRepository;
 import com.decathlon.ara.security.dto.user.UserAccount;
+import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
 import com.decathlon.ara.security.service.user.strategy.UserAccountStrategy;
 import com.decathlon.ara.security.service.user.strategy.select.UserStrategySelector;
@@ -34,7 +35,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class AuthorityServiceTest {
@@ -115,6 +115,32 @@ class AuthorityServiceTest {
     }
 
     @Test
+    void getRoleOnProject_returnAdminRole_whenProjectIsDemoProject() {
+        // Given
+        var projectCode = DemoLoaderConstants.PROJECT_CODE_DEMO;
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(Authentication.class);
+        var authority1 = mock(GrantedAuthority.class);
+        var authority2 = mock(GrantedAuthority.class);
+        var authority3 = mock(GrantedAuthority.class);
+        Collection authorities = Set.of(authority1, authority2, authority3);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getAuthorities()).thenReturn(authorities);
+        when(authority1.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code1:MEMBER");
+        when(authority2.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code2:MAINTAINER");
+        when(authority3.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code3:ADMIN");
+
+        // Then
+        var roleOnProject = authorityService.getRoleOnProject(projectCode);
+        assertThat(roleOnProject).isPresent().contains(UserAccountScopeRole.ADMIN);
+    }
+
+    @Test
     void getRoleOnProject_returnRole_whenProjectFound() {
         // Given
         var projectCode = "project-code";
@@ -137,7 +163,7 @@ class AuthorityServiceTest {
 
         // Then
         var roleOnProject = authorityService.getRoleOnProject(projectCode);
-        assertThat(roleOnProject).isPresent().contains(UserEntityRoleOnProject.ScopedUserRoleOnProject.ADMIN);
+        assertThat(roleOnProject).isPresent().contains(UserAccountScopeRole.ADMIN);
     }
 
     @Test
@@ -240,7 +266,7 @@ class AuthorityServiceTest {
     }
 
     @Test
-    void getScopedProjectCodes_returnProjectCodes_whenScopedProjectAuthoritiesFound() {
+    void getScopedProjectCodes_returnProjectCodesPlusDemoProjectCode_whenScopedProjectAuthoritiesFound() {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
@@ -265,8 +291,8 @@ class AuthorityServiceTest {
         // Then
         var projectCodes = authorityService.getScopedProjectCodes();
         assertThat(projectCodes)
-                .containsExactly("project-code1", "project-code2", "project-code3")
-                .hasSize(3);
+                .containsExactlyInAnyOrder("project-code1", "project-code2", "project-code3", DemoLoaderConstants.PROJECT_CODE_DEMO)
+                .hasSize(4);
     }
 
     @Test
@@ -317,7 +343,7 @@ class AuthorityServiceTest {
     }
 
     @Test
-    void getUserAccountScopes_returnUserAccountScopes_whenScopedProjectAuthoritiesFound() {
+    void getUserAccountScopes_returnUserAccountScopesPlusDemoProjectScope_whenScopedProjectAuthoritiesFound() {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
@@ -348,7 +374,8 @@ class AuthorityServiceTest {
                 .containsExactlyInAnyOrder(
                         tuple("project-code1", UserAccountScopeRole.MEMBER),
                         tuple("project-code2", UserAccountScopeRole.MAINTAINER),
-                        tuple("project-code3", UserAccountScopeRole.ADMIN)
+                        tuple("project-code3", UserAccountScopeRole.ADMIN),
+                        tuple(DemoLoaderConstants.PROJECT_CODE_DEMO, UserAccountScopeRole.ADMIN)
                 );
     }
 
@@ -400,8 +427,8 @@ class AuthorityServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = UserEntity.UserEntityProfile.class)
-    void getProfile_returnProfile_whenProfileFound(UserEntity.UserEntityProfile userProfile) {
+    @EnumSource(value = UserAccountProfile.class)
+    void getProfile_returnProfile_whenProfileFound(UserAccountProfile userProfile) {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);

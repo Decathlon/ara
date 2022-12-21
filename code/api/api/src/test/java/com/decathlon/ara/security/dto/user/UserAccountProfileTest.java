@@ -1,4 +1,4 @@
-package com.decathlon.ara.domain.security.member.user.entity;
+package com.decathlon.ara.security.dto.user;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -7,7 +7,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-class UserEntityTest {
+class UserAccountProfileTest {
 
     @Test
     void getProfileFromString_returnSuperAdminProfile_whenStringIsSuperAdmin() {
@@ -17,10 +17,10 @@ class UserEntityTest {
         // When
 
         // Then
-        var profile = UserEntity.UserEntityProfile.getProfileFromString(profileAsString);
+        var profile = UserAccountProfile.getProfileFromString(profileAsString);
         assertThat(profile)
                 .isPresent()
-                .contains(UserEntity.UserEntityProfile.SUPER_ADMIN);
+                .contains(UserAccountProfile.SUPER_ADMIN);
     }
 
     @Test
@@ -31,10 +31,10 @@ class UserEntityTest {
         // When
 
         // Then
-        var profile = UserEntity.UserEntityProfile.getProfileFromString(profileAsString);
+        var profile = UserAccountProfile.getProfileFromString(profileAsString);
         assertThat(profile)
                 .isPresent()
-                .contains(UserEntity.UserEntityProfile.AUDITOR);
+                .contains(UserAccountProfile.AUDITOR);
     }
 
     @Test
@@ -45,10 +45,10 @@ class UserEntityTest {
         // When
 
         // Then
-        var profile = UserEntity.UserEntityProfile.getProfileFromString(profileAsString);
+        var profile = UserAccountProfile.getProfileFromString(profileAsString);
         assertThat(profile)
                 .isPresent()
-                .contains(UserEntity.UserEntityProfile.SCOPED_USER);
+                .contains(UserAccountProfile.SCOPED_USER);
     }
 
     @Test
@@ -59,10 +59,10 @@ class UserEntityTest {
         // When
 
         // Then
-        var profile = UserEntity.UserEntityProfile.getProfileFromString(profileAsString);
+        var profile = UserAccountProfile.getProfileFromString(profileAsString);
         assertThat(profile)
                 .isPresent()
-                .contains(UserEntity.UserEntityProfile.SCOPED_USER);
+                .contains(UserAccountProfile.SCOPED_USER);
     }
 
     @Test
@@ -72,7 +72,7 @@ class UserEntityTest {
         // When
 
         // Then
-        var profile = UserEntity.UserEntityProfile.getProfileFromString(null);
+        var profile = UserAccountProfile.getProfileFromString(null);
         assertThat(profile).isNotPresent();
     }
 
@@ -84,7 +84,7 @@ class UserEntityTest {
         // When
 
         // Then
-        var profile = UserEntity.UserEntityProfile.getProfileFromString(profileAsString);
+        var profile = UserAccountProfile.getProfileFromString(profileAsString);
         assertThat(profile).isNotPresent();
     }
 }

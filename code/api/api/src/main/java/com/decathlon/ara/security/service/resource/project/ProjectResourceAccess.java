@@ -1,8 +1,8 @@
 package com.decathlon.ara.security.service.resource.project;
 
-import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntityRoleOnProject;
 import com.decathlon.ara.security.dto.permission.ResourcePermission;
+import com.decathlon.ara.security.dto.user.UserAccountProfile;
+import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
 import com.decathlon.ara.security.service.AuthorityService;
 import com.decathlon.ara.service.ProjectService;
 import org.apache.commons.lang3.StringUtils;
@@ -48,11 +48,11 @@ public abstract class ProjectResourceAccess {
         if (userProfile.isEmpty()) {
             return false;
         }
-        if (UserEntity.UserEntityProfile.SUPER_ADMIN.equals(userProfile.get())) {
+        if (UserAccountProfile.SUPER_ADMIN.equals(userProfile.get())) {
             return true;
         }
 
-        if (UserEntity.UserEntityProfile.AUDITOR.equals(userProfile.get())) {
+        if (UserAccountProfile.AUDITOR.equals(userProfile.get())) {
             return permission.isReadOnly();
         }
 
@@ -64,14 +64,11 @@ public abstract class ProjectResourceAccess {
                 .orElse(false);
     }
 
-    private Map<UserEntityRoleOnProject.ScopedUserRoleOnProject, List<ResourcePermission>> getPermissionsByRole() {
-        var admin = UserEntityRoleOnProject.ScopedUserRoleOnProject.ADMIN;
-        var maintainer = UserEntityRoleOnProject.ScopedUserRoleOnProject.MAINTAINER;
-        var member = UserEntityRoleOnProject.ScopedUserRoleOnProject.MEMBER;
+    private Map<UserAccountScopeRole, List<ResourcePermission>> getPermissionsByRole() {
         return Map.ofEntries(
-                entry(admin, getAdminPermissions()),
-                entry(maintainer, getMaintainerPermissions()),
-                entry(member, getMemberPermissions())
+                entry(UserAccountScopeRole.ADMIN, getAdminPermissions()),
+                entry(UserAccountScopeRole.MAINTAINER, getMaintainerPermissions()),
+                entry(UserAccountScopeRole.MEMBER, getMemberPermissions())
         );
     }
 

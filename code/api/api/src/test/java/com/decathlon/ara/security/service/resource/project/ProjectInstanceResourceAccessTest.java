@@ -1,8 +1,8 @@
 package com.decathlon.ara.security.service.resource.project;
 
-import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntityRoleOnProject;
 import com.decathlon.ara.security.dto.permission.ResourcePermission;
+import com.decathlon.ara.security.dto.user.UserAccountProfile;
+import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
 import com.decathlon.ara.security.service.AuthorityService;
 import com.decathlon.ara.service.ProjectService;
 import org.junit.jupiter.api.Test;
@@ -93,7 +93,7 @@ class ProjectInstanceResourceAccessTest {
         // Given
         var projectCode = "project-code";
         var permission = mock(ResourcePermission.class);
-        var profile = UserEntity.UserEntityProfile.SUPER_ADMIN;
+        var profile = UserAccountProfile.SUPER_ADMIN;
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
@@ -112,7 +112,7 @@ class ProjectInstanceResourceAccessTest {
     void isEnabled_returnTrue_whenUserIsAuditorAndPermissionDoesNotAlterData(ResourcePermission permission) {
         // Given
         var projectCode = "project-code";
-        var profile = UserEntity.UserEntityProfile.AUDITOR;
+        var profile = UserAccountProfile.AUDITOR;
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
@@ -131,7 +131,7 @@ class ProjectInstanceResourceAccessTest {
     void isEnabled_returnFalse_whenUserIsAuditorAndPermissionAltersData(ResourcePermission permission) {
         // Given
         var projectCode = "project-code";
-        var profile = UserEntity.UserEntityProfile.AUDITOR;
+        var profile = UserAccountProfile.AUDITOR;
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
@@ -147,7 +147,7 @@ class ProjectInstanceResourceAccessTest {
         // Given
         var projectCode = "project-code";
         var permission = mock(ResourcePermission.class);
-        var profile = UserEntity.UserEntityProfile.SCOPED_USER;
+        var profile = UserAccountProfile.SCOPED_USER;
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
@@ -166,8 +166,8 @@ class ProjectInstanceResourceAccessTest {
     void isEnabled_returnTrue_whenUserIsAnAdminScopedUser(ResourcePermission permission) {
         // Given
         var projectCode = "project-code";
-        var profile = UserEntity.UserEntityProfile.SCOPED_USER;
-        var role = UserEntityRoleOnProject.ScopedUserRoleOnProject.ADMIN;
+        var profile = UserAccountProfile.SCOPED_USER;
+        var role = UserAccountScopeRole.ADMIN;
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
@@ -187,8 +187,8 @@ class ProjectInstanceResourceAccessTest {
     void isEnabled_returnTrue_whenUserIsAMaintainerScopedUserAndPermissionDoesNotAlterData(ResourcePermission permission) {
         // Given
         var projectCode = "project-code";
-        var profile = UserEntity.UserEntityProfile.SCOPED_USER;
-        var role = UserEntityRoleOnProject.ScopedUserRoleOnProject.MAINTAINER;
+        var profile = UserAccountProfile.SCOPED_USER;
+        var role = UserAccountScopeRole.MAINTAINER;
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
@@ -208,8 +208,8 @@ class ProjectInstanceResourceAccessTest {
     void isEnabled_returnFalse_whenUserIsAMaintainerScopedUserAndPermissionAltersData(ResourcePermission permission) {
         // Given
         var projectCode = "project-code";
-        var profile = UserEntity.UserEntityProfile.SCOPED_USER;
-        var role = UserEntityRoleOnProject.ScopedUserRoleOnProject.MAINTAINER;
+        var profile = UserAccountProfile.SCOPED_USER;
+        var role = UserAccountScopeRole.MAINTAINER;
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
@@ -229,8 +229,8 @@ class ProjectInstanceResourceAccessTest {
     void isEnabled_returnTrue_whenUserIsAMemberScopedUserAndPermissionDoesNotAlterData(ResourcePermission permission) {
         // Given
         var projectCode = "project-code";
-        var profile = UserEntity.UserEntityProfile.SCOPED_USER;
-        var role = UserEntityRoleOnProject.ScopedUserRoleOnProject.MEMBER;
+        var profile = UserAccountProfile.SCOPED_USER;
+        var role = UserAccountScopeRole.MEMBER;
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
@@ -250,8 +250,8 @@ class ProjectInstanceResourceAccessTest {
     void isEnabled_returnFalse_whenUserIsAMemberScopedUserAndPermissionAltersData(ResourcePermission permission) {
         // Given
         var projectCode = "project-code";
-        var profile = UserEntity.UserEntityProfile.SCOPED_USER;
-        var role = UserEntityRoleOnProject.ScopedUserRoleOnProject.MEMBER;
+        var profile = UserAccountProfile.SCOPED_USER;
+        var role = UserAccountScopeRole.MEMBER;
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);

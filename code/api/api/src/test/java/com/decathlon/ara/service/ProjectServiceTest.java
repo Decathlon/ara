@@ -2,9 +2,9 @@ package com.decathlon.ara.service;
 
 import com.decathlon.ara.domain.Project;
 import com.decathlon.ara.domain.RootCause;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
 import com.decathlon.ara.repository.ProjectRepository;
 import com.decathlon.ara.repository.RootCauseRepository;
+import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.service.AuthorityService;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.exception.ForbiddenException;
@@ -63,10 +63,10 @@ class ProjectServiceTest {
 
     @ParameterizedTest
     @EnumSource(
-            value = UserEntity.UserEntityProfile.class,
+            value = UserAccountProfile.class,
             names = {"SUPER_ADMIN", "AUDITOR"}
     )
-    void findAll_returnAllProjects_whenUserIsSuperAdminOrAuditor(UserEntity.UserEntityProfile profile) {
+    void findAll_returnAllProjects_whenUserIsSuperAdminOrAuditor(UserAccountProfile profile) {
         // Given
         var project1 = mock(Project.class);
         var project2 = mock(Project.class);
@@ -92,7 +92,7 @@ class ProjectServiceTest {
     @Test
     void findAll_returnOnlyProjectsInUserScope_whenUserIsScopedUser() {
         // Given
-        var profile = UserEntity.UserEntityProfile.SCOPED_USER;
+        var profile = UserAccountProfile.SCOPED_USER;
         var project1 = mock(Project.class);
         var project2 = mock(Project.class);
         var project3 = mock(Project.class);

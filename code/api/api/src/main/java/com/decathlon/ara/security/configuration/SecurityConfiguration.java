@@ -1,10 +1,10 @@
 package com.decathlon.ara.security.configuration;
 
-import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
 import com.decathlon.ara.scenario.cucumber.resource.CucumberResource;
 import com.decathlon.ara.scenario.cypress.resource.CypressResource;
 import com.decathlon.ara.scenario.generic.resource.GenericResource;
 import com.decathlon.ara.scenario.postman.resource.PostmanResource;
+import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.service.AuthorityService;
 import com.decathlon.ara.security.service.login.OAuth2UserLoginService;
 import com.decathlon.ara.security.service.login.OidcUserLoginService;
@@ -57,7 +57,9 @@ public class SecurityConfiguration {
 
     private final OAuth2UserLoginService oauth2UserLoginService;
 
-    private static final String SUPER_ADMIN_PROFILE_AUTHORITY = AuthorityService.AUTHORITY_USER_PROFILE_PREFIX + UserEntity.UserEntityProfile.SUPER_ADMIN.name();
+    private static final String SUPER_ADMIN_PROFILE_AUTHORITY = AuthorityService.AUTHORITY_USER_PROFILE_PREFIX + UserAccountProfile.SUPER_ADMIN.name();
+
+    private static final String[] PROJECT_DEMO_PATHS = {DemoResource.PATHS, ProjectResource.DEMO_PATHS};
 
     public SecurityConfiguration(
             OidcUserLoginService oidcUserLoginService,
@@ -79,7 +81,7 @@ public class SecurityConfiguration {
                 .antMatchers(HttpMethod.GET, UserResource.PATHS).authenticated()
 
                 // projects > demo
-                .antMatchers(DemoResource.PATHS).authenticated()
+                .antMatchers(PROJECT_DEMO_PATHS).authenticated()
 
                 // projects [data] > execution
                 .antMatchers(HttpMethod.GET, ExecutionResource.PATHS).access(PROJECT_DATA_FETCH_PERMISSION)

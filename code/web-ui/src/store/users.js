@@ -18,14 +18,14 @@ export default ({
   namespaced: true,
 
   state: {
-    usersList: [],
+    users: [],
     userRole: ''
   },
 
   mutations: {
-    storeAllUsers: (state, usersList) => {
-      for (var i = 0; i < usersList.length; i++) {
-        state.usersList.push(usersList[i].memberName)
+    storeAllUsers: (state, users) => {
+      for (let user of users) {
+        state.users.push(user.memberName)
       }
     },
 

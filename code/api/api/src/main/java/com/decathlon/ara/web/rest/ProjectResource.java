@@ -18,6 +18,7 @@
 package com.decathlon.ara.web.rest;
 
 import com.decathlon.ara.Entities;
+import com.decathlon.ara.loader.DemoLoaderConstants;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
 import com.decathlon.ara.security.service.user.UserAccountService;
 import com.decathlon.ara.service.ProjectService;
@@ -44,6 +45,8 @@ public class ProjectResource {
     private static final String NAME = Entities.PROJECT;
     public static final String PATH = API_PATH + "/" + NAME + "s";
     public static final String CODE_PATH = PROJECT_API_PATH;
+
+    public static final String DEMO_PATHS = PATH + "/" + DemoLoaderConstants.PROJECT_CODE_DEMO + "/**";
 
     private final ProjectService projectService;
 

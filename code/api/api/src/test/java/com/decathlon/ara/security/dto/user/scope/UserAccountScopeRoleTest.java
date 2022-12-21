@@ -1,4 +1,4 @@
-package com.decathlon.ara.domain.security.member.user.entity;
+package com.decathlon.ara.security.dto.user.scope;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -7,7 +7,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-class UserEntityRoleOnProjectTest {
+class UserAccountScopeRoleTest {
 
     @Test
     void getScopeFromString_returnAdmin_whenStringIsAdmin() {
@@ -17,10 +17,10 @@ class UserEntityRoleOnProjectTest {
         // When
 
         // Then
-        var scope = UserEntityRoleOnProject.ScopedUserRoleOnProject.getScopeFromString(scopeAsString);
+        var scope = UserAccountScopeRole.getScopeFromString(scopeAsString);
         assertThat(scope)
                 .isPresent()
-                .contains(UserEntityRoleOnProject.ScopedUserRoleOnProject.ADMIN);
+                .contains(UserAccountScopeRole.ADMIN);
     }
 
     @Test
@@ -31,10 +31,10 @@ class UserEntityRoleOnProjectTest {
         // When
 
         // Then
-        var scope = UserEntityRoleOnProject.ScopedUserRoleOnProject.getScopeFromString(scopeAsString);
+        var scope = UserAccountScopeRole.getScopeFromString(scopeAsString);
         assertThat(scope)
                 .isPresent()
-                .contains(UserEntityRoleOnProject.ScopedUserRoleOnProject.MAINTAINER);
+                .contains(UserAccountScopeRole.MAINTAINER);
     }
 
     @Test
@@ -45,10 +45,10 @@ class UserEntityRoleOnProjectTest {
         // When
 
         // Then
-        var scope = UserEntityRoleOnProject.ScopedUserRoleOnProject.getScopeFromString(scopeAsString);
+        var scope = UserAccountScopeRole.getScopeFromString(scopeAsString);
         assertThat(scope)
                 .isPresent()
-                .contains(UserEntityRoleOnProject.ScopedUserRoleOnProject.MEMBER);
+                .contains(UserAccountScopeRole.MEMBER);
     }
 
     @Test
@@ -59,10 +59,10 @@ class UserEntityRoleOnProjectTest {
         // When
 
         // Then
-        var scope = UserEntityRoleOnProject.ScopedUserRoleOnProject.getScopeFromString(scopeAsString);
+        var scope = UserAccountScopeRole.getScopeFromString(scopeAsString);
         assertThat(scope)
                 .isPresent()
-                .contains(UserEntityRoleOnProject.ScopedUserRoleOnProject.MEMBER);
+                .contains(UserAccountScopeRole.MEMBER);
     }
 
     @Test
@@ -72,7 +72,7 @@ class UserEntityRoleOnProjectTest {
         // When
 
         // Then
-        var scope = UserEntityRoleOnProject.ScopedUserRoleOnProject.getScopeFromString(null);
+        var scope = UserAccountScopeRole.getScopeFromString(null);
         assertThat(scope).isNotPresent();
     }
 
@@ -84,7 +84,7 @@ class UserEntityRoleOnProjectTest {
         // When
 
         // Then
-        var scope = UserEntityRoleOnProject.ScopedUserRoleOnProject.getScopeFromString(scopeAsString);
+        var scope = UserAccountScopeRole.getScopeFromString(scopeAsString);
         assertThat(scope).isNotPresent();
     }
 }

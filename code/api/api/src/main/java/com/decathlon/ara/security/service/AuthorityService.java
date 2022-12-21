@@ -2,9 +2,11 @@ package com.decathlon.ara.security.service;
 
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntityRoleOnProject;
+import com.decathlon.ara.loader.DemoLoaderConstants;
 import com.decathlon.ara.repository.security.member.user.entity.UserEntityRepository;
+import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScope;
+import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
 import com.decathlon.ara.security.service.user.strategy.select.UserStrategySelector;
 import com.decathlon.ara.service.exception.ForbiddenException;
 import org.apache.commons.lang3.StringUtils;
@@ -41,24 +43,15 @@ public class AuthorityService {
      * @param projectCode the project code
      * @return the role, if found
      */
-    public Optional<UserEntityRoleOnProject.ScopedUserRoleOnProject> getRoleOnProject(String projectCode) {
+    public Optional<UserAccountScopeRole> getRoleOnProject(String projectCode) {
         if (StringUtils.isBlank(projectCode)) {
             return Optional.empty();
         }
 
-        if (userDoesNotHaveAccessToAnyAuthority()) {
-            return Optional.empty();
-        }
-
-        var splitAuthoritiesStream = getSplitAuthoritiesStreamFromPrefix(AUTHORITY_USER_PROJECT_SCOPE_PREFIX);
-        return splitAuthoritiesStream
-                .filter(array -> array.length == 3)
-                .filter(array -> projectCode.equals(array[1]))
-                .map(array -> array[2])
-                .sorted()
-                .map(UserEntityRoleOnProject.ScopedUserRoleOnProject::getScopeFromString)
-                .findFirst()
-                .orElse(Optional.empty());
+        return getUserAccountScopes().stream()
+                .filter(scope -> projectCode.equals(scope.getProject()))
+                .map(UserAccountScope::getRole)
+                .findFirst();
     }
 
     private boolean userDoesNotHaveAccessToAnyAuthority() {
@@ -85,7 +78,7 @@ public class AuthorityService {
      * Get the user profile, if found (and correct)
      * @return the user profile
      */
-    public Optional<UserEntity.UserEntityProfile> getProfile() {
+    public Optional<UserAccountProfile> getProfile() {
         if (userDoesNotHaveAccessToAnyAuthority()) {
             return Optional.empty();
         }
@@ -93,9 +86,9 @@ public class AuthorityService {
         var splitAuthoritiesStream = getSplitAuthoritiesStreamFromPrefix(AUTHORITY_USER_PROFILE_PREFIX);
         return splitAuthoritiesStream
                 .filter(array -> array.length == 2)
-                .map(array -> array[1])
-                .map(UserEntity.UserEntityProfile::getProfileFromString)
                 .findFirst()
+                .map(array -> array[1])
+                .map(UserAccountProfile::getProfileFromString)
                 .orElse(Optional.empty());
     }
 
@@ -104,16 +97,7 @@ public class AuthorityService {
      * @return the scoped project codes
      */
     public List<String> getScopedProjectCodes() {
-        if (userDoesNotHaveAccessToAnyAuthority()) {
-            return new ArrayList<>();
-        }
-
-        var splitAuthoritiesStream = getSplitAuthoritiesStreamFromPrefix(AUTHORITY_USER_PROJECT_SCOPE_PREFIX);
-        return splitAuthoritiesStream
-                .filter(array -> array.length == 3)
-                .map(array -> array[1])
-                .sorted()
-                .toList();
+        return getUserAccountScopes().stream().map(UserAccountScope::getProject).sorted().toList();
     }
 
     /**
@@ -125,13 +109,13 @@ public class AuthorityService {
             return new ArrayList<>();
         }
 
-        var splitAuthoritiesStream = getSplitAuthoritiesStreamFromPrefix(AUTHORITY_USER_PROJECT_SCOPE_PREFIX);
-        return splitAuthoritiesStream
+        var userAccountScopesStream = getSplitAuthoritiesStreamFromPrefix(AUTHORITY_USER_PROJECT_SCOPE_PREFIX)
                 .filter(array -> array.length == 3)
                 .map(array -> UserAccountScope.userAccountScopeFactory(array[1], array[2]))
                 .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList();
+                .map(Optional::get);
+        var demoProjectScopeStream = Stream.of(new UserAccountScope(DemoLoaderConstants.PROJECT_CODE_DEMO, UserAccountScopeRole.ADMIN));
+        return Stream.concat(userAccountScopesStream, demoProjectScopeStream).toList();
     }
 
     /**

@@ -10,6 +10,7 @@ import com.decathlon.ara.repository.security.member.user.entity.UserEntityRoleOn
 import com.decathlon.ara.security.configuration.data.providers.OAuth2ProvidersConfiguration;
 import com.decathlon.ara.security.configuration.data.providers.setup.users.UserProfileConfiguration;
 import com.decathlon.ara.security.dto.user.UserAccount;
+import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
 import com.decathlon.ara.security.service.AuthorityService;
 import com.decathlon.ara.security.service.user.strategy.select.UserStrategySelector;
@@ -176,7 +177,9 @@ public class UserAccountService {
 
     private static Optional<UserEntity.UserEntityProfile> getUserProfileFromConfiguration(UserProfileConfiguration profileConfiguration) {
         var profileAsString = profileConfiguration.getProfile();
-        return UserEntity.UserEntityProfile.getProfileFromString(profileAsString);
+        return UserAccountProfile.getProfileFromString(profileAsString)
+                .map(Enum::name)
+                .map(UserEntity.UserEntityProfile::valueOf);
     }
 
     private List<UserEntityRoleOnProject> getUserRolesFromConfiguration(UserProfileConfiguration profileConfiguration, String providerName, UserEntity userToSave) {
@@ -185,7 +188,7 @@ public class UserAccountService {
                         .stream()
                         .collect(
                                 Collectors.toMap(
-                                        scope -> UserEntityRoleOnProject.ScopedUserRoleOnProject.getScopeFromString(scope.getScope()),
+                                        scope -> getScopedUserRoleOnProjectFromRoleAsString(scope.getScope()),
                                         scope -> scope.getProjects()
                                                 .stream()
                                                 .map(projectCode -> getProjectFromCode(projectCode, providerName))
@@ -204,6 +207,12 @@ public class UserAccountService {
                         )
                         .toList() :
                 new ArrayList<>();
+    }
+
+    private static Optional<UserEntityRoleOnProject.ScopedUserRoleOnProject> getScopedUserRoleOnProjectFromRoleAsString(String roleAsString) {
+        return UserAccountScopeRole.getScopeFromString(roleAsString)
+                .map(Enum::name)
+                .map(UserEntityRoleOnProject.ScopedUserRoleOnProject::valueOf);
     }
 
     private Optional<Project> getProjectFromCode(String projectCode, String providerName) {

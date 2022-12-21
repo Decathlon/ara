@@ -28,15 +28,16 @@
 
 <script>
   import { mapState } from 'vuex'
+  import { AuthenticationService } from '../service/authentication.service'
 
-  export default {
+export default {
     name: 'projects-select',
 
     props: [ 'ghost' ],
 
     data () {
       let currentProjectCode = this.$route.params.projectCode
-      const userInfo = JSON.parse(localStorage.getItem('user_details'))
+      const userInfo = AuthenticationService.getDetails().user
       return {
         /**
          * The current project code: always set to a valid project code when it is possible:
@@ -105,9 +106,9 @@
 
       changeCurrentProject (projectCode) {
         let oldProjectCode = this.currentProjectCode
-        for (var i = 0; i < this.userInfo.scopes.length; i++) {
-          if (this.userInfo.scopes[i].project.includes(projectCode)) {
-            this.$store.dispatch('users/getUserRole', this.userInfo.scopes[i].role)
+        for (let scope of this.userInfo.scopes) {
+          if (scope.project.includes(projectCode)) {
+            this.$store.dispatch('users/getUserRole', scope.role)
           }
         }
 

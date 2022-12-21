@@ -32,7 +32,7 @@
     </div>
 
     <div>
-      <table class="adminTable">
+      <table class="adminTable" aria-label="Projects and roles applied to them">
         <thead>
           <tr>
             <th>Projects</th>
@@ -64,7 +64,7 @@
         </button>
       </table>
 
-      <table class="adminTable">
+      <table class="adminTable" aria-label="Users and their roles">
         <thead>
           <tr>
             <th>Name</th>

@@ -540,7 +540,7 @@
 
   .dashboardHeader {
     overflow: hidden;
-  }  
+  }
   .dashboardHeader a {
     animation: loadHeader .3s ease-in-out;
   }
@@ -551,7 +551,6 @@
     top: 0;
     left: 0;
     right: 0;
-    left: -160px;
     margin: 0 auto;
     justify-content: center;
     width: 200px;

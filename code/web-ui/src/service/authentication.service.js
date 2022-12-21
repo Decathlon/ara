@@ -143,7 +143,7 @@ class AuthenticationServiceClass {
   }
 
   logout = () => {
-    this.clearDetails()
+    this.clearUserDetails()
     // window.location.href = config.authentication.logoutProcessingUrl
     console.debug(`conf imported ? ${conf !== undefined}`)
     window.location.href = conf.authentication.logoutProcessingUrl
@@ -164,7 +164,7 @@ class AuthenticationServiceClass {
     localStorage.setItem(PROVIDER_NAME, JSON.stringify(providerName))
   }
 
-  clearDetails = () => {
+  clearUserDetails = () => {
     localStorage.removeItem(USER_DETAILS)
   }
 }
