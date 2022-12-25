@@ -248,7 +248,7 @@ class UserAccountServiceTest {
     }
 
     @Test
-    void createUserAccount_saveUserAsScopedUser_whenProfileConfigurationNotFound() {
+    void createUserAccount_saveUserAsScopedUser_whenProfileConfigurationNotFound() throws NotUniqueException {
         // Given
         var oauth2User = mock(OAuth2User.class);
         var userLogin = "user-login";
@@ -297,6 +297,10 @@ class UserAccountServiceTest {
                         UserEntity.UserEntityProfile.SCOPED_USER
                 );
         assertThat(userToSave.getRolesOnProjectWhenScopedUser()).isEmpty();
+
+        verify(projectService, never()).createFromCode(anyString(), any());
+        verify(userEntityRoleOnProjectRepository, never()).saveAll(any());
+        verify(userEntityRepository, never()).findById(any());
     }
 
     @ParameterizedTest
@@ -340,6 +344,7 @@ class UserAccountServiceTest {
         var scopes = List.of(scope1, scope2, scope3);
 
         var savedUser = mock(UserEntity.class);
+        var finalSavedUser = mock(UserEntity.class);
         var matchingUserAccount = mock(UserAccount.class);
 
         // When
@@ -368,7 +373,8 @@ class UserAccountServiceTest {
         when(projectRepository.findByCode(unknownProjectCode3)).thenReturn(Optional.empty());
 
         when(userEntityRepository.save(any(UserEntity.class))).thenReturn(savedUser);
-        when(strategy.getUserAccount(oauth2User, savedUser)).thenReturn(matchingUserAccount);
+        when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.of(finalSavedUser));
+        when(strategy.getUserAccount(oauth2User, finalSavedUser)).thenReturn(matchingUserAccount);
 
         // Then
         var savedUserAccount = userAccountService.createUserAccount(oauth2User, providerName);
@@ -394,14 +400,16 @@ class UserAccountServiceTest {
                         Optional.of(userLastName),
                         UserEntity.UserEntityProfile.valueOf(profileAsString.toUpperCase())
                 );
-        assertThat(userToSave.getRolesOnProjectWhenScopedUser())
+        ArgumentCaptor<List<UserEntityRoleOnProject>> userRolesArgumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(userEntityRoleOnProjectRepository).saveAll(userRolesArgumentCaptor.capture());
+        assertThat(userRolesArgumentCaptor.getValue())
                 .extracting("userEntity", "project", "role")
                 .containsExactlyInAnyOrder(
-                        tuple(userToSave, existingProject1, UserEntityRoleOnProject.ScopedUserRoleOnProject.ADMIN),
-                        tuple(userToSave, existingProject2, UserEntityRoleOnProject.ScopedUserRoleOnProject.ADMIN),
-                        tuple(userToSave, existingProject3, UserEntityRoleOnProject.ScopedUserRoleOnProject.MAINTAINER)
+                        tuple(savedUser, existingProject1, UserEntityRoleOnProject.ScopedUserRoleOnProject.ADMIN),
+                        tuple(savedUser, existingProject2, UserEntityRoleOnProject.ScopedUserRoleOnProject.ADMIN),
+                        tuple(savedUser, existingProject3, UserEntityRoleOnProject.ScopedUserRoleOnProject.MAINTAINER)
                 );
-        verify(projectService, never()).createFromCode(anyString());
+        verify(projectService, never()).createFromCode(anyString(), any());
     }
 
     @ParameterizedTest
@@ -448,6 +456,7 @@ class UserAccountServiceTest {
         var scopes = List.of(scope1, scope2, scope3);
 
         var savedUser = mock(UserEntity.class);
+        var finalSavedUser = mock(UserEntity.class);
         var matchingUserAccount = mock(UserAccount.class);
 
         // When
@@ -476,7 +485,8 @@ class UserAccountServiceTest {
         when(projectRepository.findByCode(unknownProjectCode3)).thenReturn(Optional.empty(), Optional.of(unknownProject3));
 
         when(userEntityRepository.save(any(UserEntity.class))).thenReturn(savedUser);
-        when(strategy.getUserAccount(oauth2User, savedUser)).thenReturn(matchingUserAccount);
+        when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.of(finalSavedUser));
+        when(strategy.getUserAccount(oauth2User, finalSavedUser)).thenReturn(matchingUserAccount);
 
         // Then
         var savedUserAccount = userAccountService.createUserAccount(oauth2User, providerName);
@@ -502,18 +512,20 @@ class UserAccountServiceTest {
                         Optional.of(userLastName),
                         UserEntity.UserEntityProfile.valueOf(profileAsString.toUpperCase())
                 );
-        assertThat(userToSave.getRolesOnProjectWhenScopedUser())
+        ArgumentCaptor<List<UserEntityRoleOnProject>> userRolesArgumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(userEntityRoleOnProjectRepository).saveAll(userRolesArgumentCaptor.capture());
+        assertThat(userRolesArgumentCaptor.getValue())
                 .extracting("userEntity", "project", "role")
                 .containsExactlyInAnyOrder(
-                        tuple(userToSave, existingProject1, UserEntityRoleOnProject.ScopedUserRoleOnProject.ADMIN),
-                        tuple(userToSave, existingProject2, UserEntityRoleOnProject.ScopedUserRoleOnProject.ADMIN),
-                        tuple(userToSave, unknownProject1, UserEntityRoleOnProject.ScopedUserRoleOnProject.ADMIN),
-                        tuple(userToSave, existingProject3, UserEntityRoleOnProject.ScopedUserRoleOnProject.MAINTAINER),
-                        tuple(userToSave, unknownProject2, UserEntityRoleOnProject.ScopedUserRoleOnProject.MAINTAINER),
-                        tuple(userToSave, unknownProject3, UserEntityRoleOnProject.ScopedUserRoleOnProject.MEMBER)
+                        tuple(savedUser, existingProject1, UserEntityRoleOnProject.ScopedUserRoleOnProject.ADMIN),
+                        tuple(savedUser, existingProject2, UserEntityRoleOnProject.ScopedUserRoleOnProject.ADMIN),
+                        tuple(savedUser, unknownProject1, UserEntityRoleOnProject.ScopedUserRoleOnProject.ADMIN),
+                        tuple(savedUser, existingProject3, UserEntityRoleOnProject.ScopedUserRoleOnProject.MAINTAINER),
+                        tuple(savedUser, unknownProject2, UserEntityRoleOnProject.ScopedUserRoleOnProject.MAINTAINER),
+                        tuple(savedUser, unknownProject3, UserEntityRoleOnProject.ScopedUserRoleOnProject.MEMBER)
                 );
         var unknownProjectCodeArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(projectService, times(3)).createFromCode(unknownProjectCodeArgumentCaptor.capture());
+        verify(projectService, times(3)).createFromCode(unknownProjectCodeArgumentCaptor.capture(), eq(savedUser));
         assertThat(unknownProjectCodeArgumentCaptor.getAllValues()).containsExactlyInAnyOrder(unknownProjectCode1, unknownProjectCode2, unknownProjectCode3);
     }
 

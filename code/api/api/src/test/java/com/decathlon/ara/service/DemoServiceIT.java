@@ -48,7 +48,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 
 import static com.decathlon.ara.loader.DemoLoaderConstants.BRANCH_MASTER;
-import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
+import static com.decathlon.ara.loader.DemoLoaderConstants.DEMO_PROJECT_CODE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -149,7 +149,7 @@ class DemoServiceIT {
         try {
             doReturn(tempDirectory.toString() + "/executions/" + Settings.DEFAULT_EXECUTION_VARIABLES)
                     .when(settingService).get(anyLong(), eq(Settings.EXECUTION_INDEXER_FILE_EXECUTION_BASE_PATH));
-            Path projectFolder = tempDirectory.resolve("executions/" + PROJECT_CODE_DEMO);
+            Path projectFolder = tempDirectory.resolve("executions/" + DEMO_PROJECT_CODE);
             Path folder = projectFolder.resolve("master/day/1525442442556/fr/firefox-desktop");
             Files.createDirectories(folder);
             Files.createFile(folder.resolve("buildInformation.json"));
@@ -158,7 +158,7 @@ class DemoServiceIT {
             cut.delete();
 
             // THEN
-            assertThat(projectRepository.findOneByCode(PROJECT_CODE_DEMO)).isNull();
+            assertThat(projectRepository.findOneByCode(DEMO_PROJECT_CODE)).isNull();
             assertThat(Files.exists(projectFolder)).as("Folder has been removed").isFalse();
         } finally {
             FileUtils.deleteQuietly(tempDirectory.toFile());
@@ -166,7 +166,7 @@ class DemoServiceIT {
     }
 
     private void assertThatDemoProjectHasBeenInserted(ProjectDTO createdProject) {
-        final Project project = projectRepository.findOneByCode(PROJECT_CODE_DEMO);
+        final Project project = projectRepository.findOneByCode(DEMO_PROJECT_CODE);
         assertThat(project.getId()).isEqualTo(createdProject.getId());
     }
 

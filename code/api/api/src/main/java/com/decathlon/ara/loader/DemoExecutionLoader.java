@@ -214,7 +214,7 @@ public class DemoExecutionLoader {
             // Create directories for all cycles so there will be no exception in logs if the indexer does not find them
             for (CycleDefinitionDTO cycleDefinition : cycleDefinitions) {
                 final File cycleDirectory = new File(executionBasePath
-                        .replace(Settings.PROJECT_VARIABLE, PROJECT_CODE_DEMO)
+                        .replace(Settings.PROJECT_VARIABLE, DEMO_PROJECT_CODE)
                         .replace(Settings.BRANCH_VARIABLE, cycleDefinition.getBranch())
                         .replace(Settings.CYCLE_VARIABLE, cycleDefinition.getName()));
                 Files.createDirectories(cycleDirectory.toPath());

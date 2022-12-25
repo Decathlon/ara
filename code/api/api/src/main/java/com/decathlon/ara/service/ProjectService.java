@@ -21,6 +21,7 @@ import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.domain.Project;
 import com.decathlon.ara.domain.RootCause;
+import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
 import com.decathlon.ara.repository.ProjectRepository;
 import com.decathlon.ara.repository.RootCauseRepository;
 import com.decathlon.ara.security.dto.user.UserAccountProfile;
@@ -30,10 +31,12 @@ import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.ForbiddenException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
-import com.decathlon.ara.service.mapper.GenericMapper;
+import com.decathlon.ara.service.mapper.ProjectMapper;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,26 +51,26 @@ import java.util.stream.Collectors;
 @Transactional
 public class ProjectService {
 
-    private final ProjectRepository repository;
+    private final ProjectRepository projectRepository;
 
     private final RootCauseRepository rootCauseRepository;
 
-    private final GenericMapper mapper;
+    private final ProjectMapper projectMapper;
 
     private final CommunicationService communicationService;
 
     private final AuthorityService authorityService;
 
     public ProjectService(
-            ProjectRepository repository,
+            ProjectRepository projectRepository,
             RootCauseRepository rootCauseRepository,
-            GenericMapper mapper,
+            ProjectMapper projectMapper,
             CommunicationService communicationService,
             AuthorityService authorityService
     ) {
-        this.repository = repository;
+        this.projectRepository = projectRepository;
         this.rootCauseRepository = rootCauseRepository;
-        this.mapper = mapper;
+        this.projectMapper = projectMapper;
         this.communicationService = communicationService;
         this.authorityService = authorityService;
     }
@@ -79,11 +82,12 @@ public class ProjectService {
      * @return the persisted entity
      * @throws NotUniqueException when the given code or name is already used by another entity
      */
-    public ProjectDTO create(ProjectDTO dtoToCreate) throws NotUniqueException {
+    public ProjectDTO create(@NonNull ProjectDTO dtoToCreate, @NonNull UserEntity creationUser) throws NotUniqueException {
         validateBusinessRules(dtoToCreate);
-        final Project entity = mapper.map(dtoToCreate, Project.class);
+        final Project entity = projectMapper.getProjectEntityFromProjectDTO(dtoToCreate);
+        entity.setCreationUser(creationUser);
         communicationService.initializeProject(entity);
-        final ProjectDTO createdProject = mapper.map(repository.save(entity), ProjectDTO.class);
+        final ProjectDTO createdProject = projectMapper.getProjectDTOFromProjectEntity(projectRepository.save(entity));
 
         final long projectId = createdProject.getId();
         rootCauseRepository.saveAll(Arrays.asList(
@@ -102,9 +106,10 @@ public class ProjectService {
      * @return the created {@link ProjectDTO}
      * @throws NotUniqueException thrown when project code already exists
      */
-    public ProjectDTO createFromCode(String projectCode) throws NotUniqueException {
+    public ProjectDTO createFromCode(@NonNull String projectCode, @NonNull UserEntity creationUser) throws NotUniqueException {
         var projectName =  getProjectNameFromCode(projectCode);
-        return create(new ProjectDTO(null, projectCode, projectName, false));
+        var projectToCreate = new ProjectDTO(projectCode, projectName, false);
+        return create(projectToCreate, creationUser);
     }
 
     private static String getProjectNameFromCode(String projectCode) {
@@ -123,18 +128,19 @@ public class ProjectService {
      * @throws NotFoundException  when the given entity ID is not present in database
      * @throws NotUniqueException when the given code or name is already used by another entity
      */
-    public ProjectDTO update(ProjectDTO dtoToUpdate) throws BadRequestException {
-        // Must update an existing entity
-        Optional<Project> dataBaseEntity = repository.findById(dtoToUpdate.getId());
+    public ProjectDTO update(@NonNull ProjectDTO dtoToUpdate, @NonNull UserEntity updateUser) throws BadRequestException {
+        Optional<Project> dataBaseEntity = projectRepository.findById(dtoToUpdate.getId());
         if (!dataBaseEntity.isPresent()) {
             throw new NotFoundException(Messages.NOT_FOUND_PROJECT, Entities.PROJECT);
         }
 
         validateBusinessRules(dtoToUpdate);
 
-        final Project entity = mapper.map(dtoToUpdate, Project.class);
+        final Project entity = projectMapper.getProjectEntityFromProjectDTO(dtoToUpdate);
         entity.setCommunications(dataBaseEntity.get().getCommunications());
-        return mapper.map(repository.save(entity), ProjectDTO.class);
+        entity.setUpdateDate(ZonedDateTime.now());
+        entity.setUpdateUser(updateUser);
+        return projectMapper.getProjectDTOFromProjectEntity(projectRepository.save(entity));
     }
 
     /**
@@ -148,17 +154,18 @@ public class ProjectService {
         if (profile.isEmpty()) {
             return new ArrayList<>();
         }
-        var superAdmin = UserAccountProfile.SUPER_ADMIN;
-        var auditor = UserAccountProfile.AUDITOR;
-        var userHasFullAccessToProjects = superAdmin.equals(profile.get()) || auditor.equals(profile.get());
+
+        var userHasFullAccessToProjects = UserAccountProfile.SUPER_ADMIN.equals(profile.get()) || UserAccountProfile.AUDITOR.equals(profile.get());
         if (userHasFullAccessToProjects) {
-            return mapper.mapCollection(repository.findAllByOrderByName(), ProjectDTO.class);
+            var projects = projectRepository.findAllByOrderByName();
+            return projects.stream().map(projectMapper::getProjectDTOFromProjectEntity).toList();
         }
         var scopedUser = UserAccountProfile.SCOPED_USER;
         var userHasLimitedAccessToProjects = scopedUser.equals(profile.get());
         if (userHasLimitedAccessToProjects) {
             var scopedProjectCodes = authorityService.getScopedProjectCodes();
-            return mapper.mapCollection(repository.findByCodeInOrderByName(scopedProjectCodes), ProjectDTO.class);
+            var projects = projectRepository.findByCodeInOrderByName(scopedProjectCodes);
+            return projects.stream().map(projectMapper::getProjectDTOFromProjectEntity).toList();
         }
 
         return new ArrayList<>();
@@ -170,7 +177,7 @@ public class ProjectService {
      * @return true iff the project exists
      */
     public boolean exists(String projectCode) {
-        return repository.existsByCode(projectCode);
+        return projectRepository.existsByCode(projectCode);
     }
 
     /**
@@ -180,7 +187,7 @@ public class ProjectService {
      */
     @Transactional
     public void delete(String projectCode) throws ForbiddenException {
-        repository.deleteByCode(projectCode);
+        projectRepository.deleteByCode(projectCode);
         authorityService.refreshCurrentUserAccountAuthorities();
     }
 
@@ -192,7 +199,7 @@ public class ProjectService {
      * @throws NotFoundException when the project code does not exist
      */
     public long toId(String code) throws NotFoundException {
-        final Project project = repository.findOneByCode(code);
+        final Project project = projectRepository.findOneByCode(code);
         if (project == null) {
             throw new NotFoundException(Messages.NOT_FOUND_PROJECT, Entities.PROJECT);
         }
@@ -206,14 +213,14 @@ public class ProjectService {
     }
 
     private void validateUniqueCode(ProjectDTO dto) throws NotUniqueException {
-        Project existingEntityWithSameCode = repository.findOneByCode(dto.getCode());
+        Project existingEntityWithSameCode = projectRepository.findOneByCode(dto.getCode());
         if (existingEntityWithSameCode != null && !existingEntityWithSameCode.getId().equals(dto.getId())) {
             throw new NotUniqueException(Messages.NOT_UNIQUE_PROJECT_CODE, Entities.PROJECT, "code", existingEntityWithSameCode.getId());
         }
     }
 
     private void validateUniqueName(ProjectDTO dto) throws NotUniqueException {
-        Project existingEntityWithSameName = repository.findOneByName(dto.getName());
+        Project existingEntityWithSameName = projectRepository.findOneByName(dto.getName());
         if (existingEntityWithSameName != null && !existingEntityWithSameName.getId().equals(dto.getId())) {
             throw new NotUniqueException(Messages.NOT_UNIQUE_PROJECT_NAME, Entities.PROJECT, "name", existingEntityWithSameName.getId());
         }
@@ -221,7 +228,7 @@ public class ProjectService {
 
     private void switchProjectAsDefault(ProjectDTO dto) {
         if (dto.isDefaultAtStartup()) {
-            Project entityDataBaseWithDefaultAtStartup = repository.findByDefaultAtStartup(true);
+            Project entityDataBaseWithDefaultAtStartup = projectRepository.findByDefaultAtStartup(true);
             if (entityDataBaseWithDefaultAtStartup != null && !entityDataBaseWithDefaultAtStartup.getCode().equals(dto.getCode())) {
                 entityDataBaseWithDefaultAtStartup.setDefaultAtStartup(false);
             }

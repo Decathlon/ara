@@ -40,7 +40,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
+import static com.decathlon.ara.loader.DemoLoaderConstants.DEMO_PROJECT_CODE;
 
 /**
  * Service for managing a Demo project.
@@ -90,7 +90,7 @@ public class DemoService {
      */
     @Transactional
     public ProjectDTO create() throws BadRequestException {
-        if (projectService.exists(PROJECT_CODE_DEMO)) {
+        if (projectService.exists(DEMO_PROJECT_CODE)) {
             throw new BadRequestException(Messages.RULE_DEMO_PROJECT_ALREADY_EXISTS, Entities.PROJECT, "demo-exists");
         }
 
@@ -124,7 +124,7 @@ public class DemoService {
      * @throws NotFoundException if there is no demo project
      */
     public void delete() throws NotFoundException {
-        final Project project = projectRepository.findOneByCode(PROJECT_CODE_DEMO);
+        final Project project = projectRepository.findOneByCode(DEMO_PROJECT_CODE);
         if (project == null) {
             throw new NotFoundException(Messages.NOT_FOUND_PROJECT, Entities.PROJECT);
         }
@@ -136,7 +136,7 @@ public class DemoService {
 
         if (executionBasePath.contains(Settings.PROJECT_VARIABLE)) {
             final String projectExecutionsFolder = executionBasePath
-                    .replace(Settings.PROJECT_VARIABLE, PROJECT_CODE_DEMO)
+                    .replace(Settings.PROJECT_VARIABLE, DEMO_PROJECT_CODE)
                     .replace(Settings.BRANCH_VARIABLE, "")
                     .replace(Settings.CYCLE_VARIABLE, "");
             try {

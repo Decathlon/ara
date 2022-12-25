@@ -72,7 +72,7 @@ class ProjectResourceIT {
     @Test
     void create_ShouldInsertEntity_WhenAllRulesAreRespected() {
         // GIVEN
-        final ProjectDTO project = new ProjectDTO(null, "new-code", "New name", false);
+        final ProjectDTO project = new ProjectDTO("new-code", "New name", false);
 
         // WHEN
         ResponseEntity<ProjectDTO> response = cut.create(project);
@@ -108,7 +108,7 @@ class ProjectResourceIT {
     @Test
     void create_ShouldFailAsNotUnique_WhenCodeAlreadyExists() {
         // GIVEN
-        final ProjectDTO projectWithExistingCode = new ProjectDTO(null, "project-y", "any", false);
+        final ProjectDTO projectWithExistingCode = new ProjectDTO("project-y", "any", false);
 
         // WHEN
         ResponseEntity<ProjectDTO> response = cut.create(projectWithExistingCode);
@@ -126,7 +126,7 @@ class ProjectResourceIT {
     @Test
     void create_ShouldFailAsNotUnique_WhenNameAlreadyExists() {
         // GIVEN
-        final ProjectDTO projectWithExistingName = new ProjectDTO(null, "new-code", "Project A", false);
+        final ProjectDTO projectWithExistingName = new ProjectDTO("new-code", "Project A", false);
 
         // WHEN
         ResponseEntity<ProjectDTO> response = cut.create(projectWithExistingName);
@@ -144,7 +144,7 @@ class ProjectResourceIT {
     @Test
     void create_ShouldInsertCommunications_WhenCreatingAProject() {
         // GIVEN
-        final ProjectDTO project = new ProjectDTO(null, "new-code", "any", false);
+        final ProjectDTO project = new ProjectDTO("new-code", "any", false);
 
         // WHEN
         ResponseEntity<ProjectDTO> response = cut.create(project);
@@ -163,7 +163,7 @@ class ProjectResourceIT {
     @Test
     void create_ShouldInsertDefaultRootCauses_WhenCreatingAProject() {
         // GIVEN
-        final ProjectDTO project = new ProjectDTO(null, "new-code", "any", false);
+        final ProjectDTO project = new ProjectDTO("new-code", "any", false);
 
         // WHEN
         ResponseEntity<ProjectDTO> response = cut.create(project);
@@ -195,7 +195,7 @@ class ProjectResourceIT {
     void update_ShouldUpdateEntity_WhenAllRulesAreRespected() {
         // GIVEN
         final String projectCode = "project-y";
-        final ProjectDTO project = new ProjectDTO(null, "renamed-code", "Renamed name", false);
+        final ProjectDTO project = new ProjectDTO("renamed-code", "Renamed name", false);
 
         // WHEN
         ResponseEntity<ProjectDTO> response = cut.update(projectCode, project);
@@ -230,7 +230,7 @@ class ProjectResourceIT {
     @Test
     void update_ShouldFailAsNotFound_WhenUpdatingNonexistentEntity() {
         // GIVEN
-        final ProjectDTO anyProject = new ProjectDTO(null, "Trying to...", "... update nonexistent", false);
+        final ProjectDTO anyProject = new ProjectDTO("Trying to...", "... update nonexistent", false);
 
         // WHEN
         ResponseEntity<ProjectDTO> response = cut.update("NONEXISTENT_PROJECT", anyProject);
@@ -247,7 +247,7 @@ class ProjectResourceIT {
     void update_ShouldFailAsNotUnique_WhenCodeAlreadyExists() {
         // GIVEN
         final String code = "project-y";
-        final ProjectDTO projectWithExistingCode = new ProjectDTO(null, "project-y", "any", false);
+        final ProjectDTO projectWithExistingCode = new ProjectDTO("project-y", "any", false);
 
         // WHEN
         ResponseEntity<ProjectDTO> response = cut.update(code, projectWithExistingCode);
@@ -266,7 +266,7 @@ class ProjectResourceIT {
     void update_ShouldFailAsNotUnique_WhenNameAlreadyExists() {
         // GIVEN
         final String code = "project-x";
-        final ProjectDTO projectWithExistingName = new ProjectDTO(null, "any", "Project A", false);
+        final ProjectDTO projectWithExistingName = new ProjectDTO("any", "Project A", false);
 
         // WHEN
         ResponseEntity<ProjectDTO> response = cut.update(code, projectWithExistingName);
@@ -286,7 +286,7 @@ class ProjectResourceIT {
         // GIVEN
         final Long id = 1L;
         final String code = "project-y";
-        final ProjectDTO updatedProjectProperties = new ProjectDTO(null, "any", "any", false);
+        final ProjectDTO updatedProjectProperties = new ProjectDTO("any", "any", false);
 
         // WHEN
         cut.update(code, updatedProjectProperties);

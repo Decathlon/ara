@@ -17,12 +17,17 @@
 
 package com.decathlon.ara.service.dto.project;
 
-import static com.decathlon.ara.service.support.DtoConstants.CODE_MESSAGE;
-import static com.decathlon.ara.service.support.DtoConstants.CODE_PATTERN;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+import java.util.Date;
+
+import static com.decathlon.ara.service.support.DtoConstants.CODE_MESSAGE;
+import static com.decathlon.ara.service.support.DtoConstants.CODE_PATTERN;
+import static com.decathlon.ara.service.util.DateService.DATE_FORMAT_YEAR_TO_SECOND;
 
 public class ProjectDTO {
 
@@ -43,6 +48,20 @@ public class ProjectDTO {
      */
     private boolean defaultAtStartup;
 
+    @JsonProperty("creation_date")
+    @JsonFormat(pattern = DATE_FORMAT_YEAR_TO_SECOND)
+    private Date creationDate;
+
+    @JsonProperty("creation_user")
+    private String creationUserLogin;
+
+    @JsonProperty("update_date")
+    @JsonFormat(pattern = DATE_FORMAT_YEAR_TO_SECOND)
+    private Date updateDate;
+
+    @JsonProperty("update_user")
+    private String updateUserLogin;
+
     public ProjectDTO() {
     }
 
@@ -51,6 +70,12 @@ public class ProjectDTO {
             String name,
             boolean defaultAtStartup) {
         this.id = id;
+        this.code = code;
+        this.name = name;
+        this.defaultAtStartup = defaultAtStartup;
+    }
+
+    public ProjectDTO(String code, String name, boolean defaultAtStartup) {
         this.code = code;
         this.name = name;
         this.defaultAtStartup = defaultAtStartup;
@@ -76,4 +101,35 @@ public class ProjectDTO {
         return defaultAtStartup;
     }
 
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public String getCreationUserLogin() {
+        return creationUserLogin;
+    }
+
+    public void setCreationUserLogin(String creationUserLogin) {
+        this.creationUserLogin = creationUserLogin;
+    }
+
+    public Date getUpdateDate() {
+        return updateDate;
+    }
+
+    public void setUpdateDate(Date updateDate) {
+        this.updateDate = updateDate;
+    }
+
+    public String getUpdateUserLogin() {
+        return updateUserLogin;
+    }
+
+    public void setUpdateUserLogin(String updateUserLogin) {
+        this.updateUserLogin = updateUserLogin;
+    }
 }

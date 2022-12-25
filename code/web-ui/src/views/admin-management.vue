@@ -62,8 +62,10 @@
       <thead>
         <tr>
           <th>Name</th>
-          <th>Creation date</th>
-          <th>Update date</th>
+          <th>Created on</th>
+          <th>Created by</th>
+          <th>Updated on</th>
+          <th>Updated by</th>
           <th v-if="isScopedUser">Role</th>
           <th>Default</th>
           <th></th>
@@ -73,8 +75,10 @@
       <tbody>
         <tr v-for="(project, index) in sortedProjects" :class="index %2 !== 0 ? 'darkGrey' : 'lightGrey'" :key="project.id">
           <td>{{ project.name }}</td>
-          <td>Creation date</td>
-          <td>Update date</td>
+          <td>{{ project.creation_date }}</td>
+          <td>{{ getProjectUserNameDisplay(project.creation_user) }}</td>
+          <td>{{ project.update_date }}</td>
+          <td>{{ getProjectUserNameDisplay(project.update_user) }}</td>
           <td v-if="isScopedUser">{{ getRoleOnProject(project.code) }}</td>
           <td>
             <input type="radio" name="defaultProject" @change="changeDefaultProject(project)" :checked="project.defaultAtStartup === true">
@@ -226,6 +230,12 @@ export default {
       },
       getRoleOnProject (projectCode) {
         return _(this.userDetails.scopes).filter({ 'project': projectCode }).map('role').first()
+      },
+      getProjectUserNameDisplay (login) {
+        if (login === this.userDetails.login) {
+          return 'Me'
+        }
+        return login
       },
       changeDefaultProject (project) {
         const defaultInfo = {

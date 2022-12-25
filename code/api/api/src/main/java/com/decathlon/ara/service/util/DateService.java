@@ -18,6 +18,10 @@ import static java.util.Map.entry;
 @Service
 public class DateService {
 
+    public static final String DATE_FORMAT_YEAR_TO_DAY = "yyyy-MM-dd";
+
+    public static final String DATE_FORMAT_YEAR_TO_SECOND = DATE_FORMAT_YEAR_TO_DAY + " HH:mm:ss";
+
     /**
      * @return the current date and time
      */

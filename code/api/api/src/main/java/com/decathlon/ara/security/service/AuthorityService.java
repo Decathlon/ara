@@ -114,7 +114,7 @@ public class AuthorityService {
                 .map(array -> UserAccountScope.userAccountScopeFactory(array[1], array[2]))
                 .filter(Optional::isPresent)
                 .map(Optional::get);
-        var demoProjectScopeStream = Stream.of(new UserAccountScope(DemoLoaderConstants.PROJECT_CODE_DEMO, UserAccountScopeRole.ADMIN));
+        var demoProjectScopeStream = Stream.of(new UserAccountScope(DemoLoaderConstants.DEMO_PROJECT_CODE, UserAccountScopeRole.ADMIN));
         return Stream.concat(userAccountScopesStream, demoProjectScopeStream).toList();
     }
 

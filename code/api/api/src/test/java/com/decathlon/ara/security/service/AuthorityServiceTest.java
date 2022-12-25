@@ -117,7 +117,7 @@ class AuthorityServiceTest {
     @Test
     void getRoleOnProject_returnAdminRole_whenProjectIsDemoProject() {
         // Given
-        var projectCode = DemoLoaderConstants.PROJECT_CODE_DEMO;
+        var projectCode = DemoLoaderConstants.DEMO_PROJECT_CODE;
 
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
@@ -291,7 +291,7 @@ class AuthorityServiceTest {
         // Then
         var projectCodes = authorityService.getScopedProjectCodes();
         assertThat(projectCodes)
-                .containsExactlyInAnyOrder("project-code1", "project-code2", "project-code3", DemoLoaderConstants.PROJECT_CODE_DEMO)
+                .containsExactlyInAnyOrder("project-code1", "project-code2", "project-code3", DemoLoaderConstants.DEMO_PROJECT_CODE)
                 .hasSize(4);
     }
 
@@ -375,7 +375,7 @@ class AuthorityServiceTest {
                         tuple("project-code1", UserAccountScopeRole.MEMBER),
                         tuple("project-code2", UserAccountScopeRole.MAINTAINER),
                         tuple("project-code3", UserAccountScopeRole.ADMIN),
-                        tuple(DemoLoaderConstants.PROJECT_CODE_DEMO, UserAccountScopeRole.ADMIN)
+                        tuple(DemoLoaderConstants.DEMO_PROJECT_CODE, UserAccountScopeRole.ADMIN)
                 );
     }
 

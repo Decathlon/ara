@@ -23,7 +23,9 @@ public class DemoLoaderConstants {
     }
 
     // Quite long code (not just "demo") and name, to not clash with a user-defined project, if they need a demo project
-    public static final String PROJECT_CODE_DEMO = "the-demo-project";
+    public static final String DEMO_PROJECT_CODE = "the-demo-project";
+
+    public static final String DEMO_PROJECT_NAME = "The Demo Project";
 
     public static final String BRANCH_MASTER = "master";
     static final String BRANCH_DEVELOP = "develop";

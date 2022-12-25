@@ -17,11 +17,13 @@
 
 package com.decathlon.ara.domain;
 
+import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
 import com.decathlon.ara.domain.security.member.user.entity.UserEntityRoleOnProject;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,13 +41,19 @@ public class Project {
     @Column(length = 64, nullable = false, unique = true)
     private String name;
 
-    public Project() {
-    }
+    private ZonedDateTime creationDate;
 
-    public Project(String code, String name) {
-        this.code = code;
-        this.name = name;
-    }
+    @ManyToOne
+    @JoinColumn(name = "creation_user_login", referencedColumnName = "login")
+    @JoinColumn(name = "creation_user_provider", referencedColumnName = "provider")
+    private UserEntity creationUser;
+
+    private ZonedDateTime updateDate;
+
+    @ManyToOne
+    @JoinColumn(name = "update_user_login", referencedColumnName = "login")
+    @JoinColumn(name = "update_user_provider", referencedColumnName = "provider")
+    private UserEntity updateUser;
 
     /**
      * True to use that project as the default one appearing at ARA's client startup when no project code is present in
@@ -60,6 +68,30 @@ public class Project {
     @OneToMany(mappedBy = "project")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<UserEntityRoleOnProject> userRoles = new ArrayList<>();
+
+    public Project() {
+        this.creationDate = ZonedDateTime.now();
+    }
+
+    public Project(Long id, String code, String name) {
+        this.id = id;
+        this.code = code;
+        this.name = name;
+        this.creationDate = ZonedDateTime.now();
+    }
+
+    public Project(String code, String name) {
+        this.code = code;
+        this.name = name;
+        this.creationDate = ZonedDateTime.now();
+    }
+
+    public Project(String code, String name, UserEntity creationUser) {
+        this.code = code;
+        this.name = name;
+        this.creationDate = ZonedDateTime.now();
+        this.creationUser = creationUser;
+    }
 
     public void addCommunication(Communication communication) {
         // Set the child-entity's foreign-key BEFORE adding the child-entity to the TreeSet,
@@ -87,6 +119,34 @@ public class Project {
 
     public void setDefaultAtStartup(boolean defaultAtStartup) {
         this.defaultAtStartup = defaultAtStartup;
+    }
+
+    public ZonedDateTime getCreationDate() {
+        return creationDate;
+    }
+
+    public UserEntity getCreationUser() {
+        return creationUser;
+    }
+
+    public void setCreationUser(UserEntity creationUser) {
+        this.creationUser = creationUser;
+    }
+
+    public ZonedDateTime getUpdateDate() {
+        return updateDate;
+    }
+
+    public void setUpdateDate(ZonedDateTime updateDate) {
+        this.updateDate = updateDate;
+    }
+
+    public UserEntity getUpdateUser() {
+        return updateUser;
+    }
+
+    public void setUpdateUser(UserEntity updateUser) {
+        this.updateUser = updateUser;
     }
 
     public List<Communication> getCommunications() {

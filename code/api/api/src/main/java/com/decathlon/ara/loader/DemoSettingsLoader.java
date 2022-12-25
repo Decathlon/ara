@@ -17,9 +17,11 @@
 
 package com.decathlon.ara.loader;
 
+import com.decathlon.ara.Entities;
 import com.decathlon.ara.domain.Communication;
 import com.decathlon.ara.domain.enumeration.CommunicationType;
 import com.decathlon.ara.domain.enumeration.Technology;
+import com.decathlon.ara.security.service.user.UserAccountService;
 import com.decathlon.ara.service.*;
 import com.decathlon.ara.service.dto.communication.CommunicationDTO;
 import com.decathlon.ara.service.dto.country.CountryDTO;
@@ -30,6 +32,7 @@ import com.decathlon.ara.service.dto.source.SourceDTO;
 import com.decathlon.ara.service.dto.team.TeamDTO;
 import com.decathlon.ara.service.dto.type.TypeWithSourceCodeDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
+import com.decathlon.ara.service.exception.ForbiddenException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,11 +70,20 @@ public class DemoSettingsLoader {
 
     private final TeamService teamService;
 
+    private final UserAccountService userAccountService;
+
     @Autowired
-    public DemoSettingsLoader(ProjectService projectService, CommunicationService communicationService,
-            SourceService sourceService, TypeService typeService, CountryService countryService,
+    public DemoSettingsLoader(
+            ProjectService projectService,
+            CommunicationService communicationService,
+            SourceService sourceService,
+            TypeService typeService,
+            CountryService countryService,
             SeverityService severityService,
-            CycleDefinitionService cycleDefinitionService, TeamService teamService) {
+            CycleDefinitionService cycleDefinitionService,
+            TeamService teamService,
+            UserAccountService userAccountService
+    ) {
         this.projectService = projectService;
         this.communicationService = communicationService;
         this.sourceService = sourceService;
@@ -80,11 +92,13 @@ public class DemoSettingsLoader {
         this.severityService = severityService;
         this.cycleDefinitionService = cycleDefinitionService;
         this.teamService = teamService;
+        this.userAccountService = userAccountService;
     }
 
-    public ProjectDTO createProjectWithCommunicationsAndRootCauses() throws NotUniqueException {
-        return projectService.create(
-                new ProjectDTO(null, PROJECT_CODE_DEMO, "The Demo Project", false));
+    public ProjectDTO createProjectWithCommunicationsAndRootCauses() throws NotUniqueException, ForbiddenException {
+        var creationUser = userAccountService.getCurrentUserEntity().orElseThrow(() -> new ForbiddenException(Entities.PROJECT, "demo project creation"));
+        var demoProject = new ProjectDTO(DEMO_PROJECT_CODE, DEMO_PROJECT_NAME, false);
+        return projectService.create(demoProject, creationUser);
     }
 
     public void setCommunications(long projectId) throws NotFoundException {

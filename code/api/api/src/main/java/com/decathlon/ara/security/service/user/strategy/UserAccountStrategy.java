@@ -17,7 +17,7 @@ public interface UserAccountStrategy {
      * @param userEntity the user entity
      * @return the {@link UserAccount}
      */
-    public default UserAccount getUserAccount(@NonNull OAuth2User oauth2User, @NonNull UserEntity userEntity) {
+    default UserAccount getUserAccount(@NonNull OAuth2User oauth2User, @NonNull UserEntity userEntity) {
         var userAttributes = new HashMap<String, String>();
 
         var login = getLogin(oauth2User);
@@ -38,13 +38,13 @@ public interface UserAccountStrategy {
         return new UserAccount(userAttributes, userEntity);
     }
 
-    public abstract String getLogin(OAuth2User oauth2User);
+    String getLogin(OAuth2User oauth2User);
 
-    public abstract Optional<String> getFirstName(OAuth2User oauth2User);
+    Optional<String> getFirstName(OAuth2User oauth2User);
 
-    public abstract Optional<String> getLastName(OAuth2User oauth2User);
+    Optional<String> getLastName(OAuth2User oauth2User);
 
-    public abstract Optional<String> getEmail(OAuth2User oauth2User);
+    Optional<String> getEmail(OAuth2User oauth2User);
 
-    public abstract Optional<String> getPictureUrl(OAuth2User oauth2User);
+    Optional<String> getPictureUrl(OAuth2User oauth2User);
 }

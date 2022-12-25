@@ -26,7 +26,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
+import static com.decathlon.ara.loader.DemoLoaderConstants.DEMO_PROJECT_CODE;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -45,7 +45,7 @@ class DemoServiceTest {
     @Test
     void create_ShouldFail_WhenDemoProjectAlreadyExists() {
         // GIVEN
-        when(projectService.exists(PROJECT_CODE_DEMO)).thenReturn(true);
+        when(projectService.exists(DEMO_PROJECT_CODE)).thenReturn(true);
 
         // WHEN
         assertThrows(BadRequestException.class, () -> cut.create());
@@ -54,7 +54,7 @@ class DemoServiceTest {
     @Test
     void delete_ShouldFail_WhenDemoProjectDoesNotExist() {
         // GIVEN
-        when(projectRepository.findOneByCode(PROJECT_CODE_DEMO)).thenReturn(null);
+        when(projectRepository.findOneByCode(DEMO_PROJECT_CODE)).thenReturn(null);
 
         // WHEN
         assertThrows(NotFoundException.class, () -> cut.delete());

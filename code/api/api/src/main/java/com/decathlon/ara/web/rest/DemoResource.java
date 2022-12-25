@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
+import static com.decathlon.ara.loader.DemoLoaderConstants.DEMO_PROJECT_CODE;
 import static com.decathlon.ara.web.rest.util.RestConstants.API_PATH;
 import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 
@@ -77,7 +77,7 @@ public class DemoResource {
     public ResponseEntity<Void> delete() {
         try {
             service.delete();
-            return ResponseUtil.deleted(Entities.PROJECT, PROJECT_CODE_DEMO);
+            return ResponseUtil.deleted(Entities.PROJECT, DEMO_PROJECT_CODE);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
         }

@@ -125,7 +125,7 @@ public class UserAccountService {
         return userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName));
     }
 
-    private Optional<UserEntity> getCurrentUserEntity() {
+    public Optional<UserEntity> getCurrentUserEntity() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!(authentication instanceof OAuth2AuthenticationToken oauth2Authentication)) {
             return Optional.empty();
@@ -163,16 +163,18 @@ public class UserAccountService {
         email.ifPresent(userToSave::setEmail);
 
         var profileConfiguration = providersConfiguration.getUserProfileConfiguration(providerName, userLogin);
-        if (profileConfiguration.isPresent()) {
-            var actualProfileConfiguration = profileConfiguration.get();
-            var profile = getUserProfileFromConfiguration(actualProfileConfiguration);
-            profile.ifPresent(userToSave::setProfile);
-            var userRoles = getUserRolesFromConfiguration(actualProfileConfiguration, providerName, userToSave);
-            userToSave.setRolesOnProjectWhenScopedUser(userRoles);
-        }
+        var userProfile = profileConfiguration.flatMap(UserAccountService::getUserProfileFromConfiguration);
+        userProfile.ifPresent(userToSave::setProfile);
 
         var savedUser = userEntityRepository.save(userToSave);
-        return strategy.getUserAccount(oauth2User, savedUser);
+        var finalSavedUser = savedUser;
+
+        var userRoles = profileConfiguration.map(configuration -> getUserRolesFromConfiguration(configuration, providerName, savedUser));
+        userRoles.ifPresent(userEntityRoleOnProjectRepository::saveAll);
+        if (userRoles.isPresent()) {
+            finalSavedUser = userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName)).orElse(savedUser);
+        }
+        return strategy.getUserAccount(oauth2User, finalSavedUser);
     }
 
     private static Optional<UserEntity.UserEntityProfile> getUserProfileFromConfiguration(UserProfileConfiguration profileConfiguration) {
@@ -182,7 +184,7 @@ public class UserAccountService {
                 .map(UserEntity.UserEntityProfile::valueOf);
     }
 
-    private List<UserEntityRoleOnProject> getUserRolesFromConfiguration(UserProfileConfiguration profileConfiguration, String providerName, UserEntity userToSave) {
+    private List<UserEntityRoleOnProject> getUserRolesFromConfiguration(UserProfileConfiguration profileConfiguration, String providerName, UserEntity savedUser) {
         return CollectionUtils.isNotEmpty(profileConfiguration.getScopes()) ?
                 profileConfiguration.getScopes()
                         .stream()
@@ -191,7 +193,7 @@ public class UserAccountService {
                                         scope -> getScopedUserRoleOnProjectFromRoleAsString(scope.getScope()),
                                         scope -> scope.getProjects()
                                                 .stream()
-                                                .map(projectCode -> getProjectFromCode(projectCode, providerName))
+                                                .map(projectCode -> getProjectFromCode(projectCode, providerName, savedUser))
                                                 .filter(Objects::nonNull)
                                                 .filter(Optional::isPresent)
                                                 .map(Optional::get)
@@ -203,7 +205,7 @@ public class UserAccountService {
                         .filter(entry -> entry.getKey().isPresent())
                         .flatMap(entry -> entry.getValue()
                                 .stream()
-                                .map(project -> new UserEntityRoleOnProject(userToSave, project, entry.getKey().get()))
+                                .map(project -> new UserEntityRoleOnProject(savedUser, project, entry.getKey().get()))
                         )
                         .toList() :
                 new ArrayList<>();
@@ -215,13 +217,13 @@ public class UserAccountService {
                 .map(UserEntityRoleOnProject.ScopedUserRoleOnProject::valueOf);
     }
 
-    private Optional<Project> getProjectFromCode(String projectCode, String providerName) {
+    private Optional<Project> getProjectFromCode(String projectCode, String providerName, UserEntity creationUser) {
         var project = projectRepository.findByCode(projectCode);
         var isAllowedToCreateProjects = providersConfiguration.createNewProjectsIfNotFoundAtUsersInit(providerName);
         var projectNotFound = project.isEmpty();
         if (projectNotFound && isAllowedToCreateProjects) {
             try {
-                projectService.createFromCode(projectCode);
+                projectService.createFromCode(projectCode, creationUser);
             } catch (NotUniqueException e) {
                 LOG.warn("Project {} already exists", projectCode, e);
             }
