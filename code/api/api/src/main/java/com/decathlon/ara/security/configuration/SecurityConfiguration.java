@@ -78,6 +78,8 @@ public class SecurityConfiguration {
                 .authorizeRequests() //NOSONAR
                 .antMatchers(AuthenticationResource.PATHS, RestConstants.ACTUATOR_PATHS).permitAll()
                 // user
+                .antMatchers(HttpMethod.DELETE, UserResource.DEFAULT_PROJECT_PATH).authenticated()
+                .antMatchers(HttpMethod.PUT, UserResource.DEFAULT_PROJECT_CODE_PATH).access(PROJECT_INSTANCE_FETCH_PERMISSION)
                 .antMatchers(HttpMethod.GET, UserResource.PATHS).authenticated()
 
                 // projects > demo

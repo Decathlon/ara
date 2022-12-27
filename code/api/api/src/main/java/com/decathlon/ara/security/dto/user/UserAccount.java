@@ -17,12 +17,14 @@
 
 package com.decathlon.ara.security.dto.user;
 
+import com.decathlon.ara.domain.Project;
 import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
 import com.decathlon.ara.domain.security.member.user.entity.UserEntityRoleOnProject;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScope;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
 import com.decathlon.ara.security.service.AuthorityService;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.GrantedAuthority;
@@ -50,11 +52,15 @@ public class UserAccount {
 
     private List<UserAccountScope> scopes;
 
+    @JsonProperty("default_project")
+    private String defaultProjectCode;
+
     public UserAccount(@NonNull Map<String, String> userAttributes, @NonNull UserEntity userEntity) {
         this.providerName = userEntity.getProviderName();
         this.login = userEntity.getLogin();
         this.profile = getProfileFromUserEntity(userEntity);
         this.scopes = getScopesFromUserEntity(userEntity);
+        this.defaultProjectCode = userEntity.getDefaultProject().map(Project::getCode).orElse(null);
 
         this.firstName = userAttributes.get(StandardClaimNames.GIVEN_NAME);
         this.lastName = userAttributes.get(StandardClaimNames.FAMILY_NAME);
@@ -92,6 +98,10 @@ public class UserAccount {
 
     public List<UserAccountScope> getScopes() {
         return scopes;
+    }
+
+    public String getDefaultProjectCode() {
+        return defaultProjectCode;
     }
 
     private UserAccountProfile getProfileFromUserEntity(@NonNull UserEntity userEntity) {

@@ -18,7 +18,7 @@
 
 <dataset>
 
-    <project id="1" code="p" name="Any" default_at_startup="false"/>
+    <project id="1" code="p" name="Any"/>
 
     <cycle_definition id="1" project_id="1" branch="develop" name="day" branch_position="1"/>
     <cycle_definition id="2" project_id="1" branch="develop" name="night" branch_position="1"/>

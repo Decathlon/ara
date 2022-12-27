@@ -48,7 +48,7 @@
           <td>Update date</td>
           <td>Created by</td>
           <td>
-            <input type="radio" name="defaultProject" @change="changeDefaultProject(project)" :checked="project.defaultAtStartup === true">
+            <input type="radio" name="defaultProject" @change="changeDefaultProject(project)" :checked="userDefaultProjectCode && userDefaultProjectCode === project.code">
           </td>
           <td>
             <Icon type="md-close-circle" size="24" @click="deleteDemoProject()"/>
@@ -81,7 +81,7 @@
           <td>{{ getProjectUserNameDisplay(project.update_user) }}</td>
           <td v-if="isScopedUser">{{ getRoleOnProject(project.code) }}</td>
           <td>
-            <input type="radio" name="defaultProject" @change="changeDefaultProject(project)" :checked="project.defaultAtStartup === true">
+            <input type="radio" name="defaultProject" @change="changeDefaultProject(project)" :checked="userDefaultProjectCode && userDefaultProjectCode === project.code">
           </td>
           <td>
             <Icon v-if="isAdminOnProject(project.code)" type="md-close-circle" size="24" @click="deleteProject(project.code)"/>
@@ -147,17 +147,6 @@ export default {
             newValue: '',
             width: undefined,
             help: 'The name of the project, visible in the top-left combobox in ARA\'s header.' + 'Eg. "Phoenix - Front".'
-          },
-          {
-            code: 'defaultAtStartup',
-            name: 'Default',
-            columnTitle: 'Default',
-            type: 'boolean',
-            required: true,
-            newValue: '',
-            width: 96,
-            help: 'Check to use that project as the default one when arriving at ARA homepage without any specified project. ' +
-              'Only one project can be declared as the default.'
           }
         ],
         editingData: {},
@@ -237,15 +226,27 @@ export default {
         }
         return login
       },
-      changeDefaultProject (project) {
-        const defaultInfo = {
-          'id': project.id,
-          'code': project.code,
-          'name': project.name,
-          'defaultAtStartup': true
-        }
+      clearDefaultProject () {
+        const url = `${api.paths.user}/default-project`
         Vue.http
-          .put('api/projects/' + project.code, defaultInfo, api.REQUEST_OPTIONS)
+          .delete(url, api.REQUEST_OPTIONS)
+          .then((response) => {
+            const updatedUser = response.body
+            AuthenticationService.saveUserDetails(updatedUser)
+          }, (error) => {
+            api.handleError(error)
+          })
+      },
+      changeDefaultProject (project) {
+        const url = `${api.paths.user}/default-project/${project.code}`
+        Vue.http
+          .put(url, null, api.REQUEST_OPTIONS)
+          .then((response) => {
+            const updatedUser = response.body
+            AuthenticationService.saveUserDetails(updatedUser)
+          }, (error) => {
+            api.handleError(error)
+          })
       },
       deleteDemoProject () {
         let self = this
@@ -309,6 +310,10 @@ export default {
 
       userDetails () {
         return AuthenticationService.getDetails().user
+      },
+
+      userDefaultProjectCode () {
+        return this.userDetails?.default_project
       },
 
       isSuperAdmin () {

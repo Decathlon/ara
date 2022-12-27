@@ -16,7 +16,7 @@ import java.util.List;
 @TestPropertySource(properties = {
         "ara.database.target=h2"
 })
-class AraExporterTest {
+class AraExporterIT {
 
     @Autowired
     private AraExporter sut;

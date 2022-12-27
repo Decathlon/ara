@@ -6,7 +6,6 @@ package "Project Segmentation" <<Rectangle>> {
         {static} + id : bigint(20)
         + code : varchar(32) *U1
         + name : varchar(64) *U2
-        + default_at_startup : boolean()
     }
 
 }

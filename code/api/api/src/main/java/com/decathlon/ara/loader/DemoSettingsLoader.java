@@ -97,7 +97,7 @@ public class DemoSettingsLoader {
 
     public ProjectDTO createProjectWithCommunicationsAndRootCauses() throws NotUniqueException, ForbiddenException {
         var creationUser = userAccountService.getCurrentUserEntity().orElseThrow(() -> new ForbiddenException(Entities.PROJECT, "demo project creation"));
-        var demoProject = new ProjectDTO(DEMO_PROJECT_CODE, DEMO_PROJECT_NAME, false);
+        var demoProject = new ProjectDTO(DEMO_PROJECT_CODE, DEMO_PROJECT_NAME);
         return projectService.create(demoProject, creationUser);
     }
 

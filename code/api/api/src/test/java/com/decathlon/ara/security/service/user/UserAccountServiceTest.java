@@ -899,4 +899,170 @@ class UserAccountServiceTest {
 
         verify(authorityService).refreshCurrentUserAccountAuthorities();
     }
+
+    @Test
+    void clearDefaultProject_throwForbiddenException_whenUserNotFound() {
+        // Given
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var principal = mock(OAuth2User.class);
+        var userLogin = "user-login";
+        var providerName = "provider-name";
+
+        var strategy = mock(UserAccountStrategy.class);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(principal);
+        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
+        when(userStrategySelector.selectUserStrategyFromProviderName(providerName)).thenReturn(strategy);
+        when(strategy.getLogin(principal)).thenReturn(userLogin);
+        when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountService.clearDefaultProject());
+        verify(userEntityRepository, never()).save(any(UserEntity.class));
+    }
+
+    @Test
+    void clearDefaultProject_saveUserDefaultProjectAsNull_whenUserFound() throws ForbiddenException {
+        // Given
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var principal = mock(OAuth2User.class);
+        var userLogin = "user-login";
+        var providerName = "provider-name";
+
+        var strategy = mock(UserAccountStrategy.class);
+
+        var defaultProjectToReplace = mock(Project.class);
+        var persistedUser = new UserEntity(userLogin, providerName);
+        persistedUser.setDefaultProject(defaultProjectToReplace);
+
+        var updatedUser = mock(UserEntity.class);
+        var updatedAccount = mock(UserAccount.class);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(principal);
+        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
+        when(userStrategySelector.selectUserStrategyFromProviderName(providerName)).thenReturn(strategy);
+        when(strategy.getLogin(principal)).thenReturn(userLogin);
+        when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.of(persistedUser));
+        when(userEntityRepository.save(persistedUser)).thenReturn(updatedUser);
+        when(updatedUser.getProviderName()).thenReturn(providerName);
+        when(strategy.getUserAccount(principal, updatedUser)).thenReturn(updatedAccount);
+
+        // Then
+        var actualAccount = userAccountService.clearDefaultProject();
+        assertThat(actualAccount).isSameAs(updatedAccount);
+
+        var userToUpdateArgumentCaptor = ArgumentCaptor.forClass(UserEntity.class);
+        verify(userEntityRepository).save(userToUpdateArgumentCaptor.capture());
+        var capturedUser = userToUpdateArgumentCaptor.getValue();
+        assertThat(capturedUser).isSameAs(persistedUser);
+        assertThat(capturedUser.getDefaultProject()).isNotPresent();
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "\t", "\n"})
+    void updateDefaultProject_throwForbiddenException_whenProjectCodeIsBlank(String projectCode) {
+        // Given
+
+        // When
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountService.updateDefaultProject(projectCode));
+        verify(userEntityRepository, never()).save(any(UserEntity.class));
+    }
+
+    @Test
+    void updateDefaultProject_throwForbiddenException_whenProjectNotFound() {
+        // Given
+        var projectCode = "unknown-project-code";
+
+        // When
+        when(projectRepository.findByCode(projectCode)).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountService.updateDefaultProject(projectCode));
+        verify(userEntityRepository, never()).save(any(UserEntity.class));
+    }
+
+    @Test
+    void updateDefaultProject_throwForbiddenException_whenUserNotFound() {
+        // Given
+        var projectCode = "unknown-project-code";
+        var newDefaultProject = mock(Project.class);
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var principal = mock(OAuth2User.class);
+        var userLogin = "user-login";
+        var providerName = "provider-name";
+
+        var strategy = mock(UserAccountStrategy.class);
+
+        // When
+        when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(newDefaultProject));
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(principal);
+        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
+        when(userStrategySelector.selectUserStrategyFromProviderName(providerName)).thenReturn(strategy);
+        when(strategy.getLogin(principal)).thenReturn(userLogin);
+        when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountService.updateDefaultProject(projectCode));
+        verify(userEntityRepository, never()).save(any(UserEntity.class));
+    }
+
+    @Test
+    void updateDefaultProject_saveUserNewDefaultProject_whenProjectAndUserFound() throws ForbiddenException {
+        // Given
+        var projectCode = "unknown-project-code";
+        var newDefaultProject = mock(Project.class);
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var principal = mock(OAuth2User.class);
+        var userLogin = "user-login";
+        var providerName = "provider-name";
+
+        var strategy = mock(UserAccountStrategy.class);
+
+        var defaultProjectToReplace = mock(Project.class);
+        var persistedUser = new UserEntity(userLogin, providerName);
+        persistedUser.setDefaultProject(defaultProjectToReplace);
+
+        var updatedUser = mock(UserEntity.class);
+        var updatedAccount = mock(UserAccount.class);
+
+        // When
+        when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(newDefaultProject));
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(principal);
+        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
+        when(userStrategySelector.selectUserStrategyFromProviderName(providerName)).thenReturn(strategy);
+        when(strategy.getLogin(principal)).thenReturn(userLogin);
+        when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.of(persistedUser));
+        when(userEntityRepository.save(persistedUser)).thenReturn(updatedUser);
+        when(updatedUser.getProviderName()).thenReturn(providerName);
+        when(strategy.getUserAccount(principal, updatedUser)).thenReturn(updatedAccount);
+
+        // Then
+        var actualAccount = userAccountService.updateDefaultProject(projectCode);
+        assertThat(actualAccount).isSameAs(updatedAccount);
+
+        var userToUpdateArgumentCaptor = ArgumentCaptor.forClass(UserEntity.class);
+        verify(userEntityRepository).save(userToUpdateArgumentCaptor.capture());
+        var capturedUser = userToUpdateArgumentCaptor.getValue();
+        assertThat(capturedUser).isSameAs(persistedUser);
+        assertThat(capturedUser.getDefaultProject()).containsSame(newDefaultProject);
+    }
 }

@@ -18,8 +18,8 @@
 
 <dataset>
 
-    <project id="1" code="p1" name="Any1" default_at_startup="false"/>
-    <project id="2" code="p2" name="Any2" default_at_startup="false"/>
+    <project id="1" code="p1" name="Any1"/>
+    <project id="2" code="p2" name="Any2"/>
 
     <problem id="1" project_id="1" name="any1" status="OPEN" creation_date_time="2018-01-01 12:00:00.0"/>
     <problem id="2" project_id="1" name="any2" status="OPEN" creation_date_time="2018-01-01 12:00:00.0" defect_id="a"/>

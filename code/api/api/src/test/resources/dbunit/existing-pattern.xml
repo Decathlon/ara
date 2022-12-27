@@ -18,7 +18,7 @@
 
 <dataset>
 
-    <project id="1" code="p" name="Any" default_at_startup="false"/>
+    <project id="1" code="p" name="Any"/>
 
     <execution/>
 

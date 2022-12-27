@@ -102,18 +102,6 @@ export default {
             businessKey: true,
             width: undefined,
             help: 'The name of the project, visible in the top-left combobox in ARA\'s header. Eg. "Phoenix - Front".'
-          },
-          {
-            code: 'defaultAtStartup',
-            name: 'Default',
-            columnTitle: 'Default',
-            type: 'boolean',
-            required: false,
-            newValue: false,
-            width: 96,
-            help: '' +
-              'Check to use that project as the default one when arriving at ARA homepage without any specified project. ' +
-              'Only one project can be declared as the default.'
           }
         ]
       }

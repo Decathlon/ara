@@ -12,10 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.oidc.StandardClaimNames;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -33,6 +30,9 @@ class UserAccountTest {
 
         var userLogin = "user-login";
         var providerName = "provider-name";
+
+        var defaultProject = mock(Project.class);
+        var defaultProjectCode = "default-project-code";
 
         var userEntityRole1 = mock(UserEntityRoleOnProject.class);
         var userEntityScope1 = UserEntityRoleOnProject.ScopedUserRoleOnProject.ADMIN;
@@ -55,6 +55,8 @@ class UserAccountTest {
         when(userEntity.getLogin()).thenReturn(userLogin);
         when(userEntity.getProviderName()).thenReturn(providerName);
         when(userEntity.getProfile()).thenReturn(userEntityProfile);
+        when(userEntity.getDefaultProject()).thenReturn(Optional.of(defaultProject));
+        when(defaultProject.getCode()).thenReturn(defaultProjectCode);
 
         when(userEntity.getRolesOnProjectWhenScopedUser()).thenReturn(userEntityRoles);
         when(userEntityRole1.getRole()).thenReturn(userEntityScope1);
@@ -74,6 +76,7 @@ class UserAccountTest {
                         "providerName",
                         "login",
                         "profile",
+                        "defaultProjectCode",
                         "firstName",
                         "lastName",
                         "email",
@@ -83,6 +86,7 @@ class UserAccountTest {
                         providerName,
                         userLogin,
                         UserAccountProfile.valueOf(userEntityProfile.name()),
+                        defaultProjectCode,
                         null,
                         null,
                         null,
@@ -116,6 +120,9 @@ class UserAccountTest {
         var userLogin = "user-login";
         var providerName = "provider-name";
 
+        var defaultProject = mock(Project.class);
+        var defaultProjectCode = "default-project-code";
+
         var userEntityRole1 = mock(UserEntityRoleOnProject.class);
         var userEntityScope1 = UserEntityRoleOnProject.ScopedUserRoleOnProject.ADMIN;
         var project1 = mock(Project.class);
@@ -137,6 +144,8 @@ class UserAccountTest {
         when(userEntity.getLogin()).thenReturn(userLogin);
         when(userEntity.getProviderName()).thenReturn(providerName);
         when(userEntity.getProfile()).thenReturn(userEntityProfile);
+        when(userEntity.getDefaultProject()).thenReturn(Optional.of(defaultProject));
+        when(defaultProject.getCode()).thenReturn(defaultProjectCode);
 
         when(userEntity.getRolesOnProjectWhenScopedUser()).thenReturn(userEntityRoles);
         when(userEntityRole1.getRole()).thenReturn(userEntityScope1);
@@ -156,6 +165,7 @@ class UserAccountTest {
                         "providerName",
                         "login",
                         "profile",
+                        "defaultProjectCode",
                         "firstName",
                         "lastName",
                         "email",
@@ -165,6 +175,7 @@ class UserAccountTest {
                         providerName,
                         userLogin,
                         UserAccountProfile.valueOf(userEntityProfile.name()),
+                        defaultProjectCode,
                         userFirstName,
                         userLastName,
                         userEmail,

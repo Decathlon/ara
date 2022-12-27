@@ -71,7 +71,6 @@ class ProjectServiceTest {
         // When
         when(projectToCreate.getCode()).thenReturn(projectCode);
         when(projectToCreate.getName()).thenReturn(projectName);
-        when(projectToCreate.isDefaultAtStartup()).thenReturn(false);
         when(projectRepository.findOneByCode(projectCode)).thenReturn(null);
         when(projectRepository.findOneByName(projectName)).thenReturn(null);
         when(projectMapper.getProjectEntityFromProjectDTO(projectToCreate)).thenReturn(mappedProject);
@@ -145,7 +144,6 @@ class ProjectServiceTest {
         when(projectToUpdate.getId()).thenReturn(projectId);
         when(projectToUpdate.getCode()).thenReturn(projectCode);
         when(projectToUpdate.getName()).thenReturn(projectName);
-        when(projectToUpdate.isDefaultAtStartup()).thenReturn(false);
         when(persistedProjectBeforeUpdate.getId()).thenReturn(projectId);
         when(persistedProjectBeforeUpdate.getCommunications()).thenReturn(communications);
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(persistedProjectBeforeUpdate));

@@ -19,7 +19,7 @@
 <dataset>
 
     <!-- Project -->
-    <project id="2" code="prj" name="project" default_at_startup="false" />
+    <project id="2" code="prj" name="project"/>
 
     <!-- Setting -->
     <setting id="1" project_id="2" code="execution.indexer.file.executionBasePath"

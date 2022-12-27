@@ -42,12 +42,6 @@ public class ProjectDTO {
     @Size(min = 1, max = 64, message = "The name is required and must not exceed {max} characters.")
     private String name;
 
-    /**
-     * True to use that project as the default one appearing at ARA's client startup when no project code is present in
-     * URL. Only one project can be declared as the default.
-     */
-    private boolean defaultAtStartup;
-
     @JsonProperty("creation_date")
     @JsonFormat(pattern = DATE_FORMAT_YEAR_TO_SECOND)
     private Date creationDate;
@@ -65,20 +59,15 @@ public class ProjectDTO {
     public ProjectDTO() {
     }
 
-    public ProjectDTO(Long id,
-            String code,
-            String name,
-            boolean defaultAtStartup) {
+    public ProjectDTO(Long id, String code, String name) {
         this.id = id;
         this.code = code;
         this.name = name;
-        this.defaultAtStartup = defaultAtStartup;
     }
 
-    public ProjectDTO(String code, String name, boolean defaultAtStartup) {
+    public ProjectDTO(String code, String name) {
         this.code = code;
         this.name = name;
-        this.defaultAtStartup = defaultAtStartup;
     }
 
     public Long getId() {
@@ -95,10 +84,6 @@ public class ProjectDTO {
 
     public String getName() {
         return name;
-    }
-
-    public boolean isDefaultAtStartup() {
-        return defaultAtStartup;
     }
 
     public Date getCreationDate() {

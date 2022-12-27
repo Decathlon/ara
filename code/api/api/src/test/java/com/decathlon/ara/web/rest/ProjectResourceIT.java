@@ -72,7 +72,7 @@ class ProjectResourceIT {
     @Test
     void create_ShouldInsertEntity_WhenAllRulesAreRespected() {
         // GIVEN
-        final ProjectDTO project = new ProjectDTO("new-code", "New name", false);
+        final ProjectDTO project = new ProjectDTO("new-code", "New name");
 
         // WHEN
         ResponseEntity<ProjectDTO> response = cut.create(project);
@@ -83,18 +83,17 @@ class ProjectResourceIT {
         assertThat(response.getBody().getId()).isGreaterThan(3);
         assertThat(response.getBody().getCode()).isEqualTo("new-code");
         assertThat(response.getBody().getName()).isEqualTo("New name");
-        assertThat(response.getBody().isDefaultAtStartup()).isFalse();
         assertThat(cut.getAll()).containsExactly( // Ordered by name ASC
-                new ProjectDTO(response.getBody().getId(), "new-code", "New name", false),
-                new ProjectDTO(1L, "project-y", "Project A", false),
-                new ProjectDTO(3L, "project-z", "Project B", false),
-                new ProjectDTO(2L, "project-x", "Project C", true));
+                new ProjectDTO(response.getBody().getId(), "new-code", "New name"),
+                new ProjectDTO(1L, "project-y", "Project A"),
+                new ProjectDTO(3L, "project-z", "Project B"),
+                new ProjectDTO(2L, "project-x", "Project C"));
     }
 
     @Test
     void create_ShouldFailAsBadRequest_WhenIdProvided() {
         // GIVEN
-        final ProjectDTO projectWithId = new ProjectDTO(NONEXISTENT, "is...", "...provided", false);
+        final ProjectDTO projectWithId = new ProjectDTO(NONEXISTENT, "is...", "...provided");
 
         // WHEN
         ResponseEntity<ProjectDTO> response = cut.create(projectWithId);
@@ -108,7 +107,7 @@ class ProjectResourceIT {
     @Test
     void create_ShouldFailAsNotUnique_WhenCodeAlreadyExists() {
         // GIVEN
-        final ProjectDTO projectWithExistingCode = new ProjectDTO("project-y", "any", false);
+        final ProjectDTO projectWithExistingCode = new ProjectDTO("project-y", "any");
 
         // WHEN
         ResponseEntity<ProjectDTO> response = cut.create(projectWithExistingCode);
@@ -126,7 +125,7 @@ class ProjectResourceIT {
     @Test
     void create_ShouldFailAsNotUnique_WhenNameAlreadyExists() {
         // GIVEN
-        final ProjectDTO projectWithExistingName = new ProjectDTO("new-code", "Project A", false);
+        final ProjectDTO projectWithExistingName = new ProjectDTO("new-code", "Project A");
 
         // WHEN
         ResponseEntity<ProjectDTO> response = cut.create(projectWithExistingName);
@@ -144,7 +143,7 @@ class ProjectResourceIT {
     @Test
     void create_ShouldInsertCommunications_WhenCreatingAProject() {
         // GIVEN
-        final ProjectDTO project = new ProjectDTO("new-code", "any", false);
+        final ProjectDTO project = new ProjectDTO("new-code", "any");
 
         // WHEN
         ResponseEntity<ProjectDTO> response = cut.create(project);
@@ -163,7 +162,7 @@ class ProjectResourceIT {
     @Test
     void create_ShouldInsertDefaultRootCauses_WhenCreatingAProject() {
         // GIVEN
-        final ProjectDTO project = new ProjectDTO("new-code", "any", false);
+        final ProjectDTO project = new ProjectDTO("new-code", "any");
 
         // WHEN
         ResponseEntity<ProjectDTO> response = cut.create(project);
@@ -186,16 +185,16 @@ class ProjectResourceIT {
 
         // THEN
         assertThat(projects).containsExactly( // Ordered by name ASC
-                new ProjectDTO(1L, "project-y", "Project A", false),
-                new ProjectDTO(3L, "project-z", "Project B", false),
-                new ProjectDTO(2L, "project-x", "Project C", true));
+                new ProjectDTO(1L, "project-y", "Project A"),
+                new ProjectDTO(3L, "project-z", "Project B"),
+                new ProjectDTO(2L, "project-x", "Project C"));
     }
 
     @Test
     void update_ShouldUpdateEntity_WhenAllRulesAreRespected() {
         // GIVEN
         final String projectCode = "project-y";
-        final ProjectDTO project = new ProjectDTO("renamed-code", "Renamed name", false);
+        final ProjectDTO project = new ProjectDTO("renamed-code", "Renamed name");
 
         // WHEN
         ResponseEntity<ProjectDTO> response = cut.update(projectCode, project);
@@ -205,9 +204,9 @@ class ProjectResourceIT {
         assertThat(header(response, HeaderUtil.ALERT)).isEqualTo("ara.project.updated");
         assertThat(header(response, HeaderUtil.PARAMS)).isEqualTo("1");
         assertThat(cut.getAll()).containsExactly( // Ordered by name ASC
-                new ProjectDTO(3L, "project-z", "Project B", false),
-                new ProjectDTO(2L, "project-x", "Project C", true),
-                new ProjectDTO(1L, "renamed-code", "Renamed name", false));
+                new ProjectDTO(3L, "project-z", "Project B"),
+                new ProjectDTO(2L, "project-x", "Project C"),
+                new ProjectDTO(1L, "renamed-code", "Renamed name"));
     }
 
     @Test
@@ -215,7 +214,7 @@ class ProjectResourceIT {
         // GIVEN
         Long existingId = 1L;
         String projectCode = "project-y";
-        final ProjectDTO project = new ProjectDTO(existingId, "project-y", "Project A", false);
+        final ProjectDTO project = new ProjectDTO(existingId, "project-y", "Project A");
 
         // WHEN
         ResponseEntity<ProjectDTO> response = cut.update(projectCode, project);
@@ -230,7 +229,7 @@ class ProjectResourceIT {
     @Test
     void update_ShouldFailAsNotFound_WhenUpdatingNonexistentEntity() {
         // GIVEN
-        final ProjectDTO anyProject = new ProjectDTO("Trying to...", "... update nonexistent", false);
+        final ProjectDTO anyProject = new ProjectDTO("Trying to...", "... update nonexistent");
 
         // WHEN
         ResponseEntity<ProjectDTO> response = cut.update("NONEXISTENT_PROJECT", anyProject);
@@ -247,7 +246,7 @@ class ProjectResourceIT {
     void update_ShouldFailAsNotUnique_WhenCodeAlreadyExists() {
         // GIVEN
         final String code = "project-y";
-        final ProjectDTO projectWithExistingCode = new ProjectDTO("project-y", "any", false);
+        final ProjectDTO projectWithExistingCode = new ProjectDTO("project-y", "any");
 
         // WHEN
         ResponseEntity<ProjectDTO> response = cut.update(code, projectWithExistingCode);
@@ -266,7 +265,7 @@ class ProjectResourceIT {
     void update_ShouldFailAsNotUnique_WhenNameAlreadyExists() {
         // GIVEN
         final String code = "project-x";
-        final ProjectDTO projectWithExistingName = new ProjectDTO("any", "Project A", false);
+        final ProjectDTO projectWithExistingName = new ProjectDTO("any", "Project A");
 
         // WHEN
         ResponseEntity<ProjectDTO> response = cut.update(code, projectWithExistingName);
@@ -286,7 +285,7 @@ class ProjectResourceIT {
         // GIVEN
         final Long id = 1L;
         final String code = "project-y";
-        final ProjectDTO updatedProjectProperties = new ProjectDTO("any", "any", false);
+        final ProjectDTO updatedProjectProperties = new ProjectDTO("any", "any");
 
         // WHEN
         cut.update(code, updatedProjectProperties);

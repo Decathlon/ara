@@ -108,7 +108,7 @@ public class ProjectService {
      */
     public ProjectDTO createFromCode(@NonNull String projectCode, @NonNull UserEntity creationUser) throws NotUniqueException {
         var projectName =  getProjectNameFromCode(projectCode);
-        var projectToCreate = new ProjectDTO(projectCode, projectName, false);
+        var projectToCreate = new ProjectDTO(projectCode, projectName);
         return create(projectToCreate, creationUser);
     }
 
@@ -209,7 +209,6 @@ public class ProjectService {
     private void validateBusinessRules(ProjectDTO dto) throws NotUniqueException {
         validateUniqueCode(dto);
         validateUniqueName(dto);
-        switchProjectAsDefault(dto);
     }
 
     private void validateUniqueCode(ProjectDTO dto) throws NotUniqueException {
@@ -223,15 +222,6 @@ public class ProjectService {
         Project existingEntityWithSameName = projectRepository.findOneByName(dto.getName());
         if (existingEntityWithSameName != null && !existingEntityWithSameName.getId().equals(dto.getId())) {
             throw new NotUniqueException(Messages.NOT_UNIQUE_PROJECT_NAME, Entities.PROJECT, "name", existingEntityWithSameName.getId());
-        }
-    }
-
-    private void switchProjectAsDefault(ProjectDTO dto) {
-        if (dto.isDefaultAtStartup()) {
-            Project entityDataBaseWithDefaultAtStartup = projectRepository.findByDefaultAtStartup(true);
-            if (entityDataBaseWithDefaultAtStartup != null && !entityDataBaseWithDefaultAtStartup.getCode().equals(dto.getCode())) {
-                entityDataBaseWithDefaultAtStartup.setDefaultAtStartup(false);
-            }
         }
     }
 

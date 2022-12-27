@@ -30,8 +30,8 @@ begin
 	end if;
 	-- Add project
 	select nextval('project_id') into projectID;
-	insert into project(id, code, default_at_startup, "name") values
-		(projectID, 'tests-project', true, 'The tests project');
+	insert into project(id, code, "name") values
+		(projectID, 'tests-project', 'The tests project');
 	
 	-- Add root cause
 	insert into root_cause(id, "name", project_id) values 

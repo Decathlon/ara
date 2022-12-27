@@ -17,7 +17,7 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <dataset>
-    <project id="1" code="p" name="Any" default_at_startup="false"/>
+    <project id="1" code="p" name="Any"/>
 
     <country id="1" project_id="1" code="cn" name="China"/>
     <country id="2" project_id="1" code="nl" name="Netherlands"/>

@@ -55,12 +55,6 @@ public class Project {
     @JoinColumn(name = "update_user_provider", referencedColumnName = "provider")
     private UserEntity updateUser;
 
-    /**
-     * True to use that project as the default one appearing at ARA's client startup when no project code is present in
-     * URL. Only one project can be declared as the default.
-     */
-    private boolean defaultAtStartup;
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "project", orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Communication> communications = new ArrayList<>();
@@ -111,14 +105,6 @@ public class Project {
 
     public String getName() {
         return name;
-    }
-
-    public boolean isDefaultAtStartup() {
-        return defaultAtStartup;
-    }
-
-    public void setDefaultAtStartup(boolean defaultAtStartup) {
-        this.defaultAtStartup = defaultAtStartup;
     }
 
     public ZonedDateTime getCreationDate() {

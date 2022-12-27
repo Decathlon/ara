@@ -17,7 +17,7 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <dataset>
-    <project id="1" code="p" name="Any" default_at_startup="false"/>
+    <project id="1" code="p" name="Any"/>
 
     <severity id="2" project_id="1" code="code1" position="1" name="test" short_name="P0" initials="A" default_on_missing="true"/>
     <severity id="3" project_id="1" code="code3" position="3" name="test1" short_name="P1" initials="B" default_on_missing="false"/>

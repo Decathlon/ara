@@ -302,4 +302,45 @@ public class UserAccountService {
             userRoles.add(new UserEntityRoleOnProject(userToUpdate, project, roleToUpdate));
         }
     }
+
+    /**
+     * Clear the current user default project
+     * @return the updated user account
+     * @throws ForbiddenException thrown if the operation failed
+     */
+    public UserAccount clearDefaultProject() throws ForbiddenException {
+        var userToUpdate = getCurrentUserEntity().orElseThrow(() -> new ForbiddenException(Entities.PROJECT, "clear default project"));
+        userToUpdate.setDefaultProject(null);
+        var updatedUser = userEntityRepository.save(userToUpdate);
+        return getUserAccountFromUserEntity(updatedUser);
+    }
+
+    private UserAccount getUserAccountFromUserEntity(@NonNull UserEntity userEntity) {
+        var authentication = (OAuth2AuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        var oauth2User = authentication.getPrincipal();
+        var providerName = userEntity.getProviderName();
+        var strategy = userStrategySelector.selectUserStrategyFromProviderName(providerName);
+        return strategy.getUserAccount(oauth2User, userEntity);
+    }
+
+    /**
+     * Update the user default project
+     * @param projectCode the project code. Note that the code must exist and the user must have access to this project.
+     * @return the updated user account
+     * @throws ForbiddenException thrown if the operation failed
+     */
+    public UserAccount updateDefaultProject(@NonNull String projectCode) throws ForbiddenException {
+        var projectCodeContext = getProjectCodeExceptionContext(projectCode);
+        var exception = new ForbiddenException(Entities.PROJECT, "update default project", projectCodeContext);
+
+        if (StringUtils.isBlank(projectCode)) {
+            throw exception;
+        }
+
+        var defaultProject = projectRepository.findByCode(projectCode).orElseThrow(() -> exception);
+        var userToUpdate = getCurrentUserEntity().orElseThrow(() -> exception);
+        userToUpdate.setDefaultProject(defaultProject);
+        var updatedUser = userEntityRepository.save(userToUpdate);
+        return getUserAccountFromUserEntity(updatedUser);
+    }
 }

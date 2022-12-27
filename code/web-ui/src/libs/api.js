@@ -39,6 +39,7 @@ api.REQUEST_OPTIONS = {
 api.paths = {
   authenticationConfiguration: () => `${AUTH}/configuration`,
   loggedStatus: `${AUTH}/status`,
+  user: `${API_PATH}/user`,
   userDetails: `${API_PATH}/user/details`,
   communications: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/communications',
   countries: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/countries',

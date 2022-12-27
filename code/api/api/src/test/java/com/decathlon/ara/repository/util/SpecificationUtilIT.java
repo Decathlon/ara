@@ -33,7 +33,7 @@ import static org.mockito.ArgumentMatchers.any;
 
 @DataJpaTest
 @ExtendWith(MockitoExtension.class)
-class SpecificationUtilTest {
+class SpecificationUtilIT {
 
     @Autowired
     private EntityManager entityManager;
@@ -134,7 +134,7 @@ class SpecificationUtilTest {
         }
 
         private String getName() {
-            return SpecificationUtilTest.getName(expression);
+            return SpecificationUtilIT.getName(expression);
         }
 
         @SuppressWarnings("unchecked")

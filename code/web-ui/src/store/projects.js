@@ -16,6 +16,7 @@
  ******************************************************************************/
 import Vue from 'vue'
 import api from '../libs/api'
+import { AuthenticationService } from '../service/authentication.service'
 
 export default {
   namespaced: true,
@@ -38,13 +39,8 @@ export default {
       // Compute the default project code: either the one set as default,
       // or the first one (or undefined if no projects exist)
       if (projects && projects.length) {
-        state.defaultProjectCode = projects[0].code
-        for (let project of projects) {
-          if (project.defaultAtStartup) {
-            state.defaultProjectCode = project.code
-            break
-          }
-        }
+        const userDefaultProject = AuthenticationService.getDetails().user.default_project
+        state.defaultProjectCode = userDefaultProject || projects[0].code
       }
 
       // At the end, when everything is loaded/computed

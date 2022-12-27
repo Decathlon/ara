@@ -28,7 +28,6 @@ class ProjectMapperTest {
         var projectId = 1L;
         var projectCode = "project-code";
         var projectName = "project-name";
-        var isDefaultProject = true;
 
         var creationDate = ZonedDateTime.now().minusDays(3);
         var creationUser = mock(UserEntity.class);
@@ -42,7 +41,6 @@ class ProjectMapperTest {
         when(projectToConvert.getId()).thenReturn(projectId);
         when(projectToConvert.getCode()).thenReturn(projectCode);
         when(projectToConvert.getName()).thenReturn(projectName);
-        when(projectToConvert.isDefaultAtStartup()).thenReturn(isDefaultProject);
         when(projectToConvert.getCreationDate()).thenReturn(creationDate);
         when(projectToConvert.getCreationUser()).thenReturn(creationUser);
         when(projectToConvert.getUpdateDate()).thenReturn(updateDate);
@@ -58,7 +56,6 @@ class ProjectMapperTest {
                         "id",
                         "name",
                         "code",
-                        "defaultAtStartup",
                         "creationDate",
                         "creationUserLogin",
                         "updateDate",
@@ -68,7 +65,6 @@ class ProjectMapperTest {
                         projectId,
                         projectName,
                         projectCode,
-                        isDefaultProject,
                         Date.from(creationDate.toInstant()),
                         creationUserLogin,
                         Date.from(updateDate.toInstant()),
@@ -83,13 +79,11 @@ class ProjectMapperTest {
         var projectId = 1L;
         var projectCode = "project-code";
         var projectName = "project-name";
-        var isDefaultProject = true;
 
         // When
         when(projectToConvert.getId()).thenReturn(projectId);
         when(projectToConvert.getCode()).thenReturn(projectCode);
         when(projectToConvert.getName()).thenReturn(projectName);
-        when(projectToConvert.isDefaultAtStartup()).thenReturn(isDefaultProject);
 
         // Then
         var convertedProject = projectMapper.getProjectEntityFromProjectDTO(projectToConvert);
@@ -97,14 +91,12 @@ class ProjectMapperTest {
                 .extracting(
                         "id",
                         "name",
-                        "code",
-                        "defaultAtStartup"
+                        "code"
                 )
                 .containsExactly(
                         projectId,
                         projectName,
-                        projectCode,
-                        isDefaultProject
+                        projectCode
                 );
         var now = ZonedDateTime.now();
         assertThat(convertedProject.getCreationDate()).isBetween(now.minusSeconds(1), now.plusSeconds(1));

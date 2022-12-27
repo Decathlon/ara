@@ -156,8 +156,8 @@ class AuthenticationServiceClass {
     }
   }
 
-  saveUserDetails = (authenticationDetails) => {
-    localStorage.setItem(USER_DETAILS, JSON.stringify(authenticationDetails))
+  saveUserDetails = (userDetails) => {
+    localStorage.setItem(USER_DETAILS, JSON.stringify(userDetails))
   }
 
   saveProviderName = (providerName) => {

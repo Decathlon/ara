@@ -14,8 +14,7 @@ public class ProjectMapper {
         var id = project.getId();
         var code = project.getCode();
         var name = project.getName();
-        var isDefaultAtStartup = project.isDefaultAtStartup();
-        var projectToConvert = new ProjectDTO(id, code, name, isDefaultAtStartup);
+        var projectToConvert = new ProjectDTO(id, code, name);
 
         var creationDate = project.getCreationDate();
         if (creationDate != null) {
@@ -41,9 +40,6 @@ public class ProjectMapper {
         var id = projectDTO.getId();
         var code = projectDTO.getCode();
         var name = projectDTO.getName();
-        var isDefaultAtStartup = projectDTO.isDefaultAtStartup();
-        var projectToConvert = new Project(id, code, name);
-        projectToConvert.setDefaultAtStartup(isDefaultAtStartup);
-        return projectToConvert;
+        return new Project(id, code, name);
     }
 }

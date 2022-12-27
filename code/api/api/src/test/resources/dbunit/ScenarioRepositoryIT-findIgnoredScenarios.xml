@@ -18,7 +18,7 @@
 
 <dataset>
 
-    <project id="1" code="p" name="Any" default_at_startup="false"/>
+    <project id="1" code="p" name="Any"/>
 
     <source id="1" project_id="1" code="sourceA" name="Source A" letter="A" technology="CUCUMBER" vcs_url="urlA"
             default_branch="branchA" postman_country_root_folders="false"/>
