@@ -1,7 +1,7 @@
 package com.decathlon.ara.security.service.resource.project;
 
 import com.decathlon.ara.security.dto.permission.ResourcePermission;
-import com.decathlon.ara.security.service.AuthorityService;
+import com.decathlon.ara.security.service.UserSessionService;
 import com.decathlon.ara.service.ProjectService;
 import org.springframework.stereotype.Component;
 
@@ -11,8 +11,8 @@ import java.util.List;
 @Component("projectSettings")
 public class ProjectSettingsResourceAccess extends ProjectResourceAccess {
 
-    public ProjectSettingsResourceAccess(AuthorityService authorityService, ProjectService projectService) {
-        super(authorityService, projectService);
+    public ProjectSettingsResourceAccess(UserSessionService userSessionService, ProjectService projectService) {
+        super(userSessionService, projectService);
     }
 
     @Override

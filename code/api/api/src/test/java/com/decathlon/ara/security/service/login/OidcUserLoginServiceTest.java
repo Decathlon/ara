@@ -1,6 +1,7 @@
 package com.decathlon.ara.security.service.login;
 
 import com.decathlon.ara.security.dto.user.UserAccount;
+import com.decathlon.ara.security.mapper.AuthorityMapper;
 import com.decathlon.ara.security.service.user.UserAccountService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +32,9 @@ class OidcUserLoginServiceTest {
 
     @Mock
     private UserAccountService userAccountService;
+
+    @Mock
+    private AuthorityMapper authorityMapper;
 
     @InjectMocks
     private OidcUserLoginService loginService;
@@ -67,7 +71,7 @@ class OidcUserLoginServiceTest {
         when(clientRegistration.getRegistrationId()).thenReturn(providerName);
         when(userAccountService.getCurrentUserAccount(oidcUser, providerName)).thenReturn(Optional.empty());
         when(userAccountService.createUserAccount(oidcUser, providerName)).thenReturn(newlyPersistedUser);
-        when(newlyPersistedUser.getMatchingAuthorities()).thenReturn(authorities);
+        when(authorityMapper.getGrantedAuthoritiesFromUserAccount(newlyPersistedUser)).thenReturn(authorities);
         when(authority1.getAuthority()).thenReturn(authorityValue1);
         when(authority2.getAuthority()).thenReturn(authorityValue2);
         when(authority3.getAuthority()).thenReturn(authorityValue3);
@@ -112,7 +116,7 @@ class OidcUserLoginServiceTest {
         when(request.getClientRegistration()).thenReturn(clientRegistration);
         when(clientRegistration.getRegistrationId()).thenReturn(providerName);
         when(userAccountService.getCurrentUserAccount(oidcUser, providerName)).thenReturn(Optional.of(alreadyPersistedUser));
-        when(alreadyPersistedUser.getMatchingAuthorities()).thenReturn(authorities);
+        when(authorityMapper.getGrantedAuthoritiesFromUserAccount(alreadyPersistedUser)).thenReturn(authorities);
         when(authority1.getAuthority()).thenReturn(authorityValue1);
         when(authority2.getAuthority()).thenReturn(authorityValue2);
         when(authority3.getAuthority()).thenReturn(authorityValue3);

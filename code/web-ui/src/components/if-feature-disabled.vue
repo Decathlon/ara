@@ -34,7 +34,7 @@
     },
     created () {
       Vue.http
-        .get(api.paths.features() + '/' + this.$props.code + '/state', api.REQUEST_OPTIONS)
+        .get(api.paths.features + '/' + this.$props.code + '/state', api.REQUEST_OPTIONS)
         .then((response) => {
           this.inactive = !response.body.enabled
         }, (error) => {

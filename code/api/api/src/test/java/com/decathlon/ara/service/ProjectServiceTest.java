@@ -7,7 +7,7 @@ import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
 import com.decathlon.ara.repository.ProjectRepository;
 import com.decathlon.ara.repository.RootCauseRepository;
 import com.decathlon.ara.security.dto.user.UserAccountProfile;
-import com.decathlon.ara.security.service.AuthorityService;
+import com.decathlon.ara.security.service.UserSessionService;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.ForbiddenException;
@@ -45,7 +45,7 @@ class ProjectServiceTest {
     private ProjectMapper projectMapper;
 
     @Mock
-    private AuthorityService authorityService;
+    private UserSessionService userSessionService;
 
     @Mock
     private CommunicationService communicationService;
@@ -180,7 +180,7 @@ class ProjectServiceTest {
         // Given
 
         // When
-        when(authorityService.getProfile()).thenReturn(Optional.empty());
+        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.empty());
 
         // Then
         var userProjects = projectService.findAll();
@@ -207,7 +207,7 @@ class ProjectServiceTest {
         var mappedProjects = List.of(mappedProject1, mappedProject2, mappedProject3);
 
         // When
-        when(authorityService.getProfile()).thenReturn(Optional.of(profile));
+        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
         when(projectRepository.findAllByOrderByName()).thenReturn(allProjects);
         when(projectMapper.getProjectDTOFromProjectEntity(project1)).thenReturn(mappedProject1);
         when(projectMapper.getProjectDTOFromProjectEntity(project2)).thenReturn(mappedProject2);
@@ -239,8 +239,8 @@ class ProjectServiceTest {
         var mappedProjects = List.of(mappedProject1, mappedProject2, mappedProject3);
 
         // When
-        when(authorityService.getProfile()).thenReturn(Optional.of(profile));
-        when(authorityService.getScopedProjectCodes()).thenReturn(projectCodes);
+        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
+        when(userSessionService.getCurrentUserScopedProjectCodes()).thenReturn(projectCodes);
         when(projectRepository.findByCodeInOrderByName(projectCodes)).thenReturn(scopedProjects);
         when(projectMapper.getProjectDTOFromProjectEntity(project1)).thenReturn(mappedProject1);
         when(projectMapper.getProjectDTOFromProjectEntity(project2)).thenReturn(mappedProject2);
@@ -262,7 +262,7 @@ class ProjectServiceTest {
         // Then
         projectService.delete(projectCode);
         verify(projectRepository, times(1)).deleteByCode(projectCode);
-        verify(authorityService, times(1)).refreshCurrentUserAccountAuthorities();
+        verify(userSessionService, times(1)).refreshCurrentUserAuthorities();
     }
 
     @Test

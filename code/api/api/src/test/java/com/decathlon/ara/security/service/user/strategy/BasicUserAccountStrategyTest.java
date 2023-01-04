@@ -1,6 +1,5 @@
 package com.decathlon.ara.security.service.user.strategy;
 
-import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,7 +19,7 @@ import static org.mockito.Mockito.when;
 class BasicUserAccountStrategyTest {
 
     @Test
-    void getUserAccount_returnUserAccount_whenOidcUserFieldValuesFound() {
+    void getUserDetails_returnUserDetails_whenOidcUserFieldValuesFound() {
         // Given
         var customAttributes = new HashMap<String, String>();
 
@@ -33,7 +32,6 @@ class BasicUserAccountStrategyTest {
 
         var userEntityLogin = "user-entity-login";
         var providerName = "provider-name";
-        var userEntity = new UserEntity(userEntityLogin, providerName);
 
         // When
         when(oauth2User.getName()).thenReturn(userLogin);
@@ -49,27 +47,10 @@ class BasicUserAccountStrategyTest {
         assertThat(strategy.getLastName(oauth2User)).contains(userLastName);
         assertThat(strategy.getEmail(oauth2User)).contains(userEmail);
         assertThat(strategy.getPictureUrl(oauth2User)).contains(userPictureUrl);
-
-        var userAccount = strategy.getUserAccount(oauth2User, userEntity);
-        assertThat(userAccount)
-                .extracting(
-                        "login",
-                        "firstName",
-                        "lastName",
-                        "email",
-                        "pictureUrl"
-                )
-                .contains(
-                        userEntityLogin,
-                        userFirstName,
-                        userLastName,
-                        userEmail,
-                        userPictureUrl
-                );
     }
 
     @Test
-    void getUserAccount_returnUserAccount_whenOidcUserAttributesFound() {
+    void getUserDetails_returnUserDetails_whenOidcUserAttributesFound() {
         // Given
         var customAttributes = new HashMap<String, String>();
 
@@ -79,10 +60,6 @@ class BasicUserAccountStrategyTest {
         var userLastName = "user-lastName";
         var userEmail = "user-email";
         var userPictureUrl = "user-picture-url";
-
-        var userEntityLogin = "user-entity-login";
-        var providerName = "provider-name";
-        var userEntity = new UserEntity(userEntityLogin, providerName);
 
         // When
         when(oauth2User.getName()).thenReturn(userLogin);
@@ -102,27 +79,10 @@ class BasicUserAccountStrategyTest {
         assertThat(strategy.getLastName(oauth2User)).contains(userLastName);
         assertThat(strategy.getEmail(oauth2User)).contains(userEmail);
         assertThat(strategy.getPictureUrl(oauth2User)).contains(userPictureUrl);
-
-        var userAccount = strategy.getUserAccount(oauth2User, userEntity);
-        assertThat(userAccount)
-                .extracting(
-                        "login",
-                        "firstName",
-                        "lastName",
-                        "email",
-                        "pictureUrl"
-                )
-                .contains(
-                        userEntityLogin,
-                        userFirstName,
-                        userLastName,
-                        userEmail,
-                        userPictureUrl
-                );
     }
 
     @Test
-    void getUserAccount_returnUserAccountWithCustomValues_whenOidcUserAttributesNotFound() {
+    void getUserDetails_returnCustomUserDetails_whenOidcUserAttributesNotFound() {
         // Given
         var oauth2User = mock(OidcUser.class);
         var userLogin = "user-login";
@@ -133,7 +93,6 @@ class BasicUserAccountStrategyTest {
 
         var userEntityLogin = "user-entity-login";
         var providerName = "provider-name";
-        var userEntity = new UserEntity(userEntityLogin, providerName);
 
         var customFirstNameAttribute = "user-firstname-attribute";
         var customLastNameAttribute = "user-lastName-attribute";
@@ -169,27 +128,10 @@ class BasicUserAccountStrategyTest {
         assertThat(strategy.getLastName(oauth2User)).contains(userLastName);
         assertThat(strategy.getEmail(oauth2User)).contains(userEmail);
         assertThat(strategy.getPictureUrl(oauth2User)).contains(userPictureUrl);
-
-        var userAccount = strategy.getUserAccount(oauth2User, userEntity);
-        assertThat(userAccount)
-                .extracting(
-                        "login",
-                        "firstName",
-                        "lastName",
-                        "email",
-                        "pictureUrl"
-                )
-                .contains(
-                        userEntityLogin,
-                        userFirstName,
-                        userLastName,
-                        userEmail,
-                        userPictureUrl
-                );
     }
 
     @Test
-    void getUserAccount_returnUserAccount_whenOAuth2UserAttributesFound() {
+    void getUserDetails_returnUserDetails_whenOAuth2UserAttributesFound() {
         // Given
         var oauth2User = mock(OAuth2User.class);
         var userLogin = "user-login";
@@ -200,7 +142,6 @@ class BasicUserAccountStrategyTest {
 
         var userEntityLogin = "user-entity-login";
         var providerName = "provider-name";
-        var userEntity = new UserEntity(userEntityLogin, providerName);
 
         // When
         when(oauth2User.getName()).thenReturn(userLogin);
@@ -216,27 +157,10 @@ class BasicUserAccountStrategyTest {
         assertThat(strategy.getLastName(oauth2User)).contains(userLastName);
         assertThat(strategy.getEmail(oauth2User)).contains(userEmail);
         assertThat(strategy.getPictureUrl(oauth2User)).contains(userPictureUrl);
-
-        var userAccount = strategy.getUserAccount(oauth2User, userEntity);
-        assertThat(userAccount)
-                .extracting(
-                        "login",
-                        "firstName",
-                        "lastName",
-                        "email",
-                        "pictureUrl"
-                )
-                .contains(
-                        userEntityLogin,
-                        userFirstName,
-                        userLastName,
-                        userEmail,
-                        userPictureUrl
-                );
     }
 
     @Test
-    void getUserAccount_returnUserAccountWithCustomValues_whenOAuth2UserAttributesNotFound() {
+    void getUserDetails_returnCustomUserDetails_whenOAuth2UserAttributesNotFound() {
         // Given
         var oauth2User = mock(OAuth2User.class);
         var userLogin = "user-login";
@@ -247,7 +171,6 @@ class BasicUserAccountStrategyTest {
 
         var userEntityLogin = "user-entity-login";
         var providerName = "provider-name";
-        var userEntity = new UserEntity(userEntityLogin, providerName);
 
         var customFirstNameAttribute = "user-firstname-attribute";
         var customLastNameAttribute = "user-lastName-attribute";
@@ -279,22 +202,5 @@ class BasicUserAccountStrategyTest {
         assertThat(strategy.getLastName(oauth2User)).contains(userLastName);
         assertThat(strategy.getEmail(oauth2User)).contains(userEmail);
         assertThat(strategy.getPictureUrl(oauth2User)).contains(userPictureUrl);
-
-        var userAccount = strategy.getUserAccount(oauth2User, userEntity);
-        assertThat(userAccount)
-                .extracting(
-                        "login",
-                        "firstName",
-                        "lastName",
-                        "email",
-                        "pictureUrl"
-                )
-                .contains(
-                        userEntityLogin,
-                        userFirstName,
-                        userLastName,
-                        userEmail,
-                        userPictureUrl
-                );
     }
 }

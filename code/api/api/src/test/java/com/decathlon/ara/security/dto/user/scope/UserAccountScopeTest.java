@@ -3,7 +3,6 @@ package com.decathlon.ara.security.dto.user.scope;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -70,18 +69,4 @@ class UserAccountScopeTest {
                 .contains(projectCode, UserAccountScopeRole.valueOf(roleAsString));
     }
 
-    @ParameterizedTest
-    @EnumSource(value = UserAccountScopeRole.class)
-    void getMatchingAuthority_returnMatchingAuthority(UserAccountScopeRole role) {
-        // Given
-        var projectCode = "project-code";
-        var accountScope = new UserAccountScope(projectCode, role);
-
-        // When
-
-        // Then
-        var actualAuthority = accountScope.getMatchingAuthority().getAuthority();
-        String expectedAuthority = "USER_PROJECT_SCOPE:project-code:" + role;
-        assertThat(actualAuthority).isEqualTo(expectedAuthority);
-    }
 }

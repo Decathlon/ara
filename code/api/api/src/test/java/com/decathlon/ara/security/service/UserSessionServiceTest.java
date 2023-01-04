@@ -3,9 +3,9 @@ package com.decathlon.ara.security.service;
 import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
 import com.decathlon.ara.loader.DemoLoaderConstants;
 import com.decathlon.ara.repository.security.member.user.entity.UserEntityRepository;
-import com.decathlon.ara.security.dto.user.UserAccount;
 import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
+import com.decathlon.ara.security.mapper.AuthorityMapper;
 import com.decathlon.ara.security.service.user.strategy.UserAccountStrategy;
 import com.decathlon.ara.security.service.user.strategy.select.UserStrategySelector;
 import com.decathlon.ara.service.exception.ForbiddenException;
@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class AuthorityServiceTest {
+class UserSessionServiceTest {
 
     @Mock
     private UserStrategySelector userStrategySelector;
@@ -45,24 +45,27 @@ class AuthorityServiceTest {
     @Mock
     private UserEntityRepository userEntityRepository;
 
+    @Mock
+    private AuthorityMapper authorityMapper;
+
     @InjectMocks
-    private AuthorityService authorityService;
+    private UserSessionService userSessionService;
 
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = {" ", "\t", "\n"})
-    void getRoleOnProject_returnEmptyOptional_whenProjectCodeIsNull(String projectCode) {
+    void getCurrentUserRoleOnProject_returnEmptyOptional_whenProjectCodeIsNull(String projectCode) {
         // Given
 
         // When
 
         // Then
-        var roleOnProject = authorityService.getRoleOnProject(projectCode);
+        var roleOnProject = userSessionService.getCurrentUserRoleOnProject(projectCode);
         assertThat(roleOnProject).isNotPresent();
     }
 
     @Test
-    void getRoleOnProject_returnEmptyOptional_whenAuthenticationIsNull() {
+    void getCurrentUserRoleOnProject_returnEmptyOptional_whenAuthenticationIsNull() {
         // Given
         var projectCode = "project-code";
 
@@ -73,12 +76,12 @@ class AuthorityServiceTest {
         when(securityContext.getAuthentication()).thenReturn(null);
 
         // Then
-        var roleOnProject = authorityService.getRoleOnProject(projectCode);
+        var roleOnProject = userSessionService.getCurrentUserRoleOnProject(projectCode);
         assertThat(roleOnProject).isNotPresent();
     }
 
     @Test
-    void getRoleOnProject_returnEmptyOptional_whenUserIsNotAuthenticated() {
+    void getCurrentUserRoleOnProject_returnEmptyOptional_whenUserIsNotAuthenticated() {
         // Given
         var projectCode = "project-code";
 
@@ -91,12 +94,12 @@ class AuthorityServiceTest {
         when(authentication.isAuthenticated()).thenReturn(false);
 
         // Then
-        var roleOnProject = authorityService.getRoleOnProject(projectCode);
+        var roleOnProject = userSessionService.getCurrentUserRoleOnProject(projectCode);
         assertThat(roleOnProject).isNotPresent();
     }
 
     @Test
-    void getRoleOnProject_returnEmptyOptional_whenNoAuthorityFound() {
+    void getCurrentUserRoleOnProject_returnEmptyOptional_whenNoAuthorityFound() {
         // Given
         var projectCode = "project-code";
 
@@ -110,12 +113,12 @@ class AuthorityServiceTest {
         when(authentication.getAuthorities()).thenReturn(null);
 
         // Then
-        var roleOnProject = authorityService.getRoleOnProject(projectCode);
+        var roleOnProject = userSessionService.getCurrentUserRoleOnProject(projectCode);
         assertThat(roleOnProject).isNotPresent();
     }
 
     @Test
-    void getRoleOnProject_returnAdminRole_whenProjectIsDemoProject() {
+    void getCurrentUserRoleOnProject_returnAdminRole_whenProjectIsDemoProject() {
         // Given
         var projectCode = DemoLoaderConstants.DEMO_PROJECT_CODE;
 
@@ -136,12 +139,12 @@ class AuthorityServiceTest {
         when(authority3.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code3:ADMIN");
 
         // Then
-        var roleOnProject = authorityService.getRoleOnProject(projectCode);
+        var roleOnProject = userSessionService.getCurrentUserRoleOnProject(projectCode);
         assertThat(roleOnProject).isPresent().contains(UserAccountScopeRole.ADMIN);
     }
 
     @Test
-    void getRoleOnProject_returnRole_whenProjectFound() {
+    void getCurrentUserRoleOnProject_returnRole_whenProjectFound() {
         // Given
         var projectCode = "project-code";
 
@@ -162,12 +165,12 @@ class AuthorityServiceTest {
         when(authority3.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code:ADMIN");
 
         // Then
-        var roleOnProject = authorityService.getRoleOnProject(projectCode);
+        var roleOnProject = userSessionService.getCurrentUserRoleOnProject(projectCode);
         assertThat(roleOnProject).isPresent().contains(UserAccountScopeRole.ADMIN);
     }
 
     @Test
-    void getRoleOnProject_returnEmptyOptional_whenProjectNotFound() {
+    void getCurrentUserRoleOnProject_returnEmptyOptional_whenProjectNotFound() {
         // Given
         var projectCode = "project-code";
 
@@ -188,12 +191,12 @@ class AuthorityServiceTest {
         when(authority3.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code3:ADMIN");
 
         // Then
-        var roleOnProject = authorityService.getRoleOnProject(projectCode);
+        var roleOnProject = userSessionService.getCurrentUserRoleOnProject(projectCode);
         assertThat(roleOnProject).isNotPresent();
     }
 
     @Test
-    void getRoleOnProject_returnEmptyOptional_whenRoleFoundButWasUnknown() {
+    void getCurrentUserRoleOnProject_returnEmptyOptional_whenRoleFoundButWasUnknown() {
         // Given
         var projectCode = "project-code";
 
@@ -214,12 +217,12 @@ class AuthorityServiceTest {
         when(authority3.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code:UNKNOWN_ROLE");
 
         // Then
-        var roleOnProject = authorityService.getRoleOnProject(projectCode);
+        var roleOnProject = userSessionService.getCurrentUserRoleOnProject(projectCode);
         assertThat(roleOnProject).isNotPresent();
     }
 
     @Test
-    void getScopedProjectCodes_returnEmptyList_whenAuthenticationIsNull() {
+    void getCurrentUserScopedProjectCodes_returnEmptyList_whenAuthenticationIsNull() {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
@@ -228,12 +231,12 @@ class AuthorityServiceTest {
         when(securityContext.getAuthentication()).thenReturn(null);
 
         // Then
-        var projectCodes = authorityService.getScopedProjectCodes();
+        var projectCodes = userSessionService.getCurrentUserScopedProjectCodes();
         assertThat(projectCodes).isEmpty();
     }
 
     @Test
-    void getScopedProjectCodes_returnEmptyList_whenUserIsNotAuthenticated() {
+    void getCurrentUserScopedProjectCodes_returnEmptyList_whenUserIsNotAuthenticated() {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
@@ -244,12 +247,12 @@ class AuthorityServiceTest {
         when(authentication.isAuthenticated()).thenReturn(false);
 
         // Then
-        var projectCodes = authorityService.getScopedProjectCodes();
+        var projectCodes = userSessionService.getCurrentUserScopedProjectCodes();
         assertThat(projectCodes).isEmpty();
     }
 
     @Test
-    void getScopedProjectCodes_returnEmptyList_whenNoAuthorityFound() {
+    void getCurrentUserScopedProjectCodes_returnEmptyList_whenNoAuthorityFound() {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
@@ -261,12 +264,12 @@ class AuthorityServiceTest {
         when(authentication.getAuthorities()).thenReturn(null);
 
         // Then
-        var projectCodes = authorityService.getScopedProjectCodes();
+        var projectCodes = userSessionService.getCurrentUserScopedProjectCodes();
         assertThat(projectCodes).isEmpty();
     }
 
     @Test
-    void getScopedProjectCodes_returnProjectCodesPlusDemoProjectCode_whenScopedProjectAuthoritiesFound() {
+    void getCurrentUserScopedProjectCodes_returnProjectCodesPlusDemoProjectCode_whenScopedProjectAuthoritiesFound() {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
@@ -289,14 +292,14 @@ class AuthorityServiceTest {
         when(authority5.getAuthority()).thenReturn("unknown_authority");
 
         // Then
-        var projectCodes = authorityService.getScopedProjectCodes();
+        var projectCodes = userSessionService.getCurrentUserScopedProjectCodes();
         assertThat(projectCodes)
                 .containsExactlyInAnyOrder("project-code1", "project-code2", "project-code3", DemoLoaderConstants.DEMO_PROJECT_CODE)
                 .hasSize(4);
     }
 
     @Test
-    void getUserAccountScopes_returnEmptyList_whenAuthenticationIsNull() {
+    void getCurrentUserScopes_returnEmptyList_whenAuthenticationIsNull() {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
@@ -305,12 +308,12 @@ class AuthorityServiceTest {
         when(securityContext.getAuthentication()).thenReturn(null);
 
         // Then
-        var scopes = authorityService.getUserAccountScopes();
+        var scopes = userSessionService.getCurrentUserScopes();
         assertThat(scopes).isEmpty();
     }
 
     @Test
-    void getUserAccountScopes_returnEmptyList_whenUserIsNotAuthenticated() {
+    void getCurrentUserScopes_returnEmptyList_whenUserIsNotAuthenticated() {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
@@ -321,12 +324,12 @@ class AuthorityServiceTest {
         when(authentication.isAuthenticated()).thenReturn(false);
 
         // Then
-        var scopes = authorityService.getUserAccountScopes();
+        var scopes = userSessionService.getCurrentUserScopes();
         assertThat(scopes).isEmpty();
     }
 
     @Test
-    void getUserAccountScopes_returnEmptyList_whenNoAuthorityFound() {
+    void getCurrentUserScopes_returnEmptyList_whenNoAuthorityFound() {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
@@ -338,12 +341,12 @@ class AuthorityServiceTest {
         when(authentication.getAuthorities()).thenReturn(null);
 
         // Then
-        var scopes = authorityService.getUserAccountScopes();
+        var scopes = userSessionService.getCurrentUserScopes();
         assertThat(scopes).isEmpty();
     }
 
     @Test
-    void getUserAccountScopes_returnUserAccountScopesPlusDemoProjectScope_whenScopedProjectAuthoritiesFound() {
+    void getCurrentUserScopes_returnUserAccountScopesPlusDemoProjectScope_whenScopedProjectAuthoritiesFound() {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
@@ -368,7 +371,7 @@ class AuthorityServiceTest {
         when(authority5.getAuthority()).thenReturn("unknown_authority");
 
         // Then
-        var scopes = authorityService.getUserAccountScopes();
+        var scopes = userSessionService.getCurrentUserScopes();
         assertThat(scopes)
                 .extracting("project", "role")
                 .containsExactlyInAnyOrder(
@@ -380,7 +383,7 @@ class AuthorityServiceTest {
     }
 
     @Test
-    void getProfile_returnEmptyOptional_whenAuthenticationIsNull() {
+    void getCurrentUserProfile_returnEmptyOptional_whenAuthenticationIsNull() {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
@@ -389,12 +392,12 @@ class AuthorityServiceTest {
         when(securityContext.getAuthentication()).thenReturn(null);
 
         // Then
-        var profile = authorityService.getProfile();
+        var profile = userSessionService.getCurrentUserProfile();
         assertThat(profile).isNotPresent();
     }
 
     @Test
-    void getProfile_returnEmptyOptional_whenUserIsNotAuthenticated() {
+    void getCurrentUserProfile_returnEmptyOptional_whenUserIsNotAuthenticated() {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
@@ -405,12 +408,12 @@ class AuthorityServiceTest {
         when(authentication.isAuthenticated()).thenReturn(false);
 
         // Then
-        var profile = authorityService.getProfile();
+        var profile = userSessionService.getCurrentUserProfile();
         assertThat(profile).isNotPresent();
     }
 
     @Test
-    void getProfile_returnEmptyOptional_whenNoAuthorityFound() {
+    void getCurrentUserProfile_returnEmptyOptional_whenNoAuthorityFound() {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
@@ -422,13 +425,13 @@ class AuthorityServiceTest {
         when(authentication.getAuthorities()).thenReturn(null);
 
         // Then
-        var profile = authorityService.getProfile();
+        var profile = userSessionService.getCurrentUserProfile();
         assertThat(profile).isNotPresent();
     }
 
     @ParameterizedTest
     @EnumSource(value = UserAccountProfile.class)
-    void getProfile_returnProfile_whenProfileFound(UserAccountProfile userProfile) {
+    void getCurrentUserProfile_returnProfile_whenProfileFound(UserAccountProfile userProfile) {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
@@ -443,12 +446,12 @@ class AuthorityServiceTest {
         when(authority.getAuthority()).thenReturn("USER_PROFILE:" + userProfile.name());
 
         // Then
-        var profile = authorityService.getProfile();
+        var profile = userSessionService.getCurrentUserProfile();
         assertThat(profile).isPresent().contains(userProfile);
     }
 
     @Test
-    void getProfile_returnEmptyOptional_whenProfileFoundButUnknown() {
+    void getCurrentUserProfile_returnEmptyOptional_whenProfileFoundButUnknown() {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
@@ -463,12 +466,12 @@ class AuthorityServiceTest {
         when(authority.getAuthority()).thenReturn("USER_PROFILE:UNKNOWN_PROFILE");
 
         // Then
-        var profile = authorityService.getProfile();
+        var profile = userSessionService.getCurrentUserProfile();
         assertThat(profile).isNotPresent();
     }
 
     @Test
-    void getProfile_returnEmptyOptional_whenProfileNotFound() {
+    void getCurrentUserProfile_returnEmptyOptional_whenProfileNotFound() {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
@@ -483,12 +486,12 @@ class AuthorityServiceTest {
         when(authority.getAuthority()).thenReturn("any_other_authority");
 
         // Then
-        var profile = authorityService.getProfile();
+        var profile = userSessionService.getCurrentUserProfile();
         assertThat(profile).isNotPresent();
     }
 
     @Test
-    void refreshCurrentUserAccountAuthorities_throwForbiddenException_whenAuthenticationIsNotAnInstanceOfOAuth2AuthenticationToken() {
+    void refreshCurrentUserAuthorities_throwForbiddenException_whenAuthenticationIsNotAnInstanceOfOAuth2AuthenticationToken() {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
@@ -498,12 +501,12 @@ class AuthorityServiceTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
 
         // Then
-        assertThrows(ForbiddenException.class, () -> authorityService.refreshCurrentUserAccountAuthorities());
+        assertThrows(ForbiddenException.class, () -> userSessionService.refreshCurrentUserAuthorities());
         verify(securityContext, never()).setAuthentication(any());
     }
 
     @Test
-    void refreshCurrentUserAccountAuthorities_throwForbiddenException_whenUserNotFound() {
+    void refreshCurrentUserAuthorities_throwForbiddenException_whenUserNotFound() {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
@@ -523,12 +526,12 @@ class AuthorityServiceTest {
         when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.empty());
 
         // Then
-        assertThrows(ForbiddenException.class, () -> authorityService.refreshCurrentUserAccountAuthorities());
+        assertThrows(ForbiddenException.class, () -> userSessionService.refreshCurrentUserAuthorities());
         verify(securityContext, never()).setAuthentication(any());
     }
 
     @Test
-    void refreshCurrentUserAccountAuthorities_updateAuthorities_whenUserFound() throws ForbiddenException {
+    void refreshCurrentUserAuthorities_updateAuthorities_whenUserFound() throws ForbiddenException {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
@@ -540,7 +543,6 @@ class AuthorityServiceTest {
         var strategy = mock(UserAccountStrategy.class);
 
         var userEntity = mock(UserEntity.class);
-        var userAccount = mock(UserAccount.class);
 
         var updatedAuthority1 = mock(GrantedAuthority.class);
         var updatedAuthority2 = mock(GrantedAuthority.class);
@@ -554,11 +556,10 @@ class AuthorityServiceTest {
         when(userStrategySelector.selectUserStrategyFromProviderName(providerName)).thenReturn(strategy);
         when(strategy.getLogin(principal)).thenReturn(userLogin);
         when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.of(userEntity));
-        when(strategy.getUserAccount(principal, userEntity)).thenReturn(userAccount);
-        when(userAccount.getMatchingAuthorities()).thenReturn(updatedAuthorities);
+        when(authorityMapper.getGrantedAuthoritiesFromUserEntity(userEntity)).thenReturn(updatedAuthorities);
 
         // Then
-        authorityService.refreshCurrentUserAccountAuthorities();
+        userSessionService.refreshCurrentUserAuthorities();
 
         var authenticationToUpdateArgumentCaptor = ArgumentCaptor.forClass(OAuth2AuthenticationToken.class);
         verify(securityContext, times(1)).setAuthentication(authenticationToUpdateArgumentCaptor.capture());

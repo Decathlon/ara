@@ -63,6 +63,9 @@ public class UserEntity {
     @Column(length = 100)
     private String lastName;
 
+    @Column(length = 512)
+    private String pictureUrl;
+
     @ManyToOne
     private Project defaultProject;
 
@@ -133,6 +136,14 @@ public class UserEntity {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public Optional<String> getPictureUrl() {
+        return Optional.ofNullable(pictureUrl);
+    }
+
+    public void setPictureUrl(String pictureUrl) {
+        this.pictureUrl = pictureUrl;
     }
 
     public Optional<Project> getDefaultProject() {

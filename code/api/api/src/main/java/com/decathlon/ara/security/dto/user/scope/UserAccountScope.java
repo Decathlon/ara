@@ -1,10 +1,7 @@
 package com.decathlon.ara.security.dto.user.scope;
 
-import com.decathlon.ara.security.service.AuthorityService;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
-import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Optional;
 
@@ -46,14 +43,4 @@ public class UserAccountScope {
         }
     }
 
-    /**
-     * Get matching authority from project and role
-     * @return the granted authority
-     */
-    @JsonIgnore
-    public GrantedAuthority getMatchingAuthority() {
-        var projectCodeAndRole = String.format("%s:%s", project, role);
-        var authorityAsString = String.format("%s%s", AuthorityService.AUTHORITY_USER_PROJECT_SCOPE_PREFIX, projectCodeAndRole);
-        return () -> authorityAsString;
-    }
 }

@@ -23,7 +23,12 @@ let api = {}
 const IGNORED_ERROR_STATUS_CODE = [401, 403]
 
 const API_PATH = '/api'
-const PROJECT_API_PATH = API_PATH + '/projects'
+const PROJECT_API_PATH = `${API_PATH}/projects`
+
+const USER_ACCOUNTS_API_PATH = `${API_PATH}/user/accounts`
+const SCOPES_USER_ACCOUNTS_API_PATH = `${USER_ACCOUNTS_API_PATH}/scoped`
+const CURRENT_USER_ACCOUNTS_API_PATH = `${USER_ACCOUNTS_API_PATH}/current`
+const CURRENT_USER_ACCOUNTS_DEFAULT_PROJECT_API_PATH = `${CURRENT_USER_ACCOUNTS_API_PATH}/default-project`
 
 const AUTH = '/oauth'
 
@@ -37,22 +42,26 @@ api.REQUEST_OPTIONS = {
 }
 
 api.paths = {
-  authenticationConfiguration: () => `${AUTH}/configuration`,
+  authenticationConfiguration: `${AUTH}/configuration`,
   loggedStatus: `${AUTH}/status`,
-  user: `${API_PATH}/user`,
-  userDetails: `${API_PATH}/user/details`,
+  currentUser: CURRENT_USER_ACCOUNTS_API_PATH,
+  currentUserDefaultProjectClear: CURRENT_USER_ACCOUNTS_DEFAULT_PROJECT_API_PATH,
+  currentUserDefaultProjectUpdate: (projectCode) => `${CURRENT_USER_ACCOUNTS_DEFAULT_PROJECT_API_PATH}/${projectCode}`,
+  allUsers: `${USER_ACCOUNTS_API_PATH}/all`,
+  scopedUsers: SCOPES_USER_ACCOUNTS_API_PATH,
+  scopedUsersByProject: (projectCode) => `${SCOPES_USER_ACCOUNTS_API_PATH}/project/${projectCode}`,
   communications: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/communications',
   countries: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/countries',
   cycleDefinitions: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/cycle-definitions',
-  demo: () => API_PATH + '/demo',
+  demo: `${API_PATH}/demo`,
   executions: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/executions',
   errors: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/errors',
   executedScenarios: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/executed-scenarios',
   functionalities: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/functionalities',
-  info: () => '/actuator/info',
+  info: '/actuator/info',
   problemPatterns: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/problem-patterns',
   problems: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/problems',
-  projects: () => PROJECT_API_PATH,
+  projects: PROJECT_API_PATH,
   rootCauses: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/root-causes',
   scenarios: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/scenarios',
   settings: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/settings',
@@ -60,7 +69,7 @@ api.paths = {
   sources: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/sources',
   teams: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/teams',
   types: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/types',
-  features: () => API_PATH + '/features'
+  features: `${API_PATH}/features`
 }
 
 api.handleError = function (response, callBack) {

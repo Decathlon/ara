@@ -17,22 +17,10 @@
 
 package com.decathlon.ara.security.dto.user;
 
-import com.decathlon.ara.domain.Project;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntityRoleOnProject;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScope;
-import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
-import com.decathlon.ara.security.service.AuthorityService;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.collections.CollectionUtils;
-import org.springframework.lang.NonNull;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.core.oidc.StandardClaimNames;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.List;
 
 public class UserAccount {
 
@@ -55,17 +43,9 @@ public class UserAccount {
     @JsonProperty("default_project")
     private String defaultProjectCode;
 
-    public UserAccount(@NonNull Map<String, String> userAttributes, @NonNull UserEntity userEntity) {
-        this.providerName = userEntity.getProviderName();
-        this.login = userEntity.getLogin();
-        this.profile = getProfileFromUserEntity(userEntity);
-        this.scopes = getScopesFromUserEntity(userEntity);
-        this.defaultProjectCode = userEntity.getDefaultProject().map(Project::getCode).orElse(null);
-
-        this.firstName = userAttributes.get(StandardClaimNames.GIVEN_NAME);
-        this.lastName = userAttributes.get(StandardClaimNames.FAMILY_NAME);
-        this.email = userAttributes.get(StandardClaimNames.EMAIL);
-        this.pictureUrl = userAttributes.get(StandardClaimNames.PICTURE);
+    public UserAccount(String providerName, String login) {
+        this.providerName = providerName;
+        this.login = login;
     }
 
     public String getProviderName() {
@@ -104,58 +84,32 @@ public class UserAccount {
         return defaultProjectCode;
     }
 
-    private UserAccountProfile getProfileFromUserEntity(@NonNull UserEntity userEntity) {
-        var userEntityProfile = userEntity.getProfile();
-        return UserAccountProfile.valueOf(userEntityProfile.name());
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    private List<UserAccountScope> getScopesFromUserEntity(@NonNull UserEntity userEntity) {
-        var userRoles = userEntity.getRolesOnProjectWhenScopedUser();
-        return CollectionUtils.isNotEmpty(userRoles) ?
-                userRoles.stream()
-                        .filter(role -> role.getProject() != null)
-                        .filter(role -> role.getRole() != null)
-                        .map(this::getUserAccountScopeFromUserEntityRole)
-                        .toList():
-                new ArrayList<>();
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
-    private UserAccountScope getUserAccountScopeFromUserEntityRole(@NonNull UserEntityRoleOnProject userEntityRole) {
-        var projectCode = userEntityRole.getProject().getCode();
-        var userAccountRole = getUserAccountScopeRoleFromScopedUserRoleOnProject(userEntityRole.getRole());
-        return new UserAccountScope(projectCode, userAccountRole);
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    private UserAccountScopeRole getUserAccountScopeRoleFromScopedUserRoleOnProject(@NonNull UserEntityRoleOnProject.ScopedUserRoleOnProject scopedUserRoleOnProject) {
-        return UserAccountScopeRole.valueOf(scopedUserRoleOnProject.name());
+    public void setPictureUrl(String pictureUrl) {
+        this.pictureUrl = pictureUrl;
     }
 
-    /**
-     * Get all the user's matching authorities
-     * @return the granted authorities
-     */
-    @JsonIgnore
-    public Set<GrantedAuthority> getMatchingAuthorities() {
-        var profileAuthority = getProfileAuthority();
-        var scopeAuthorities = getScopeAuthorities();
-        return Stream.of(Set.of(profileAuthority), scopeAuthorities)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
+    public void setProfile(UserAccountProfile profile) {
+        this.profile = profile;
     }
 
-    /**
-     * Get the authority matching this user profile
-     * @return the granted authority
-     */
-    private GrantedAuthority getProfileAuthority() {
-        return () -> String.format("%s%s", AuthorityService.AUTHORITY_USER_PROFILE_PREFIX, profile);
+    public void setScopes(List<UserAccountScope> scopes) {
+        this.scopes = scopes;
     }
 
-    private Set<GrantedAuthority> getScopeAuthorities() {
-        return CollectionUtils.isNotEmpty(scopes) ?
-                scopes.stream()
-                        .map(UserAccountScope::getMatchingAuthority)
-                        .collect(Collectors.toSet()) :
-                new HashSet<>();
+    public void setDefaultProjectCode(String defaultProjectCode) {
+        this.defaultProjectCode = defaultProjectCode;
     }
+
 }

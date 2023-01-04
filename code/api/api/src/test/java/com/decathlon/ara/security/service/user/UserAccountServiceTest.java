@@ -10,8 +10,11 @@ import com.decathlon.ara.security.configuration.data.providers.OAuth2ProvidersCo
 import com.decathlon.ara.security.configuration.data.providers.setup.users.UserProfileConfiguration;
 import com.decathlon.ara.security.configuration.data.providers.setup.users.UserScopeConfiguration;
 import com.decathlon.ara.security.dto.user.UserAccount;
+import com.decathlon.ara.security.dto.user.UserAccountProfile;
+import com.decathlon.ara.security.dto.user.scope.UserAccountScope;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
-import com.decathlon.ara.security.service.AuthorityService;
+import com.decathlon.ara.security.mapper.UserMapper;
+import com.decathlon.ara.security.service.UserSessionService;
 import com.decathlon.ara.security.service.user.strategy.UserAccountStrategy;
 import com.decathlon.ara.security.service.user.strategy.select.UserStrategySelector;
 import com.decathlon.ara.service.ProjectService;
@@ -20,9 +23,7 @@ import com.decathlon.ara.service.exception.NotUniqueException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.*;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -36,8 +37,10 @@ import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserServ
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -63,10 +66,13 @@ class UserAccountServiceTest {
     private OAuth2ProvidersConfiguration providersConfiguration;
 
     @Mock
+    private UserMapper userMapper;
+
+    @Mock
     private ProjectService projectService;
 
     @Mock
-    private AuthorityService authorityService;
+    private UserSessionService userSessionService;
 
     @InjectMocks
     private UserAccountService userAccountService;
@@ -183,7 +189,7 @@ class UserAccountServiceTest {
         when(userStrategySelector.selectUserStrategyFromProviderName(providerName)).thenReturn(accountStrategy);
         when(accountStrategy.getLogin(oauth2User)).thenReturn(userLogin);
         when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.of(userEntity));
-        when(accountStrategy.getUserAccount(oauth2User, userEntity)).thenReturn(matchingUserAccount);
+        when(userMapper.getUserAccountFromPersistedUser(userEntity)).thenReturn(matchingUserAccount);
 
         // Then
         var fetchedUserAccount = userAccountService.getCurrentUserAccount(oauth2User, providerName);
@@ -210,7 +216,7 @@ class UserAccountServiceTest {
         when(userStrategySelector.selectUserStrategyFromProviderName(providerName)).thenReturn(accountStrategy);
         when(accountStrategy.getLogin(oauth2User)).thenReturn(userLogin);
         when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.of(userEntity));
-        when(accountStrategy.getUserAccount(oauth2User, userEntity)).thenReturn(matchingUserAccount);
+        when(userMapper.getUserAccountFromPersistedUser(userEntity)).thenReturn(matchingUserAccount);
 
         // Then
         var fetchedUserAccount = userAccountService.getCurrentUserAccount(authentication);
@@ -240,7 +246,7 @@ class UserAccountServiceTest {
         when(userStrategySelector.selectUserStrategyFromProviderName(providerName)).thenReturn(accountStrategy);
         when(accountStrategy.getLogin(oauth2User)).thenReturn(userLogin);
         when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.of(userEntity));
-        when(accountStrategy.getUserAccount(oauth2User, userEntity)).thenReturn(matchingUserAccount);
+        when(userMapper.getUserAccountFromPersistedUser(userEntity)).thenReturn(matchingUserAccount);
 
         // Then
         var fetchedUserAccount = userAccountService.getCurrentUserAccount();
@@ -255,6 +261,7 @@ class UserAccountServiceTest {
         var userFirstName = "user-firstname";
         var userLastName = "user-lastname";
         var userEmail = "user-email";
+        var userPictureUrl = "user-picture-url";
         var providerName = "provider-name";
 
         var strategy = mock(UserAccountStrategy.class);
@@ -268,9 +275,10 @@ class UserAccountServiceTest {
         when(strategy.getFirstName(oauth2User)).thenReturn(Optional.of(userFirstName));
         when(strategy.getLastName(oauth2User)).thenReturn(Optional.of(userLastName));
         when(strategy.getEmail(oauth2User)).thenReturn(Optional.of(userEmail));
+        when(strategy.getPictureUrl(oauth2User)).thenReturn(Optional.of(userPictureUrl));
         when(providersConfiguration.getUserProfileConfiguration(providerName, userLogin)).thenReturn(Optional.empty());
         when(userEntityRepository.save(any(UserEntity.class))).thenReturn(savedUser);
-        when(strategy.getUserAccount(oauth2User, savedUser)).thenReturn(matchingUserAccount);
+        when(userMapper.getUserAccountFromPersistedUser(savedUser)).thenReturn(matchingUserAccount);
 
         // Then
         var savedUserAccount = userAccountService.createUserAccount(oauth2User, providerName);
@@ -286,6 +294,7 @@ class UserAccountServiceTest {
                         "email",
                         "firstName",
                         "lastName",
+                        "pictureUrl",
                         "profile"
                 )
                 .contains(
@@ -294,6 +303,7 @@ class UserAccountServiceTest {
                         Optional.of(userEmail),
                         Optional.of(userFirstName),
                         Optional.of(userLastName),
+                        Optional.of(userPictureUrl),
                         UserEntity.UserEntityProfile.SCOPED_USER
                 );
         assertThat(userToSave.getRolesOnProjectWhenScopedUser()).isEmpty();
@@ -316,6 +326,7 @@ class UserAccountServiceTest {
         var userFirstName = "user-firstname";
         var userLastName = "user-lastname";
         var userEmail = "user-email";
+        var userPictureUrl = "user-picture-url";
         var providerName = "provider-name";
 
         var strategy = mock(UserAccountStrategy.class);
@@ -353,6 +364,7 @@ class UserAccountServiceTest {
         when(strategy.getFirstName(oauth2User)).thenReturn(Optional.of(userFirstName));
         when(strategy.getLastName(oauth2User)).thenReturn(Optional.of(userLastName));
         when(strategy.getEmail(oauth2User)).thenReturn(Optional.of(userEmail));
+        when(strategy.getPictureUrl(oauth2User)).thenReturn(Optional.of(userPictureUrl));
 
         when(providersConfiguration.getUserProfileConfiguration(providerName, userLogin)).thenReturn(Optional.of(userProfileConfiguration));
         when(userProfileConfiguration.getProfile()).thenReturn(profileAsString);
@@ -374,7 +386,7 @@ class UserAccountServiceTest {
 
         when(userEntityRepository.save(any(UserEntity.class))).thenReturn(savedUser);
         when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.of(finalSavedUser));
-        when(strategy.getUserAccount(oauth2User, finalSavedUser)).thenReturn(matchingUserAccount);
+        when(userMapper.getUserAccountFromPersistedUser(finalSavedUser)).thenReturn(matchingUserAccount);
 
         // Then
         var savedUserAccount = userAccountService.createUserAccount(oauth2User, providerName);
@@ -390,6 +402,7 @@ class UserAccountServiceTest {
                         "email",
                         "firstName",
                         "lastName",
+                        "pictureUrl",
                         "profile"
                 )
                 .contains(
@@ -398,6 +411,7 @@ class UserAccountServiceTest {
                         Optional.of(userEmail),
                         Optional.of(userFirstName),
                         Optional.of(userLastName),
+                        Optional.of(userPictureUrl),
                         UserEntity.UserEntityProfile.valueOf(profileAsString.toUpperCase())
                 );
         ArgumentCaptor<List<UserEntityRoleOnProject>> userRolesArgumentCaptor = ArgumentCaptor.forClass(List.class);
@@ -425,6 +439,7 @@ class UserAccountServiceTest {
         var userFirstName = "user-firstname";
         var userLastName = "user-lastname";
         var userEmail = "user-email";
+        var userPictureUrl = "user-picture-url";
         var providerName = "provider-name";
 
         var strategy = mock(UserAccountStrategy.class);
@@ -465,6 +480,7 @@ class UserAccountServiceTest {
         when(strategy.getFirstName(oauth2User)).thenReturn(Optional.of(userFirstName));
         when(strategy.getLastName(oauth2User)).thenReturn(Optional.of(userLastName));
         when(strategy.getEmail(oauth2User)).thenReturn(Optional.of(userEmail));
+        when(strategy.getPictureUrl(oauth2User)).thenReturn(Optional.of(userPictureUrl));
 
         when(providersConfiguration.getUserProfileConfiguration(providerName, userLogin)).thenReturn(Optional.of(userProfileConfiguration));
         when(userProfileConfiguration.getProfile()).thenReturn(profileAsString);
@@ -486,7 +502,7 @@ class UserAccountServiceTest {
 
         when(userEntityRepository.save(any(UserEntity.class))).thenReturn(savedUser);
         when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.of(finalSavedUser));
-        when(strategy.getUserAccount(oauth2User, finalSavedUser)).thenReturn(matchingUserAccount);
+        when(userMapper.getUserAccountFromPersistedUser(finalSavedUser)).thenReturn(matchingUserAccount);
 
         // Then
         var savedUserAccount = userAccountService.createUserAccount(oauth2User, providerName);
@@ -502,6 +518,7 @@ class UserAccountServiceTest {
                         "email",
                         "firstName",
                         "lastName",
+                        "pictureUrl",
                         "profile"
                 )
                 .contains(
@@ -510,6 +527,7 @@ class UserAccountServiceTest {
                         Optional.of(userEmail),
                         Optional.of(userFirstName),
                         Optional.of(userLastName),
+                        Optional.of(userPictureUrl),
                         UserEntity.UserEntityProfile.valueOf(profileAsString.toUpperCase())
                 );
         ArgumentCaptor<List<UserEntityRoleOnProject>> userRolesArgumentCaptor = ArgumentCaptor.forClass(List.class);
@@ -540,7 +558,7 @@ class UserAccountServiceTest {
         // Then
         assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromCurrentUserAccountScope(projectCode));
         verify(userEntityRoleOnProjectRepository, never()).deleteById(any(UserEntityRoleOnProject.UserEntityRoleOnProjectId.class));
-        verify(authorityService, never()).refreshCurrentUserAccountAuthorities();
+        verify(userSessionService, never()).refreshCurrentUserAuthorities();
     }
 
     @Test
@@ -554,7 +572,7 @@ class UserAccountServiceTest {
         // Then
         assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromCurrentUserAccountScope(projectCode));
         verify(userEntityRoleOnProjectRepository, never()).deleteById(any(UserEntityRoleOnProject.UserEntityRoleOnProjectId.class));
-        verify(authorityService, never()).refreshCurrentUserAccountAuthorities();
+        verify(userSessionService, never()).refreshCurrentUserAuthorities();
     }
 
     @Test
@@ -575,7 +593,7 @@ class UserAccountServiceTest {
         // Then
         assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromCurrentUserAccountScope(projectCode));
         verify(userEntityRoleOnProjectRepository, never()).deleteById(any(UserEntityRoleOnProject.UserEntityRoleOnProjectId.class));
-        verify(authorityService, never()).refreshCurrentUserAccountAuthorities();
+        verify(userSessionService, never()).refreshCurrentUserAuthorities();
     }
 
     @Test
@@ -597,7 +615,7 @@ class UserAccountServiceTest {
         // Then
         assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromCurrentUserAccountScope(projectCode));
         verify(userEntityRoleOnProjectRepository, never()).deleteById(any(UserEntityRoleOnProject.UserEntityRoleOnProjectId.class));
-        verify(authorityService, never()).refreshCurrentUserAccountAuthorities();
+        verify(userSessionService, never()).refreshCurrentUserAuthorities();
     }
 
     @ParameterizedTest
@@ -623,7 +641,7 @@ class UserAccountServiceTest {
         // Then
         assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromCurrentUserAccountScope(projectCode));
         verify(userEntityRoleOnProjectRepository, never()).deleteById(any(UserEntityRoleOnProject.UserEntityRoleOnProjectId.class));
-        verify(authorityService, never()).refreshCurrentUserAccountAuthorities();
+        verify(userSessionService, never()).refreshCurrentUserAuthorities();
     }
 
     @Test
@@ -654,7 +672,7 @@ class UserAccountServiceTest {
         // Then
         assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromCurrentUserAccountScope(projectCode));
         verify(userEntityRoleOnProjectRepository, never()).deleteById(any(UserEntityRoleOnProject.UserEntityRoleOnProjectId.class));
-        verify(authorityService, never()).refreshCurrentUserAccountAuthorities();
+        verify(userSessionService, never()).refreshCurrentUserAuthorities();
     }
 
     @Test
@@ -705,7 +723,7 @@ class UserAccountServiceTest {
                         providerName
                 );
 
-        verify(authorityService).refreshCurrentUserAccountAuthorities();
+        verify(userSessionService).refreshCurrentUserAuthorities();
     }
 
     @ParameterizedTest
@@ -720,7 +738,7 @@ class UserAccountServiceTest {
         // Then
         assertThrows(ForbiddenException.class, () -> userAccountService.updateCurrentUserAccountProjectScope(projectCode, roleToUpdate));
         verify(userEntityRepository, never()).save(any(UserEntity.class));
-        verify(authorityService, never()).refreshCurrentUserAccountAuthorities();
+        verify(userSessionService, never()).refreshCurrentUserAuthorities();
     }
 
     @Test
@@ -735,7 +753,7 @@ class UserAccountServiceTest {
         // Then
         assertThrows(ForbiddenException.class, () -> userAccountService.updateCurrentUserAccountProjectScope(projectCode, roleToUpdate));
         verify(userEntityRepository, never()).save(any(UserEntity.class));
-        verify(authorityService, never()).refreshCurrentUserAccountAuthorities();
+        verify(userSessionService, never()).refreshCurrentUserAuthorities();
     }
 
     @Test
@@ -767,7 +785,7 @@ class UserAccountServiceTest {
         // Then
         assertThrows(ForbiddenException.class, () -> userAccountService.updateCurrentUserAccountProjectScope(projectCode, roleToUpdate));
         verify(userEntityRepository, never()).save(any(UserEntity.class));
-        verify(authorityService, never()).refreshCurrentUserAccountAuthorities();
+        verify(userSessionService, never()).refreshCurrentUserAuthorities();
     }
 
     @ParameterizedTest
@@ -804,6 +822,7 @@ class UserAccountServiceTest {
 
         // When
         when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(project));
+        when(project.getCode()).thenReturn(projectCode);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(principal);
         when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
@@ -831,7 +850,7 @@ class UserAccountServiceTest {
                 )
                 .hasSize(3);
 
-        verify(authorityService).refreshCurrentUserAccountAuthorities();
+        verify(userSessionService).refreshCurrentUserAuthorities();
     }
 
     @ParameterizedTest
@@ -869,6 +888,7 @@ class UserAccountServiceTest {
 
         // When
         when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(project));
+        when(project.getCode()).thenReturn(projectCode);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(principal);
         when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
@@ -897,7 +917,7 @@ class UserAccountServiceTest {
                 )
                 .hasSize(4);
 
-        verify(authorityService).refreshCurrentUserAccountAuthorities();
+        verify(userSessionService).refreshCurrentUserAuthorities();
     }
 
     @Test
@@ -952,8 +972,7 @@ class UserAccountServiceTest {
         when(strategy.getLogin(principal)).thenReturn(userLogin);
         when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.of(persistedUser));
         when(userEntityRepository.save(persistedUser)).thenReturn(updatedUser);
-        when(updatedUser.getProviderName()).thenReturn(providerName);
-        when(strategy.getUserAccount(principal, updatedUser)).thenReturn(updatedAccount);
+        when(userMapper.getUserAccountFromPersistedUser(updatedUser)).thenReturn(updatedAccount);
 
         // Then
         var actualAccount = userAccountService.clearDefaultProject();
@@ -1052,8 +1071,7 @@ class UserAccountServiceTest {
         when(strategy.getLogin(principal)).thenReturn(userLogin);
         when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.of(persistedUser));
         when(userEntityRepository.save(persistedUser)).thenReturn(updatedUser);
-        when(updatedUser.getProviderName()).thenReturn(providerName);
-        when(strategy.getUserAccount(principal, updatedUser)).thenReturn(updatedAccount);
+        when(userMapper.getUserAccountFromPersistedUser(updatedUser)).thenReturn(updatedAccount);
 
         // Then
         var actualAccount = userAccountService.updateDefaultProject(projectCode);
@@ -1064,5 +1082,352 @@ class UserAccountServiceTest {
         var capturedUser = userToUpdateArgumentCaptor.getValue();
         assertThat(capturedUser).isSameAs(persistedUser);
         assertThat(capturedUser.getDefaultProject()).containsSame(newDefaultProject);
+    }
+
+    @Test
+    void getAllUserAccounts_returnAllUserAccountsForTheCurrentProviderName() {
+        // Given
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var providerName = "provider-name";
+
+        var persistedUser1 = mock(UserEntity.class);
+        var persistedUser2 = mock(UserEntity.class);
+        var persistedUser3 = mock(UserEntity.class);
+        var persistedUsers = List.of(persistedUser1, persistedUser2, persistedUser3);
+
+        var matchingUserAccount1 = mock(UserAccount.class);
+        var matchingUserAccount2 = mock(UserAccount.class);
+        var matchingUserAccount3 = mock(UserAccount.class);
+
+        // When
+        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
+        when(userEntityRepository.findAllByProviderName(providerName)).thenReturn(persistedUsers);
+        when(userMapper.getUserAccountFromPersistedUser(persistedUser1)).thenReturn(matchingUserAccount1);
+        when(userMapper.getUserAccountFromPersistedUser(persistedUser2)).thenReturn(matchingUserAccount2);
+        when(userMapper.getUserAccountFromPersistedUser(persistedUser3)).thenReturn(matchingUserAccount3);
+
+        // Then
+        var accounts = userAccountService.getAllUserAccounts(authentication);
+        assertThat(accounts).containsExactlyInAnyOrder(matchingUserAccount1, matchingUserAccount2, matchingUserAccount3);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideSuperAdminAndAuditorUserAccountProfilesAndUserAccountScopeRolesArguments")
+    void getAllScopedUserAccounts_returnAllFullScopedUserAccountsForTheCurrentProviderName_whenProfileIsEitherSuperAdminOrAuditorAndRoleIsPresent(UserAccountProfile profile, UserAccountScopeRole role) {
+        // Given
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var providerName = "provider-name";
+
+        var matchingUserEntityRole = UserEntityRoleOnProject.ScopedUserRoleOnProject.valueOf(role.name());
+
+        var persistedUser1 = mock(UserEntity.class);
+        var persistedUser2 = mock(UserEntity.class);
+        var persistedUser3 = mock(UserEntity.class);
+        var persistedUsers = List.of(persistedUser1, persistedUser2, persistedUser3);
+
+        var matchingUserAccount1 = new UserAccount(providerName, "login-1");
+        var matchingUserAccount2 = new UserAccount(providerName, "login-2");
+        var matchingUserAccount3 = new UserAccount(providerName, "login-3");
+
+        var scope1 = mock(UserAccountScope.class);
+        var scope2 = mock(UserAccountScope.class);
+        var scope3 = mock(UserAccountScope.class);
+        var scope4 = mock(UserAccountScope.class);
+        var scope5 = mock(UserAccountScope.class);
+
+        var matchingUserAccountScopes1 = List.of(scope1, scope2, scope3, scope4, scope5);
+        var matchingUserAccountScopes2 = List.of(scope1, scope5);
+        var matchingUserAccountScopes3 = List.of(scope4, scope5);
+
+        matchingUserAccount1.setScopes(matchingUserAccountScopes1);
+        matchingUserAccount2.setScopes(matchingUserAccountScopes2);
+        matchingUserAccount3.setScopes(matchingUserAccountScopes3);
+
+        // When
+        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
+        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
+        when(userEntityRepository.findAllScopedUsersByProviderName(providerName, null, matchingUserEntityRole)).thenReturn(persistedUsers);
+        when(userMapper.getUserAccountFromPersistedUser(persistedUser1)).thenReturn(matchingUserAccount1);
+        when(userMapper.getUserAccountFromPersistedUser(persistedUser2)).thenReturn(matchingUserAccount2);
+        when(userMapper.getUserAccountFromPersistedUser(persistedUser3)).thenReturn(matchingUserAccount3);
+
+        // Then
+        var accounts = userAccountService.getAllScopedUserAccounts(authentication, Optional.of(role));
+        assertThat(accounts).containsExactlyInAnyOrder(matchingUserAccount1, matchingUserAccount2, matchingUserAccount3);
+
+        assertThat(matchingUserAccount1.getScopes()).containsExactlyInAnyOrderElementsOf(matchingUserAccountScopes1);
+        assertThat(matchingUserAccount2.getScopes()).containsExactlyInAnyOrderElementsOf(matchingUserAccountScopes2);
+        assertThat(matchingUserAccount3.getScopes()).containsExactlyInAnyOrderElementsOf(matchingUserAccountScopes3);
+    }
+
+    private static Stream<Arguments> provideSuperAdminAndAuditorUserAccountProfilesAndUserAccountScopeRolesArguments() {
+        var profiles = List.of(UserAccountProfile.SUPER_ADMIN, UserAccountProfile.AUDITOR);
+        var allRoles = Arrays.stream(UserAccountScopeRole.values()).toList();
+        return profiles.stream().flatMap(profile -> allRoles.stream().map(role -> Arguments.of(profile, role)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = UserAccountProfile.class, names = "SCOPED_USER", mode = EnumSource.Mode.EXCLUDE)
+    void getAllScopedUserAccounts_returnAllFullScopedUserAccountsForTheCurrentProviderName_whenProfileIsEitherSuperAdminOrAuditorAndRoleIsNotPresent(UserAccountProfile profile) {
+        // Given
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var providerName = "provider-name";
+
+        var persistedUser1 = mock(UserEntity.class);
+        var persistedUser2 = mock(UserEntity.class);
+        var persistedUser3 = mock(UserEntity.class);
+        var persistedUsers = List.of(persistedUser1, persistedUser2, persistedUser3);
+
+        var matchingUserAccount1 = new UserAccount(providerName, "login-1");
+        var matchingUserAccount2 = new UserAccount(providerName, "login-2");
+        var matchingUserAccount3 = new UserAccount(providerName, "login-3");
+
+        var scope1 = mock(UserAccountScope.class);
+        var scope2 = mock(UserAccountScope.class);
+        var scope3 = mock(UserAccountScope.class);
+        var scope4 = mock(UserAccountScope.class);
+        var scope5 = mock(UserAccountScope.class);
+
+        var matchingUserAccountScopes1 = List.of(scope1, scope2, scope3, scope4, scope5);
+        var matchingUserAccountScopes2 = List.of(scope1, scope5);
+        var matchingUserAccountScopes3 = List.of(scope4, scope5);
+
+        matchingUserAccount1.setScopes(matchingUserAccountScopes1);
+        matchingUserAccount2.setScopes(matchingUserAccountScopes2);
+        matchingUserAccount3.setScopes(matchingUserAccountScopes3);
+
+        // When
+        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
+        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
+        when(userEntityRepository.findAllScopedUsersByProviderName(providerName, null, null)).thenReturn(persistedUsers);
+        when(userMapper.getUserAccountFromPersistedUser(persistedUser1)).thenReturn(matchingUserAccount1);
+        when(userMapper.getUserAccountFromPersistedUser(persistedUser2)).thenReturn(matchingUserAccount2);
+        when(userMapper.getUserAccountFromPersistedUser(persistedUser3)).thenReturn(matchingUserAccount3);
+
+        // Then
+        var accounts = userAccountService.getAllScopedUserAccounts(authentication, Optional.empty());
+        assertThat(accounts).containsExactlyInAnyOrder(matchingUserAccount1, matchingUserAccount2, matchingUserAccount3);
+
+        assertThat(matchingUserAccount1.getScopes()).containsExactlyInAnyOrderElementsOf(matchingUserAccountScopes1);
+        assertThat(matchingUserAccount2.getScopes()).containsExactlyInAnyOrderElementsOf(matchingUserAccountScopes2);
+        assertThat(matchingUserAccount3.getScopes()).containsExactlyInAnyOrderElementsOf(matchingUserAccountScopes3);
+    }
+
+    @Test
+    void getAllScopedUserAccounts_returnAllPartialScopedUserAccountsForTheCurrentProviderName_whenProfileIsScopedUser() {
+        // Given
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var providerName = "provider-name";
+
+        var persistedUser1 = mock(UserEntity.class);
+        var persistedUser2 = mock(UserEntity.class);
+        var persistedUser3 = mock(UserEntity.class);
+        var persistedUsers = List.of(persistedUser1, persistedUser2, persistedUser3);
+
+        var matchingUserAccount1 = new UserAccount(providerName, "login-1");
+        var matchingUserAccount2 = new UserAccount(providerName, "login-2");
+        var matchingUserAccount3 = new UserAccount(providerName, "login-3");
+
+        var scope1 = mock(UserAccountScope.class);
+        var scope2 = mock(UserAccountScope.class);
+        var scope3 = mock(UserAccountScope.class);
+        var scope4 = mock(UserAccountScope.class);
+        var scope5 = mock(UserAccountScope.class);
+
+        var projectCode1 = "project-code-1";
+        var projectCode2 = "project-code-2";
+        var projectCode3 = "project-code-3";
+        var projectCode4 = "project-code-4";
+        var projectCode5 = "project-code-5";
+
+        var matchingUserAccountScopes1 = List.of(scope1, scope2, scope3, scope4, scope5);
+        var matchingUserAccountScopes2 = List.of(scope1, scope5);
+        var matchingUserAccountScopes3 = List.of(scope4, scope5);
+
+        matchingUserAccount1.setScopes(matchingUserAccountScopes1);
+        matchingUserAccount2.setScopes(matchingUserAccountScopes2);
+        matchingUserAccount3.setScopes(matchingUserAccountScopes3);
+
+        // When
+        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
+        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(UserAccountProfile.SCOPED_USER));
+        when(userSessionService.getCurrentUserScopedProjectCodes()).thenReturn(List.of(projectCode1, projectCode2, projectCode3));
+        when(userEntityRepository.findAllScopedUsersByProviderName(providerName, null, null)).thenReturn(persistedUsers);
+        when(userMapper.getUserAccountFromPersistedUser(persistedUser1)).thenReturn(matchingUserAccount1);
+        when(userMapper.getUserAccountFromPersistedUser(persistedUser2)).thenReturn(matchingUserAccount2);
+        when(userMapper.getUserAccountFromPersistedUser(persistedUser3)).thenReturn(matchingUserAccount3);
+        when(scope1.getProject()).thenReturn(projectCode1);
+        when(scope2.getProject()).thenReturn(projectCode2);
+        when(scope3.getProject()).thenReturn(projectCode3);
+        when(scope4.getProject()).thenReturn(projectCode4);
+        when(scope5.getProject()).thenReturn(projectCode5);
+
+        // Then
+        var accounts = userAccountService.getAllScopedUserAccounts(authentication, Optional.empty());
+        assertThat(accounts).containsExactlyInAnyOrder(matchingUserAccount1, matchingUserAccount2, matchingUserAccount3);
+
+        assertThat(matchingUserAccount1.getScopes()).containsExactlyInAnyOrder(scope1, scope2, scope3).hasSize(3);
+        assertThat(matchingUserAccount2.getScopes()).containsExactly(scope1).hasSize(1);
+        assertThat(matchingUserAccount3.getScopes()).isEmpty();
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideSuperAdminAndAuditorUserAccountProfilesAndUserAccountScopeRolesArguments")
+    void getAllScopedUserAccountsOnProject_returnAllFullScopedUserAccountsForTheCurrentProviderName_whenProfileIsEitherSuperAdminOrAuditorAndRoleIsPresent(UserAccountProfile profile, UserAccountScopeRole role) {
+        // Given
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var providerName = "provider-name";
+
+        var projectCode = "project-code";
+
+        var matchingUserEntityRole = UserEntityRoleOnProject.ScopedUserRoleOnProject.valueOf(role.name());
+
+        var persistedUser1 = mock(UserEntity.class);
+        var persistedUser2 = mock(UserEntity.class);
+        var persistedUser3 = mock(UserEntity.class);
+        var persistedUsers = List.of(persistedUser1, persistedUser2, persistedUser3);
+
+        var matchingUserAccount1 = new UserAccount(providerName, "login-1");
+        var matchingUserAccount2 = new UserAccount(providerName, "login-2");
+        var matchingUserAccount3 = new UserAccount(providerName, "login-3");
+
+        var scope1 = mock(UserAccountScope.class);
+        var scope2 = mock(UserAccountScope.class);
+        var scope3 = mock(UserAccountScope.class);
+        var scope4 = mock(UserAccountScope.class);
+        var scope5 = mock(UserAccountScope.class);
+
+        var matchingUserAccountScopes1 = List.of(scope1, scope2, scope3, scope4, scope5);
+        var matchingUserAccountScopes2 = List.of(scope1, scope5);
+        var matchingUserAccountScopes3 = List.of(scope4, scope5);
+
+        matchingUserAccount1.setScopes(matchingUserAccountScopes1);
+        matchingUserAccount2.setScopes(matchingUserAccountScopes2);
+        matchingUserAccount3.setScopes(matchingUserAccountScopes3);
+
+        // When
+        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
+        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
+        when(userEntityRepository.findAllScopedUsersByProviderName(providerName, projectCode, matchingUserEntityRole)).thenReturn(persistedUsers);
+        when(userMapper.getUserAccountFromPersistedUser(persistedUser1)).thenReturn(matchingUserAccount1);
+        when(userMapper.getUserAccountFromPersistedUser(persistedUser2)).thenReturn(matchingUserAccount2);
+        when(userMapper.getUserAccountFromPersistedUser(persistedUser3)).thenReturn(matchingUserAccount3);
+
+        // Then
+        var accounts = userAccountService.getAllScopedUserAccountsOnProject(authentication, projectCode, Optional.of(role));
+        assertThat(accounts).containsExactlyInAnyOrder(matchingUserAccount1, matchingUserAccount2, matchingUserAccount3);
+
+        assertThat(matchingUserAccount1.getScopes()).containsExactlyInAnyOrderElementsOf(matchingUserAccountScopes1);
+        assertThat(matchingUserAccount2.getScopes()).containsExactlyInAnyOrderElementsOf(matchingUserAccountScopes2);
+        assertThat(matchingUserAccount3.getScopes()).containsExactlyInAnyOrderElementsOf(matchingUserAccountScopes3);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = UserAccountProfile.class, names = "SCOPED_USER", mode = EnumSource.Mode.EXCLUDE)
+    void getAllScopedUserAccountsOnProject_returnAllFullScopedUserAccountsForTheCurrentProviderName_whenProfileIsEitherSuperAdminOrAuditorAndRoleIsNotPresent(UserAccountProfile profile) {
+        // Given
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var providerName = "provider-name";
+
+        var projectCode = "project-code";
+
+        var persistedUser1 = mock(UserEntity.class);
+        var persistedUser2 = mock(UserEntity.class);
+        var persistedUser3 = mock(UserEntity.class);
+        var persistedUsers = List.of(persistedUser1, persistedUser2, persistedUser3);
+
+        var matchingUserAccount1 = new UserAccount(providerName, "login-1");
+        var matchingUserAccount2 = new UserAccount(providerName, "login-2");
+        var matchingUserAccount3 = new UserAccount(providerName, "login-3");
+
+        var scope1 = mock(UserAccountScope.class);
+        var scope2 = mock(UserAccountScope.class);
+        var scope3 = mock(UserAccountScope.class);
+        var scope4 = mock(UserAccountScope.class);
+        var scope5 = mock(UserAccountScope.class);
+
+        var matchingUserAccountScopes1 = List.of(scope1, scope2, scope3, scope4, scope5);
+        var matchingUserAccountScopes2 = List.of(scope1, scope5);
+        var matchingUserAccountScopes3 = List.of(scope4, scope5);
+
+        matchingUserAccount1.setScopes(matchingUserAccountScopes1);
+        matchingUserAccount2.setScopes(matchingUserAccountScopes2);
+        matchingUserAccount3.setScopes(matchingUserAccountScopes3);
+
+        // When
+        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
+        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
+        when(userEntityRepository.findAllScopedUsersByProviderName(providerName, projectCode, null)).thenReturn(persistedUsers);
+        when(userMapper.getUserAccountFromPersistedUser(persistedUser1)).thenReturn(matchingUserAccount1);
+        when(userMapper.getUserAccountFromPersistedUser(persistedUser2)).thenReturn(matchingUserAccount2);
+        when(userMapper.getUserAccountFromPersistedUser(persistedUser3)).thenReturn(matchingUserAccount3);
+
+        // Then
+        var accounts = userAccountService.getAllScopedUserAccountsOnProject(authentication, projectCode, Optional.empty());
+        assertThat(accounts).containsExactlyInAnyOrder(matchingUserAccount1, matchingUserAccount2, matchingUserAccount3);
+
+        assertThat(matchingUserAccount1.getScopes()).containsExactlyInAnyOrderElementsOf(matchingUserAccountScopes1);
+        assertThat(matchingUserAccount2.getScopes()).containsExactlyInAnyOrderElementsOf(matchingUserAccountScopes2);
+        assertThat(matchingUserAccount3.getScopes()).containsExactlyInAnyOrderElementsOf(matchingUserAccountScopes3);
+    }
+
+    @Test
+    void getAllScopedUserAccountsOnProject_returnAllPartialScopedUserAccountsForTheCurrentProviderName_whenProfileIsScopedUser() {
+        // Given
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var providerName = "provider-name";
+
+        var projectCode = "project-code";
+
+        var persistedUser1 = mock(UserEntity.class);
+        var persistedUser2 = mock(UserEntity.class);
+        var persistedUser3 = mock(UserEntity.class);
+        var persistedUsers = List.of(persistedUser1, persistedUser2, persistedUser3);
+
+        var matchingUserAccount1 = new UserAccount(providerName, "login-1");
+        var matchingUserAccount2 = new UserAccount(providerName, "login-2");
+        var matchingUserAccount3 = new UserAccount(providerName, "login-3");
+
+        var scope1 = mock(UserAccountScope.class);
+        var scope2 = mock(UserAccountScope.class);
+        var scope3 = mock(UserAccountScope.class);
+        var scope4 = mock(UserAccountScope.class);
+        var scope5 = mock(UserAccountScope.class);
+
+        var projectCode1 = "project-code-1";
+        var projectCode2 = "project-code-2";
+        var projectCode3 = "project-code-3";
+        var projectCode4 = "project-code-4";
+        var projectCode5 = "project-code-5";
+
+        var matchingUserAccountScopes1 = List.of(scope1, scope2, scope3, scope4, scope5);
+        var matchingUserAccountScopes2 = List.of(scope1, scope5);
+        var matchingUserAccountScopes3 = List.of(scope4, scope5);
+
+        matchingUserAccount1.setScopes(matchingUserAccountScopes1);
+        matchingUserAccount2.setScopes(matchingUserAccountScopes2);
+        matchingUserAccount3.setScopes(matchingUserAccountScopes3);
+
+        // When
+        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
+        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(UserAccountProfile.SCOPED_USER));
+        when(userSessionService.getCurrentUserScopedProjectCodes()).thenReturn(List.of(projectCode1, projectCode2, projectCode3));
+        when(userEntityRepository.findAllScopedUsersByProviderName(providerName, projectCode, null)).thenReturn(persistedUsers);
+        when(userMapper.getUserAccountFromPersistedUser(persistedUser1)).thenReturn(matchingUserAccount1);
+        when(userMapper.getUserAccountFromPersistedUser(persistedUser2)).thenReturn(matchingUserAccount2);
+        when(userMapper.getUserAccountFromPersistedUser(persistedUser3)).thenReturn(matchingUserAccount3);
+        when(scope1.getProject()).thenReturn(projectCode1);
+        when(scope2.getProject()).thenReturn(projectCode2);
+        when(scope3.getProject()).thenReturn(projectCode3);
+        when(scope4.getProject()).thenReturn(projectCode4);
+        when(scope5.getProject()).thenReturn(projectCode5);
+
+        // Then
+        var accounts = userAccountService.getAllScopedUserAccountsOnProject(authentication, projectCode, Optional.empty());
+        assertThat(accounts).containsExactlyInAnyOrder(matchingUserAccount1, matchingUserAccount2, matchingUserAccount3);
+
+        assertThat(matchingUserAccount1.getScopes()).containsExactlyInAnyOrder(scope1, scope2, scope3).hasSize(3);
+        assertThat(matchingUserAccount2.getScopes()).containsExactly(scope1).hasSize(1);
+        assertThat(matchingUserAccount3.getScopes()).isEmpty();
     }
 }

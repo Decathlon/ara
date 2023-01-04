@@ -62,6 +62,7 @@
       <thead>
         <tr>
           <th>Name</th>
+          <th>Code</th>
           <th>Created on</th>
           <th>Created by</th>
           <th>Updated on</th>
@@ -75,6 +76,7 @@
       <tbody>
         <tr v-for="(project, index) in sortedProjects" :class="index %2 !== 0 ? 'darkGrey' : 'lightGrey'" :key="project.id">
           <td>{{ project.name }}</td>
+          <td>{{ project.code }}</td>
           <td>{{ project.creation_date }}</td>
           <td>{{ getProjectUserNameDisplay(project.creation_user) }}</td>
           <td>{{ project.update_date }}</td>
@@ -218,32 +220,30 @@ export default {
         return this.isSuperAdmin || (this.isScopedUser && (this.getRoleOnProject(projectCode) === USER.ROLE_ON_PROJECT.ADMIN))
       },
       getRoleOnProject (projectCode) {
-        return _(this.userDetails.scopes).filter({ 'project': projectCode }).map('role').first()
+        return _(this.currentUser.scopes).filter({ 'project': projectCode }).map('role').first()
       },
       getProjectUserNameDisplay (login) {
-        if (login === this.userDetails.login) {
+        if (login === this.currentUser.login) {
           return 'Me'
         }
         return login
       },
       clearDefaultProject () {
-        const url = `${api.paths.user}/default-project`
         Vue.http
-          .delete(url, api.REQUEST_OPTIONS)
+          .delete(api.paths.currentUserDefaultProjectClear, api.REQUEST_OPTIONS)
           .then((response) => {
             const updatedUser = response.body
-            AuthenticationService.saveUserDetails(updatedUser)
+            AuthenticationService.saveCurrentUser(updatedUser)
           }, (error) => {
             api.handleError(error)
           })
       },
       changeDefaultProject (project) {
-        const url = `${api.paths.user}/default-project/${project.code}`
         Vue.http
-          .put(url, null, api.REQUEST_OPTIONS)
+          .put(api.paths.currentUserDefaultProjectUpdate(project.code), null, api.REQUEST_OPTIONS)
           .then((response) => {
             const updatedUser = response.body
-            AuthenticationService.saveUserDetails(updatedUser)
+            AuthenticationService.saveCurrentUser(updatedUser)
           }, (error) => {
             api.handleError(error)
           })
@@ -258,7 +258,7 @@ export default {
           onOk () {
             self.$store.commit('teams/unloadTeams', { projectCode: DEMO_PROJECT_CODE })
             Vue.http
-              .delete(api.paths.demo(), api.REQUEST_OPTIONS)
+              .delete(api.paths.demo, api.REQUEST_OPTIONS)
               .then(() => {
                 self.$Modal.remove()
                 self.getProjectList()
@@ -281,7 +281,7 @@ export default {
       createDemoProject () {
         this.loadingDemoProject = true
         Vue.http
-          .post(api.paths.demo(), null, api.REQUEST_OPTIONS)
+          .post(api.paths.demo, null, api.REQUEST_OPTIONS)
           .then(() => {
             this.loadingDemoProject = false
             this.getProjectList()
@@ -308,20 +308,20 @@ export default {
         return this.projects.filter(item => item.code === DEMO_PROJECT_CODE)
       },
 
-      userDetails () {
+      currentUser () {
         return AuthenticationService.getDetails().user
       },
 
       userDefaultProjectCode () {
-        return this.userDetails?.default_project
+        return this.currentUser?.default_project
       },
 
       isSuperAdmin () {
-        return this.userDetails?.profile === USER.PROFILE.SUPER_ADMIN
+        return this.currentUser?.profile === USER.PROFILE.SUPER_ADMIN
       },
 
       isScopedUser () {
-        return this.userDetails?.profile === USER.PROFILE.SCOPED_USER
+        return this.currentUser?.profile === USER.PROFILE.SCOPED_USER
       }
     }
   }

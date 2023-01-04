@@ -1,5 +1,6 @@
 package com.decathlon.ara.security.service.login;
 
+import com.decathlon.ara.security.mapper.AuthorityMapper;
 import com.decathlon.ara.security.service.user.UserAccountService;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
@@ -13,8 +14,8 @@ import java.util.Set;
 @Service
 public class OidcUserLoginService extends UserLoginService<OidcUserRequest, OidcUser, OidcUserService> {
 
-    public OidcUserLoginService(UserAccountService userAccountService) {
-        super(userAccountService);
+    public OidcUserLoginService(UserAccountService userAccountService, AuthorityMapper authorityMapper) {
+        super(userAccountService, authorityMapper);
     }
 
     @Override

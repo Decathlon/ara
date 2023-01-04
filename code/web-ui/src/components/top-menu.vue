@@ -406,7 +406,7 @@
         })
       this.loadLocalParameters()
       Vue.http
-        .get(api.paths.info(), api.REQUEST_OPTIONS)
+        .get(api.paths.info, api.REQUEST_OPTIONS)
         .then((response) => {
           const data = response?.data
           this.appVersion = this.extractVersion(data, 'app')

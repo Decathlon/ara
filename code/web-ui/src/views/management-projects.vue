@@ -111,7 +111,7 @@ export default {
       createDemoProject () {
         this.loadingDemoProject = true
         Vue.http
-          .post(api.paths.demo(), null, api.REQUEST_OPTIONS)
+          .post(api.paths.demo, null, api.REQUEST_OPTIONS)
           .then((response) => {
             this.loadingDemoProject = false
             this.$refs.crud.load()
@@ -134,7 +134,7 @@ export default {
             self.justCreatedDemoProject = false
             self.$store.commit('teams/unloadTeams', { projectCode: DEMO_PROJECT_CODE })
             Vue.http
-              .delete(api.paths.demo(), api.REQUEST_OPTIONS)
+              .delete(api.paths.demo, api.REQUEST_OPTIONS)
               .then((response) => {
                 self.$Modal.remove()
                 self.$refs.crud.load()

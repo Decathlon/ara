@@ -1,6 +1,5 @@
 package com.decathlon.ara.security.service.user.strategy;
 
-import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,17 +17,13 @@ class GoogleUserAccountStrategyTest {
     private GoogleUserAccountStrategy googleUserAccountStrategy;
 
     @Test
-    void getUserAccount_returnUserAccount() {
+    void getUserDetails_returnUserDetails() {
         // Given
         var googleUser = mock(OidcUser.class);
         var userFirstName = "user-firstname";
         var userLastName = "user-lastName";
         var userEmail = "user-email";
         var userPictureUrl = "user-picture-url";
-
-        var userEntityLogin = "user-entity-login";
-        var providerName = "provider-name";
-        var userEntity = new UserEntity(userEntityLogin, providerName);
 
         // When
         when(googleUser.getGivenName()).thenReturn(userFirstName);
@@ -42,22 +37,5 @@ class GoogleUserAccountStrategyTest {
         assertThat(googleUserAccountStrategy.getLastName(googleUser)).contains(userLastName);
         assertThat(googleUserAccountStrategy.getEmail(googleUser)).contains(userEmail);
         assertThat(googleUserAccountStrategy.getPictureUrl(googleUser)).contains(userPictureUrl);
-
-        var userAccount = googleUserAccountStrategy.getUserAccount(googleUser, userEntity);
-        assertThat(userAccount)
-                .extracting(
-                        "login",
-                        "firstName",
-                        "lastName",
-                        "email",
-                        "pictureUrl"
-                )
-                .contains(
-                        userEntityLogin,
-                        userFirstName,
-                        userLastName,
-                        userEmail,
-                        userPictureUrl
-                );
     }
 }

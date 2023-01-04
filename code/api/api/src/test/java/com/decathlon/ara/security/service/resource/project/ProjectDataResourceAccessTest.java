@@ -3,7 +3,7 @@ package com.decathlon.ara.security.service.resource.project;
 import com.decathlon.ara.security.dto.permission.ResourcePermission;
 import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
-import com.decathlon.ara.security.service.AuthorityService;
+import com.decathlon.ara.security.service.UserSessionService;
 import com.decathlon.ara.service.ProjectService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 class ProjectDataResourceAccessTest {
 
     @Mock
-    private AuthorityService authorityService;
+    private UserSessionService userSessionService;
 
     @Mock
     private ProjectService projectService;
@@ -81,7 +81,7 @@ class ProjectDataResourceAccessTest {
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
-        when(authorityService.getProfile()).thenReturn(Optional.empty());
+        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.empty());
 
         // Then
         var isEnabled = projectDataResourceAccess.isEnabled(projectCode, permission);
@@ -97,7 +97,7 @@ class ProjectDataResourceAccessTest {
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
-        when(authorityService.getProfile()).thenReturn(Optional.of(profile));
+        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
 
         // Then
         var isEnabled = projectDataResourceAccess.isEnabled(projectCode, permission);
@@ -116,7 +116,7 @@ class ProjectDataResourceAccessTest {
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
-        when(authorityService.getProfile()).thenReturn(Optional.of(profile));
+        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
 
         // Then
         var isEnabled = projectDataResourceAccess.isEnabled(projectCode, permission);
@@ -135,7 +135,7 @@ class ProjectDataResourceAccessTest {
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
-        when(authorityService.getProfile()).thenReturn(Optional.of(profile));
+        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
 
         // Then
         var isEnabled = projectDataResourceAccess.isEnabled(projectCode, permission);
@@ -151,8 +151,8 @@ class ProjectDataResourceAccessTest {
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
-        when(authorityService.getProfile()).thenReturn(Optional.of(profile));
-        when(authorityService.getRoleOnProject(projectCode)).thenReturn(Optional.empty());
+        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
+        when(userSessionService.getCurrentUserRoleOnProject(projectCode)).thenReturn(Optional.empty());
 
         // Then
         var isEnabled = projectDataResourceAccess.isEnabled(projectCode, permission);
@@ -171,8 +171,8 @@ class ProjectDataResourceAccessTest {
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
-        when(authorityService.getProfile()).thenReturn(Optional.of(profile));
-        when(authorityService.getRoleOnProject(projectCode)).thenReturn(Optional.of(role));
+        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
+        when(userSessionService.getCurrentUserRoleOnProject(projectCode)).thenReturn(Optional.of(role));
 
         // Then
         var isEnabled = projectDataResourceAccess.isEnabled(projectCode, permission);
@@ -191,8 +191,8 @@ class ProjectDataResourceAccessTest {
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
-        when(authorityService.getProfile()).thenReturn(Optional.of(profile));
-        when(authorityService.getRoleOnProject(projectCode)).thenReturn(Optional.of(role));
+        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
+        when(userSessionService.getCurrentUserRoleOnProject(projectCode)).thenReturn(Optional.of(role));
 
         // Then
         var isEnabled = projectDataResourceAccess.isEnabled(projectCode, permission);
@@ -212,8 +212,8 @@ class ProjectDataResourceAccessTest {
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
-        when(authorityService.getProfile()).thenReturn(Optional.of(profile));
-        when(authorityService.getRoleOnProject(projectCode)).thenReturn(Optional.of(role));
+        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
+        when(userSessionService.getCurrentUserRoleOnProject(projectCode)).thenReturn(Optional.of(role));
 
         // Then
         var isEnabled = projectDataResourceAccess.isEnabled(projectCode, permission);
@@ -233,8 +233,8 @@ class ProjectDataResourceAccessTest {
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
-        when(authorityService.getProfile()).thenReturn(Optional.of(profile));
-        when(authorityService.getRoleOnProject(projectCode)).thenReturn(Optional.of(role));
+        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
+        when(userSessionService.getCurrentUserRoleOnProject(projectCode)).thenReturn(Optional.of(role));
 
         // Then
         var isEnabled = projectDataResourceAccess.isEnabled(projectCode, permission);

@@ -25,7 +25,7 @@ import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
 import com.decathlon.ara.repository.ProjectRepository;
 import com.decathlon.ara.repository.RootCauseRepository;
 import com.decathlon.ara.security.dto.user.UserAccountProfile;
-import com.decathlon.ara.security.service.AuthorityService;
+import com.decathlon.ara.security.service.UserSessionService;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.ForbiddenException;
@@ -59,20 +59,20 @@ public class ProjectService {
 
     private final CommunicationService communicationService;
 
-    private final AuthorityService authorityService;
+    private final UserSessionService userSessionService;
 
     public ProjectService(
             ProjectRepository projectRepository,
             RootCauseRepository rootCauseRepository,
             ProjectMapper projectMapper,
             CommunicationService communicationService,
-            AuthorityService authorityService
+            UserSessionService userSessionService
     ) {
         this.projectRepository = projectRepository;
         this.rootCauseRepository = rootCauseRepository;
         this.projectMapper = projectMapper;
         this.communicationService = communicationService;
-        this.authorityService = authorityService;
+        this.userSessionService = userSessionService;
     }
 
     /**
@@ -150,7 +150,7 @@ public class ProjectService {
      */
     @Transactional(readOnly = true)
     public List<ProjectDTO> findAll() {
-        var profile = authorityService.getProfile();
+        var profile = userSessionService.getCurrentUserProfile();
         if (profile.isEmpty()) {
             return new ArrayList<>();
         }
@@ -163,7 +163,7 @@ public class ProjectService {
         var scopedUser = UserAccountProfile.SCOPED_USER;
         var userHasLimitedAccessToProjects = scopedUser.equals(profile.get());
         if (userHasLimitedAccessToProjects) {
-            var scopedProjectCodes = authorityService.getScopedProjectCodes();
+            var scopedProjectCodes = userSessionService.getCurrentUserScopedProjectCodes();
             var projects = projectRepository.findByCodeInOrderByName(scopedProjectCodes);
             return projects.stream().map(projectMapper::getProjectDTOFromProjectEntity).toList();
         }
@@ -188,7 +188,7 @@ public class ProjectService {
     @Transactional
     public void delete(String projectCode) throws ForbiddenException {
         projectRepository.deleteByCode(projectCode);
-        authorityService.refreshCurrentUserAccountAuthorities();
+        userSessionService.refreshCurrentUserAuthorities();
     }
 
     /**

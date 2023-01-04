@@ -3,7 +3,7 @@ package com.decathlon.ara.security.service.resource.project;
 import com.decathlon.ara.security.dto.permission.ResourcePermission;
 import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
-import com.decathlon.ara.security.service.AuthorityService;
+import com.decathlon.ara.security.service.UserSessionService;
 import com.decathlon.ara.service.ProjectService;
 import org.apache.commons.lang3.StringUtils;
 
@@ -15,12 +15,12 @@ import static java.util.Map.entry;
 
 public abstract class ProjectResourceAccess {
 
-    protected AuthorityService authorityService;
+    protected UserSessionService userSessionService;
 
     protected ProjectService projectService;
 
-    protected ProjectResourceAccess(AuthorityService authorityService, ProjectService projectService) {
-        this.authorityService = authorityService;
+    protected ProjectResourceAccess(UserSessionService userSessionService, ProjectService projectService) {
+        this.userSessionService = userSessionService;
         this.projectService = projectService;
     }
 
@@ -44,7 +44,7 @@ public abstract class ProjectResourceAccess {
             return false;
         }
 
-        var userProfile = authorityService.getProfile();
+        var userProfile = userSessionService.getCurrentUserProfile();
         if (userProfile.isEmpty()) {
             return false;
         }
@@ -56,7 +56,7 @@ public abstract class ProjectResourceAccess {
             return permission.isReadOnly();
         }
 
-        var role = authorityService.getRoleOnProject(projectCode);
+        var role = userSessionService.getCurrentUserRoleOnProject(projectCode);
         var permissionsByRole = getPermissionsByRole();
 
         return role.map(permissionsByRole::get)

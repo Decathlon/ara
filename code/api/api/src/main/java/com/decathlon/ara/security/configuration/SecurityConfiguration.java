@@ -4,8 +4,6 @@ import com.decathlon.ara.scenario.cucumber.resource.CucumberResource;
 import com.decathlon.ara.scenario.cypress.resource.CypressResource;
 import com.decathlon.ara.scenario.generic.resource.GenericResource;
 import com.decathlon.ara.scenario.postman.resource.PostmanResource;
-import com.decathlon.ara.security.dto.user.UserAccountProfile;
-import com.decathlon.ara.security.service.AuthorityService;
 import com.decathlon.ara.security.service.login.OAuth2UserLoginService;
 import com.decathlon.ara.security.service.login.OidcUserLoginService;
 import com.decathlon.ara.web.rest.*;
@@ -24,6 +22,9 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
+
+import static com.decathlon.ara.security.service.UserSessionService.AUDITOR_PROFILE_AUTHORITY;
+import static com.decathlon.ara.security.service.UserSessionService.SUPER_ADMIN_PROFILE_AUTHORITY;
 
 @Configuration
 public class SecurityConfiguration {
@@ -57,8 +58,6 @@ public class SecurityConfiguration {
 
     private final OAuth2UserLoginService oauth2UserLoginService;
 
-    private static final String SUPER_ADMIN_PROFILE_AUTHORITY = AuthorityService.AUTHORITY_USER_PROFILE_PREFIX + UserAccountProfile.SUPER_ADMIN.name();
-
     private static final String[] PROJECT_DEMO_PATHS = {DemoResource.PATHS, ProjectResource.DEMO_PATHS};
 
     public SecurityConfiguration(
@@ -78,9 +77,12 @@ public class SecurityConfiguration {
                 .authorizeRequests() //NOSONAR
                 .antMatchers(AuthenticationResource.PATHS, RestConstants.ACTUATOR_PATHS).permitAll()
                 // user
-                .antMatchers(HttpMethod.DELETE, UserResource.DEFAULT_PROJECT_PATH).authenticated()
-                .antMatchers(HttpMethod.PUT, UserResource.DEFAULT_PROJECT_CODE_PATH).access(PROJECT_INSTANCE_FETCH_PERMISSION)
-                .antMatchers(HttpMethod.GET, UserResource.PATHS).authenticated()
+                .antMatchers(HttpMethod.DELETE, UserResource.CLEAR_DEFAULT_PROJECT_PATH).authenticated()
+                .antMatchers(HttpMethod.PUT, UserResource.UPDATE_DEFAULT_PROJECT_BY_CODE_PATH).access(PROJECT_INSTANCE_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.GET, UserResource.CURRENT_ACCOUNT_PATH).authenticated()
+                .antMatchers(HttpMethod.GET, UserResource.ALL_ACCOUNTS_PATH).hasAnyAuthority(SUPER_ADMIN_PROFILE_AUTHORITY, AUDITOR_PROFILE_AUTHORITY)
+                .antMatchers(HttpMethod.GET, UserResource.SCOPED_ACCOUNTS_PATH).authenticated()
+                .antMatchers(HttpMethod.GET, UserResource.SCOPED_ACCOUNTS_BY_PROJECT_PATH).access(PROJECT_INSTANCE_FETCH_PERMISSION)
 
                 // projects > demo
                 .antMatchers(PROJECT_DEMO_PATHS).authenticated()

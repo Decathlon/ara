@@ -4,7 +4,7 @@ import api from '../libs/api'
 import RememberUrlService from './rememberurl.service'
 import { config } from '../config.js'
 
-const USER_DETAILS = 'user_details'
+const CURRENT_USER = 'current_user'
 const PROVIDER_NAME = 'provider_name'
 
 const conf = config
@@ -47,9 +47,9 @@ class AuthenticationServiceClass {
       .then(logged => {
         isLogged = logged
         if (logged) {
-          return Vue.http.get(api.paths.userDetails)
+          return Vue.http.get(api.paths.currentUser)
             .then(answer => answer.body)
-            .then(userData => this.saveUserDetails(userData))
+            .then(userData => this.saveCurrentUser(userData))
         }
       }).catch((e) => {
         isLogged = false
@@ -57,7 +57,7 @@ class AuthenticationServiceClass {
   }
 
   getOauthProviders = async () => {
-    return Vue.http.get(api.paths.authenticationConfiguration(), api.REQUEST_OPTIONS)
+    return Vue.http.get(api.paths.authenticationConfiguration, api.REQUEST_OPTIONS)
       .then(response => response.body)
       .then(content => {
         const res = {
@@ -143,7 +143,7 @@ class AuthenticationServiceClass {
   }
 
   logout = () => {
-    this.clearUserDetails()
+    this.clearCurrentUser()
     // window.location.href = config.authentication.logoutProcessingUrl
     console.debug(`conf imported ? ${conf !== undefined}`)
     window.location.href = conf.authentication.logoutProcessingUrl
@@ -151,21 +151,21 @@ class AuthenticationServiceClass {
 
   getDetails = () => {
     return {
-      user: JSON.parse(localStorage.getItem(USER_DETAILS)),
+      user: JSON.parse(localStorage.getItem(CURRENT_USER)),
       providerName: JSON.parse(localStorage.getItem(PROVIDER_NAME))
     }
   }
 
-  saveUserDetails = (userDetails) => {
-    localStorage.setItem(USER_DETAILS, JSON.stringify(userDetails))
+  saveCurrentUser = (user) => {
+    localStorage.setItem(CURRENT_USER, JSON.stringify(user))
   }
 
   saveProviderName = (providerName) => {
     localStorage.setItem(PROVIDER_NAME, JSON.stringify(providerName))
   }
 
-  clearUserDetails = () => {
-    localStorage.removeItem(USER_DETAILS)
+  clearCurrentUser = () => {
+    localStorage.removeItem(CURRENT_USER)
   }
 }
 

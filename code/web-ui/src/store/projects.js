@@ -53,7 +53,7 @@ export default {
       if (!this.loading && !this.loaded) {
         commit('setLoading', true)
         Vue.http
-          .get(api.paths.projects(), api.REQUEST_OPTIONS)
+          .get(api.paths.projects, api.REQUEST_OPTIONS)
           .then((response) => {
             commit('setProjects', response.body)
             commit('setLoading', false)

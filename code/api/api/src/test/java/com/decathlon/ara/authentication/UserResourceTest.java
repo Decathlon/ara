@@ -27,7 +27,7 @@ class UserResourceTest {
     private UserResource userResource;
 
     @Test
-    void getUserDetails_returnBadRequestResponse_whenUserNotFound() {
+    void getCurrentUserAccount_returnBadRequestResponse_whenUserNotFound() {
         // Given
         var authentication = mock(OAuth2AuthenticationToken.class);
 
@@ -35,13 +35,13 @@ class UserResourceTest {
         when(userAccountService.getCurrentUserAccount(authentication)).thenReturn(Optional.empty());
 
         // Then
-        var response = userResource.getUserDetails(authentication);
+        var response = userResource.getCurrentUserAccount(authentication);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNull();
     }
 
     @Test
-    void getUserDetails_returnRequestResponseContainingUser_whenUserFound() {
+    void getCurrentUserAccount_returnRequestResponseContainingUser_whenUserFound() {
         // Given
         var authentication = mock(OAuth2AuthenticationToken.class);
         var userAccount = mock(UserAccount.class);
@@ -50,7 +50,7 @@ class UserResourceTest {
         when(userAccountService.getCurrentUserAccount(authentication)).thenReturn(Optional.of(userAccount));
 
         // Then
-        var response = userResource.getUserDetails(authentication);
+        var response = userResource.getCurrentUserAccount(authentication);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isSameAs(userAccount);
     }

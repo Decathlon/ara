@@ -24,7 +24,7 @@ info:
   api:
     version: @project.version@
 
-# Srping custom conf
+# Spring custom configuration
 spring:
   profiles:
     include: @profiles.from.maven@,${ara.oauth2.mode},${ara.logging.mode}

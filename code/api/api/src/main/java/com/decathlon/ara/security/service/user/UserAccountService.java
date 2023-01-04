@@ -12,7 +12,8 @@ import com.decathlon.ara.security.configuration.data.providers.setup.users.UserP
 import com.decathlon.ara.security.dto.user.UserAccount;
 import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
-import com.decathlon.ara.security.service.AuthorityService;
+import com.decathlon.ara.security.mapper.UserMapper;
+import com.decathlon.ara.security.service.UserSessionService;
 import com.decathlon.ara.security.service.user.strategy.select.UserStrategySelector;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.exception.ForbiddenException;
@@ -51,26 +52,30 @@ public class UserAccountService {
 
     private final OAuth2ProvidersConfiguration providersConfiguration;
 
+    private final UserMapper userMapper;
+
     private final ProjectService projectService;
 
-    private final AuthorityService authorityService;
+    private final UserSessionService userSessionService;
 
     public UserAccountService(
             UserStrategySelector userStrategySelector,
             UserEntityRepository userEntityRepository,
             UserEntityRoleOnProjectRepository userEntityRoleOnProjectRepository,
-            OAuth2ProvidersConfiguration providersConfiguration,
-            ProjectService projectService,
             ProjectRepository projectRepository,
-            AuthorityService authorityService
+            OAuth2ProvidersConfiguration providersConfiguration,
+            UserMapper userMapper,
+            ProjectService projectService,
+            UserSessionService userSessionService
     ) {
         this.userStrategySelector = userStrategySelector;
         this.userEntityRepository = userEntityRepository;
         this.userEntityRoleOnProjectRepository = userEntityRoleOnProjectRepository;
-        this.providersConfiguration = providersConfiguration;
-        this.projectService = projectService;
         this.projectRepository = projectRepository;
-        this.authorityService = authorityService;
+        this.providersConfiguration = providersConfiguration;
+        this.userMapper = userMapper;
+        this.projectService = projectService;
+        this.userSessionService = userSessionService;
     }
 
     public DefaultOAuth2UserService getDefaultOAuth2UserService() {
@@ -118,13 +123,17 @@ public class UserAccountService {
 
         var strategy = userStrategySelector.selectUserStrategyFromProviderName(providerName);
         var userLogin = strategy.getLogin(oauth2User);
-        return getCurrentUserEntity(userLogin, providerName).map(userEntity -> strategy.getUserAccount(oauth2User, userEntity));
+        return getCurrentUserEntity(userLogin, providerName).map(userMapper::getUserAccountFromPersistedUser);
     }
 
     private Optional<UserEntity> getCurrentUserEntity(String userLogin, String providerName) {
         return userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName));
     }
 
+    /**
+     * Fetch the currently logged-in {@link UserEntity}
+     * @return the current {@link UserEntity}
+     */
     public Optional<UserEntity> getCurrentUserEntity() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!(authentication instanceof OAuth2AuthenticationToken oauth2Authentication)) {
@@ -162,6 +171,9 @@ public class UserAccountService {
         var email = strategy.getEmail(oauth2User);
         email.ifPresent(userToSave::setEmail);
 
+        var pictureUrl = strategy.getPictureUrl(oauth2User);
+        pictureUrl.ifPresent(userToSave::setPictureUrl);
+
         var profileConfiguration = providersConfiguration.getUserProfileConfiguration(providerName, userLogin);
         var userProfile = profileConfiguration.flatMap(UserAccountService::getUserProfileFromConfiguration);
         userProfile.ifPresent(userToSave::setProfile);
@@ -174,7 +186,7 @@ public class UserAccountService {
         if (userRoles.isPresent()) {
             finalSavedUser = userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName)).orElse(savedUser);
         }
-        return strategy.getUserAccount(oauth2User, finalSavedUser);
+        return userMapper.getUserAccountFromPersistedUser(finalSavedUser);
     }
 
     private static Optional<UserEntity.UserEntityProfile> getUserProfileFromConfiguration(UserProfileConfiguration profileConfiguration) {
@@ -248,7 +260,7 @@ public class UserAccountService {
         var user = getCurrentUserEntity().orElseThrow(() -> exception);
 
         userEntityRoleOnProjectRepository.deleteById(new UserEntityRoleOnProject.UserEntityRoleOnProjectId(user, project));
-        authorityService.refreshCurrentUserAccountAuthorities();
+        userSessionService.refreshCurrentUserAuthorities();
     }
 
     private Pair[] getProjectCodeExceptionContext(String projectCode) {
@@ -275,17 +287,18 @@ public class UserAccountService {
         var userToUpdate = getCurrentUserEntity().orElseThrow(() -> exception);
         var roleToUpdate = getUserEntityScopedUserRoleOnProjectFromUserAccountScopeRole(accountRole);
 
-        updateUserEntityRoles(projectCode, project, userToUpdate, roleToUpdate);
+        updateUserEntityRoles(userToUpdate, project, roleToUpdate);
 
         userEntityRepository.save(userToUpdate);
-        authorityService.refreshCurrentUserAccountAuthorities();
+        userSessionService.refreshCurrentUserAuthorities();
     }
 
-    private UserEntityRoleOnProject.ScopedUserRoleOnProject getUserEntityScopedUserRoleOnProjectFromUserAccountScopeRole(UserAccountScopeRole userAccountScopeRole) {
+    private UserEntityRoleOnProject.ScopedUserRoleOnProject getUserEntityScopedUserRoleOnProjectFromUserAccountScopeRole(@NonNull UserAccountScopeRole userAccountScopeRole) {
         return UserEntityRoleOnProject.ScopedUserRoleOnProject.valueOf(userAccountScopeRole.name());
     }
 
-    private static void updateUserEntityRoles(String projectCode, Project project, UserEntity userToUpdate, UserEntityRoleOnProject.ScopedUserRoleOnProject roleToUpdate) {
+    private void updateUserEntityRoles(UserEntity userToUpdate, Project project, UserEntityRoleOnProject.ScopedUserRoleOnProject roleToUpdate) {
+        var projectCode = project.getCode();
         var userRoles = userToUpdate.getRolesOnProjectWhenScopedUser();
         for (var userRole : userRoles) {
             var roleProject = userRole.getProject();
@@ -312,15 +325,7 @@ public class UserAccountService {
         var userToUpdate = getCurrentUserEntity().orElseThrow(() -> new ForbiddenException(Entities.PROJECT, "clear default project"));
         userToUpdate.setDefaultProject(null);
         var updatedUser = userEntityRepository.save(userToUpdate);
-        return getUserAccountFromUserEntity(updatedUser);
-    }
-
-    private UserAccount getUserAccountFromUserEntity(@NonNull UserEntity userEntity) {
-        var authentication = (OAuth2AuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        var oauth2User = authentication.getPrincipal();
-        var providerName = userEntity.getProviderName();
-        var strategy = userStrategySelector.selectUserStrategyFromProviderName(providerName);
-        return strategy.getUserAccount(oauth2User, userEntity);
+        return userMapper.getUserAccountFromPersistedUser(updatedUser);
     }
 
     /**
@@ -341,6 +346,74 @@ public class UserAccountService {
         var userToUpdate = getCurrentUserEntity().orElseThrow(() -> exception);
         userToUpdate.setDefaultProject(defaultProject);
         var updatedUser = userEntityRepository.save(userToUpdate);
-        return getUserAccountFromUserEntity(updatedUser);
+        return userMapper.getUserAccountFromPersistedUser(updatedUser);
+    }
+
+    /**
+     * Get all user accounts (only for the current OAuth2 provider)
+     * @param authentication the current authentication
+     * @return the user accounts
+     */
+    public List<UserAccount> getAllUserAccounts(@NonNull OAuth2AuthenticationToken authentication) {
+        var providerName = authentication.getAuthorizedClientRegistrationId();
+
+        var persistedUsers = userEntityRepository.findAllByProviderName(providerName);
+        return persistedUsers.stream().map(userMapper::getUserAccountFromPersistedUser).toList();
+    }
+
+    /**
+     * Get all the scoped user accounts (only for the current OAuth2 provider).
+     * Note that account scopes contain only projects shared by the current user.
+     * @param authentication the current authentication
+     * @param roleFilter if present, filter on scoped users having at least this role on a project
+     * @return the user accounts
+     */
+    public List<UserAccount> getAllScopedUserAccounts(@NonNull OAuth2AuthenticationToken authentication, Optional<UserAccountScopeRole> roleFilter) {
+        return getAllScopedUserAccounts(authentication, Optional.empty(), roleFilter);
+    }
+
+    private List<UserAccount> getAllScopedUserAccounts(@NonNull OAuth2AuthenticationToken authentication, Optional<String> projectCodeFilter, Optional<UserAccountScopeRole> roleFilter) {
+        var providerName = authentication.getAuthorizedClientRegistrationId();
+
+        var actualUserEntityRole = roleFilter.map(this::getUserEntityScopedUserRoleOnProjectFromUserAccountScopeRole).orElse(null);
+
+        var persistedScopedUsers = userEntityRepository.findAllScopedUsersByProviderName(providerName, projectCodeFilter.orElse(null), actualUserEntityRole);
+
+        var profile = userSessionService.getCurrentUserProfile();
+        if (profile.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        var userAccounts = persistedScopedUsers.stream().map(userMapper::getUserAccountFromPersistedUser).toList();
+
+        var currentUserIsScopedUser = UserAccountProfile.SCOPED_USER.equals(profile.get());
+        if (currentUserIsScopedUser) {
+            filterScopedUserAccountsScopes(userAccounts);
+        }
+
+        return userAccounts;
+    }
+
+    private void filterScopedUserAccountsScopes(List<UserAccount> userAccounts) {
+        var scopedProjectCodes = userSessionService.getCurrentUserScopedProjectCodes();
+        userAccounts.forEach(account -> {
+            var filteredScopes = account.getScopes()
+                    .stream()
+                    .filter(scope -> scopedProjectCodes.contains(scope.getProject()))
+                    .toList();
+            account.setScopes(filteredScopes);
+        });
+    }
+
+    /**
+     * Get all the scoped user accounts having access to a given project (only for the current OAuth2 provider).
+     * Note that account scopes contain only projects shared by the current user.
+     * @param authentication the current authentication
+     * @param projectCode the project code
+     * @param roleFilter if present, filter only on scoped users having this role on the project 'projectCode'
+     * @return the user accounts
+     */
+    public List<UserAccount> getAllScopedUserAccountsOnProject(@NonNull OAuth2AuthenticationToken authentication, String projectCode, Optional<UserAccountScopeRole> roleFilter) {
+        return getAllScopedUserAccounts(authentication, Optional.of(projectCode), roleFilter);
     }
 }

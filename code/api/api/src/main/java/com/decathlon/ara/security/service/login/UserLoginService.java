@@ -1,5 +1,6 @@
 package com.decathlon.ara.security.service.login;
 
+import com.decathlon.ara.security.mapper.AuthorityMapper;
 import com.decathlon.ara.security.service.user.UserAccountService;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -12,8 +13,11 @@ public abstract class UserLoginService<R extends OAuth2UserRequest, U extends OA
 
     protected final UserAccountService userAccountService;
 
-    protected UserLoginService(UserAccountService userAccountService) {
+    protected final AuthorityMapper authorityMapper;
+
+    protected UserLoginService(UserAccountService userAccountService, AuthorityMapper authorityMapper) {
         this.userAccountService = userAccountService;
+        this.authorityMapper = authorityMapper;
     }
 
     protected abstract S getUserService();
@@ -32,7 +36,7 @@ public abstract class UserLoginService<R extends OAuth2UserRequest, U extends OA
         var savedUserAccount = userAccountService
                 .getCurrentUserAccount(oauth2User, providerName)
                 .orElseGet(() -> userAccountService.createUserAccount(oauth2User, providerName));
-        var authorities = savedUserAccount.getMatchingAuthorities();
+        var authorities = authorityMapper.getGrantedAuthoritiesFromUserAccount(savedUserAccount);
         return getUpdatedOAuth2User(authorities, oauth2User);
     }
 

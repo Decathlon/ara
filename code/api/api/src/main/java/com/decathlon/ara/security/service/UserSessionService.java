@@ -7,6 +7,7 @@ import com.decathlon.ara.repository.security.member.user.entity.UserEntityReposi
 import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScope;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
+import com.decathlon.ara.security.mapper.AuthorityMapper;
 import com.decathlon.ara.security.service.user.strategy.select.UserStrategySelector;
 import com.decathlon.ara.service.exception.ForbiddenException;
 import org.apache.commons.lang3.StringUtils;
@@ -22,33 +23,43 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @Service
-public class AuthorityService {
+public class UserSessionService {
 
     public static final String AUTHORITY_USER_PROJECT_SCOPE_PREFIX = "USER_PROJECT_SCOPE:";
 
     public static final String AUTHORITY_USER_PROFILE_PREFIX = "USER_PROFILE:";
 
+    public static final String SUPER_ADMIN_PROFILE_AUTHORITY = AUTHORITY_USER_PROFILE_PREFIX + UserAccountProfile.SUPER_ADMIN.name();
+    public static final String AUDITOR_PROFILE_AUTHORITY = AUTHORITY_USER_PROFILE_PREFIX + UserAccountProfile.AUDITOR.name();
+
     private final UserStrategySelector strategySelector;
 
     private final UserEntityRepository userEntityRepository;
 
-    public AuthorityService(UserStrategySelector strategySelector, UserEntityRepository userEntityRepository) {
+    private final AuthorityMapper authorityMapper;
+
+    public UserSessionService(
+            UserStrategySelector strategySelector,
+            UserEntityRepository userEntityRepository,
+            AuthorityMapper authorityMapper
+    ) {
         this.strategySelector = strategySelector;
         this.userEntityRepository = userEntityRepository;
+        this.authorityMapper = authorityMapper;
     }
 
     /**
-     * Get the role on a given project, if found.
+     * Get the current user role on a given project, if found.
      * Note that if the user is a super admin or an auditor, the role is still returned (if found) but not taken into account.
      * @param projectCode the project code
      * @return the role, if found
      */
-    public Optional<UserAccountScopeRole> getRoleOnProject(String projectCode) {
+    public Optional<UserAccountScopeRole> getCurrentUserRoleOnProject(String projectCode) {
         if (StringUtils.isBlank(projectCode)) {
             return Optional.empty();
         }
 
-        return getUserAccountScopes().stream()
+        return getCurrentUserScopes().stream()
                 .filter(scope -> projectCode.equals(scope.getProject()))
                 .map(UserAccountScope::getRole)
                 .findFirst();
@@ -75,10 +86,10 @@ public class AuthorityService {
     }
 
     /**
-     * Get the user profile, if found (and correct)
+     * Get the current user profile, if found (and correct)
      * @return the user profile
      */
-    public Optional<UserAccountProfile> getProfile() {
+    public Optional<UserAccountProfile> getCurrentUserProfile() {
         if (userDoesNotHaveAccessToAnyAuthority()) {
             return Optional.empty();
         }
@@ -93,18 +104,18 @@ public class AuthorityService {
     }
 
     /**
-     * Get the user scoped project codes, if any
+     * Get the current user scoped project codes, if any
      * @return the scoped project codes
      */
-    public List<String> getScopedProjectCodes() {
-        return getUserAccountScopes().stream().map(UserAccountScope::getProject).sorted().toList();
+    public List<String> getCurrentUserScopedProjectCodes() {
+        return getCurrentUserScopes().stream().map(UserAccountScope::getProject).sorted().toList();
     }
 
     /**
      * Get the logged-in user scopes
      * @return the user scopes
      */
-    public List<UserAccountScope> getUserAccountScopes() {
+    public List<UserAccountScope> getCurrentUserScopes() {
         if (userDoesNotHaveAccessToAnyAuthority()) {
             return new ArrayList<>();
         }
@@ -122,7 +133,7 @@ public class AuthorityService {
      * Refresh the logged-in user authorities (updated in the {@link org.springframework.security.core.context.SecurityContext})
      * @throws ForbiddenException thrown if the refresh has failed
      */
-    public void refreshCurrentUserAccountAuthorities() throws ForbiddenException {
+    public void refreshCurrentUserAuthorities() throws ForbiddenException {
         var exception = new ForbiddenException(Entities.PROJECT, "refresh authorities");
 
         var securityContext = SecurityContextHolder.getContext();
@@ -138,9 +149,9 @@ public class AuthorityService {
         var userLogin = strategy.getLogin(oauth2User);
 
         var persistedUser = userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName)).orElseThrow(() -> exception);
-        var userAccount = strategy.getUserAccount(oauth2User, persistedUser);
 
-        var authorities = userAccount.getMatchingAuthorities();
+        var authorities = authorityMapper.getGrantedAuthoritiesFromUserEntity(persistedUser);
         securityContext.setAuthentication(new OAuth2AuthenticationToken(oauth2User, authorities, providerName));
     }
+
 }
