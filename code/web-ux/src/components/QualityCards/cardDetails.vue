@@ -11,21 +11,16 @@ const emit = defineEmits(["changeHeight", "cardSelected"]);
 
 let showFirstLines = ref(false);
 let showSecondLines = ref(false);
-let lineHeight = ref("");
 
 const calcHeight = (line) => {
   if (line === "firstLine") {
     showFirstLines.value = !showFirstLines.value;
-    lineHeight.value =
-      document.getElementById("firstLineToHide")?.scrollHeight + "px";
     emit(
       "changeHeight",
       document.getElementById("firstLineToHide")?.scrollHeight + "px"
     );
   } else {
     showSecondLines.value = !showSecondLines.value;
-    lineHeight.value =
-      document.getElementById("secondLineToHide")?.scrollHeight + "px";
     emit(
       "changeHeight",
       document.getElementById("firstLineToHide")?.scrollHeight + "px"
@@ -36,6 +31,11 @@ const calcHeight = (line) => {
 const selectedDetail = (data) => {
   emit("cardSelected", data);
 };
+
+defineExpose({
+  showFirstLines,
+  calcHeight,
+});
 </script>
 
 <template>
@@ -151,7 +151,6 @@ const selectedDetail = (data) => {
               class="hideLines"
               id="firstLineToHide"
               :class="showFirstLines ? ' active' : ''"
-              :style="showFirstLines ? 'max-height: ' + lineHeight : ''"
             >
               <td>
                 <div

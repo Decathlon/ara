@@ -82,6 +82,10 @@ onMounted(() => {
     counter.value = storedConditions[0].length + 1;
   }
 });
+
+defineExpose({
+  openModal,
+});
 </script>
 
 <template>

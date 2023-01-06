@@ -45,8 +45,8 @@ const showSelectedCard = (data) => {
               v-if="!props.cardActive"
               class="navCards vtmn-flex vtmn-items-center vtmn-text-xl"
             >
-              <span>&#171;</span>
-              <span>&#8249;</span>
+              <span class="vtmn-cursor-pointer"> &#171; </span>
+              <span class="vtmn-cursor-pointer"> &#8249; </span>
             </div>
 
             <div
@@ -108,8 +108,8 @@ const showSelectedCard = (data) => {
               v-if="!props.cardActive"
               class="navCards vtmn-flex vtmn-items-center vtmn-text-xl"
             >
-              <span>&#8250;</span>
-              <span>&#187;</span>
+              <span class="vtmn-cursor-pointer">&#8250;</span>
+              <span class="vtmn-cursor-pointer">&#187;</span>
             </div>
           </div>
         </div>

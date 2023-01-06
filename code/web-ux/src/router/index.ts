@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Login from "../components/LoginForm.vue";
-import Dashboard from "../views/DashboardHome.vue";
+import qualityValidation from "../views/qualityValidation.vue";
+import qualityValidationList from "../views/qualityValidationList.vue";
+import qualityValidationGraph from "../views/qualityValidationGraph.vue";
 import cardDetails from "../views/QualityDetails.vue";
 import Issues from "../views/IssuesPart.vue";
 import Features from "../views/FeaturesPart.vue";
@@ -27,7 +29,19 @@ const router = createRouter({
     {
       path: "/quality-validation",
       name: "qualityValidation",
-      component: Dashboard,
+      component: qualityValidation,
+      children: [
+        {
+          path: "list",
+          name: "list",
+          component: qualityValidationList,
+        },
+        {
+          path: "graph",
+          name: "graph",
+          component: qualityValidationGraph,
+        }
+      ]
     },
     {
       path: "/quality-details",
