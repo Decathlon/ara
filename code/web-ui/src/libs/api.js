@@ -50,6 +50,7 @@ api.paths = {
   allUsers: `${USER_ACCOUNTS_API_PATH}/all`,
   scopedUsers: SCOPES_USER_ACCOUNTS_API_PATH,
   scopedUsersByProject: (projectCode) => `${SCOPES_USER_ACCOUNTS_API_PATH}/project/${projectCode}`,
+  userProjectScopeManagement: (userLogin, projectCode) => `${USER_ACCOUNTS_API_PATH}/login/${userLogin}/scopes/project/${projectCode}`,
   communications: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/communications',
   countries: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/countries',
   cycleDefinitions: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/cycle-definitions',

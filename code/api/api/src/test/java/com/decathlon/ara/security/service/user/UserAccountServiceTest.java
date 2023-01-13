@@ -18,8 +18,10 @@ import com.decathlon.ara.security.service.UserSessionService;
 import com.decathlon.ara.security.service.user.strategy.UserAccountStrategy;
 import com.decathlon.ara.security.service.user.strategy.select.UserStrategySelector;
 import com.decathlon.ara.service.ProjectService;
+import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.exception.ForbiddenException;
 import com.decathlon.ara.service.exception.NotUniqueException;
+import com.decathlon.ara.service.mapper.ProjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -42,6 +44,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static com.decathlon.ara.loader.DemoLoaderConstants.DEMO_PROJECT_CODE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -67,6 +70,9 @@ class UserAccountServiceTest {
 
     @Mock
     private UserMapper userMapper;
+
+    @Mock
+    private ProjectMapper projectMapper;
 
     @Mock
     private ProjectService projectService;
@@ -547,22 +553,242 @@ class UserAccountServiceTest {
         assertThat(unknownProjectCodeArgumentCaptor.getAllValues()).containsExactlyInAnyOrder(unknownProjectCode1, unknownProjectCode2, unknownProjectCode3);
     }
 
+    @Test
+    void getCurrentUserProjects_throwForbiddenException_whenUserNotFound() {
+        // Given
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+
+        var oauth2User = mock(OAuth2User.class);
+        var userLogin = "user-login";
+        var providerName = "provider-name";
+
+        var accountStrategy = mock(UserAccountStrategy.class);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(oauth2User);
+        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
+        when(userStrategySelector.selectUserStrategyFromProviderName(providerName)).thenReturn(accountStrategy);
+        when(accountStrategy.getLogin(oauth2User)).thenReturn(userLogin);
+        when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountService.getCurrentUserProjects());
+        verifyNoInteractions(projectRepository);
+    }
+
+    @Test
+    void getCurrentUserProjects_throwForbiddenException_whenUserHasNoProfile() throws ForbiddenException {
+        // Given
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+
+        var oauth2User = mock(OAuth2User.class);
+        var userLogin = "user-login";
+        var providerName = "provider-name";
+
+        var accountStrategy = mock(UserAccountStrategy.class);
+
+        var userEntity = mock(UserEntity.class);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(oauth2User);
+        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
+        when(userStrategySelector.selectUserStrategyFromProviderName(providerName)).thenReturn(accountStrategy);
+        when(accountStrategy.getLogin(oauth2User)).thenReturn(userLogin);
+        when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.of(userEntity));
+        when(userEntity.getProfile()).thenReturn(null);
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountService.getCurrentUserProjects());
+        verifyNoInteractions(projectRepository);
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+            value = UserEntity.UserEntityProfile.class,
+            names = {"SUPER_ADMIN", "AUDITOR"}
+    )
+    void getCurrentUserProjects_returnAllProjects_whenUserIsEitherSuperAdminOrAuditor(UserEntity.UserEntityProfile profile) throws ForbiddenException {
+        // Given
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+
+        var oauth2User = mock(OAuth2User.class);
+        var userLogin = "user-login";
+        var providerName = "provider-name";
+
+        var accountStrategy = mock(UserAccountStrategy.class);
+
+        var userEntity = mock(UserEntity.class);
+
+        var project1 = mock(Project.class);
+        var project2 = mock(Project.class);
+        var project3 = mock(Project.class);
+        var allProjects = List.of(project1, project2, project3);
+
+        var mappedProject1 = mock(ProjectDTO.class);
+        var mappedProject2 = mock(ProjectDTO.class);
+        var mappedProject3 = mock(ProjectDTO.class);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(oauth2User);
+        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
+        when(userStrategySelector.selectUserStrategyFromProviderName(providerName)).thenReturn(accountStrategy);
+        when(accountStrategy.getLogin(oauth2User)).thenReturn(userLogin);
+        when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.of(userEntity));
+        when(userEntity.getProfile()).thenReturn(profile);
+        when(projectRepository.findAllByOrderByName()).thenReturn(allProjects);
+        when(projectMapper.getProjectDTOFromProjectEntity(project1)).thenReturn(mappedProject1);
+        when(projectMapper.getProjectDTOFromProjectEntity(project2)).thenReturn(mappedProject2);
+        when(projectMapper.getProjectDTOFromProjectEntity(project3)).thenReturn(mappedProject3);
+
+        // Then
+        var actualProjects = userAccountService.getCurrentUserProjects();
+
+        var expectedProjects = List.of(mappedProject1, mappedProject2, mappedProject3);
+        assertThat(actualProjects).containsExactlyInAnyOrderElementsOf(expectedProjects);
+        verify(projectRepository, never()).findByCode(DEMO_PROJECT_CODE);
+        verifyNoMoreInteractions(projectRepository);
+    }
+
+    @Test
+    void getCurrentUserProjects_returnProjectsInCurrentUserScopesWithoutDemoProject_whenUserIsScopedUserButDemoProjectNotFound() throws ForbiddenException {
+        // Given
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+
+        var oauth2User = mock(OAuth2User.class);
+        var userLogin = "user-login";
+        var providerName = "provider-name";
+
+        var accountStrategy = mock(UserAccountStrategy.class);
+
+        var userEntity = mock(UserEntity.class);
+        var profile = UserEntity.UserEntityProfile.SCOPED_USER;
+
+        var userScope1 = mock(UserEntityRoleOnProject.class);
+        var userScope2 = mock(UserEntityRoleOnProject.class);
+        var userScope3 = mock(UserEntityRoleOnProject.class);
+        var userScopes = List.of(userScope1, userScope2, userScope3);
+
+        var project1 = mock(Project.class);
+        var project2 = mock(Project.class);
+        var project3 = mock(Project.class);
+
+        var mappedProject1 = mock(ProjectDTO.class);
+        var mappedProject2 = mock(ProjectDTO.class);
+        var mappedProject3 = mock(ProjectDTO.class);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(oauth2User);
+        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
+        when(userStrategySelector.selectUserStrategyFromProviderName(providerName)).thenReturn(accountStrategy);
+        when(accountStrategy.getLogin(oauth2User)).thenReturn(userLogin);
+        when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.of(userEntity));
+        when(userEntity.getProfile()).thenReturn(profile);
+        when(userEntity.getRolesOnProjectWhenScopedUser()).thenReturn(userScopes);
+        when(userScope1.getProject()).thenReturn(project1);
+        when(userScope2.getProject()).thenReturn(project2);
+        when(userScope3.getProject()).thenReturn(project3);
+        when(projectRepository.findByCode(DEMO_PROJECT_CODE)).thenReturn(Optional.empty());
+        when(projectMapper.getProjectDTOFromProjectEntity(project1)).thenReturn(mappedProject1);
+        when(projectMapper.getProjectDTOFromProjectEntity(project2)).thenReturn(mappedProject2);
+        when(projectMapper.getProjectDTOFromProjectEntity(project3)).thenReturn(mappedProject3);
+
+        // Then
+        var actualProjects = userAccountService.getCurrentUserProjects();
+
+        var expectedProjects = List.of(mappedProject1, mappedProject2, mappedProject3);
+        assertThat(actualProjects).containsExactlyInAnyOrderElementsOf(expectedProjects);
+        verify(projectRepository, never()).findAllByOrderByName();
+        verify(projectRepository, times(1)).findByCode(DEMO_PROJECT_CODE);
+        verifyNoMoreInteractions(projectRepository);
+    }
+
+    @Test
+    void getCurrentUserProjects_returnProjectsInCurrentUserScopesWithDemoProject_whenUserIsScopedUserAndDemoProjectIsFound() throws ForbiddenException {
+        // Given
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+
+        var oauth2User = mock(OAuth2User.class);
+        var userLogin = "user-login";
+        var providerName = "provider-name";
+
+        var accountStrategy = mock(UserAccountStrategy.class);
+
+        var userEntity = mock(UserEntity.class);
+        var profile = UserEntity.UserEntityProfile.SCOPED_USER;
+
+        var userScope1 = mock(UserEntityRoleOnProject.class);
+        var userScope2 = mock(UserEntityRoleOnProject.class);
+        var userScope3 = mock(UserEntityRoleOnProject.class);
+        var userScopes = List.of(userScope1, userScope2, userScope3);
+
+        var project1 = mock(Project.class);
+        var project2 = mock(Project.class);
+        var project3 = mock(Project.class);
+        var demoProject = mock(Project.class);
+
+        var mappedProject1 = mock(ProjectDTO.class);
+        var mappedProject2 = mock(ProjectDTO.class);
+        var mappedProject3 = mock(ProjectDTO.class);
+        var mappedDemoProject = mock(ProjectDTO.class);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(oauth2User);
+        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
+        when(userStrategySelector.selectUserStrategyFromProviderName(providerName)).thenReturn(accountStrategy);
+        when(accountStrategy.getLogin(oauth2User)).thenReturn(userLogin);
+        when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.of(userEntity));
+        when(userEntity.getProfile()).thenReturn(profile);
+        when(userEntity.getRolesOnProjectWhenScopedUser()).thenReturn(userScopes);
+        when(userScope1.getProject()).thenReturn(project1);
+        when(userScope2.getProject()).thenReturn(project2);
+        when(userScope3.getProject()).thenReturn(project3);
+        when(projectRepository.findByCode(DEMO_PROJECT_CODE)).thenReturn(Optional.of(demoProject));
+        when(projectMapper.getProjectDTOFromProjectEntity(project1)).thenReturn(mappedProject1);
+        when(projectMapper.getProjectDTOFromProjectEntity(project2)).thenReturn(mappedProject2);
+        when(projectMapper.getProjectDTOFromProjectEntity(project3)).thenReturn(mappedProject3);
+        when(projectMapper.getProjectDTOFromProjectEntity(demoProject)).thenReturn(mappedDemoProject);
+
+        // Then
+        var actualProjects = userAccountService.getCurrentUserProjects();
+
+        var expectedProjects = List.of(mappedProject1, mappedProject2, mappedProject3, mappedDemoProject);
+        assertThat(actualProjects).containsExactlyInAnyOrderElementsOf(expectedProjects);
+        verify(projectRepository, never()).findAllByOrderByName();
+        verify(projectRepository, times(1)).findByCode(DEMO_PROJECT_CODE);
+        verifyNoMoreInteractions(projectRepository);
+    }
+
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = {" ", "\t", "\n"})
-    void removeProjectFromCurrentUserAccountScope_throwForbiddenException_whenProjectCodeIsBlank(String projectCode) throws ForbiddenException {
+    void removeProjectFromCurrentUserScope_throwForbiddenException_whenProjectCodeIsBlank(String projectCode) throws ForbiddenException {
         // Given
 
         // When
 
         // Then
-        assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromCurrentUserAccountScope(projectCode));
+        assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromCurrentUserScope(projectCode));
         verify(userEntityRoleOnProjectRepository, never()).deleteById(any(UserEntityRoleOnProject.UserEntityRoleOnProjectId.class));
         verify(userSessionService, never()).refreshCurrentUserAuthorities();
     }
 
     @Test
-    void removeProjectFromCurrentUserAccountScope_throwForbiddenException_whenProjectIsNotFound() throws ForbiddenException {
+    void removeProjectFromCurrentUserScope_throwForbiddenException_whenProjectIsNotFound() throws ForbiddenException {
         // Given
         var projectCode = "project-code";
 
@@ -570,13 +796,13 @@ class UserAccountServiceTest {
         when(projectRepository.findByCode(projectCode)).thenReturn(Optional.empty());
 
         // Then
-        assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromCurrentUserAccountScope(projectCode));
+        assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromCurrentUserScope(projectCode));
         verify(userEntityRoleOnProjectRepository, never()).deleteById(any(UserEntityRoleOnProject.UserEntityRoleOnProjectId.class));
         verify(userSessionService, never()).refreshCurrentUserAuthorities();
     }
 
     @Test
-    void removeProjectFromCurrentUserAccountScope_throwForbiddenException_whenAuthenticationIsNotAnInstanceOfOAuth2AuthenticationToken() throws ForbiddenException {
+    void removeProjectFromCurrentUserScope_throwForbiddenException_whenAuthenticationIsNotAnInstanceOfOAuth2AuthenticationToken() throws ForbiddenException {
         // Given
         var projectCode = "project-code";
 
@@ -591,13 +817,13 @@ class UserAccountServiceTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
 
         // Then
-        assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromCurrentUserAccountScope(projectCode));
+        assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromCurrentUserScope(projectCode));
         verify(userEntityRoleOnProjectRepository, never()).deleteById(any(UserEntityRoleOnProject.UserEntityRoleOnProjectId.class));
         verify(userSessionService, never()).refreshCurrentUserAuthorities();
     }
 
     @Test
-    void removeProjectFromCurrentUserAccountScope_throwForbiddenException_whenAuthenticationPrincipalIsNull() throws ForbiddenException {
+    void removeProjectFromCurrentUserScope_throwForbiddenException_whenAuthenticationPrincipalIsNull() throws ForbiddenException {
         // Given
         var projectCode = "project-code";
 
@@ -613,7 +839,7 @@ class UserAccountServiceTest {
         when(authentication.getPrincipal()).thenReturn(null);
 
         // Then
-        assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromCurrentUserAccountScope(projectCode));
+        assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromCurrentUserScope(projectCode));
         verify(userEntityRoleOnProjectRepository, never()).deleteById(any(UserEntityRoleOnProject.UserEntityRoleOnProjectId.class));
         verify(userSessionService, never()).refreshCurrentUserAuthorities();
     }
@@ -621,7 +847,7 @@ class UserAccountServiceTest {
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = {" ", "\t", "\n"})
-    void removeProjectFromCurrentUserAccountScope_throwForbiddenException_whenAuthenticationAuthorizedClientRegistrationIdIsBlank(String providerName) throws ForbiddenException {
+    void removeProjectFromCurrentUserScope_throwForbiddenException_whenAuthenticationAuthorizedClientRegistrationIdIsBlank(String providerName) throws ForbiddenException {
         // Given
         var projectCode = "project-code";
 
@@ -639,13 +865,13 @@ class UserAccountServiceTest {
         when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
 
         // Then
-        assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromCurrentUserAccountScope(projectCode));
+        assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromCurrentUserScope(projectCode));
         verify(userEntityRoleOnProjectRepository, never()).deleteById(any(UserEntityRoleOnProject.UserEntityRoleOnProjectId.class));
         verify(userSessionService, never()).refreshCurrentUserAuthorities();
     }
 
     @Test
-    void removeProjectFromCurrentUserAccountScope_throwForbiddenException_whenUserNotFound() throws ForbiddenException {
+    void removeProjectFromCurrentUserScope_throwForbiddenException_whenUserNotFound() throws ForbiddenException {
         // Given
         var projectCode = "project-code";
 
@@ -670,13 +896,13 @@ class UserAccountServiceTest {
         when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.empty());
 
         // Then
-        assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromCurrentUserAccountScope(projectCode));
+        assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromCurrentUserScope(projectCode));
         verify(userEntityRoleOnProjectRepository, never()).deleteById(any(UserEntityRoleOnProject.UserEntityRoleOnProjectId.class));
         verify(userSessionService, never()).refreshCurrentUserAuthorities();
     }
 
     @Test
-    void removeProjectFromCurrentUserAccountScope_deleteUserRoleAndRefreshAuthorities_whenUserAndProjectFound() throws ForbiddenException {
+    void removeProjectFromCurrentUserScope_deleteUserRoleAndRefreshAuthorities_whenUserAndProjectFound() throws ForbiddenException {
         // Given
         var projectCode = "project-code";
 
@@ -708,7 +934,7 @@ class UserAccountServiceTest {
         when(project.getId()).thenReturn(projectId);
 
         // Then
-        userAccountService.removeProjectFromCurrentUserAccountScope(projectCode);
+        userAccountService.removeProjectFromCurrentUserScope(projectCode);
         var roleToDeleteArgumentCaptor = ArgumentCaptor.forClass(UserEntityRoleOnProject.UserEntityRoleOnProjectId.class);
         verify(userEntityRoleOnProjectRepository).deleteById(roleToDeleteArgumentCaptor.capture());
         assertThat(roleToDeleteArgumentCaptor.getValue())
@@ -729,20 +955,20 @@ class UserAccountServiceTest {
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = {" ", "\t", "\n"})
-    void updateCurrentUserAccountProjectScope_throwForbiddenException_whenProjectCodeIsBlank(String projectCode) throws ForbiddenException {
+    void updateCurrentUserProjectScope_throwForbiddenException_whenProjectCodeIsBlank(String projectCode) throws ForbiddenException {
         // Given
         var roleToUpdate = UserAccountScopeRole.ADMIN;
 
         // When
 
         // Then
-        assertThrows(ForbiddenException.class, () -> userAccountService.updateCurrentUserAccountProjectScope(projectCode, roleToUpdate));
+        assertThrows(ForbiddenException.class, () -> userAccountService.updateCurrentUserProjectScope(projectCode, roleToUpdate));
         verify(userEntityRepository, never()).save(any(UserEntity.class));
         verify(userSessionService, never()).refreshCurrentUserAuthorities();
     }
 
     @Test
-    void updateCurrentUserAccountProjectScope_throwForbiddenException_whenProjectNotFound() throws ForbiddenException {
+    void updateCurrentUserProjectScope_throwForbiddenException_whenProjectNotFound() throws ForbiddenException {
         // Given
         var projectCode = "project-code";
         var roleToUpdate = UserAccountScopeRole.ADMIN;
@@ -751,13 +977,13 @@ class UserAccountServiceTest {
         when(projectRepository.findByCode(projectCode)).thenReturn(Optional.empty());
 
         // Then
-        assertThrows(ForbiddenException.class, () -> userAccountService.updateCurrentUserAccountProjectScope(projectCode, roleToUpdate));
+        assertThrows(ForbiddenException.class, () -> userAccountService.updateCurrentUserProjectScope(projectCode, roleToUpdate));
         verify(userEntityRepository, never()).save(any(UserEntity.class));
         verify(userSessionService, never()).refreshCurrentUserAuthorities();
     }
 
     @Test
-    void updateCurrentUserAccountProjectScope_throwForbiddenException_whenUserNotFound() throws ForbiddenException {
+    void updateCurrentUserProjectScope_throwForbiddenException_whenUserNotFound() throws ForbiddenException {
         // Given
         var projectCode = "project-code";
         var roleToUpdate = UserAccountScopeRole.ADMIN;
@@ -783,14 +1009,14 @@ class UserAccountServiceTest {
         when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.empty());
 
         // Then
-        assertThrows(ForbiddenException.class, () -> userAccountService.updateCurrentUserAccountProjectScope(projectCode, roleToUpdate));
+        assertThrows(ForbiddenException.class, () -> userAccountService.updateCurrentUserProjectScope(projectCode, roleToUpdate));
         verify(userEntityRepository, never()).save(any(UserEntity.class));
         verify(userSessionService, never()).refreshCurrentUserAuthorities();
     }
 
     @ParameterizedTest
     @EnumSource(value = UserAccountScopeRole.class)
-    void updateCurrentUserAccountProjectScope_updateProjectRole_whenProjectFoundInUserScope(UserAccountScopeRole roleToUpdate) throws ForbiddenException {
+    void updateCurrentUserProjectScope_updateProjectRole_whenProjectFoundInUserScope(UserAccountScopeRole roleToUpdate) throws ForbiddenException {
         // Given
         var projectCode = "project-code";
 
@@ -835,7 +1061,7 @@ class UserAccountServiceTest {
         when(project3.getCode()).thenReturn(projectCode);
 
         // Then
-        userAccountService.updateCurrentUserAccountProjectScope(projectCode, roleToUpdate);
+        userAccountService.updateCurrentUserProjectScope(projectCode, roleToUpdate);
 
         var userToSaveArgumentCaptor = ArgumentCaptor.forClass(UserEntity.class);
         verify(userEntityRepository, times(1)).save(userToSaveArgumentCaptor.capture());
@@ -855,7 +1081,7 @@ class UserAccountServiceTest {
 
     @ParameterizedTest
     @EnumSource(value = UserAccountScopeRole.class)
-    void updateCurrentUserAccountProjectScope_addProjectRole_whenProjectNotFoundInUserScope(UserAccountScopeRole roleToUpdate) throws ForbiddenException {
+    void updateCurrentUserProjectScope_addProjectRole_whenProjectNotFoundInUserScope(UserAccountScopeRole roleToUpdate) throws ForbiddenException {
         // Given
         var projectCode = "project-code";
 
@@ -901,7 +1127,7 @@ class UserAccountServiceTest {
         when(project3.getCode()).thenReturn(projectCode3);
 
         // Then
-        userAccountService.updateCurrentUserAccountProjectScope(projectCode, roleToUpdate);
+        userAccountService.updateCurrentUserProjectScope(projectCode, roleToUpdate);
 
         var userToSaveArgumentCaptor = ArgumentCaptor.forClass(UserEntity.class);
         verify(userEntityRepository, times(1)).save(userToSaveArgumentCaptor.capture());
@@ -1429,5 +1655,406 @@ class UserAccountServiceTest {
         assertThat(matchingUserAccount1.getScopes()).containsExactlyInAnyOrder(scope1, scope2, scope3).hasSize(3);
         assertThat(matchingUserAccount2.getScopes()).containsExactly(scope1).hasSize(1);
         assertThat(matchingUserAccount3.getScopes()).isEmpty();
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "\t", "\n"})
+    void updateUserProjectScope_throwForbiddenException_whenUserLoginIsBlank(String userLogin) {
+        // Given
+        var projectCode = "project-code";
+        var roleToUpdate = UserAccountScopeRole.ADMIN;
+
+        // When
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProjectScope(userLogin, projectCode, roleToUpdate));
+        verify(userEntityRepository, never()).save(any(UserEntity.class));
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "\t", "\n"})
+    void updateUserProjectScope_throwForbiddenException_whenProjectCodeIsBlank(String projectCode) {
+        // Given
+        var userLogin = "user-login";
+        var roleToUpdate = UserAccountScopeRole.ADMIN;
+
+        // When
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProjectScope(userLogin, projectCode, roleToUpdate));
+        verify(userEntityRepository, never()).save(any(UserEntity.class));
+    }
+
+    @Test
+    void updateUserProjectScope_throwForbiddenException_whenProjectNotFound() {
+        // Given
+        var userLogin = "user-login";
+        var projectCode = "project-code";
+        var roleToUpdate = UserAccountScopeRole.ADMIN;
+
+        // When
+        when(projectRepository.findByCode(projectCode)).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProjectScope(userLogin, projectCode, roleToUpdate));
+        verify(userEntityRepository, never()).save(any(UserEntity.class));
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "\t", "\n"})
+    void updateUserProjectScope_throwForbiddenException_whenProviderNameNotFound(String providerName) {
+        // Given
+        var userLogin = "user-login";
+        var projectCode = "project-code";
+        var roleToUpdate = UserAccountScopeRole.ADMIN;
+
+        var project = mock(Project.class);
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var principal = mock(OAuth2User.class);
+
+        // When
+        when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(project));
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(principal);
+        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProjectScope(userLogin, projectCode, roleToUpdate));
+        verify(userEntityRepository, never()).save(any(UserEntity.class));
+    }
+
+    @Test
+    void updateUserProjectScope_throwForbiddenException_whenUserNotFound() {
+        // Given
+        var userLogin = "user-login";
+        var projectCode = "project-code";
+        var roleToUpdate = UserAccountScopeRole.ADMIN;
+
+        var project = mock(Project.class);
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var principal = mock(OAuth2User.class);
+        var providerName = "provider-name";
+
+        // When
+        when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(project));
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(principal);
+        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
+        when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProjectScope(userLogin, projectCode, roleToUpdate));
+        verify(userEntityRepository, never()).save(any(UserEntity.class));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = UserAccountScopeRole.class)
+    void updateUserProjectScope_updateProjectRole_whenProjectFoundInUserScope(UserAccountScopeRole roleToUpdate) throws ForbiddenException {
+        // Given
+        var userLogin = "user-login";
+        var projectCode = "project-code";
+
+        var project = mock(Project.class);
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var principal = mock(OAuth2User.class);
+        var providerName = "provider-name";
+
+        var user = mock(UserEntity.class);
+
+        var project1 = mock(Project.class);
+        var projectCode1 = "project-code1";
+        var scope1 = mock(UserEntityRoleOnProject.ScopedUserRoleOnProject.class);
+        var role1 = new UserEntityRoleOnProject(user, project1, scope1);
+        var project2 = mock(Project.class);
+        var projectCode2 = "project-code2";
+        var scope2 = mock(UserEntityRoleOnProject.ScopedUserRoleOnProject.class);
+        var role2 = new UserEntityRoleOnProject(user, project2, scope2);
+        var project3 = mock(Project.class);
+        var scope3 = mock(UserEntityRoleOnProject.ScopedUserRoleOnProject.class);
+        var role3 = new UserEntityRoleOnProject(user, project3, scope3);
+        var roles = List.of(role1, role2, role3);
+
+        // When
+        when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(project));
+        when(project.getCode()).thenReturn(projectCode);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(principal);
+        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
+        when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.of(user));
+        when(user.getRolesOnProjectWhenScopedUser()).thenReturn(roles);
+        when(project1.getCode()).thenReturn(projectCode1);
+        when(project2.getCode()).thenReturn(projectCode2);
+        when(project3.getCode()).thenReturn(projectCode);
+
+        // Then
+        userAccountService.updateUserProjectScope(userLogin, projectCode, roleToUpdate);
+
+        var userToSaveArgumentCaptor = ArgumentCaptor.forClass(UserEntity.class);
+        verify(userEntityRepository, times(1)).save(userToSaveArgumentCaptor.capture());
+        var capturedUserToSave = userToSaveArgumentCaptor.getValue();
+        var expectedScope = UserEntityRoleOnProject.ScopedUserRoleOnProject.valueOf(roleToUpdate.name());
+        assertThat(capturedUserToSave.getRolesOnProjectWhenScopedUser())
+                .extracting("role", "project", "userEntity")
+                .containsExactlyInAnyOrder(
+                        tuple(scope1, project1, user),
+                        tuple(scope2, project2, user),
+                        tuple(expectedScope, project3, user)
+                )
+                .hasSize(3);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = UserAccountScopeRole.class)
+    void updateUserProjectScope_addProjectRole_whenProjectNotFoundInUserScope(UserAccountScopeRole roleToUpdate) throws ForbiddenException {
+        // Given
+        var userLogin = "user-login";
+        var projectCode = "project-code";
+
+        var project = mock(Project.class);
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var principal = mock(OAuth2User.class);
+        var providerName = "provider-name";
+
+        var user = mock(UserEntity.class);
+
+        var project1 = mock(Project.class);
+        var projectCode1 = "project-code1";
+        var scope1 = mock(UserEntityRoleOnProject.ScopedUserRoleOnProject.class);
+        var role1 = new UserEntityRoleOnProject(user, project1, scope1);
+        var project2 = mock(Project.class);
+        var projectCode2 = "project-code2";
+        var scope2 = mock(UserEntityRoleOnProject.ScopedUserRoleOnProject.class);
+        var role2 = new UserEntityRoleOnProject(user, project2, scope2);
+        var project3 = mock(Project.class);
+        var projectCode3 = "project-code3";
+        var scope3 = mock(UserEntityRoleOnProject.ScopedUserRoleOnProject.class);
+        var role3 = new UserEntityRoleOnProject(user, project3, scope3);
+        var roles = new ArrayList<UserEntityRoleOnProject>() {{add(role1); add(role2); add(role3);}};
+
+        // When
+        when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(project));
+        when(project.getCode()).thenReturn(projectCode);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(principal);
+        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
+        when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.of(user));
+        when(user.getRolesOnProjectWhenScopedUser()).thenReturn(roles);
+        when(project1.getCode()).thenReturn(projectCode1);
+        when(project2.getCode()).thenReturn(projectCode2);
+        when(project3.getCode()).thenReturn(projectCode3);
+
+        // Then
+        userAccountService.updateUserProjectScope(userLogin, projectCode, roleToUpdate);
+
+        var userToSaveArgumentCaptor = ArgumentCaptor.forClass(UserEntity.class);
+        verify(userEntityRepository, times(1)).save(userToSaveArgumentCaptor.capture());
+        var capturedUserToSave = userToSaveArgumentCaptor.getValue();
+        var expectedScope = UserEntityRoleOnProject.ScopedUserRoleOnProject.valueOf(roleToUpdate.name());
+        assertThat(capturedUserToSave.getRolesOnProjectWhenScopedUser())
+                .extracting("role", "project", "userEntity")
+                .containsExactlyInAnyOrder(
+                        tuple(scope1, project1, user),
+                        tuple(scope2, project2, user),
+                        tuple(scope3, project3, user),
+                        tuple(expectedScope, project, user)
+                )
+                .hasSize(4);
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "\t", "\n"})
+    void removeProjectFromUserScope_throwForbiddenException_whenUserLoginIsBlank(String userLogin) {
+        // Given
+        var projectCode = "project-code";
+
+        // When
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromUserScope(userLogin, projectCode));
+        verify(userEntityRoleOnProjectRepository, never()).deleteById(any(UserEntityRoleOnProject.UserEntityRoleOnProjectId.class));
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "\t", "\n"})
+    void removeProjectFromUserScope_throwForbiddenException_whenProjectCodeIsBlank(String projectCode) {
+        // Given
+        var userLogin = "user-login";
+
+        // When
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromUserScope(userLogin, projectCode));
+        verify(userEntityRoleOnProjectRepository, never()).deleteById(any(UserEntityRoleOnProject.UserEntityRoleOnProjectId.class));
+    }
+
+    @Test
+    void removeProjectFromUserScope_throwForbiddenException_whenProjectIsNotFound() {
+        // Given
+        var userLogin = "user-login";
+        var projectCode = "project-code";
+
+        // When
+        when(projectRepository.findByCode(projectCode)).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromUserScope(userLogin, projectCode));
+        verify(userEntityRoleOnProjectRepository, never()).deleteById(any(UserEntityRoleOnProject.UserEntityRoleOnProjectId.class));
+    }
+
+    @Test
+    void removeProjectFromUserScope_throwForbiddenException_whenAuthenticationIsNotAnInstanceOfOAuth2AuthenticationToken() {
+        // Given
+        var userLogin = "user-login";
+        var projectCode = "project-code";
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(UsernamePasswordAuthenticationToken.class);
+
+        var project = mock(Project.class);
+
+        // When
+        when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(project));
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromUserScope(userLogin, projectCode));
+        verify(userEntityRoleOnProjectRepository, never()).deleteById(any(UserEntityRoleOnProject.UserEntityRoleOnProjectId.class));
+    }
+
+    @Test
+    void removeProjectFromUserScope_throwForbiddenException_whenAuthenticationPrincipalIsNull() {
+        // Given
+        var userLogin = "user-login";
+        var projectCode = "project-code";
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+
+        var project = mock(Project.class);
+
+        // When
+        when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(project));
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(null);
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromUserScope(userLogin, projectCode));
+        verify(userEntityRoleOnProjectRepository, never()).deleteById(any(UserEntityRoleOnProject.UserEntityRoleOnProjectId.class));
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "\t", "\n"})
+    void removeProjectFromUserScope_throwForbiddenException_whenAuthenticationAuthorizedClientRegistrationIdIsBlank(String providerName) {
+        // Given
+        var userLogin = "user-login";
+        var projectCode = "project-code";
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var principal = mock(OAuth2User.class);
+
+        var project = mock(Project.class);
+
+        // When
+        when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(project));
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(principal);
+        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromUserScope(userLogin, projectCode));
+        verify(userEntityRoleOnProjectRepository, never()).deleteById(any(UserEntityRoleOnProject.UserEntityRoleOnProjectId.class));
+    }
+
+    @Test
+    void removeProjectFromUserScope_throwForbiddenException_whenUserNotFound() {
+        // Given
+        var userLogin = "user-login";
+        var projectCode = "project-code";
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var principal = mock(OAuth2User.class);
+        var providerName = "provider-name";
+
+        var project = mock(Project.class);
+
+        // When
+        when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(project));
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(principal);
+        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
+        when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountService.removeProjectFromUserScope(userLogin, projectCode));
+        verify(userEntityRoleOnProjectRepository, never()).deleteById(any(UserEntityRoleOnProject.UserEntityRoleOnProjectId.class));
+    }
+
+    @Test
+    void removeProjectFromUserScope_deleteUserRoleAndRefreshAuthorities_whenUserAndProjectFound() throws ForbiddenException {
+        // Given
+        var userLogin = "user-login";
+        var projectCode = "project-code";
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var principal = mock(OAuth2User.class);
+        var providerName = "provider-name";
+
+        var project = mock(Project.class);
+        var projectId = 1L;
+
+        var user = mock(UserEntity.class);
+
+        // When
+        when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(project));
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(principal);
+        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
+        when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.of(user));
+
+        when(user.getLogin()).thenReturn(userLogin);
+        when(user.getProviderName()).thenReturn(providerName);
+        when(project.getId()).thenReturn(projectId);
+
+        // Then
+        userAccountService.removeProjectFromUserScope(userLogin, projectCode);
+        var roleToDeleteArgumentCaptor = ArgumentCaptor.forClass(UserEntityRoleOnProject.UserEntityRoleOnProjectId.class);
+        verify(userEntityRoleOnProjectRepository).deleteById(roleToDeleteArgumentCaptor.capture());
+        assertThat(roleToDeleteArgumentCaptor.getValue())
+                .extracting(
+                        "projectId",
+                        "userEntityId.login",
+                        "userEntityId.providerName"
+                )
+                .contains(
+                        projectId,
+                        userLogin,
+                        providerName
+                );
     }
 }

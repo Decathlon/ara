@@ -74,7 +74,7 @@ public class ProjectResource {
         try {
             var creationUser = userAccountService.getCurrentUserEntity().orElseThrow(() -> new ForbiddenException(Entities.PROJECT, "project creation"));
             ProjectDTO createdDto = projectService.create(dtoToCreate, creationUser);
-            userAccountService.updateCurrentUserAccountProjectScope(createdDto.getCode(), UserAccountScopeRole.ADMIN);
+            userAccountService.updateCurrentUserProjectScope(createdDto.getCode(), UserAccountScopeRole.ADMIN);
             return ResponseEntity
                     .created(HeaderUtil.uri(PATH + "/" + createdDto.getId()))
                     .headers(HeaderUtil.entityCreated(NAME, createdDto.getId()))
@@ -113,8 +113,13 @@ public class ProjectResource {
      * @return the ResponseEntity with status 200 (OK) and the list of projects in body
      */
     @GetMapping
-    public List<ProjectDTO> getAll() {
-        return projectService.findAll();
+    public ResponseEntity<List<ProjectDTO>> getAll() {
+        try {
+            var userProjects = userAccountService.getCurrentUserProjects();
+            return ResponseEntity.ok(userProjects);
+        } catch (ForbiddenException e) {
+            return ResponseUtil.handle(e);
+        }
     }
 
     /**

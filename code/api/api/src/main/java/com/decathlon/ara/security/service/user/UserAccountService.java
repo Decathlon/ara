@@ -16,8 +16,10 @@ import com.decathlon.ara.security.mapper.UserMapper;
 import com.decathlon.ara.security.service.UserSessionService;
 import com.decathlon.ara.security.service.user.strategy.select.UserStrategySelector;
 import com.decathlon.ara.service.ProjectService;
+import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.exception.ForbiddenException;
 import com.decathlon.ara.service.exception.NotUniqueException;
+import com.decathlon.ara.service.mapper.ProjectMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -36,6 +38,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.decathlon.ara.loader.DemoLoaderConstants.DEMO_PROJECT_CODE;
 
 @Service
 public class UserAccountService {
@@ -54,6 +59,8 @@ public class UserAccountService {
 
     private final UserMapper userMapper;
 
+    private final ProjectMapper projectMapper;
+
     private final ProjectService projectService;
 
     private final UserSessionService userSessionService;
@@ -65,6 +72,7 @@ public class UserAccountService {
             ProjectRepository projectRepository,
             OAuth2ProvidersConfiguration providersConfiguration,
             UserMapper userMapper,
+            ProjectMapper projectMapper,
             ProjectService projectService,
             UserSessionService userSessionService
     ) {
@@ -74,6 +82,7 @@ public class UserAccountService {
         this.projectRepository = projectRepository;
         this.providersConfiguration = providersConfiguration;
         this.userMapper = userMapper;
+        this.projectMapper = projectMapper;
         this.projectService = projectService;
         this.userSessionService = userSessionService;
     }
@@ -121,12 +130,16 @@ public class UserAccountService {
             return Optional.empty();
         }
 
-        var strategy = userStrategySelector.selectUserStrategyFromProviderName(providerName);
-        var userLogin = strategy.getLogin(oauth2User);
-        return getCurrentUserEntity(userLogin, providerName).map(userMapper::getUserAccountFromPersistedUser);
+        var userLogin = getUserLoginFromOAuth2UserAndProviderName(oauth2User, providerName);
+        return getUserEntityFromLoginAndProviderName(userLogin, providerName).map(userMapper::getUserAccountFromPersistedUser);
     }
 
-    private Optional<UserEntity> getCurrentUserEntity(String userLogin, String providerName) {
+    private String getUserLoginFromOAuth2UserAndProviderName(OAuth2User oauth2User, String providerName) {
+        var strategy = userStrategySelector.selectUserStrategyFromProviderName(providerName);
+        return strategy.getLogin(oauth2User);
+    }
+
+    private Optional<UserEntity> getUserEntityFromLoginAndProviderName(@NonNull String userLogin, @NonNull String providerName) {
         return userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName));
     }
 
@@ -135,19 +148,41 @@ public class UserAccountService {
      * @return the current {@link UserEntity}
      */
     public Optional<UserEntity> getCurrentUserEntity() {
+        try {
+            var principalAndProviderName = getCurrentOAuth2UserAndProviderName();
+            var oauth2User = principalAndProviderName.getFirst();
+            var providerName = principalAndProviderName.getSecond();
+            var userLogin = getUserLoginFromOAuth2UserAndProviderName(oauth2User, providerName);
+            return getUserEntityFromLoginAndProviderName(userLogin, providerName);
+        } catch (ForbiddenException e) {
+            LOG.warn("Current user not found...");
+        }
+        return Optional.empty();
+    }
+
+    private Pair<OAuth2User, String> getCurrentOAuth2UserAndProviderName() throws ForbiddenException {
+        var exception =  new ForbiddenException(Entities.SECURITY, "current authentication details access");
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!(authentication instanceof OAuth2AuthenticationToken oauth2Authentication)) {
-            return Optional.empty();
+            throw exception;
         }
         var oauth2User = oauth2Authentication.getPrincipal();
         var providerName = oauth2Authentication.getAuthorizedClientRegistrationId();
         if (oauth2User == null || StringUtils.isBlank(providerName)) {
-            return Optional.empty();
+            throw exception;
         }
+        return Pair.of(oauth2User, providerName);
+    }
 
-        var strategy = userStrategySelector.selectUserStrategyFromProviderName(providerName);
-        var userLogin = strategy.getLogin(oauth2User);
-        return getCurrentUserEntity(userLogin, providerName);
+    private Optional<UserEntity> getUserEntityFromLogin(String userLogin) {
+        try {
+            var principalAndProviderName = getCurrentOAuth2UserAndProviderName();
+            var providerName = principalAndProviderName.getSecond();
+            return getUserEntityFromLoginAndProviderName(userLogin, providerName);
+        } catch (ForbiddenException e) {
+            LOG.warn("User not found...");
+        }
+        return Optional.empty();
     }
 
     /**
@@ -245,21 +280,49 @@ public class UserAccountService {
     }
 
     /**
-     * Remove a project from the user scope
-     * @param projectCode the project code matching the project
+     * Fetch the projects ({@link ProjectDTO}) the current user can access:
+     * - super admins and auditors can access all projects
+     * - scoped users can only access the projects in their scopes, plus the demo project (if found)
+     * - no projects are returned otherwise
+     * @return the current user projects
      * @throws ForbiddenException thrown if this operation failed
      */
-    public void removeProjectFromCurrentUserAccountScope(@NonNull String projectCode) throws ForbiddenException {
-        var projectCodeContext = getProjectCodeExceptionContext(projectCode);
-        var exception = new ForbiddenException(Entities.PROJECT, "remove project scope", projectCodeContext);
-        if (StringUtils.isBlank(projectCode)) {
+    public List<ProjectDTO> getCurrentUserProjects() throws ForbiddenException {
+        var exception = new ForbiddenException(Entities.PROJECT, "fetch user projects");
+
+        var currentUser = getCurrentUserEntity().orElseThrow(() -> exception);
+        var profile = currentUser.getProfile();
+        if (profile == null) {
             throw exception;
         }
 
-        var project = projectRepository.findByCode(projectCode).orElseThrow(() -> exception);
-        var user = getCurrentUserEntity().orElseThrow(() -> exception);
+        Stream<Project> userProjectsStream = Stream.empty();
+        var currentUserCanAccessAllProjects = UserEntity.UserEntityProfile.SUPER_ADMIN.equals(profile) || UserEntity.UserEntityProfile.AUDITOR.equals(profile);
+        if (currentUserCanAccessAllProjects) {
+            userProjectsStream = projectRepository.findAllByOrderByName().stream();
+        }
+        var currentUserIsScopedUser = UserEntity.UserEntityProfile.SCOPED_USER.equals(profile);
+        if (currentUserIsScopedUser) {
+            var scopedProjectsStream = currentUser.getRolesOnProjectWhenScopedUser().stream().map(UserEntityRoleOnProject::getProject);
+            var demoProjectStream = projectRepository.findByCode(DEMO_PROJECT_CODE).map(Stream::of).orElse(Stream.empty());
+            userProjectsStream = Stream.concat(scopedProjectsStream, demoProjectStream);
+        }
+        return userProjectsStream.map(projectMapper::getProjectDTOFromProjectEntity).toList();
+    }
 
-        userEntityRoleOnProjectRepository.deleteById(new UserEntityRoleOnProject.UserEntityRoleOnProjectId(user, project));
+    /**
+     * Remove a project from the current user scope
+     * @param projectCode the project code matching the project
+     * @throws ForbiddenException thrown if this operation failed
+     */
+    public void removeProjectFromCurrentUserScope(@NonNull String projectCode) throws ForbiddenException {
+        var projectCodeContext = getProjectCodeExceptionContext(projectCode);
+        var exception = new ForbiddenException(Entities.PROJECT, "remove current user project scope", projectCodeContext);
+
+        var targetProject = getProjectFromCode(projectCode).orElseThrow(() -> exception);
+        var targetUser = getCurrentUserEntity().orElseThrow(() -> exception);
+
+        removeProjectFromUserScope(targetUser, targetProject);
         userSessionService.refreshCurrentUserAuthorities();
     }
 
@@ -267,44 +330,75 @@ public class UserAccountService {
         return StringUtils.isNotBlank(projectCode) ? new Pair[]{Pair.of("code", projectCode)} : new Pair[]{};
     }
 
+    private Optional<Project> getProjectFromCode(String projectCode) {
+        if (StringUtils.isBlank(projectCode)) {
+            return Optional.empty();
+        }
+
+        return projectRepository.findByCode(projectCode);
+    }
+
+    private void removeProjectFromUserScope(UserEntity user, Project project) {
+        userEntityRoleOnProjectRepository.deleteById(new UserEntityRoleOnProject.UserEntityRoleOnProjectId(user, project));
+    }
+
+    /**
+     * Remove a project from a user scope
+     * @param userLogin the user login
+     * @param projectCode the project code matching the project
+     * @throws ForbiddenException thrown if this operation failed
+     */
+    public void removeProjectFromUserScope(@NonNull String userLogin, @NonNull String projectCode) throws ForbiddenException {
+        var projectCodeContext = getProjectCodeExceptionContext(projectCode);
+        var exception = new ForbiddenException(Entities.PROJECT, "remove user project scope", projectCodeContext);
+
+        if (StringUtils.isBlank(userLogin)) {
+            throw exception;
+        }
+
+        var targetProject = getProjectFromCode(projectCode).orElseThrow(() -> exception);
+        var targetUser = getUserEntityFromLogin(userLogin).orElseThrow(() -> exception);
+
+        removeProjectFromUserScope(targetUser, targetProject);
+    }
+
     /**
      * Update the current user scope.
      * If the project is already in the scope, then its role is updated
      * Otherwise, a new scope is added containing the project and the role
      * @param projectCode the project code
-     * @param accountRole the role
+     * @param accountRole the new role
      * @throws ForbiddenException thrown if this operation failed
      */
-    public void updateCurrentUserAccountProjectScope(@NonNull String projectCode, @NonNull UserAccountScopeRole accountRole) throws ForbiddenException {
+    public void updateCurrentUserProjectScope(@NonNull String projectCode, @NonNull UserAccountScopeRole accountRole) throws ForbiddenException {
         var projectCodeContext = getProjectCodeExceptionContext(projectCode);
-        var exception = new ForbiddenException(Entities.PROJECT, "update project scope", projectCodeContext);
+        var exception = new ForbiddenException(Entities.PROJECT, "update current user project scope", projectCodeContext);
 
-        if (StringUtils.isBlank(projectCode)) {
-            throw exception;
-        }
-
-        var project = projectRepository.findByCode(projectCode).orElseThrow(() -> exception);
-        var userToUpdate = getCurrentUserEntity().orElseThrow(() -> exception);
-        var roleToUpdate = getUserEntityScopedUserRoleOnProjectFromUserAccountScopeRole(accountRole);
-
-        updateUserEntityRoles(userToUpdate, project, roleToUpdate);
-
-        userEntityRepository.save(userToUpdate);
+        var targetProject = getProjectFromCode(projectCode).orElseThrow(() -> exception);
+        var targetUser = getCurrentUserEntity().orElseThrow(() -> exception);
+        updateUserProjectScope(targetUser, targetProject, accountRole);
+        
         userSessionService.refreshCurrentUserAuthorities();
+    }
+
+    private void updateUserProjectScope(UserEntity targetUser, Project targetProject, UserAccountScopeRole targetAccountRole) {
+        var targetRole = getUserEntityScopedUserRoleOnProjectFromUserAccountScopeRole(targetAccountRole);
+        updateScopedUserRoleOnProject(targetUser, targetProject, targetRole);
+        userEntityRepository.save(targetUser);
     }
 
     private UserEntityRoleOnProject.ScopedUserRoleOnProject getUserEntityScopedUserRoleOnProjectFromUserAccountScopeRole(@NonNull UserAccountScopeRole userAccountScopeRole) {
         return UserEntityRoleOnProject.ScopedUserRoleOnProject.valueOf(userAccountScopeRole.name());
     }
 
-    private void updateUserEntityRoles(UserEntity userToUpdate, Project project, UserEntityRoleOnProject.ScopedUserRoleOnProject roleToUpdate) {
-        var projectCode = project.getCode();
-        var userRoles = userToUpdate.getRolesOnProjectWhenScopedUser();
+    private void updateScopedUserRoleOnProject(UserEntity targetUser, Project targetProject, UserEntityRoleOnProject.ScopedUserRoleOnProject targetRole) {
+        var projectCode = targetProject.getCode();
+        var userRoles = targetUser.getRolesOnProjectWhenScopedUser();
         for (var userRole : userRoles) {
             var roleProject = userRole.getProject();
             var roleProjectCode = roleProject.getCode();
             if (projectCode.equals(roleProjectCode)) {
-                userRole.setRole(roleToUpdate);
+                userRole.setRole(targetRole);
             }
         }
         var projectScopeNotFound = userRoles.stream()
@@ -312,8 +406,30 @@ public class UserAccountService {
                 .map(Project::getCode)
                 .noneMatch(projectCode::equals);
         if (projectScopeNotFound) {
-            userRoles.add(new UserEntityRoleOnProject(userToUpdate, project, roleToUpdate));
+            userRoles.add(new UserEntityRoleOnProject(targetUser, targetProject, targetRole));
         }
+    }
+
+    /**
+     * Update a user scope.
+     * If the project is already in the scope, then its role is updated
+     * Otherwise, a new scope is added containing the project and the role
+     * @param userLogin the user login
+     * @param projectCode the project code
+     * @param accountRole the new role
+     * @throws ForbiddenException thrown if this operation failed
+     */
+    public void updateUserProjectScope(@NonNull String userLogin, @NonNull String projectCode, @NonNull UserAccountScopeRole accountRole) throws ForbiddenException {
+        var projectCodeContext = getProjectCodeExceptionContext(projectCode);
+        var exception = new ForbiddenException(Entities.PROJECT, "update user project scope", projectCodeContext);
+
+        if (StringUtils.isBlank(userLogin)) {
+            throw exception;
+        }
+
+        var targetProject = getProjectFromCode(projectCode).orElseThrow(() -> exception);
+        var targetUser = getUserEntityFromLogin(userLogin).orElseThrow(() -> exception);
+        updateUserProjectScope(targetUser, targetProject, accountRole);
     }
 
     /**

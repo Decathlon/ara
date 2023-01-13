@@ -24,7 +24,6 @@ import com.decathlon.ara.domain.RootCause;
 import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
 import com.decathlon.ara.repository.ProjectRepository;
 import com.decathlon.ara.repository.RootCauseRepository;
-import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.service.UserSessionService;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
@@ -37,9 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -141,34 +138,6 @@ public class ProjectService {
         entity.setUpdateDate(ZonedDateTime.now());
         entity.setUpdateUser(updateUser);
         return projectMapper.getProjectDTOFromProjectEntity(projectRepository.save(entity));
-    }
-
-    /**
-     * Get all the projects depending on the (logged in) user profile.
-     *
-     * @return the list of the projects
-     */
-    @Transactional(readOnly = true)
-    public List<ProjectDTO> findAll() {
-        var profile = userSessionService.getCurrentUserProfile();
-        if (profile.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        var userHasFullAccessToProjects = UserAccountProfile.SUPER_ADMIN.equals(profile.get()) || UserAccountProfile.AUDITOR.equals(profile.get());
-        if (userHasFullAccessToProjects) {
-            var projects = projectRepository.findAllByOrderByName();
-            return projects.stream().map(projectMapper::getProjectDTOFromProjectEntity).toList();
-        }
-        var scopedUser = UserAccountProfile.SCOPED_USER;
-        var userHasLimitedAccessToProjects = scopedUser.equals(profile.get());
-        if (userHasLimitedAccessToProjects) {
-            var scopedProjectCodes = userSessionService.getCurrentUserScopedProjectCodes();
-            var projects = projectRepository.findByCodeInOrderByName(scopedProjectCodes);
-            return projects.stream().map(projectMapper::getProjectDTOFromProjectEntity).toList();
-        }
-
-        return new ArrayList<>();
     }
 
     /**

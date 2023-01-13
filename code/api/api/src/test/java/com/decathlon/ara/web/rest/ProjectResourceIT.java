@@ -21,7 +21,9 @@ import com.decathlon.ara.domain.Communication;
 import com.decathlon.ara.domain.RootCause;
 import com.decathlon.ara.repository.CommunicationRepository;
 import com.decathlon.ara.repository.RootCauseRepository;
+import com.decathlon.ara.security.service.user.UserAccountService;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
+import com.decathlon.ara.service.exception.ForbiddenException;
 import com.decathlon.ara.web.rest.util.HeaderUtil;
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
@@ -69,8 +71,11 @@ class ProjectResourceIT {
     @Autowired
     private EntityManager entityManager;
 
+    @Autowired
+    private UserAccountService userAccountService;
+
     @Test
-    void create_ShouldInsertEntity_WhenAllRulesAreRespected() {
+    void create_ShouldInsertEntity_WhenAllRulesAreRespected() throws ForbiddenException {
         // GIVEN
         final ProjectDTO project = new ProjectDTO("new-code", "New name");
 
@@ -83,7 +88,7 @@ class ProjectResourceIT {
         assertThat(response.getBody().getId()).isGreaterThan(3);
         assertThat(response.getBody().getCode()).isEqualTo("new-code");
         assertThat(response.getBody().getName()).isEqualTo("New name");
-        assertThat(cut.getAll()).containsExactly( // Ordered by name ASC
+        assertThat(userAccountService.getCurrentUserProjects()).containsExactly( // Ordered by name ASC
                 new ProjectDTO(response.getBody().getId(), "new-code", "New name"),
                 new ProjectDTO(1L, "project-y", "Project A"),
                 new ProjectDTO(3L, "project-z", "Project B"),
@@ -91,7 +96,7 @@ class ProjectResourceIT {
     }
 
     @Test
-    void create_ShouldFailAsBadRequest_WhenIdProvided() {
+    void create_ShouldFailAsBadRequest_WhenIdProvided() throws ForbiddenException {
         // GIVEN
         final ProjectDTO projectWithId = new ProjectDTO(NONEXISTENT, "is...", "...provided");
 
@@ -105,7 +110,7 @@ class ProjectResourceIT {
     }
 
     @Test
-    void create_ShouldFailAsNotUnique_WhenCodeAlreadyExists() {
+    void create_ShouldFailAsNotUnique_WhenCodeAlreadyExists() throws ForbiddenException {
         // GIVEN
         final ProjectDTO projectWithExistingCode = new ProjectDTO("project-y", "any");
 
@@ -123,7 +128,7 @@ class ProjectResourceIT {
     }
 
     @Test
-    void create_ShouldFailAsNotUnique_WhenNameAlreadyExists() {
+    void create_ShouldFailAsNotUnique_WhenNameAlreadyExists() throws ForbiddenException {
         // GIVEN
         final ProjectDTO projectWithExistingName = new ProjectDTO("new-code", "Project A");
 
@@ -179,9 +184,9 @@ class ProjectResourceIT {
     }
 
     @Test
-    void getAll_ShouldReturnAllEntitiesOrderedByName() {
+    void getAll_ShouldReturnAllEntitiesOrderedByName() throws ForbiddenException {
         // WHEN
-        List<ProjectDTO> projects = cut.getAll();
+        List<ProjectDTO> projects = userAccountService.getCurrentUserProjects();
 
         // THEN
         assertThat(projects).containsExactly( // Ordered by name ASC
@@ -191,7 +196,7 @@ class ProjectResourceIT {
     }
 
     @Test
-    void update_ShouldUpdateEntity_WhenAllRulesAreRespected() {
+    void update_ShouldUpdateEntity_WhenAllRulesAreRespected() throws ForbiddenException {
         // GIVEN
         final String projectCode = "project-y";
         final ProjectDTO project = new ProjectDTO("renamed-code", "Renamed name");
@@ -203,14 +208,14 @@ class ProjectResourceIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(header(response, HeaderUtil.ALERT)).isEqualTo("ara.project.updated");
         assertThat(header(response, HeaderUtil.PARAMS)).isEqualTo("1");
-        assertThat(cut.getAll()).containsExactly( // Ordered by name ASC
+        assertThat(userAccountService.getCurrentUserProjects()).containsExactly( // Ordered by name ASC
                 new ProjectDTO(3L, "project-z", "Project B"),
                 new ProjectDTO(2L, "project-x", "Project C"),
                 new ProjectDTO(1L, "renamed-code", "Renamed name"));
     }
 
     @Test
-    void update_ShouldNotFailAsNameNotUnique_WhenUpdatingWithoutAnyChange() {
+    void update_ShouldNotFailAsNameNotUnique_WhenUpdatingWithoutAnyChange() throws ForbiddenException {
         // GIVEN
         Long existingId = 1L;
         String projectCode = "project-y";
@@ -227,7 +232,7 @@ class ProjectResourceIT {
     }
 
     @Test
-    void update_ShouldFailAsNotFound_WhenUpdatingNonexistentEntity() {
+    void update_ShouldFailAsNotFound_WhenUpdatingNonexistentEntity() throws ForbiddenException {
         // GIVEN
         final ProjectDTO anyProject = new ProjectDTO("Trying to...", "... update nonexistent");
 
@@ -243,7 +248,7 @@ class ProjectResourceIT {
     }
 
     @Test
-    void update_ShouldFailAsNotUnique_WhenCodeAlreadyExists() {
+    void update_ShouldFailAsNotUnique_WhenCodeAlreadyExists() throws ForbiddenException {
         // GIVEN
         final String code = "project-y";
         final ProjectDTO projectWithExistingCode = new ProjectDTO("project-y", "any");
@@ -262,7 +267,7 @@ class ProjectResourceIT {
     }
 
     @Test
-    void update_ShouldFailAsNotUnique_WhenNameAlreadyExists() {
+    void update_ShouldFailAsNotUnique_WhenNameAlreadyExists() throws ForbiddenException {
         // GIVEN
         final String code = "project-x";
         final ProjectDTO projectWithExistingName = new ProjectDTO("any", "Project A");
@@ -294,7 +299,7 @@ class ProjectResourceIT {
         assertThat(communicationRepository.findAllByProjectIdOrderByCode(id)).hasSize(1);
     }
 
-    private void assertThatTableHasNotChangedInDataBase() {
+    private void assertThatTableHasNotChangedInDataBase() throws ForbiddenException {
         getAll_ShouldReturnAllEntitiesOrderedByName();
     }
 

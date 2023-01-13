@@ -16,11 +16,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 
 import static com.decathlon.ara.security.service.UserSessionService.AUDITOR_PROFILE_AUTHORITY;
@@ -35,6 +30,10 @@ public class SecurityConfiguration {
     private static final String PROJECT_SETTINGS_ALTER_PERMISSION = "@projectSettings.isEnabled(#projectCode, T(com.decathlon.ara.security.dto.permission.ResourcePermission).ALTER)";
     private static final String PROJECT_INSTANCE_FETCH_PERMISSION = "@projectInstance.isEnabled(#projectCode, T(com.decathlon.ara.security.dto.permission.ResourcePermission).FETCH)";
     private static final String PROJECT_INSTANCE_ALTER_PERMISSION = "@projectInstance.isEnabled(#projectCode, T(com.decathlon.ara.security.dto.permission.ResourcePermission).ALTER)";
+    private static final String PROJECT_SCOPE_FETCH_PERMISSION = "@projectScope.isEnabled(#projectCode, T(com.decathlon.ara.security.dto.permission.ResourcePermission).FETCH)";
+    private static final String PROJECT_SCOPE_ALTER_PERMISSION = "@projectScope.isEnabled(#projectCode, T(com.decathlon.ara.security.dto.permission.ResourcePermission).ALTER)";
+
+    private static final String[] PROJECT_DEMO_PATHS = {DemoResource.PATHS, ProjectResource.DEMO_PATHS};
 
     @Value("${ara.clientBaseUrl}")
     private String clientBaseUrl;
@@ -58,8 +57,6 @@ public class SecurityConfiguration {
 
     private final OAuth2UserLoginService oauth2UserLoginService;
 
-    private static final String[] PROJECT_DEMO_PATHS = {DemoResource.PATHS, ProjectResource.DEMO_PATHS};
-
     public SecurityConfiguration(
             OidcUserLoginService oidcUserLoginService,
             OAuth2UserLoginService oauth2UserLoginService
@@ -76,13 +73,18 @@ public class SecurityConfiguration {
                 .csrf().disable() //NOSONAR
                 .authorizeRequests() //NOSONAR
                 .antMatchers(AuthenticationResource.PATHS, RestConstants.ACTUATOR_PATHS).permitAll()
-                // user
-                .antMatchers(HttpMethod.DELETE, UserResource.CLEAR_DEFAULT_PROJECT_PATH).authenticated()
-                .antMatchers(HttpMethod.PUT, UserResource.UPDATE_DEFAULT_PROJECT_BY_CODE_PATH).access(PROJECT_INSTANCE_FETCH_PERMISSION)
-                .antMatchers(HttpMethod.GET, UserResource.CURRENT_ACCOUNT_PATH).authenticated()
+                // user > accounts
                 .antMatchers(HttpMethod.GET, UserResource.ALL_ACCOUNTS_PATH).hasAnyAuthority(SUPER_ADMIN_PROFILE_AUTHORITY, AUDITOR_PROFILE_AUTHORITY)
                 .antMatchers(HttpMethod.GET, UserResource.SCOPED_ACCOUNTS_PATH).authenticated()
-                .antMatchers(HttpMethod.GET, UserResource.SCOPED_ACCOUNTS_BY_PROJECT_PATH).access(PROJECT_INSTANCE_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.GET, UserResource.SCOPED_ACCOUNTS_BY_PROJECT_PATH).access(PROJECT_SCOPE_FETCH_PERMISSION)
+                // user > accounts > scopes
+                .antMatchers(HttpMethod.PUT, UserResource.ACCOUNT_PROJECT_SCOPE_PATH).access(PROJECT_SCOPE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.DELETE, UserResource.ACCOUNT_PROJECT_SCOPE_PATH).access(PROJECT_SCOPE_ALTER_PERMISSION)
+                // user > accounts > current > default project
+                .antMatchers(HttpMethod.DELETE, UserResource.CLEAR_DEFAULT_PROJECT_PATH).authenticated()
+                .antMatchers(HttpMethod.PUT, UserResource.UPDATE_DEFAULT_PROJECT_BY_CODE_PATH).access(PROJECT_INSTANCE_FETCH_PERMISSION)
+                // user > accounts > current
+                .antMatchers(HttpMethod.GET, UserResource.CURRENT_ACCOUNT_PATH).authenticated()
 
                 // projects > demo
                 .antMatchers(PROJECT_DEMO_PATHS).authenticated()
@@ -195,7 +197,7 @@ public class SecurityConfiguration {
                 .clearAuthentication(true).logoutSuccessUrl(redirectUrl).deleteCookies("JSESSIONID").permitAll()
                 .and()
                 .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo.oidcUserService(oidcUserService()).userService(oauth2UserService()))
+                        .userInfoEndpoint(userInfo -> userInfo.oidcUserService(oidcUserLoginService::manageUserLoginRequest).userService(oauth2UserLoginService::manageUserLoginRequest))
                         .loginProcessingUrl(this.loginProcessingUrl + "/*") // path to redirect to from auth server
                         .loginPage(String.format("%s/%s", this.clientBaseUrl, "login")) // standard spring redirection for protected resources
                         .defaultSuccessUrl(redirectUrl, true) // once logged in, redirect to
@@ -206,14 +208,6 @@ public class SecurityConfiguration {
             http.oauth2ResourceServer().jwt();
         }
         return http.build();
-    }
-
-    private OAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService() {
-        return oauth2UserLoginService::manageUserLoginRequest;
-    }
-
-    private OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService() {
-        return oidcUserLoginService::manageUserLoginRequest;
     }
 
     private boolean isResourceServerConfiguration() {

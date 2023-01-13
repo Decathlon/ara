@@ -6,7 +6,6 @@ import com.decathlon.ara.domain.RootCause;
 import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
 import com.decathlon.ara.repository.ProjectRepository;
 import com.decathlon.ara.repository.RootCauseRepository;
-import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.service.UserSessionService;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
@@ -16,8 +15,6 @@ import com.decathlon.ara.service.exception.NotUniqueException;
 import com.decathlon.ara.service.mapper.ProjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -173,83 +170,6 @@ class ProjectServiceTest {
         verify(mappedProject).setUpdateUser(currentUserEntity);
 
         verify(mappedProject, never()).setCreationUser(any());
-    }
-
-    @Test
-    void findAll_returnEmptyList_whenUserHasNoProfile() {
-        // Given
-
-        // When
-        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.empty());
-
-        // Then
-        var userProjects = projectService.findAll();
-        assertThat(userProjects).isEmpty();
-        verify(projectRepository, never()).findAllByOrderByName();
-        verify(projectRepository, never()).findByCodeInOrderByName(anyCollection());
-    }
-
-    @ParameterizedTest
-    @EnumSource(
-            value = UserAccountProfile.class,
-            names = {"SUPER_ADMIN", "AUDITOR"}
-    )
-    void findAll_returnAllProjects_whenUserIsSuperAdminOrAuditor(UserAccountProfile profile) {
-        // Given
-        var project1 = mock(Project.class);
-        var project2 = mock(Project.class);
-        var project3 = mock(Project.class);
-        var allProjects = List.of(project1, project2, project3);
-
-        var mappedProject1 = mock(ProjectDTO.class);
-        var mappedProject2 = mock(ProjectDTO.class);
-        var mappedProject3 = mock(ProjectDTO.class);
-        var mappedProjects = List.of(mappedProject1, mappedProject2, mappedProject3);
-
-        // When
-        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
-        when(projectRepository.findAllByOrderByName()).thenReturn(allProjects);
-        when(projectMapper.getProjectDTOFromProjectEntity(project1)).thenReturn(mappedProject1);
-        when(projectMapper.getProjectDTOFromProjectEntity(project2)).thenReturn(mappedProject2);
-        when(projectMapper.getProjectDTOFromProjectEntity(project3)).thenReturn(mappedProject3);
-
-        // Then
-        var userProjects = projectService.findAll();
-        assertThat(userProjects).containsExactlyInAnyOrderElementsOf(mappedProjects);
-        verify(projectRepository, never()).findByCodeInOrderByName(anyCollection());
-    }
-
-    @Test
-    void findAll_returnOnlyProjectsInUserScope_whenUserIsScopedUser() {
-        // Given
-        var profile = UserAccountProfile.SCOPED_USER;
-        var project1 = mock(Project.class);
-        var project2 = mock(Project.class);
-        var project3 = mock(Project.class);
-        var scopedProjects = List.of(project1, project2, project3);
-
-        var projectCode1 = "project-code-1";
-        var projectCode2 = "project-code-2";
-        var projectCode3 = "project-code-3";
-        var projectCodes = List.of(projectCode1, projectCode2, projectCode3);
-
-        var mappedProject1 = mock(ProjectDTO.class);
-        var mappedProject2 = mock(ProjectDTO.class);
-        var mappedProject3 = mock(ProjectDTO.class);
-        var mappedProjects = List.of(mappedProject1, mappedProject2, mappedProject3);
-
-        // When
-        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
-        when(userSessionService.getCurrentUserScopedProjectCodes()).thenReturn(projectCodes);
-        when(projectRepository.findByCodeInOrderByName(projectCodes)).thenReturn(scopedProjects);
-        when(projectMapper.getProjectDTOFromProjectEntity(project1)).thenReturn(mappedProject1);
-        when(projectMapper.getProjectDTOFromProjectEntity(project2)).thenReturn(mappedProject2);
-        when(projectMapper.getProjectDTOFromProjectEntity(project3)).thenReturn(mappedProject3);
-
-        // Then
-        var userProjects = projectService.findAll();
-        assertThat(userProjects).containsExactlyInAnyOrderElementsOf(mappedProjects);
-        verify(projectRepository, never()).findAllByOrderByName();
     }
 
     @Test
