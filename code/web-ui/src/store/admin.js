@@ -20,7 +20,6 @@ export default ({
   state: {
     savedSingleUserConnections: false,
     userRole: '',
-    showMembersTypeChoice: false,
     membersType: '',
     showSubMenuMembers: false,
     typeSelected: ''
@@ -39,12 +38,6 @@ export default ({
       state.savedSingleUserConnections = false
     },
 
-    activeMembersChoice (state, memberType) {
-      if (memberType === false) {
-        state.showMembersTypeChoice = false
-      } else state.showMembersTypeChoice = true
-    },
-
     activeSubMenuMembers (state, memberType) {
       state.showSubMenuMembers = memberType
     },
@@ -56,7 +49,7 @@ export default ({
 
   actions: {
     enableAdmin ({ state, commit }, payload) {
-      if (!this.savedSingleUserConnections && payload === 'active-admin') {
+      if (!(state.savedSingleUserConnections) && payload === 'projects-list') {
         commit('saveSingleUserConnections', true)
         localStorage.setItem('adminRight', true)
       } else if (payload === 'dashboard') {

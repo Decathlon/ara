@@ -17,75 +17,45 @@
 <template>
   <div>
     <span class="breadcrumbLink" @click="$router.go(-1)">Members list</span>
-
-    <div class="adminTitle">
-      <h1>{{ memberInfo.name }}</h1>
-      <div class="memberRole">
-        {{ memberInfo.role }}
-        <div v-if="memberType == 'Users'">
-          <Icon type="md-create" />
-        </div>
-        <div v-else>
-          <p>Group description</p>
-        </div>
-      </div>
+    <div>
+      <h1 class="adminTitle">{{ memberInfo.login }}'s projects</h1>
     </div>
 
     <div>
-      <table class="adminTable" aria-label="Projects and roles applied to them">
-        <thead>
-          <tr>
-            <th>Projects</th>
-            <th>Role</th>
-            <th></th>
-          </tr>
-        </thead>
-
+      <div v-if="memberInfo.profile === 'SUPER_ADMIN'" class="projectCTA">
+        <Button type="primary" class="addBtn" @click="add()">
+          Affect to a new project
+        </Button>
+      </div>
+      <table class="adminTable" aria-label="User's project and his role for each of them">
         <tbody v-if="members">
-          <tr v-for="(member, index) in sortedMembers" :key="index" :class="index %2 !== 0 ? 'lightGrey' : 'darkGrey'">
+          <tr v-for="(scope, index) in memberInfo.scopes" :key="index" :class="index %2 !== 0 ? 'lightGrey' : 'darkGrey'">
             <td class="userType">
-              {{ member.name }}
+              {{ scope.project }}
             </td>
 
             <td class="userType">
-              {{ member.role }}
+              <ul class="user-project-roles">
+                <li class="user-role-chip" @click="changeProfile(index, 'MEMBER')" :class="scope.role === 'MEMBER' ? ' active' : ''">
+                    <span v-if="scope.role === 'MEMBER'"><Icon type="md-checkmark" /></span>
+                    Member
+                </li>
+                <li class="user-role-chip" @click="changeProfile(index, 'MAINTAINER')" :class="scope.role === 'MAINTAINER' ? ' active' : ''">
+                    <span v-if="scope.role === 'MAINTAINER'"><Icon type="md-checkmark" /></span>
+                    Maintainer
+                </li>
+                <li class="user-role-chip" @click="changeProfile(index, 'ADMIN')" :class="scope.role === 'ADMIN' ? ' active' : ''">
+                    <span v-if="scope.role === 'ADMIN'"><Icon type="md-checkmark" /></span>
+                    Admin
+                </li>
+              </ul>
             </td>
 
             <td class="userType">
-              {{ member.blockReason }}
+                <Icon type="md-close-circle" size="32" />
             </td>
           </tr>
         </tbody>
-        <button class="showBtn" @click="memberToAdd = true">
-          <Icon type="md-eye" size="24"/>
-        </button>
-        <button class="addBtn" @click="memberToAdd = true">
-          <Icon type="md-add" size="24"/>
-        </button>
-      </table>
-
-      <table class="adminTable" aria-label="Users and their roles">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Admin(s)</th>
-          </tr>
-        </thead>
-
-        <tbody v-if="members">
-          <tr v-for="(member, index) in sortedMembers" :key="index" :class="index %2 !== 0 ? 'lightGrey' : 'darkGrey'">
-            <td class="userType">
-              {{ member.name }}
-            </td>
-
-            <td class="userType">
-              {{ member.role }}
-            </td>
-          </tr>
-        </tbody>
-        <button v-if="memberType == 'Groups'" class="addBtn" @click="memberToAdd = true">
-          <Icon type="md-add" size="24"/>
-        </button>
       </table>
     </div>
 
@@ -107,7 +77,6 @@
   import Vue from 'vue'
   import api from '../libs/api'
   import formField from '../components/form-field'
-  import { mapState } from 'vuex'
   export default {
     name: 'admin-management-members',
     components: {
@@ -171,32 +140,73 @@
             .delete('/api/groups/' + this.groupName + '/members/' + groupMemberInfo.name, api.REQUEST_OPTIONS)
             .then(setTimeout(() => this.showGroupInfo(this.groupName), 100))
         }
+      },
+      changeProfile (index, newRole) {
+        this.memberInfo.scopes[index].role = newRole
       }
     },
     created () {
-      this.memberInfo = this.$route.query
+      this.memberInfo = JSON.parse(localStorage.getItem('user'))
     },
     computed: {
       sortedMembers () {
         return this.members.map(item => item).sort((a, b) => a.id - b.id)
-      },
-      ...mapState('users', ['getAllUsers'])
+      }
     }
   }
 </script>
 
 <style scoped>
-  .memberRole {
-    text-align: center;
-    color: #AC8DAF;
-    font-weight: bold;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  .memberRole i {
-    color: #ff7d00;
-    font-size: 14px;
-    margin-left: 5px;
-  }
+    .adminTable {
+        font-size: 16px;
+    }
+    .adminTable tbody tr {
+        height: 80px;
+    }
+    .user-project-roles {
+        display: flex;
+        list-style: none;
+        justify-content: center;
+    }
+    .user-role-chip {
+        display: flex;
+        cursor: pointer;
+        align-items: center;
+        background-color: #ffffff;
+        border: 2px solid #d9dde1;
+        height: 44px;
+        padding: 0 25px;
+        border-radius: 100px;
+        margin: 0 80px;
+    }
+    .user-role-chip:hover {
+      background-color: #007DBC;
+      border: 2px solid #007DBC;
+      color: #ffffff;
+    }
+    .user-role-chip.active {
+        background-color: #007DBC;
+        border: 1px solid #007DBC;
+        color: #ffffff;
+    }
+
+    .adminTable tbody tr:first-child td:first-child {
+        border-radius: 10px 0 0 0;
+        display: table-cell;
+    }
+
+    .adminTable tbody tr:first-child td:last-child {
+        border-radius: 0 10px 0 0;
+        display: table-cell;
+    }
+
+    .adminTable tbody tr:last-child td:first-child {
+        border-radius: 0 0 0 10px;
+        display: table-cell;
+    }
+
+    .adminTable tbody tr:last-child td:last-child {
+        border-radius: 0 0 10px 0;
+        display: table-cell;
+    }
 </style>

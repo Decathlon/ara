@@ -22,7 +22,7 @@ function requireAuth (to, from, next) {
   if (store.state.users.userRole !== 'MEMBER') {
     next()
   } else {
-    next('/403')
+    next('/access-denied')
   }
 }
 
@@ -178,20 +178,15 @@ const routes = [
 
   // Management
   {
-    path: '/projects/:projectCode/management',
-    name: 'management',
-    redirect: '/projects/:projectCode/management/communications' // First tab
-  },
-  {
-    path: '/projects/:projectCode/active-admin',
-    name: 'active-admin',
+    path: '/admin/projects-list',
+    name: 'projects-list',
     meta: {
       title: 'Admin Management'
     },
     component: (resolve) => require(['./views/admin-management.vue'], resolve)
   },
   {
-    path: '/projects/:projectCode/members',
+    path: '/admin/members-list',
     name: 'members',
     meta: {
       title: 'Members'
@@ -199,12 +194,12 @@ const routes = [
     component: (resolve) => require(['./views/admin-management-members.vue'], resolve)
   },
   {
-    path: '/projects/:projectCode/members/memberDetails',
-    name: 'member-details',
+    path: '/admin/members-list/:user/projects',
+    name: 'member-projects',
     meta: {
-      title: 'Member details'
+      title: 'Member projects'
     },
-    component: (resolve) => require(['./views/admin-management-members-details.vue'], resolve)
+    component: (resolve) => require(['./views/admin-management-members-projects.vue'], resolve)
   },
   {
     path: '/projects/:projectCode/dashboard',
@@ -212,7 +207,7 @@ const routes = [
     redirect: '/projects/:projectCode/executions'
   },
   {
-    path: '/projects/:projectCode/active-admin/admin-project-details',
+    path: '/admin/projects-list/:projectCode',
     name: 'admin-project-details',
     meta: {
       title: 'Admin project details'
@@ -220,7 +215,12 @@ const routes = [
     component: (resolve) => require(['./views/admin-project-details.vue'], resolve)
   },
   {
-    path: '/projects/:projectCode/management/communications',
+    path: '/admin/configuration',
+    name: 'settings',
+    redirect: '/:projectCode/settings/management-communications'
+  },
+  {
+    path: '/:projectCode/settings/management-communications',
     name: 'management-communications',
     meta: {
       title: 'Communications'
@@ -228,7 +228,7 @@ const routes = [
     component: (resolve) => require(['./views/management-communications.vue'], resolve)
   },
   {
-    path: '/projects/:projectCode/management/teams',
+    path: '/:projectCode/settings/management-teams',
     name: 'management-teams',
     meta: {
       title: 'Teams'
@@ -236,7 +236,7 @@ const routes = [
     component: (resolve) => require(['./views/management-teams.vue'], resolve)
   },
   {
-    path: '/projects/:projectCode/management/root-causes',
+    path: '/:projectCode/settings/management-root-causes',
     name: 'management-root-causes',
     meta: {
       title: 'Root Causes'
@@ -244,7 +244,7 @@ const routes = [
     component: (resolve) => require(['./views/management-root-causes.vue'], resolve)
   },
   {
-    path: '/projects/:projectCode/management/countries',
+    path: '/:projectCode/settings/management-countries',
     name: 'management-countries',
     meta: {
       title: 'Countries'
@@ -252,7 +252,7 @@ const routes = [
     component: (resolve) => require(['./views/management-countries.vue'], resolve)
   },
   {
-    path: '/projects/:projectCode/management/cycle-definitions',
+    path: '/:projectCode/settings/management-cycle-definitions',
     name: 'management-cycle-definitions',
     meta: {
       title: 'Cycles'
@@ -260,7 +260,7 @@ const routes = [
     component: (resolve) => require(['./views/management-cycle-definitions.vue'], resolve)
   },
   {
-    path: '/projects/:projectCode/management/severities',
+    path: '/:projectCode/settings/management-severities',
     name: 'management-severities',
     meta: {
       title: 'Severities'
@@ -268,7 +268,7 @@ const routes = [
     component: (resolve) => require(['./views/management-severities.vue'], resolve)
   },
   {
-    path: '/projects/:projectCode/management/sources',
+    path: '/:projectCode/settings/management-sources',
     name: 'management-sources',
     meta: {
       title: 'Sources'
@@ -276,7 +276,7 @@ const routes = [
     component: (resolve) => require(['./views/management-sources.vue'], resolve)
   },
   {
-    path: '/projects/:projectCode/management/types',
+    path: '/:projectCode/settings/management-types',
     name: 'management-types',
     meta: {
       title: 'Types'
@@ -292,7 +292,7 @@ const routes = [
     component: (resolve) => require(['./views/admin-management.vue'], resolve)
   },
   {
-    path: '/projects/:projectCode/management/technologies',
+    path: '/:projectCode/settings/management-technologies',
     name: 'management-technologies',
     beforeEnter: requireAuth,
     meta: {
@@ -302,7 +302,7 @@ const routes = [
     component: (resolve) => require(['./views/management-technologies.vue'], resolve)
   },
   {
-    path: '/projects/:projectCode/management/settings',
+    path: '/:projectCode/settings/management-settings',
     name: 'management-settings',
     beforeEnter: requireAuth,
     meta: {
@@ -314,8 +314,8 @@ const routes = [
 
   // 403 redirect
   {
-    path: '/403',
-    name: 'redirect-error',
+    path: '/access-denied',
+    name: 'Access denied',
     component: (resolve) => require(['./views/403.vue'], resolve)
   },
 

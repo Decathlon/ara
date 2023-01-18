@@ -2,7 +2,7 @@
   <div class="container">
     <div class="content">
       You don't have the rights to access this page!
-      <router-link :to="'/projects-list'">Go back to projects list</router-link>
+      <router-link :to="'/admin/projects-list'">Go back to projects list</router-link>
     </div>
   </div>
 </template>

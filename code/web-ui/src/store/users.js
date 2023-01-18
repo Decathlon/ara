@@ -19,7 +19,8 @@ export default ({
 
   state: {
     users: [],
-    userRole: ''
+    userRole: '',
+    user: []
   },
 
   mutations: {
@@ -31,6 +32,10 @@ export default ({
 
     setUserRole: (state, userRole) => {
       state.userRole = userRole
+    },
+
+    setUserInfo: (state, user) => {
+      state.user = user
     }
   },
 
@@ -41,6 +46,10 @@ export default ({
 
     getUserRole ({ commit }, payload) {
       commit('setUserRole', payload)
+    },
+
+    getUserInfo ({ commit }, payload) {
+      commit('setUserInfo', payload)
     }
   }
 })

@@ -113,7 +113,7 @@ export default {
         }
 
         if (this.$route.meta.denied === this.userRole) {
-          this.$router.push('/403').catch(() => {})
+          this.$router.push('/access-denied').catch(() => {})
         }
 
         this.currentProjectCode = projectCode

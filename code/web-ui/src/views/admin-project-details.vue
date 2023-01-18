@@ -17,9 +17,11 @@
 <template>
   <div>
     <div class="projectHeader">
-      <div class="adminTitle">
-        <h1>{{ projectName }}</h1>
-        <p class="projectCode"><strong>{{ projectCode }}</strong></p>
+      <div>
+        <h1 class="adminTitle">
+          {{ projectName }}
+          <p class="projectCode ivu-text-center"><strong>{{ projectCode }}</strong></p>
+        </h1>
       </div>
 
       <Button title="Edit" class="editBtn" type="primary" ghost>Edit project</Button>
@@ -38,7 +40,7 @@
         <Button type="primary" shape="circle" icon="md-checkmark">Groups</Button>
       </div>
 
-      <table class="adminTable" aria-label="User names and roles">
+      <table class="adminTable" aria-label="Project's members name and role">
         <thead>
           <tr>
             <th>Name</th>
@@ -190,7 +192,7 @@
         })
     },
     beforeDestroy () {
-      this.projectInfo = this.$route.query
+      this.projectInfo = this.$route.params
     }
   }
 </script>

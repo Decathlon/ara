@@ -16,97 +16,84 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
   <div>
-    <h1 class="adminTitle">Projects management</h1>
+    <div v-if="sortedProjects.length">
+      <h1 class="adminTitle">Projects management</h1>
 
-    <div class="projectCTA">
-     <Select class="filterSelect" v-model="projectFilter" clearable filterable placeholder="Filter">
-        <Option v-for="(filters, index) in filterType" :value="index" :key="index" :label="filters" />
-      </Select>
-      <Button v-if="demoProjectNotFound" type="warning" class="demoProjectButton" data-nrt="createDemo" :loading="loadingDemoProject" @click="createDemoProject">CREATE THE DEMO PROJECT</Button>
-      <Button v-else class="change-view" @click="switchView = !switchView" type="primary" ghost>{{ !switchView ? 'Show Demo Project' : 'Show Projects List' }}</Button>
+      <div class="projectCTA">
+        <Select class="filterSelect" v-model="projectFilter" clearable filterable placeholder="Filter">
+          <Option v-for="(filters, index) in filterType" :value="index" :key="index" :label="filters" />
+        </Select>
+        <Button v-if="demoProjectNotFound" type="warning" class="demoProjectButton" data-nrt="createDemo" :loading="loadingDemoProject" @click="createDemoProject">CREATE THE DEMO PROJECT</Button>
+        <Button type="primary" class="addBtn" @click="add()">
+          Add project
+        </Button>
+      </div>
+
+      <table class="adminTable" aria-label="Current user projects scopes">
+        <div v-if="showLoader" class="loading-overlay">
+          <Icon type="ios-loading" class="ivu-anim-loop" size="32" />
+        </div>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Code</th>
+            <th>Created on</th>
+            <th>Created by</th>
+            <th>Updated on</th>
+            <th>Updated by</th>
+            <th v-if="isScopedUser">Role</th>
+            <th>Default</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr v-for="(project, index) in sortedProjects" :class="index %2 !== 0 ? 'darkGrey' : 'lightGrey'" :key="project.id">
+            <td class="project-name">
+              <Icon v-if="project.code === 'the-demo-project'" class="demo-project-icon" type="md-construct" size="18" />
+              {{ project.name }}
+            </td>
+            <td>{{ project.code }}</td>
+            <td>{{ project.creation_date }}</td>
+            <td>{{ getProjectUserNameDisplay(project.creation_user) }}</td>
+            <td>{{ project.update_date }}</td>
+            <td>{{ getProjectUserNameDisplay(project.update_user) }}</td>
+            <td v-if="isScopedUser">{{ getRoleOnProject(project.code) }}</td>
+            <td>
+              <input type="radio" name="defaultProject" @change="changeDefaultProject(project)" :checked="userDefaultProjectCode && userDefaultProjectCode === project.code">
+            </td>
+            <td>
+              <Icon v-if="isAdminOnProject(project.code)" type="md-close-circle" size="24" @click="deleteProject(project.code)"/>
+              <Icon type="md-eye" size="24" @click="openProjectDetails(project)" :class="isAdminOnProject(project.code) ? '' : 'spaced-icon'"/>
+              <Icon type="md-create" size="24" @click="add(project)"/>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div v-else class="no-project">
+      <h2>No projects to display. Create a new project by clicking the button below.</h2>
       <Button type="primary" class="addBtn" @click="add()">
         Add project
       </Button>
     </div>
 
-    <table v-if="switchView" class="adminTable" aria-label="Current user projects">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Creation date</th>
-          <th>Update date</th>
-          <th>Author</th>
-          <th>Default</th>
-          <th></th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr v-for="(project, index) in sortedDemoProject" :key="project.id">
-          <td>{{ project.name }}</td>
-          <td>Creation date</td>
-          <td>Update date</td>
-          <td>Created by</td>
-          <td>
-            <input type="radio" name="defaultProject" @change="changeDefaultProject(project)" :checked="userDefaultProjectCode && userDefaultProjectCode === project.code">
-          </td>
-          <td>
-            <Icon type="md-close-circle" size="24" @click="deleteDemoProject()"/>
-            <Icon type="md-eye" size="24" @click="openProjectDetails(project)"/>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <table v-if="!switchView" class="adminTable" aria-label="Current user project scopes">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Code</th>
-          <th>Created on</th>
-          <th>Created by</th>
-          <th>Updated on</th>
-          <th>Updated by</th>
-          <th v-if="isScopedUser">Role</th>
-          <th>Default</th>
-          <th></th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr v-for="(project, index) in sortedProjects" :class="index %2 !== 0 ? 'darkGrey' : 'lightGrey'" :key="project.id">
-          <td>{{ project.name }}</td>
-          <td>{{ project.code }}</td>
-          <td>{{ project.creation_date }}</td>
-          <td>{{ getProjectUserNameDisplay(project.creation_user) }}</td>
-          <td>{{ project.update_date }}</td>
-          <td>{{ getProjectUserNameDisplay(project.update_user) }}</td>
-          <td v-if="isScopedUser">{{ getRoleOnProject(project.code) }}</td>
-          <td>
-            <input type="radio" name="defaultProject" @change="changeDefaultProject(project)" :checked="userDefaultProjectCode && userDefaultProjectCode === project.code">
-          </td>
-          <td>
-            <Icon v-if="isAdminOnProject(project.code)" type="md-close-circle" size="24" @click="deleteProject(project.code)"/>
-            <Icon type="md-eye" size="24" @click="openProjectDetails(project)"/>
-          </td>
-        </tr>
-      </tbody>
-    </table>
     <Modal v-model="addOrChangeProject" title="Add Project" okText="Add" @on-ok="save" @close="addOrChangeProject = false" :width="900"
-      :loading="loadingSaving" ref="editPopup">
-      <Form :label-width="128"
-        v-if="fields.type !== 'hidden'">
-        <Form-item v-for="field in fields"
-          :key="field.code"
-          :label="(field.type === 'boolean' ? '' : field.name + ':')"
-          :required="field.required && (editingNew || (!field.primaryKey && !field.createOnly))">
-          <form-field :field="field" v-model="editingData[field.code]" :editingNew="editingNew" :ref="field.code" v-on:enter="save"/>
-          <div class="hints">
-            {{field.help}}
-          </div>
-        </Form-item>
-      </Form>
-    </Modal>
+        :loading="loadingSaving" ref="editPopup">
+        <Form :label-width="128"
+          v-if="fields.type !== 'hidden'">
+          <Form-item v-for="field in fields"
+            :key="field.code"
+            :label="(field.type === 'boolean' ? '' : field.name + ':')"
+            :required="field.required && (editingNew || (!field.primaryKey && !field.createOnly))">
+            <form-field :field="field" v-model="editingData[field.code]" :editingNew="editingNew" :ref="field.code" v-on:enter="save"/>
+            <div class="hints">
+              {{field.help}}
+            </div>
+          </Form-item>
+        </Form>
+      </Modal>
   </div>
 </template>
 
@@ -155,7 +142,7 @@ export default {
         filterType: ['Name', 'Creation Date', 'Update Date', 'Author'],
         editingNew: false,
         editing: false,
-        switchView: false
+        showLoader: false
       }
     },
     methods: {
@@ -166,9 +153,12 @@ export default {
         }
         return row
       },
-      add () {
+      add (project) {
+        if (project) {
+          this.editProject = true
+        }
         this.addOrChangeProject = true
-        this.doEdit(this.newRowData(), true)
+        this.doEdit(project.code ? project : this.newRowData(), true)
       },
       doEdit (row, editingNew) {
         this.editingData = { ...row }
@@ -187,29 +177,35 @@ export default {
       save () {
         let row = { ...this.editingData }
         row.id = undefined
-        Vue.http
-          .post('/api/projects', row, api.REQUEST_OPTIONS)
-          .then((response) => {
-            const newProject = response.body
-            Vue.http
-              .get('/api/projects/' + newProject.code + '/members/users')
-              .then((response) => {
-                newProject.members = response.body
-                this.projects.push(newProject)
+        if (this.editProject) {
+          Vue.http
+            .put('/api/projects', row, api.REQUEST_OPTIONS)
+            .then(() => {
+              this.getProjectList()
+            }, (error) => {
+              this.loadingSaving = false
+              api.handleError(error, () => {
+                this.loadingSaving = true
               })
-            this.$refs.editPopup.close()
-          }, (error) => {
-            this.loadingSaving = false
-            api.handleError(error, () => {
-              this.loadingSaving = true
             })
-          })
+        } else {
+          Vue.http
+            .post('/api/projects', row, api.REQUEST_OPTIONS)
+            .then(() => {
+              this.getProjectList()
+            }, (error) => {
+              this.loadingSaving = false
+              api.handleError(error, () => {
+                this.loadingSaving = true
+              })
+            })
+        }
       },
       openProjectDetails (projectInfo) {
-        this.$router.push({ name: 'admin-project-details', path: '/projectDetails/', query: { projectCode: projectInfo.code, projectName: projectInfo.name } })
+        this.$router.push({ name: 'admin-project-details', query: { projectCode: projectInfo.code, projectName: projectInfo.name } })
       },
-      getProjectList () {
-        Vue.http
+      async getProjectList () {
+        await Vue.http
           .get('api/projects', api.REQUEST_OPTIONS)
           .then((response) => {
             this.projects = response.body
@@ -248,35 +244,31 @@ export default {
             api.handleError(error)
           })
       },
-      deleteDemoProject () {
+      deleteProject (code) {
         let self = this
         this.$Modal.confirm({
-          title: 'Delete the Demo Project',
-          content: `<p>Do you really want to delete the demo project?</p>`,
+          title: 'Delete a project',
+          content: `<p>Do you really want to delete <strong>` + code + `</strong>?</p>`,
           okText: 'Delete',
           loading: true,
           onOk () {
-            self.$store.commit('teams/unloadTeams', { projectCode: DEMO_PROJECT_CODE })
+            if (code === 'the-demo-project') {
+              self.$store.commit('teams/unloadTeams', { projectCode: DEMO_PROJECT_CODE })
+            }
             Vue.http
-              .delete(api.paths.demo, api.REQUEST_OPTIONS)
+              .delete(code === 'the-demo-project' ? api.paths.demo : `api/projects/` + code, api.REQUEST_OPTIONS)
               .then(() => {
                 self.$Modal.remove()
-                self.getProjectList()
-                self.switchView = false
+                self.showLoader = true
+                setTimeout(() => {
+                  self.showLoader = false
+                  self.getProjectList()
+                }, 500)
               }, (error) => {
                 api.handleError(error)
               })
           }
         })
-      },
-      deleteProject (code) {
-        Vue.http
-          .delete('api/projects/' + code, api.REQUEST_OPTIONS)
-          .then(() => {
-            this.getProjectList()
-          }, (error) => {
-            api.handleError(error)
-          })
       },
       createDemoProject () {
         this.loadingDemoProject = true
@@ -293,6 +285,7 @@ export default {
       }
     },
     mounted () {
+      this.$store.dispatch('admin/setTypeSelected', '')
       this.getProjectList()
     },
     computed: {
@@ -301,7 +294,7 @@ export default {
       },
 
       sortedProjects () {
-        return this.projects.map(item => item).sort((a, b) => a.code - b.code).filter(project => project.code !== DEMO_PROJECT_CODE)
+        return this.projects.map(item => item).sort((a, b) => a.code - b.code)
       },
 
       sortedDemoProject () {

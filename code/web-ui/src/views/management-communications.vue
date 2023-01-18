@@ -83,6 +83,10 @@
       url () {
         return api.paths.communications(this)
       }
+    },
+
+    mounted () {
+      this.$store.dispatch('admin/setTypeSelected', '')
     }
   }
 </script>

@@ -300,6 +300,15 @@ pre code {
   background-color: #F7F8F9;
 }
 
+.lightGrey .project-name, .darkGrey .project-name {
+  position: relative;
+}
+
+.darkGrey .demo-project-icon, .lightGrey .demo-project-icon{
+  position: absolute;
+  right: 15px;
+}
+
 /****  ADMIN RIGHTS STYLESHEET  ****/
 
 /* General */
@@ -307,8 +316,11 @@ pre code {
 .adminTitle {
   margin-bottom: 3rem;
   text-align: center;
-  font-weight: bold;
   margin-top: 3rem;
+  /* font-size: 32px;
+  margin: 10px 0; */
+  color: #007DBC;
+  font-weight: 900;
 }
 
 /* CTA */
@@ -418,6 +430,16 @@ pre code {
 
 /* Tables */
 
+.no-project {
+  text-align: center;
+  height: 100%;
+  transform: translateY(10rem);
+}
+
+.no-project > * {
+  margin: 12px;
+}
+
 .projectCTA {
   width: 90%;
   position: relative;
@@ -440,6 +462,26 @@ pre code {
   position: absolute;
   right: 0;
   top: -45px;
+}
+
+.user-role {
+  text-align: center;
+  color: #AC8DAF;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.user-role i {
+  color: #ff7d00;
+  font-size: 14px;
+  margin-left: 5px;
+}
+
+.table-title {
+  margin-left: 94px;
+  color: #007DBC;
+  font-weight: 900;
 }
 
 .tableContent {
@@ -507,27 +549,66 @@ pre code {
 }
 
 .adminTable .ivu-icon-md-create, .projectCode {
-  color: #AC8DAF;
+  color: #ef8854;
+  font-size: 16px;
 }
+
+.adminTable .ivu-icon-md-create
 
 .ivu-icon-ios-checkmark-circle {
   color: #23a9427d;
 }
 
-.adminTable .showBtn {
+.adminTable .showBtn, .adminTable .addBtn {
   position: absolute;
   top: -20px;
-  right: 80px;
-  color: #ad8daf;
   background-color: #ffffff;
   padding: 8px;
   border-radius: 100px;
-  border: 2px solid #3780be;
+  border: 2px solid #9cbed8;
   cursor: pointer;
 }
 
+.adminTable .showBtn {
+  right: 80px;
+  color: #ad8daf;
+}
+
 .adminTable .addBtn {
-  right: 0;
+  right: 20px;
+  color: #ff600a;
+}
+
+.spaced-icon {
+  margin-right: 55px !important;
+}
+
+@keyframes loading {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: #8a8a8aba;
+  z-index: 999;
+  top: 0;
+}
+
+.ivu-anim-loop {
+  animation: loading 1s linear infinite;
+  transform-origin: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  color: #ffffff;
 }
 
 /* Modal  */

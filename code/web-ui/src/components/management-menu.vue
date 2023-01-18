@@ -22,8 +22,11 @@
       So we use Menu classes with router-links.
     -->
     <ul class="subMenu ivu-menu ivu-menu-light ivu-menu-horizontal">
-      <router-link v-for="link in links" :key="link.name" :to="to(link)"
-                   class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected" 
+      <router-link v-for="(link,index) in links" :key="link.name" :to="to(link)"
+                  class="ivu-menu-item" :class="$route.path.includes([link.routeName]) ? 'ivu-menu-item-active ivu-menu-item-selected' 
+                  : userAuthorization && link.name === 'SETTINGS' ? 'hidden' 
+                  : userAuthorization && link.name === 'TECHNOLOGIES' ? 'hidden'
+                  : ''"
       >
         {{link.name}}
       </router-link>
@@ -57,7 +60,8 @@
           // FOR TESTING, FOR NOW
           { routeName: 'management-technologies', name: 'TECHNOLOGIES' },
           { routeName: 'management-settings', name: 'SETTINGS' }
-        ]
+        ],
+        userRole: null
       }
     },
 
@@ -72,14 +76,29 @@
       }
     },
 
+    created () {
+      this.userRole = JSON.parse(localStorage.getItem('current_user'))
+    },
+
     computed: {
-      ...mapState('users', ['userRole'])
+      ...mapState('users', ['userRole']),
+
+      projectSelected () {
+        return this.$route.params.projectCode
+      },
+
+      userAuthorization () {
+        const test = this.userRole.scopes.find((item) => item.project === this.projectSelected)
+        if (test?.role === 'MEMBER') {
+          return true
+        }
+      }
     }
   }
 </script>
 
 <style scoped>
-  .ivu-menu-item.hide {
+  .ivu-menu-item.hide, .hidden {
     display: none;
   }
 </style>

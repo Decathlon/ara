@@ -30,25 +30,39 @@
               Fighting Against Regressions All Together
             </div>
             <img src="../assets/favicon-white.png" width="32" height="32"/></Tooltip></router-link><!-- No space between!
-     --><projects-select :ghost="true" v-on:projectSelection="projectSelection" style="flex: 1 0 auto; margin-right: 10px;"/>
+     --><projects-select :class="$route.path.includes('/settings') ? '' 
+                        : $route.path.includes('/projects/') ? '' 
+                        : 'hidden'" 
+                        :ghost="true"
+                        v-on:projectSelection="projectSelection" 
+                        style="flex: 1 0 auto; margin-right: 10px;"
+        />
       </div>
 
       <div style="flex: 1 0 auto;">
         <!-- After deleting the demo project, if no other project exists, `projectCode` still exists but we should hide the menu anyway  -->
         <ul v-if="projectCode && projects && projects.length && !savedSingleUserConnections" class="ivu-menu ivu-menu-primary ivu-menu-horizontal dashboardHeader">
-          <router-link v-for="link in links" @click.native="changeAdminState(link.routeName)" :key="link.name" :to="to(link)" class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected">
+          <router-link v-for="(link, index) in links" @click.native="changeAdminState(link.routeName)" :key="index" :to="to(link)" :class="index === links.length - 1 ? 'last-nav' : ''" class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected">
             {{link.name}}
           </router-link>
         </ul>
 
         <ul v-else-if="projectCode && projects && projects.length && savedSingleUserConnections" class="ivu-menu ivu-menu-primary ivu-menu-horizontal dashboardHeader">
-          <router-link v-for="link in adminMenu" class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected" @click.native="changeAdminState(link.routeName)" :key="link.name" :to="to(link)" :class="link.name">
-            {{link.name}}
-          </router-link>
+          <li v-for="link, index in adminMenu" :key="index" :class="index === adminMenu.length - 1 ? 'last-nav' : ''">
+            <router-link v-if="link.name !== 'MEMBERS'" class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected" @click.native="changeAdminState(link.routeName)" :key="link.name" :to="to(link)" :class="link.name === 'DASHBOARD' ? 'last-nav' : $route.path.includes(link.routeName) ? 'ivu-menu-item-active ivu-menu-item-selected' : ''">
+              {{ link.name }}
+            </router-link>
+
+            <span v-else class="ivu-menu-item" :class="[$route.path.includes('/members') ? 'ivu-menu-item-active ivu-menu-item-selected active' : '']" @click="changeAdminState('members')">{{ link.name }}</span>
+          </li>
         </ul>
         <div :class="showSubMenuMembers ? 'membersSubMenu active' : 'membersSubMenu'">
-          <p @click="showMembersType('individual')" :class="typeSelected == 'individual' ? 'selected' : ''">INDIVIDUAL</p>
-          <p @click="showMembersType('machine')" :class="typeSelected == 'machine' ? 'selected' : ''">MACHINE</p>
+          <router-link active-class="ivu-menu-item-active ivu-menu-item-selected" @click.native="changeAdminState('typeChoosen')" :key="index" :to="{name: 'members'}">
+            <p>INDIVIDUAL</p>
+          </router-link>
+          <router-link active-class="ivu-menu-item-active ivu-menu-item-selected" @click.native="changeAdminState('typeChoosen')" :key="index" :to="{name: 'machine'}">
+            <p>MACHINE</p>
+          </router-link>
         </div>
       </div>
 
@@ -208,7 +222,6 @@
     computed: {
       ...mapState('admin', ['savedSingleUserConnections', 'showSubMenuMembers', 'typeSelected']),
       ...mapState('projects', ['projects', 'defaultProjectCode']),
-      ...mapState('users', ['userRole']),
 
       executedScenariosHistoryDurationIsApplied () {
         return this.duration.applied && this.duration.value && this.duration.type
@@ -251,14 +264,14 @@
           { params: { projectCode: this.projectCode }, name: 'PROBLEMS', routeName: 'problems' },
           { params: { projectCode: this.projectCode }, name: 'FUNCTIONALITIES', routeName: 'functionalities' },
           { params: { projectCode: this.projectCode }, name: 'SCENARIOS', routeName: 'scenario-writing-helps' },
-          { params: { projectCode: this.projectCode }, name: 'SETTINGS', routeName: 'active-admin' }
+          { params: { projectCode: this.projectCode }, name: 'SETTINGS', routeName: 'projects-list' }
         ]
       },
       adminMenu () {
         return [
-          { params: { projectCode: this.projectCode }, name: 'PROJECTS', routeName: 'active-admin' },
+          { params: { projectCode: this.projectCode }, name: 'PROJECTS', routeName: 'projects-list' },
           { params: { projectCode: this.projectCode }, name: 'MEMBERS', routeName: 'members' },
-          { params: { projectCode: this.projectCode }, name: 'CONFIGURATION', routeName: 'management' },
+          { params: { projectCode: this.projectCode }, name: 'CONFIGURATION', routeName: 'settings' },
           { params: { projectCode: this.projectCode }, name: 'DASHBOARD', routeName: 'dashboard' }
         ]
       },
@@ -376,6 +389,9 @@
           this.$store.dispatch('admin/setTypeSelected', '')
           this.$store.dispatch('admin/showSubMenuMembers', true)
           this.$store.dispatch('admin/showChoice', false)
+        } else if (data === ('typeChoosen')) {
+          this.$store.dispatch('admin/showSubMenuMembers', false)
+          this.$store.dispatch('admin/setTypeSelected', data)
         } else {
           this.$store.dispatch('admin/showSubMenuMembers', false)
           this.$store.dispatch('admin/enableAdmin', data)
@@ -395,7 +411,7 @@
 
     beforeUpdate () {
       if (localStorage.adminRight === 'true') {
-        this.$store.dispatch('admin/enableAdmin', 'active-admin')
+        this.$store.dispatch('admin/enableAdmin', 'projects-list')
       }
     },
 
@@ -445,13 +461,18 @@
     display: inline-block;
   }
 
-  .ivu-menu-horizontal .ivu-menu-item:last-child {
-    float: right;
+  .last-nav {
+    position: absolute !important;
+    right: 0;
   }
 
   .selected-project-management div {
     background-color: #135b95;
     border-radius: 50%;
+  }
+
+  .hidden {
+    visibility: hidden;
   }
 
   #helps {
@@ -539,20 +560,23 @@
   }
 
   .dashboardHeader {
+    display: flex;
+    justify-content: center;
     overflow: hidden;
   }
-  .dashboardHeader a {
+  .dashboardHeader > * {
     animation: loadHeader .3s ease-in-out;
   }
   .membersSubMenu {
-    position: absolute;
+    visibility: hidden;
     display: flex;
+    position: fixed;
     background-color: #ffffff;
     top: 0;
     left: 0;
     right: 0;
     margin: 0 auto;
-    justify-content: center;
+    justify-content: space-evenly;
     width: 200px;
     height: 60px;
     border-radius: 0 0 20px 20px;
@@ -560,8 +584,13 @@
     transition: 200ms;
   }
   .membersSubMenu.active {
+    visibility: visible;
     top: 60px;
+    align-content: center;
     transition: 200ms;
+  }
+  .membersSubMenu a {
+    display: flex;
   }
   .membersSubMenu p {
     line-height: 1;

@@ -16,13 +16,13 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
   <div>
-    <div v-if="showGroup && !showMembersTypeChoice" class="tableContent">
+    <div class="tableContent">
       <span class="breadcrumbLink" @click="$router.go(-1)">
         <Icon type="md-home" />
         {{ memberType }} list
       </span>
 
-      <h1 class="adminTitle">{{ memberType }} management</h1>
+      <h1 class="adminTitle">Members</h1>
 
       <div v-if="memberType == 'Users'" class="searchButton">
         <AutoComplete
@@ -34,37 +34,47 @@
         </AutoComplete>
       </div>
 
-      <table class="adminTable" aria-label="Users and their roles">
+      <table class="adminTable" aria-label="Users with their roles and projects">
         <thead>
           <tr>
             <th>Name</th>
-            <th>Role</th>
+            <th>Profile</th>
+            <th>Projects</th>
             <th v-if="memberType == 'Users'">Restriction</th>
             <th></th>
           </tr>
         </thead>
 
         <tbody v-if="members">
-          <tr v-for="(member, index) in sortedMembers" :key="index" :class="index %2 !== 0 ? 'lightGrey' : 'darkGrey'">
+          <tr v-for="(member, index) in members" :key="index" :class="index %2 !== 0 ? 'lightGrey' : 'darkGrey'">
             <td class="userType">
-              {{ member.name }}
+              {{ member.login }}
             </td>
 
             <td class="userType">
-              {{ member.role }}
+              {{ member.profile }}
             </td>
 
             <td v-if="memberType == 'Users'" class="userType">
               {{ member.blockReason }}
             </td>
 
+            <td class="member-projects-list">
+              <span v-for="(scope, index) in member.scopes" :class="index > 2 ? 'project-count' : ''">
+                <template v-if="index <= 2">
+                  {{ scope.project }}
+                </template>
+                <template v-if="index === member.scopes.length - 1 && index > 2">
+                  <Tag color="warning">+{{ member.scopes.length - 3 }}</Tag>
+                </template>
+              </span>
+            </td>
+
             <td>
-              <Icon v-if="!member.blockReason && memberType == 'Users'" type="ios-checkmark-circle" size="24" @click="showUserBlock(member, index)"/>
-              <Icon v-if="member.blockReason && memberType == 'Users'" type="md-remove-circle" size="24" @click="unblockUser(index)"/>
+              <Icon v-if="!member.blockReason" type="ios-checkmark-circle" size="24" @click="showUserBlock(member, index)"/>
+              <Icon v-if="member.blockReason" type="md-remove-circle" size="24" @click="unblockUser(index)"/>
               <Icon v-if="memberType == 'Groups'" type="md-close-circle" size="24" @click="removeGroup(member)"/>
-              <router-link :to="{ name: 'member-details', path: '/:memberDetails', query: member }">
-                <Icon type="md-eye" size="24"/>
-              </router-link>
+              <Icon type="md-eye" size="24" @click="navTo(member)"/>
             </td>
           </tr>
         </tbody>
@@ -72,40 +82,6 @@
           <Icon type="md-add" size="24"/>
         </button>
       </table>
-    </div>
-
-    <div v-else-if="showMembersTypeChoice">
-      <div v-if="typeSelected === 'individual'" class="membersTypeChoice">
-        <div @click="getMember('Users'), showGroup = true">
-          <p>
-            <span><Icon type="md-person" /></span>
-            <strong>Users</strong>
-          </p>
-        </div>
-
-        <div @click="getMember('Groups'), showGroup = true">
-          <p>
-            <span><Icon type="md-people" /></span>
-            <strong>Groups</strong>
-          </p>
-        </div>
-      </div>
-
-      <div v-else class="membersTypeChoice">
-        <div @click="getMember('Users'), showGroup = true">
-          <p>
-            <span><Icon type="md-person" /></span>
-            <strong>Single Machine</strong>
-          </p>
-        </div>
-
-        <div @click="getMember('Groups'), showGroup = true">
-          <p>
-            <span><Icon type="md-people" /></span>
-            <strong>Machine Groups</strong>
-          </p>
-        </div>
-      </div>
     </div>
 
     <Modal v-model="memberToAdd" title="Add Group" okText="Add" @on-ok="createMember" @close="memberToAdd = false" :width="900"
@@ -139,7 +115,7 @@
   import Vue from 'vue'
   import api from '../libs/api'
   import formField from '../components/form-field'
-  import { mapState } from 'vuex'
+
   export default {
     name: 'admin-management-members',
     components: {
@@ -186,23 +162,12 @@
         this.members = []
         this.memberType = memberType
         localStorage.setItem('memberType', memberType)
-        this.$store.dispatch('admin/showChoice', false)
         await Vue.http
-          .get(memberType === 'Users' ? 'api/users' : 'api/groups', api.REQUEST_OPTIONS)
-          .then((groups) => {
-            if (groups.body.length > 0) {
-              for (let i = 0; i < groups.body.length; i++) {
-                this.members = []
-                this.members = groups.body
-              }
-              for (let member of this.members) {
-                if (member.memberName) {
-                  Vue.http
-                    .get('/api/users/' + member.memberName, api.REQUEST_OPTIONS)
-                    .then((response) => {
-                      member.role = response.body.roles[0]
-                    })
-                }
+          .get(api.paths.allUsers, api.REQUEST_OPTIONS)
+          .then((users) => {
+            if (users.body.length > 0) {
+              for (let i = 0; i < users.body.length; i++) {
+                this.members.push(users.body[i])
               }
             }
             return this.members
@@ -233,6 +198,10 @@
               }
             })
         }
+      },
+      async navTo (user) {
+        await localStorage.setItem('user', JSON.stringify(user))
+        this.$router.push({ name: 'member-projects', params: { user: user.login } })
       }
     },
     created () {
@@ -242,8 +211,7 @@
       sortedMembers () {
         this.$store.dispatch('admin/showSubMenuMembers', false)
         return this.members.map(item => item).sort((a, b) => a.id - b.id)
-      },
-      ...mapState('admin', ['showMembersTypeChoice', 'typeSelected'])
+      }
     }
   }
 </script>
@@ -255,5 +223,12 @@
   }
   .searchButton .ivu-select {
     width: 40%;
+  }
+  .member-projects-list {
+    vertical-align: middle;
+  }
+  .member-projects-list span {
+    margin: 0 2px;
+    vertical-align: middle;
   }
 </style>
