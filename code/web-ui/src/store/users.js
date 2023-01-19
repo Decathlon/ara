@@ -18,18 +18,11 @@ export default ({
   namespaced: true,
 
   state: {
-    users: [],
     userRole: '',
     user: []
   },
 
   mutations: {
-    storeAllUsers: (state, users) => {
-      for (let user of users) {
-        state.users.push(user.memberName)
-      }
-    },
-
     setUserRole: (state, userRole) => {
       state.userRole = userRole
     },
@@ -40,10 +33,6 @@ export default ({
   },
 
   actions: {
-    getAllUsers ({ commit }, payload) {
-      commit('storeAllUsers', payload)
-    },
-
     getUserRole ({ commit }, payload) {
       commit('setUserRole', payload)
     },

@@ -18,41 +18,47 @@
   <div>
     <span class="breadcrumbLink" @click="$router.go(-1)">Members list</span>
     <div>
-      <h1 class="adminTitle">{{ memberInfo.login }}'s projects</h1>
+      <h1 class="adminTitle">{{ getMemberInfo.login }}'s projects</h1>
     </div>
 
     <div>
-      <div v-if="memberInfo.profile === 'SUPER_ADMIN'" class="projectCTA">
+      <div v-if="currentProfile.profile === 'SUPER_ADMIN'" class="projectCTA">
         <Button type="primary" class="addBtn" @click="add()">
           Affect to a new project
         </Button>
       </div>
       <table class="adminTable" aria-label="User's project and his role for each of them">
         <tbody v-if="members">
-          <tr v-for="(scope, index) in memberInfo.scopes" :key="index" :class="index %2 !== 0 ? 'lightGrey' : 'darkGrey'">
+          <tr v-for="(scope, index) in getMemberInfo.scopes" :key="index" :class="index %2 !== 0 ? 'lightGrey' : 'darkGrey'">
             <td class="userType">
               {{ scope.project }}
             </td>
 
             <td class="userType">
               <ul class="user-project-roles">
-                <li class="user-role-chip" @click="changeProfile(index, 'MEMBER')" :class="scope.role === 'MEMBER' ? ' active' : ''">
+                <li class="user-role-chip" 
+                    @click="changeProfile({ member: getMemberInfo, project: scope.project, role: 'MEMBER'})" 
+                    :class="scope.role === 'MEMBER' ? ' active' : ''">
                     <span v-if="scope.role === 'MEMBER'"><Icon type="md-checkmark" /></span>
                     Member
                 </li>
-                <li class="user-role-chip" @click="changeProfile(index, 'MAINTAINER')" :class="scope.role === 'MAINTAINER' ? ' active' : ''">
+                <li class="user-role-chip"
+                    @click="changeProfile({ member: getMemberInfo, project: scope.project, role: 'MAINTAINER'})"
+                    :class="scope.role === 'MAINTAINER' ? ' active' : ''">
                     <span v-if="scope.role === 'MAINTAINER'"><Icon type="md-checkmark" /></span>
                     Maintainer
                 </li>
-                <li class="user-role-chip" @click="changeProfile(index, 'ADMIN')" :class="scope.role === 'ADMIN' ? ' active' : ''">
+                <li class="user-role-chip"
+                    @click="changeProfile({ member: getMemberInfo, project: scope.project, role: 'ADMIN'})" 
+                    :class="scope.role === 'ADMIN' ? ' active' : ''">
                     <span v-if="scope.role === 'ADMIN'"><Icon type="md-checkmark" /></span>
                     Admin
                 </li>
               </ul>
             </td>
 
-            <td class="userType">
-                <Icon type="md-close-circle" size="32" />
+            <td class="remove-member-project-btn">
+                <Icon type="md-close-circle" size="32" @click="changeProfile('remove')" />
             </td>
           </tr>
         </tbody>
@@ -118,7 +124,8 @@
         editing: false,
         groupName: this.$route.query.groupName,
         groupMembers: [],
-        memberType: localStorage.getItem('memberType')
+        memberType: localStorage.getItem('memberType'),
+        currentProfile: ''
       }
     },
     methods: {
@@ -141,16 +148,31 @@
             .then(setTimeout(() => this.showGroupInfo(this.groupName), 100))
         }
       },
-      changeProfile (index, newRole) {
-        this.memberInfo.scopes[index].role = newRole
+      changeProfile (changeType) {
+        const role = {
+          scope: changeType.newRole,
+          project: changeType.project
+        }
+        if (changeType === 'remove') {
+          Vue.http
+            .delete(api.paths.userProjectScopeManagement(changeType.member.login, changeType.project), api.REQUEST_OPTIONS)
+            .then(() => this.getMemberInfo)
+        } else {
+          Vue.http
+            .put(api.paths.userProjectScopeManagement(changeType.member.login, changeType.project), role, api.REQUEST_OPTIONS)
+            .then(() => this.getMemberInfo)
+        }
       }
     },
     created () {
-      this.memberInfo = JSON.parse(localStorage.getItem('user'))
+      this.currentProfile = JSON.parse(localStorage.getItem('current_user'))
     },
     computed: {
       sortedMembers () {
         return this.members.map(item => item).sort((a, b) => a.id - b.id)
+      },
+      getMemberInfo () {
+        return JSON.parse(localStorage.getItem('user'))
       }
     }
   }
@@ -170,8 +192,10 @@
     }
     .user-role-chip {
         display: flex;
+        width: 150px;
         cursor: pointer;
         align-items: center;
+        justify-content: center;
         background-color: #ffffff;
         border: 2px solid #d9dde1;
         height: 44px;

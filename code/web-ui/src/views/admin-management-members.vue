@@ -19,12 +19,12 @@
     <div class="tableContent">
       <span class="breadcrumbLink" @click="$router.go(-1)">
         <Icon type="md-home" />
-        {{ memberType }} list
+        list
       </span>
 
       <h1 class="adminTitle">Members</h1>
 
-      <div v-if="memberType == 'Users'" class="searchButton">
+      <div class="searchButton">
         <AutoComplete
           v-model="value"
           placeholder="Search a member..."
@@ -40,7 +40,7 @@
             <th>Name</th>
             <th>Profile</th>
             <th>Projects</th>
-            <th v-if="memberType == 'Users'">Restriction</th>
+            <!-- <th>Restriction</th> -->
             <th></th>
           </tr>
         </thead>
@@ -48,16 +48,16 @@
         <tbody v-if="members">
           <tr v-for="(member, index) in members" :key="index" :class="index %2 !== 0 ? 'lightGrey' : 'darkGrey'">
             <td class="userType">
-              {{ member.login }}
+              {{ getProjectUserNameDisplay(member.login) }}
             </td>
 
             <td class="userType">
               {{ member.profile }}
             </td>
 
-            <td v-if="memberType == 'Users'" class="userType">
+            <!-- <td class="userType">
               {{ member.blockReason }}
-            </td>
+            </td> -->
 
             <td class="member-projects-list">
               <span v-for="(scope, index) in member.scopes" :class="index > 2 ? 'project-count' : ''">
@@ -70,17 +70,17 @@
               </span>
             </td>
 
-            <td>
+            <td :class="member.login !== currentUser.login ? '' : 'hidden'">
               <Icon v-if="!member.blockReason" type="ios-checkmark-circle" size="24" @click="showUserBlock(member, index)"/>
               <Icon v-if="member.blockReason" type="md-remove-circle" size="24" @click="unblockUser(index)"/>
-              <Icon v-if="memberType == 'Groups'" type="md-close-circle" size="24" @click="removeGroup(member)"/>
+              <!-- <Icon type="md-close-circle" size="24" @click="removeGroup(member)"/> -->
               <Icon type="md-eye" size="24" @click="navTo(member)"/>
             </td>
           </tr>
         </tbody>
-        <button v-if="memberType == 'Groups'" class="addBtn" @click="memberToAdd = true">
+        <!-- <button class="addBtn" @click="memberToAdd = true">
           <Icon type="md-add" size="24"/>
-        </button>
+        </button> -->
       </table>
     </div>
 
@@ -115,6 +115,7 @@
   import Vue from 'vue'
   import api from '../libs/api'
   import formField from '../components/form-field'
+  import { AuthenticationService } from '../service/authentication.service'
 
   export default {
     name: 'admin-management-members',
@@ -141,7 +142,6 @@
         editingNew: false,
         editing: false,
         showGroup: false,
-        memberType: '',
         userRole: '',
         blockPopup: false,
         memberToBlock: {
@@ -158,12 +158,12 @@
           .post('/api/groups', this.editingData, api.REQUEST_OPTIONS)
           .then(() => { return this.members })
       },
-      async getMember (memberType) {
+      async getMember () {
+        const profile = this.currentUser.profile
         this.members = []
-        this.memberType = memberType
-        localStorage.setItem('memberType', memberType)
         await Vue.http
-          .get(api.paths.allUsers, api.REQUEST_OPTIONS)
+          .get(profile === 'SUPER_ADMIN' ? api.paths.allUsers
+            : profile === 'AUDITOR' ? api.paths.allUsers : api.paths.scopedUsers, api.REQUEST_OPTIONS)
           .then((users) => {
             if (users.body.length > 0) {
               for (let i = 0; i < users.body.length; i++) {
@@ -202,6 +202,12 @@
       async navTo (user) {
         await localStorage.setItem('user', JSON.stringify(user))
         this.$router.push({ name: 'member-projects', params: { user: user.login } })
+      },
+      getProjectUserNameDisplay (login) {
+        if (login === this.currentUser.login) {
+          return 'Me'
+        }
+        return login
       }
     },
     created () {
@@ -211,6 +217,9 @@
       sortedMembers () {
         this.$store.dispatch('admin/showSubMenuMembers', false)
         return this.members.map(item => item).sort((a, b) => a.id - b.id)
+      },
+      currentUser () {
+        return AuthenticationService.getDetails().user
       }
     }
   }
@@ -230,5 +239,8 @@
   .member-projects-list span {
     margin: 0 2px;
     vertical-align: middle;
+  }
+  .hidden > *{
+    visibility: hidden;
   }
 </style>

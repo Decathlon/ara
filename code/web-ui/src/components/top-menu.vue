@@ -416,10 +416,6 @@
     },
 
     mounted () {
-      Vue.http.get('api/users')
-        .then((response) => {
-          this.$store.dispatch('users/getAllUsers', response.body)
-        })
       this.loadLocalParameters()
       Vue.http
         .get(api.paths.info, api.REQUEST_OPTIONS)
