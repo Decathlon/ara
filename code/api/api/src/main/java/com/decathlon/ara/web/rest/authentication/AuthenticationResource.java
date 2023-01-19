@@ -17,7 +17,7 @@
 
 package com.decathlon.ara.web.rest.authentication;
 
-import com.decathlon.ara.security.dto.provider.AuthenticationProvidersDTO;
+import com.decathlon.ara.security.dto.authentication.provider.AuthenticationProviders;
 import com.decathlon.ara.security.service.AuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +56,7 @@ public class AuthenticationResource {
     }
 
     @GetMapping("/configuration")
-    public AuthenticationProvidersDTO getAuthenticationConfiguration() {
+    public AuthenticationProviders getAuthenticationConfiguration() {
         return this.authenticationService.getAuthenticationConfiguration();
     }
 }

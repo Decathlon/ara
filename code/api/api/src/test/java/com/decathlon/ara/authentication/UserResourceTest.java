@@ -41,7 +41,7 @@ class UserResourceTest {
         var authentication = mock(OAuth2AuthenticationToken.class);
 
         // When
-        when(userAccountService.getCurrentUserAccount(authentication)).thenReturn(Optional.empty());
+        when(userAccountService.getCurrentUserAccountFromAuthentication(authentication)).thenReturn(Optional.empty());
 
         // Then
         var response = userResource.getCurrentUserAccount(authentication);
@@ -56,7 +56,7 @@ class UserResourceTest {
         var userAccount = mock(UserAccount.class);
 
         // When
-        when(userAccountService.getCurrentUserAccount(authentication)).thenReturn(Optional.of(userAccount));
+        when(userAccountService.getCurrentUserAccountFromAuthentication(authentication)).thenReturn(Optional.of(userAccount));
 
         // Then
         var response = userResource.getCurrentUserAccount(authentication);

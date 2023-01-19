@@ -19,8 +19,8 @@ package com.decathlon.ara.security.service;
 
 import com.decathlon.ara.security.configuration.data.providers.OAuth2ProvidersConfiguration;
 import com.decathlon.ara.security.configuration.data.providers.setup.ProviderSetupConfiguration;
-import com.decathlon.ara.security.dto.provider.AuthenticationProviderDTO;
-import com.decathlon.ara.security.dto.provider.AuthenticationProvidersDTO;
+import com.decathlon.ara.security.dto.authentication.provider.AuthenticationProvider;
+import com.decathlon.ara.security.dto.authentication.provider.AuthenticationProviders;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,16 +49,16 @@ public class AuthenticationService {
      * Get the authentication configuration
      * @return the authentication configuration
      */
-    public AuthenticationProvidersDTO getAuthenticationConfiguration() {
+    public AuthenticationProviders getAuthenticationConfiguration() {
         var providers = CollectionUtils.isEmpty(this.providersConfiguration.getSetup()) ?
-                new ArrayList<AuthenticationProviderDTO>() :
+                new ArrayList<AuthenticationProvider>() :
                 this.providersConfiguration.getSetup()
                         .stream()
                         .map(ProviderSetupConfiguration::getProvider)
                         .filter(Objects::nonNull)
-                        .map(provider -> new AuthenticationProviderDTO(provider.getDisplayValue(), provider.getType(), provider.getRegistration()))
+                        .map(provider -> new AuthenticationProvider(provider.getDisplayValue(), provider.getType(), provider.getRegistration()))
                         .toList();
-        return new AuthenticationProvidersDTO(
+        return new AuthenticationProviders(
                 providers,
                 this.loginStartingUrl,
                 this.logoutProcessingUrl);

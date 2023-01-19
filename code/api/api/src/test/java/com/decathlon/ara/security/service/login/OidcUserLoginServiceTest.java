@@ -1,8 +1,12 @@
 package com.decathlon.ara.security.service.login;
 
+import com.decathlon.ara.Entities;
+import com.decathlon.ara.security.dto.authentication.user.AuthenticatedOAuth2User;
 import com.decathlon.ara.security.dto.user.UserAccount;
 import com.decathlon.ara.security.mapper.AuthorityMapper;
+import com.decathlon.ara.security.service.UserSessionService;
 import com.decathlon.ara.security.service.user.UserAccountService;
+import com.decathlon.ara.service.exception.ForbiddenException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,13 +38,16 @@ class OidcUserLoginServiceTest {
     private UserAccountService userAccountService;
 
     @Mock
+    private UserSessionService userSessionService;
+
+    @Mock
     private AuthorityMapper authorityMapper;
 
     @InjectMocks
     private OidcUserLoginService loginService;
 
     @Test
-    void manageUserLoginRequest_saveUser_whenUserIsNotPersisted(){
+    void manageUserLoginRequest_ignoreUserAuthorities_whenUserNotFoundInSession() throws ForbiddenException {
         // Given
         var request = mock(OidcUserRequest.class);
         var userService = mock(OidcUserService.class);
@@ -49,7 +56,41 @@ class OidcUserLoginServiceTest {
         var oidcUserInfo = mock(OidcUserInfo.class);
         Map<String, Object> claims = Map.ofEntries(entry(StandardClaimNames.SUB, "subValue"));
         var clientRegistration = mock(ClientRegistration.class);
-        var newlyPersistedUser = mock(UserAccount.class);
+
+        var providerName = "provider-name";
+
+        // When
+        when(userAccountService.getOidcUserService()).thenReturn(userService);
+        when(userService.loadUser(request)).thenReturn(oidcUser);
+        when(oidcUser.getIdToken()).thenReturn(oidcIdToken);
+        when(oidcUser.getUserInfo()).thenReturn(oidcUserInfo);
+        when(oidcIdToken.getClaims()).thenReturn(claims);
+        when(request.getClientRegistration()).thenReturn(clientRegistration);
+        when(clientRegistration.getRegistrationId()).thenReturn(providerName);
+        when(userSessionService.getCurrentAuthenticatedOAuth2UserFromOAuth2UserAndProviderName(oidcUser, providerName)).thenReturn(Optional.empty());
+
+        // Then
+        var updatedUser = loginService.manageUserLoginRequest(request);
+        assertThat(updatedUser).isNotNull().isExactlyInstanceOf(DefaultOidcUser.class);
+        assertThat(updatedUser.getAuthorities()).isEmpty();
+        assertThat(updatedUser.getIdToken()).isSameAs(oidcIdToken);
+        assertThat(updatedUser.getUserInfo()).isSameAs(oidcUserInfo);
+        verify(userAccountService, never()).getCurrentUserAccountFromAuthenticatedOAuth2User(any());
+        verify(userAccountService, never()).createUserAccountFromAuthenticatedOAuth2User(any());
+    }
+
+    @Test
+    void manageUserLoginRequest_saveUser_whenUserIsNotPersisted() throws ForbiddenException {
+        // Given
+        var request = mock(OidcUserRequest.class);
+        var userService = mock(OidcUserService.class);
+        var oidcUser = mock(OidcUser.class);
+        var oidcIdToken =  mock(OidcIdToken.class);
+        var oidcUserInfo = mock(OidcUserInfo.class);
+        Map<String, Object> claims = Map.ofEntries(entry(StandardClaimNames.SUB, "subValue"));
+        var clientRegistration = mock(ClientRegistration.class);
+        var authenticatedUser = mock(AuthenticatedOAuth2User.class);
+        var newlyPersistedUserAccount = mock(UserAccount.class);
 
         var authority1 = mock(GrantedAuthority.class);
         var authorityValue1 = "authority-1";
@@ -69,9 +110,10 @@ class OidcUserLoginServiceTest {
         when(oidcIdToken.getClaims()).thenReturn(claims);
         when(request.getClientRegistration()).thenReturn(clientRegistration);
         when(clientRegistration.getRegistrationId()).thenReturn(providerName);
-        when(userAccountService.getCurrentUserAccount(oidcUser, providerName)).thenReturn(Optional.empty());
-        when(userAccountService.createUserAccount(oidcUser, providerName)).thenReturn(newlyPersistedUser);
-        when(authorityMapper.getGrantedAuthoritiesFromUserAccount(newlyPersistedUser)).thenReturn(authorities);
+        when(userSessionService.getCurrentAuthenticatedOAuth2UserFromOAuth2UserAndProviderName(oidcUser, providerName)).thenReturn(Optional.of(authenticatedUser));
+        when(userAccountService.getCurrentUserAccountFromAuthenticatedOAuth2User(authenticatedUser)).thenReturn(Optional.empty());
+        when(userAccountService.createUserAccountFromAuthenticatedOAuth2User(authenticatedUser)).thenReturn(newlyPersistedUserAccount);
+        when(authorityMapper.getGrantedAuthoritiesFromUserAccount(newlyPersistedUserAccount)).thenReturn(authorities);
         when(authority1.getAuthority()).thenReturn(authorityValue1);
         when(authority2.getAuthority()).thenReturn(authorityValue2);
         when(authority3.getAuthority()).thenReturn(authorityValue3);
@@ -82,11 +124,46 @@ class OidcUserLoginServiceTest {
         assertThat(updatedUser.getAuthorities()).containsExactlyInAnyOrderElementsOf(authorities);
         assertThat(updatedUser.getIdToken()).isSameAs(oidcIdToken);
         assertThat(updatedUser.getUserInfo()).isSameAs(oidcUserInfo);
-        verify(userAccountService, times(1)).createUserAccount(oidcUser, providerName);
+        verify(userAccountService, times(1)).createUserAccountFromAuthenticatedOAuth2User(authenticatedUser);
     }
 
     @Test
-    void manageUserLoginRequest_fetchUser_whenUserIsPersisted(){
+    void manageUserLoginRequest_ignoreUserAuthorities_whenAnExceptionIsThrownWhilePersistingTheUser() throws ForbiddenException {
+        // Given
+        var request = mock(OidcUserRequest.class);
+        var userService = mock(OidcUserService.class);
+        var oidcUser = mock(OidcUser.class);
+        var oidcIdToken =  mock(OidcIdToken.class);
+        var oidcUserInfo = mock(OidcUserInfo.class);
+        Map<String, Object> claims = Map.ofEntries(entry(StandardClaimNames.SUB, "subValue"));
+        var clientRegistration = mock(ClientRegistration.class);
+        var authenticatedUser = mock(AuthenticatedOAuth2User.class);
+
+        var providerName = "provider-name";
+
+        // When
+        when(userAccountService.getOidcUserService()).thenReturn(userService);
+        when(userService.loadUser(request)).thenReturn(oidcUser);
+        when(oidcUser.getIdToken()).thenReturn(oidcIdToken);
+        when(oidcUser.getUserInfo()).thenReturn(oidcUserInfo);
+        when(oidcIdToken.getClaims()).thenReturn(claims);
+        when(request.getClientRegistration()).thenReturn(clientRegistration);
+        when(clientRegistration.getRegistrationId()).thenReturn(providerName);
+        when(userSessionService.getCurrentAuthenticatedOAuth2UserFromOAuth2UserAndProviderName(oidcUser, providerName)).thenReturn(Optional.of(authenticatedUser));
+        when(userAccountService.getCurrentUserAccountFromAuthenticatedOAuth2User(authenticatedUser)).thenReturn(Optional.empty());
+        when(userAccountService.createUserAccountFromAuthenticatedOAuth2User(authenticatedUser)).thenThrow(new ForbiddenException(Entities.USER, "persisting user"));
+
+        // Then
+        var updatedUser = loginService.manageUserLoginRequest(request);
+        assertThat(updatedUser).isNotNull().isExactlyInstanceOf(DefaultOidcUser.class);
+        assertThat(updatedUser.getAuthorities()).isEmpty();
+        assertThat(updatedUser.getIdToken()).isSameAs(oidcIdToken);
+        assertThat(updatedUser.getUserInfo()).isSameAs(oidcUserInfo);
+        verify(userAccountService, times(1)).createUserAccountFromAuthenticatedOAuth2User(authenticatedUser);
+    }
+
+    @Test
+    void manageUserLoginRequest_fetchUser_whenUserIsPersisted() throws ForbiddenException {
         // Given
         var request = mock(OidcUserRequest.class);
         var userService = mock(OidcUserService.class);
@@ -95,7 +172,8 @@ class OidcUserLoginServiceTest {
         var oidcUserInfo = mock(OidcUserInfo.class);
         Map<String, Object> claims = Map.ofEntries(entry(StandardClaimNames.SUB, "subValue"));
         var clientRegistration = mock(ClientRegistration.class);
-        var alreadyPersistedUser = mock(UserAccount.class);
+        var authenticatedUser = mock(AuthenticatedOAuth2User.class);
+        var alreadyPersistedUserAccount = mock(UserAccount.class);
 
         var authority1 = mock(GrantedAuthority.class);
         var authorityValue1 = "authority-1";
@@ -115,8 +193,9 @@ class OidcUserLoginServiceTest {
         when(oidcIdToken.getClaims()).thenReturn(claims);
         when(request.getClientRegistration()).thenReturn(clientRegistration);
         when(clientRegistration.getRegistrationId()).thenReturn(providerName);
-        when(userAccountService.getCurrentUserAccount(oidcUser, providerName)).thenReturn(Optional.of(alreadyPersistedUser));
-        when(authorityMapper.getGrantedAuthoritiesFromUserAccount(alreadyPersistedUser)).thenReturn(authorities);
+        when(userSessionService.getCurrentAuthenticatedOAuth2UserFromOAuth2UserAndProviderName(oidcUser, providerName)).thenReturn(Optional.of(authenticatedUser));
+        when(userAccountService.getCurrentUserAccountFromAuthenticatedOAuth2User(authenticatedUser)).thenReturn(Optional.of(alreadyPersistedUserAccount));
+        when(authorityMapper.getGrantedAuthoritiesFromUserAccount(alreadyPersistedUserAccount)).thenReturn(authorities);
         when(authority1.getAuthority()).thenReturn(authorityValue1);
         when(authority2.getAuthority()).thenReturn(authorityValue2);
         when(authority3.getAuthority()).thenReturn(authorityValue3);
@@ -127,6 +206,6 @@ class OidcUserLoginServiceTest {
         assertThat(updatedUser.getAuthorities()).containsExactlyInAnyOrderElementsOf(authorities);
         assertThat(updatedUser.getIdToken()).isEqualTo(oidcIdToken);
         assertThat(updatedUser.getUserInfo()).isEqualTo(oidcUserInfo);
-        verify(userAccountService, never()).createUserAccount(any(), anyString());
+        verify(userAccountService, never()).createUserAccountFromAuthenticatedOAuth2User(any());
     }
 }

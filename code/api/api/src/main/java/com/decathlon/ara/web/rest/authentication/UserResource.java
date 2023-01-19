@@ -52,7 +52,7 @@ public class UserResource {
 
     @GetMapping(CURRENT_ACCOUNT)
     public ResponseEntity<UserAccount> getCurrentUserAccount(OAuth2AuthenticationToken authentication) {
-        var user = userAccountService.getCurrentUserAccount(authentication);
+        var user = userAccountService.getCurrentUserAccountFromAuthentication(authentication);
         return user.map(ResponseEntity::ok).orElse(ResponseEntity.badRequest().build());
     }
 

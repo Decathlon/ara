@@ -32,7 +32,7 @@ public class UserEntityRoleOnProject {
     }
 
     public UserEntityRoleOnProject(@NonNull UserEntity userEntity, @NonNull Project project, @NonNull ScopedUserRoleOnProject role) {
-        this.userEntityRoleOnProjectId = new UserEntityRoleOnProjectId(userEntity.getLogin(), userEntity.getProviderName(), project.getId());
+        this.userEntityRoleOnProjectId = new UserEntityRoleOnProjectId(userEntity.getProviderName(), userEntity.getLogin(), project.getId());
         this.userEntity = userEntity;
         this.project = project;
         this.role = role;
@@ -74,12 +74,12 @@ public class UserEntityRoleOnProject {
         }
 
         public UserEntityRoleOnProjectId(@NonNull UserEntity userEntity, @NonNull Project project) {
-            this.userEntityId = new UserEntity.UserEntityId(userEntity.getLogin(), userEntity.getProviderName());
+            this.userEntityId = new UserEntity.UserEntityId(userEntity.getProviderName(), userEntity.getLogin());
             this.projectId = project.getId();
         }
 
-        public UserEntityRoleOnProjectId(@NonNull String login, @NonNull String providerName, @NonNull Long projectId) {
-            this.userEntityId = new UserEntity.UserEntityId(login, providerName);
+        public UserEntityRoleOnProjectId(@NonNull String providerName, @NonNull String login, @NonNull Long projectId) {
+            this.userEntityId = new UserEntity.UserEntityId(providerName, login);
             this.projectId = projectId;
         }
 

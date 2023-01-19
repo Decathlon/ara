@@ -1,6 +1,6 @@
-package com.decathlon.ara.security.dto.provider;
+package com.decathlon.ara.security.dto.authentication.provider;
 
-public class AuthenticationProviderDTO {
+public class AuthenticationProvider {
 
     private String displayValue;
 
@@ -8,7 +8,7 @@ public class AuthenticationProviderDTO {
 
     private String name;
 
-    public AuthenticationProviderDTO(String displayValue, String type, String name) {
+    public AuthenticationProvider(String displayValue, String type, String name) {
         this.displayValue = displayValue;
         this.type = type;
         this.name = name;

@@ -4,16 +4,21 @@ import com.decathlon.ara.Entities;
 import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
 import com.decathlon.ara.loader.DemoLoaderConstants;
 import com.decathlon.ara.repository.security.member.user.entity.UserEntityRepository;
+import com.decathlon.ara.security.dto.authentication.user.AuthenticatedOAuth2User;
 import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScope;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
+import com.decathlon.ara.security.mapper.AuthenticationMapper;
 import com.decathlon.ara.security.mapper.AuthorityMapper;
-import com.decathlon.ara.security.service.user.strategy.select.UserStrategySelector;
 import com.decathlon.ara.service.exception.ForbiddenException;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -25,6 +30,8 @@ import java.util.stream.Stream;
 @Service
 public class UserSessionService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(UserSessionService.class);
+
     public static final String AUTHORITY_USER_PROJECT_SCOPE_PREFIX = "USER_PROJECT_SCOPE:";
 
     public static final String AUTHORITY_USER_PROFILE_PREFIX = "USER_PROFILE:";
@@ -32,20 +39,20 @@ public class UserSessionService {
     public static final String SUPER_ADMIN_PROFILE_AUTHORITY = AUTHORITY_USER_PROFILE_PREFIX + UserAccountProfile.SUPER_ADMIN.name();
     public static final String AUDITOR_PROFILE_AUTHORITY = AUTHORITY_USER_PROFILE_PREFIX + UserAccountProfile.AUDITOR.name();
 
-    private final UserStrategySelector strategySelector;
-
     private final UserEntityRepository userEntityRepository;
 
     private final AuthorityMapper authorityMapper;
 
+    private final AuthenticationMapper authenticationMapper;
+
     public UserSessionService(
-            UserStrategySelector strategySelector,
             UserEntityRepository userEntityRepository,
-            AuthorityMapper authorityMapper
+            AuthorityMapper authorityMapper,
+            AuthenticationMapper authenticationMapper
     ) {
-        this.strategySelector = strategySelector;
         this.userEntityRepository = userEntityRepository;
         this.authorityMapper = authorityMapper;
+        this.authenticationMapper = authenticationMapper;
     }
 
     /**
@@ -142,16 +149,62 @@ public class UserSessionService {
             throw exception;
         }
 
+        var authenticatedUser = getCurrentAuthenticatedOAuth2UserFromAuthentication(oauth2Authentication).orElseThrow(() -> exception);
+
+        var providerName = authenticatedUser.getProviderName();
+        var userLogin = authenticatedUser.getLogin();
+
+        var persistedUser = userEntityRepository.findById(new UserEntity.UserEntityId(providerName, userLogin)).orElseThrow(() -> exception);
+
         var oauth2User = oauth2Authentication.getPrincipal();
-        var providerName = oauth2Authentication.getAuthorizedClientRegistrationId();
-
-        var strategy = strategySelector.selectUserStrategyFromProviderName(providerName);
-        var userLogin = strategy.getLogin(oauth2User);
-
-        var persistedUser = userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName)).orElseThrow(() -> exception);
-
         var authorities = authorityMapper.getGrantedAuthoritiesFromUserEntity(persistedUser);
         securityContext.setAuthentication(new OAuth2AuthenticationToken(oauth2User, authorities, providerName));
+    }
+
+    /**
+     * Get current authenticated (OAuth2) user
+     * @return the current authenticated user
+     */
+    public Optional<AuthenticatedOAuth2User> getCurrentAuthenticatedOAuth2User() {
+        var securityContext = SecurityContextHolder.getContext();
+        var authentication = securityContext.getAuthentication();
+
+        if (authentication instanceof OAuth2AuthenticationToken oauth2Authentication) {
+            return getCurrentAuthenticatedOAuth2UserFromAuthentication(oauth2Authentication);
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Get current authenticated user from a {@link OAuth2AuthenticationToken}
+     * @param authentication the authentication
+     * @return the current authenticated user
+     */
+    public Optional<AuthenticatedOAuth2User> getCurrentAuthenticatedOAuth2UserFromAuthentication(@NonNull OAuth2AuthenticationToken authentication) {
+        try {
+            var authenticatedUser = authenticationMapper.getAuthenticatedOAuth2UserFromAuthentication(authentication);
+            return Optional.of(authenticatedUser);
+        } catch (ForbiddenException e) {
+            LOG.warn("Current user couldn't be fetched...");
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Get current authenticated user from {@link OAuth2User} and provider name
+     * @param oauth2User the oauth2 user
+     * @param providerName the provider name
+     * @return the current authenticated user
+     */
+    public Optional<AuthenticatedOAuth2User> getCurrentAuthenticatedOAuth2UserFromOAuth2UserAndProviderName(@NonNull OAuth2User oauth2User, @NonNull String providerName) {
+        try {
+            var authenticatedUser = authenticationMapper.getAuthenticatedOAuth2UserFromOAuth2UserAndProviderName(oauth2User, providerName);
+            return Optional.of(authenticatedUser);
+        } catch (ForbiddenException e) {
+            LOG.warn("Current user couldn't be fetched...");
+        }
+        return Optional.empty();
     }
 
 }

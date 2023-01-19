@@ -1,13 +1,14 @@
 package com.decathlon.ara.security.service;
 
+import com.decathlon.ara.Entities;
 import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
 import com.decathlon.ara.loader.DemoLoaderConstants;
 import com.decathlon.ara.repository.security.member.user.entity.UserEntityRepository;
+import com.decathlon.ara.security.dto.authentication.user.AuthenticatedOAuth2User;
 import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
+import com.decathlon.ara.security.mapper.AuthenticationMapper;
 import com.decathlon.ara.security.mapper.AuthorityMapper;
-import com.decathlon.ara.security.service.user.strategy.UserAccountStrategy;
-import com.decathlon.ara.security.service.user.strategy.select.UserStrategySelector;
 import com.decathlon.ara.service.exception.ForbiddenException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,13 +41,13 @@ import static org.mockito.Mockito.*;
 class UserSessionServiceTest {
 
     @Mock
-    private UserStrategySelector userStrategySelector;
-
-    @Mock
     private UserEntityRepository userEntityRepository;
 
     @Mock
     private AuthorityMapper authorityMapper;
+
+    @Mock
+    private AuthenticationMapper authenticationMapper;
 
     @InjectMocks
     private UserSessionService userSessionService;
@@ -506,24 +507,38 @@ class UserSessionServiceTest {
     }
 
     @Test
-    void refreshCurrentUserAuthorities_throwForbiddenException_whenUserNotFound() {
+    void refreshCurrentUserAuthorities_throwForbiddenException_whenAuthenticationMapperThrowsForbiddenException() throws ForbiddenException {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
         var authentication = mock(OAuth2AuthenticationToken.class);
-        var principal = mock(OAuth2User.class);
-        var userLogin = "user-login";
-        var providerName = "provider-name";
-
-        var strategy = mock(UserAccountStrategy.class);
 
         // When
         when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getPrincipal()).thenReturn(principal);
-        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
-        when(userStrategySelector.selectUserStrategyFromProviderName(providerName)).thenReturn(strategy);
-        when(strategy.getLogin(principal)).thenReturn(userLogin);
-        when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.empty());
+        when(authenticationMapper.getAuthenticatedOAuth2UserFromAuthentication(authentication)).thenThrow(new ForbiddenException(Entities.USER, "searching for current user"));
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userSessionService.refreshCurrentUserAuthorities());
+        verify(securityContext, never()).setAuthentication(any());
+    }
+
+    @Test
+    void refreshCurrentUserAuthorities_throwForbiddenException_whenUserNotFound() throws ForbiddenException {
+        // Given
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var userLogin = "user-login";
+        var providerName = "provider-name";
+
+        var authenticatedUser = mock(AuthenticatedOAuth2User.class);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authenticationMapper.getAuthenticatedOAuth2UserFromAuthentication(authentication)).thenReturn(authenticatedUser);
+        when(authenticatedUser.getLogin()).thenReturn(userLogin);
+        when(authenticatedUser.getProviderName()).thenReturn(providerName);
+        when(userEntityRepository.findById(new UserEntity.UserEntityId(providerName, userLogin))).thenReturn(Optional.empty());
 
         // Then
         assertThrows(ForbiddenException.class, () -> userSessionService.refreshCurrentUserAuthorities());
@@ -540,7 +555,7 @@ class UserSessionServiceTest {
         var userLogin = "user-login";
         var providerName = "provider-name";
 
-        var strategy = mock(UserAccountStrategy.class);
+        var authenticatedUser = mock(AuthenticatedOAuth2User.class);
 
         var userEntity = mock(UserEntity.class);
 
@@ -552,10 +567,10 @@ class UserSessionServiceTest {
         // When
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(principal);
-        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
-        when(userStrategySelector.selectUserStrategyFromProviderName(providerName)).thenReturn(strategy);
-        when(strategy.getLogin(principal)).thenReturn(userLogin);
-        when(userEntityRepository.findById(new UserEntity.UserEntityId(userLogin, providerName))).thenReturn(Optional.of(userEntity));
+        when(authenticationMapper.getAuthenticatedOAuth2UserFromAuthentication(authentication)).thenReturn(authenticatedUser);
+        when(authenticatedUser.getLogin()).thenReturn(userLogin);
+        when(authenticatedUser.getProviderName()).thenReturn(providerName);
+        when(userEntityRepository.findById(new UserEntity.UserEntityId(providerName, userLogin))).thenReturn(Optional.of(userEntity));
         when(authorityMapper.getGrantedAuthoritiesFromUserEntity(userEntity)).thenReturn(updatedAuthorities);
 
         // Then
@@ -567,5 +582,112 @@ class UserSessionServiceTest {
         assertThat(authenticationToUpdate.getPrincipal()).isSameAs(principal);
         assertThat(authenticationToUpdate.getAuthorities()).containsExactlyInAnyOrder(updatedAuthority1, updatedAuthority2, updatedAuthority3);
         assertThat(authenticationToUpdate.getAuthorizedClientRegistrationId()).isEqualTo(providerName);
+    }
+
+    @Test
+    void getCurrentAuthenticatedOAuth2User_returnEmptyOptional_whenAuthenticationIsNotInstanceOfOAuth2AuthenticationToken() {
+        // Given
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(UsernamePasswordAuthenticationToken.class);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+
+        // Then
+        var authenticatedUser = userSessionService.getCurrentAuthenticatedOAuth2User();
+        assertThat(authenticatedUser).isNotPresent();
+    }
+
+    @Test
+    void getCurrentAuthenticatedOAuth2User_returnEmptyOptional_whenAuthenticationMapperThrowsForbiddenException() throws ForbiddenException {
+        // Given
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authenticationMapper.getAuthenticatedOAuth2UserFromAuthentication(authentication)).thenThrow(new ForbiddenException(Entities.USER, "fetching the current user"));
+
+        // Then
+        var authenticatedUser = userSessionService.getCurrentAuthenticatedOAuth2User();
+        assertThat(authenticatedUser).isNotPresent();
+    }
+
+    @Test
+    void getCurrentAuthenticatedOAuth2User_returnAuthenticatedOAuth2User_whenAuthenticationMapperReturnsAuthenticatedOAuth2User() throws ForbiddenException {
+        // Given
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+
+        var authenticatedOAuth2User = mock(AuthenticatedOAuth2User.class);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authenticationMapper.getAuthenticatedOAuth2UserFromAuthentication(authentication)).thenReturn(authenticatedOAuth2User);
+
+        // Then
+        var authenticatedUser = userSessionService.getCurrentAuthenticatedOAuth2User();
+        assertThat(authenticatedUser).containsSame(authenticatedOAuth2User);
+    }
+
+    @Test
+    void getCurrentAuthenticatedOAuth2UserFromAuthentication_returnEmptyOptional_whenAuthenticationMapperThrowsForbiddenException() throws ForbiddenException {
+        // Given
+        var authentication = mock(OAuth2AuthenticationToken.class);
+
+        // When
+        when(authenticationMapper.getAuthenticatedOAuth2UserFromAuthentication(authentication)).thenThrow(new ForbiddenException(Entities.USER, "fetching the current user"));
+
+        // Then
+        var authenticatedUser = userSessionService.getCurrentAuthenticatedOAuth2UserFromAuthentication(authentication);
+        assertThat(authenticatedUser).isNotPresent();
+    }
+
+    @Test
+    void getCurrentAuthenticatedOAuth2UserFromAuthentication_returnAuthenticatedOAuth2User_whenAuthenticationMapperReturnsAuthenticatedOAuth2User() throws ForbiddenException {
+        // Given
+        var authentication = mock(OAuth2AuthenticationToken.class);
+
+        var authenticatedOAuth2User = mock(AuthenticatedOAuth2User.class);
+
+        // When
+        when(authenticationMapper.getAuthenticatedOAuth2UserFromAuthentication(authentication)).thenReturn(authenticatedOAuth2User);
+
+        // Then
+        var authenticatedUser = userSessionService.getCurrentAuthenticatedOAuth2UserFromAuthentication(authentication);
+        assertThat(authenticatedUser).containsSame(authenticatedOAuth2User);
+    }
+
+    @Test
+    void getCurrentAuthenticatedOAuth2UserFromOAuth2UserAndProviderName_returnEmptyOptional_whenAuthenticationMapperThrowsForbiddenException() throws ForbiddenException {
+        // Given
+        var oauth2User = mock(OAuth2User.class);
+        var providerName = "provider-name";
+
+        // When
+        when(authenticationMapper.getAuthenticatedOAuth2UserFromOAuth2UserAndProviderName(oauth2User, providerName)).thenThrow(new ForbiddenException(Entities.USER, "fetching the current user"));
+
+        // Then
+        var authenticatedUser = userSessionService.getCurrentAuthenticatedOAuth2UserFromOAuth2UserAndProviderName(oauth2User, providerName);
+        assertThat(authenticatedUser).isNotPresent();
+    }
+
+    @Test
+    void getCurrentAuthenticatedOAuth2UserFromOAuth2UserAndProviderName_returnAuthenticatedOAuth2User_whenAuthenticationMapperReturnsAuthenticatedOAuth2User() throws ForbiddenException {
+        // Given
+        var oauth2User = mock(OAuth2User.class);
+        var providerName = "provider-name";
+
+        var authenticatedOAuth2User = mock(AuthenticatedOAuth2User.class);
+
+        // When
+        when(authenticationMapper.getAuthenticatedOAuth2UserFromOAuth2UserAndProviderName(oauth2User, providerName)).thenReturn(authenticatedOAuth2User);
+
+        // Then
+        var authenticatedUser = userSessionService.getCurrentAuthenticatedOAuth2UserFromOAuth2UserAndProviderName(oauth2User, providerName);
+        assertThat(authenticatedUser).containsSame(authenticatedOAuth2User);
     }
 }

@@ -1,6 +1,7 @@
 package com.decathlon.ara.security.service.login;
 
 import com.decathlon.ara.security.mapper.AuthorityMapper;
+import com.decathlon.ara.security.service.UserSessionService;
 import com.decathlon.ara.security.service.user.UserAccountService;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -15,8 +16,12 @@ import java.util.Set;
 @Service
 public class OAuth2UserLoginService extends UserLoginService<OAuth2UserRequest, OAuth2User, OAuth2UserService<OAuth2UserRequest, OAuth2User>> {
 
-    public OAuth2UserLoginService(UserAccountService userAccountService, AuthorityMapper authorityMapper) {
-        super(userAccountService, authorityMapper);
+    public OAuth2UserLoginService(
+            UserAccountService userAccountService,
+            UserSessionService userSessionService,
+            AuthorityMapper authorityMapper
+    ) {
+        super(userAccountService, userSessionService, authorityMapper);
     }
 
     @Override

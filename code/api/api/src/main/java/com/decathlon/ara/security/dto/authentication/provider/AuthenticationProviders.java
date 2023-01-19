@@ -1,26 +1,26 @@
-package com.decathlon.ara.security.dto.provider;
+package com.decathlon.ara.security.dto.authentication.provider;
 
 import java.util.List;
 
-public class AuthenticationProvidersDTO {
+public class AuthenticationProviders {
 
-    private List<AuthenticationProviderDTO> providers;
+    private List<AuthenticationProvider> providers;
 
     private String loginUrl;
 
     private String logoutUrl;
 
-    public AuthenticationProvidersDTO(List<AuthenticationProviderDTO> providers, String loginUrl, String logoutUrl) {
+    public AuthenticationProviders(List<AuthenticationProvider> providers, String loginUrl, String logoutUrl) {
         this.providers = providers;
         this.loginUrl = loginUrl;
         this.logoutUrl = logoutUrl;
     }
 
-    public List<AuthenticationProviderDTO> getProviders() {
+    public List<AuthenticationProvider> getProviders() {
         return providers;
     }
 
-    public void setProviders(List<AuthenticationProviderDTO> providers) {
+    public void setProviders(List<AuthenticationProvider> providers) {
         this.providers = providers;
     }
 

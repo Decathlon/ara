@@ -14,25 +14,25 @@ import java.util.Optional;
 public class UserEntity {
 
     @Id
-    @Column(length = 50)
-    private String login;
-
-    @Id
     @Column(name = "provider", length = 30)
     private String providerName;
 
+    @Id
+    @Column(length = 50)
+    private String login;
+
     public static class UserEntityId implements Serializable {
 
-        private String login;
-
         private String providerName;
+
+        private String login;
 
         public UserEntityId() {
         }
 
-        public UserEntityId(@NonNull String login, @NonNull String providerName) {
-            this.login = login;
+        public UserEntityId(@NonNull String providerName, @NonNull String login) {
             this.providerName = providerName;
+            this.login = login;
         }
 
         @Override
@@ -42,14 +42,14 @@ public class UserEntity {
 
             UserEntityId that = (UserEntityId) o;
 
-            if (!login.equals(that.login)) return false;
-            return providerName.equals(that.providerName);
+            if (!providerName.equals(that.providerName)) return false;
+            return login.equals(that.login);
         }
 
         @Override
         public int hashCode() {
-            int result = login.hashCode();
-            result = 31 * result + providerName.hashCode();
+            int result = providerName.hashCode();
+            result = 31 * result + login.hashCode();
             return result;
         }
     }
@@ -86,24 +86,16 @@ public class UserEntity {
         this.profile = UserEntityProfile.SCOPED_USER;
     }
 
-    public UserEntity(@NonNull String login, @NonNull String providerName) {
-        this.login = login;
+    public UserEntity(@NonNull String providerName, @NonNull String login) {
         this.providerName = providerName;
+        this.login = login;
         this.profile = UserEntityProfile.SCOPED_USER;
     }
 
-    public UserEntity(@NonNull String login, @NonNull String providerName, @NonNull UserEntityProfile profile) {
-        this.login = login;
+    public UserEntity(@NonNull String providerName, @NonNull String login, @NonNull UserEntityProfile profile) {
         this.providerName = providerName;
-        this.profile = profile;
-    }
-
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(String login) {
         this.login = login;
+        this.profile = profile;
     }
 
     public String getProviderName() {
@@ -112,6 +104,14 @@ public class UserEntity {
 
     public void setProviderName(String providerName) {
         this.providerName = providerName;
+    }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
     }
 
     public Optional<String> getEmail() {
