@@ -32,7 +32,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1957,5 +1956,74 @@ class UserAccountServiceTest {
                         userLogin,
                         providerName
                 );
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "\t", "\n"})
+    void updateUserProfile_throwForbiddenException_whenUserLoginIsBlank(String userLogin) {
+        // Given
+        var profile = UserAccountProfile.SUPER_ADMIN;
+
+        // When
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProfile(userLogin, profile));
+        verify(userEntityRepository, never()).save(any());
+    }
+
+    @Test
+    void updateUserProfile_throwForbiddenException_whenUserNotFoundInSession() {
+        // Given
+        var userLogin = "user-login";
+        var profile = UserAccountProfile.SUPER_ADMIN;
+
+        // When
+        when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProfile(userLogin, profile));
+        verify(userEntityRepository, never()).save(any());
+    }
+
+    @Test
+    void updateUserProfile_throwForbiddenException_whenUserNotFoundInDatabase() {
+        // Given
+        var profile = UserAccountProfile.SUPER_ADMIN;
+        var userLogin = "user-login";
+        var providerName = "provider-name";
+
+        var authenticatedUser = mock(AuthenticatedOAuth2User.class);
+
+        // When
+        when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
+        when(authenticatedUser.getProviderName()).thenReturn(providerName);
+        when(userEntityRepository.findById(new UserEntity.UserEntityId(providerName, userLogin))).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProfile(userLogin, profile));
+        verify(userEntityRepository, never()).save(any());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = UserAccountProfile.class)
+    void updateUserProfile_updateUserProfile_whenUserFound(UserAccountProfile profile) throws ForbiddenException {
+        // Given
+        var providerName = "provider-name";
+        var userLogin = "user-login";
+
+        var authenticatedUser = mock(AuthenticatedOAuth2User.class);
+        var persistedUser = new UserEntity(providerName, userLogin);
+
+        // When
+        when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
+        when(authenticatedUser.getProviderName()).thenReturn(providerName);
+        when(userEntityRepository.findById(new UserEntity.UserEntityId(providerName, userLogin))).thenReturn(Optional.of(persistedUser));
+
+        // Then
+        userAccountService.updateUserProfile(userLogin, profile);
+        var userToSaveArgumentCaptor = ArgumentCaptor.forClass(UserEntity.class);
+        verify(userEntityRepository).save(userToSaveArgumentCaptor.capture());
+        assertThat(userToSaveArgumentCaptor.getValue().getProfile()).isEqualTo(UserEntity.UserEntityProfile.valueOf(profile.name()));
     }
 }

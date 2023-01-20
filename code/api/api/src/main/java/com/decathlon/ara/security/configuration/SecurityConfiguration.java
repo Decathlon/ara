@@ -80,6 +80,8 @@ public class SecurityConfiguration {
                 // user > accounts > scopes
                 .antMatchers(HttpMethod.PUT, UserResource.ACCOUNT_PROJECT_SCOPE_PATH).access(PROJECT_SCOPE_ALTER_PERMISSION)
                 .antMatchers(HttpMethod.DELETE, UserResource.ACCOUNT_PROJECT_SCOPE_PATH).access(PROJECT_SCOPE_ALTER_PERMISSION)
+                // user > accounts > profile
+                .antMatchers(HttpMethod.PUT, UserResource.ACCOUNT_PROFILE_PATH).hasAuthority(SUPER_ADMIN_PROFILE_AUTHORITY)
                 // user > accounts > current > default project
                 .antMatchers(HttpMethod.DELETE, UserResource.CLEAR_DEFAULT_PROJECT_PATH).authenticated()
                 .antMatchers(HttpMethod.PUT, UserResource.UPDATE_DEFAULT_PROJECT_BY_CODE_PATH).access(PROJECT_INSTANCE_FETCH_PERMISSION)

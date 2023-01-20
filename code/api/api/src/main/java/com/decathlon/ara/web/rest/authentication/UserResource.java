@@ -29,6 +29,7 @@ public class UserResource {
     static final String PATH = API_PATH + "/user";
 
     private static final String ACCOUNTS = "/accounts";
+
     private static final String CURRENT_ACCOUNT = ACCOUNTS + "/current";
     public static final String CURRENT_ACCOUNT_PATH = PATH + CURRENT_ACCOUNT;
     private static final String ALL_ACCOUNTS = ACCOUNTS + "/all";
@@ -38,8 +39,12 @@ public class UserResource {
     private static final String SCOPED_ACCOUNTS_BY_PROJECT = SCOPED_ACCOUNTS + "/project/" + PROJECT_CODE_REQUEST_PARAMETER;
     public static final String SCOPED_ACCOUNTS_BY_PROJECT_PATH = PATH + SCOPED_ACCOUNTS_BY_PROJECT;
 
-    private static final String ACCOUNT_PROJECT_SCOPE = ACCOUNTS + "/login/{userLogin}/scopes/project/" + PROJECT_CODE_REQUEST_PARAMETER;
+    private static final String ACCOUNT_USER_LOGIN = ACCOUNTS + "/login/{userLogin}";
+    private static final String ACCOUNT_PROJECT_SCOPE = ACCOUNT_USER_LOGIN + "/scopes/project/" + PROJECT_CODE_REQUEST_PARAMETER;
     public static final String ACCOUNT_PROJECT_SCOPE_PATH = PATH + ACCOUNT_PROJECT_SCOPE;
+
+    private static final String ACCOUNT_PROFILE = ACCOUNT_USER_LOGIN + "/profile";
+    public static final String ACCOUNT_PROFILE_PATH = PATH + ACCOUNT_PROFILE;
 
     private static final String DEFAULT_PROJECT = CURRENT_ACCOUNT + "/default-project";
     private static final String UPDATE_DEFAULT_PROJECT_BY_CODE = DEFAULT_PROJECT + "/" + PROJECT_CODE_REQUEST_PARAMETER;
@@ -124,6 +129,16 @@ public class UserResource {
     private ResponseEntity<Void> getUpdateUserScopeResponseEntity(String userLogin, String projectCode, UserAccountScope scope) {
         try {
             userAccountService.updateUserProjectScope(userLogin, projectCode, scope.getRole());
+        } catch (ForbiddenException e) {
+            return ResponseUtil.handle(e);
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping(ACCOUNT_PROFILE)
+    public ResponseEntity<Void> updateUserProfile(@PathVariable String userLogin, @RequestBody UserAccount account) {
+        try {
+            userAccountService.updateUserProfile(userLogin, account.getProfile());
         } catch (ForbiddenException e) {
             return ResponseUtil.handle(e);
         }

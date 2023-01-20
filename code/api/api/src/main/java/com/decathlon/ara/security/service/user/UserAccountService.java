@@ -178,9 +178,7 @@ public class UserAccountService {
 
     private static Optional<UserEntity.UserEntityProfile> getUserProfileFromConfiguration(UserProfileConfiguration profileConfiguration) {
         var profileAsString = profileConfiguration.getProfile();
-        return UserAccountProfile.getProfileFromString(profileAsString)
-                .map(Enum::name)
-                .map(UserEntity.UserEntityProfile::valueOf);
+        return UserAccountProfile.getProfileFromString(profileAsString).map(UserAccountService::getUserEntityProfileFromUserAccountProfile);
     }
 
     private List<UserEntityRoleOnProject> getUserRolesFromConfiguration(UserProfileConfiguration profileConfiguration, String providerName, UserEntity savedUser) {
@@ -211,9 +209,7 @@ public class UserAccountService {
     }
 
     private static Optional<UserEntityRoleOnProject.ScopedUserRoleOnProject> getScopedUserRoleOnProjectFromRoleAsString(String roleAsString) {
-        return UserAccountScopeRole.getScopeFromString(roleAsString)
-                .map(Enum::name)
-                .map(UserEntityRoleOnProject.ScopedUserRoleOnProject::valueOf);
+        return UserAccountScopeRole.getScopeFromString(roleAsString).map(UserAccountService::getUserEntityScopedUserRoleOnProjectFromUserAccountScopeRole);
     }
 
     private Optional<Project> getProjectFromCode(String projectCode, String providerName, UserEntity creationUser) {
@@ -340,7 +336,7 @@ public class UserAccountService {
         userEntityRepository.save(targetUser);
     }
 
-    private UserEntityRoleOnProject.ScopedUserRoleOnProject getUserEntityScopedUserRoleOnProjectFromUserAccountScopeRole(@NonNull UserAccountScopeRole userAccountScopeRole) {
+    private static UserEntityRoleOnProject.ScopedUserRoleOnProject getUserEntityScopedUserRoleOnProjectFromUserAccountScopeRole(@NonNull UserAccountScopeRole userAccountScopeRole) {
         return UserEntityRoleOnProject.ScopedUserRoleOnProject.valueOf(userAccountScopeRole.name());
     }
 
@@ -382,6 +378,31 @@ public class UserAccountService {
 
         var providerName = userSessionService.getCurrentAuthenticatedOAuth2User().map(AuthenticatedOAuth2User::getProviderName).orElseThrow(() -> exception);
         updateUserProjectScope(providerName, userLogin, projectCode, accountRole, exception);
+    }
+
+    /**
+     * Update the user profile.
+     * @param userLogin the user login
+     * @param profile the new profile
+     * @throws ForbiddenException thrown if this operation failed
+     */
+    public void updateUserProfile(@NonNull String userLogin, @NonNull UserAccountProfile profile) throws ForbiddenException {
+        var projectCodeContext = getProjectCodeExceptionContext(userLogin);
+        var exception = new ForbiddenException(Entities.USER, "update user profile", projectCodeContext);
+
+        if (StringUtils.isBlank(userLogin)) {
+            throw exception;
+        }
+
+        var providerName = userSessionService.getCurrentAuthenticatedOAuth2User().map(AuthenticatedOAuth2User::getProviderName).orElseThrow(() -> exception);
+        var targetUser = getUserEntityFromProviderNameAndUserLogin(providerName, userLogin).orElseThrow(() -> exception);
+        var targetProfile = getUserEntityProfileFromUserAccountProfile(profile);
+        targetUser.setProfile(targetProfile);
+        userEntityRepository.save(targetUser);
+    }
+
+    private static UserEntity.UserEntityProfile getUserEntityProfileFromUserAccountProfile(@NonNull UserAccountProfile userAccountProfile) {
+        return UserEntity.UserEntityProfile.valueOf(userAccountProfile.name());
     }
 
     /**
@@ -443,7 +464,7 @@ public class UserAccountService {
     private List<UserAccount> getAllScopedUserAccounts(@NonNull OAuth2AuthenticationToken authentication, Optional<String> projectCodeFilter, Optional<UserAccountScopeRole> roleFilter) {
         var providerName = authentication.getAuthorizedClientRegistrationId();
 
-        var actualUserEntityRole = roleFilter.map(this::getUserEntityScopedUserRoleOnProjectFromUserAccountScopeRole).orElse(null);
+        var actualUserEntityRole = roleFilter.map(UserAccountService::getUserEntityScopedUserRoleOnProjectFromUserAccountScopeRole).orElse(null);
 
         var persistedScopedUsers = userEntityRepository.findAllScopedUsersByProviderName(providerName, projectCodeFilter.orElse(null), actualUserEntityRole);
 
