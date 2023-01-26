@@ -73,6 +73,7 @@
             <Avatar v-else icon="md-person" style="color: #0082c3;background-color: white" size="large"/>
             <div slot="content">
               <p v-if="providerName">Connected via <strong>{{providerName}}</strong></p>
+              <p v-if="user && user.profile">> Profile: <strong>{{user.profile}}</strong></p>
               <p v-if="user && user.login">> Login: <strong>{{user.login}}</strong></p>
               <p v-if="user && user.firstName && user.lastName">> Name: <strong>{{user.firstName + " " + user.lastName}}</strong></p>
               <p v-if="user && user.email">> Email: <strong>{{user.email}}</strong></p>

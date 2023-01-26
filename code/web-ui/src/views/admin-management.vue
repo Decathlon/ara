@@ -16,14 +16,17 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
   <div>
-    <div v-if="sortedProjects.length">
+    <div v-if="projects.length">
       <h1 class="adminTitle">Projects management</h1>
 
       <div class="projectCTA">
-        <Select class="filterSelect" v-model="projectFilter" clearable filterable placeholder="Filter">
-          <Option v-for="(filters, index) in filterType" :value="index" :key="index" :label="filters" />
+        <Select class="filterSelect" v-model="projectFilter" placeholder="Filter" @on-change="filterProjects" :label-in-value="true">
+          <Option v-for="(filter, index) in filterType" :value="index" :key="index" :label="filter" />
         </Select>
-        <Button v-if="demoProjectNotFound" type="warning" class="demoProjectButton" data-nrt="createDemo" :loading="loadingDemoProject" @click="createDemoProject">CREATE THE DEMO PROJECT</Button>
+        <Button v-if="user.default_project" type="error" class="deleteBtn" @click="clearDefaultProject()" ghost>
+          Clear default project
+        </Button>
+        <Button v-if="!demoProjectNotFound" type="warning" class="demoProjectButton" data-nrt="createDemo" :loading="loadingDemoProject" @click="createDemoProject">Create the demo project</Button>
         <Button type="primary" class="addBtn" @click="add()">
           Add project
         </Button>
@@ -48,7 +51,7 @@
         </thead>
 
         <tbody>
-          <tr v-for="(project, index) in sortedProjects" :class="index %2 !== 0 ? 'darkGrey' : 'lightGrey'" :key="project.id">
+          <tr v-for="(project, index) in projects" :class="index %2 !== 0 ? 'darkGrey' : 'lightGrey'" :key="project.id">
             <td class="project-name">
               <Icon v-if="project.code === 'the-demo-project'" class="demo-project-icon" type="md-construct" size="18" />
               {{ project.name }}
@@ -60,7 +63,7 @@
             <td>{{ getProjectUserNameDisplay(project.update_user) }}</td>
             <td v-if="isScopedUser">{{ getRoleOnProject(project.code) }}</td>
             <td>
-              <input type="radio" name="defaultProject" @change="changeDefaultProject(project)" :checked="userDefaultProjectCode && userDefaultProjectCode === project.code">
+              <input type="radio" name="defaultProject" @change="changeDefaultProject(project)" :checked="(user.default_project && user.default_project === project.code) || (projectByDefault === project.code) ">
             </td>
             <td>
               <Icon v-if="isAdminOnProject(project.code)" type="md-close-circle" size="24" @click="deleteProject(project.code)"/>
@@ -102,10 +105,11 @@
   import api from '../libs/api'
   import managementProjects from '../views/management-projects.vue'
   import formField from '../components/form-field'
-  import _ from 'lodash'
   import { DEMO_PROJECT_CODE, USER } from '../libs/constants'
   import { AuthenticationService } from '../service/authentication.service'
-export default {
+  import { mapState } from 'vuex'
+
+  export default {
     name: 'admin-management',
     components: {
       managementProjects,
@@ -216,10 +220,14 @@ export default {
         return this.isSuperAdmin || (this.isScopedUser && (this.getRoleOnProject(projectCode) === USER.ROLE_ON_PROJECT.ADMIN))
       },
       getRoleOnProject (projectCode) {
-        return _(this.currentUser.scopes).filter({ 'project': projectCode }).map('role').first()
+        let userRole = ''
+
+        this.user.scopes.filter((item) => { if (item.project === projectCode) { userRole = item.role } })
+
+        return userRole
       },
       getProjectUserNameDisplay (login) {
-        if (login === this.currentUser.login) {
+        if (login === this.user.login) {
           return 'Me'
         }
         return login
@@ -229,6 +237,7 @@ export default {
           .delete(api.paths.currentUserDefaultProjectClear, api.REQUEST_OPTIONS)
           .then((response) => {
             const updatedUser = response.body
+            this.$store.dispatch('users/updateDefaultProject', updatedUser)
             AuthenticationService.saveCurrentUser(updatedUser)
           }, (error) => {
             api.handleError(error)
@@ -239,6 +248,7 @@ export default {
           .put(api.paths.currentUserDefaultProjectUpdate(project.code), null, api.REQUEST_OPTIONS)
           .then((response) => {
             const updatedUser = response.body
+            this.$store.dispatch('users/getUserInfo', updatedUser)
             AuthenticationService.saveCurrentUser(updatedUser)
           }, (error) => {
             api.handleError(error)
@@ -282,39 +292,42 @@ export default {
             this.loadingDemoProject = false
             api.handleError(error)
           })
+      },
+      filterProjects (filter) {
+        switch (filter.label) {
+          case 'Name':
+            return this.projects.sort((a, b) => a.code.localeCompare(b.code))
+          case 'Creation Date':
+            return this.projects.sort((a, b) => (new Date(b.creation_date)) - (new Date(a.creation_date)))
+          case 'Update Date':
+            return this.sortedProjectsByUpdate
+          case 'Author':
+            return this.sortedProjectsByAuthor
+        }
       }
     },
     mounted () {
       this.$store.dispatch('admin/setTypeSelected', '')
+      this.$store.dispatch('users/getUserInfo', JSON.parse(localStorage.getItem('current_user')))
       this.getProjectList()
     },
     computed: {
-      demoProjectNotFound () {
-        return !_(this.projects).some({ 'code': DEMO_PROJECT_CODE })
-      },
+      ...mapState('users', ['user']),
 
-      sortedProjects () {
-        return this.projects.map(item => item).sort((a, b) => a.code - b.code)
+      demoProjectNotFound () {
+        return this.projects.some((project) => project.code === DEMO_PROJECT_CODE)
       },
 
       sortedDemoProject () {
         return this.projects.filter(item => item.code === DEMO_PROJECT_CODE)
       },
 
-      currentUser () {
-        return AuthenticationService.getDetails().user
-      },
-
-      userDefaultProjectCode () {
-        return this.currentUser?.default_project
-      },
-
       isSuperAdmin () {
-        return this.currentUser?.profile === USER.PROFILE.SUPER_ADMIN
+        return this.user?.profile === USER.PROFILE.SUPER_ADMIN
       },
 
       isScopedUser () {
-        return this.currentUser?.profile === USER.PROFILE.SCOPED_USER
+        return this.user?.profile === USER.PROFILE.SCOPED_USER
       }
     }
   }

@@ -29,6 +29,10 @@ export default ({
 
     setUserInfo: (state, user) => {
       state.user = user
+    },
+
+    removeUserDefaultProject: (state, updateUser) => {
+      state.user = updateUser
     }
   },
 
@@ -39,6 +43,10 @@ export default ({
 
     getUserInfo ({ commit }, payload) {
       commit('setUserInfo', payload)
+    },
+
+    updateDefaultProject ({ commit }, payload) {
+      commit('removeUserDefaultProject', payload)
     }
   }
 })

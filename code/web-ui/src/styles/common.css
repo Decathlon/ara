@@ -452,7 +452,7 @@ pre code {
   top: -45px;
 }
 
-.projectCTA .change-view, .projectCTA .demoProjectButton {
+.projectCTA .demoProjectButton {
   position: absolute !important;
   right: 8rem;
   top: -45px;
@@ -461,6 +461,12 @@ pre code {
 .projectCTA .addBtn {
   position: absolute;
   right: 0;
+  top: -45px;
+}
+
+.projectCTA .deleteBtn {
+  position: absolute;
+  right: 22rem;
   top: -45px;
 }
 

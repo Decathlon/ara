@@ -15,7 +15,12 @@
   ~
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
-  <Spin fix v-if="!teamsAssignableToProblems || !teamsAssignableToProblems.length || !rootCauses"/>
+  <div v-if="!problemsList" class="container">
+    <div class="content">
+      There are no problems to show for this project.
+    </div>
+  </div>
+  <Spin fix v-else-if="!teamsAssignableToProblems || !teamsAssignableToProblems.length || !rootCauses"/>
   <div v-else>
     <div :class="'subMenu' + (inPopup ? ' inPopup' : '')" style="border-bottom: 1px solid #dddee1;">
       Status:
@@ -88,6 +93,10 @@
     computed: {
       teamsAssignableToProblems () {
         return this.$store.getters['teams/teamsAssignableToProblems'](this)
+      },
+
+      problemsList () {
+        return this.problems.content?.length
       },
 
       rootCauses () {
@@ -267,3 +276,26 @@
     }
   }
 </script>
+
+<style scoped>
+  .container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    height: 400px;
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 35px;
+    text-align: center;
+    width: 75%;
+    margin: 0 auto;
+  }
+</style>
