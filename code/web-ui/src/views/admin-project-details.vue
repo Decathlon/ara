@@ -113,7 +113,6 @@
             createOnlyBecause: 'the code ends-up in URLs of ARA, and people should be allowed to bookmark fixed URLs or copy/past them in other services (defect tracking system, wiki, etc.)',
             newValue: '',
             width: undefined,
-            help: 'The technical code of the project, to use in ARA URLs (as well as API URLs used by continuous integration to push data to ARA). Eg. "phoenix-front".',
             primaryKey: true
           },
           {
@@ -129,8 +128,7 @@
             required: true,
             newValue: '',
             businessKey: true,
-            width: undefined,
-            help: 'The name of the project, visible in the top-left combobox in ARA\'s header. Eg. "Phoenix - Front".'
+            width: undefined
           }
         ],
         editingData: {},

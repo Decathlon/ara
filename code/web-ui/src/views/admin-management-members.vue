@@ -40,7 +40,6 @@
             <th>Name</th>
             <th>Profile</th>
             <th>Projects</th>
-            <!-- <th>Restriction</th> -->
             <th></th>
           </tr>
         </thead>
@@ -54,10 +53,6 @@
             <td class="userType">
               {{ member.profile }}
             </td>
-
-            <!-- <td class="userType">
-              {{ member.blockReason }}
-            </td> -->
 
             <td class="member-projects-list">
               <span v-for="(scope, index) in member.scopes" :class="index > 2 ? 'project-count' : ''">
@@ -73,14 +68,10 @@
             <td :class="member.login !== currentUser.login ? '' : 'hidden'">
               <Icon v-if="!member.blockReason" type="ios-checkmark-circle" size="24" @click="showUserBlock(member, index)"/>
               <Icon v-if="member.blockReason" type="md-remove-circle" size="24" @click="unblockUser(index)"/>
-              <!-- <Icon type="md-close-circle" size="24" @click="removeGroup(member)"/> -->
               <Icon type="md-eye" size="24" @click="navTo(member)"/>
             </td>
           </tr>
         </tbody>
-        <!-- <button class="addBtn" @click="memberToAdd = true">
-          <Icon type="md-add" size="24"/>
-        </button> -->
       </table>
     </div>
 
@@ -161,13 +152,16 @@
       async getMember () {
         const profile = this.currentUser.profile
         this.members = []
+        let url = api.paths.scopedUsers
+        if (profile === 'SUPER_ADMIN' || profile === 'AUDITOR') {
+          url = api.paths.allUsers
+        }
         await Vue.http
-          .get(profile === 'SUPER_ADMIN' ? api.paths.allUsers
-            : profile === 'AUDITOR' ? api.paths.allUsers : api.paths.scopedUsers, api.REQUEST_OPTIONS)
+          .get(url, api.REQUEST_OPTIONS)
           .then((users) => {
             if (users.body.length > 0) {
-              for (let i = 0; i < users.body.length; i++) {
-                this.members.push(users.body[i])
+              for (let user of users.body) {
+                this.members.push(user)
               }
             }
             return this.members
@@ -200,7 +194,7 @@
         }
       },
       async navTo (user) {
-        await localStorage.setItem('user', JSON.stringify(user))
+        localStorage.setItem('user', JSON.stringify(user))
         this.$router.push({ name: 'member-projects', params: { user: user.login } })
       },
       getProjectUserNameDisplay (login) {

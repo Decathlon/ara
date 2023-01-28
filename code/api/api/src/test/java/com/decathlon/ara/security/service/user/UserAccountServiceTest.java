@@ -40,6 +40,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.decathlon.ara.loader.DemoLoaderConstants.DEMO_PROJECT_CODE;
+import static com.decathlon.ara.loader.DemoLoaderConstants.DEMO_PROJECT_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -715,6 +716,10 @@ class UserAccountServiceTest {
         var userScope3 = mock(UserEntityRoleOnProject.class);
         var userScopes = List.of(userScope1, userScope2, userScope3);
 
+        var projectName1 = "p2";
+        var projectName2 = "p3";
+        var projectName3 = "p1";
+
         var project1 = mock(Project.class);
         var project2 = mock(Project.class);
         var project3 = mock(Project.class);
@@ -731,8 +736,11 @@ class UserAccountServiceTest {
         when(persistedUser.getProfile()).thenReturn(profile);
         when(persistedUser.getRolesOnProjectWhenScopedUser()).thenReturn(userScopes);
         when(userScope1.getProject()).thenReturn(project1);
+        when(project1.getName()).thenReturn(projectName1);
         when(userScope2.getProject()).thenReturn(project2);
+        when(project2.getName()).thenReturn(projectName2);
         when(userScope3.getProject()).thenReturn(project3);
+        when(project3.getName()).thenReturn(projectName3);
         when(projectRepository.findByCode(DEMO_PROJECT_CODE)).thenReturn(Optional.empty());
         when(projectMapper.getProjectDTOFromProjectEntity(project1)).thenReturn(mappedProject1);
         when(projectMapper.getProjectDTOFromProjectEntity(project2)).thenReturn(mappedProject2);
@@ -741,8 +749,7 @@ class UserAccountServiceTest {
         // Then
         var actualProjects = userAccountService.getCurrentUserProjects();
 
-        var expectedProjects = List.of(mappedProject1, mappedProject2, mappedProject3);
-        assertThat(actualProjects).containsExactlyInAnyOrderElementsOf(expectedProjects);
+        assertThat(actualProjects).containsExactly(mappedProject3, mappedProject1, mappedProject2);
         verify(projectRepository, never()).findAllByOrderByName();
         verify(projectRepository, times(1)).findByCode(DEMO_PROJECT_CODE);
         verifyNoMoreInteractions(projectRepository);
@@ -763,6 +770,10 @@ class UserAccountServiceTest {
         var userScope3 = mock(UserEntityRoleOnProject.class);
         var userScopes = List.of(userScope1, userScope2, userScope3);
 
+        var projectName1 = "p2";
+        var projectName2 = "p3";
+        var projectName3 = "p1";
+
         var project1 = mock(Project.class);
         var project2 = mock(Project.class);
         var project3 = mock(Project.class);
@@ -781,9 +792,13 @@ class UserAccountServiceTest {
         when(persistedUser.getProfile()).thenReturn(profile);
         when(persistedUser.getRolesOnProjectWhenScopedUser()).thenReturn(userScopes);
         when(userScope1.getProject()).thenReturn(project1);
+        when(project1.getName()).thenReturn(projectName1);
         when(userScope2.getProject()).thenReturn(project2);
+        when(project2.getName()).thenReturn(projectName2);
         when(userScope3.getProject()).thenReturn(project3);
+        when(project3.getName()).thenReturn(projectName3);
         when(projectRepository.findByCode(DEMO_PROJECT_CODE)).thenReturn(Optional.of(demoProject));
+        when(demoProject.getName()).thenReturn(DEMO_PROJECT_NAME);
         when(projectMapper.getProjectDTOFromProjectEntity(project1)).thenReturn(mappedProject1);
         when(projectMapper.getProjectDTOFromProjectEntity(project2)).thenReturn(mappedProject2);
         when(projectMapper.getProjectDTOFromProjectEntity(project3)).thenReturn(mappedProject3);
@@ -792,8 +807,7 @@ class UserAccountServiceTest {
         // Then
         var actualProjects = userAccountService.getCurrentUserProjects();
 
-        var expectedProjects = List.of(mappedProject1, mappedProject2, mappedProject3, mappedDemoProject);
-        assertThat(actualProjects).containsExactlyInAnyOrderElementsOf(expectedProjects);
+        assertThat(actualProjects).containsExactly(mappedDemoProject, mappedProject3, mappedProject1, mappedProject2);
         verify(projectRepository, never()).findAllByOrderByName();
         verify(projectRepository, times(1)).findByCode(DEMO_PROJECT_CODE);
         verifyNoMoreInteractions(projectRepository);

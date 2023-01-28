@@ -160,6 +160,12 @@ pre code {
   margin-bottom: 10px;
 }
 
+.form-field-info-description {
+  color: lightgray;
+  line-height: 1.2;
+  margin-top: 4px;
+}
+
 /* PROBLEMS */
 .problem { background-color: #ED3F14; color: white; margin-right: 4px; margin-bottom: 4px; padding: 1px 3px; border-radius: 3px; display: inline-block; }
 .problem.OPEN { background-color: #FF9900; }
@@ -612,7 +618,7 @@ pre code {
 }
 
 .spaced-icon {
-  margin-right: 55px !important;
+  margin-right: 95px !important;
 }
 
 @keyframes loading {

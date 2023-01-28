@@ -60,7 +60,7 @@
 
     props: {
       url: {
-        // URL of the ressource where to GET (read), POST (create) entities, and the root URL for PUT (update) and DELETE (delete) (will append thee primary key to this URL for these two cases)
+        // URL of the resource where to GET (read), POST (create) entities, and the root URL for PUT (update) and DELETE (delete) (will append thee primary key to this URL for these two cases)
         type: String,
         required: true
       },
@@ -147,7 +147,7 @@
                 let maxLength = 512
                 let trimmed = value
                 if (trimmed) {
-                  trimmed = trimmed.replace(/\s\s+/g, ' ') // HTML values will have lot of spaces (+ tabulations and new lines) trimmed by browser
+                  trimmed = trimmed.replace(/\s\s+/g, ' ') // HTML values will have a lot of spaces (+ tabulations and new lines) trimmed by browser
                   if (trimmed.length > maxLength) {
                     trimmed = trimmed.substr(0, maxLength) + '...'
                   }

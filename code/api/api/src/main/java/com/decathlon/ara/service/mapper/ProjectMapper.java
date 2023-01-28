@@ -15,6 +15,7 @@ public class ProjectMapper {
         var code = project.getCode();
         var name = project.getName();
         var projectToConvert = new ProjectDTO(id, code, name);
+        projectToConvert.setDescription(project.getDescription());
 
         var creationDate = project.getCreationDate();
         if (creationDate != null) {
@@ -40,6 +41,8 @@ public class ProjectMapper {
         var id = projectDTO.getId();
         var code = projectDTO.getCode();
         var name = projectDTO.getName();
-        return new Project(id, code, name);
+        var projectToConvert = new Project(id, code, name);
+        projectToConvert.setDescription(projectDTO.getDescription());
+        return projectToConvert;
     }
 }

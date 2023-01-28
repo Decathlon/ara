@@ -42,6 +42,8 @@ public class ProjectDTO {
     @Size(min = 1, max = 64, message = "The name is required and must not exceed {max} characters.")
     private String name;
 
+    private String description;
+
     @JsonProperty("creation_date")
     @JsonFormat(pattern = DATE_FORMAT_YEAR_TO_SECOND)
     private Date creationDate;
@@ -84,6 +86,14 @@ public class ProjectDTO {
 
     public String getName() {
         return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Date getCreationDate() {

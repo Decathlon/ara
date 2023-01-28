@@ -41,6 +41,9 @@ public class Project {
     @Column(length = 64, nullable = false, unique = true)
     private String name;
 
+    @Column(length = 512)
+    private String description;
+
     private ZonedDateTime creationDate;
 
     @ManyToOne
@@ -105,6 +108,18 @@ public class Project {
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public ZonedDateTime getCreationDate() {

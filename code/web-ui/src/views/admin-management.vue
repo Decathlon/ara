@@ -27,8 +27,8 @@
         <Button v-if="user.default_project" type="error" class="deleteBtn" @click="clearDefaultProject()" ghost>
           Clear default project
         </Button>
-        <Button v-if="!demoProjectNotFound" type="warning" class="demoProjectButton" data-nrt="createDemo" :loading="loadingDemoProject" @click="createDemoProject">Create the demo project</Button>
-        <Button type="primary" class="addBtn" @click="add()">
+        <Button v-if="demoProjectNotFound" type="warning" class="demoProjectButton" data-nrt="createDemo" :loading="loadingDemoProject" @click="createDemoProject">Create the demo project</Button>
+        <Button type="primary" class="addBtn" @click="openProjectCreationModal()">
           Add project
         </Button>
       </div>
@@ -39,6 +39,7 @@
         </div>
         <thead>
           <tr>
+            <th></th>
             <th>Name</th>
             <th>Code</th>
             <th>Created on</th>
@@ -53,8 +54,13 @@
 
         <tbody>
           <tr v-for="(project, index) in projects" :class="index %2 !== 0 ? 'darkGrey' : 'lightGrey'" :key="project.id">
+            <td>
+              <Tooltip v-if="project.description" placement="right" :content="project.description">
+                <Icon type="md-information-circle" size="24"/>
+              </Tooltip>
+            </td>
             <td class="project-name">
-              <Icon v-if="project.code === 'the-demo-project'" class="demo-project-icon" type="md-construct" size="18" />
+              <Icon v-if="isDemoProject(project.code)" class="demo-project-icon" type="md-flask" size="18" />
               {{ project.name }}
             </td>
             <td>{{ project.code }}</td>
@@ -62,14 +68,14 @@
             <td>{{ getProjectUserNameDisplay(project.creation_user) }}</td>
             <td>{{ project.update_date }}</td>
             <td>{{ getProjectUserNameDisplay(project.update_user) }}</td>
-            <td v-if="isScopedUser">{{ getRoleOnProject(project.code) }}</td>
+            <td v-if="isScopedUser">{{ project.currentUserRole }}</td>
             <td>
-              <input type="radio" name="defaultProject" @change="changeDefaultProject(project)" :checked="(user.default_project && user.default_project === project.code) || (projectByDefault === project.code) ">
+              <input type="radio" name="defaultProject" @change="changeDefaultProject(project)" :checked="(user.default_project && user.default_project === project.code)">
             </td>
             <td>
-              <Icon v-if="isAdminOnProject(project.code)" type="md-close-circle" size="24" @click="deleteProject(project.code)"/>
-              <Icon type="md-eye" size="24" @click="openProjectDetails(project)" :class="isAdminOnProject(project.code) ? '' : 'spaced-icon'"/>
-              <Icon type="md-create" size="24" @click="add(project)"/>
+              <Icon v-if="isAdminOnProject(project)" type="md-close-circle" size="24" @click="deleteProject(project.code)"/>
+              <Icon v-if="isAdminOnProject(project)" type="md-create" size="24" @click="openProjectUpdateModal(project)"/>
+              <Icon type="md-eye" size="24" @click="openProjectDetails(project)" :class="isAdminOnProject(project) ? '' : 'spaced-icon'"/>
             </td>
           </tr>
         </tbody>
@@ -78,156 +84,197 @@
 
     <div v-else class="no-project">
       <h2>No projects to display. Create a new project by clicking the button below.</h2>
-      <Button type="primary" class="addBtn" @click="add()">
+      <Button type="primary" class="addBtn" @click="openProjectCreationModal()">
         Add project
       </Button>
     </div>
 
-    <Modal v-model="addOrChangeProject" title="Add Project" okText="Add" @on-ok="save" @close="addOrChangeProject = false" :width="900"
-        :loading="loadingSaving" ref="editPopup">
-        <Form :label-width="128"
-          v-if="fields.type !== 'hidden'">
-          <Form-item v-for="field in fields"
-            :key="field.code"
-            :label="(field.type === 'boolean' ? '' : field.name + ':')"
-            :required="field.required && (editingNew || (!field.primaryKey && !field.createOnly))">
-            <form-field :field="field" v-model="editingData[field.code]" :editingNew="editingNew" :ref="field.code" v-on:enter="save"/>
-            <div class="hints">
-              {{field.help}}
-            </div>
-          </Form-item>
-        </Form>
-      </Modal>
+    <Modal v-for="modalConfiguration in Object.entries(projectModalConfigurations)"
+           v-model="modalConfiguration[1].open"
+           :title="modalConfiguration[1].display.title"
+           :okText="modalConfiguration[1].display.okButton"
+           @on-ok="modalConfiguration[1].onSubmit"
+           :width="900"
+           :loading="showLoader">
+      <Form :label-width="128">
+        <Form-item :key="'code'" :label="'Code:'" required>
+          <div>
+            <Input v-model="modalConfiguration[1].model.code" :disabled="modalConfiguration[0] === 'update'"/>
+            <div class="hints">{{fieldDescription.code.hint}}</div>
+          </div>
+          <div class="form-field-info-description">{{fieldDescription.code.warning}}</div>
+        </Form-item>
+        <Form-item :key="'name'" :label="'Name:'" required>
+          <div>
+            <Input v-model="modalConfiguration[1].model.name"/>
+            <div class="hints">{{fieldDescription.name.hint}}</div>
+          </div>
+          <div class="form-field-info-description">{{fieldDescription.name.warning}}</div>
+        </Form-item>
+        <Form-item :key="'description'" :label="'Description:'">
+          <div>
+            <Input v-model="modalConfiguration[1].model.description" :type="'textarea'" :autosize="{ minRows: 2, maxRows: 15 }"/>
+            <div class="hints">{{fieldDescription.description.hint}}</div>
+          </div>
+          <div class="form-field-info-description">{{fieldDescription.description.warning}}</div>
+        </Form-item>
+      </Form>
+    </Modal>
   </div>
 </template>
 
 <script>
   import Vue from 'vue'
   import api from '../libs/api'
-  import managementProjects from '../views/management-projects.vue'
   import formField from '../components/form-field'
   import { DEMO_PROJECT_CODE, USER } from '../libs/constants'
   import { AuthenticationService } from '../service/authentication.service'
   import { mapState } from 'vuex'
-
-  export default {
+  import util from '../libs/util'
+export default {
     name: 'admin-management',
     components: {
-      managementProjects,
       formField
     },
     data () {
       return {
         projects: [],
-        addOrChangeProject: false,
         loadingDemoProject: false,
-        fields: [
-          {
-            code: 'code',
-            name: 'Code',
-            columnTitle: 'Code',
-            type: 'string',
-            required: true,
-            newValue: '',
-            width: undefined,
-            help: 'The technical code of the project, to use in ARA URLs (as well as API URLs used by continuous integration to push data to ARA). Eg. "phoenix-front".'
+        fieldDescription: {
+          code: {
+            hint: 'The technical code of the project, to use in ARA URLs (as well as API URLs used by continuous integration to push data to ARA). Eg. "phoenix-front".',
+            warning: 'Choose the project code carefully because once created, this cannot be changed later. Also, this must be unique to each project.'
           },
-          {
-            code: 'name',
-            name: 'Name',
-            columnTitle: 'Project',
-            type: 'string',
-            required: true,
-            newValue: '',
-            width: undefined,
-            help: 'The name of the project, visible in the top-left combobox in ARA\'s header.' + 'Eg. "Phoenix - Front".'
+          name: {
+            hint: 'The name of the project, visible in the top-left combobox in ARA\'s header. E.g. "Phoenix - Front".',
+            warning: 'Like the code field, this must also be unique.'
+          },
+          description: {
+            hint: 'Explain briefly what your project is supposed to do.',
+            warning: 'Write a short description of 512 characters max'
           }
-        ],
-        editingData: {},
+        },
+        projectModalConfigurations: {
+          creation: {
+            open: false,
+            display: {
+              title: 'Create Project',
+              okButton: 'Create'
+            },
+            onSubmit: () => this.create(),
+            model: {}
+          },
+          update: {
+            open: false,
+            display: {
+              title: 'Update Project',
+              okButton: 'Update'
+            },
+            onSubmit: () => this.update(),
+            model: {}
+          }
+        },
         filterType: ['Name', 'Creation Date', 'Update Date', 'Author'],
         filterSelected: 'Name',
         searchElement: '',
-        editingNew: false,
-        editing: false,
         showLoader: false
       }
     },
     methods: {
-      newRowData () {
-        let row = {}
-        for (let field of this.fields) {
-          row[field.code] = field.newValue
+      openProjectCreationModal () {
+        this.projectModalConfigurations.creation.open = true
+        this.resetProjectCreationForm()
+      },
+      resetProjectCreationForm () {
+        this.projectModalConfigurations.creation.model = {}
+      },
+      create () {
+        const projectToCreate = this.projectModalConfigurations.creation.model
+        const projectCode = projectToCreate.code
+        const projectName = projectToCreate.name
+        const someRequiredFieldsAreLeftBlank = util.isBlank(projectCode) || util.isBlank(projectName)
+        if (someRequiredFieldsAreLeftBlank) {
+          this.$Message.error({
+            content: 'Project not created because some required fields were blank!',
+            duration: 3,
+            closable: true
+          })
+          return
         }
-        return row
-      },
-      add (project) {
-        if (project) {
-          this.editProject = true
-        }
-        this.addOrChangeProject = true
-        this.doEdit(project.code ? project : this.newRowData(), true)
-      },
-      doEdit (row, editingNew) {
-        this.editingData = { ...row }
-        this.editingNew = editingNew
-        this.editing = true
-        this.$nextTick(() => this.$refs[this.firstVisibleFieldCode(editingNew)][0].focus())
-      },
-      firstVisibleFieldCode (editingNew) {
-        for (let field of this.fields) {
-          if (field.type !== 'hidden' && field.type !== 'select' && !field.readOnly && !field.readOnly && (editingNew || (!field.primaryKey && !field.createOnly))) { // Primary-key is read-only when editing
-            return field.code
-          }
-        }
-        throw new Error('The table ' + this.name + ' has no field, or they are all either of type hidden, selects, read-only or non-modifiable primary key')
-      },
-      save () {
-        let row = { ...this.editingData }
-        row.id = undefined
-        if (this.editProject) {
-          Vue.http
-            .put('/api/projects', row, api.REQUEST_OPTIONS)
-            .then(() => {
-              this.getProjectList()
-            }, (error) => {
-              this.loadingSaving = false
-              api.handleError(error, () => {
-                this.loadingSaving = true
-              })
+        Vue.http
+          .post(api.paths.projects, projectToCreate, api.REQUEST_OPTIONS)
+          .then(async () => {
+            this.showLoader = false
+            this.$Message.success({
+              content: `Project <b>${projectCode}</b> succesfully created!`,
+              duration: 3,
+              closable: true
             })
-        } else {
-          Vue.http
-            .post('/api/projects', row, api.REQUEST_OPTIONS)
-            .then(() => {
-              this.getProjectList()
-            }, (error) => {
-              this.loadingSaving = false
-              api.handleError(error, () => {
-                this.loadingSaving = true
+            await AuthenticationService.refreshUser()
+              .then((refreshedUser) => {
+                this.$store.dispatch('users/getUserInfo', refreshedUser)
+                this.initProjects()
               })
-            })
-        }
+          }, (error) => {
+            this.showLoader = false
+            api.handleError(error)
+          })
       },
+
+      openProjectUpdateModal (project) {
+        this.projectModalConfigurations.update.open = true
+        this.resetProjectUpdateForm(project)
+      },
+      resetProjectUpdateForm (project) {
+        const projectToUpdate = this.projectModalConfigurations.update.model
+        projectToUpdate.code = project.code
+        projectToUpdate.name = project.name
+        projectToUpdate.description = project.description
+      },
+      update () {
+        const projectToUpdate = this.projectModalConfigurations.update.model
+        const projectCode = projectToUpdate.code
+        const projectNameIsBlank = util.isBlank(projectToUpdate.name)
+        if (projectNameIsBlank) {
+          this.$Message.error({
+            content: `Project <b>${projectCode}</b> not updated because the name field was blank!`,
+            duration: 3,
+            closable: true
+          })
+          return
+        }
+        Vue.http
+          .put(api.paths.projectByCode(projectCode), projectToUpdate, api.REQUEST_OPTIONS)
+          .then(() => {
+            this.showLoader = false
+            this.$Message.success({
+              content: `Project <b>${projectCode}</b> succesfully updated!`,
+              duration: 3,
+              closable: true
+            })
+            this.initProjects()
+          }, (error) => {
+            this.showLoader = false
+            api.handleError(error)
+          })
+      },
+
       openProjectDetails (projectInfo) {
         this.$router.push({ name: 'admin-project-details', query: { projectCode: projectInfo.code, projectName: projectInfo.name } })
       },
-      async getProjectList () {
+      async initProjects () {
         await Vue.http
-          .get('api/projects', api.REQUEST_OPTIONS)
+          .get(api.paths.projects, api.REQUEST_OPTIONS)
           .then((response) => {
             this.projects = response.body
-            return this.projects
+            this.projects.forEach((project) => { project.currentUserRole = this.getRoleOnProject(project.code) })
           })
       },
-      isAdminOnProject (projectCode) {
-        return this.isSuperAdmin || (this.isScopedUser && (this.getRoleOnProject(projectCode) === USER.ROLE_ON_PROJECT.ADMIN))
+      isAdminOnProject (project) {
+        return this.isSuperAdmin || (this.isScopedUser && (project.currentUserRole === USER.ROLE_ON_PROJECT.ADMIN))
       },
       getRoleOnProject (projectCode) {
-        let userRole = ''
-
-        this.user.scopes.filter((item) => { if (item.project === projectCode) { userRole = item.role } })
-
-        return userRole
+        return this.user.scopes.find((scope) => scope.project === projectCode)?.role
       },
       getProjectUserNameDisplay (login) {
         if (login === this.user.login) {
@@ -265,23 +312,29 @@
           okText: 'Delete',
           loading: true,
           onOk () {
-            if (code === 'the-demo-project') {
+            const isDemoProject = self.isDemoProject(code)
+            if (isDemoProject) {
               self.$store.commit('teams/unloadTeams', { projectCode: DEMO_PROJECT_CODE })
             }
+            const url = isDemoProject ? api.paths.demo : api.paths.projectByCode(code)
             Vue.http
-              .delete(code === 'the-demo-project' ? api.paths.demo : `api/projects/` + code, api.REQUEST_OPTIONS)
+              .delete(url, api.REQUEST_OPTIONS)
               .then(() => {
                 self.$Modal.remove()
                 self.showLoader = true
                 setTimeout(() => {
                   self.showLoader = false
-                  self.getProjectList()
+                  self.initProjects()
                 }, 500)
               }, (error) => {
+                self.showLoader = false
                 api.handleError(error)
               })
           }
         })
+      },
+      isDemoProject (projectCode) {
+        return projectCode === DEMO_PROJECT_CODE
       },
       createDemoProject () {
         this.loadingDemoProject = true
@@ -289,7 +342,7 @@
           .post(api.paths.demo, null, api.REQUEST_OPTIONS)
           .then(() => {
             this.loadingDemoProject = false
-            this.getProjectList()
+            this.initProjects()
             this.$store.dispatch('teams/ensureTeamsLoaded', DEMO_PROJECT_CODE)
           }, (error) => {
             this.loadingDemoProject = false
@@ -301,24 +354,19 @@
       },
 
       searchProject () {
-        let filteredProjects = this.projects.filter(o => o.name.toLowerCase().includes(this.searchElement.toLowerCase()))
-        return filteredProjects
+        return this.projects.filter(project => project.name.toLowerCase().includes(this.searchElement.toLowerCase()))
       }
     },
     mounted () {
       this.$store.dispatch('admin/setTypeSelected', '')
       this.$store.dispatch('users/getUserInfo', JSON.parse(localStorage.getItem('current_user')))
-      this.getProjectList()
+      this.initProjects()
     },
     computed: {
       ...mapState('users', ['user']),
 
       demoProjectNotFound () {
-        return this.projects.some((project) => project.code === DEMO_PROJECT_CODE)
-      },
-
-      sortedDemoProject () {
-        return this.projects.filter(item => item.code === DEMO_PROJECT_CODE)
+        return !this.projects.some((project) => project.code === DEMO_PROJECT_CODE)
       },
 
       isSuperAdmin () {

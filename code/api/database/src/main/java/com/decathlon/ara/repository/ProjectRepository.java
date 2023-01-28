@@ -45,6 +45,8 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     boolean existsByCode(String code);
 
+    boolean existsByName(String name);
+
     @Modifying
     @Query(value = "delete from Project p where p.code = ?1")
     void deleteByCode(String code);

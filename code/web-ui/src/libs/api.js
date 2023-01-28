@@ -64,6 +64,7 @@ api.paths = {
   problemPatterns: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/problem-patterns',
   problems: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/problems',
   projects: PROJECT_API_PATH,
+  projectByCode: (projectCode) => `${PROJECT_API_PATH}/${projectCode}`,
   rootCauses: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/root-causes',
   scenarios: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/scenarios',
   settings: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/settings',

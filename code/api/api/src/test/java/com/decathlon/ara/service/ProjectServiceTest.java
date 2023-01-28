@@ -1,6 +1,5 @@
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.domain.Communication;
 import com.decathlon.ara.domain.Project;
 import com.decathlon.ara.domain.RootCause;
 import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
@@ -15,6 +14,9 @@ import com.decathlon.ara.service.exception.NotUniqueException;
 import com.decathlon.ara.service.mapper.ProjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -98,78 +100,118 @@ class ProjectServiceTest {
         verify(mappedProject, never()).setUpdateDate(any());
     }
 
-    @Test
-    void update_throwNotFoundException_whenProjectNotFound() {
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "\t", "\n"})
+    void update_throwBadRequestException_whenProjectNewNameIsBlank(String newProjectName) {
         // Given
-        var projectId = 1L;
-
         var projectToUpdate = mock(ProjectDTO.class);
-
-        var currentUserEntity = mock(UserEntity.class);
+        var updateUser = mock(UserEntity.class);
 
         // When
-        when(projectToUpdate.getId()).thenReturn(projectId);
-        when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
+        when(projectToUpdate.getName()).thenReturn(newProjectName);
 
         // Then
-        assertThrows(NotFoundException.class, () -> projectService.update(projectToUpdate, currentUserEntity));
+        assertThrows(BadRequestException.class, () -> projectService.update(projectToUpdate, updateUser));
     }
 
     @Test
-    void update_updateProject_whenBusinessRulesAreValid() throws BadRequestException {
+    void update_throwNotFoundException_whenProjectNotFound() {
         // Given
-        var projectId = 1L;
         var projectCode = "project-code";
-        var projectName = "Project Name";
+        var newProjectName = "New Project Name";
 
         var projectToUpdate = mock(ProjectDTO.class);
-
-        var persistedProjectBeforeUpdate = mock(Project.class);
-
-        var currentUserEntity = mock(UserEntity.class);
-
-        var mappedProject = mock(Project.class);
-        var savedProject = mock(Project.class);
-        var updatedProjectDTO = mock(ProjectDTO.class);
-
-        var communication1 = mock(Communication.class);
-        var communication2 = mock(Communication.class);
-        var communication3 = mock(Communication.class);
-        var communications = List.of(communication1, communication2, communication3);
+        var updateUser = mock(UserEntity.class);
 
         // When
-        when(projectToUpdate.getId()).thenReturn(projectId);
+        when(projectToUpdate.getName()).thenReturn(newProjectName);
         when(projectToUpdate.getCode()).thenReturn(projectCode);
-        when(projectToUpdate.getName()).thenReturn(projectName);
-        when(persistedProjectBeforeUpdate.getId()).thenReturn(projectId);
-        when(persistedProjectBeforeUpdate.getCommunications()).thenReturn(communications);
-        when(projectRepository.findById(projectId)).thenReturn(Optional.of(persistedProjectBeforeUpdate));
-        when(projectRepository.findOneByCode(projectCode)).thenReturn(persistedProjectBeforeUpdate);
-        when(projectRepository.findOneByName(projectName)).thenReturn(persistedProjectBeforeUpdate);
-        when(projectMapper.getProjectEntityFromProjectDTO(projectToUpdate)).thenReturn(mappedProject);
-        when(projectRepository.save(mappedProject)).thenReturn(savedProject);
-        when(projectMapper.getProjectDTOFromProjectEntity(savedProject)).thenReturn(updatedProjectDTO);
+        when(projectRepository.findByCode(projectCode)).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(NotFoundException.class, () -> projectService.update(projectToUpdate, updateUser));
+    }
+
+    @Test
+    void update_throwNotUniqueException_whenProjectNewNameIsDifferentButNotUnique() {
+        // Given
+        var projectCode = "project-code";
+        var newProjectName = "New Project Name";
+
+        var projectToUpdate = mock(ProjectDTO.class);
+        var updateUser = mock(UserEntity.class);
+
+        var persistedProjectBeforeUpdate = mock(Project.class);
+        var persistedProjectName = "Persisted Project Name";
+
+        // When
+        when(projectToUpdate.getCode()).thenReturn(projectCode);
+        when(projectToUpdate.getName()).thenReturn(newProjectName);
+        when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(persistedProjectBeforeUpdate));
+        when(persistedProjectBeforeUpdate.getName()).thenReturn(persistedProjectName);
+        when(projectRepository.existsByName(newProjectName)).thenReturn(true);
+
+        // Then
+        assertThrows(NotUniqueException.class, () -> projectService.update(projectToUpdate, updateUser));
+    }
+
+    @Test
+    void update_updateProject_whenAllBusinessRulesAreValid() throws BadRequestException {
+        // Given
+        var projectCode = "project-code";
+        var newProjectName = "New Project Name";
+        var newProjectDescription = "A new project description";
+
+        var projectToUpdate = mock(ProjectDTO.class);
+        var updateUser = mock(UserEntity.class);
+
+        var persistedProjectName = "Persisted Project Name";
+        var persistedProjectDescription = "Persisted project description";
+        var creationUser = mock(UserEntity.class);
+        var persistedProjectBeforeUpdate = new Project(projectCode, persistedProjectName, creationUser);
+        persistedProjectBeforeUpdate.setDescription(persistedProjectDescription);
+
+        var savedProject = mock(Project.class);
+        var mappedUpdatedProject = mock(ProjectDTO.class);
+
+        // When
+        when(projectToUpdate.getCode()).thenReturn(projectCode);
+        when(projectToUpdate.getName()).thenReturn(newProjectName);
+        when(projectToUpdate.getDescription()).thenReturn(newProjectDescription);
+        when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(persistedProjectBeforeUpdate));
+        when(projectRepository.existsByName(newProjectName)).thenReturn(false);
+        when(projectRepository.save(persistedProjectBeforeUpdate)).thenReturn(savedProject);
+        when(projectMapper.getProjectDTOFromProjectEntity(savedProject)).thenReturn(mappedUpdatedProject);
 
         // Then
         var now = ZonedDateTime.now();
         var oneSecondBeforeNow = now.minusSeconds(1);
         var oneSecondAfterNow = now.plusSeconds(1);
 
-        var updatedProject = projectService.update(projectToUpdate, currentUserEntity);
+        var actualUpdatedProject = projectService.update(projectToUpdate, updateUser);
 
-        assertThat(updatedProject).isSameAs(updatedProjectDTO);
+        assertThat(actualUpdatedProject).isSameAs(mappedUpdatedProject);
 
-        ArgumentCaptor<List<Communication>> communicationsArgumentCaptor = ArgumentCaptor.forClass(List.class);
-        verify(mappedProject).setCommunications(communicationsArgumentCaptor.capture());
-        assertThat(communicationsArgumentCaptor.getValue()).isSameAs(communications);
-
-        var updateDateArgumentCaptor = ArgumentCaptor.forClass(ZonedDateTime.class);
-        verify(mappedProject).setUpdateDate(updateDateArgumentCaptor.capture());
-        assertThat(updateDateArgumentCaptor.getValue()).isBetween(oneSecondBeforeNow, oneSecondAfterNow);
-
-        verify(mappedProject).setUpdateUser(currentUserEntity);
-
-        verify(mappedProject, never()).setCreationUser(any());
+        var projectToPersistArgumentCaptor = ArgumentCaptor.forClass(Project.class);
+        verify(projectRepository).save(projectToPersistArgumentCaptor.capture());
+        var capturedProjectToPersist = projectToPersistArgumentCaptor.getValue();
+        assertThat(capturedProjectToPersist)
+                .extracting(
+                        "code",
+                        "name",
+                        "description",
+                        "creationUser",
+                        "updateUser"
+                )
+                .contains(
+                        projectCode,
+                        newProjectName,
+                        newProjectDescription,
+                        creationUser,
+                        updateUser
+                );
+        assertThat(capturedProjectToPersist.getUpdateDate()).isBetween(oneSecondBeforeNow, oneSecondAfterNow);
     }
 
     @Test

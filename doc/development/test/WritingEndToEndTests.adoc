@@ -97,7 +97,7 @@ specific label in ARA, then search it in the client sources), and add the custom
 In your JavaScript code, you'll retrieve the element with the code `cy.GetByDataNrt("<your-id>")` or
 `cy.WaitForElementByDataNrt("<your-id>", timeoutValueInMs)` if your element appears dynamically.
 
-You can check the `<ARA_ROOT>/client/src/views/management-projects.vue` file for an example.
+You can check the `<ARA_ROOT>/client/src/views/admin-management.vue` file for an example.
 
 === Implement the Gherkin sentences
 

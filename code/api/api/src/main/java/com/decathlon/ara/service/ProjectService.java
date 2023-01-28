@@ -31,13 +31,13 @@ import com.decathlon.ara.service.exception.ForbiddenException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
 import com.decathlon.ara.service.mapper.ProjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
@@ -75,16 +75,16 @@ public class ProjectService {
     /**
      * Create a new entity.
      *
-     * @param dtoToCreate the entity to save
+     * @param projectToCreate the entity to save
      * @return the persisted entity
      * @throws NotUniqueException when the given code or name is already used by another entity
      */
-    public ProjectDTO create(@NonNull ProjectDTO dtoToCreate, @NonNull UserEntity creationUser) throws NotUniqueException {
-        validateBusinessRules(dtoToCreate);
-        final Project entity = projectMapper.getProjectEntityFromProjectDTO(dtoToCreate);
-        entity.setCreationUser(creationUser);
-        communicationService.initializeProject(entity);
-        final ProjectDTO createdProject = projectMapper.getProjectDTOFromProjectEntity(projectRepository.save(entity));
+    public ProjectDTO create(@NonNull ProjectDTO projectToCreate, @NonNull UserEntity creationUser) throws NotUniqueException {
+        validateBusinessRules(projectToCreate);
+        final Project projectToSave = projectMapper.getProjectEntityFromProjectDTO(projectToCreate);
+        projectToSave.setCreationUser(creationUser);
+        communicationService.initializeProject(projectToSave);
+        final ProjectDTO createdProject = projectMapper.getProjectDTOFromProjectEntity(projectRepository.save(projectToSave));
 
         final long projectId = createdProject.getId();
         rootCauseRepository.saveAll(Arrays.asList(
@@ -120,24 +120,31 @@ public class ProjectService {
     /**
      * Update an entity.
      *
-     * @param dtoToUpdate the entity to update
+     * @param projectToUpdate the entity to update
      * @return the updated entity, if the entity was present in database
      * @throws NotFoundException  when the given entity ID is not present in database
      * @throws NotUniqueException when the given code or name is already used by another entity
      */
-    public ProjectDTO update(@NonNull ProjectDTO dtoToUpdate, @NonNull UserEntity updateUser) throws BadRequestException {
-        Optional<Project> dataBaseEntity = projectRepository.findById(dtoToUpdate.getId());
-        if (!dataBaseEntity.isPresent()) {
-            throw new NotFoundException(Messages.NOT_FOUND_PROJECT, Entities.PROJECT);
+    public ProjectDTO update(@NonNull ProjectDTO projectToUpdate, @NonNull UserEntity updateUser) throws BadRequestException {
+        var newProjectName = projectToUpdate.getName();
+        if (StringUtils.isBlank(newProjectName)) {
+            throw new BadRequestException("The project name cannot be left blank!", Entities.PROJECT, "project_name_blank");
         }
 
-        validateBusinessRules(dtoToUpdate);
+        var persistedProject = projectRepository.findByCode(projectToUpdate.getCode()).orElseThrow(() -> new NotFoundException(Messages.NOT_FOUND_PROJECT, Entities.PROJECT));
 
-        final Project entity = projectMapper.getProjectEntityFromProjectDTO(dtoToUpdate);
-        entity.setCommunications(dataBaseEntity.get().getCommunications());
-        entity.setUpdateDate(ZonedDateTime.now());
-        entity.setUpdateUser(updateUser);
-        return projectMapper.getProjectDTOFromProjectEntity(projectRepository.save(entity));
+        if (!newProjectName.equals(persistedProject.getName())) {
+            var projectNameAlreadyExists = projectRepository.existsByName(newProjectName);
+            if (projectNameAlreadyExists) {
+                throw new NotUniqueException(Messages.NOT_UNIQUE_PROJECT_NAME, Entities.PROJECT, "name", persistedProject.getId());
+            }
+        }
+
+        persistedProject.setName(newProjectName);
+        persistedProject.setDescription(projectToUpdate.getDescription());
+        persistedProject.setUpdateDate(ZonedDateTime.now());
+        persistedProject.setUpdateUser(updateUser);
+        return projectMapper.getProjectDTOFromProjectEntity(projectRepository.save(persistedProject));
     }
 
     /**

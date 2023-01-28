@@ -31,10 +31,7 @@ import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -253,7 +250,7 @@ public class UserAccountService {
         if (currentUserIsScopedUser) {
             var scopedProjectsStream = currentUser.getRolesOnProjectWhenScopedUser().stream().map(UserEntityRoleOnProject::getProject);
             var demoProjectStream = projectRepository.findByCode(DEMO_PROJECT_CODE).map(Stream::of).orElse(Stream.empty());
-            userProjectsStream = Stream.concat(scopedProjectsStream, demoProjectStream);
+            userProjectsStream = Stream.concat(scopedProjectsStream, demoProjectStream).sorted(Comparator.comparing(Project::getName));
         }
         return userProjectsStream.map(projectMapper::getProjectDTOFromProjectEntity).toList();
     }

@@ -158,4 +158,8 @@ util.cleanFromPreviousVersion = function () {
   localStorage.removeItem('last_url')
 }
 
+util.isBlank = function (s) {
+  return s == null || s.trim() === ''
+}
+
 export default util

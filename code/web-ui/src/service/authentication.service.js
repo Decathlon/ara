@@ -56,6 +56,18 @@ class AuthenticationServiceClass {
       })
   }
 
+  refreshUser = async function () {
+    const self = this
+    let refreshedUser
+    await Vue.http.get(api.paths.currentUser)
+      .then(response => response.body)
+      .then(user => {
+        self.saveCurrentUser(user)
+        refreshedUser = user
+      })
+    return refreshedUser
+  }
+
   getOauthProviders = async () => {
     return Vue.http.get(api.paths.authenticationConfiguration, api.REQUEST_OPTIONS)
       .then(response => response.body)

@@ -81,7 +81,7 @@
   import { mapState } from 'vuex'
 
   export default {
-    name: 'management-projects',
+    name: 'management-settings',
 
     components: {
       'management-menu': managementMenuComponent,

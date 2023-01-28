@@ -88,20 +88,18 @@ public class ProjectResource {
      * Update an existing project.
      *
      * @param projectCode          the code of the project to update
-     * @param dtoToUpdate the project to update
+     * @param projectToUpdate the project to update
      * @return the ResponseEntity with status 200 (OK) and with body the updated project, or with status 400 (Bad Request) if the project is not
      * valid, or with status 500 (Internal Server Error) if the project couldn't be updated
      */
     @PutMapping(PROJECT_CODE_REQUEST_PARAMETER)
-    public ResponseEntity<ProjectDTO> update(@PathVariable String projectCode, @Valid @RequestBody ProjectDTO dtoToUpdate) {
+    public ResponseEntity<ProjectDTO> update(@PathVariable String projectCode, @Valid @RequestBody ProjectDTO projectToUpdate) {
         try {
-            var projectId = projectService.toId(projectCode);
-            dtoToUpdate.setId(projectId); // HTTP PUT requires the URL to be the URL of the entity
             var updateUser = userAccountService.getCurrentUserEntity().orElseThrow(() -> new ForbiddenException(Entities.PROJECT, "project update", Pair.of("code", projectCode)));
-            ProjectDTO updatedDto = projectService.update(dtoToUpdate, updateUser);
+            ProjectDTO updatedProject = projectService.update(projectToUpdate, updateUser);
             return ResponseEntity.ok()
-                    .headers(HeaderUtil.entityUpdated(NAME, updatedDto.getId()))
-                    .body(updatedDto);
+                    .headers(HeaderUtil.entityUpdated(NAME, updatedProject.getId()))
+                    .body(updatedProject);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
         }
