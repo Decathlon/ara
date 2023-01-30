@@ -20,9 +20,10 @@
       <h1 class="adminTitle">Projects management</h1>
 
       <div class="projectCTA">
-        <Select class="filterSelect" v-model="projectFilter" placeholder="Filter" @on-change="filterProjects" :label-in-value="true">
+        <Select class="filterSelect" placeholder="Filter" @on-change="filterProjects" :label-in-value="true">
           <Option v-for="(filter, index) in filterType" :value="index" :key="index" :label="filter" />
         </Select>
+        <Input class="filterSearch" v-model="searchElement" search placeholder="Enter something..." @on-change="searchProject" />
         <Button v-if="user.default_project" type="error" class="deleteBtn" @click="clearDefaultProject()" ghost>
           Clear default project
         </Button>
@@ -144,6 +145,8 @@
         ],
         editingData: {},
         filterType: ['Name', 'Creation Date', 'Update Date', 'Author'],
+        filterSelected: 'Name',
+        searchElement: '',
         editingNew: false,
         editing: false,
         showLoader: false
@@ -294,16 +297,12 @@
           })
       },
       filterProjects (filter) {
-        switch (filter.label) {
-          case 'Name':
-            return this.projects.sort((a, b) => a.code.localeCompare(b.code))
-          case 'Creation Date':
-            return this.projects.sort((a, b) => (new Date(b.creation_date)) - (new Date(a.creation_date)))
-          case 'Update Date':
-            return this.sortedProjectsByUpdate
-          case 'Author':
-            return this.sortedProjectsByAuthor
-        }
+        this.filterSelected = filter.label
+      },
+
+      searchProject () {
+        let filteredProjects = this.projects.filter(o => o.name.toLowerCase().includes(this.searchElement.toLowerCase()))
+        return filteredProjects
       }
     },
     mounted () {

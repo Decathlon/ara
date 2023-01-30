@@ -20,16 +20,14 @@
 
     <Spin fix v-if="loadingSettings"></Spin>
 
-    <div v-else-if="countries.length === 0 || sources.length === 0 || teamsAssignableToFunctionalities.length === 0">
-      <h2 style="text-align: center; width: 75%; margin: auto; font-weight: normal;">
-        <span>
-          Before adding functionalities, please make sure to add at least
+    <div v-else-if="countries.length === 0 || sources.length === 0 || teamsAssignableToFunctionalities.length === 0" class="error-message">
+      <div class="content">
+        <p>Before adding functionalities, please make sure to add at least
           a <router-link :to="{ name: 'management-countries' }">country</router-link>,
           a <router-link :to="{ name: 'management-sources' }">source</router-link> and
-          a <router-link :to="{ name: 'management-teams' }">team</router-link> (that is assignable to functionalities).
-        </span>
-      </h2>
-
+          a <router-link :to="{ name: 'management-teams' }">team</router-link> (that is assignable to functionalities).</p>
+        <p>Contact an admin if you need help.</p>
+      </div>
     </div>
 
     <div v-else>

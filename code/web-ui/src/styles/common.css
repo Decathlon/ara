@@ -317,10 +317,29 @@ pre code {
   margin-bottom: 3rem;
   text-align: center;
   margin-top: 3rem;
-  /* font-size: 32px;
-  margin: 10px 0; */
   color: #007DBC;
   font-weight: 900;
+}
+
+.error-message {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  height: 400px;
+}
+
+.error-message .content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 30px;
+  text-align: center;
+  width: 75%;
+  margin: 0 auto;
 }
 
 /* CTA */
@@ -450,6 +469,13 @@ pre code {
   width: 150px;
   position: absolute;
   top: -45px;
+}
+
+.projectCTA .filterSearch {
+  width: 350px;
+  position: absolute;
+  top: -45px;
+  left: 170px;
 }
 
 .projectCTA .demoProjectButton {

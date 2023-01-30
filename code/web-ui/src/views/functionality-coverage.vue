@@ -19,6 +19,12 @@
     <functionality-menu />
 
     <Spin fix v-if="loadingCoverage" />
+    <div v-else-if="!tableValues[0][0][0]" class="error-message">
+      <div class="content">
+        <p>There are no coverage values to show.</p>
+        <p>Contact an admin if you need help.</p>
+      </div>
+    </div>
     <div v-else>
       <div style="text-align: center;">
         <span v-for="axisIndex in filterIndices" :key="axisIndex">

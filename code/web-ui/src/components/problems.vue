@@ -15,7 +15,7 @@
   ~
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
-  <div v-if="!problemsList" class="container">
+  <div v-if="!problemsList" class="error-message">
     <div class="content">
       There are no problems to show for this project.
     </div>
@@ -276,26 +276,3 @@
     }
   }
 </script>
-
-<style scoped>
-  .container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-
-    height: 400px;
-  }
-
-  .content {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-
-    font-size: 35px;
-    text-align: center;
-    width: 75%;
-    margin: 0 auto;
-  }
-</style>
