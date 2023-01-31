@@ -83,7 +83,7 @@ h2 {
 /* DROPDOWNS */
 
 .ivu-select-dropdown {
-  max-height: 40vh !important;
+  max-height: 50vh !important;
   overflow: auto !important;
 }
 

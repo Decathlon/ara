@@ -22,14 +22,14 @@
       So we use Menu classes with router-links.
     -->
     <div style="background-color: #0082C3; display: flex;">
-      <div style="flex: 0 0 auto;">
+      <div class="header-top-left">
         <router-link v-if="!adminRight" :to="{ name: 'redirecter' }" id="home-logo">
           <Tooltip placement="bottom-start" :transfer="true">
             <div slot="content">
               ARA - AGILE REGRESSION ANALYZER<br>
               Fighting Against Regressions All Together
             </div>
-            <img src="../assets/favicon-white.png" width="32" height="32"/></Tooltip></router-link><!-- No space between!
+            <img src="../assets/favicon-white.png" class="default-icon" width="32" height="32"/></Tooltip></router-link><!-- No space between!
      --><projects-select :class="$route.path.includes('/settings') ? '' 
                         : $route.path.includes('/projects/') ? '' 
                         : 'hidden'" 
@@ -42,14 +42,14 @@
       <div style="flex: 1 0 auto;">
         <!-- After deleting the demo project, if no other project exists, `projectCode` still exists but we should hide the menu anyway  -->
         <ul v-if="projectCode && projects && projects.length && !savedSingleUserConnections" class="ivu-menu ivu-menu-primary ivu-menu-horizontal dashboardHeader">
-          <router-link v-for="(link, index) in links" @click.native="changeAdminState(link.routeName)" :key="index" :to="to(link)" :class="index === links.length - 1 ? 'last-nav' : ''" class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected">
+          <router-link v-for="(link, index) in links" class="ivu-menu-item top-nav" active-class="ivu-menu-item-active ivu-menu-item-selected" @click.native="changeAdminState(link.routeName)" :key="index" :to="to(link)">
             {{link.name}}
           </router-link>
         </ul>
 
         <ul v-else-if="projectCode && projects && projects.length && savedSingleUserConnections" class="ivu-menu ivu-menu-primary ivu-menu-horizontal dashboardHeader">
-          <li v-for="link, index in adminMenu" :key="index" :class="index === adminMenu.length - 1 ? 'last-nav' : ''">
-            <router-link v-if="link.name !== 'MEMBERS'" class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected" @click.native="changeAdminState(link.routeName)" :key="link.name" :to="to(link)" :class="link.name === 'DASHBOARD' ? 'last-nav' : $route.path.includes(link.routeName) ? 'ivu-menu-item-active ivu-menu-item-selected' : ''">
+          <li v-for="link, index in adminMenu" class="top-nav" :key="index">
+            <router-link v-if="link.name !== 'MEMBERS'" class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected" @click.native="changeAdminState(link.routeName)" :key="link.name" :to="to(link)" :class="$route.path.includes(link.routeName) ? 'ivu-menu-item-active ivu-menu-item-selected' : ''">
               {{ link.name }}
             </router-link>
 
@@ -67,41 +67,22 @@
       </div>
 
       <div id="helps">
-        <span v-if="isLoggedIn" style="margin-right: 10px" class="user-avatar">
-          <Tooltip placement="bottom">
-            <Avatar v-if="user && user.pictureUrl" :src="user.pictureUrl" size="large" />
-            <Avatar v-else icon="md-person" style="color: #0082c3;background-color: white" size="large"/>
-            <div slot="content">
-              <p v-if="providerName">Connected via <strong>{{providerName}}</strong></p>
-              <p v-if="user && user.profile">> Profile: <strong>{{user.profile}}</strong></p>
-              <p v-if="user && user.login">> Login: <strong>{{user.login}}</strong></p>
-              <p v-if="user && user.firstName && user.lastName">> Name: <strong>{{user.firstName + " " + user.lastName}}</strong></p>
-              <p v-if="user && user.email">> Email: <strong>{{user.email}}</strong></p>
-            </div>
-          </Tooltip>
-        </span>
-        <Tooltip placement="bottom-end">
-          <span id="current-version">V{{ appVersion }}</span>
+        <Tooltip v-if="isLoggedIn" class="user-avatar top-right-nav" placement="bottom">
+          <p class="user-avatar">
+            <span></span>
+          </p>
           <div slot="content">
-            <table aria-label="ARA versions">
-              <tr v-if="webUIVersion">
-                <th scope="row" style="text-align: right;">WEB-UI: </th>
-                <td>{{ webUIVersion }}</td>
-              </tr>
-              <tr v-if="apiVersion">
-                <th scope="row" style="text-align: right;">API: </th>
-                <td>{{ apiVersion }}</td>
-              </tr>
-            </table>
+            <p v-if="providerName">Connected via <strong>{{providerName}}</strong></p>
+            <p v-if="user && user.profile">> Profile: <strong>{{user.profile}}</strong></p>
+            <p v-if="user && user.login">> Login: <strong>{{user.login}}</strong></p>
+            <p v-if="user && user.firstName && user.lastName">> Name: <strong>{{user.firstName + " " + user.lastName}}</strong></p>
+            <p v-if="user && user.email">> Email: <strong>{{user.email}}</strong></p>
           </div>
         </Tooltip>
         <!-- Keep the same width as logo+select: this is to center the menu when space is available -->
-        <Tooltip content="How to use ARA?" placement="bottom-end" :transfer="true">
-          <a href="https://github.com/Decathlon/ara/blob/main/doc/usage/main/UserDocumentation.adoc"
-             rel="noopener" target="_blank"><Icon type="md-help-circle" size="24" style="padding: 0;"/></a>
-        </Tooltip><!-- No space between items -->
-        <Dropdown trigger="click" placement="bottom-end">
-          <a><Icon type="md-settings" size="24"/></a>
+        <!-- No space between items -->
+        <Dropdown trigger="click" class="top-right-nav" placement="bottom-end">
+          <Icon type="md-settings" color="white" size="24"/>
           <DropdownMenu slot="list">
             <div class="parameters-box">
               <div class="parameter-box-title">Executed Scenarios</div>
@@ -134,18 +115,42 @@
                   </Select>
                 </div>
               </div>
+              <div class="parameter-line">
+                <div class="parameter-title">Infos</div>
+                <div class="parameter-switch">
+                  <div class="link-helper">
+                    <a href="https://github.com/Decathlon/ara/blob/main/doc/usage/main/UserDocumentation.adoc" rel="noopener" target="_blank">
+                      <Icon type="md-help-circle" color="grey" size="24" style="padding: 0;"/>
+                      <span>How to use ARA?</span>
+                    </a>
+                  </div>
+                  <Tooltip :transfer="true" placement="left">
+                    <span class="parameter-switch-description">V{{ appVersion }}</span>
+                    <div slot="content">
+                      <table aria-label="ARA versions">
+                        <tr v-if="webUIVersion">
+                          <th scope="row" style="text-align: right;">WEB-UI: </th>
+                          <td>{{ webUIVersion }}</td>
+                        </tr>
+                        <tr v-if="apiVersion">
+                          <th scope="row" style="text-align: right;">API: </th>
+                          <td>{{ apiVersion }}</td>
+                        </tr>
+                      </table>
+                    </div>
+                  </Tooltip>
+                </div>
+              </div>
             </div>
           </DropdownMenu>
         </Dropdown>
-        <Tooltip content="What's new in ARA?" placement="bottom-end" :transfer="false">
+        <Tooltip content="What's new in ARA?" class="top-right-nav" placement="bottom-end" :transfer="false">
           <a :href="$sanitizeUrl('https://github.com/Decathlon/ara/releases/tag/ara-' + channel + '-v' + appVersion)"
              @click="setLatestChangelogVersion"
-             rel="noopener" target="_blank"><Badge dot :count="changelogCount"><Icon type="md-notifications" size="24"/></Badge></a>
+             rel="noopener" target="_blank"><Badge dot :count="changelogCount"><Icon type="md-notifications" color="white" size="24"/></Badge></a>
         </Tooltip>
-        <Tooltip v-if="isLoggedIn" content="Logout from ARA" placement="bottom-end">
-          <a @click="logout()">
-            <Icon type="md-exit" size="24"></Icon>
-          </a>
+        <Tooltip v-if="isLoggedIn" class="top-right-nav" content="Logout from ARA" placement="bottom-end">
+          <Icon type="md-exit" color="white" size="24" @click="logout()"></Icon>
         </Tooltip>
       </div>
     </div>
@@ -442,30 +447,18 @@
     to   { transform: translateY(0); }
   }
 
-  #home-logo {
-    display: inline-block;
-    margin: 0 8px;
-  }
   #home-logo img {
-    margin: 14px calc(14px - 8px);
-    vertical-align: middle;
-  }
-  .ivu-menu-horizontal {
-    text-align: center;
-  }
-  .ivu-menu-horizontal .ivu-menu-item {
-    float: none;
-    display: inline-block;
+    margin: 0 12px;
   }
 
-  .last-nav {
-    position: absolute !important;
-    right: 0;
+  .header-top-left {
+    display: flex;
+    margin: 5px;
+    align-items: center;
   }
 
-  .selected-project-management div {
-    background-color: #135b95;
-    border-radius: 50%;
+  .top-nav:first-child, .top-nav:last-child {
+    margin-left: auto;
   }
 
   .hidden {
@@ -473,30 +466,13 @@
   }
 
   #helps {
-    flex: 0 1 auto;
-    text-align: right;
-    line-height: calc(30px - 14px);
-    font-size: 14px;
-    padding-right: 8px;
-    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    margin-right: 12px;
   }
 
-  #current-version {
-    color: white;
-  }
-
-  #helps a {
-    display: block;
-    color: white;
-    padding: 18px 6px;
-  }
-  #home-logo,
-  #helps a {
-    transition: all .2s ease-in-out;
-  }
-  #home-logo:hover,
-  #helps a:hover {
-    background-color: #2B85E4;
+  #helps .top-right-nav {
+    padding-right: 15px;
   }
 
   .user-avatar:hover {
@@ -542,8 +518,8 @@
     margin-bottom: 10px;
   }
 
-  .parameter-switch-description {
-    cursor: pointer;
+  .parameter-switch a {
+    color: #515a6e;
   }
 
   .parameter-inputs {
@@ -602,4 +578,38 @@
     color: #007DBC;
     font-weight: 900;
   }
+
+  .link-helper a {
+    align-items: center;
+    display: flex;
+  }
+
+  .link-helper a > i {
+    margin-right: 4px;
+  }
+
+  .user-avatar {
+    background-color: #ffffff;
+    margin-right: 15px;
+    width: 30px;
+    height: 30px;
+    border-radius: 100px;
+    overflow: hidden;
+    background-image: url('../assets/super_admin.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+  
+  /* .user-avatar.specifi-role::after {
+    content: '';
+  } */
+
+  /* .user-avatar span {
+    position: absolute;
+    top: 0;
+    background-color: #ffffff;
+    height: 15px;
+    width: 15px;
+    border-radius: 100px;
+  } */
 </style>
