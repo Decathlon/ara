@@ -53,7 +53,7 @@ public class DefaultSecurityConfiguration {
                 Authentication principal = context.getPrincipal();
                 context.getClaims().claim(
                         StandardClaimNames.PICTURE,
-                        "%s/user/%s.png".formatted(providerUrl, principal.getName())
+                        "%s/user/%s.jpg".formatted(providerUrl, principal.getName())
                 );
                 context.getClaims().claim(
                         StandardClaimNames.EMAIL,
