@@ -1,10 +1,10 @@
 <script setup>
 import { VtmnChip, VtmnIcon } from "@vtmn/vue";
-import cardDetails from "./CardDetails.vue";
+import cardDetails from "./cardDetails.vue";
 import { defineAsyncComponent } from "vue";
 
 const cardScenarios = defineAsyncComponent(() =>
-  import("../../views/ScenariosList.vue")
+  import("../../views/scenariosList.vue")
 );
 const props = defineProps(["cardInfo", "cardValue", "cardActive"]);
 const emit = defineEmits(["cardSelected"]);

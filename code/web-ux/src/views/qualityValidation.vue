@@ -4,10 +4,10 @@ import { VtmnBreadcrumb, VtmnBreadcrumbItem, VtmnIcon } from "@vtmn/vue";
 import { useRouter, useRoute } from "vue-router";
 
 const cardStarter = defineAsyncComponent(() =>
-  import("../components/QualityCards/CardStarter.vue")
+  import("../components/Quality/cardStarter.vue")
 );
 const cardFull = defineAsyncComponent(() =>
-  import("../components/QualityCards/CardFull.vue")
+  import("../components/Quality/cardFull.vue")
 );
 let configurationCards = ref([
   JSON.parse(localStorage.getItem("conditionStored")),

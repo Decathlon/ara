@@ -3,7 +3,7 @@ import { VtmnButton, VtmnIcon } from "@vtmn/vue";
 import { ref, defineAsyncComponent } from "vue";
 
 const cardProgressBar = defineAsyncComponent(() =>
-  import("./CardProgressBar.vue")
+  import("./cardProgressBar.vue")
 );
 const props = defineProps(["cardInfo", "cardValue", "cardActive"]);
 const sanityGroup = ref(["Sanity Check", "High", "Medium", "Global"]);

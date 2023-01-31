@@ -4,7 +4,7 @@ import { onMounted, ref, defineAsyncComponent } from "vue";
 import { useCardsPositionsStore } from "../../stores/cardsPositions";
 
 const positionsModal = defineAsyncComponent(() =>
-  import("../../views/PositionsModal.vue")
+  import("../../views/positionsModal.vue")
 );
 const cardsPositionsStore = useCardsPositionsStore();
 const selectedCondition = {
