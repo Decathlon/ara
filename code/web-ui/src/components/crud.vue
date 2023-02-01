@@ -50,6 +50,7 @@
   import api from '../libs/api'
   import util from '../libs/util'
   import _ from 'lodash'
+  import { AuthenticationService } from '../service/authentication.service'
 
   export default {
     name: 'crud',
@@ -167,12 +168,14 @@
           let buttons = [
             h('Button', {
               props: { type: 'primary', size: 'small', icon: 'md-create' },
+              class: this.isUser,
               on: { click: () => { this.edit(params.row) } }
             }, 'EDIT')
           ]
           if (!this.editOnly && !this.disableDelete) {
             buttons.push(h('Button', {
               props: { type: 'error', size: 'small', icon: 'md-trash' },
+              class: this.isUser,
               on: { click: () => { this.delete(params.index) } }
             }, 'DELETE'))
           }
@@ -186,6 +189,7 @@
           } else {
             return h('Button', {
               props: { type: 'success', size: 'small', icon: 'md-add' },
+              class: this.isUser,
               on: { click: () => { this.add() } }
             }, 'ADD')
           }
@@ -199,7 +203,8 @@
         columns,
         data: [],
         editingData: {},
-        editingNew: false
+        editingNew: false,
+        btnVisibility: false
       }
     },
 
@@ -242,6 +247,17 @@
           throw new Error('The table ' + this.name + ' has no businessKey field')
         }
         return businessKeyFields
+      },
+
+      isUser () {
+        const user = AuthenticationService.getDetails().user
+        const project = this.$route.params.projectCode
+        const userProject = user?.scopes.find((item) => item.project === project)
+        if (userProject?.role === 'MEMBER') {
+          this.btnVisibility = 'btn-hidden'
+        } else this.btnVisibility = 'btn-visible'
+
+        return this.btnVisibility
       }
     },
 

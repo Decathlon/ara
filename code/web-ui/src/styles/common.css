@@ -133,6 +133,10 @@ table > thead > tr > th {
   height: 32px !important;
 }
 
+.btn-hidden {
+  display: none !important;
+}
+
 /* PAGES */
 .ivu-page.mini {
   margin-right: -10px;

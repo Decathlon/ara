@@ -131,7 +131,8 @@
   import { AuthenticationService } from '../service/authentication.service'
   import { mapState } from 'vuex'
   import util from '../libs/util'
-export default {
+
+  export default {
     name: 'admin-management',
     components: {
       formField
@@ -359,7 +360,7 @@ export default {
     },
     mounted () {
       this.$store.dispatch('admin/setTypeSelected', '')
-      this.$store.dispatch('users/getUserInfo', JSON.parse(localStorage.getItem('current_user')))
+      this.$store.dispatch('users/getUserInfo', AuthenticationService.getDetails().user)
       this.initProjects()
     },
     computed: {

@@ -36,6 +36,7 @@
 
 <script>
   import { mapState } from 'vuex'
+  import { AuthenticationService } from '../service/authentication.service'
 
   export default {
     name: 'management-menu',
@@ -77,7 +78,7 @@
     },
 
     created () {
-      this.userRole = JSON.parse(localStorage.getItem('current_user'))
+      this.userRole = AuthenticationService.getDetails().user
     },
 
     computed: {
@@ -88,8 +89,8 @@
       },
 
       userAuthorization () {
-        const test = this.userRole.scopes.find((item) => item.project === this.projectSelected)
-        if (test?.role === 'MEMBER') {
+        const user = this.userRole.scopes.find((item) => item.project === this.projectSelected)
+        if (user?.role === 'MEMBER') {
           return true
         }
       }
