@@ -152,7 +152,7 @@ class ProjectSettingsResourceAccessTest {
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
         when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
-        when(userSessionService.getCurrentUserRoleOnProject(projectCode)).thenReturn(Optional.empty());
+        when(userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode)).thenReturn(Optional.empty());
 
         // Then
         var isEnabled = projectSettingsResourceAccess.isEnabled(projectCode, permission);
@@ -172,7 +172,7 @@ class ProjectSettingsResourceAccessTest {
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
         when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
-        when(userSessionService.getCurrentUserRoleOnProject(projectCode)).thenReturn(Optional.of(role));
+        when(userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode)).thenReturn(Optional.of(role));
 
         // Then
         var isEnabled = projectSettingsResourceAccess.isEnabled(projectCode, permission);
@@ -193,7 +193,7 @@ class ProjectSettingsResourceAccessTest {
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
         when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
-        when(userSessionService.getCurrentUserRoleOnProject(projectCode)).thenReturn(Optional.of(role));
+        when(userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode)).thenReturn(Optional.of(role));
 
         // Then
         var isEnabled = projectSettingsResourceAccess.isEnabled(projectCode, permission);
@@ -214,7 +214,7 @@ class ProjectSettingsResourceAccessTest {
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
         when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
-        when(userSessionService.getCurrentUserRoleOnProject(projectCode)).thenReturn(Optional.of(role));
+        when(userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode)).thenReturn(Optional.of(role));
 
         // Then
         var isEnabled = projectSettingsResourceAccess.isEnabled(projectCode, permission);
@@ -234,7 +234,7 @@ class ProjectSettingsResourceAccessTest {
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
         when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
-        when(userSessionService.getCurrentUserRoleOnProject(projectCode)).thenReturn(Optional.of(role));
+        when(userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode)).thenReturn(Optional.of(role));
 
         // Then
         var isEnabled = projectSettingsResourceAccess.isEnabled(projectCode, permission);

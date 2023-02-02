@@ -1,8 +1,10 @@
 package com.decathlon.ara.security.mapper;
 
 import com.decathlon.ara.domain.Project;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntityRoleOnProject;
+import com.decathlon.ara.domain.security.member.user.role.ProjectRole;
+import com.decathlon.ara.domain.security.member.user.User;
+import com.decathlon.ara.domain.security.member.user.UserProfile;
+import com.decathlon.ara.domain.security.member.user.UserScope;
 import com.decathlon.ara.security.dto.user.UserAccount;
 import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScope;
@@ -29,31 +31,31 @@ class AuthorityMapperTest {
     private AuthorityMapper authorityMapper;
 
     @ParameterizedTest
-    @EnumSource(value = UserEntity.UserEntityProfile.class)
-    void getGrantedAuthoritiesFromUserEntity_returnProfileAndScopedAuthorities_whenUserEntityHasProfileAndScopes(UserEntity.UserEntityProfile profile) {
+    @EnumSource(value = UserProfile.class)
+    void getGrantedAuthoritiesFromUser_returnProfileAndScopedAuthorities_whenUserHasProfileAndScopes(UserProfile profile) {
         // Given
-        var persistedUser = mock(UserEntity.class);
+        var user = mock(User.class);
 
         var project1 = mock(Project.class);
         var projectCode1 = "project-code1";
-        var role1 = UserEntityRoleOnProject.ScopedUserRoleOnProject.ADMIN;
-        var scope1 = mock(UserEntityRoleOnProject.class);
+        var role1 = ProjectRole.ADMIN;
+        var scope1 = mock(UserScope.class);
 
         var project2 = mock(Project.class);
         var projectCode2 = "project-code2";
-        var role2 = UserEntityRoleOnProject.ScopedUserRoleOnProject.MAINTAINER;
-        var scope2 = mock(UserEntityRoleOnProject.class);
+        var role2 = ProjectRole.MAINTAINER;
+        var scope2 = mock(UserScope.class);
 
         var project3 = mock(Project.class);
         var projectCode3 = "project-code3";
-        var role3 = UserEntityRoleOnProject.ScopedUserRoleOnProject.MEMBER;
-        var scope3 = mock(UserEntityRoleOnProject.class);
+        var role3 = ProjectRole.MEMBER;
+        var scope3 = mock(UserScope.class);
 
         var scopes = List.of(scope1, scope2, scope3);
 
         // When
-        when(persistedUser.getProfile()).thenReturn(profile);
-        when(persistedUser.getRolesOnProjectWhenScopedUser()).thenReturn(scopes);
+        when(user.getProfile()).thenReturn(profile);
+        when(user.getScopes()).thenReturn(scopes);
         when(scope1.getProject()).thenReturn(project1);
         when(project1.getCode()).thenReturn(projectCode1);
         when(scope1.getRole()).thenReturn(role1);
@@ -65,7 +67,7 @@ class AuthorityMapperTest {
         when(scope3.getRole()).thenReturn(role3);
 
         // Then
-        Set<GrantedAuthority> authorities = authorityMapper.getGrantedAuthoritiesFromUserEntity(persistedUser);
+        Set<GrantedAuthority> authorities = authorityMapper.getGrantedAuthoritiesFromUser(user);
         assertThat(authorities)
                 .extracting("authority")
                 .containsExactlyInAnyOrder(

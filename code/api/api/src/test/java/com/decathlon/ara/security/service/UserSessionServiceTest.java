@@ -1,9 +1,9 @@
 package com.decathlon.ara.security.service;
 
 import com.decathlon.ara.Entities;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
+import com.decathlon.ara.domain.security.member.user.User;
 import com.decathlon.ara.loader.DemoLoaderConstants;
-import com.decathlon.ara.repository.security.member.user.entity.UserEntityRepository;
+import com.decathlon.ara.repository.security.member.user.UserRepository;
 import com.decathlon.ara.security.dto.authentication.user.AuthenticatedOAuth2User;
 import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
@@ -41,7 +41,7 @@ import static org.mockito.Mockito.*;
 class UserSessionServiceTest {
 
     @Mock
-    private UserEntityRepository userEntityRepository;
+    private UserRepository userRepository;
 
     @Mock
     private AuthorityMapper authorityMapper;
@@ -55,18 +55,18 @@ class UserSessionServiceTest {
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = {" ", "\t", "\n"})
-    void getCurrentUserRoleOnProject_returnEmptyOptional_whenProjectCodeIsNull(String projectCode) {
+    void getCurrentUserAccountScopeRoleFromProjectCode_returnEmptyOptional_whenProjectCodeIsNull(String projectCode) {
         // Given
 
         // When
 
         // Then
-        var roleOnProject = userSessionService.getCurrentUserRoleOnProject(projectCode);
-        assertThat(roleOnProject).isNotPresent();
+        var role = userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode);
+        assertThat(role).isNotPresent();
     }
 
     @Test
-    void getCurrentUserRoleOnProject_returnEmptyOptional_whenAuthenticationIsNull() {
+    void getCurrentUserAccountScopeRoleFromProjectCode_returnEmptyOptional_whenAuthenticationIsNull() {
         // Given
         var projectCode = "project-code";
 
@@ -77,12 +77,12 @@ class UserSessionServiceTest {
         when(securityContext.getAuthentication()).thenReturn(null);
 
         // Then
-        var roleOnProject = userSessionService.getCurrentUserRoleOnProject(projectCode);
-        assertThat(roleOnProject).isNotPresent();
+        var role = userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode);
+        assertThat(role).isNotPresent();
     }
 
     @Test
-    void getCurrentUserRoleOnProject_returnEmptyOptional_whenUserIsNotAuthenticated() {
+    void getCurrentUserAccountScopeRoleFromProjectCode_returnEmptyOptional_whenUserIsNotAuthenticated() {
         // Given
         var projectCode = "project-code";
 
@@ -95,12 +95,12 @@ class UserSessionServiceTest {
         when(authentication.isAuthenticated()).thenReturn(false);
 
         // Then
-        var roleOnProject = userSessionService.getCurrentUserRoleOnProject(projectCode);
-        assertThat(roleOnProject).isNotPresent();
+        var role = userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode);
+        assertThat(role).isNotPresent();
     }
 
     @Test
-    void getCurrentUserRoleOnProject_returnEmptyOptional_whenNoAuthorityFound() {
+    void getCurrentUserAccountScopeRoleFromProjectCode_returnEmptyOptional_whenNoAuthorityFound() {
         // Given
         var projectCode = "project-code";
 
@@ -114,12 +114,12 @@ class UserSessionServiceTest {
         when(authentication.getAuthorities()).thenReturn(null);
 
         // Then
-        var roleOnProject = userSessionService.getCurrentUserRoleOnProject(projectCode);
-        assertThat(roleOnProject).isNotPresent();
+        var role = userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode);
+        assertThat(role).isNotPresent();
     }
 
     @Test
-    void getCurrentUserRoleOnProject_returnAdminRole_whenProjectIsDemoProject() {
+    void getCurrentUserAccountScopeRoleFromProjectCode_returnAdminRole_whenProjectIsDemoProject() {
         // Given
         var projectCode = DemoLoaderConstants.DEMO_PROJECT_CODE;
 
@@ -140,12 +140,12 @@ class UserSessionServiceTest {
         when(authority3.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code3:ADMIN");
 
         // Then
-        var roleOnProject = userSessionService.getCurrentUserRoleOnProject(projectCode);
-        assertThat(roleOnProject).isPresent().contains(UserAccountScopeRole.ADMIN);
+        var role = userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode);
+        assertThat(role).isPresent().contains(UserAccountScopeRole.ADMIN);
     }
 
     @Test
-    void getCurrentUserRoleOnProject_returnRole_whenProjectFound() {
+    void getCurrentUserAccountScopeRoleFromProjectCode_returnRole_whenProjectFound() {
         // Given
         var projectCode = "project-code";
 
@@ -166,12 +166,12 @@ class UserSessionServiceTest {
         when(authority3.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code:ADMIN");
 
         // Then
-        var roleOnProject = userSessionService.getCurrentUserRoleOnProject(projectCode);
-        assertThat(roleOnProject).isPresent().contains(UserAccountScopeRole.ADMIN);
+        var role = userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode);
+        assertThat(role).isPresent().contains(UserAccountScopeRole.ADMIN);
     }
 
     @Test
-    void getCurrentUserRoleOnProject_returnEmptyOptional_whenProjectNotFound() {
+    void getCurrentUserAccountScopeRoleFromProjectCode_returnEmptyOptional_whenProjectNotFound() {
         // Given
         var projectCode = "project-code";
 
@@ -192,12 +192,12 @@ class UserSessionServiceTest {
         when(authority3.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code3:ADMIN");
 
         // Then
-        var roleOnProject = userSessionService.getCurrentUserRoleOnProject(projectCode);
-        assertThat(roleOnProject).isNotPresent();
+        var role = userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode);
+        assertThat(role).isNotPresent();
     }
 
     @Test
-    void getCurrentUserRoleOnProject_returnEmptyOptional_whenRoleFoundButWasUnknown() {
+    void getCurrentUserAccountScopeRoleFromProjectCode_returnEmptyOptional_whenRoleFoundButWasUnknown() {
         // Given
         var projectCode = "project-code";
 
@@ -218,8 +218,8 @@ class UserSessionServiceTest {
         when(authority3.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code:UNKNOWN_ROLE");
 
         // Then
-        var roleOnProject = userSessionService.getCurrentUserRoleOnProject(projectCode);
-        assertThat(roleOnProject).isNotPresent();
+        var role = userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode);
+        assertThat(role).isNotPresent();
     }
 
     @Test
@@ -538,7 +538,7 @@ class UserSessionServiceTest {
         when(authenticationMapper.getAuthenticatedOAuth2UserFromAuthentication(authentication)).thenReturn(authenticatedUser);
         when(authenticatedUser.getLogin()).thenReturn(userLogin);
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userEntityRepository.findById(new UserEntity.UserEntityId(providerName, userLogin))).thenReturn(Optional.empty());
+        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.empty());
 
         // Then
         assertThrows(ForbiddenException.class, () -> userSessionService.refreshCurrentUserAuthorities());
@@ -557,7 +557,7 @@ class UserSessionServiceTest {
 
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
 
-        var userEntity = mock(UserEntity.class);
+        var user = mock(User.class);
 
         var updatedAuthority1 = mock(GrantedAuthority.class);
         var updatedAuthority2 = mock(GrantedAuthority.class);
@@ -570,8 +570,8 @@ class UserSessionServiceTest {
         when(authenticationMapper.getAuthenticatedOAuth2UserFromAuthentication(authentication)).thenReturn(authenticatedUser);
         when(authenticatedUser.getLogin()).thenReturn(userLogin);
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userEntityRepository.findById(new UserEntity.UserEntityId(providerName, userLogin))).thenReturn(Optional.of(userEntity));
-        when(authorityMapper.getGrantedAuthoritiesFromUserEntity(userEntity)).thenReturn(updatedAuthorities);
+        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
+        when(authorityMapper.getGrantedAuthoritiesFromUser(user)).thenReturn(updatedAuthorities);
 
         // Then
         userSessionService.refreshCurrentUserAuthorities();

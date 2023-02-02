@@ -80,7 +80,7 @@ class OidcUserLoginServiceTest {
     }
 
     @Test
-    void manageUserLoginRequest_saveUser_whenUserIsNotPersisted() throws ForbiddenException {
+    void manageUserLoginRequest_saveUser_whenUserNotFoundInDatabase() throws ForbiddenException {
         // Given
         var request = mock(OidcUserRequest.class);
         var userService = mock(OidcUserService.class);
@@ -90,7 +90,7 @@ class OidcUserLoginServiceTest {
         Map<String, Object> claims = Map.ofEntries(entry(StandardClaimNames.SUB, "subValue"));
         var clientRegistration = mock(ClientRegistration.class);
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
-        var newlyPersistedUserAccount = mock(UserAccount.class);
+        var userAccount = mock(UserAccount.class);
 
         var authority1 = mock(GrantedAuthority.class);
         var authorityValue1 = "authority-1";
@@ -112,8 +112,8 @@ class OidcUserLoginServiceTest {
         when(clientRegistration.getRegistrationId()).thenReturn(providerName);
         when(userSessionService.getCurrentAuthenticatedOAuth2UserFromOAuth2UserAndProviderName(oidcUser, providerName)).thenReturn(Optional.of(authenticatedUser));
         when(userAccountService.getCurrentUserAccountFromAuthenticatedOAuth2User(authenticatedUser)).thenReturn(Optional.empty());
-        when(userAccountService.createUserAccountFromAuthenticatedOAuth2User(authenticatedUser)).thenReturn(newlyPersistedUserAccount);
-        when(authorityMapper.getGrantedAuthoritiesFromUserAccount(newlyPersistedUserAccount)).thenReturn(authorities);
+        when(userAccountService.createUserAccountFromAuthenticatedOAuth2User(authenticatedUser)).thenReturn(userAccount);
+        when(authorityMapper.getGrantedAuthoritiesFromUserAccount(userAccount)).thenReturn(authorities);
         when(authority1.getAuthority()).thenReturn(authorityValue1);
         when(authority2.getAuthority()).thenReturn(authorityValue2);
         when(authority3.getAuthority()).thenReturn(authorityValue3);
@@ -163,7 +163,7 @@ class OidcUserLoginServiceTest {
     }
 
     @Test
-    void manageUserLoginRequest_fetchUser_whenUserIsPersisted() throws ForbiddenException {
+    void manageUserLoginRequest_fetchUser_whenUserFoundInDatabase() throws ForbiddenException {
         // Given
         var request = mock(OidcUserRequest.class);
         var userService = mock(OidcUserService.class);
@@ -173,7 +173,7 @@ class OidcUserLoginServiceTest {
         Map<String, Object> claims = Map.ofEntries(entry(StandardClaimNames.SUB, "subValue"));
         var clientRegistration = mock(ClientRegistration.class);
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
-        var alreadyPersistedUserAccount = mock(UserAccount.class);
+        var userAccount = mock(UserAccount.class);
 
         var authority1 = mock(GrantedAuthority.class);
         var authorityValue1 = "authority-1";
@@ -194,8 +194,8 @@ class OidcUserLoginServiceTest {
         when(request.getClientRegistration()).thenReturn(clientRegistration);
         when(clientRegistration.getRegistrationId()).thenReturn(providerName);
         when(userSessionService.getCurrentAuthenticatedOAuth2UserFromOAuth2UserAndProviderName(oidcUser, providerName)).thenReturn(Optional.of(authenticatedUser));
-        when(userAccountService.getCurrentUserAccountFromAuthenticatedOAuth2User(authenticatedUser)).thenReturn(Optional.of(alreadyPersistedUserAccount));
-        when(authorityMapper.getGrantedAuthoritiesFromUserAccount(alreadyPersistedUserAccount)).thenReturn(authorities);
+        when(userAccountService.getCurrentUserAccountFromAuthenticatedOAuth2User(authenticatedUser)).thenReturn(Optional.of(userAccount));
+        when(authorityMapper.getGrantedAuthoritiesFromUserAccount(userAccount)).thenReturn(authorities);
         when(authority1.getAuthority()).thenReturn(authorityValue1);
         when(authority2.getAuthority()).thenReturn(authorityValue2);
         when(authority3.getAuthority()).thenReturn(authorityValue3);

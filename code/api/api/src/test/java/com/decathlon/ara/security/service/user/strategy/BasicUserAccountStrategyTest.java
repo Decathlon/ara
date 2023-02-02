@@ -30,9 +30,6 @@ class BasicUserAccountStrategyTest {
         var userEmail = "user-email";
         var userPictureUrl = "user-picture-url";
 
-        var userEntityLogin = "user-entity-login";
-        var providerName = "provider-name";
-
         // When
         when(oauth2User.getName()).thenReturn(userLogin);
         when(oauth2User.getGivenName()).thenReturn(userFirstName);
@@ -91,9 +88,6 @@ class BasicUserAccountStrategyTest {
         var userEmail = "user-email";
         var userPictureUrl = "user-picture-url";
 
-        var userEntityLogin = "user-entity-login";
-        var providerName = "provider-name";
-
         var customFirstNameAttribute = "user-firstname-attribute";
         var customLastNameAttribute = "user-lastName-attribute";
         var customEmailAttribute = "user-email-attribute";
@@ -140,9 +134,6 @@ class BasicUserAccountStrategyTest {
         var userEmail = "user-email";
         var userPictureUrl = "user-picture-url";
 
-        var userEntityLogin = "user-entity-login";
-        var providerName = "provider-name";
-
         // When
         when(oauth2User.getName()).thenReturn(userLogin);
         when(oauth2User.getAttribute(StandardClaimNames.GIVEN_NAME)).thenReturn(userFirstName);
@@ -168,9 +159,6 @@ class BasicUserAccountStrategyTest {
         var userLastName = "user-lastName";
         var userEmail = "user-email";
         var userPictureUrl = "user-picture-url";
-
-        var userEntityLogin = "user-entity-login";
-        var providerName = "provider-name";
 
         var customFirstNameAttribute = "user-firstname-attribute";
         var customLastNameAttribute = "user-lastName-attribute";

@@ -17,8 +17,8 @@
 
 package com.decathlon.ara.domain;
 
-import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntityRoleOnProject;
+import com.decathlon.ara.domain.security.member.user.User;
+import com.decathlon.ara.domain.security.member.user.UserScope;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -47,16 +47,16 @@ public class Project {
     private ZonedDateTime creationDate;
 
     @ManyToOne
-    @JoinColumn(name = "creation_user_login", referencedColumnName = "login")
-    @JoinColumn(name = "creation_user_provider", referencedColumnName = "provider")
-    private UserEntity creationUser;
+    @JoinColumn(name = "creation_user_account_login", referencedColumnName = "login")
+    @JoinColumn(name = "creation_user_account_provider", referencedColumnName = "provider")
+    private User creationUser;
 
     private ZonedDateTime updateDate;
 
     @ManyToOne
-    @JoinColumn(name = "update_user_login", referencedColumnName = "login")
-    @JoinColumn(name = "update_user_provider", referencedColumnName = "provider")
-    private UserEntity updateUser;
+    @JoinColumn(name = "update_user_account_login", referencedColumnName = "login")
+    @JoinColumn(name = "update_user_account_provider", referencedColumnName = "provider")
+    private User updateUser;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "project", orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -64,7 +64,7 @@ public class Project {
 
     @OneToMany(mappedBy = "project")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private List<UserEntityRoleOnProject> userRoles = new ArrayList<>();
+    private List<UserScope> userScopes = new ArrayList<>();
 
     public Project() {
         this.creationDate = ZonedDateTime.now();
@@ -83,7 +83,7 @@ public class Project {
         this.creationDate = ZonedDateTime.now();
     }
 
-    public Project(String code, String name, UserEntity creationUser) {
+    public Project(String code, String name, User creationUser) {
         this.code = code;
         this.name = name;
         this.creationDate = ZonedDateTime.now();
@@ -126,11 +126,11 @@ public class Project {
         return creationDate;
     }
 
-    public UserEntity getCreationUser() {
+    public User getCreationUser() {
         return creationUser;
     }
 
-    public void setCreationUser(UserEntity creationUser) {
+    public void setCreationUser(User creationUser) {
         this.creationUser = creationUser;
     }
 
@@ -142,11 +142,11 @@ public class Project {
         this.updateDate = updateDate;
     }
 
-    public UserEntity getUpdateUser() {
+    public User getUpdateUser() {
         return updateUser;
     }
 
-    public void setUpdateUser(UserEntity updateUser) {
+    public void setUpdateUser(User updateUser) {
         this.updateUser = updateUser;
     }
 
@@ -158,7 +158,7 @@ public class Project {
         this.communications = communications;
     }
 
-    public List<UserEntityRoleOnProject> getUserRoles() {
-        return userRoles;
+    public List<UserScope> getUserScopes() {
+        return userScopes;
     }
 }

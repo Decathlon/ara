@@ -2,7 +2,7 @@ package com.decathlon.ara.service;
 
 import com.decathlon.ara.domain.Project;
 import com.decathlon.ara.domain.RootCause;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
+import com.decathlon.ara.domain.security.member.user.User;
 import com.decathlon.ara.repository.ProjectRepository;
 import com.decathlon.ara.repository.RootCauseRepository;
 import com.decathlon.ara.security.service.UserSessionService;
@@ -59,7 +59,7 @@ class ProjectServiceTest {
         var projectName = "Project Name";
         var projectToCreate = mock(ProjectDTO.class);
 
-        var currentUserEntity = mock(UserEntity.class);
+        var currentUser = mock(User.class);
 
         var createdProjectId = 1L;
 
@@ -72,17 +72,17 @@ class ProjectServiceTest {
         when(projectToCreate.getName()).thenReturn(projectName);
         when(projectRepository.findOneByCode(projectCode)).thenReturn(null);
         when(projectRepository.findOneByName(projectName)).thenReturn(null);
-        when(projectMapper.getProjectEntityFromProjectDTO(projectToCreate)).thenReturn(mappedProject);
+        when(projectMapper.getProjectFromProjectDTO(projectToCreate)).thenReturn(mappedProject);
         when(projectRepository.save(mappedProject)).thenReturn(savedProject);
-        when(projectMapper.getProjectDTOFromProjectEntity(savedProject)).thenReturn(createdProjectDTO);
+        when(projectMapper.getProjectDTOFromProject(savedProject)).thenReturn(createdProjectDTO);
         when(createdProjectDTO.getId()).thenReturn(createdProjectId);
 
         // Then
-        var createdProject = projectService.create(projectToCreate, currentUserEntity);
+        var createdProject = projectService.create(projectToCreate, currentUser);
 
         assertThat(createdProject).isSameAs(createdProjectDTO);
 
-        verify(mappedProject).setCreationUser(currentUserEntity);
+        verify(mappedProject).setCreationUser(currentUser);
 
         verify(communicationService, times(1)).initializeProject(mappedProject);
         ArgumentCaptor<List<RootCause>> rootCausesArgumentCaptor = ArgumentCaptor.forClass(List.class);
@@ -106,7 +106,7 @@ class ProjectServiceTest {
     void update_throwBadRequestException_whenProjectNewNameIsBlank(String newProjectName) {
         // Given
         var projectToUpdate = mock(ProjectDTO.class);
-        var updateUser = mock(UserEntity.class);
+        var updateUser = mock(User.class);
 
         // When
         when(projectToUpdate.getName()).thenReturn(newProjectName);
@@ -122,7 +122,7 @@ class ProjectServiceTest {
         var newProjectName = "New Project Name";
 
         var projectToUpdate = mock(ProjectDTO.class);
-        var updateUser = mock(UserEntity.class);
+        var updateUser = mock(User.class);
 
         // When
         when(projectToUpdate.getName()).thenReturn(newProjectName);
@@ -140,7 +140,7 @@ class ProjectServiceTest {
         var newProjectName = "New Project Name";
 
         var projectToUpdate = mock(ProjectDTO.class);
-        var updateUser = mock(UserEntity.class);
+        var updateUser = mock(User.class);
 
         var persistedProjectBeforeUpdate = mock(Project.class);
         var persistedProjectName = "Persisted Project Name";
@@ -164,11 +164,11 @@ class ProjectServiceTest {
         var newProjectDescription = "A new project description";
 
         var projectToUpdate = mock(ProjectDTO.class);
-        var updateUser = mock(UserEntity.class);
+        var updateUser = mock(User.class);
 
         var persistedProjectName = "Persisted Project Name";
         var persistedProjectDescription = "Persisted project description";
-        var creationUser = mock(UserEntity.class);
+        var creationUser = mock(User.class);
         var persistedProjectBeforeUpdate = new Project(projectCode, persistedProjectName, creationUser);
         persistedProjectBeforeUpdate.setDescription(persistedProjectDescription);
 
@@ -182,7 +182,7 @@ class ProjectServiceTest {
         when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(persistedProjectBeforeUpdate));
         when(projectRepository.existsByName(newProjectName)).thenReturn(false);
         when(projectRepository.save(persistedProjectBeforeUpdate)).thenReturn(savedProject);
-        when(projectMapper.getProjectDTOFromProjectEntity(savedProject)).thenReturn(mappedUpdatedProject);
+        when(projectMapper.getProjectDTOFromProject(savedProject)).thenReturn(mappedUpdatedProject);
 
         // Then
         var now = ZonedDateTime.now();
@@ -238,23 +238,23 @@ class ProjectServiceTest {
         var savedProject = mock(Project.class);
         var createdProjectDTO = mock(ProjectDTO.class);
 
-        var currentUserEntity = mock(UserEntity.class);
+        var currentUser = mock(User.class);
 
         // When
         when(projectRepository.findOneByCode(projectCode)).thenReturn(null);
         when(projectRepository.findOneByName(expectedProjectName)).thenReturn(null);
-        when(projectMapper.getProjectEntityFromProjectDTO(any(ProjectDTO.class))).thenReturn(mappedProject);
+        when(projectMapper.getProjectFromProjectDTO(any(ProjectDTO.class))).thenReturn(mappedProject);
         when(projectRepository.save(mappedProject)).thenReturn(savedProject);
-        when(projectMapper.getProjectDTOFromProjectEntity(savedProject)).thenReturn(createdProjectDTO);
+        when(projectMapper.getProjectDTOFromProject(savedProject)).thenReturn(createdProjectDTO);
         when(createdProjectDTO.getId()).thenReturn(createdProjectId);
 
         // Then
-        var createdProject = projectService.createFromCode(projectCode, currentUserEntity);
+        var createdProject = projectService.createFromCode(projectCode, currentUser);
 
         assertThat(createdProject).isSameAs(createdProjectDTO);
 
         var mappedProjectArgumentCaptor = ArgumentCaptor.forClass(ProjectDTO.class);
-        verify(projectMapper).getProjectEntityFromProjectDTO(mappedProjectArgumentCaptor.capture());
+        verify(projectMapper).getProjectFromProjectDTO(mappedProjectArgumentCaptor.capture());
         assertThat(mappedProjectArgumentCaptor.getValue().getName()).isEqualTo(expectedProjectName);
 
         verify(communicationService, times(1)).initializeProject(mappedProject);

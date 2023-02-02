@@ -1,8 +1,10 @@
 package com.decathlon.ara.security.mapper;
 
 import com.decathlon.ara.domain.Project;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntityRoleOnProject;
+import com.decathlon.ara.domain.security.member.user.role.ProjectRole;
+import com.decathlon.ara.domain.security.member.user.User;
+import com.decathlon.ara.domain.security.member.user.UserProfile;
+import com.decathlon.ara.domain.security.member.user.UserScope;
 import com.decathlon.ara.security.dto.user.UserAccount;
 import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScope;
@@ -18,58 +20,58 @@ import java.util.List;
 public class UserMapper {
 
     /**
-     * Convert a persisted user ({@link UserEntity}) into a user account ({@link UserAccount}).
-     * @param persistedUser the persisted user
+     * Convert a ({@link User}) into a ({@link UserAccount}).
+     * @param user the user
      * @return the converted user account
      */
-    public UserAccount getUserAccountFromPersistedUser(@NonNull UserEntity persistedUser) {
-        var providerName = persistedUser.getProviderName();
-        var login = persistedUser.getLogin();
+    public UserAccount getUserAccountFromUser(@NonNull User user) {
+        var providerName = user.getProviderName();
+        var login = user.getLogin();
 
         var userAccount = new UserAccount(providerName, login);
 
-        var persistedProfile = persistedUser.getProfile() != null ? persistedUser.getProfile() : UserEntity.UserEntityProfile.SCOPED_USER;
-        var userAccountProfile = UserAccountProfile.valueOf(persistedProfile.name());
+        var userProfile = user.getProfile() != null ? user.getProfile() : UserProfile.SCOPED_USER;
+        var userAccountProfile = UserAccountProfile.valueOf(userProfile.name());
         userAccount.setProfile(userAccountProfile);
 
-        var firstName = persistedUser.getFirstName();
+        var firstName = user.getFirstName();
         firstName.ifPresent(userAccount::setFirstName);
 
-        var lastName = persistedUser.getLastName();
+        var lastName = user.getLastName();
         lastName.ifPresent(userAccount::setLastName);
 
-        var email = persistedUser.getEmail();
+        var email = user.getEmail();
         email.ifPresent(userAccount::setEmail);
 
-        var pictureUrl = persistedUser.getPictureUrl();
+        var pictureUrl = user.getPictureUrl();
         pictureUrl.ifPresent(userAccount::setPictureUrl);
 
-        var defaultProjectCode = persistedUser.getDefaultProject().map(Project::getCode);
+        var defaultProjectCode = user.getDefaultProject().map(Project::getCode);
         defaultProjectCode.ifPresent(userAccount::setDefaultProjectCode);
 
-        var userAccountScopes = getUserAccountScopesFromPersistedUserRoles(persistedUser.getRolesOnProjectWhenScopedUser());
+        var userAccountScopes = getUserAccountScopesFromUserScopes(user.getScopes());
         userAccount.setScopes(userAccountScopes);
 
         return userAccount;
     }
 
-    private List<UserAccountScope> getUserAccountScopesFromPersistedUserRoles(@NonNull List<UserEntityRoleOnProject> persistedUserRoles) {
-        return CollectionUtils.isNotEmpty(persistedUserRoles) ?
-                persistedUserRoles.stream()
+    private List<UserAccountScope> getUserAccountScopesFromUserScopes(@NonNull List<UserScope> userScopes) {
+        return CollectionUtils.isNotEmpty(userScopes) ?
+                userScopes.stream()
                         .filter(role -> role.getProject() != null)
                         .filter(role -> role.getRole() != null)
-                        .map(this::getUserAccountScopeFromPersistedUserRole)
+                        .map(this::getUserAccountScopeFromUserScope)
                         .toList():
                 new ArrayList<>();
     }
 
-    private UserAccountScope getUserAccountScopeFromPersistedUserRole(@NonNull UserEntityRoleOnProject persistedUserRole) {
-        var projectCode = persistedUserRole.getProject().getCode();
-        var userAccountRole = getUserAccountScopeRoleFromScopedUserRoleOnProject(persistedUserRole.getRole());
+    private UserAccountScope getUserAccountScopeFromUserScope(@NonNull UserScope userScope) {
+        var projectCode = userScope.getProject().getCode();
+        var userAccountRole = getUserAccountScopeRoleFromProjectRole(userScope.getRole());
         return new UserAccountScope(projectCode, userAccountRole);
     }
 
-    private UserAccountScopeRole getUserAccountScopeRoleFromScopedUserRoleOnProject(@NonNull UserEntityRoleOnProject.ScopedUserRoleOnProject scopedUserRoleOnProject) {
-        return UserAccountScopeRole.valueOf(scopedUserRoleOnProject.name());
+    private UserAccountScopeRole getUserAccountScopeRoleFromProjectRole(@NonNull ProjectRole projectRole) {
+        return UserAccountScopeRole.valueOf(projectRole.name());
     }
 }

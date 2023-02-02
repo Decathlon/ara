@@ -1,7 +1,8 @@
 package com.decathlon.ara.security.mapper;
 
-import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntityRoleOnProject;
+import com.decathlon.ara.domain.security.member.user.User;
+import com.decathlon.ara.domain.security.member.user.UserProfile;
+import com.decathlon.ara.domain.security.member.user.UserScope;
 import com.decathlon.ara.security.dto.user.UserAccount;
 import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScope;
@@ -24,19 +25,19 @@ import java.util.stream.Stream;
 public class AuthorityMapper {
 
     /**
-     * Extract granted authorities from a {@link UserEntity}
-     * @param persistedUser the persisted user
+     * Extract granted authorities from a {@link User}
+     * @param user the user
      * @return the matching granted authorities
      */
-    public Set<GrantedAuthority> getGrantedAuthoritiesFromUserEntity(@NonNull UserEntity persistedUser) {
-        var profileAuthority = getProfileAuthorityFromUserEntityProfile(persistedUser.getProfile());
-        var scopeAuthorities = getScopeAuthoritiesFromUserEntityScopes(persistedUser.getRolesOnProjectWhenScopedUser());
+    public Set<GrantedAuthority> getGrantedAuthoritiesFromUser(@NonNull User user) {
+        var profileAuthority = getProfileAuthorityFromUserProfile(user.getProfile());
+        var scopeAuthorities = getScopeAuthoritiesFromUserScopes(user.getScopes());
         return Stream.of(Set.of(profileAuthority), scopeAuthorities)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
     }
 
-    private GrantedAuthority getProfileAuthorityFromUserEntityProfile(@NonNull UserEntity.UserEntityProfile profile) {
+    private GrantedAuthority getProfileAuthorityFromUserProfile(@NonNull UserProfile profile) {
         return getProfileAuthorityFromUserProfileAsString(profile.name());
     }
 
@@ -44,18 +45,18 @@ public class AuthorityMapper {
         return () -> String.format("%s%s", UserSessionService.AUTHORITY_USER_PROFILE_PREFIX, profileAsString);
     }
 
-    private Set<GrantedAuthority> getScopeAuthoritiesFromUserEntityScopes(List<UserEntityRoleOnProject> scopes) {
+    private Set<GrantedAuthority> getScopeAuthoritiesFromUserScopes(List<UserScope> scopes) {
         return CollectionUtils.isNotEmpty(scopes) ?
                 scopes.stream()
                         .filter(scope -> scope.getProject() != null)
                         .filter(scope -> StringUtils.isNotBlank(scope.getProject().getCode()))
                         .filter(scope -> scope.getRole() != null)
-                        .map(this::getScopeAuthorityFromUserEntityScope)
+                        .map(this::getScopeAuthorityFromUserScope)
                         .collect(Collectors.toSet()) :
                 new HashSet<>();
     }
 
-    private GrantedAuthority getScopeAuthorityFromUserEntityScope(@NonNull UserEntityRoleOnProject scope) {
+    private GrantedAuthority getScopeAuthorityFromUserScope(@NonNull UserScope scope) {
         var projectCode = scope.getProject().getCode();
         var roleAsString = scope.getRole().name();
         return getScopeAuthorityFromProjectCodeAndRoleAsStringPair(Pair.of(projectCode, roleAsString));

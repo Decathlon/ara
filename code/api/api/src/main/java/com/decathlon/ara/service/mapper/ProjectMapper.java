@@ -10,7 +10,7 @@ import java.util.Date;
 @Component
 public class ProjectMapper {
 
-    public ProjectDTO getProjectDTOFromProjectEntity(@NonNull Project project) {
+    public ProjectDTO getProjectDTOFromProject(@NonNull Project project) {
         var id = project.getId();
         var code = project.getCode();
         var name = project.getName();
@@ -37,7 +37,7 @@ public class ProjectMapper {
         return projectToConvert;
     }
 
-    public Project getProjectEntityFromProjectDTO(@NonNull ProjectDTO projectDTO) {
+    public Project getProjectFromProjectDTO(@NonNull ProjectDTO projectDTO) {
         var id = projectDTO.getId();
         var code = projectDTO.getCode();
         var name = projectDTO.getName();

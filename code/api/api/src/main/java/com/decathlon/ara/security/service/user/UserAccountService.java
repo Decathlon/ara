@@ -2,11 +2,13 @@ package com.decathlon.ara.security.service.user;
 
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.domain.Project;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntityRoleOnProject;
+import com.decathlon.ara.domain.security.member.user.role.ProjectRole;
+import com.decathlon.ara.domain.security.member.user.User;
+import com.decathlon.ara.domain.security.member.user.UserProfile;
+import com.decathlon.ara.domain.security.member.user.UserScope;
 import com.decathlon.ara.repository.ProjectRepository;
-import com.decathlon.ara.repository.security.member.user.entity.UserEntityRepository;
-import com.decathlon.ara.repository.security.member.user.entity.UserEntityRoleOnProjectRepository;
+import com.decathlon.ara.repository.security.member.user.UserRepository;
+import com.decathlon.ara.repository.security.member.user.UserScopeRepository;
 import com.decathlon.ara.security.configuration.data.providers.OAuth2ProvidersConfiguration;
 import com.decathlon.ara.security.configuration.data.providers.setup.users.UserProfileConfiguration;
 import com.decathlon.ara.security.dto.authentication.user.AuthenticatedOAuth2User;
@@ -42,9 +44,9 @@ public class UserAccountService {
 
     private static final Logger LOG = LoggerFactory.getLogger(UserAccountService.class);
 
-    private final UserEntityRepository userEntityRepository;
+    private final UserRepository userRepository;
 
-    private final UserEntityRoleOnProjectRepository userEntityRoleOnProjectRepository;
+    private final UserScopeRepository userScopeRepository;
 
     private final ProjectRepository projectRepository;
 
@@ -59,8 +61,8 @@ public class UserAccountService {
     private final UserSessionService userSessionService;
 
     public UserAccountService(
-            UserEntityRepository userEntityRepository,
-            UserEntityRoleOnProjectRepository userEntityRoleOnProjectRepository,
+            UserRepository userRepository,
+            UserScopeRepository userScopeRepository,
             ProjectRepository projectRepository,
             OAuth2ProvidersConfiguration providersConfiguration,
             UserMapper userMapper,
@@ -68,8 +70,8 @@ public class UserAccountService {
             ProjectService projectService,
             UserSessionService userSessionService
     ) {
-        this.userEntityRepository = userEntityRepository;
-        this.userEntityRoleOnProjectRepository = userEntityRoleOnProjectRepository;
+        this.userRepository = userRepository;
+        this.userScopeRepository = userScopeRepository;
         this.projectRepository = projectRepository;
         this.providersConfiguration = providersConfiguration;
         this.userMapper = userMapper;
@@ -91,7 +93,7 @@ public class UserAccountService {
      * @return the current {@link UserAccount}
      */
     public Optional<UserAccount> getCurrentUserAccount() {
-        return getCurrentUserEntity().map(userMapper::getUserAccountFromPersistedUser);
+        return getCurrentUser().map(userMapper::getUserAccountFromUser);
     }
 
     /**
@@ -101,8 +103,8 @@ public class UserAccountService {
      */
     public Optional<UserAccount> getCurrentUserAccountFromAuthentication(@NonNull OAuth2AuthenticationToken authentication) {
         return userSessionService.getCurrentAuthenticatedOAuth2UserFromAuthentication(authentication)
-                .flatMap(authenticatedUser -> getUserEntityFromProviderNameAndUserLogin(authenticatedUser.getProviderName(), authenticatedUser.getLogin()))
-                .map(userMapper::getUserAccountFromPersistedUser);
+                .flatMap(authenticatedUser -> getUserFromProviderNameAndUserLogin(authenticatedUser.getProviderName(), authenticatedUser.getLogin()))
+                .map(userMapper::getUserAccountFromUser);
     }
 
     /**
@@ -111,20 +113,20 @@ public class UserAccountService {
      * @return the current {@link UserAccount}
      */
     public Optional<UserAccount> getCurrentUserAccountFromAuthenticatedOAuth2User(@NonNull AuthenticatedOAuth2User authenticatedUser) {
-        return getUserEntityFromProviderNameAndUserLogin(authenticatedUser.getProviderName(), authenticatedUser.getLogin()).map(userMapper::getUserAccountFromPersistedUser);
+        return getUserFromProviderNameAndUserLogin(authenticatedUser.getProviderName(), authenticatedUser.getLogin()).map(userMapper::getUserAccountFromUser);
     }
 
-    private Optional<UserEntity> getUserEntityFromProviderNameAndUserLogin(@NonNull String providerName, @NonNull String userLogin) {
-        return userEntityRepository.findById(new UserEntity.UserEntityId(providerName, userLogin));
+    private Optional<User> getUserFromProviderNameAndUserLogin(@NonNull String providerName, @NonNull String userLogin) {
+        return userRepository.findById(new User.UserId(providerName, userLogin));
     }
 
     /**
-     * Fetch the currently logged-in {@link UserEntity}
-     * @return the current {@link UserEntity}
+     * Fetch the currently logged-in {@link User}
+     * @return the current {@link User}
      */
-    public Optional<UserEntity> getCurrentUserEntity() {
+    public Optional<User> getCurrentUser() {
         return userSessionService.getCurrentAuthenticatedOAuth2User()
-                .flatMap(authenticatedOAuth2User -> getUserEntityFromProviderNameAndUserLogin(authenticatedOAuth2User.getProviderName(), authenticatedOAuth2User.getLogin()));
+                .flatMap(authenticatedOAuth2User -> getUserFromProviderNameAndUserLogin(authenticatedOAuth2User.getProviderName(), authenticatedOAuth2User.getLogin()));
     }
 
     /**
@@ -138,13 +140,13 @@ public class UserAccountService {
 
         var providerName = authenticatedUser.getProviderName();
         var userLogin = authenticatedUser.getLogin();
-        var userAlreadyExists = userEntityRepository.existsById(new UserEntity.UserEntityId(providerName, userLogin));
+        var userAlreadyExists = userRepository.existsById(new User.UserId(providerName, userLogin));
         if (userAlreadyExists) {
             LOG.warn("Cannot create user '{}' because he already exists", userLogin);
             throw exception;
         }
 
-        var userToSave = new UserEntity(providerName, userLogin);
+        var userToSave = new User(providerName, userLogin);
 
         var firstName = authenticatedUser.getFirstName();
         firstName.ifPresent(userToSave::setFirstName);
@@ -162,29 +164,29 @@ public class UserAccountService {
         var userProfile = profileConfiguration.flatMap(UserAccountService::getUserProfileFromConfiguration);
         userProfile.ifPresent(userToSave::setProfile);
 
-        var savedUser = userEntityRepository.save(userToSave);
+        var savedUser = userRepository.save(userToSave);
         var finalSavedUser = savedUser;
 
         var userRoles = profileConfiguration.map(configuration -> getUserRolesFromConfiguration(configuration, providerName, savedUser));
-        userRoles.ifPresent(userEntityRoleOnProjectRepository::saveAll);
+        userRoles.ifPresent(userScopeRepository::saveAll);
         if (userRoles.isPresent()) {
-            finalSavedUser = userEntityRepository.findById(new UserEntity.UserEntityId(providerName, userLogin)).orElse(savedUser);
+            finalSavedUser = userRepository.findById(new User.UserId(providerName, userLogin)).orElse(savedUser);
         }
-        return userMapper.getUserAccountFromPersistedUser(finalSavedUser);
+        return userMapper.getUserAccountFromUser(finalSavedUser);
     }
 
-    private static Optional<UserEntity.UserEntityProfile> getUserProfileFromConfiguration(UserProfileConfiguration profileConfiguration) {
+    private static Optional<UserProfile> getUserProfileFromConfiguration(UserProfileConfiguration profileConfiguration) {
         var profileAsString = profileConfiguration.getProfile();
-        return UserAccountProfile.getProfileFromString(profileAsString).map(UserAccountService::getUserEntityProfileFromUserAccountProfile);
+        return UserAccountProfile.getProfileFromString(profileAsString).map(UserAccountService::getUserProfileFromUserAccountProfile);
     }
 
-    private List<UserEntityRoleOnProject> getUserRolesFromConfiguration(UserProfileConfiguration profileConfiguration, String providerName, UserEntity savedUser) {
+    private List<UserScope> getUserRolesFromConfiguration(UserProfileConfiguration profileConfiguration, String providerName, User savedUser) {
         return CollectionUtils.isNotEmpty(profileConfiguration.getScopes()) ?
                 profileConfiguration.getScopes()
                         .stream()
                         .collect(
                                 Collectors.toMap(
-                                        scope -> getScopedUserRoleOnProjectFromRoleAsString(scope.getScope()),
+                                        scope -> getProjectRoleFromString(scope.getScope()),
                                         scope -> scope.getProjects()
                                                 .stream()
                                                 .map(projectCode -> getProjectFromCode(projectCode, providerName, savedUser))
@@ -199,17 +201,17 @@ public class UserAccountService {
                         .filter(entry -> entry.getKey().isPresent())
                         .flatMap(entry -> entry.getValue()
                                 .stream()
-                                .map(project -> new UserEntityRoleOnProject(savedUser, project, entry.getKey().get()))
+                                .map(project -> new UserScope(savedUser, project, entry.getKey().get()))
                         )
                         .toList() :
                 new ArrayList<>();
     }
 
-    private static Optional<UserEntityRoleOnProject.ScopedUserRoleOnProject> getScopedUserRoleOnProjectFromRoleAsString(String roleAsString) {
-        return UserAccountScopeRole.getScopeFromString(roleAsString).map(UserAccountService::getUserEntityScopedUserRoleOnProjectFromUserAccountScopeRole);
+    private static Optional<ProjectRole> getProjectRoleFromString(String roleAsString) {
+        return UserAccountScopeRole.getScopeFromString(roleAsString).map(UserAccountService::getProjectRoleFromUserAccountScopeRole);
     }
 
-    private Optional<Project> getProjectFromCode(String projectCode, String providerName, UserEntity creationUser) {
+    private Optional<Project> getProjectFromCode(String projectCode, String providerName, User creationUser) {
         var project = projectRepository.findByCode(projectCode);
         var isAllowedToCreateProjects = providersConfiguration.createNewProjectsIfNotFoundAtUsersInit(providerName);
         var projectNotFound = project.isEmpty();
@@ -235,45 +237,45 @@ public class UserAccountService {
     public List<ProjectDTO> getCurrentUserProjects() throws ForbiddenException {
         var exception = new ForbiddenException(Entities.PROJECT, "fetch user projects");
 
-        var currentUser = getCurrentUserEntity().orElseThrow(() -> exception);
+        var currentUser = getCurrentUser().orElseThrow(() -> exception);
         var profile = currentUser.getProfile();
         if (profile == null) {
             throw exception;
         }
 
         Stream<Project> userProjectsStream = Stream.empty();
-        var currentUserCanAccessAllProjects = UserEntity.UserEntityProfile.SUPER_ADMIN.equals(profile) || UserEntity.UserEntityProfile.AUDITOR.equals(profile);
+        var currentUserCanAccessAllProjects = UserProfile.SUPER_ADMIN.equals(profile) || UserProfile.AUDITOR.equals(profile);
         if (currentUserCanAccessAllProjects) {
             userProjectsStream = projectRepository.findAllByOrderByName().stream();
         }
-        var currentUserIsScopedUser = UserEntity.UserEntityProfile.SCOPED_USER.equals(profile);
+        var currentUserIsScopedUser = UserProfile.SCOPED_USER.equals(profile);
         if (currentUserIsScopedUser) {
-            var scopedProjectsStream = currentUser.getRolesOnProjectWhenScopedUser().stream().map(UserEntityRoleOnProject::getProject);
+            var scopedProjectsStream = currentUser.getScopes().stream().map(UserScope::getProject);
             var demoProjectStream = projectRepository.findByCode(DEMO_PROJECT_CODE).map(Stream::of).orElse(Stream.empty());
             userProjectsStream = Stream.concat(scopedProjectsStream, demoProjectStream).sorted(Comparator.comparing(Project::getName));
         }
-        return userProjectsStream.map(projectMapper::getProjectDTOFromProjectEntity).toList();
+        return userProjectsStream.map(projectMapper::getProjectDTOFromProject).toList();
     }
 
     /**
-     * Remove a project from the current user scope
-     * @param projectCode the project code matching the project
+     * Remove a scope from the current user scopes
+     * @param projectCode the project code
      * @throws ForbiddenException thrown if this operation failed
      */
-    public void removeProjectFromCurrentUserScope(@NonNull String projectCode) throws ForbiddenException {
+    public void removeCurrentUserScope(@NonNull String projectCode) throws ForbiddenException {
         var projectCodeContext = getProjectCodeExceptionContext(projectCode);
         var exception = new ForbiddenException(Entities.PROJECT, "remove current user project scope", projectCodeContext);
 
         var authenticatedUser = userSessionService.getCurrentAuthenticatedOAuth2User().orElseThrow(() -> exception);
-        removeProjectFromUserScope(authenticatedUser.getProviderName(), authenticatedUser.getLogin(), projectCode, exception);
+        removeUserScope(authenticatedUser.getProviderName(), authenticatedUser.getLogin(), projectCode, exception);
         userSessionService.refreshCurrentUserAuthorities();
     }
 
-    private void removeProjectFromUserScope(String providerName, String userLogin, String projectCode, ForbiddenException exception) throws ForbiddenException {
-        var targetUser = getUserEntityFromProviderNameAndUserLogin(providerName, userLogin).orElseThrow(() -> exception);
+    private void removeUserScope(String providerName, String userLogin, String projectCode, ForbiddenException exception) throws ForbiddenException {
+        var targetUser = getUserFromProviderNameAndUserLogin(providerName, userLogin).orElseThrow(() -> exception);
         var targetProject = getProjectFromCode(projectCode).orElseThrow(() -> exception);
 
-        userEntityRoleOnProjectRepository.deleteById(new UserEntityRoleOnProject.UserEntityRoleOnProjectId(targetUser, targetProject));
+        userScopeRepository.deleteById(new UserScope.UserScopeId(targetUser, targetProject));
     }
 
     private Pair[] getProjectCodeExceptionContext(String projectCode) {
@@ -289,12 +291,12 @@ public class UserAccountService {
     }
 
     /**
-     * Remove a project from a user scope
+     * Remove a user scope
      * @param userLogin the user login
-     * @param projectCode the project code matching the project
+     * @param projectCode the project code 
      * @throws ForbiddenException thrown if this operation failed
      */
-    public void removeProjectFromUserScope(@NonNull String userLogin, @NonNull String projectCode) throws ForbiddenException {
+    public void removeUserScope(@NonNull String userLogin, @NonNull String projectCode) throws ForbiddenException {
         var projectCodeContext = getProjectCodeExceptionContext(projectCode);
         var exception = new ForbiddenException(Entities.PROJECT, "remove user project scope", projectCodeContext);
 
@@ -303,7 +305,7 @@ public class UserAccountService {
         }
 
         var providerName = userSessionService.getCurrentAuthenticatedOAuth2User().map(AuthenticatedOAuth2User::getProviderName).orElseThrow(() -> exception);
-        removeProjectFromUserScope(providerName, userLogin, projectCode, exception);
+        removeUserScope(providerName, userLogin, projectCode, exception);
     }
 
     /**
@@ -325,21 +327,21 @@ public class UserAccountService {
     }
 
     private void updateUserProjectScope(String providerName, String userLogin, String projectCode, UserAccountScopeRole targetAccountRole, ForbiddenException exception) throws ForbiddenException {
-        var targetUser = getUserEntityFromProviderNameAndUserLogin(providerName, userLogin).orElseThrow(() -> exception);
+        var targetUser = getUserFromProviderNameAndUserLogin(providerName, userLogin).orElseThrow(() -> exception);
         var targetProject = getProjectFromCode(projectCode).orElseThrow(() -> exception);
 
-        var targetRole = getUserEntityScopedUserRoleOnProjectFromUserAccountScopeRole(targetAccountRole);
-        updateScopedUserRoleOnProject(targetUser, targetProject, targetRole);
-        userEntityRepository.save(targetUser);
+        var targetRole = getProjectRoleFromUserAccountScopeRole(targetAccountRole);
+        updateScopedUserProjectRole(targetUser, targetProject, targetRole);
+        userRepository.save(targetUser);
     }
 
-    private static UserEntityRoleOnProject.ScopedUserRoleOnProject getUserEntityScopedUserRoleOnProjectFromUserAccountScopeRole(@NonNull UserAccountScopeRole userAccountScopeRole) {
-        return UserEntityRoleOnProject.ScopedUserRoleOnProject.valueOf(userAccountScopeRole.name());
+    private static ProjectRole getProjectRoleFromUserAccountScopeRole(@NonNull UserAccountScopeRole userAccountScopeRole) {
+        return ProjectRole.valueOf(userAccountScopeRole.name());
     }
 
-    private void updateScopedUserRoleOnProject(UserEntity targetUser, Project targetProject, UserEntityRoleOnProject.ScopedUserRoleOnProject targetRole) {
+    private void updateScopedUserProjectRole(User targetUser, Project targetProject, ProjectRole targetRole) {
         var projectCode = targetProject.getCode();
-        var userRoles = targetUser.getRolesOnProjectWhenScopedUser();
+        var userRoles = targetUser.getScopes();
         for (var userRole : userRoles) {
             var roleProject = userRole.getProject();
             var roleProjectCode = roleProject.getCode();
@@ -348,11 +350,11 @@ public class UserAccountService {
             }
         }
         var projectScopeNotFound = userRoles.stream()
-                .map(UserEntityRoleOnProject::getProject)
+                .map(UserScope::getProject)
                 .map(Project::getCode)
                 .noneMatch(projectCode::equals);
         if (projectScopeNotFound) {
-            userRoles.add(new UserEntityRoleOnProject(targetUser, targetProject, targetRole));
+            userRoles.add(new UserScope(targetUser, targetProject, targetRole));
         }
     }
 
@@ -392,14 +394,14 @@ public class UserAccountService {
         }
 
         var providerName = userSessionService.getCurrentAuthenticatedOAuth2User().map(AuthenticatedOAuth2User::getProviderName).orElseThrow(() -> exception);
-        var targetUser = getUserEntityFromProviderNameAndUserLogin(providerName, userLogin).orElseThrow(() -> exception);
-        var targetProfile = getUserEntityProfileFromUserAccountProfile(profile);
+        var targetUser = getUserFromProviderNameAndUserLogin(providerName, userLogin).orElseThrow(() -> exception);
+        var targetProfile = getUserProfileFromUserAccountProfile(profile);
         targetUser.setProfile(targetProfile);
-        userEntityRepository.save(targetUser);
+        userRepository.save(targetUser);
     }
 
-    private static UserEntity.UserEntityProfile getUserEntityProfileFromUserAccountProfile(@NonNull UserAccountProfile userAccountProfile) {
-        return UserEntity.UserEntityProfile.valueOf(userAccountProfile.name());
+    private static UserProfile getUserProfileFromUserAccountProfile(@NonNull UserAccountProfile userAccountProfile) {
+        return UserProfile.valueOf(userAccountProfile.name());
     }
 
     /**
@@ -408,10 +410,10 @@ public class UserAccountService {
      * @throws ForbiddenException thrown if the operation failed
      */
     public UserAccount clearDefaultProject() throws ForbiddenException {
-        var userToUpdate = getCurrentUserEntity().orElseThrow(() -> new ForbiddenException(Entities.PROJECT, "clear default project"));
+        var userToUpdate = getCurrentUser().orElseThrow(() -> new ForbiddenException(Entities.PROJECT, "clear default project"));
         userToUpdate.setDefaultProject(null);
-        var updatedUser = userEntityRepository.save(userToUpdate);
-        return userMapper.getUserAccountFromPersistedUser(updatedUser);
+        var updatedUser = userRepository.save(userToUpdate);
+        return userMapper.getUserAccountFromUser(updatedUser);
     }
 
     /**
@@ -429,10 +431,10 @@ public class UserAccountService {
         }
 
         var defaultProject = projectRepository.findByCode(projectCode).orElseThrow(() -> exception);
-        var userToUpdate = getCurrentUserEntity().orElseThrow(() -> exception);
+        var userToUpdate = getCurrentUser().orElseThrow(() -> exception);
         userToUpdate.setDefaultProject(defaultProject);
-        var updatedUser = userEntityRepository.save(userToUpdate);
-        return userMapper.getUserAccountFromPersistedUser(updatedUser);
+        var updatedUser = userRepository.save(userToUpdate);
+        return userMapper.getUserAccountFromUser(updatedUser);
     }
 
     /**
@@ -443,8 +445,8 @@ public class UserAccountService {
     public List<UserAccount> getAllUserAccounts(@NonNull OAuth2AuthenticationToken authentication) {
         var providerName = authentication.getAuthorizedClientRegistrationId();
 
-        var persistedUsers = userEntityRepository.findAllByProviderName(providerName);
-        return persistedUsers.stream().map(userMapper::getUserAccountFromPersistedUser).toList();
+        var users = userRepository.findAllByProviderName(providerName);
+        return users.stream().map(userMapper::getUserAccountFromUser).toList();
     }
 
     /**
@@ -461,16 +463,16 @@ public class UserAccountService {
     private List<UserAccount> getAllScopedUserAccounts(@NonNull OAuth2AuthenticationToken authentication, Optional<String> projectCodeFilter, Optional<UserAccountScopeRole> roleFilter) {
         var providerName = authentication.getAuthorizedClientRegistrationId();
 
-        var actualUserEntityRole = roleFilter.map(UserAccountService::getUserEntityScopedUserRoleOnProjectFromUserAccountScopeRole).orElse(null);
+        var actualUserRole = roleFilter.map(UserAccountService::getProjectRoleFromUserAccountScopeRole).orElse(null);
 
-        var persistedScopedUsers = userEntityRepository.findAllScopedUsersByProviderName(providerName, projectCodeFilter.orElse(null), actualUserEntityRole);
+        var users = userRepository.findAllScopedUsersByProviderName(providerName, projectCodeFilter.orElse(null), actualUserRole);
 
         var profile = userSessionService.getCurrentUserProfile();
         if (profile.isEmpty()) {
             return new ArrayList<>();
         }
 
-        var userAccounts = persistedScopedUsers.stream().map(userMapper::getUserAccountFromPersistedUser).toList();
+        var userAccounts = users.stream().map(userMapper::getUserAccountFromUser).toList();
 
         var currentUserIsScopedUser = UserAccountProfile.SCOPED_USER.equals(profile.get());
         if (currentUserIsScopedUser) {

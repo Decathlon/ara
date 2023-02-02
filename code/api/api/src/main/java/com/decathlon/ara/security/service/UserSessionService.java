@@ -1,9 +1,9 @@
 package com.decathlon.ara.security.service;
 
 import com.decathlon.ara.Entities;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
+import com.decathlon.ara.domain.security.member.user.User;
 import com.decathlon.ara.loader.DemoLoaderConstants;
-import com.decathlon.ara.repository.security.member.user.entity.UserEntityRepository;
+import com.decathlon.ara.repository.security.member.user.UserRepository;
 import com.decathlon.ara.security.dto.authentication.user.AuthenticatedOAuth2User;
 import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScope;
@@ -39,18 +39,18 @@ public class UserSessionService {
     public static final String SUPER_ADMIN_PROFILE_AUTHORITY = AUTHORITY_USER_PROFILE_PREFIX + UserAccountProfile.SUPER_ADMIN.name();
     public static final String AUDITOR_PROFILE_AUTHORITY = AUTHORITY_USER_PROFILE_PREFIX + UserAccountProfile.AUDITOR.name();
 
-    private final UserEntityRepository userEntityRepository;
+    private final UserRepository userRepository;
 
     private final AuthorityMapper authorityMapper;
 
     private final AuthenticationMapper authenticationMapper;
 
     public UserSessionService(
-            UserEntityRepository userEntityRepository,
+            UserRepository userRepository,
             AuthorityMapper authorityMapper,
             AuthenticationMapper authenticationMapper
     ) {
-        this.userEntityRepository = userEntityRepository;
+        this.userRepository = userRepository;
         this.authorityMapper = authorityMapper;
         this.authenticationMapper = authenticationMapper;
     }
@@ -61,7 +61,7 @@ public class UserSessionService {
      * @param projectCode the project code
      * @return the role, if found
      */
-    public Optional<UserAccountScopeRole> getCurrentUserRoleOnProject(String projectCode) {
+    public Optional<UserAccountScopeRole> getCurrentUserAccountScopeRoleFromProjectCode(String projectCode) {
         if (StringUtils.isBlank(projectCode)) {
             return Optional.empty();
         }
@@ -154,10 +154,10 @@ public class UserSessionService {
         var providerName = authenticatedUser.getProviderName();
         var userLogin = authenticatedUser.getLogin();
 
-        var persistedUser = userEntityRepository.findById(new UserEntity.UserEntityId(providerName, userLogin)).orElseThrow(() -> exception);
+        var user = userRepository.findById(new User.UserId(providerName, userLogin)).orElseThrow(() -> exception);
 
         var oauth2User = oauth2Authentication.getPrincipal();
-        var authorities = authorityMapper.getGrantedAuthoritiesFromUserEntity(persistedUser);
+        var authorities = authorityMapper.getGrantedAuthoritiesFromUser(user);
         securityContext.setAuthentication(new OAuth2AuthenticationToken(oauth2User, authorities, providerName));
     }
 

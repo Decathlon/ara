@@ -56,7 +56,7 @@ public abstract class ProjectResourceAccess {
             return permission.isReadOnly();
         }
 
-        var role = userSessionService.getCurrentUserRoleOnProject(projectCode);
+        var role = userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode);
         var permissionsByRole = getPermissionsByRole();
 
         return role.map(permissionsByRole::get)

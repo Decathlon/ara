@@ -1,8 +1,10 @@
 package com.decathlon.ara.security.mapper;
 
 import com.decathlon.ara.domain.Project;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntityRoleOnProject;
+import com.decathlon.ara.domain.security.member.user.role.ProjectRole;
+import com.decathlon.ara.domain.security.member.user.User;
+import com.decathlon.ara.domain.security.member.user.UserProfile;
+import com.decathlon.ara.domain.security.member.user.UserScope;
 import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,10 +28,10 @@ class UserMapperTest {
     private UserMapper userMapper;
 
     @ParameterizedTest
-    @EnumSource(value = UserEntity.UserEntityProfile.class)
-    void getUserAccountFromPersistedUser_returnUserAccount_whenPersistedUserIsNotNull(UserEntity.UserEntityProfile persistedProfile) {
+    @EnumSource(value = UserProfile.class)
+    void getUserAccountFromUser_returnUserAccount_whenUserIsNotNull(UserProfile userProfile) {
         // Given
-        var userToConvert = mock(UserEntity.class);
+        var userToConvert = mock(User.class);
         var userLogin = "user-login";
         var providerName = "provider-name";
         var userFirstName = "user-firstname";
@@ -40,22 +42,22 @@ class UserMapperTest {
         var defaultProject = mock(Project.class);
         var defaultProjectCode = "default-project-code";
 
-        var userEntityRole1 = mock(UserEntityRoleOnProject.class);
-        var userEntityScope1 = UserEntityRoleOnProject.ScopedUserRoleOnProject.ADMIN;
+        var scope1 = mock(UserScope.class);
+        var role1 = ProjectRole.ADMIN;
         var project1 = mock(Project.class);
         var projectCode1 = "project-code1";
 
-        var userEntityRole2 = mock(UserEntityRoleOnProject.class);
-        var userEntityScope2 = UserEntityRoleOnProject.ScopedUserRoleOnProject.MAINTAINER;
+        var scope2 = mock(UserScope.class);
+        var role2 = ProjectRole.MAINTAINER;
         var project2 = mock(Project.class);
         var projectCode2 = "project-code2";
 
-        var userEntityRole3 = mock(UserEntityRoleOnProject.class);
-        var userEntityScope3 = UserEntityRoleOnProject.ScopedUserRoleOnProject.MEMBER;
+        var scope3 = mock(UserScope.class);
+        var role3 = ProjectRole.MEMBER;
         var project3 = mock(Project.class);
         var projectCode3 = "project-code3";
 
-        var userEntityRoles = List.of(userEntityRole1, userEntityRole2, userEntityRole3);
+        var scopes = List.of(scope1, scope2, scope3);
 
         // When
         when(userToConvert.getLogin()).thenReturn(userLogin);
@@ -68,21 +70,21 @@ class UserMapperTest {
         when(userToConvert.getDefaultProject()).thenReturn(Optional.of(defaultProject));
         when(defaultProject.getCode()).thenReturn(defaultProjectCode);
 
-        when(userToConvert.getProfile()).thenReturn(persistedProfile);
+        when(userToConvert.getProfile()).thenReturn(userProfile);
 
-        when(userToConvert.getRolesOnProjectWhenScopedUser()).thenReturn(userEntityRoles);
-        when(userEntityRole1.getRole()).thenReturn(userEntityScope1);
-        when(userEntityRole1.getProject()).thenReturn(project1);
+        when(userToConvert.getScopes()).thenReturn(scopes);
+        when(scope1.getRole()).thenReturn(role1);
+        when(scope1.getProject()).thenReturn(project1);
         when(project1.getCode()).thenReturn(projectCode1);
-        when(userEntityRole2.getRole()).thenReturn(userEntityScope2);
-        when(userEntityRole2.getProject()).thenReturn(project2);
+        when(scope2.getRole()).thenReturn(role2);
+        when(scope2.getProject()).thenReturn(project2);
         when(project2.getCode()).thenReturn(projectCode2);
-        when(userEntityRole3.getRole()).thenReturn(userEntityScope3);
-        when(userEntityRole3.getProject()).thenReturn(project3);
+        when(scope3.getRole()).thenReturn(role3);
+        when(scope3.getProject()).thenReturn(project3);
         when(project3.getCode()).thenReturn(projectCode3);
 
         // Then
-        var convertedUser = userMapper.getUserAccountFromPersistedUser(userToConvert);
+        var convertedUser = userMapper.getUserAccountFromUser(userToConvert);
         assertThat(convertedUser)
                 .extracting(
                         "providerName",
@@ -97,7 +99,7 @@ class UserMapperTest {
                 .containsExactly(
                         providerName,
                         userLogin,
-                        UserAccountProfile.valueOf(persistedProfile.name()),
+                        UserAccountProfile.valueOf(userProfile.name()),
                         defaultProjectCode,
                         userFirstName,
                         userLastName,

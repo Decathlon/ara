@@ -1,7 +1,7 @@
 package com.decathlon.ara.service.mapper;
 
 import com.decathlon.ara.domain.Project;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
+import com.decathlon.ara.domain.security.member.user.User;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,11 +31,11 @@ class ProjectMapperTest {
         var projectDescription = "A small description of this project";
 
         var creationDate = ZonedDateTime.now().minusDays(3);
-        var creationUser = mock(UserEntity.class);
+        var creationUser = mock(User.class);
         var creationUserLogin = "creation-user-login";
 
         var updateDate = ZonedDateTime.now();
-        var updateUser = mock(UserEntity.class);
+        var updateUser = mock(User.class);
         var updateUserLogin = "update-user-login";
 
         // When
@@ -52,7 +52,7 @@ class ProjectMapperTest {
         when(updateUser.getLogin()).thenReturn(updateUserLogin);
 
         // Then
-        var convertedProject = projectMapper.getProjectDTOFromProjectEntity(projectToConvert);
+        var convertedProject = projectMapper.getProjectDTOFromProject(projectToConvert);
         assertThat(convertedProject)
                 .extracting(
                         "id",
@@ -92,7 +92,7 @@ class ProjectMapperTest {
         when(projectToConvert.getDescription()).thenReturn(projectDescription);
 
         // Then
-        var convertedProject = projectMapper.getProjectEntityFromProjectDTO(projectToConvert);
+        var convertedProject = projectMapper.getProjectFromProjectDTO(projectToConvert);
         assertThat(convertedProject)
                 .extracting(
                         "id",

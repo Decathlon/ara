@@ -1,7 +1,7 @@
-package com.decathlon.ara.repository.security.member.user.entity;
+package com.decathlon.ara.repository.security.member.user;
 
-import com.decathlon.ara.domain.security.member.user.entity.UserEntity;
-import com.decathlon.ara.domain.security.member.user.entity.UserEntityRoleOnProject;
+import com.decathlon.ara.domain.security.member.user.role.ProjectRole;
+import com.decathlon.ara.domain.security.member.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface UserEntityRepository extends JpaRepository<UserEntity, UserEntity.UserEntityId> {
+public interface UserRepository extends JpaRepository<User, User.UserId> {
 
     /**
      * Get all scoped users concerning a given provider
@@ -21,16 +21,16 @@ public interface UserEntityRepository extends JpaRepository<UserEntity, UserEnti
      * @return the matching scoped users
      */
     @Query("""
-        select distinct user from UserEntity user
-        left join user.rolesOnProjectWhenScopedUser scope
+        select distinct user from User user
+        left join user.scopes scope
         left join scope.project project
         where
-            user.profile = com.decathlon.ara.domain.security.member.user.entity.UserEntity$UserEntityProfile.SCOPED_USER and
+            user.profile = com.decathlon.ara.domain.security.member.user.UserProfile.SCOPED_USER and
             user.providerName = :providerName and
             (:projectCode is null or project.code = :projectCode) and
             (:role is null or scope.role = :role)
     """)
-    List<UserEntity> findAllScopedUsersByProviderName(@Param("providerName") String providerName, @Param("projectCode") String projectCode, @Param("role") UserEntityRoleOnProject.ScopedUserRoleOnProject role);
+    List<User> findAllScopedUsersByProviderName(@Param("providerName") String providerName, @Param("projectCode") String projectCode, @Param("role") ProjectRole role);
 
-    List<UserEntity> findAllByProviderName(String providerName);
+    List<User> findAllByProviderName(String providerName);
 }

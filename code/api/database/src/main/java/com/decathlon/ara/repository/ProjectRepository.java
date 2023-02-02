@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Spring Data JPA repository for the Project entity.
+ * Spring Data JPA repository for projects.
  */
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, Long> {

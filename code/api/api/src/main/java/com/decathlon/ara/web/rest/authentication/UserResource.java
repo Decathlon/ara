@@ -91,7 +91,7 @@ public class UserResource {
     @DeleteMapping(ACCOUNT_PROJECT_SCOPE)
     public ResponseEntity<Void> removeUserScope(@PathVariable String userLogin, @PathVariable String projectCode) {
         try {
-            userAccountService.removeProjectFromUserScope(userLogin, projectCode);
+            userAccountService.removeUserScope(userLogin, projectCode);
             return ResponseEntity.ok().build();
         } catch (ForbiddenException e) {
             return ResponseUtil.handle(e);

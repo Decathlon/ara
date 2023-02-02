@@ -72,7 +72,7 @@ public class ProjectResource {
             return ResponseEntity.badRequest().headers(HeaderUtil.idMustBeEmpty(NAME)).build();
         }
         try {
-            var creationUser = userAccountService.getCurrentUserEntity().orElseThrow(() -> new ForbiddenException(Entities.PROJECT, "project creation"));
+            var creationUser = userAccountService.getCurrentUser().orElseThrow(() -> new ForbiddenException(Entities.PROJECT, "project creation"));
             ProjectDTO createdDto = projectService.create(dtoToCreate, creationUser);
             userAccountService.updateCurrentUserProjectScope(createdDto.getCode(), UserAccountScopeRole.ADMIN);
             return ResponseEntity
@@ -95,7 +95,7 @@ public class ProjectResource {
     @PutMapping(PROJECT_CODE_REQUEST_PARAMETER)
     public ResponseEntity<ProjectDTO> update(@PathVariable String projectCode, @Valid @RequestBody ProjectDTO projectToUpdate) {
         try {
-            var updateUser = userAccountService.getCurrentUserEntity().orElseThrow(() -> new ForbiddenException(Entities.PROJECT, "project update", Pair.of("code", projectCode)));
+            var updateUser = userAccountService.getCurrentUser().orElseThrow(() -> new ForbiddenException(Entities.PROJECT, "project update", Pair.of("code", projectCode)));
             ProjectDTO updatedProject = projectService.update(projectToUpdate, updateUser);
             return ResponseEntity.ok()
                     .headers(HeaderUtil.entityUpdated(NAME, updatedProject.getId()))

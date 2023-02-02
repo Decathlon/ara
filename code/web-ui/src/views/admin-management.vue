@@ -268,13 +268,13 @@
           .get(api.paths.projects, api.REQUEST_OPTIONS)
           .then((response) => {
             this.projects = response.body
-            this.projects.forEach((project) => { project.currentUserRole = this.getRoleOnProject(project.code) })
+            this.projects.forEach((project) => { project.currentUserRole = this.getProjectRole(project.code) })
           })
       },
       isAdminOnProject (project) {
         return this.isSuperAdmin || (this.isScopedUser && (project.currentUserRole === USER.ROLE_ON_PROJECT.ADMIN))
       },
-      getRoleOnProject (projectCode) {
+      getProjectRole (projectCode) {
         return this.user.scopes.find((scope) => scope.project === projectCode)?.role
       },
       getProjectUserNameDisplay (login) {
