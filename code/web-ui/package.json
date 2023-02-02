@@ -30,7 +30,7 @@
     "sharp": "^0.26.3",
     "vue": "2.5.17",
     "vue-cookies": "^1.7.4",
-    "vue-resource": "^1.5.1",
+    "vue-resource": "^1.5.3",
     "vue-router": "^3.0.1",
     "vue-virtual-scroller": "^0.12.2",
     "vue2-filters": "^0.3.0",
