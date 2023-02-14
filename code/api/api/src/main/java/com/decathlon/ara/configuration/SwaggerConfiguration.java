@@ -21,10 +21,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.security.SecurityScheme.Type;
 import io.swagger.v3.oas.models.servers.Server;
 
 @Configuration
@@ -32,10 +36,14 @@ public class SwaggerConfiguration {
 
     @Value("${ara.clientBaseUrl}")
     private String baseUrl;
+          
+    final String JWT_SECURITY_SCHEME_NAME = "jwt";
+    final String JWT_SECURITY_SCHEME_BEARER = "bearer";
+    final String JWT_SECURITY_SCHEME_BEARER_FORMAT = "JWT";
 
     @Bean
     public OpenAPI araOpenAPI() {
-        return new OpenAPI()
+      return new OpenAPI()
                 .addServersItem(new Server().url(baseUrl))
                 .info(
                         new Info()
@@ -50,8 +58,14 @@ public class SwaggerConfiguration {
                                 .license(
                                         new License()
                                                 .name("Apache 2.0")
-                                                .url("http://www.apache.org/licenses/")));
+                                                .url("http://www.apache.org/licenses/")))
+                                .components(
+                                         new Components()
+                                                    .addSecuritySchemes(JWT_SECURITY_SCHEME_NAME, new SecurityScheme().scheme(JWT_SECURITY_SCHEME_BEARER).type(Type.HTTP).bearerFormat(JWT_SECURITY_SCHEME_BEARER_FORMAT)))
+                                                    .addSecurityItem(new SecurityRequirement().addList(JWT_SECURITY_SCHEME_NAME));     
 
     }
 
 }
+
+   

@@ -35,7 +35,7 @@ public class CustomSecurity {
         http
                 .csrf().disable() //NOSONAR
                 .authorizeRequests() //NOSONAR
-                .antMatchers("/oauth/**", "/actuator/**").permitAll()
+                .antMatchers("/oauth/**", "/actuator/**", "/swagger-ui/**","/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .logout()

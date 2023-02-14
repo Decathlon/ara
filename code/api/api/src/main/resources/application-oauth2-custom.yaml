@@ -11,6 +11,14 @@
 #         step: 15s
 #         autoCreateDb: false
 
+springdoc:
+  swagger-ui:
+    disable-swagger-default-url: false
+  packagesToScan: 
+  pathsToMatch: /**, /actuator/**
+  use-management-port: false
+  show-actuator: true
+  
 spring:
   security:
     oauth2:
@@ -52,7 +60,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health, info, openapi, swaggerui
+        include: health, info
   # Metrics
   metrics:
     export:
