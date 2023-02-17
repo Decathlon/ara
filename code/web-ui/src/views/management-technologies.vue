@@ -46,7 +46,7 @@
               <span v-if="errorText" class="error-message">You don't have the rights to edit this field!</span>
             </div>
             <div v-else>
-              <Button v-if="userRole === 'ADMIN' || 'SUPER_ADMIN'" :disabled="!!editingCode" icon="md-create" :title="(editingCode ? 'Another setting is currently being edited' : 'Edit')" @click="edit(setting, group.technology)" style="margin-right: 4px;"/>
+              <Button v-if="adminRight" :disabled="!!editingCode" icon="md-create" :title="(editingCode ? 'Another setting is currently being edited' : 'Edit')" @click="edit(setting, group.technology)" style="margin-right: 4px;"/>
               <span v-if="setting.type === 'boolean'">
                 <Icon v-if="setting.value === 'true'" type="md-checkmark" size="16"/>
                 <span v-else>-</span>
@@ -76,6 +76,7 @@
   import formFieldComponent from '../components/form-field'
   import api from '../libs/api'
   import { mapState } from 'vuex'
+  import { USER } from '../libs/constants'
 
   export default {
     name: 'management-technologies',
@@ -98,7 +99,13 @@
     },
 
     computed: {
-      ...mapState('users', ['userRole'])
+      ...mapState('users', ['userRole']),
+
+      adminRight () {
+        if (this.userRole === USER.PROFILE.SUPER_ADMIN || this.userRole === USER.ROLE_ON_PROJECT.ADMIN) {
+          return true
+        }
+      }
     },
 
     methods: {

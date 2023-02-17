@@ -137,6 +137,10 @@ table > thead > tr > th {
   display: none !important;
 }
 
+.hidden {
+  visibility: hidden;
+}
+
 /* PAGES */
 .ivu-page.mini {
   margin-right: -10px;
@@ -310,15 +314,6 @@ pre code {
   background-color: #F7F8F9;
 }
 
-.lightGrey .project-name, .darkGrey .project-name {
-  position: relative;
-}
-
-.darkGrey .demo-project-icon, .lightGrey .demo-project-icon{
-  position: absolute;
-  right: 15px;
-}
-
 /****  ADMIN RIGHTS STYLESHEET  ****/
 
 /* General */
@@ -376,13 +371,6 @@ pre code {
 
 .projectMemberFilter * {
   align-self: center;
-}
-
-.projectMemberFilter button {
-  background-color: #ad8daf;
-  border-color: #ad8daf;
-  color: #ffffff;
-  margin: 5px 5px;
 }
 
 .saveProjectChange {
@@ -471,39 +459,41 @@ pre code {
 
 .projectCTA {
   width: 90%;
-  position: relative;
+  display: flex;
   margin: 0 auto;
 }
 
 .projectCTA .filterSelect {
   width: 150px;
-  position: absolute;
-  top: -45px;
+}
+
+.projectCTA .dateSelect {
+  margin-left: 15px;
 }
 
 .projectCTA .filterSearch {
   width: 350px;
-  position: absolute;
-  top: -45px;
-  left: 170px;
+  margin-left: 15px;
 }
 
 .projectCTA .demoProjectButton {
-  position: absolute !important;
-  right: 8rem;
-  top: -45px;
+  margin-left: auto;
 }
 
-.projectCTA .addBtn {
-  position: absolute;
-  right: 0;
-  top: -45px;
+.projectCTA .left-margin {
+  margin-left: 15px;
 }
 
-.projectCTA .deleteBtn {
-  position: absolute;
-  right: 22rem;
-  top: -45px;
+.projectCTA .addBtn.align-right {
+  margin-left: auto;
+}
+
+.projectCTA h2 {
+  margin-right: auto;
+}
+
+.projectCTA .btn-group-right {
+  margin-left: 15px;
 }
 
 .user-role {
@@ -571,7 +561,7 @@ pre code {
   padding: 10px;
 }
 
-.adminTable tbody tr td i {
+.adminTable .table-cta i {
   float: right;
   margin-right: 1rem;
   cursor: pointer;
@@ -601,24 +591,9 @@ pre code {
   color: #23a9427d;
 }
 
-.adminTable .showBtn, .adminTable .addBtn {
-  position: absolute;
-  top: -20px;
-  background-color: #ffffff;
-  padding: 8px;
-  border-radius: 100px;
-  border: 2px solid #9cbed8;
-  cursor: pointer;
-}
-
 .adminTable .showBtn {
   right: 80px;
   color: #ad8daf;
-}
-
-.adminTable .addBtn {
-  right: 20px;
-  color: #ff600a;
 }
 
 .spaced-icon {
@@ -682,4 +657,13 @@ pre code {
   border: 2px solid #3780be;
   color: #ffffff;
   cursor: pointer;
+}
+
+.modal-cta {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modal-cta button {
+  margin-left: 10px;
 }

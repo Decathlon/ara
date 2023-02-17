@@ -23,9 +23,6 @@
           <p class="projectCode ivu-text-center"><strong>{{ projectCode }}</strong></p>
         </h1>
       </div>
-
-      <Button title="Edit" class="editBtn" type="primary" ghost>Edit project</Button>
-      <Button title="Delete project" class="removeBtn" type="error">Remove project</Button>
     </div>
 
     <div class="tableContent">
@@ -34,10 +31,14 @@
         Project list
       </span>
 
-      <div class="projectMemberFilter">
-        <h3>Project's members</h3>
-        <Button type="primary" shape="circle" icon="md-checkmark">Users</Button>
-        <Button type="primary" shape="circle" icon="md-checkmark">Groups</Button>
+      <div class="projectCTA">
+        <h2>Project's members</h2>
+
+        <span :class="isMember ? 'hidden' : ''">
+          <Button title="Add" type="primary" ghost class="btn-group-right" @click="memberToAdd = true">Add member</Button>
+          <Button title="Edit" type="primary" class="btn-group-right" ghost>Edit project</Button>
+          <Button title="Delete project" class="btn-group-right" type="error">Remove project</Button>
+        </span>
       </div>
 
       <table class="adminTable" aria-label="Project's members name and role">
@@ -49,38 +50,38 @@
           </tr>
         </thead>
 
-        <tbody v-if="projectInfo">
-          <tr v-for="(member, index) in projectInfo" :key="index" :class="index %2 !== 0 ? 'lightGrey' : 'darkGrey'">
-            <td >{{ member.name }}</td>
-            <td>{{ member.role }}</td>
-            <td>
-              <Icon type="md-close-circle" class="crossIcon" size="24" @click="removeUserFromProject()"/>
-              <Icon type="md-create" size="24" @click="openProjectDetails(project)"/>
+        <tbody>
+          <tr v-for="(member, index) in usersList" :key="index" :class="index %2 !== 0 ? 'lightGrey' : 'darkGrey'">
+            <td >{{ member.login }}</td>
+            <td>{{ getUserRole(member.scopes) }}</td>
+            <td class="table-cta">
+              <Icon type="md-close-circle" class="crossIcon" size="24" @click="removeUserFromProject()" :class="isMember ? 'hidden' : ''"/>
+              <Icon type="md-create" size="24" @click="openProjectDetails(project)" :class="isMember ? 'hidden' : ''"/>
             </td>
           </tr>
         </tbody>
-        <button class="addBtn" @click="addMember">
-          <Icon type="md-add" size="24"/>
-        </button>
       </table>
-
-      <Button class="saveProjectChange" type="primary" :disabled="!changesTab">Save changes</Button>
     </div>
 
-    <Modal v-model="memberToAdd" title="Add Member" okText="Add" :footer-hide="!memberTypeSelected" @on-ok="addMemberToProject" @close="memberToAdd = false" :width="900"
+    <Modal v-model="memberToAdd" title="Add Member" okText="Add" footer-hide :width="900"
       :loading="loadingSaving" ref="editPopup">
-      <Form v-if="!memberTypeSelected" :label-width="128">
-        <div class="memberType">
-          <span @click="memberTypeSelected = 'Users'">Users</span>
-          <span @click="memberTypeSelected = 'Groups'">Groups</span>
-        </div>
-      </Form>
-      <Form v-else :label-width="128">
-        <Form-item v-for="field in fields"
-                   :key="field.code"
-                   :label="(field.type === 'boolean' ? '' : field.name + ':')"
-                   :required="field.required && (editingNew || (!field.primaryKey && !field.createOnly))">
-          <form-field :field="field" v-model="editingData[field.code]" :editingNew="editingNew" :ref="field.code" v-on:enter="addMemberToProject(memberTypeSelected)"/>
+      <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="128">
+        <FormItem label="Search">
+          <Input search placeholder="Enter something..." />
+        </FormItem>
+        <FormItem label="Role" prop="role">
+          <RadioGroup v-model="formValidate.role">
+            <Radio v-for="role in userRole" class="ivu-radio-border" :label="role"></Radio>
+          </RadioGroup>
+        </FormItem>
+        <FormItem label="Users" prop="scope">
+          <RadioGroup v-model="formValidate.scope">
+            <Radio v-for="user in isAlreadyMember" class="ivu-radio-border" :label="user"></Radio>
+          </RadioGroup>
+        </FormItem>
+        <Form-item class="modal-cta">
+          <Button @click="memberToAdd = false">Cancel</Button>
+          <Button type="primary" @click="handleSubmit('formValidate')">Add</Button>
         </Form-item>
       </Form>
     </Modal>
@@ -91,6 +92,10 @@
   import Vue from 'vue'
   import api from '../libs/api'
   import formField from '../components/form-field'
+  import { AuthenticationService } from '../service/authentication.service'
+  import { mapState } from 'vuex'
+  import { USER } from '../libs/constants'
+
   export default {
     name: 'admin-project-details',
     components: {
@@ -102,39 +107,22 @@
         projectName: '',
         projectCode: '',
         memberToAdd: false,
-        fields: [
-          {
-            code: 'name',
-            name: 'Name',
-            columnTitle: 'Name',
-            type: 'autocomplete',
-            required: true,
-            createOnly: true,
-            createOnlyBecause: 'the code ends-up in URLs of ARA, and people should be allowed to bookmark fixed URLs or copy/past them in other services (defect tracking system, wiki, etc.)',
-            newValue: '',
-            width: undefined,
-            primaryKey: true
-          },
-          {
-            code: 'role',
-            name: 'Role',
-            columnTitle: 'Role',
-            type: 'select',
-            options: [
-              { value: 'MEMBER', label: 'Member' },
-              { value: 'MAINTAINER', label: 'Maintainer' },
-              { value: 'ADMIN', label: 'Admin' }
-            ],
-            required: true,
-            newValue: '',
-            businessKey: true,
-            width: undefined
-          }
-        ],
-        editingData: {},
-        editingNew: false,
-        editing: false,
-        memberTypeSelected: ''
+        usersList: [],
+        users: [],
+        userRole: ['Member', 'Maintainer', 'Admin'],
+        formValidate: {
+          role: '',
+          scope: ''
+        },
+        ruleValidate: {
+          role: [
+            { required: true, message: 'You need to assign your user a role', trigger: 'change' }
+          ],
+          scope: [
+            { required: true, message: 'Choose at least one user to add', trigger: 'change' }
+          ]
+        },
+        projectRole: ''
       }
     },
     methods: {
@@ -145,52 +133,113 @@
         }
         return row
       },
-      addMember () {
-        this.memberToAdd = true
-        this.doEdit(this.newRowData(), true)
+
+      async getAllUsers () {
+        await Vue.http
+          .get(api.paths.allUsers, api.REQUEST_OPTIONS)
+          .then((response) => { this.usersList = response.body })
       },
-      doEdit (row, editingNew) {
-        this.editingData = { ...row }
-        this.editingNew = editingNew
-        this.editing = true
-        if (this.memberTypeSelected) {
-          this.$nextTick(() => this.$refs[this.firstVisibleFieldCode(editingNew)][0].focus())
-        }
+
+      async getScopedUsers () {
+        await Vue.http
+          .get(api.paths.scopedUsersByProject(this.projectCode), api.REQUEST_OPTIONS)
+          .then((response) => {
+            this.usersList = response.body
+          })
       },
-      firstVisibleFieldCode (editingNew) {
-        for (let field of this.fields) {
-          if (field.type !== 'hidden' && field.type !== 'select' && !field.readOnly && !field.readOnly && (editingNew)) {
-            return field.code
+
+      getUserRole (scope) {
+        let userRole = ''
+        scope.filter((item) => {
+          if (item.project === this.projectCode) {
+            userRole = item.role
           }
-        }
-        throw new Error('The table ' + this.name + ' has no field, or they are all either of type hidden, selects, read-only or non-modifiable primary key')
+        })
+        return userRole
       },
-      addMemberToProject (memberType) {
-        if (memberType === 'Users') {
-          Vue.http
-            .post('/api/projects/' + this.projectCode + '/members/users', this.editingData, api.REQUEST_OPTIONS)
-        } else {
-          Vue.http
-            .post('/api/projects/' + this.projectCode + '/members/groups', this.editingData, api.REQUEST_OPTIONS)
+
+      handleSubmit (name) {
+        this.$refs[name].validate((valid) => {
+          if (valid) {
+            const scopeInfo = {
+              role: this.formValidate.role.toUpperCase(),
+              project: this.projectCode
+            }
+
+            Vue.http
+              .put(api.paths.userProjectScopeManagement(this.formValidate.scope, this.projectCode), scopeInfo, api.REQUEST_OPTIONS)
+              .then(() => this.$Message.success('User successfully added to ' + this.projectCode))
+          } else {
+            this.$Message.error('Something went wrong, please contact an admin')
+          }
+        })
+      }
+    },
+
+    computed: {
+      ...mapState('users', ['user']),
+
+      isAlreadyMember () {
+        const newUser = this.users?.map(item => item.login)
+        return this.usersList.filter(item => newUser.some(itemToBeRemoved => itemToBeRemoved !== item))
+      },
+
+      isSuperAdmin () {
+        if (this.user.profile === USER.PROFILE.SUPER_ADMIN) {
+          return true
+        }
+      },
+
+      isMember () {
+        if (this.$route.params.role === USER.ROLE_ON_PROJECT.MEMBER) {
+          return true
         }
       }
     },
+
     mounted () {
-      this.projectName = this.$route.query.projectName
-      this.projectCode = this.$route.query.projectCode
+      this.$store.dispatch('users/getUserInfo', AuthenticationService.getDetails().user)
+      this.projectName = this.$route.params.projectName
+      this.projectCode = this.$route.params.projectCode
+      if (this.isSuperAdmin) {
+        this.getAllUsers()
+      } else {
+        this.getScopedUsers()
+      }
       Vue.http
-        .get('/api/projects/' + this.projectCode + '/members/users')
+        .get(api.paths.scopedUsersByProject(this.projectCode), api.REQUEST_OPTIONS)
         .then((response) => {
-          for (let user of response.body) {
-            this.projectInfo.push({
-              name: user.name,
-              role: user.role
-            })
-          }
+          this.users = response.body
         })
     },
+
     beforeDestroy () {
       this.projectInfo = this.$route.params
     }
   }
 </script>
+
+<style scoped>
+  .projectMemberFilter {
+    width: 90%;
+    margin: 0 auto;
+  }
+
+  .project-cta {
+    margin-left: auto;
+  }
+
+  .ivu-radio-border {
+    border: 1px solid #dcdee2;
+    border-radius: 4px;
+    height: 32px;
+    line-height: 30px;
+    padding: 0 15px;
+    -webkit-transition: border .2s ease-in-out;
+    transition: border .2s ease-in-out;
+  }
+
+  .ivu-radio-wrapper-checked.ivu-radio-border {
+    border-color: #2d8cf0;
+  }
+</style>

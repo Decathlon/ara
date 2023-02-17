@@ -23,12 +23,13 @@
         <Select class="filterSelect" placeholder="Filter" @on-change="filterProjects" :label-in-value="true">
           <Option v-for="(filter, index) in filterType" :value="index" :key="index" :label="filter" />
         </Select>
-        <Input class="filterSearch" v-model="searchElement" search placeholder="Enter something..." @on-change="searchProject" />
+        <Input v-if="filterSelected === 'Name' || filterSelected === 'Created By'" class="filterSearch" v-model="searchElement" search placeholder="Enter something..." />
+        <DatePicker v-else class="dateSelect" type="datetimerange" placement="bottom-right" placeholder="Select date range" format="yyyy-MM-dd HH:mm:ss" :start-date="new Date(2020, 4, 14)" @on-change="dateSelected" />
         <Button v-if="user.default_project" type="error" class="deleteBtn" @click="clearDefaultProject()" ghost>
           Clear default project
         </Button>
         <Button v-if="demoProjectNotFound" type="warning" class="demoProjectButton" data-nrt="createDemo" :loading="loadingDemoProject" @click="createDemoProject">Create the demo project</Button>
-        <Button type="primary" class="addBtn" @click="openProjectCreationModal()">
+        <Button type="primary" :class="demoProjectNotFound ? 'addBtn' : 'addBtn align-right'" @click="openProjectCreationModal()">
           Add project
         </Button>
       </div>
@@ -53,7 +54,7 @@
         </thead>
 
         <tbody>
-          <tr v-for="(project, index) in projects" :class="index %2 !== 0 ? 'darkGrey' : 'lightGrey'" :key="project.id">
+          <tr v-for="(project, index) in searchProject" :class="index %2 !== 0 ? 'darkGrey' : 'lightGrey'" :key="project.id">
             <td>
               <Tooltip v-if="project.description" placement="right" :content="project.description">
                 <Icon type="md-information-circle" size="24"/>
@@ -65,17 +66,17 @@
             </td>
             <td>{{ project.code }}</td>
             <td>{{ project.creation_date }}</td>
-            <td>{{ getProjectUserNameDisplay(project.creation_user) }}</td>
+            <td>{{ project.creation_user }}</td>
             <td>{{ project.update_date }}</td>
-            <td>{{ getProjectUserNameDisplay(project.update_user) }}</td>
+            <td>{{ project.update_user }}</td>
             <td v-if="isScopedUser">{{ project.currentUserRole }}</td>
             <td>
               <input type="radio" name="defaultProject" @change="changeDefaultProject(project)" :checked="(user.default_project && user.default_project === project.code)">
             </td>
-            <td>
-              <Icon v-if="isAdminOnProject(project)" type="md-close-circle" size="24" @click="deleteProject(project.code)"/>
-              <Icon v-if="isAdminOnProject(project)" type="md-create" size="24" @click="openProjectUpdateModal(project)"/>
-              <Icon type="md-eye" size="24" @click="openProjectDetails(project)" :class="isAdminOnProject(project) ? '' : 'spaced-icon'"/>
+            <td class="table-cta">
+              <Icon type="md-close-circle" size="24" @click="deleteProject(project.code)" :class="isAdminOnProject(project) ? '' : 'hidden'"/>
+              <Icon type="md-create" size="24" @click="openProjectUpdateModal(project)" :class="isAdminOnProject(project) ? '' : 'hidden'"/>
+              <Icon type="md-eye" size="24" @click="openProjectDetails(project)" :class="isDemoProject(project.code) ? 'hidden' : ''"/>
             </td>
           </tr>
         </tbody>
@@ -83,8 +84,8 @@
     </div>
 
     <div v-else class="no-project">
-      <h2>No projects to display. Create a new project by clicking the button below.</h2>
-      <Button type="primary" class="addBtn" @click="openProjectCreationModal()">
+      <h2>No projects to display. Contact an admin or create a new project by clicking the button below.</h2>
+      <Button type="primary" class="addBtn" @click="openProjectCreationModal()" >
         Add project
       </Button>
     </div>
@@ -93,30 +94,30 @@
            v-model="modalConfiguration[1].open"
            :title="modalConfiguration[1].display.title"
            :okText="modalConfiguration[1].display.okButton"
-           @on-ok="modalConfiguration[1].onSubmit"
            :width="900"
-           :loading="showLoader">
-      <Form :label-width="128">
-        <Form-item :key="'code'" :label="'Code:'" required>
-          <div>
-            <Input v-model="modalConfiguration[1].model.code" :disabled="modalConfiguration[0] === 'update'"/>
-            <div class="hints">{{fieldDescription.code.hint}}</div>
-          </div>
-          <div class="form-field-info-description">{{fieldDescription.code.warning}}</div>
+           :loading="showLoader"
+           :footer-hide="true">
+      <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="128">
+        <Form-item label="Code" prop="code">
+          <Input v-model="formValidate.code" :disabled="modalConfiguration[0] === 'update'"/>
+          <p class="hints">{{fieldDescription.code.hint}}</p>
+          <p class="form-field-info-description">{{fieldDescription.code.warning}}</p>
         </Form-item>
-        <Form-item :key="'name'" :label="'Name:'" required>
-          <div>
-            <Input v-model="modalConfiguration[1].model.name"/>
-            <div class="hints">{{fieldDescription.name.hint}}</div>
-          </div>
-          <div class="form-field-info-description">{{fieldDescription.name.warning}}</div>
+        <Form-item label="Name" prop="name">
+          <Input v-model="formValidate.name"/>
+          <p class="hints">{{fieldDescription.name.hint}}</p>
+          <p class="form-field-info-description">{{fieldDescription.name.warning}}</p>
         </Form-item>
         <Form-item :key="'description'" :label="'Description:'">
           <div>
-            <Input v-model="modalConfiguration[1].model.description" :type="'textarea'" :autosize="{ minRows: 2, maxRows: 15 }"/>
+            <Input v-model="formValidate.description" :type="'textarea'" :autosize="{ minRows: 2, maxRows: 15 }"/>
             <div class="hints">{{fieldDescription.description.hint}}</div>
           </div>
           <div class="form-field-info-description">{{fieldDescription.description.warning}}</div>
+        </Form-item>
+        <Form-item class="modal-cta">
+          <Button @click="closeModal(modalConfiguration[0])">Cancel</Button>
+          <Button type="primary" @click="handleSubmit(modalConfiguration[0])">Submit</Button>
         </Form-item>
       </Form>
     </Modal>
@@ -130,7 +131,6 @@
   import { DEMO_PROJECT_CODE, USER } from '../libs/constants'
   import { AuthenticationService } from '../service/authentication.service'
   import { mapState } from 'vuex'
-  import util from '../libs/util'
 
   export default {
     name: 'admin-management',
@@ -141,6 +141,15 @@
       return {
         projects: [],
         loadingDemoProject: false,
+        formValidate: {
+          code: '',
+          name: '',
+          description: ''
+        },
+        ruleValidate: {
+          code: { required: true, message: 'The code cannot be empty', trigger: 'blur' },
+          name: { required: true, message: 'The name cannot be empty', trigger: 'blur' }
+        },
         fieldDescription: {
           code: {
             hint: 'The technical code of the project, to use in ARA URLs (as well as API URLs used by continuous integration to push data to ARA). Eg. "phoenix-front".',
@@ -161,51 +170,45 @@
             display: {
               title: 'Create Project',
               okButton: 'Create'
-            },
-            onSubmit: () => this.create(),
-            model: {}
+            }
           },
           update: {
             open: false,
             display: {
               title: 'Update Project',
               okButton: 'Update'
-            },
-            onSubmit: () => this.update(),
-            model: {}
+            }
           }
         },
-        filterType: ['Name', 'Creation Date', 'Update Date', 'Author'],
+        filterType: ['Name', 'Creation Date', 'Update Date', 'Created By'],
         filterSelected: 'Name',
         searchElement: '',
-        showLoader: false
+        showLoader: false,
+        dateToSearch: []
       }
     },
     methods: {
+      closeModal (form) {
+        this.projectModalConfigurations[form].open = false
+      },
+
       openProjectCreationModal () {
         this.projectModalConfigurations.creation.open = true
         this.resetProjectCreationForm()
       },
+
       resetProjectCreationForm () {
         this.projectModalConfigurations.creation.model = {}
       },
+
       create () {
-        const projectToCreate = this.projectModalConfigurations.creation.model
+        const projectToCreate = this.formValidate
         const projectCode = projectToCreate.code
-        const projectName = projectToCreate.name
-        const someRequiredFieldsAreLeftBlank = util.isBlank(projectCode) || util.isBlank(projectName)
-        if (someRequiredFieldsAreLeftBlank) {
-          this.$Message.error({
-            content: 'Project not created because some required fields were blank!',
-            duration: 3,
-            closable: true
-          })
-          return
-        }
         Vue.http
           .post(api.paths.projects, projectToCreate, api.REQUEST_OPTIONS)
           .then(async () => {
             this.showLoader = false
+            this.closeModal('creation')
             this.$Message.success({
               content: `Project <b>${projectCode}</b> succesfully created!`,
               duration: 3,
@@ -224,30 +227,17 @@
 
       openProjectUpdateModal (project) {
         this.projectModalConfigurations.update.open = true
-        this.resetProjectUpdateForm(project)
+        this.formValidate = { ...project }
       },
-      resetProjectUpdateForm (project) {
-        const projectToUpdate = this.projectModalConfigurations.update.model
-        projectToUpdate.code = project.code
-        projectToUpdate.name = project.name
-        projectToUpdate.description = project.description
-      },
+
       update () {
-        const projectToUpdate = this.projectModalConfigurations.update.model
+        const projectToUpdate = this.formValidate
         const projectCode = projectToUpdate.code
-        const projectNameIsBlank = util.isBlank(projectToUpdate.name)
-        if (projectNameIsBlank) {
-          this.$Message.error({
-            content: `Project <b>${projectCode}</b> not updated because the name field was blank!`,
-            duration: 3,
-            closable: true
-          })
-          return
-        }
         Vue.http
           .put(api.paths.projectByCode(projectCode), projectToUpdate, api.REQUEST_OPTIONS)
           .then(() => {
             this.showLoader = false
+            this.closeModal('update')
             this.$Message.success({
               content: `Project <b>${projectCode}</b> succesfully updated!`,
               duration: 3,
@@ -261,28 +251,40 @@
       },
 
       openProjectDetails (projectInfo) {
-        this.$router.push({ name: 'admin-project-details', query: { projectCode: projectInfo.code, projectName: projectInfo.name } })
+        this.$router.push({ name: 'admin-project-details', params: { projectCode: projectInfo.code, projectName: projectInfo.name, role: projectInfo.currentUserRole } })
       },
       async initProjects () {
         await Vue.http
           .get(api.paths.projects, api.REQUEST_OPTIONS)
           .then((response) => {
             this.projects = response.body
-            this.projects.forEach((project) => { project.currentUserRole = this.getProjectRole(project.code) })
+            this.projects.forEach((project) => {
+              project.currentUserRole = this.getRoleOnProject(project.code)
+              if (project.creation_user === this.user.login) {
+                project.creation_user = 'Me'
+                project.update_user = 'Me'
+              }
+            })
+
+            return this.projects
           })
       },
+
       isAdminOnProject (project) {
         return this.isSuperAdmin || (this.isScopedUser && (project.currentUserRole === USER.ROLE_ON_PROJECT.ADMIN))
       },
-      getProjectRole (projectCode) {
+
+      getRoleOnProject (projectCode) {
         return this.user.scopes.find((scope) => scope.project === projectCode)?.role
       },
+
       getProjectUserNameDisplay (login) {
         if (login === this.user.login) {
           return 'Me'
         }
         return login
       },
+
       clearDefaultProject () {
         Vue.http
           .delete(api.paths.currentUserDefaultProjectClear, api.REQUEST_OPTIONS)
@@ -294,6 +296,7 @@
             api.handleError(error)
           })
       },
+
       changeDefaultProject (project) {
         Vue.http
           .put(api.paths.currentUserDefaultProjectUpdate(project.code), null, api.REQUEST_OPTIONS)
@@ -305,6 +308,7 @@
             api.handleError(error)
           })
       },
+
       deleteProject (code) {
         let self = this
         this.$Modal.confirm({
@@ -334,9 +338,11 @@
           }
         })
       },
+
       isDemoProject (projectCode) {
         return projectCode === DEMO_PROJECT_CODE
       },
+
       createDemoProject () {
         this.loadingDemoProject = true
         Vue.http
@@ -350,12 +356,25 @@
             api.handleError(error)
           })
       },
+
       filterProjects (filter) {
         this.filterSelected = filter.label
       },
 
-      searchProject () {
-        return this.projects.filter(project => project.name.toLowerCase().includes(this.searchElement.toLowerCase()))
+      dateSelected (dates) {
+        this.dateToSearch = dates
+      },
+
+      handleSubmit (submit) {
+        this.$refs['formValidate'][0].validate((valid) => {
+          if (valid) {
+            if (submit === 'creation') {
+              this.create()
+            } else {
+              this.update()
+            }
+          }
+        })
       }
     },
     mounted () {
@@ -376,6 +395,27 @@
 
       isScopedUser () {
         return this.user?.profile === USER.PROFILE.SCOPED_USER
+      },
+
+      searchProject () {
+        switch (this.filterSelected) {
+          case 'Name':
+            return this.projects.filter(project => project.name.toLowerCase().includes(this.searchElement.toLowerCase()))
+          case 'Creation Date':
+            if (this.dateToSearch[0]) {
+              return this.projects.filter(project => (Date.parse(project.creation_date) >= Date.parse(this.dateToSearch[0])) && (Date.parse(project.creation_date) <= Date.parse(this.dateToSearch[1])))
+            } else {
+              return this.projects
+            }
+          case 'Update Date':
+            if (this.dateToSearch[0]) {
+              return this.projects.filter(project => (Date.parse(project.update_date) >= Date.parse(this.dateToSearch[0])) && (Date.parse(project.update_date) <= Date.parse(this.dateToSearch[1])))
+            } else {
+              return this.projects
+            }
+          case 'Created By':
+            return this.projects.filter(project => project.creation_user.toLowerCase().includes(this.searchElement.toLowerCase()))
+        }
       }
     }
   }

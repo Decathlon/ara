@@ -207,7 +207,7 @@ const routes = [
     redirect: '/projects/:projectCode/executions'
   },
   {
-    path: '/admin/projects-list/:projectCode',
+    path: '/admin/projects-list/projectCode=:projectCode?projectName:projectName',
     name: 'admin-project-details',
     meta: {
       title: 'Admin project details'

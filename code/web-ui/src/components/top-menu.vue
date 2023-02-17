@@ -68,9 +68,11 @@
 
       <div id="helps">
         <Tooltip v-if="isLoggedIn" class="user-avatar top-right-nav" placement="bottom">
-          <p class="user-avatar">
-            <span></span>
-          </p>
+          <div class="user-picture" :style="{ backgroundImage: `url(${user.pictureUrl})` }">
+            <span v-if="isAdmin">
+              <img src="../assets/super_admin.png" width="20" height="20" alt="User role">
+            </span>
+          </div>
           <div slot="content">
             <p v-if="providerName">Connected via <strong>{{providerName}}</strong></p>
             <p v-if="user && user.profile">> Profile: <strong>{{user.profile}}</strong></p>
@@ -159,16 +161,12 @@
 
 <script>
   import { mapState } from 'vuex'
-
   import Vue from 'vue'
   import api from '../libs/api'
-
   import projectsSelect from '../components/projects-select.vue'
-
-  import constants from '../libs/constants.js'
-
   import { AuthenticationService } from '../service/authentication.service'
   import { LocalParameterService } from '../service/local-parameter.service'
+  import { USER } from '../libs/constants'
   import _ from 'lodash'
 
   // Will contain the latest version when the user clicked to view the CHANGELOG:
@@ -177,12 +175,6 @@
 
   export default {
     name: 'top-menu',
-
-    mixins: [{
-      created () {
-        this.constants = constants
-      }
-    }],
 
     components: {
       projectsSelect
@@ -288,6 +280,10 @@
           return 0 // Do not show the badge dot
         }
         return 1 // Show a red badge dot
+      },
+
+      isAdmin () {
+        return this.user.profile === USER.PROFILE.SUPER_ADMIN
       }
     },
 
@@ -468,7 +464,7 @@
   #helps {
     display: flex;
     align-items: center;
-    margin-right: 12px;
+    margin: 0 12px;
   }
 
   #helps .top-right-nav {
@@ -588,28 +584,27 @@
     margin-right: 4px;
   }
 
-  .user-avatar {
-    background-color: #ffffff;
-    margin-right: 15px;
-    width: 30px;
-    height: 30px;
-    border-radius: 100px;
-    overflow: hidden;
-    background-image: url('../assets/super_admin.png');
-    background-repeat: no-repeat;
+  .user-avatar .user-picture {
     background-size: cover;
-  }
-  
-  /* .user-avatar.specifi-role::after {
-    content: '';
-  } */
-
-  /* .user-avatar span {
-    position: absolute;
-    top: 0;
-    background-color: #ffffff;
-    height: 15px;
-    width: 15px;
+    width: 35px;
+    height: 35px;
     border-radius: 100px;
-  } */
+  }
+
+  .user-avatar img {
+    margin-right: 15px;
+    border-radius: 100px;
+    position: relative;
+  }
+
+  .user-avatar span {
+    position: absolute;
+    left: 20px;
+    top: 15px;
+  }
+
+  .user-avatar span img {
+    background-color: #ffffff;
+    padding: 2px;
+  }
 </style>

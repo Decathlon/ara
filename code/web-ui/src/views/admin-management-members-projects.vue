@@ -22,12 +22,21 @@
     </div>
 
     <div>
-      <div v-if="currentProfile.profile === 'SUPER_ADMIN'" class="projectCTA">
-        <Button type="primary" class="addBtn" @click="add()">
+      <div v-if="isSuperAdmin" class="projectCTA">
+        <h2>Project's roles</h2>
+
+        <Button type="primary" class="btn-group-right" @click="add()">
           Affect to a new project
         </Button>
       </div>
       <table class="adminTable" aria-label="User's project and his role for each of them">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Role</th>
+            <th></th>
+          </tr>
+        </thead>
         <tbody v-if="members">
           <tr v-for="(scope, index) in getMemberInfo.scopes" :key="index" :class="index %2 !== 0 ? 'lightGrey' : 'darkGrey'">
             <td class="userType">
@@ -83,6 +92,8 @@
   import Vue from 'vue'
   import api from '../libs/api'
   import formField from '../components/form-field'
+  import { USER } from '../libs/constants'
+
   export default {
     name: 'admin-management-members',
     components: {
@@ -149,8 +160,8 @@
         }
       },
       changeProfile (changeType) {
-        const role = {
-          scope: changeType.newRole,
+        const newRole = {
+          role: changeType.role,
           project: changeType.project
         }
         if (changeType === 'remove') {
@@ -159,8 +170,8 @@
             .then(() => this.getMemberInfo)
         } else {
           Vue.http
-            .put(api.paths.userProjectScopeManagement(changeType.member.login, changeType.project), role, api.REQUEST_OPTIONS)
-            .then(() => this.getMemberInfo)
+            .put(api.paths.userProjectScopeManagement(changeType.member.login, changeType.project), newRole, api.REQUEST_OPTIONS)
+            .then((response) => this.getMemberInfo)
         }
       }
     },
@@ -173,15 +184,15 @@
       },
       getMemberInfo () {
         return JSON.parse(localStorage.getItem('user'))
+      },
+      isSuperAdmin () {
+        return this.currentProfile.profile === USER.PROFILE.SUPER_ADMIN
       }
     }
   }
 </script>
 
 <style scoped>
-    .adminTable {
-        font-size: 16px;
-    }
     .adminTable tbody tr {
         height: 80px;
     }
@@ -212,25 +223,7 @@
         background-color: #007DBC;
         border: 1px solid #007DBC;
         color: #ffffff;
-    }
-
-    .adminTable tbody tr:first-child td:first-child {
-        border-radius: 10px 0 0 0;
-        display: table-cell;
-    }
-
-    .adminTable tbody tr:first-child td:last-child {
-        border-radius: 0 10px 0 0;
-        display: table-cell;
-    }
-
-    .adminTable tbody tr:last-child td:first-child {
-        border-radius: 0 0 0 10px;
-        display: table-cell;
-    }
-
-    .adminTable tbody tr:last-child td:last-child {
-        border-radius: 0 0 10px 0;
-        display: table-cell;
+        display: flex;
+        justify-content: space-evenly;
     }
 </style>

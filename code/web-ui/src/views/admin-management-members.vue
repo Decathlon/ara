@@ -22,36 +22,59 @@
         list
       </span>
 
-      <h1 class="adminTitle">Members</h1>
+      <h1 class="adminTitle">{{ memberType }}</h1>
 
-      <div class="searchButton">
-        <AutoComplete
-          v-model="value"
-          placeholder="Search a member..."
-          icon="ios-search"
-          size="default">
-            <Option v-for="(item, index) in members" :value="item" :key="index">{{ item.name }}</Option>
-        </AutoComplete>
+      <div class="array-filters">
+        <div class="member-type-select">
+          <Select placeholder="Members" @on-change="changeMemberView" :label-in-value="true">
+            <Option v-for="item in memberValues" :value="item.value" :key="item.value">{{ item.label }}</Option>
+          </Select>
+        </div>
+        <div class="member-search">
+          <AutoComplete
+            v-model="value"
+            placeholder="Search a member..."
+            icon="ios-search"
+            size="default">
+              <Option v-for="(item, index) in members" :value="item" :key="index">{{ item.name }}</Option>
+          </AutoComplete>
+        </div>
+        <div class="member-cta" :class="memberType === 'Members' ? 'hidden' : ''">
+          <Button type="primary" class="addBtn" @click="openProjectCreationModal()">
+            Add group
+          </Button>
+        </div>
       </div>
+
 
       <table class="adminTable" aria-label="Users with their roles and projects">
         <thead>
-          <tr>
-            <th>Name</th>
-            <th>Profile</th>
-            <th>Projects</th>
-            <th></th>
+          <tr v-if="memberType === 'Members'">
+            <th v-for="header in memberHeader">
+              {{ header }}
+            </th>
+          </tr>
+          <tr v-else>
+            <th v-for="header in groupHeader">
+              {{ header }}
+            </th>
           </tr>
         </thead>
 
-        <tbody v-if="members">
+        <tbody>
           <tr v-for="(member, index) in members" :key="index" :class="index %2 !== 0 ? 'lightGrey' : 'darkGrey'">
             <td class="userType">
-              {{ getProjectUserNameDisplay(member.login) }}
+              <p v-if="memberType === 'Members'">{{ getProjectUserNameDisplay(member.login) }}</p>
+              <p v-else> Group {{ index }} </p>
             </td>
 
             <td class="userType">
-              {{ member.profile }}
+              <p v-if="memberType === 'Members'">{{ member.profile }}</p>
+              <p v-else>Manager {{ index }}</p>
+            </td>
+
+            <td v-if="memberType === 'Groups'">
+              User {{ index }}
             </td>
 
             <td class="member-projects-list">
@@ -65,10 +88,9 @@
               </span>
             </td>
 
-            <td :class="member.login !== currentUser.login ? '' : 'hidden'">
-              <Icon v-if="!member.blockReason" type="ios-checkmark-circle" size="24" @click="showUserBlock(member, index)"/>
-              <Icon v-if="member.blockReason" type="md-remove-circle" size="24" @click="unblockUser(index)"/>
-              <Icon type="md-eye" size="24" @click="navTo(member)"/>
+            <td class="table-cta">
+              <Icon type="md-close-circle" size="24" @click="navTo(member)" :class="member.login !== currentUser.login ? '' : 'hidden'" />
+              <Icon type="md-eye" size="24" @click="navTo(member)" :class="member.login !== currentUser.login ? '' : 'hidden'" />
             </td>
           </tr>
         </tbody>
@@ -107,6 +129,7 @@
   import api from '../libs/api'
   import formField from '../components/form-field'
   import { AuthenticationService } from '../service/authentication.service'
+  import { USER } from '../libs/constants'
 
   export default {
     name: 'admin-management-members',
@@ -129,6 +152,8 @@
             businessKey: true
           }
         ],
+        memberHeader: ['Name', 'Profile', 'Projects', ''],
+        groupHeader: ['Name', 'Management', 'Users', 'Projects', ''],
         editingData: {},
         editingNew: false,
         editing: false,
@@ -140,7 +165,18 @@
           'index': '',
           'blockReason': ''
         },
-        selectedBlockOption: ''
+        memberValues: [
+          {
+            value: 'member',
+            label: 'Members'
+          },
+          {
+            value: 'group',
+            label: 'Groups'
+          }
+        ],
+        selectedBlockOption: '',
+        memberType: 'Members'
       }
     },
     methods: {
@@ -153,7 +189,7 @@
         const profile = this.currentUser.profile
         this.members = []
         let url = api.paths.scopedUsers
-        if (profile === 'SUPER_ADMIN' || profile === 'AUDITOR') {
+        if (profile === USER.PROFILE.SUPER_ADMIN || profile === USER.PROFILE.AUDITOR) {
           url = api.paths.allUsers
         }
         await Vue.http
@@ -202,6 +238,9 @@
           return 'Me'
         }
         return login
+      },
+      changeMemberView (type) {
+        this.memberType = type.label
       }
     },
     created () {
@@ -236,5 +275,25 @@
   }
   .hidden > *{
     visibility: hidden;
+  }
+
+  .array-filters {
+    width: 90%;
+    margin: 0 auto;
+    display: flex;
+  }
+
+  .member-type-select {
+    width: 100px;
+    margin-right: auto;
+  }
+
+  .member-search {
+    width: 400px;
+    margin: auto;
+  }
+
+  .member-cta {
+    margin-left: auto;
   }
 </style>
