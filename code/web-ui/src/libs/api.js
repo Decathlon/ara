@@ -24,11 +24,15 @@ const IGNORED_ERROR_STATUS_CODE = [401, 403]
 
 const API_PATH = '/api'
 const PROJECT_API_PATH = `${API_PATH}/projects`
+const MEMBER_API_PATH = `${API_PATH}/member`
+const MEMBER_USER_API_PATH = `${MEMBER_API_PATH}/user`
 
-const USER_ACCOUNTS_API_PATH = `${API_PATH}/user/accounts`
+const USER_ACCOUNTS_API_PATH = `${MEMBER_USER_API_PATH}/accounts`
 const SCOPES_USER_ACCOUNTS_API_PATH = `${USER_ACCOUNTS_API_PATH}/scoped`
 const CURRENT_USER_ACCOUNTS_API_PATH = `${USER_ACCOUNTS_API_PATH}/current`
 const CURRENT_USER_ACCOUNTS_DEFAULT_PROJECT_API_PATH = `${CURRENT_USER_ACCOUNTS_API_PATH}/default-project`
+
+const USER_GROUP_API_PATH = `${MEMBER_USER_API_PATH}/groups`
 
 const AUTH = '/oauth'
 
@@ -44,6 +48,7 @@ api.REQUEST_OPTIONS = {
 api.paths = {
   authenticationConfiguration: `${AUTH}/configuration`,
   loggedStatus: `${AUTH}/status`,
+
   currentUser: CURRENT_USER_ACCOUNTS_API_PATH,
   currentUserDefaultProjectClear: CURRENT_USER_ACCOUNTS_DEFAULT_PROJECT_API_PATH,
   currentUserDefaultProjectUpdate: (projectCode) => `${CURRENT_USER_ACCOUNTS_DEFAULT_PROJECT_API_PATH}/${projectCode}`,
@@ -52,6 +57,15 @@ api.paths = {
   scopedUsersByProject: (projectCode) => `${SCOPES_USER_ACCOUNTS_API_PATH}/project/${projectCode}`,
   userProjectScopeManagement: (userLogin, projectCode) => `${USER_ACCOUNTS_API_PATH}/login/${userLogin}/scopes/project/${projectCode}`,
   userProfileUpdate: (userLogin) => `${USER_ACCOUNTS_API_PATH}/login/${userLogin}/profile`,
+
+  groupBasePath: USER_GROUP_API_PATH,
+  groupById: (groupId) => `${USER_GROUP_API_PATH}/${groupId}`,
+  allGroups: `${USER_GROUP_API_PATH}/all`,
+  groupsContainingUser: (userLogin) => `${USER_GROUP_API_PATH}/containing/account/login/${userLogin}`,
+  groupsContainingCurrentUser: `${USER_GROUP_API_PATH}/containing/account/current`,
+  groupsManagedByUser: (userLogin) => `${USER_GROUP_API_PATH}/managed/account/login/${userLogin}`,
+  groupsManagedByCurrentUser: `${USER_GROUP_API_PATH}/managed/account/current`,
+
   communications: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/communications',
   countries: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/countries',
   cycleDefinitions: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/cycle-definitions',
@@ -72,6 +86,7 @@ api.paths = {
   sources: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/sources',
   teams: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/teams',
   types: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/types',
+
   features: `${API_PATH}/features`
 }
 

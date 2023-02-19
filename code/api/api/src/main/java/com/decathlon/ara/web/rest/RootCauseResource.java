@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.RootCauseService;
 import com.decathlon.ara.service.dto.rootcause.RootCauseDTO;
@@ -31,18 +30,19 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import static com.decathlon.ara.Entities.ROOT_CAUSE;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.RootCauseResource.ROOT_CAUSE_BASE_API_PATH;
 
 /**
  * REST controller for managing Root Causes.
  */
 @RestController
-@RequestMapping(RootCauseResource.PATH)
+@RequestMapping(ROOT_CAUSE_BASE_API_PATH)
 public class RootCauseResource {
 
-    private static final String NAME = Entities.ROOT_CAUSE;
-    static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
-    public static final String PATHS = PATH + "/**";
+    public static final String ROOT_CAUSE_BASE_API_PATH = PROJECT_CODE_BASE_API_PATH + "/root-causes";
+    public static final String ROOT_CAUSE_ALL_API_PATHS = ROOT_CAUSE_BASE_API_PATH + "/**";
 
     private final RootCauseService service;
 
@@ -64,13 +64,13 @@ public class RootCauseResource {
     @PostMapping
     public ResponseEntity<RootCauseDTO> create(@PathVariable String projectCode, @Valid @RequestBody RootCauseDTO dtoToCreate) {
         if (dtoToCreate.getId() != null) {
-            return ResponseEntity.badRequest().headers(HeaderUtil.idMustBeEmpty(NAME)).build();
+            return ResponseEntity.badRequest().headers(HeaderUtil.idMustBeEmpty(ROOT_CAUSE)).build();
         }
         try {
             RootCauseDTO createdDto = service.create(projectService.toId(projectCode), dtoToCreate);
             return ResponseEntity
-                    .created(HeaderUtil.uri(PATH + "/" + createdDto.getId(), projectCode))
-                    .headers(HeaderUtil.entityCreated(NAME, createdDto.getId()))
+                    .created(HeaderUtil.uri(ROOT_CAUSE_BASE_API_PATH + "/" + createdDto.getId(), projectCode))
+                    .headers(HeaderUtil.entityCreated(ROOT_CAUSE, createdDto.getId()))
                     .body(createdDto);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
@@ -92,7 +92,7 @@ public class RootCauseResource {
         try {
             RootCauseDTO updatedDto = service.update(projectService.toId(projectCode), dtoToUpdate);
             return ResponseEntity.ok()
-                    .headers(HeaderUtil.entityUpdated(NAME, updatedDto.getId()))
+                    .headers(HeaderUtil.entityUpdated(ROOT_CAUSE, updatedDto.getId()))
                     .body(updatedDto);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
@@ -125,7 +125,7 @@ public class RootCauseResource {
     public ResponseEntity<Void> delete(@PathVariable String projectCode, @PathVariable long id) {
         try {
             service.delete(projectService.toId(projectCode), id);
-            return ResponseUtil.deleted(NAME, id);
+            return ResponseUtil.deleted(ROOT_CAUSE, id);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
         }

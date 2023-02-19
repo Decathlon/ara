@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.TeamService;
 import com.decathlon.ara.service.dto.team.TeamDTO;
@@ -31,18 +30,19 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import static com.decathlon.ara.Entities.TEAM;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.TeamResource.TEAM_BASE_API_PATH;
 
 /**
  * REST controller for managing Teams.
  */
 @RestController
-@RequestMapping(TeamResource.PATH)
+@RequestMapping(TEAM_BASE_API_PATH)
 public class TeamResource {
 
-    private static final String NAME = Entities.TEAM;
-    static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
-    public static final String PATHS = PATH + "/**";
+    public static final String TEAM_BASE_API_PATH = PROJECT_CODE_BASE_API_PATH + "/teams";
+    public static final String TEAM_ALL_API_PATHS = TEAM_BASE_API_PATH + "/**";
 
     private final TeamService service;
 
@@ -64,13 +64,13 @@ public class TeamResource {
     @PostMapping
     public ResponseEntity<TeamDTO> create(@PathVariable String projectCode, @Valid @RequestBody TeamDTO dtoToCreate) {
         if (dtoToCreate.getId() != null) {
-            return ResponseEntity.badRequest().headers(HeaderUtil.idMustBeEmpty(NAME)).build();
+            return ResponseEntity.badRequest().headers(HeaderUtil.idMustBeEmpty(TEAM)).build();
         }
         try {
             TeamDTO createdDto = service.create(projectService.toId(projectCode), dtoToCreate);
             return ResponseEntity
-                    .created(HeaderUtil.uri(PATH + "/" + createdDto.getId(), projectCode))
-                    .headers(HeaderUtil.entityCreated(NAME, createdDto.getId()))
+                    .created(HeaderUtil.uri(TEAM_BASE_API_PATH + "/" + createdDto.getId(), projectCode))
+                    .headers(HeaderUtil.entityCreated(TEAM, createdDto.getId()))
                     .body(createdDto);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
@@ -92,7 +92,7 @@ public class TeamResource {
         try {
             TeamDTO updatedDto = service.update(projectService.toId(projectCode), dtoToUpdate);
             return ResponseEntity.ok()
-                    .headers(HeaderUtil.entityUpdated(NAME, updatedDto.getId()))
+                    .headers(HeaderUtil.entityUpdated(TEAM, updatedDto.getId()))
                     .body(updatedDto);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
@@ -125,7 +125,7 @@ public class TeamResource {
     public ResponseEntity<Void> delete(@PathVariable String projectCode, @PathVariable long id) {
         try {
             service.delete(projectService.toId(projectCode), id);
-            return ResponseUtil.deleted(NAME, id);
+            return ResponseUtil.deleted(TEAM, id);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
         }

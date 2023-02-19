@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.domain.enumeration.Technology;
 import com.decathlon.ara.service.ProjectService;
@@ -36,20 +35,21 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import static com.decathlon.ara.Entities.TECHNOLOGY_SETTING;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.SettingResource.SETTING_BASE_API_PATH;
 
 /**
  * REST controller for managing Settings.
  */
 @RestController
-@RequestMapping(SettingResource.PATH)
+@RequestMapping(SETTING_BASE_API_PATH)
 public class SettingResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(SettingResource.class);
 
-    private static final String NAME = Entities.SETTING;
-    static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
-    public static final String PATHS = PATH + "/**";
+    public static final String SETTING_BASE_API_PATH = PROJECT_CODE_BASE_API_PATH + "/settings";
+    public static final String SETTING_ALL_API_PATHS = SETTING_BASE_API_PATH + "/**";
 
     private final SettingService settingService;
 
@@ -147,7 +147,7 @@ public class SettingResource {
         } catch (IllegalArgumentException e) {
             LOG.error("SETTING|technology|Please check that the technology {} exists", technology, e);
             String message = String.format(Messages.NOT_FOUND_TECHNOLOGY, technology);
-            throw new BadRequestException(message, Entities.TECHNOLOGY_SETTING, "unknown_technology");
+            throw new BadRequestException(message, TECHNOLOGY_SETTING, "unknown_technology");
         }
 
         technologySettingService.update(projectId, code, matchingTechnology, StringUtils.trimToNull(settingValue.getValue()));

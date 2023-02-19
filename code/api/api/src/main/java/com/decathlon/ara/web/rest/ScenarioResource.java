@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.Entities;
 import com.decathlon.ara.scenario.common.service.ScenarioService;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.dto.ignore.ScenarioIgnoreSourceDTO;
@@ -32,18 +31,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.ScenarioResource.SCENARIO_BASE_API_PATH;
 
 /**
  * REST controller for managing Scenarios.
  */
 @RestController
-@RequestMapping(ScenarioResource.PATH)
+@RequestMapping(SCENARIO_BASE_API_PATH)
 public class ScenarioResource {
 
-    private static final String NAME = Entities.SCENARIO;
-    static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
-    public static final String PATHS = PATH + "/**";
+    public static final String SCENARIO_BASE_API_PATH = PROJECT_CODE_BASE_API_PATH + "/scenarios";
+    public static final String SCENARIO_ALL_API_PATHS = SCENARIO_BASE_API_PATH + "/**";
 
     private final ScenarioService scenarioService;
 

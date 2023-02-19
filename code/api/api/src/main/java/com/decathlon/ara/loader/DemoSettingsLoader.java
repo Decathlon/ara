@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.loader;
 
-import com.decathlon.ara.Entities;
 import com.decathlon.ara.domain.Communication;
 import com.decathlon.ara.domain.enumeration.CommunicationType;
 import com.decathlon.ara.domain.enumeration.Technology;
@@ -42,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.decathlon.ara.Entities.PROJECT;
 import static com.decathlon.ara.loader.DemoLoaderConstants.*;
 
 /**
@@ -96,7 +96,7 @@ public class DemoSettingsLoader {
     }
 
     public ProjectDTO createProjectWithCommunicationsAndRootCauses() throws NotUniqueException, ForbiddenException {
-        var creationUser = userAccountService.getCurrentUser().orElseThrow(() -> new ForbiddenException(Entities.PROJECT, "demo project creation"));
+        var creationUser = userAccountService.getCurrentUser().orElseThrow(() -> new ForbiddenException(PROJECT, "demo project creation"));
         var demoProject = new ProjectDTO(DEMO_PROJECT_CODE, DEMO_PROJECT_NAME);
         return projectService.create(demoProject, creationUser);
     }

@@ -5,6 +5,7 @@ import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
 import com.decathlon.ara.security.service.UserSessionService;
 import com.decathlon.ara.service.ProjectService;
+import com.decathlon.ara.service.exception.ForbiddenException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static com.decathlon.ara.Entities.USER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -74,14 +76,14 @@ class ProjectScopeResourceAccessTest {
     }
 
     @Test
-    void isEnabled_returnFalse_whenUserHasNoProfile() {
+    void isEnabled_returnFalse_whenExceptionThrownWhileFetchingCurrentUserProfile() throws ForbiddenException {
         // Given
         var projectCode = "project-code";
         var permission = mock(ResourcePermission.class);
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
-        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.empty());
+        when(userSessionService.getCurrentUserProfile()).thenThrow(new ForbiddenException(USER, "fetch profile"));
 
         // Then
         var isEnabled = projectScopeResourceAccess.isEnabled(projectCode, permission);
@@ -89,7 +91,7 @@ class ProjectScopeResourceAccessTest {
     }
 
     @Test
-    void isEnabled_returnTrue_whenUserIsSuperAdmin() {
+    void isEnabled_returnTrue_whenUserIsSuperAdmin() throws ForbiddenException {
         // Given
         var projectCode = "project-code";
         var permission = mock(ResourcePermission.class);
@@ -97,7 +99,7 @@ class ProjectScopeResourceAccessTest {
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
-        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
+        when(userSessionService.getCurrentUserProfile()).thenReturn(profile);
 
         // Then
         var isEnabled = projectScopeResourceAccess.isEnabled(projectCode, permission);
@@ -109,14 +111,14 @@ class ProjectScopeResourceAccessTest {
             value = ResourcePermission.class,
             names = {"FETCH"}
     )
-    void isEnabled_returnTrue_whenUserIsAuditorAndPermissionDoesNotAlterData(ResourcePermission permission) {
+    void isEnabled_returnTrue_whenUserIsAuditorAndPermissionDoesNotAlterData(ResourcePermission permission) throws ForbiddenException {
         // Given
         var projectCode = "project-code";
         var profile = UserAccountProfile.AUDITOR;
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
-        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
+        when(userSessionService.getCurrentUserProfile()).thenReturn(profile);
 
         // Then
         var isEnabled = projectScopeResourceAccess.isEnabled(projectCode, permission);
@@ -128,14 +130,14 @@ class ProjectScopeResourceAccessTest {
             value = ResourcePermission.class,
             names = {"ALTER"}
     )
-    void isEnabled_returnFalse_whenUserIsAuditorAndPermissionAltersData(ResourcePermission permission) {
+    void isEnabled_returnFalse_whenUserIsAuditorAndPermissionAltersData(ResourcePermission permission) throws ForbiddenException {
         // Given
         var projectCode = "project-code";
         var profile = UserAccountProfile.AUDITOR;
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
-        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
+        when(userSessionService.getCurrentUserProfile()).thenReturn(profile);
 
         // Then
         var isEnabled = projectScopeResourceAccess.isEnabled(projectCode, permission);
@@ -143,7 +145,7 @@ class ProjectScopeResourceAccessTest {
     }
 
     @Test
-    void isEnabled_returnFalse_whenUserIsScopedUserButProjectWasNotInItsScope() {
+    void isEnabled_returnFalse_whenUserIsScopedUserButProjectWasNotInItsScope() throws ForbiddenException {
         // Given
         var projectCode = "project-code";
         var permission = mock(ResourcePermission.class);
@@ -151,7 +153,7 @@ class ProjectScopeResourceAccessTest {
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
-        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
+        when(userSessionService.getCurrentUserProfile()).thenReturn(profile);
         when(userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode)).thenReturn(Optional.empty());
 
         // Then
@@ -163,7 +165,7 @@ class ProjectScopeResourceAccessTest {
     @EnumSource(
             value = ResourcePermission.class
     )
-    void isEnabled_returnTrue_whenUserIsAnAdminScopedUser(ResourcePermission permission) {
+    void isEnabled_returnTrue_whenUserIsAnAdminScopedUser(ResourcePermission permission) throws ForbiddenException {
         // Given
         var projectCode = "project-code";
         var profile = UserAccountProfile.SCOPED_USER;
@@ -171,7 +173,7 @@ class ProjectScopeResourceAccessTest {
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
-        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
+        when(userSessionService.getCurrentUserProfile()).thenReturn(profile);
         when(userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode)).thenReturn(Optional.of(role));
 
         // Then
@@ -184,7 +186,7 @@ class ProjectScopeResourceAccessTest {
             value = ResourcePermission.class,
             names = {"FETCH"}
     )
-    void isEnabled_returnTrue_whenUserIsAMaintainerScopedUserAndPermissionDoesNotAlterData(ResourcePermission permission) {
+    void isEnabled_returnTrue_whenUserIsAMaintainerScopedUserAndPermissionDoesNotAlterData(ResourcePermission permission) throws ForbiddenException {
         // Given
         var projectCode = "project-code";
         var profile = UserAccountProfile.SCOPED_USER;
@@ -192,7 +194,7 @@ class ProjectScopeResourceAccessTest {
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
-        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
+        when(userSessionService.getCurrentUserProfile()).thenReturn(profile);
         when(userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode)).thenReturn(Optional.of(role));
 
         // Then
@@ -205,7 +207,7 @@ class ProjectScopeResourceAccessTest {
             value = ResourcePermission.class,
             names = {"ALTER"}
     )
-    void isEnabled_returnFalse_whenUserIsAMaintainerScopedUserAndPermissionAltersData(ResourcePermission permission) {
+    void isEnabled_returnFalse_whenUserIsAMaintainerScopedUserAndPermissionAltersData(ResourcePermission permission) throws ForbiddenException {
         // Given
         var projectCode = "project-code";
         var profile = UserAccountProfile.SCOPED_USER;
@@ -213,7 +215,7 @@ class ProjectScopeResourceAccessTest {
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
-        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
+        when(userSessionService.getCurrentUserProfile()).thenReturn(profile);
         when(userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode)).thenReturn(Optional.of(role));
 
         // Then
@@ -226,7 +228,7 @@ class ProjectScopeResourceAccessTest {
             value = ResourcePermission.class,
             names = {"FETCH"}
     )
-    void isEnabled_returnTrue_whenUserIsAMemberScopedUserAndPermissionDoesNotAlterData(ResourcePermission permission) {
+    void isEnabled_returnTrue_whenUserIsAMemberScopedUserAndPermissionDoesNotAlterData(ResourcePermission permission) throws ForbiddenException {
         // Given
         var projectCode = "project-code";
         var profile = UserAccountProfile.SCOPED_USER;
@@ -234,7 +236,7 @@ class ProjectScopeResourceAccessTest {
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
-        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
+        when(userSessionService.getCurrentUserProfile()).thenReturn(profile);
         when(userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode)).thenReturn(Optional.of(role));
 
         // Then
@@ -247,7 +249,7 @@ class ProjectScopeResourceAccessTest {
             value = ResourcePermission.class,
             names = {"ALTER"}
     )
-    void isEnabled_returnFalse_whenUserIsAMemberScopedUserAndPermissionAltersData(ResourcePermission permission) {
+    void isEnabled_returnFalse_whenUserIsAMemberScopedUserAndPermissionAltersData(ResourcePermission permission) throws ForbiddenException {
         // Given
         var projectCode = "project-code";
         var profile = UserAccountProfile.SCOPED_USER;
@@ -255,7 +257,7 @@ class ProjectScopeResourceAccessTest {
 
         // When
         when(projectService.exists(projectCode)).thenReturn(true);
-        when(userSessionService.getCurrentUserProfile()).thenReturn(Optional.of(profile));
+        when(userSessionService.getCurrentUserProfile()).thenReturn(profile);
         when(userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode)).thenReturn(Optional.of(role));
 
         // Then

@@ -5,6 +5,7 @@ import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
 import com.decathlon.ara.security.service.UserSessionService;
 import com.decathlon.ara.service.ProjectService;
+import com.decathlon.ara.service.exception.ForbiddenException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -31,29 +32,17 @@ public abstract class ProjectResourceAccess {
      * @return true iff it is enabled
      */
     public boolean isEnabled(String projectCode, ResourcePermission permission) {
-        if (StringUtils.isBlank(projectCode)) {
+        if (StringUtils.isBlank(projectCode) || permission == null || !projectService.exists(projectCode)) {
             return false;
         }
 
-        if (permission == null) {
+        try {
+            var userProfile = userSessionService.getCurrentUserProfile();
+            if (!UserAccountProfile.SCOPED_USER.equals(userProfile)) {
+                return UserAccountProfile.SUPER_ADMIN.equals(userProfile) || (UserAccountProfile.AUDITOR.equals(userProfile) && permission.isReadOnly());
+            }
+        } catch (ForbiddenException e) {
             return false;
-        }
-
-        var projectDoesNotExist = !projectService.exists(projectCode);
-        if (projectDoesNotExist) {
-            return false;
-        }
-
-        var userProfile = userSessionService.getCurrentUserProfile();
-        if (userProfile.isEmpty()) {
-            return false;
-        }
-        if (UserAccountProfile.SUPER_ADMIN.equals(userProfile.get())) {
-            return true;
-        }
-
-        if (UserAccountProfile.AUDITOR.equals(userProfile.get())) {
-            return permission.isReadOnly();
         }
 
         var role = userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode);

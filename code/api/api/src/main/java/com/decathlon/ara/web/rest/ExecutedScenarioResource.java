@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.Entities;
 import com.decathlon.ara.scenario.common.service.ExecutedScenarioService;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.dto.executedscenario.ExecutedScenarioDTO;
@@ -31,21 +30,21 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import static com.decathlon.ara.web.rest.ExecutedScenarioResource.EXECUTED_SCENARIO_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_BASE_API_PATH;
 
 /**
  * REST controller for managing ExecutedScenarios.
  */
 @RestController
-@RequestMapping(ExecutedScenarioResource.PATH)
+@RequestMapping(EXECUTED_SCENARIO_BASE_API_PATH)
 public class ExecutedScenarioResource {
 
-    private static final String NAME = Entities.EXECUTED_SCENARIO;
-    static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
-    public static final String PATHS = PATH + "/**";
+    public static final String EXECUTED_SCENARIO_BASE_API_PATH = PROJECT_CODE_BASE_API_PATH + "/executed-scenarios";
+    public static final String EXECUTED_SCENARIO_ALL_API_PATHS = EXECUTED_SCENARIO_BASE_API_PATH + "/**";
 
     private static final String HISTORY = "/history";
-    public static final String HISTORY_PATH = PATH + HISTORY;
+    public static final String EXECUTED_SCENARIO_HISTORY_API_PATH = EXECUTED_SCENARIO_BASE_API_PATH + HISTORY;
 
     private final ExecutedScenarioService executedScenarioService;
 

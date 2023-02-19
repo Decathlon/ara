@@ -28,16 +28,17 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import static com.decathlon.ara.scenario.cucumber.resource.CucumberResource.CUCUMBER_SCENARIO_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_BASE_API_PATH;
 
 @RestController
-@RequestMapping(CucumberResource.PATH)
+@RequestMapping(CUCUMBER_SCENARIO_BASE_API_PATH)
 public class CucumberResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(CucumberResource.class);
 
-    static final String PATH = PROJECT_API_PATH + "/cucumber";
-    public static final String PATHS = PATH + "/**";
+    public static final String CUCUMBER_SCENARIO_BASE_API_PATH = PROJECT_CODE_BASE_API_PATH + "/cucumber";
+    public static final String CUCUMBER_SCENARIO_ALL_API_PATHS = CUCUMBER_SCENARIO_BASE_API_PATH + "/**";
 
     private final ProjectService projectService;
 

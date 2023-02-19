@@ -10,7 +10,7 @@ import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
+import java.util.Collection;
 
 @Service
 public class OidcUserLoginService extends UserLoginService<OidcUserRequest, OidcUser, OidcUserService> {
@@ -29,7 +29,7 @@ public class OidcUserLoginService extends UserLoginService<OidcUserRequest, Oidc
     }
 
     @Override
-    protected OidcUser getUpdatedOAuth2User(Set<GrantedAuthority> authorities, OidcUser user) {
+    protected OidcUser getUpdatedOAuth2User(Collection<GrantedAuthority> authorities, OidcUser user) {
         return new DefaultOidcUser(authorities, user.getIdToken(), user.getUserInfo());
     }
 }

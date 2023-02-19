@@ -1,4 +1,4 @@
-package com.decathlon.ara.domain.security.member.user;
+package com.decathlon.ara.domain.security.member.user.account;
 
 public enum UserProfile {
     SUPER_ADMIN,

@@ -27,15 +27,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.AUTH_PATH;
+import static com.decathlon.ara.web.rest.authentication.AuthenticationResource.OAUTH_BASE_API_PATH;
 
 @RestController
-@RequestMapping(AuthenticationResource.PATH)
+@RequestMapping(OAUTH_BASE_API_PATH)
 public class AuthenticationResource {
 
-    static final String PATH = AUTH_PATH;
+    public static final String OAUTH_BASE_API_PATH = "/oauth";
 
-    public static final String PATHS = PATH + "/**";
+    public static final String OAUTH_ALL_API_PATHS = OAUTH_BASE_API_PATH + "/**";
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthenticationResource.class);
 

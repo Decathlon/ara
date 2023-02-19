@@ -1,7 +1,7 @@
 package com.decathlon.ara.service.mapper;
 
 import com.decathlon.ara.domain.Project;
-import com.decathlon.ara.domain.security.member.user.User;
+import com.decathlon.ara.domain.security.member.user.account.User;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

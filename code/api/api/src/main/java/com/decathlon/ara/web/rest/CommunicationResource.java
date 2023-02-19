@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.CommunicationService;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.dto.communication.CommunicationDTO;
@@ -30,15 +29,16 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import static com.decathlon.ara.Entities.COMMUNICATION;
+import static com.decathlon.ara.web.rest.CommunicationResource.COMMUNICATION_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_BASE_API_PATH;
 
 @RestController
-@RequestMapping(CommunicationResource.PATH)
+@RequestMapping(COMMUNICATION_BASE_API_PATH)
 public class CommunicationResource {
 
-    private static final String NAME = Entities.COMMUNICATION;
-    static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
-    public static final String PATHS = PATH + "/**";
+    public static final String COMMUNICATION_BASE_API_PATH = PROJECT_CODE_BASE_API_PATH + "/communications";
+    public static final String COMMUNICATION_ALL_API_PATHS = COMMUNICATION_BASE_API_PATH + "/**";
 
     private final CommunicationService service;
 
@@ -81,7 +81,7 @@ public class CommunicationResource {
         try {
             CommunicationDTO updatedDto = service.update(projectService.toId(projectCode), dtoToUpdate);
             return ResponseEntity.ok()
-                    .headers(HeaderUtil.entityUpdated(Entities.COMMUNICATION, updatedDto.getCode()))
+                    .headers(HeaderUtil.entityUpdated(COMMUNICATION, updatedDto.getCode()))
                     .body(updatedDto);
         } catch (NotFoundException e) {
             return ResponseUtil.handle(e);

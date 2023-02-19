@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.Entities;
 import com.decathlon.ara.domain.enumeration.QualityStatus;
 import com.decathlon.ara.service.ExecutionHistoryService;
 import com.decathlon.ara.service.ExecutionService;
@@ -38,21 +37,23 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import static com.decathlon.ara.Entities.EXECUTION;
+import static com.decathlon.ara.web.rest.ExecutionResource.EXECUTION_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_BASE_API_PATH;
 
 /**
  * REST controller for managing Cycle Runs.
  */
 @RestController
-@RequestMapping(ExecutionResource.PATH)
+@RequestMapping(EXECUTION_BASE_API_PATH)
 public class ExecutionResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionResource.class);
 
-    static final String PATH = PROJECT_API_PATH + "/" + Entities.EXECUTION + "s";
-    public static final String PATHS = PATH + "/**";
+    public static final String EXECUTION_BASE_API_PATH = PROJECT_CODE_BASE_API_PATH + "/executions";
+    public static final String EXECUTION_ALL_API_PATHS = EXECUTION_BASE_API_PATH + "/**";
     private static final String FILTER = "/{id:[0-9]+}/filtered";
-    public static final String FILTER_PATH = PATH + FILTER;
+    public static final String EXECUTION_FILTER_API_PATH = EXECUTION_BASE_API_PATH + FILTER;
 
     private static final String VALIDATION_ERROR = "validation";
 
@@ -254,7 +255,7 @@ public class ExecutionResource {
             service.uploadExecutionReport(projectId, projectCode, branch, cycle, zipFile);
         } catch (NotFoundException | IllegalArgumentException e) {
             LOG.error("EXECUTION|Some parameters may not be correct");
-            result = ResponseUtil.handle(new BadRequestException(e.getMessage(), Entities.EXECUTION, VALIDATION_ERROR));
+            result = ResponseUtil.handle(new BadRequestException(e.getMessage(), EXECUTION, VALIDATION_ERROR));
         } catch (IOException ex) {
             LOG.error("EXECUTION|Unable to index the uploaded execution.", ex);
             result = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

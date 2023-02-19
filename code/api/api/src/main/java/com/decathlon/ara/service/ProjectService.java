@@ -17,11 +17,10 @@
 
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.domain.Project;
 import com.decathlon.ara.domain.RootCause;
-import com.decathlon.ara.domain.security.member.user.User;
+import com.decathlon.ara.domain.security.member.user.account.User;
 import com.decathlon.ara.repository.ProjectRepository;
 import com.decathlon.ara.repository.RootCauseRepository;
 import com.decathlon.ara.security.service.UserSessionService;
@@ -40,6 +39,8 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
+
+import static com.decathlon.ara.Entities.PROJECT;
 
 /**
  * Service for managing Project.
@@ -128,15 +129,15 @@ public class ProjectService {
     public ProjectDTO update(@NonNull ProjectDTO projectToUpdate, @NonNull User updateUser) throws BadRequestException {
         var newProjectName = projectToUpdate.getName();
         if (StringUtils.isBlank(newProjectName)) {
-            throw new BadRequestException("The project name cannot be left blank!", Entities.PROJECT, "project_name_blank");
+            throw new BadRequestException("The project name cannot be left blank!", PROJECT, "project_name_blank");
         }
 
-        var persistedProject = projectRepository.findByCode(projectToUpdate.getCode()).orElseThrow(() -> new NotFoundException(Messages.NOT_FOUND_PROJECT, Entities.PROJECT));
+        var persistedProject = projectRepository.findByCode(projectToUpdate.getCode()).orElseThrow(() -> new NotFoundException(Messages.NOT_FOUND_PROJECT, PROJECT));
 
         if (!newProjectName.equals(persistedProject.getName())) {
             var projectNameAlreadyExists = projectRepository.existsByName(newProjectName);
             if (projectNameAlreadyExists) {
-                throw new NotUniqueException(Messages.NOT_UNIQUE_PROJECT_NAME, Entities.PROJECT, "name", persistedProject.getId());
+                throw new NotUniqueException(Messages.NOT_UNIQUE_PROJECT_NAME, PROJECT, "name", persistedProject.getId());
             }
         }
 
@@ -177,7 +178,7 @@ public class ProjectService {
     public long toId(String code) throws NotFoundException {
         final Project project = projectRepository.findOneByCode(code);
         if (project == null) {
-            throw new NotFoundException(Messages.NOT_FOUND_PROJECT, Entities.PROJECT);
+            throw new NotFoundException(Messages.NOT_FOUND_PROJECT, PROJECT);
         }
         return project.getId();
     }
@@ -190,14 +191,14 @@ public class ProjectService {
     private void validateUniqueCode(ProjectDTO dto) throws NotUniqueException {
         Project existingProjectWithSameCode = projectRepository.findOneByCode(dto.getCode());
         if (existingProjectWithSameCode != null && !existingProjectWithSameCode.getId().equals(dto.getId())) {
-            throw new NotUniqueException(Messages.NOT_UNIQUE_PROJECT_CODE, Entities.PROJECT, "code", existingProjectWithSameCode.getId());
+            throw new NotUniqueException(Messages.NOT_UNIQUE_PROJECT_CODE, PROJECT, "code", existingProjectWithSameCode.getId());
         }
     }
 
     private void validateUniqueName(ProjectDTO dto) throws NotUniqueException {
         Project existingProjectWithSameName = projectRepository.findOneByName(dto.getName());
         if (existingProjectWithSameName != null && !existingProjectWithSameName.getId().equals(dto.getId())) {
-            throw new NotUniqueException(Messages.NOT_UNIQUE_PROJECT_NAME, Entities.PROJECT, "name", existingProjectWithSameName.getId());
+            throw new NotUniqueException(Messages.NOT_UNIQUE_PROJECT_NAME, PROJECT, "name", existingProjectWithSameName.getId());
         }
     }
 

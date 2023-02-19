@@ -50,5 +50,6 @@ public final class Entities {
 
     public static final String SECURITY = "security";
     public static final String USER = "user";
+    public static final String GROUP = "group";
 
 }

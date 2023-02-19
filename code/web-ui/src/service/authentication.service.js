@@ -12,10 +12,6 @@ const conf = config
 let isLogged = false
 
 class AuthenticationServiceClass {
-  setLogged = (logged) => {
-    isLogged = logged
-  }
-
   setLoggedOutInterceptor = (router) => {
     Vue.http.interceptors.push((request, next) => {
       next((response) => {
@@ -85,39 +81,31 @@ class AuthenticationServiceClass {
             return previous
           }, {})
         }
-        console.debug(res)
         return res
       })
   }
 
   manageLoginRedirection = async (to, from, next) => {
-    // RememberUrlService.redirectToLastWantedUrlWhenLoggin(from, to, next)
     RememberUrlService.keepLastUrl(to)
 
     const isPublic = to.matched.some(record => record.meta.public)
     const onlyWhenLoggedOut = to.matched.some(record => record.meta.onlyWhenLoggedOut)
 
     if (isPublic) {
-      console.debug('url is public, continue')
       return next()
     }
     if (config.downloadError) {
-      console.debug('downloadError is defined')
       return next('/login')
     }
 
     const loggedIn = await this.isAlreadyLoggedIn()
     const needToDownloadConfig = !(config.isComplete)
-    console.debug(`loggedIn? ${loggedIn} / needToDownloadConfig? ${needToDownloadConfig}`)
     if (needToDownloadConfig) {
       try {
         config.authentication = await this.getOauthProviders()
-        console.debug('Authent conf retrieved')
         config.downloadError = false
       } catch (err) {
-        console.error(err)
         config.downloadError = true
-        console.debug('error while retrieving providers')
         return next('/login')
       }
     }
@@ -129,7 +117,6 @@ class AuthenticationServiceClass {
         title: 'Access denied',
         desc: 'You need to login first if you want to access this page.'
       })
-      console.debug('access denied')
       return next('/login')
     }
 
@@ -156,8 +143,6 @@ class AuthenticationServiceClass {
 
   logout = () => {
     this.clearCurrentUser()
-    // window.location.href = config.authentication.logoutProcessingUrl
-    console.debug(`conf imported ? ${conf !== undefined}`)
     window.location.href = conf.authentication.logoutProcessingUrl
   }
 

@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.ErrorService;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionAndProblemsDTO;
@@ -31,21 +30,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import static com.decathlon.ara.web.rest.ErrorResource.ERROR_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_BASE_API_PATH;
 
 /**
  * REST controller for managing Unidentified Errors.
  */
 @RestController
-@RequestMapping(ErrorResource.PATH)
+@RequestMapping(ERROR_BASE_API_PATH)
 public class ErrorResource {
 
-    private static final String NAME = Entities.ERROR;
-    static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
-    public static final String PATHS = PATH + "/**";
+    public static final String ERROR_BASE_API_PATH = PROJECT_CODE_BASE_API_PATH + "/errors";
+    public static final String ERROR_ALL_API_PATHS = ERROR_BASE_API_PATH + "/**";
 
     private static final String MATCHING = "/matching";
-    public static final String MATCHING_PATH = PATH + MATCHING;
+    public static final String ERROR_MATCHING_API_PATH = ERROR_BASE_API_PATH + MATCHING;
 
     private final ErrorService service;
 

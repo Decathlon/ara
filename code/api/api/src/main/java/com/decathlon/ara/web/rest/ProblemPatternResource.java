@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.ProblemPatternService;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
@@ -34,18 +33,19 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import static com.decathlon.ara.Entities.PROBLEM_PATTERN;
+import static com.decathlon.ara.web.rest.ProblemPatternResource.PROBLEM_PATTERN_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_BASE_API_PATH;
 
 /**
  * REST controller for managing Problem Patterns.
  */
 @RestController
-@RequestMapping(ProblemPatternResource.PATH)
+@RequestMapping(PROBLEM_PATTERN_BASE_API_PATH)
 public class ProblemPatternResource {
 
-    private static final String NAME = Entities.PROBLEM_PATTERN;
-    static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
-    public static final String PATHS = PATH + "/**";
+    public static final String PROBLEM_PATTERN_BASE_API_PATH = PROJECT_CODE_BASE_API_PATH + "/problem-patterns";
+    public static final String PROBLEM_PATTERN_ALL_API_PATHS = PROBLEM_PATTERN_BASE_API_PATH + "/**";
 
     private final ProblemPatternService service;
 
@@ -67,7 +67,7 @@ public class ProblemPatternResource {
     public ResponseEntity<DeletePatternDTO> delete(@PathVariable String projectCode, @PathVariable long id) {
         try {
             return ResponseEntity.ok()
-                    .headers(HeaderUtil.entityDeleted(NAME, id))
+                    .headers(HeaderUtil.entityDeleted(PROBLEM_PATTERN, id))
                     .body(service.delete(projectService.toId(projectCode), id));
         } catch (NotFoundException e) {
             return ResponseUtil.handle(e);
@@ -108,7 +108,7 @@ public class ProblemPatternResource {
         try {
             ProblemPatternDTO updatedDto = service.update(projectService.toId(projectCode), dtoToUpdate);
             return ResponseEntity.ok()
-                    .headers(HeaderUtil.entityUpdated(NAME, updatedDto.getId()))
+                    .headers(HeaderUtil.entityUpdated(PROBLEM_PATTERN, updatedDto.getId()))
                     .body(updatedDto);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);

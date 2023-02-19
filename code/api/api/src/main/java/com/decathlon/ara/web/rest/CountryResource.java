@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.CountryService;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.dto.country.CountryDTO;
@@ -34,18 +33,19 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import static com.decathlon.ara.Entities.COUNTRY;
+import static com.decathlon.ara.web.rest.CountryResource.COUNTRY_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_BASE_API_PATH;
 
 /**
  * REST controller for managing Countries.
  */
 @RestController
-@RequestMapping(CountryResource.PATH)
+@RequestMapping(COUNTRY_BASE_API_PATH)
 public class CountryResource {
 
-    static final String PATH = PROJECT_API_PATH + "/countries";
-    public static final String PATHS = PATH + "/**";
-    private static final String NAME = Entities.COUNTRY;
+    public static final String COUNTRY_BASE_API_PATH = PROJECT_CODE_BASE_API_PATH + "/countries";
+    public static final String COUNTRY_ALL_API_PATHS = COUNTRY_BASE_API_PATH + "/**";
 
     private final CountryService service;
 
@@ -69,8 +69,8 @@ public class CountryResource {
         try {
             CountryDTO createdDto = service.create(projectService.toId(projectCode), dtoToCreate);
             return ResponseEntity
-                    .created(HeaderUtil.uri(PATH + "/" + createdDto.getCode(), projectCode))
-                    .headers(HeaderUtil.entityCreated(NAME, createdDto.getCode()))
+                    .created(HeaderUtil.uri(COUNTRY_BASE_API_PATH + "/" + createdDto.getCode(), projectCode))
+                    .headers(HeaderUtil.entityCreated(COUNTRY, createdDto.getCode()))
                     .body(createdDto);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
@@ -95,7 +95,7 @@ public class CountryResource {
             final String newCode = result.getUpsertedDto().getCode();
             return ResponseEntity
                     .status(isNew ? HttpStatus.CREATED : HttpStatus.OK)
-                    .headers(isNew ? HeaderUtil.entityCreated(NAME, newCode) : HeaderUtil.entityUpdated(NAME, newCode))
+                    .headers(isNew ? HeaderUtil.entityCreated(COUNTRY, newCode) : HeaderUtil.entityUpdated(COUNTRY, newCode))
                     .body(result.getUpsertedDto());
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
@@ -128,7 +128,7 @@ public class CountryResource {
     public ResponseEntity<Void> delete(@PathVariable String projectCode, @PathVariable String code) {
         try {
             service.delete(projectService.toId(projectCode), code);
-            return ResponseUtil.deleted(NAME, code);
+            return ResponseUtil.deleted(COUNTRY, code);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
         }

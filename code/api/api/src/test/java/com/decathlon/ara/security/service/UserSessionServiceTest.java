@@ -1,14 +1,16 @@
 package com.decathlon.ara.security.service;
 
 import com.decathlon.ara.Entities;
-import com.decathlon.ara.domain.security.member.user.User;
-import com.decathlon.ara.loader.DemoLoaderConstants;
-import com.decathlon.ara.repository.security.member.user.UserRepository;
+import com.decathlon.ara.domain.security.member.user.account.User;
+import com.decathlon.ara.repository.security.member.user.account.UserRepository;
 import com.decathlon.ara.security.dto.authentication.user.AuthenticatedOAuth2User;
+import com.decathlon.ara.security.dto.user.UserAccount;
 import com.decathlon.ara.security.dto.user.UserAccountProfile;
+import com.decathlon.ara.security.dto.user.scope.UserAccountScope;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
 import com.decathlon.ara.security.mapper.AuthenticationMapper;
 import com.decathlon.ara.security.mapper.AuthorityMapper;
+import com.decathlon.ara.security.mapper.UserMapper;
 import com.decathlon.ara.service.exception.ForbiddenException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,19 +23,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.groups.Tuple.tuple;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -42,6 +42,9 @@ class UserSessionServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private UserMapper userMapper;
 
     @Mock
     private AuthorityMapper authorityMapper;
@@ -88,7 +91,7 @@ class UserSessionServiceTest {
 
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
-        var authentication = mock(Authentication.class);
+        var authentication = mock(OAuth2AuthenticationToken.class);
 
         // When
         when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -106,7 +109,7 @@ class UserSessionServiceTest {
 
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
-        var authentication = mock(Authentication.class);
+        var authentication = mock(OAuth2AuthenticationToken.class);
 
         // When
         when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -118,56 +121,40 @@ class UserSessionServiceTest {
         assertThat(role).isNotPresent();
     }
 
-    @Test
-    void getCurrentUserAccountScopeRoleFromProjectCode_returnAdminRole_whenProjectIsDemoProject() {
+    @ParameterizedTest
+    @EnumSource(value = UserAccountScopeRole.class)
+    void getCurrentUserAccountScopeRoleFromProjectCode_returnRole_whenProjectFound(UserAccountScopeRole matchingRole) {
         // Given
-        var projectCode = DemoLoaderConstants.DEMO_PROJECT_CODE;
+        var matchingProjectCode = "project-code";
 
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
-        var authentication = mock(Authentication.class);
+        var authentication = mock(OAuth2AuthenticationToken.class);
         var authority1 = mock(GrantedAuthority.class);
         var authority2 = mock(GrantedAuthority.class);
         var authority3 = mock(GrantedAuthority.class);
-        Collection authorities = Set.of(authority1, authority2, authority3);
+        var authorities = Set.of(authority1, authority2, authority3);
+
+        var projectCode1 = "project-code1";
+        var projectCode2 = "project-code2";
+        var scope1 = mock(UserAccountScope.class);
+        var scope2 = mock(UserAccountScope.class);
+        var matchingScope = mock(UserAccountScope.class);
+        var scopes = List.of(scope1, scope2, matchingScope);
 
         // When
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getAuthorities()).thenReturn(authorities);
-        when(authority1.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code1:MEMBER");
-        when(authority2.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code2:MAINTAINER");
-        when(authority3.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code3:ADMIN");
+        when(authorityMapper.getUserAccountScopesFromAuthorities(authorities)).thenReturn(scopes);
+        when(scope1.getProject()).thenReturn(projectCode1);
+        when(scope2.getProject()).thenReturn(projectCode2);
+        when(matchingScope.getProject()).thenReturn(matchingProjectCode);
+        when(matchingScope.getRole()).thenReturn(matchingRole);
 
         // Then
-        var role = userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode);
-        assertThat(role).isPresent().contains(UserAccountScopeRole.ADMIN);
-    }
-
-    @Test
-    void getCurrentUserAccountScopeRoleFromProjectCode_returnRole_whenProjectFound() {
-        // Given
-        var projectCode = "project-code";
-
-        var securityContext = mock(SecurityContext.class);
-        SecurityContextHolder.setContext(securityContext);
-        var authentication = mock(Authentication.class);
-        var authority1 = mock(GrantedAuthority.class);
-        var authority2 = mock(GrantedAuthority.class);
-        var authority3 = mock(GrantedAuthority.class);
-        Collection authorities = Set.of(authority1, authority2, authority3);
-
-        // When
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.isAuthenticated()).thenReturn(true);
-        when(authentication.getAuthorities()).thenReturn(authorities);
-        when(authority1.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code1:MEMBER");
-        when(authority2.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code2:MAINTAINER");
-        when(authority3.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code:ADMIN");
-
-        // Then
-        var role = userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode);
-        assertThat(role).isPresent().contains(UserAccountScopeRole.ADMIN);
+        var actualRole = userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(matchingProjectCode);
+        assertThat(actualRole).isPresent().contains(matchingRole);
     }
 
     @Test
@@ -177,126 +164,32 @@ class UserSessionServiceTest {
 
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
-        var authentication = mock(Authentication.class);
+        var authentication = mock(OAuth2AuthenticationToken.class);
         var authority1 = mock(GrantedAuthority.class);
         var authority2 = mock(GrantedAuthority.class);
         var authority3 = mock(GrantedAuthority.class);
-        Collection authorities = Set.of(authority1, authority2, authority3);
+        var authorities = Set.of(authority1, authority2, authority3);
+
+        var projectCode1 = "project-code1";
+        var projectCode2 = "project-code2";
+        var projectCode3 = "project-code3";
+        var scope1 = mock(UserAccountScope.class);
+        var scope2 = mock(UserAccountScope.class);
+        var scope3 = mock(UserAccountScope.class);
+        var scopes = List.of(scope1, scope2, scope3);
 
         // When
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getAuthorities()).thenReturn(authorities);
-        when(authority1.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code1:MEMBER");
-        when(authority2.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code2:MAINTAINER");
-        when(authority3.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code3:ADMIN");
+        when(authorityMapper.getUserAccountScopesFromAuthorities(authorities)).thenReturn(scopes);
+        when(scope1.getProject()).thenReturn(projectCode1);
+        when(scope2.getProject()).thenReturn(projectCode2);
+        when(scope3.getProject()).thenReturn(projectCode3);
 
         // Then
         var role = userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode);
         assertThat(role).isNotPresent();
-    }
-
-    @Test
-    void getCurrentUserAccountScopeRoleFromProjectCode_returnEmptyOptional_whenRoleFoundButWasUnknown() {
-        // Given
-        var projectCode = "project-code";
-
-        var securityContext = mock(SecurityContext.class);
-        SecurityContextHolder.setContext(securityContext);
-        var authentication = mock(Authentication.class);
-        var authority1 = mock(GrantedAuthority.class);
-        var authority2 = mock(GrantedAuthority.class);
-        var authority3 = mock(GrantedAuthority.class);
-        Collection authorities = Set.of(authority1, authority2, authority3);
-
-        // When
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.isAuthenticated()).thenReturn(true);
-        when(authentication.getAuthorities()).thenReturn(authorities);
-        when(authority1.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code1:MEMBER");
-        when(authority2.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code2:MAINTAINER");
-        when(authority3.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code:UNKNOWN_ROLE");
-
-        // Then
-        var role = userSessionService.getCurrentUserAccountScopeRoleFromProjectCode(projectCode);
-        assertThat(role).isNotPresent();
-    }
-
-    @Test
-    void getCurrentUserScopedProjectCodes_returnEmptyList_whenAuthenticationIsNull() {
-        // Given
-        var securityContext = mock(SecurityContext.class);
-        SecurityContextHolder.setContext(securityContext);
-
-        // When
-        when(securityContext.getAuthentication()).thenReturn(null);
-
-        // Then
-        var projectCodes = userSessionService.getCurrentUserScopedProjectCodes();
-        assertThat(projectCodes).isEmpty();
-    }
-
-    @Test
-    void getCurrentUserScopedProjectCodes_returnEmptyList_whenUserIsNotAuthenticated() {
-        // Given
-        var securityContext = mock(SecurityContext.class);
-        SecurityContextHolder.setContext(securityContext);
-        var authentication = mock(Authentication.class);
-
-        // When
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.isAuthenticated()).thenReturn(false);
-
-        // Then
-        var projectCodes = userSessionService.getCurrentUserScopedProjectCodes();
-        assertThat(projectCodes).isEmpty();
-    }
-
-    @Test
-    void getCurrentUserScopedProjectCodes_returnEmptyList_whenNoAuthorityFound() {
-        // Given
-        var securityContext = mock(SecurityContext.class);
-        SecurityContextHolder.setContext(securityContext);
-        var authentication = mock(Authentication.class);
-
-        // When
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.isAuthenticated()).thenReturn(true);
-        when(authentication.getAuthorities()).thenReturn(null);
-
-        // Then
-        var projectCodes = userSessionService.getCurrentUserScopedProjectCodes();
-        assertThat(projectCodes).isEmpty();
-    }
-
-    @Test
-    void getCurrentUserScopedProjectCodes_returnProjectCodesPlusDemoProjectCode_whenScopedProjectAuthoritiesFound() {
-        // Given
-        var securityContext = mock(SecurityContext.class);
-        SecurityContextHolder.setContext(securityContext);
-        var authentication = mock(Authentication.class);
-        var authority1 = mock(GrantedAuthority.class);
-        var authority2 = mock(GrantedAuthority.class);
-        var authority3 = mock(GrantedAuthority.class);
-        var authority4 = mock(GrantedAuthority.class);
-        var authority5 = mock(GrantedAuthority.class);
-        Collection authorities = Set.of(authority1, authority2, authority3, authority4, authority5);
-
-        // When
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.isAuthenticated()).thenReturn(true);
-        when(authentication.getAuthorities()).thenReturn(authorities);
-        when(authority1.getAuthority()).thenReturn("USER_PROFILE:SUPER_ADMIN");
-        when(authority2.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code2:MAINTAINER");
-        when(authority3.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code3:ADMIN");
-        when(authority4.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code1:MEMBER");
-        when(authority5.getAuthority()).thenReturn("unknown_authority");
-
-        // Then
-        var projectCodes = userSessionService.getCurrentUserScopedProjectCodes();
-        assertThat(projectCodes)
-                .containsExactlyInAnyOrder("project-code1", "project-code2", "project-code3", DemoLoaderConstants.DEMO_PROJECT_CODE)
-                .hasSize(4);
     }
 
     @Test
@@ -318,11 +211,27 @@ class UserSessionServiceTest {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
-        var authentication = mock(Authentication.class);
+        var authentication = mock(OAuth2AuthenticationToken.class);
 
         // When
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.isAuthenticated()).thenReturn(false);
+
+        // Then
+        var scopes = userSessionService.getCurrentUserScopes();
+        assertThat(scopes).isEmpty();
+    }
+
+    @Test
+    void getCurrentUserScopes_returnEmptyList_whenAuthenticationIsNotAnInstanceOfOAuth2AuthenticationToken() {
+        // Given
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(UsernamePasswordAuthenticationToken.class);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
 
         // Then
         var scopes = userSessionService.getCurrentUserScopes();
@@ -334,7 +243,7 @@ class UserSessionServiceTest {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
-        var authentication = mock(Authentication.class);
+        var authentication = mock(OAuth2AuthenticationToken.class);
 
         // When
         when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -347,44 +256,36 @@ class UserSessionServiceTest {
     }
 
     @Test
-    void getCurrentUserScopes_returnUserAccountScopesPlusDemoProjectScope_whenScopedProjectAuthoritiesFound() {
+    void getCurrentUserScopes_returnUserAccountScopes_whenMatchingScopesFound() {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
-        var authentication = mock(Authentication.class);
+        var authentication = mock(OAuth2AuthenticationToken.class);
         var authority1 = mock(GrantedAuthority.class);
         var authority2 = mock(GrantedAuthority.class);
         var authority3 = mock(GrantedAuthority.class);
         var authority4 = mock(GrantedAuthority.class);
         var authority5 = mock(GrantedAuthority.class);
-        var authority6 = mock(GrantedAuthority.class);
-        Collection authorities = Set.of(authority1, authority2, authority3, authority4, authority5, authority6);
+        var authorities = Set.of(authority1, authority2, authority3, authority4, authority5);
+
+        var scope1 = mock(UserAccountScope.class);
+        var scope2 = mock(UserAccountScope.class);
+        var scope3 = mock(UserAccountScope.class);
+        var matchingScopes = List.of(scope1, scope2, scope3);
 
         // When
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getAuthorities()).thenReturn(authorities);
-        when(authority1.getAuthority()).thenReturn("USER_PROFILE:SUPER_ADMIN");
-        when(authority4.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code1:MEMBER");
-        when(authority2.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code2:mAiNtAiNeR");
-        when(authority3.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code3:admin");
-        when(authority6.getAuthority()).thenReturn("USER_PROJECT_SCOPE:project-code4:not-a-role");
-        when(authority5.getAuthority()).thenReturn("unknown_authority");
+        when(authorityMapper.getUserAccountScopesFromAuthorities(authorities)).thenReturn(matchingScopes);
 
         // Then
-        var scopes = userSessionService.getCurrentUserScopes();
-        assertThat(scopes)
-                .extracting("project", "role")
-                .containsExactlyInAnyOrder(
-                        tuple("project-code1", UserAccountScopeRole.MEMBER),
-                        tuple("project-code2", UserAccountScopeRole.MAINTAINER),
-                        tuple("project-code3", UserAccountScopeRole.ADMIN),
-                        tuple(DemoLoaderConstants.DEMO_PROJECT_CODE, UserAccountScopeRole.ADMIN)
-                );
+        var actualScopes = userSessionService.getCurrentUserScopes();
+        assertThat(actualScopes).containsExactlyInAnyOrderElementsOf(matchingScopes);
     }
 
     @Test
-    void getCurrentUserProfile_returnEmptyOptional_whenAuthenticationIsNull() {
+    void getCurrentUserProfile_throwForbiddenException_whenAuthenticationIsNull() {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
@@ -393,32 +294,45 @@ class UserSessionServiceTest {
         when(securityContext.getAuthentication()).thenReturn(null);
 
         // Then
-        var profile = userSessionService.getCurrentUserProfile();
-        assertThat(profile).isNotPresent();
+        assertThrows(ForbiddenException.class, () -> userSessionService.getCurrentUserProfile());
     }
 
     @Test
-    void getCurrentUserProfile_returnEmptyOptional_whenUserIsNotAuthenticated() {
+    void getCurrentUserProfile_throwForbiddenException_whenUserIsNotAuthenticated() {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
-        var authentication = mock(Authentication.class);
+        var authentication = mock(OAuth2AuthenticationToken.class);
 
         // When
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.isAuthenticated()).thenReturn(false);
 
         // Then
-        var profile = userSessionService.getCurrentUserProfile();
-        assertThat(profile).isNotPresent();
+        assertThrows(ForbiddenException.class, () -> userSessionService.getCurrentUserProfile());
     }
 
     @Test
-    void getCurrentUserProfile_returnEmptyOptional_whenNoAuthorityFound() {
+    void getCurrentUserProfile_throwForbiddenException_whenAuthenticationIsNotAnInstanceOfOAuth2AuthenticationToken() {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
-        var authentication = mock(Authentication.class);
+        var authentication = mock(UsernamePasswordAuthenticationToken.class);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userSessionService.getCurrentUserProfile());
+    }
+
+    @Test
+    void getCurrentUserProfile_throwForbiddenException_whenNoAuthorityFound() {
+        // Given
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
 
         // When
         when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -426,69 +340,47 @@ class UserSessionServiceTest {
         when(authentication.getAuthorities()).thenReturn(null);
 
         // Then
-        var profile = userSessionService.getCurrentUserProfile();
-        assertThat(profile).isNotPresent();
+        assertThrows(ForbiddenException.class, () -> userSessionService.getCurrentUserProfile());
     }
 
     @ParameterizedTest
     @EnumSource(value = UserAccountProfile.class)
-    void getCurrentUserProfile_returnProfile_whenProfileFound(UserAccountProfile userProfile) {
+    void getCurrentUserProfile_returnProfile_whenProfileFound(UserAccountProfile userProfile) throws ForbiddenException {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
-        var authentication = mock(Authentication.class);
+        var authentication = mock(OAuth2AuthenticationToken.class);
         var authority = mock(GrantedAuthority.class);
-        Collection authorities = Set.of(authority);
+        var authorities = Set.of(authority);
 
         // When
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getAuthorities()).thenReturn(authorities);
-        when(authority.getAuthority()).thenReturn("USER_PROFILE:" + userProfile.name());
+        when(authorityMapper.getUserAccountProfileFromAuthorities(authorities)).thenReturn(Optional.of(userProfile));
 
         // Then
         var profile = userSessionService.getCurrentUserProfile();
-        assertThat(profile).isPresent().contains(userProfile);
+        assertThat(profile).isEqualTo(userProfile);
     }
 
     @Test
-    void getCurrentUserProfile_returnEmptyOptional_whenProfileFoundButUnknown() {
+    void getCurrentUserProfile_throwForbiddenException_whenProfileNotFound() {
         // Given
         var securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
-        var authentication = mock(Authentication.class);
+        var authentication = mock(OAuth2AuthenticationToken.class);
         var authority = mock(GrantedAuthority.class);
-        Collection authorities = Set.of(authority);
+        var authorities = Set.of(authority);
 
         // When
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getAuthorities()).thenReturn(authorities);
-        when(authority.getAuthority()).thenReturn("USER_PROFILE:UNKNOWN_PROFILE");
+        when(authorityMapper.getUserAccountProfileFromAuthorities(authorities)).thenReturn(Optional.empty());
 
         // Then
-        var profile = userSessionService.getCurrentUserProfile();
-        assertThat(profile).isNotPresent();
-    }
-
-    @Test
-    void getCurrentUserProfile_returnEmptyOptional_whenProfileNotFound() {
-        // Given
-        var securityContext = mock(SecurityContext.class);
-        SecurityContextHolder.setContext(securityContext);
-        var authentication = mock(Authentication.class);
-        var authority = mock(GrantedAuthority.class);
-        Collection authorities = Set.of(authority);
-
-        // When
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.isAuthenticated()).thenReturn(true);
-        when(authentication.getAuthorities()).thenReturn(authorities);
-        when(authority.getAuthority()).thenReturn("any_other_authority");
-
-        // Then
-        var profile = userSessionService.getCurrentUserProfile();
-        assertThat(profile).isNotPresent();
+        assertThrows(ForbiddenException.class, () -> userSessionService.getCurrentUserProfile());
     }
 
     @Test
@@ -500,6 +392,7 @@ class UserSessionServiceTest {
 
         // When
         when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
 
         // Then
         assertThrows(ForbiddenException.class, () -> userSessionService.refreshCurrentUserAuthorities());
@@ -515,6 +408,7 @@ class UserSessionServiceTest {
 
         // When
         when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
         when(authenticationMapper.getAuthenticatedOAuth2UserFromAuthentication(authentication)).thenThrow(new ForbiddenException(Entities.USER, "searching for current user"));
 
         // Then
@@ -535,6 +429,7 @@ class UserSessionServiceTest {
 
         // When
         when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
         when(authenticationMapper.getAuthenticatedOAuth2UserFromAuthentication(authentication)).thenReturn(authenticatedUser);
         when(authenticatedUser.getLogin()).thenReturn(userLogin);
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
@@ -557,7 +452,8 @@ class UserSessionServiceTest {
 
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
 
-        var user = mock(User.class);
+        var currentUser = mock(User.class);
+        var currentUserAccount = mock(UserAccount.class);
 
         var updatedAuthority1 = mock(GrantedAuthority.class);
         var updatedAuthority2 = mock(GrantedAuthority.class);
@@ -566,12 +462,14 @@ class UserSessionServiceTest {
 
         // When
         when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getPrincipal()).thenReturn(principal);
         when(authenticationMapper.getAuthenticatedOAuth2UserFromAuthentication(authentication)).thenReturn(authenticatedUser);
         when(authenticatedUser.getLogin()).thenReturn(userLogin);
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
-        when(authorityMapper.getGrantedAuthoritiesFromUser(user)).thenReturn(updatedAuthorities);
+        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(currentUser));
+        when(userMapper.getFullScopeAccessUserAccountFromUser(currentUser)).thenReturn(currentUserAccount);
+        when(authorityMapper.getGrantedAuthoritiesFromUserAccount(currentUserAccount)).thenReturn(updatedAuthorities);
 
         // Then
         userSessionService.refreshCurrentUserAuthorities();
@@ -593,6 +491,7 @@ class UserSessionServiceTest {
 
         // When
         when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
 
         // Then
         var authenticatedUser = userSessionService.getCurrentAuthenticatedOAuth2User();
@@ -608,6 +507,7 @@ class UserSessionServiceTest {
 
         // When
         when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
         when(authenticationMapper.getAuthenticatedOAuth2UserFromAuthentication(authentication)).thenThrow(new ForbiddenException(Entities.USER, "fetching the current user"));
 
         // Then
@@ -626,6 +526,7 @@ class UserSessionServiceTest {
 
         // When
         when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
         when(authenticationMapper.getAuthenticatedOAuth2UserFromAuthentication(authentication)).thenReturn(authenticatedOAuth2User);
 
         // Then
@@ -689,5 +590,206 @@ class UserSessionServiceTest {
         // Then
         var authenticatedUser = userSessionService.getCurrentAuthenticatedOAuth2UserFromOAuth2UserAndProviderName(oauth2User, providerName);
         assertThat(authenticatedUser).containsSame(authenticatedOAuth2User);
+    }
+
+    @Test
+    void canManageGroup_returnFalse_whenAuthenticationIsNull() {
+        // Given
+        var groupId = 1L;
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(null);
+
+        // Then
+        var canManageGroup = userSessionService.canManageGroup(groupId);
+        assertThat(canManageGroup).isFalse();
+    }
+
+    @Test
+    void canManageGroup_returnFalse_whenUserIsNotAuthenticated() {
+        // Given
+        var groupId = 1L;
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(false);
+
+        // Then
+        var canManageGroup = userSessionService.canManageGroup(groupId);
+        assertThat(canManageGroup).isFalse();
+    }
+
+    @Test
+    void canManageGroup_returnFalse_whenAuthenticationIsNotAnInstanceOfOAuth2AuthenticationToken() {
+        // Given
+        var groupId = 1L;
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(UsernamePasswordAuthenticationToken.class);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+
+        // Then
+        var canManageGroup = userSessionService.canManageGroup(groupId);
+        assertThat(canManageGroup).isFalse();
+    }
+
+    @Test
+    void canManageGroup_returnFalse_whenNoAuthorityFound() {
+        // Given
+        var groupId = 1L;
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getAuthorities()).thenReturn(null);
+
+        // Then
+        var canManageGroup = userSessionService.canManageGroup(groupId);
+        assertThat(canManageGroup).isFalse();
+    }
+
+    @Test
+    void canManageGroup_returnFalse_whenProfileNotFound() {
+        // Given
+        var groupId = 1L;
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var authority = mock(GrantedAuthority.class);
+        var authorities = Set.of(authority);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getAuthorities()).thenReturn(authorities);
+        when(authorityMapper.getUserAccountProfileFromAuthorities(authorities)).thenReturn(Optional.empty());
+
+        // Then
+        var canManageGroup = userSessionService.canManageGroup(groupId);
+        assertThat(canManageGroup).isFalse();
+    }
+
+    @Test
+    void canManageGroup_returnTrue_whenProfileIsSuperAdmin() {
+        // Given
+        var groupId = 1L;
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var authority = mock(GrantedAuthority.class);
+        var authorities = Set.of(authority);
+
+        var profile = UserAccountProfile.SUPER_ADMIN;
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getAuthorities()).thenReturn(authorities);
+        when(authorityMapper.getUserAccountProfileFromAuthorities(authorities)).thenReturn(Optional.of(profile));
+
+        // Then
+        var canManageGroup = userSessionService.canManageGroup(groupId);
+        assertThat(canManageGroup).isTrue();
+    }
+
+    @Test
+    void canManageGroup_returnFalse_whenProfileIsAuditor() {
+        // Given
+        var groupId = 1L;
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var authority = mock(GrantedAuthority.class);
+        var authorities = Set.of(authority);
+
+        var profile = UserAccountProfile.AUDITOR;
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getAuthorities()).thenReturn(authorities);
+        when(authorityMapper.getUserAccountProfileFromAuthorities(authorities)).thenReturn(Optional.of(profile));
+
+        // Then
+        var canManageGroup = userSessionService.canManageGroup(groupId);
+        assertThat(canManageGroup).isFalse();
+    }
+
+    @Test
+    void canManageGroup_returnTrue_whenProfileIsScopedUserAndGroupIdFoundInContext() {
+        // Given
+        var groupId = 3L;
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var authority = mock(GrantedAuthority.class);
+        var authorities = Set.of(authority);
+
+        var profile = UserAccountProfile.SCOPED_USER;
+
+        var managedGroupId1 = 1L;
+        var managedGroupId2 = 2L;
+        var managedGroupId3 = 3L;
+        var managedGroupIds = List.of(managedGroupId1, managedGroupId2, managedGroupId3);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getAuthorities()).thenReturn(authorities);
+        when(authorityMapper.getUserAccountProfileFromAuthorities(authorities)).thenReturn(Optional.of(profile));
+        when(authorityMapper.getManagedUserAccountGroupIdsFromAuthorities(authorities)).thenReturn(managedGroupIds);
+
+        // Then
+        var canManageGroup = userSessionService.canManageGroup(groupId);
+        assertThat(canManageGroup).isTrue();
+    }
+
+    @Test
+    void canManageGroup_returnFalse_whenProfileIsScopedUserButGroupIdNotFoundInContext() {
+        // Given
+        var groupId = 4L;
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var authority = mock(GrantedAuthority.class);
+        var authorities = Set.of(authority);
+
+        var profile = UserAccountProfile.SCOPED_USER;
+
+        var managedGroupId1 = 1L;
+        var managedGroupId2 = 2L;
+        var managedGroupId3 = 3L;
+        var managedGroupIds = List.of(managedGroupId1, managedGroupId2, managedGroupId3);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getAuthorities()).thenReturn(authorities);
+        when(authorityMapper.getUserAccountProfileFromAuthorities(authorities)).thenReturn(Optional.of(profile));
+        when(authorityMapper.getManagedUserAccountGroupIdsFromAuthorities(authorities)).thenReturn(managedGroupIds);
+
+        // Then
+        var canManageGroup = userSessionService.canManageGroup(groupId);
+        assertThat(canManageGroup).isFalse();
     }
 }

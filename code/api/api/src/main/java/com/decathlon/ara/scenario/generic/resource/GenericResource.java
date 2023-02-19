@@ -30,14 +30,15 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import static com.decathlon.ara.scenario.generic.resource.GenericResource.GENERIC_SCENARIO_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_BASE_API_PATH;
 
 @RestController
-@RequestMapping(GenericResource.PATH)
+@RequestMapping(GENERIC_SCENARIO_BASE_API_PATH)
 public class GenericResource {
 
-    static final String PATH = PROJECT_API_PATH + "/generic";
-    public static final String PATHS = PATH + "/**";
+    public static final String GENERIC_SCENARIO_BASE_API_PATH = PROJECT_CODE_BASE_API_PATH + "/generic";
+    public static final String GENERIC_SCENARIO_ALL_API_PATHS = GENERIC_SCENARIO_BASE_API_PATH + "/**";
 
     private static final Logger LOG = LoggerFactory.getLogger(GenericResource.class);
 

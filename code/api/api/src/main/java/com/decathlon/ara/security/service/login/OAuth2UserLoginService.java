@@ -11,7 +11,7 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
+import java.util.Collection;
 
 @Service
 public class OAuth2UserLoginService extends UserLoginService<OAuth2UserRequest, OAuth2User, OAuth2UserService<OAuth2UserRequest, OAuth2User>> {
@@ -30,7 +30,7 @@ public class OAuth2UserLoginService extends UserLoginService<OAuth2UserRequest, 
     }
 
     @Override
-    protected OAuth2User getUpdatedOAuth2User(Set<GrantedAuthority> authorities, OAuth2User user) {
+    protected OAuth2User getUpdatedOAuth2User(Collection<GrantedAuthority> authorities, OAuth2User user) {
         return new DefaultOAuth2User(authorities, user.getAttributes(), StandardClaimNames.NAME);
     }
 }

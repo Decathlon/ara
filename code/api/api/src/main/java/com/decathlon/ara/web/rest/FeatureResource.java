@@ -17,18 +17,19 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.FeatureService;
 import com.decathlon.ara.service.dto.feature.DetailledFeatureDTO;
 import com.decathlon.ara.service.dto.feature.FeatureDTO;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
-import com.decathlon.ara.web.rest.util.RestConstants;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
+
+import static com.decathlon.ara.security.configuration.SecurityConfiguration.BASE_API_PATH;
+import static com.decathlon.ara.web.rest.FeatureResource.FEATURE_BASE_API_PATH;
 
 /**
  * This REST resource will handle the Feature flipping of ARA, to enable or disable experimental features.
@@ -39,15 +40,11 @@ import java.util.List;
  * @author Sylvain Nieuwlandt
  */
 @RestController
-@RequestMapping(FeatureResource.PATH)
+@RequestMapping(FEATURE_BASE_API_PATH)
 public class FeatureResource {
 
-    private static final String NAME = Entities.FEATURE;
-    /**
-     * The full path to this Rest resource from the basename.
-     */
-    static final String PATH = RestConstants.API_PATH + "/" + NAME + "s";
-    public static final String PATHS = PATH + "/**";
+    public static final String FEATURE_BASE_API_PATH = BASE_API_PATH + "/features";
+    public static final String FEATURE_ALL_API_PATHS = FEATURE_BASE_API_PATH + "/**";
 
     private FeatureService featureService;
 

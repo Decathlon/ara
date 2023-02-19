@@ -29,16 +29,17 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import static com.decathlon.ara.scenario.cypress.resource.CypressResource.CYPRESS_SCENARIO_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_BASE_API_PATH;
 
 @RestController
-@RequestMapping(CypressResource.PATH)
+@RequestMapping(CYPRESS_SCENARIO_BASE_API_PATH)
 public class CypressResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(CypressResource.class);
 
-    static final String PATH = PROJECT_API_PATH + "/cypress";
-    public static final String PATHS = PATH + "/**";
+    public static final String CYPRESS_SCENARIO_BASE_API_PATH = PROJECT_CODE_BASE_API_PATH + "/cypress";
+    public static final String CYPRESS_SCENARIO_ALL_API_PATHS = CYPRESS_SCENARIO_BASE_API_PATH + "/**";
 
     private final ProjectService projectService;
 

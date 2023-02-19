@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.Entities;
 import com.decathlon.ara.coverage.CoverageService;
 import com.decathlon.ara.service.FunctionalityService;
 import com.decathlon.ara.service.ProjectService;
@@ -47,23 +46,23 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import static com.decathlon.ara.Entities.FUNCTIONALITY;
+import static com.decathlon.ara.web.rest.FunctionalityResource.FUNCTIONALITY_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_BASE_API_PATH;
 
 /**
  * REST controller for managing Functionalities.
  */
 @RestController
-@RequestMapping(FunctionalityResource.PATH)
+@RequestMapping(FUNCTIONALITY_BASE_API_PATH)
 public class FunctionalityResource {
 
-    static final String PATH = PROJECT_API_PATH + "/functionalities";
-    public static final String PATHS = PATH + "/**";
+    public static final String FUNCTIONALITY_BASE_API_PATH = PROJECT_CODE_BASE_API_PATH + "/functionalities";
+    public static final String FUNCTIONALITY_ALL_API_PATHS = FUNCTIONALITY_BASE_API_PATH + "/**";
 
     private static final String EXPORT = "/export";
     private static final String IMPORT = "/import";
-    public static final String EXPORT_PATH = PATH + EXPORT;
-
-    private static final String NAME = Entities.FUNCTIONALITY;
+    public static final String FUNCTIONALITY_EXPORT_API_PATH = FUNCTIONALITY_BASE_API_PATH + EXPORT;
 
     private final FunctionalityService service;
 
@@ -114,7 +113,7 @@ public class FunctionalityResource {
                 updatedDto.setComment("");
             }
             return ResponseEntity.ok()
-                    .headers(HeaderUtil.entityUpdated(NAME, updatedDto.getId()))
+                    .headers(HeaderUtil.entityUpdated(FUNCTIONALITY, updatedDto.getId()))
                     .body(updatedDto);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
@@ -132,13 +131,13 @@ public class FunctionalityResource {
     @PostMapping
     public ResponseEntity<FunctionalityDTO> create(@PathVariable String projectCode, @Valid @RequestBody NewFunctionalityDTO newDto) {
         if (newDto.getFunctionality().getId() != null) {
-            return ResponseEntity.badRequest().headers(HeaderUtil.idMustBeEmpty(NAME)).build();
+            return ResponseEntity.badRequest().headers(HeaderUtil.idMustBeEmpty(FUNCTIONALITY)).build();
         }
         try {
             FunctionalityDTO createdDto = service.create(projectService.toId(projectCode), newDto);
             return ResponseEntity
-                    .created(HeaderUtil.uri(PATH + "/" + createdDto.getId(), projectCode))
-                    .headers(HeaderUtil.entityCreated(NAME, createdDto.getId()))
+                    .created(HeaderUtil.uri(FUNCTIONALITY_BASE_API_PATH + "/" + createdDto.getId(), projectCode))
+                    .headers(HeaderUtil.entityCreated(FUNCTIONALITY, createdDto.getId()))
                     .body(createdDto);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
@@ -156,7 +155,7 @@ public class FunctionalityResource {
     public ResponseEntity<Void> delete(@PathVariable String projectCode, @PathVariable Long id) {
         try {
             service.delete(projectService.toId(projectCode), id);
-            return ResponseUtil.deleted(NAME, id);
+            return ResponseUtil.deleted(FUNCTIONALITY, id);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
         }
@@ -186,7 +185,7 @@ public class FunctionalityResource {
         try {
             FunctionalityDTO updatedDto = service.move(projectService.toId(projectCode), moveRequest);
             return ResponseEntity.ok()
-                    .headers(HeaderUtil.entityMoved(NAME, updatedDto.getId()))
+                    .headers(HeaderUtil.entityMoved(FUNCTIONALITY, updatedDto.getId()))
                     .body(updatedDto);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
@@ -286,7 +285,7 @@ public class FunctionalityResource {
             return ResponseUtil.handle(ex);
         } catch (IOException ex) {
             return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-                    .headers(HeaderUtil.exception(FunctionalityResource.NAME, ex))
+                    .headers(HeaderUtil.exception(FUNCTIONALITY, ex))
                     .build();
         }
     }

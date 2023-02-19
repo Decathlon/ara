@@ -80,7 +80,8 @@
 
     <cache name="com.decathlon.ara.domain.ProblemOccurrence" maxEntriesLocalHeap="2000" eternal="true"/>
 
-    <cache name="com.decathlon.ara.domain.security.member.user.User" maxEntriesLocalHeap="10000" eternal="true"/>
-
-    <cache name="com.decathlon.ara.domain.security.member.user.UserScope" maxEntriesLocalHeap="100000" eternal="true"/>
+    <cache name="com.decathlon.ara.domain.security.member.user.account.User" maxEntriesLocalHeap="10000" eternal="true"/>
+    <cache name="com.decathlon.ara.domain.security.member.user.account.UserProjectScope" maxEntriesLocalHeap="100000" eternal="true"/>
+    <cache name="com.decathlon.ara.domain.security.member.user.group.UserGroup" maxEntriesLocalHeap="10000" eternal="true"/>
+    <cache name="com.decathlon.ara.domain.security.member.user.group.UserGroupProjectScope" maxEntriesLocalHeap="100000" eternal="true"/>
 </ehcache>

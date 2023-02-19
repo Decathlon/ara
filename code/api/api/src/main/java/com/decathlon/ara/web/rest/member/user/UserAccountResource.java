@@ -1,4 +1,4 @@
-package com.decathlon.ara.web.rest.authentication;
+package com.decathlon.ara.web.rest.member.user;
 
 import com.decathlon.ara.security.dto.user.UserAccount;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScope;
@@ -16,42 +16,41 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
+import static com.decathlon.ara.security.configuration.SecurityConfiguration.MEMBER_USER_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_REQUEST_PARAMETER;
+import static com.decathlon.ara.web.rest.member.user.UserAccountResource.MEMBER_USER_ACCOUNT_BASE_API_PATH;
 import static com.decathlon.ara.web.rest.util.HeaderUtil.MESSAGE;
-import static com.decathlon.ara.web.rest.util.RestConstants.API_PATH;
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_CODE_REQUEST_PARAMETER;
 
 @RestController
-@RequestMapping(UserResource.PATH)
-public class UserResource {
+@RequestMapping(MEMBER_USER_ACCOUNT_BASE_API_PATH)
+public class UserAccountResource {
 
     private final UserAccountService userAccountService;
 
-    static final String PATH = API_PATH + "/user";
+    public static final String MEMBER_USER_ACCOUNT_BASE_API_PATH = MEMBER_USER_BASE_API_PATH + "/accounts";
 
-    private static final String ACCOUNTS = "/accounts";
-
-    private static final String CURRENT_ACCOUNT = ACCOUNTS + "/current";
-    public static final String CURRENT_ACCOUNT_PATH = PATH + CURRENT_ACCOUNT;
-    private static final String ALL_ACCOUNTS = ACCOUNTS + "/all";
-    public static final String ALL_ACCOUNTS_PATH = PATH + ALL_ACCOUNTS;
-    private static final String SCOPED_ACCOUNTS = ACCOUNTS + "/scoped";
-    public static final String SCOPED_ACCOUNTS_PATH = PATH + SCOPED_ACCOUNTS;
+    private static final String CURRENT_ACCOUNT = "/current";
+    public static final String MEMBER_USER_ACCOUNT_CURRENT_ACCOUNT_API_PATH = MEMBER_USER_ACCOUNT_BASE_API_PATH + CURRENT_ACCOUNT;
+    private static final String ALL_ACCOUNTS = "/all";
+    public static final String MEMBER_USER_ACCOUNT_ALL_ACCOUNTS_API_PATH = MEMBER_USER_ACCOUNT_BASE_API_PATH + ALL_ACCOUNTS;
+    private static final String SCOPED_ACCOUNTS = "/scoped";
+    public static final String MEMBER_USER_ACCOUNT_SCOPED_ACCOUNTS_API_PATH = MEMBER_USER_ACCOUNT_BASE_API_PATH + SCOPED_ACCOUNTS;
     private static final String SCOPED_ACCOUNTS_BY_PROJECT = SCOPED_ACCOUNTS + "/project/" + PROJECT_CODE_REQUEST_PARAMETER;
-    public static final String SCOPED_ACCOUNTS_BY_PROJECT_PATH = PATH + SCOPED_ACCOUNTS_BY_PROJECT;
+    public static final String MEMBER_USER_ACCOUNT_SCOPED_ACCOUNTS_BY_PROJECT_API_PATH = MEMBER_USER_ACCOUNT_BASE_API_PATH + SCOPED_ACCOUNTS_BY_PROJECT;
 
-    private static final String ACCOUNT_USER_LOGIN = ACCOUNTS + "/login/{userLogin}";
-    private static final String ACCOUNT_PROJECT_SCOPE = ACCOUNT_USER_LOGIN + "/scopes/project/" + PROJECT_CODE_REQUEST_PARAMETER;
-    public static final String ACCOUNT_PROJECT_SCOPE_PATH = PATH + ACCOUNT_PROJECT_SCOPE;
+    private static final String ACCOUNT_BY_USER_LOGIN = "/login/{userLogin}";
+    private static final String ACCOUNT_PROJECT_SCOPE = ACCOUNT_BY_USER_LOGIN + "/scopes/project/" + PROJECT_CODE_REQUEST_PARAMETER;
+    public static final String MEMBER_USER_ACCOUNT_PROJECT_SCOPE_API_PATH = MEMBER_USER_ACCOUNT_BASE_API_PATH + ACCOUNT_PROJECT_SCOPE;
 
-    private static final String ACCOUNT_PROFILE = ACCOUNT_USER_LOGIN + "/profile";
-    public static final String ACCOUNT_PROFILE_PATH = PATH + ACCOUNT_PROFILE;
+    private static final String ACCOUNT_PROFILE = ACCOUNT_BY_USER_LOGIN + "/profile";
+    public static final String MEMBER_USER_ACCOUNT_PROFILE_API_PATH = MEMBER_USER_ACCOUNT_BASE_API_PATH + ACCOUNT_PROFILE;
 
     private static final String DEFAULT_PROJECT = CURRENT_ACCOUNT + "/default-project";
     private static final String UPDATE_DEFAULT_PROJECT_BY_CODE = DEFAULT_PROJECT + "/" + PROJECT_CODE_REQUEST_PARAMETER;
-    public static final String CLEAR_DEFAULT_PROJECT_PATH = PATH + DEFAULT_PROJECT;
-    public static final String UPDATE_DEFAULT_PROJECT_BY_CODE_PATH = PATH + UPDATE_DEFAULT_PROJECT_BY_CODE;
+    public static final String MEMBER_USER_ACCOUNT_CLEAR_DEFAULT_PROJECT_API_PATH = MEMBER_USER_ACCOUNT_BASE_API_PATH + DEFAULT_PROJECT;
+    public static final String MEMBER_USER_ACCOUNT_UPDATE_DEFAULT_PROJECT_BY_CODE_API_PATH = MEMBER_USER_ACCOUNT_BASE_API_PATH + UPDATE_DEFAULT_PROJECT_BY_CODE;
 
-    public UserResource(UserAccountService userAccountService) {
+    public UserAccountResource(UserAccountService userAccountService) {
         this.userAccountService = userAccountService;
     }
 
@@ -69,23 +68,29 @@ public class UserResource {
 
     @GetMapping(SCOPED_ACCOUNTS)
     public ResponseEntity<List<UserAccount>> getScopedAccounts(
-            OAuth2AuthenticationToken authentication,
             @RequestParam(value = "role", required = false) String roleAsString
     ) {
-        var roleOptional = UserAccountScopeRole.getScopeFromString(roleAsString);
-        var accounts = userAccountService.getAllScopedUserAccounts(authentication, roleOptional);
-        return ResponseEntity.ok(accounts);
+        try {
+            var roleFilter = UserAccountScopeRole.getScopeFromString(roleAsString);
+            var accounts = userAccountService.getAllScopedUserAccounts(roleFilter);
+            return ResponseEntity.ok(accounts);
+        } catch (ForbiddenException e) {
+            return ResponseUtil.handle(e);
+        }
     }
 
     @GetMapping(SCOPED_ACCOUNTS_BY_PROJECT)
     public ResponseEntity<List<UserAccount>> getProjectScopedAccounts(
-            OAuth2AuthenticationToken authentication,
             @PathVariable String projectCode,
             @RequestParam(value = "role", required = false) String roleAsString
     ) {
-        var roleOptional = UserAccountScopeRole.getScopeFromString(roleAsString);
-        var accounts = userAccountService.getAllScopedUserAccountsOnProject(authentication, projectCode, roleOptional);
-        return ResponseEntity.ok(accounts);
+        var roleFilter = UserAccountScopeRole.getScopeFromString(roleAsString);
+        try {
+            var accounts = userAccountService.getAllScopedUserAccountsOnProject(projectCode, roleFilter);
+            return ResponseEntity.ok(accounts);
+        } catch (ForbiddenException e) {
+            return ResponseUtil.handle(e);
+        }
     }
 
     @DeleteMapping(ACCOUNT_PROJECT_SCOPE)

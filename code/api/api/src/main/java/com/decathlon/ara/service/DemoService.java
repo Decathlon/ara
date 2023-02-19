@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.domain.Project;
 import com.decathlon.ara.loader.*;
@@ -40,6 +39,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import static com.decathlon.ara.Entities.PROJECT;
 import static com.decathlon.ara.loader.DemoLoaderConstants.DEMO_PROJECT_CODE;
 
 /**
@@ -91,7 +91,7 @@ public class DemoService {
     @Transactional
     public ProjectDTO create() throws BadRequestException {
         if (projectService.exists(DEMO_PROJECT_CODE)) {
-            throw new BadRequestException(Messages.RULE_DEMO_PROJECT_ALREADY_EXISTS, Entities.PROJECT, "demo-exists");
+            throw new BadRequestException(Messages.RULE_DEMO_PROJECT_ALREADY_EXISTS, PROJECT, "demo-exists");
         }
 
         // IMPORTANT: Use DTO constructors everywhere,
@@ -126,7 +126,7 @@ public class DemoService {
     public void delete() throws NotFoundException {
         final Project project = projectRepository.findOneByCode(DEMO_PROJECT_CODE);
         if (project == null) {
-            throw new NotFoundException(Messages.NOT_FOUND_PROJECT, Entities.PROJECT);
+            throw new NotFoundException(Messages.NOT_FOUND_PROJECT, PROJECT);
         }
 
         final String executionBasePath = settingService.get(project.getId().longValue(),

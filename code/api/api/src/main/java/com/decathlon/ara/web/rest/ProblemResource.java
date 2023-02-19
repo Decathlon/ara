@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.ProblemService;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
@@ -35,21 +34,23 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import static com.decathlon.ara.Entities.PROBLEM;
+import static com.decathlon.ara.Entities.PROBLEM_PATTERN;
+import static com.decathlon.ara.web.rest.ProblemResource.PROBLEM_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_BASE_API_PATH;
 
 /**
  * REST controller for managing Problems.
  */
 @RestController
-@RequestMapping(ProblemResource.PATH)
+@RequestMapping(PROBLEM_BASE_API_PATH)
 public class ProblemResource {
 
-    private static final String NAME = Entities.PROBLEM;
-    static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
-    public static final String PATHS = PATH + "/**";
+    public static final String PROBLEM_BASE_API_PATH = PROJECT_CODE_BASE_API_PATH + "/problems";
+    public static final String PROBLEM_ALL_API_PATHS = PROBLEM_BASE_API_PATH + "/**";
 
     private static final String FILTER = "/filter";
-    public static final String FILTER_PATH = PATH + FILTER;
+    public static final String PROBLEM_FILTER_API_PATH = PROBLEM_BASE_API_PATH + FILTER;
 
     private final ProblemService service;
 
@@ -71,13 +72,13 @@ public class ProblemResource {
     @PostMapping
     public ResponseEntity<ProblemWithPatternsDTO> create(@PathVariable String projectCode, @Valid @RequestBody ProblemWithPatternsDTO dtoToCreate) {
         if (dtoToCreate.getId() != null) {
-            return ResponseEntity.badRequest().headers(HeaderUtil.idMustBeEmpty(NAME)).build();
+            return ResponseEntity.badRequest().headers(HeaderUtil.idMustBeEmpty(PROBLEM)).build();
         }
         try {
             ProblemWithPatternsDTO createdDto = service.create(projectService.toId(projectCode), dtoToCreate);
             return ResponseEntity
-                    .created(HeaderUtil.uri(PATH + "/" + createdDto.getId(), projectCode))
-                    .headers(HeaderUtil.entityCreated(NAME, createdDto.getId()))
+                    .created(HeaderUtil.uri(PROBLEM_BASE_API_PATH + "/" + createdDto.getId(), projectCode))
+                    .headers(HeaderUtil.entityCreated(PROBLEM, createdDto.getId()))
                     .body(createdDto);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
@@ -130,7 +131,7 @@ public class ProblemResource {
     public ResponseEntity<Void> delete(@PathVariable String projectCode, @PathVariable long id) {
         try {
             service.delete(projectService.toId(projectCode), id);
-            return ResponseUtil.deleted(NAME, id);
+            return ResponseUtil.deleted(PROBLEM, id);
         } catch (NotFoundException e) {
             return ResponseUtil.handle(e);
         }
@@ -166,8 +167,8 @@ public class ProblemResource {
         try {
             ProblemPatternDTO savedPattern = service.appendPattern(projectService.toId(projectCode), id, newPatternDto);
             return ResponseEntity
-                    .created(HeaderUtil.uri(PATH + "/" + id + "/" + savedPattern.getId(), projectCode))
-                    .headers(HeaderUtil.entityCreated(Entities.PROBLEM_PATTERN, savedPattern.getId()))
+                    .created(HeaderUtil.uri(PROBLEM_BASE_API_PATH + "/" + id + "/" + savedPattern.getId(), projectCode))
+                    .headers(HeaderUtil.entityCreated(PROBLEM_PATTERN, savedPattern.getId()))
                     .body(savedPattern);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
@@ -189,7 +190,7 @@ public class ProblemResource {
         try {
             ProblemDTO updatedDto = service.updateProperties(projectService.toId(projectCode), dtoToUpdate);
             return ResponseEntity.ok()
-                    .headers(HeaderUtil.entityUpdated(NAME, updatedDto.getId()))
+                    .headers(HeaderUtil.entityUpdated(PROBLEM, updatedDto.getId()))
                     .body(updatedDto);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);

@@ -2,7 +2,7 @@ package com.decathlon.ara.service;
 
 import com.decathlon.ara.domain.Project;
 import com.decathlon.ara.domain.RootCause;
-import com.decathlon.ara.domain.security.member.user.User;
+import com.decathlon.ara.domain.security.member.user.account.User;
 import com.decathlon.ara.repository.ProjectRepository;
 import com.decathlon.ara.repository.RootCauseRepository;
 import com.decathlon.ara.security.service.UserSessionService;

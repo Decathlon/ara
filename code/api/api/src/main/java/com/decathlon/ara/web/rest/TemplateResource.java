@@ -1,6 +1,5 @@
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.ExecutionHistoryService;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.exception.NotFoundException;
@@ -12,18 +11,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.transaction.Transactional;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import static com.decathlon.ara.Entities.CYCLE_DEFINITION;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.TemplateResource.TEMPLATE_BASE_API_PATH;
 
 @Controller
-@RequestMapping(TemplateResource.PATH)
+@RequestMapping(TEMPLATE_BASE_API_PATH)
 @Transactional(Transactional.TxType.REQUIRED)
 public class TemplateResource {
-    private static final String NAME = "template";
-    /**
-     * The full path to this Rest resource from the basename.
-     */
-    static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
-    public static final String PATHS = PATH + "/**";
+
+    public static final String TEMPLATE_BASE_API_PATH = PROJECT_CODE_BASE_API_PATH + "/templates";
+    public static final String TEMPLATE_ALL_API_PATHS = TEMPLATE_BASE_API_PATH + "/**";
 
     private final ExecutionHistoryService executionHistoryService;
     private final ProjectService projectService;
@@ -44,7 +42,7 @@ public class TemplateResource {
                 .filter(e -> branch.equals(e.getBranch()))
                 .filter(e -> cycle.equals(e.getName()))
                 .findFirst()
-                .orElseThrow(() -> new NotFoundException("The branch and cycle couple for this project does not exists: it has perhaps been removed.", Entities.CYCLE_DEFINITION));
+                .orElseThrow(() -> new NotFoundException("The branch and cycle couple for this project does not exists: it has perhaps been removed.", CYCLE_DEFINITION));
         model.addAttribute("execution", execution);
         return "cycle-execution";
     }

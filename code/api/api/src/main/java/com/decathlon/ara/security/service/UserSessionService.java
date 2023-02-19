@@ -1,45 +1,41 @@
 package com.decathlon.ara.security.service;
 
-import com.decathlon.ara.Entities;
-import com.decathlon.ara.domain.security.member.user.User;
-import com.decathlon.ara.loader.DemoLoaderConstants;
-import com.decathlon.ara.repository.security.member.user.UserRepository;
+import com.decathlon.ara.domain.security.member.user.account.User;
+import com.decathlon.ara.repository.security.member.user.account.UserRepository;
 import com.decathlon.ara.security.dto.authentication.user.AuthenticatedOAuth2User;
 import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScope;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
 import com.decathlon.ara.security.mapper.AuthenticationMapper;
 import com.decathlon.ara.security.mapper.AuthorityMapper;
+import com.decathlon.ara.security.mapper.UserMapper;
 import com.decathlon.ara.service.exception.ForbiddenException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
+
+import static com.decathlon.ara.Entities.USER;
 
 @Service
 public class UserSessionService {
 
     private static final Logger LOG = LoggerFactory.getLogger(UserSessionService.class);
 
-    public static final String AUTHORITY_USER_PROJECT_SCOPE_PREFIX = "USER_PROJECT_SCOPE:";
-
-    public static final String AUTHORITY_USER_PROFILE_PREFIX = "USER_PROFILE:";
-
-    public static final String SUPER_ADMIN_PROFILE_AUTHORITY = AUTHORITY_USER_PROFILE_PREFIX + UserAccountProfile.SUPER_ADMIN.name();
-    public static final String AUDITOR_PROFILE_AUTHORITY = AUTHORITY_USER_PROFILE_PREFIX + UserAccountProfile.AUDITOR.name();
-
     private final UserRepository userRepository;
+
+    private final UserMapper userMapper;
 
     private final AuthorityMapper authorityMapper;
 
@@ -47,10 +43,12 @@ public class UserSessionService {
 
     public UserSessionService(
             UserRepository userRepository,
+            UserMapper userMapper,
             AuthorityMapper authorityMapper,
             AuthenticationMapper authenticationMapper
     ) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
         this.authorityMapper = authorityMapper;
         this.authenticationMapper = authenticationMapper;
     }
@@ -72,50 +70,29 @@ public class UserSessionService {
                 .findFirst();
     }
 
-    private boolean userDoesNotHaveAccessToAnyAuthority() {
+    private Collection<GrantedAuthority> getCurrentAuthorities() {
+        return getCurrentOAuth2Authentication().map(AbstractAuthenticationToken::getAuthorities).orElse(new HashSet<>());
+    }
+
+    private Optional<OAuth2AuthenticationToken> getCurrentOAuth2Authentication() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return true;
+        if (authentication != null && authentication.isAuthenticated() && (authentication instanceof OAuth2AuthenticationToken oauth2Authentication)) {
+            return Optional.of(oauth2Authentication);
         }
 
-        var authorities = authentication.getAuthorities();
-        return CollectionUtils.isEmpty(authorities);
-    }
-
-    private Stream<String[]> getSplitAuthoritiesStreamFromPrefix(String prefix) {
-        return SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .filter(authority -> authority.startsWith(prefix))
-                .map(authority -> authority.split(":"));
+        return Optional.empty();
     }
 
     /**
-     * Get the current user profile, if found (and correct)
+     * Get the current {@link UserAccountProfile}
      * @return the user profile
+     * @throws ForbiddenException thrown if the current user profile couldn't be fetched
      */
-    public Optional<UserAccountProfile> getCurrentUserProfile() {
-        if (userDoesNotHaveAccessToAnyAuthority()) {
-            return Optional.empty();
-        }
+    public UserAccountProfile getCurrentUserProfile() throws ForbiddenException {
+        var exception = new ForbiddenException(USER, "fetch current user profile");
 
-        var splitAuthoritiesStream = getSplitAuthoritiesStreamFromPrefix(AUTHORITY_USER_PROFILE_PREFIX);
-        return splitAuthoritiesStream
-                .filter(array -> array.length == 2)
-                .findFirst()
-                .map(array -> array[1])
-                .map(UserAccountProfile::getProfileFromString)
-                .orElse(Optional.empty());
-    }
-
-    /**
-     * Get the current user scoped project codes, if any
-     * @return the scoped project codes
-     */
-    public List<String> getCurrentUserScopedProjectCodes() {
-        return getCurrentUserScopes().stream().map(UserAccountScope::getProject).sorted().toList();
+        var authorities = getCurrentAuthorities();
+        return authorityMapper.getUserAccountProfileFromAuthorities(authorities).orElseThrow(() -> exception);
     }
 
     /**
@@ -123,17 +100,27 @@ public class UserSessionService {
      * @return the user scopes
      */
     public List<UserAccountScope> getCurrentUserScopes() {
-        if (userDoesNotHaveAccessToAnyAuthority()) {
-            return new ArrayList<>();
-        }
+        var authorities = getCurrentAuthorities();
+        return authorityMapper.getUserAccountScopesFromAuthorities(authorities).stream().toList();
+    }
 
-        var userAccountScopesStream = getSplitAuthoritiesStreamFromPrefix(AUTHORITY_USER_PROJECT_SCOPE_PREFIX)
-                .filter(array -> array.length == 3)
-                .map(array -> UserAccountScope.userAccountScopeFactory(array[1], array[2]))
-                .filter(Optional::isPresent)
-                .map(Optional::get);
-        var demoProjectScopeStream = Stream.of(new UserAccountScope(DemoLoaderConstants.DEMO_PROJECT_CODE, UserAccountScopeRole.ADMIN));
-        return Stream.concat(userAccountScopesStream, demoProjectScopeStream).toList();
+    /**
+     * Show if the current user can manage a user group
+     * @param groupId the group id
+     * @return true iff the current user can manage this group
+     */
+    public boolean canManageGroup(@NonNull long groupId) {
+        try {
+            var profile = getCurrentUserProfile();
+            if (!UserAccountProfile.SCOPED_USER.equals(profile)) {
+                return UserAccountProfile.SUPER_ADMIN.equals(profile);
+            }
+
+            var authorities = getCurrentAuthorities();
+            return authorityMapper.getManagedUserAccountGroupIdsFromAuthorities(authorities).contains(groupId);
+        } catch (ForbiddenException e) {
+            return false;
+        }
     }
 
     /**
@@ -141,24 +128,21 @@ public class UserSessionService {
      * @throws ForbiddenException thrown if the refresh has failed
      */
     public void refreshCurrentUserAuthorities() throws ForbiddenException {
-        var exception = new ForbiddenException(Entities.PROJECT, "refresh authorities");
+        var exception = new ForbiddenException(USER, "refresh authorities");
 
-        var securityContext = SecurityContextHolder.getContext();
-        var authentication = securityContext.getAuthentication();
-        if (!(authentication instanceof OAuth2AuthenticationToken oauth2Authentication)) {
-            throw exception;
-        }
+        var oauth2Authentication = getCurrentOAuth2Authentication().orElseThrow(() -> exception);
 
         var authenticatedUser = getCurrentAuthenticatedOAuth2UserFromAuthentication(oauth2Authentication).orElseThrow(() -> exception);
 
         var providerName = authenticatedUser.getProviderName();
         var userLogin = authenticatedUser.getLogin();
 
-        var user = userRepository.findById(new User.UserId(providerName, userLogin)).orElseThrow(() -> exception);
+        var currentUser = userRepository.findById(new User.UserId(providerName, userLogin)).orElseThrow(() -> exception);
+        var currentUserAccount = userMapper.getFullScopeAccessUserAccountFromUser(currentUser);
 
         var oauth2User = oauth2Authentication.getPrincipal();
-        var authorities = authorityMapper.getGrantedAuthoritiesFromUser(user);
-        securityContext.setAuthentication(new OAuth2AuthenticationToken(oauth2User, authorities, providerName));
+        var authorities = authorityMapper.getGrantedAuthoritiesFromUserAccount(currentUserAccount);
+        SecurityContextHolder.getContext().setAuthentication(new OAuth2AuthenticationToken(oauth2User, authorities, providerName));
     }
 
     /**
@@ -166,14 +150,7 @@ public class UserSessionService {
      * @return the current authenticated user
      */
     public Optional<AuthenticatedOAuth2User> getCurrentAuthenticatedOAuth2User() {
-        var securityContext = SecurityContextHolder.getContext();
-        var authentication = securityContext.getAuthentication();
-
-        if (authentication instanceof OAuth2AuthenticationToken oauth2Authentication) {
-            return getCurrentAuthenticatedOAuth2UserFromAuthentication(oauth2Authentication);
-        }
-
-        return Optional.empty();
+        return getCurrentOAuth2Authentication().flatMap(this::getCurrentAuthenticatedOAuth2UserFromAuthentication);
     }
 
     /**

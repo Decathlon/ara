@@ -18,8 +18,10 @@
 package com.decathlon.ara.security.dto.user;
 
 import com.decathlon.ara.security.dto.user.scope.UserAccountScope;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserAccount {
@@ -38,10 +40,16 @@ public class UserAccount {
 
     private UserAccountProfile profile;
 
-    private List<UserAccountScope> scopes;
+    private List<UserAccountScope> scopes = new ArrayList<>();
 
     @JsonProperty("default_project")
     private String defaultProjectCode;
+
+    @JsonIgnore
+    private List<Long> managedGroupIds = new ArrayList<>();
+
+    @JsonIgnore
+    private List<Long> membershipGroupIds = new ArrayList<>();
 
     public UserAccount(String providerName, String login) {
         this.providerName = providerName;
@@ -112,4 +120,19 @@ public class UserAccount {
         this.defaultProjectCode = defaultProjectCode;
     }
 
+    public List<Long> getManagedGroupIds() {
+        return managedGroupIds;
+    }
+
+    public void setManagedGroupIds(List<Long> managedGroupIds) {
+        this.managedGroupIds = managedGroupIds;
+    }
+
+    public List<Long> getMembershipGroupIds() {
+        return membershipGroupIds;
+    }
+
+    public void setMembershipGroupIds(List<Long> membershipGroupIds) {
+        this.membershipGroupIds = membershipGroupIds;
+    }
 }

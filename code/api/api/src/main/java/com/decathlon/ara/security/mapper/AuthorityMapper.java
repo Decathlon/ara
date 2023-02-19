@@ -1,103 +1,132 @@
 package com.decathlon.ara.security.mapper;
 
-import com.decathlon.ara.domain.security.member.user.User;
-import com.decathlon.ara.domain.security.member.user.UserProfile;
-import com.decathlon.ara.domain.security.member.user.UserScope;
 import com.decathlon.ara.security.dto.user.UserAccount;
 import com.decathlon.ara.security.dto.user.UserAccountProfile;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScope;
-import com.decathlon.ara.security.service.UserSessionService;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.util.Pair;
+import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.decathlon.ara.loader.DemoLoaderConstants.DEMO_PROJECT_CODE;
 
 @Component
 public class AuthorityMapper {
 
-    /**
-     * Extract granted authorities from a {@link User}
-     * @param user the user
-     * @return the matching granted authorities
-     */
-    public Set<GrantedAuthority> getGrantedAuthoritiesFromUser(@NonNull User user) {
-        var profileAuthority = getProfileAuthorityFromUserProfile(user.getProfile());
-        var scopeAuthorities = getScopeAuthoritiesFromUserScopes(user.getScopes());
-        return Stream.of(Set.of(profileAuthority), scopeAuthorities)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
-    }
+    public static final String AUTHORITY_USER_PROJECT_SCOPE_PREFIX = "USER_PROJECT_SCOPE:";
+    public static final String AUTHORITY_USER_PROFILE_PREFIX = "USER_PROFILE:";
 
-    private GrantedAuthority getProfileAuthorityFromUserProfile(@NonNull UserProfile profile) {
-        return getProfileAuthorityFromUserProfileAsString(profile.name());
-    }
+    public static final String AUTHORITY_MANAGED_GROUP_PREFIX = "MANAGED_GROUP:";
 
-    private GrantedAuthority getProfileAuthorityFromUserProfileAsString(String profileAsString) {
-        return () -> String.format("%s%s", UserSessionService.AUTHORITY_USER_PROFILE_PREFIX, profileAsString);
-    }
-
-    private Set<GrantedAuthority> getScopeAuthoritiesFromUserScopes(List<UserScope> scopes) {
-        return CollectionUtils.isNotEmpty(scopes) ?
-                scopes.stream()
-                        .filter(scope -> scope.getProject() != null)
-                        .filter(scope -> StringUtils.isNotBlank(scope.getProject().getCode()))
-                        .filter(scope -> scope.getRole() != null)
-                        .map(this::getScopeAuthorityFromUserScope)
-                        .collect(Collectors.toSet()) :
-                new HashSet<>();
-    }
-
-    private GrantedAuthority getScopeAuthorityFromUserScope(@NonNull UserScope scope) {
-        var projectCode = scope.getProject().getCode();
-        var roleAsString = scope.getRole().name();
-        return getScopeAuthorityFromProjectCodeAndRoleAsStringPair(Pair.of(projectCode, roleAsString));
-    }
-
-    private GrantedAuthority getScopeAuthorityFromProjectCodeAndRoleAsStringPair(Pair<String, String> projectCodeAndRoleAsStringPair) {
-        var projectCode = projectCodeAndRoleAsStringPair.getFirst();
-        var roleAsString = projectCodeAndRoleAsStringPair.getSecond();
-        var projectCodeAndRole = String.format("%s:%s", projectCode, roleAsString);
-        var authorityAsString = String.format("%s%s", UserSessionService.AUTHORITY_USER_PROJECT_SCOPE_PREFIX, projectCodeAndRole);
-        return () -> authorityAsString;
-    }
+    public static final String AUTHORITY_USER_PROFILE_SUPER_ADMIN = AUTHORITY_USER_PROFILE_PREFIX + UserAccountProfile.SUPER_ADMIN.name();
+    public static final String AUTHORITY_USER_PROFILE_AUDITOR = AUTHORITY_USER_PROFILE_PREFIX + UserAccountProfile.AUDITOR.name();
 
     /**
-     * Extract granted authorities from a user account
+     * Extract a {@link Collection} of {@link GrantedAuthority} from a {@link UserAccount}
      * @param userAccount the user account
      * @return the matching granted authorities
      */
-    public Set<GrantedAuthority> getGrantedAuthoritiesFromUserAccount(@NonNull UserAccount userAccount) {
+    public Collection<GrantedAuthority> getGrantedAuthoritiesFromUserAccount(@NonNull UserAccount userAccount) {
         var profileAuthority = getProfileAuthorityFromUserAccountProfile(userAccount.getProfile());
         var scopeAuthorities = getScopeAuthoritiesFromUserAccountScopes(userAccount.getScopes());
-        return Stream.of(Set.of(profileAuthority), scopeAuthorities)
+        var managedGroupAuthorities = getManagedGroupAuthoritiesFromManagedGroupIds(userAccount.getManagedGroupIds());
+        return Stream.of(Set.of(profileAuthority), scopeAuthorities, managedGroupAuthorities)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
     }
 
     private GrantedAuthority getProfileAuthorityFromUserAccountProfile(@NonNull UserAccountProfile profile) {
-        return getProfileAuthorityFromUserProfileAsString(profile.name());
+        return () -> String.format("%s%s", AUTHORITY_USER_PROFILE_PREFIX, profile.name());
     }
 
-    private Set<GrantedAuthority> getScopeAuthoritiesFromUserAccountScopes(List<UserAccountScope> scopes) {
-        return CollectionUtils.isNotEmpty(scopes) ?
-                scopes.stream()
-                        .map(this::getScopeAuthorityFromUserAccountScope)
-                        .collect(Collectors.toSet()) :
-                new HashSet<>();
+    private Collection<GrantedAuthority> getScopeAuthoritiesFromUserAccountScopes(Collection<UserAccountScope> scopes) {
+        if (CollectionUtils.isEmpty(scopes)) {
+            return new HashSet<>();
+        }
+        return scopes.stream().map(AuthorityMapper::getScopeAuthorityFromUserAccountScope).collect(Collectors.toSet());
     }
 
-    private GrantedAuthority getScopeAuthorityFromUserAccountScope(@NonNull UserAccountScope scope) {
-        var projectCode = scope.getProject();
-        var roleAsString = scope.getRole().name();
-        return getScopeAuthorityFromProjectCodeAndRoleAsStringPair(Pair.of(projectCode, roleAsString));
+    private static GrantedAuthority getScopeAuthorityFromUserAccountScope(@NonNull UserAccountScope scope) {
+        return () -> String.format("%s%s:%s", AUTHORITY_USER_PROJECT_SCOPE_PREFIX, scope.getProject(), scope.getRole());
+    }
+
+    private Collection<GrantedAuthority> getManagedGroupAuthoritiesFromManagedGroupIds(@NonNull Collection<Long> groupIds) {
+        if (CollectionUtils.isEmpty(groupIds)) {
+            return new HashSet<>();
+        }
+        return groupIds.stream().map(AuthorityMapper::getManagedGroupAuthorityFromManagedGroupId).collect(Collectors.toSet());
+    }
+
+    private static GrantedAuthority getManagedGroupAuthorityFromManagedGroupId(@NonNull Long groupId) {
+        return () -> String.format("%s%d", AUTHORITY_MANAGED_GROUP_PREFIX, groupId);
+    }
+
+    /**
+     * Get {@link UserAccountProfile} from a {@link Collection} of {@link GrantedAuthority}, if found
+     * @param authorities the granted authorities
+     * @return the user profile (as an optional)
+     */
+    public Optional<UserAccountProfile> getUserAccountProfileFromAuthorities(@NonNull Collection<GrantedAuthority> authorities) {
+        if (CollectionUtils.isEmpty(authorities)) {
+            return Optional.empty();
+        }
+        return authorities.stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(authority -> authority.startsWith(AUTHORITY_USER_PROFILE_PREFIX))
+                .map(authority -> authority.split(":"))
+                .filter(array -> array.length == 2)
+                .findFirst()
+                .map(array -> array[1])
+                .flatMap(UserAccountProfile::getProfileFromString);
+    }
+
+    /**
+     * Get a {@link Collection} of {@link UserAccountScope} from a {@link Collection} of {@link GrantedAuthority}
+     * Note that any user will have the demo project in its scope, as anyone is an admin in this project
+     * @param authorities the authorities
+     * @return user scopes
+     */
+    public Collection<UserAccountScope> getUserAccountScopesFromAuthorities(@NonNull Collection<GrantedAuthority> authorities) {
+        if (CollectionUtils.isEmpty(authorities)) {
+            return new ArrayList<>();
+        }
+
+        var demoProjectScopeStream = Stream.of(new UserAccountScope(DEMO_PROJECT_CODE, UserAccountScopeRole.ADMIN));
+        var userAccountScopesStream = authorities.stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(authority -> authority.startsWith(AUTHORITY_USER_PROJECT_SCOPE_PREFIX))
+                .map(authority -> authority.split(":"))
+                .filter(array -> array.length == 3)
+                .map(array -> UserAccountScope.userAccountScopeFactory(array[1], array[2]))
+                .filter(Optional::isPresent)
+                .map(Optional::get);
+        return Stream.concat(userAccountScopesStream, demoProjectScopeStream).toList();
+    }
+
+    /**
+     * Get managed user group ids from a {@link Collection} of {@link GrantedAuthority}
+     * @param authorities the authorities
+     * @return the managed group ids
+     */
+    public Collection<Long> getManagedUserAccountGroupIdsFromAuthorities(@NonNull Collection<GrantedAuthority> authorities) {
+        if (CollectionUtils.isEmpty(authorities)) {
+            return new ArrayList<>();
+        }
+
+        return authorities.stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(authority -> authority.startsWith(AUTHORITY_MANAGED_GROUP_PREFIX))
+                .map(authority -> authority.split(":"))
+                .filter(array -> array.length == 2)
+                .map(array -> array[1])
+                .map(Long::parseLong)
+                .sorted()
+                .distinct()
+                .toList();
     }
 }

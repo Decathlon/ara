@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.DemoService;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
@@ -29,25 +28,27 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.decathlon.ara.Entities.PROJECT;
 import static com.decathlon.ara.loader.DemoLoaderConstants.DEMO_PROJECT_CODE;
-import static com.decathlon.ara.web.rest.util.RestConstants.API_PATH;
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import static com.decathlon.ara.security.configuration.SecurityConfiguration.BASE_API_PATH;
+import static com.decathlon.ara.web.rest.DemoResource.DEMO_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_BASE_API_PATH;
 
 /**
  * REST controller for managing Cycle Runs.
  */
 @RestController
-@RequestMapping(DemoResource.PATH)
+@RequestMapping(DEMO_BASE_API_PATH)
 public class DemoResource {
 
-    static final String PATH = API_PATH + "/demo";
+    public static final String DEMO_BASE_API_PATH = BASE_API_PATH + "/demo";
 
-    public static final String PATHS = PATH + "/**";
+    public static final String DEMO_ALL_API_PATHS = DEMO_BASE_API_PATH + "/**";
 
-    private final DemoService service;
+    private final DemoService demoService;
 
-    public DemoResource(DemoService service) {
-        this.service = service;
+    public DemoResource(DemoService demoService) {
+        this.demoService = demoService;
     }
 
     /**
@@ -59,9 +60,9 @@ public class DemoResource {
     @PostMapping
     public ResponseEntity<ProjectDTO> create() {
         try {
-            final ProjectDTO project = service.create();
-            return ResponseEntity.created(HeaderUtil.uri(PROJECT_API_PATH, project.getCode()))
-                    .headers(HeaderUtil.entityCreated(Entities.PROJECT, project.getCode()))
+            final ProjectDTO project = demoService.create();
+            return ResponseEntity.created(HeaderUtil.uri(PROJECT_CODE_BASE_API_PATH, project.getCode()))
+                    .headers(HeaderUtil.entityCreated(PROJECT, project.getCode()))
                     .body(project);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
@@ -76,8 +77,8 @@ public class DemoResource {
     @DeleteMapping
     public ResponseEntity<Void> delete() {
         try {
-            service.delete();
-            return ResponseUtil.deleted(Entities.PROJECT, DEMO_PROJECT_CODE);
+            demoService.delete();
+            return ResponseUtil.deleted(PROJECT, DEMO_PROJECT_CODE);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
         }

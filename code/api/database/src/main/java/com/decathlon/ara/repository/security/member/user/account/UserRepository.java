@@ -1,7 +1,7 @@
-package com.decathlon.ara.repository.security.member.user;
+package com.decathlon.ara.repository.security.member.user.account;
 
-import com.decathlon.ara.domain.security.member.user.role.ProjectRole;
-import com.decathlon.ara.domain.security.member.user.User;
+import com.decathlon.ara.domain.security.member.user.ProjectRole;
+import com.decathlon.ara.domain.security.member.user.account.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,7 +25,7 @@ public interface UserRepository extends JpaRepository<User, User.UserId> {
         left join user.scopes scope
         left join scope.project project
         where
-            user.profile = com.decathlon.ara.domain.security.member.user.UserProfile.SCOPED_USER and
+            user.profile = com.decathlon.ara.domain.security.member.user.account.UserProfile.SCOPED_USER and
             user.providerName = :providerName and
             (:projectCode is null or project.code = :projectCode) and
             (:role is null or scope.role = :role)

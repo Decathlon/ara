@@ -17,8 +17,8 @@
 
 package com.decathlon.ara.domain;
 
-import com.decathlon.ara.domain.security.member.user.User;
-import com.decathlon.ara.domain.security.member.user.UserScope;
+import com.decathlon.ara.domain.security.member.user.account.User;
+import com.decathlon.ara.domain.security.member.user.account.UserProjectScope;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -64,7 +64,7 @@ public class Project {
 
     @OneToMany(mappedBy = "project")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private List<UserScope> userScopes = new ArrayList<>();
+    private List<UserProjectScope> userProjectScopes = new ArrayList<>();
 
     public Project() {
         this.creationDate = ZonedDateTime.now();
@@ -158,7 +158,7 @@ public class Project {
         this.communications = communications;
     }
 
-    public List<UserScope> getUserScopes() {
-        return userScopes;
+    public List<UserProjectScope> getUserProjectScopes() {
+        return userProjectScopes;
     }
 }

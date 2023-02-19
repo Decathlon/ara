@@ -5,7 +5,7 @@ import com.decathlon.ara.security.dto.user.scope.UserAccountScope;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
 import com.decathlon.ara.security.service.user.UserAccountService;
 import com.decathlon.ara.service.exception.ForbiddenException;
-import com.decathlon.ara.web.rest.authentication.UserResource;
+import com.decathlon.ara.web.rest.member.user.UserAccountResource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -27,13 +27,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class UserResourceTest {
+class UserAccountResourceTest {
 
     @Mock
     private UserAccountService userAccountService;
 
     @InjectMocks
-    private UserResource userResource;
+    private UserAccountResource userAccountResource;
 
     @Test
     void getCurrentUserAccount_returnBadRequestResponse_whenUserNotFound() {
@@ -44,7 +44,7 @@ class UserResourceTest {
         when(userAccountService.getCurrentUserAccountFromAuthentication(authentication)).thenReturn(Optional.empty());
 
         // Then
-        var response = userResource.getCurrentUserAccount(authentication);
+        var response = userAccountResource.getCurrentUserAccount(authentication);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNull();
     }
@@ -59,7 +59,7 @@ class UserResourceTest {
         when(userAccountService.getCurrentUserAccountFromAuthentication(authentication)).thenReturn(Optional.of(userAccount));
 
         // Then
-        var response = userResource.getCurrentUserAccount(authentication);
+        var response = userAccountResource.getCurrentUserAccount(authentication);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isSameAs(userAccount);
     }
@@ -75,7 +75,7 @@ class UserResourceTest {
         when(scope.getRole()).thenReturn(null);
 
         // Then
-        var response = userResource.updateUserScope(userLogin, projectCode, scope);
+        var response = userAccountResource.updateUserScope(userLogin, projectCode, scope);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNull();
 
@@ -99,7 +99,7 @@ class UserResourceTest {
         when(scope.getProject()).thenReturn(projectCode);
 
         // Then
-        var response = userResource.updateUserScope(userLogin, projectCode, scope);
+        var response = userAccountResource.updateUserScope(userLogin, projectCode, scope);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNull();
 
@@ -123,7 +123,7 @@ class UserResourceTest {
         when(scope.getProject()).thenReturn(requestBodyProjectCode);
 
         // Then
-        var response = userResource.updateUserScope(userLogin, pathVariableProjectCode, scope);
+        var response = userAccountResource.updateUserScope(userLogin, pathVariableProjectCode, scope);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNull();
 
@@ -146,7 +146,7 @@ class UserResourceTest {
         when(scope.getProject()).thenReturn(projectCode);
 
         // Then
-        var response = userResource.updateUserScope(userLogin, projectCode, scope);
+        var response = userAccountResource.updateUserScope(userLogin, projectCode, scope);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNull();
         assertThat(response.getHeaders()).isEmpty();

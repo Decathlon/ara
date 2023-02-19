@@ -12,9 +12,9 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 public abstract class UserLoginService<R extends OAuth2UserRequest, U extends OAuth2User, S extends OAuth2UserService<R, U>> {
 
@@ -56,12 +56,12 @@ public abstract class UserLoginService<R extends OAuth2UserRequest, U extends OA
         return getUpdatedOAuth2User(authorities, oauth2User);
     }
 
-    private Optional<Set<GrantedAuthority>> getAuthoritiesFromExistingUser(AuthenticatedOAuth2User authenticatedOAuth2User) {
+    private Optional<Collection<GrantedAuthority>> getAuthoritiesFromExistingUser(AuthenticatedOAuth2User authenticatedOAuth2User) {
         return userAccountService.getCurrentUserAccountFromAuthenticatedOAuth2User(authenticatedOAuth2User)
                 .map(authorityMapper::getGrantedAuthoritiesFromUserAccount);
     }
 
-    private Set<GrantedAuthority> getAuthoritiesAfterCreatingUser(AuthenticatedOAuth2User authenticatedOAuth2User) {
+    private Collection<GrantedAuthority> getAuthoritiesAfterCreatingUser(AuthenticatedOAuth2User authenticatedOAuth2User) {
         try {
             var createdAccount = userAccountService.createUserAccountFromAuthenticatedOAuth2User(authenticatedOAuth2User);
             return authorityMapper.getGrantedAuthoritiesFromUserAccount(createdAccount);
@@ -71,5 +71,5 @@ public abstract class UserLoginService<R extends OAuth2UserRequest, U extends OA
         }
     }
 
-    protected abstract U getUpdatedOAuth2User(Set<GrantedAuthority> authorities, U user);
+    protected abstract U getUpdatedOAuth2User(Collection<GrantedAuthority> authorities, U user);
 }

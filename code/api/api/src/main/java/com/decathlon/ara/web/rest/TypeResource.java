@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.TypeService;
 import com.decathlon.ara.service.dto.support.Upsert;
@@ -34,18 +33,19 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import static com.decathlon.ara.Entities.TYPE;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.TypeResource.TYPE_BASE_API_PATH;
 
 /**
  * REST controller for managing Type.
  */
 @RestController
-@RequestMapping(TypeResource.PATH)
+@RequestMapping(TYPE_BASE_API_PATH)
 public class TypeResource {
 
-    private static final String NAME = Entities.TYPE;
-    static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
-    public static final String PATHS = PATH + "/**";
+    public static final String TYPE_BASE_API_PATH = PROJECT_CODE_BASE_API_PATH + "/types";
+    public static final String TYPE_ALL_API_PATHS = TYPE_BASE_API_PATH + "/**";
 
     private final TypeService service;
 
@@ -69,8 +69,8 @@ public class TypeResource {
         try {
             TypeWithSourceCodeDTO createdDto = service.create(projectService.toId(projectCode), dtoToCreate);
             return ResponseEntity
-                    .created(HeaderUtil.uri(PATH + "/" + createdDto.getCode(), projectCode))
-                    .headers(HeaderUtil.entityCreated(NAME, createdDto.getCode()))
+                    .created(HeaderUtil.uri(TYPE_BASE_API_PATH + "/" + createdDto.getCode(), projectCode))
+                    .headers(HeaderUtil.entityCreated(TYPE, createdDto.getCode()))
                     .body(createdDto);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
@@ -95,7 +95,7 @@ public class TypeResource {
             final String newCode = result.getUpsertedDto().getCode();
             return ResponseEntity
                     .status(isNew ? HttpStatus.CREATED : HttpStatus.OK)
-                    .headers(isNew ? HeaderUtil.entityCreated(NAME, newCode) : HeaderUtil.entityUpdated(NAME, newCode))
+                    .headers(isNew ? HeaderUtil.entityCreated(TYPE, newCode) : HeaderUtil.entityUpdated(TYPE, newCode))
                     .body(result.getUpsertedDto());
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
@@ -128,7 +128,7 @@ public class TypeResource {
     public ResponseEntity<Void> delete(@PathVariable String projectCode, @PathVariable String code) {
         try {
             service.delete(projectService.toId(projectCode), code);
-            return ResponseUtil.deleted(NAME, code);
+            return ResponseUtil.deleted(TYPE, code);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
         }

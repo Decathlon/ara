@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.scenario.postman.resource;
 
-import com.decathlon.ara.Entities;
 import com.decathlon.ara.scenario.postman.upload.PostmanScenarioUploader;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.exception.BadRequestException;
@@ -34,16 +33,18 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import static com.decathlon.ara.Entities.SCENARIO;
+import static com.decathlon.ara.scenario.postman.resource.PostmanResource.POSTMAN_SCENARIO_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_BASE_API_PATH;
 
 @RestController
-@RequestMapping(PostmanResource.PATH)
+@RequestMapping(POSTMAN_SCENARIO_BASE_API_PATH)
 public class PostmanResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(PostmanResource.class);
 
-    static final String PATH = PROJECT_API_PATH + "/postman";
-    public static final String PATHS = PATH + "/**";
+    public static final String POSTMAN_SCENARIO_BASE_API_PATH = PROJECT_CODE_BASE_API_PATH + "/postman";
+    public static final String POSTMAN_SCENARIO_ALL_API_PATHS = POSTMAN_SCENARIO_BASE_API_PATH + "/**";
 
     private final ProjectService projectService;
 
@@ -73,7 +74,7 @@ public class PostmanResource {
         } catch (IOException e) {
             LOG.error("SCENARIO|postman|Project: {} -> Failed to upload ZIP file containing Postman requests for source code {}", projectCode, sourceCode, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .headers(HeaderUtil.exception(Entities.SCENARIO, e))
+                    .headers(HeaderUtil.exception(SCENARIO, e))
                     .build();
         } finally {
             FileUtils.deleteQuietly(tempZipFile);

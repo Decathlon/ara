@@ -1,13 +1,12 @@
-package com.decathlon.ara.domain.security.member.user;
+package com.decathlon.ara.domain.security.member.user.account;
 
 import com.decathlon.ara.domain.Project;
+import com.decathlon.ara.domain.security.member.user.group.UserGroup;
 import org.springframework.lang.NonNull;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Entity
 @IdClass(User.UserId.class)
@@ -27,6 +26,9 @@ public class User {
         private String providerName;
 
         private String login;
+
+        public UserId() {
+        }
 
         public UserId(@NonNull String providerName, @NonNull String login) {
             this.providerName = providerName;
@@ -72,7 +74,13 @@ public class User {
     private UserProfile profile;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private List<UserScope> scopes = new ArrayList<>();
+    private Set<UserProjectScope> scopes = new HashSet<>();
+
+    @ManyToMany(mappedBy = "members", fetch = FetchType.EAGER)
+    private Set<UserGroup> membershipGroups = new HashSet<>();
+
+    @ManyToMany(mappedBy = "managers", fetch = FetchType.EAGER)
+    private Set<UserGroup> managedGroups = new HashSet<>();
 
     public User() {
         this.profile = UserProfile.SCOPED_USER;
@@ -146,11 +154,27 @@ public class User {
         this.profile = profile;
     }
 
-    public List<UserScope> getScopes() {
+    public Set<UserProjectScope> getScopes() {
         return scopes;
     }
 
-    public void setScopes(List<UserScope> scopes) {
+    public void setScopes(Set<UserProjectScope> scopes) {
         this.scopes = scopes;
+    }
+
+    public Set<UserGroup> getManagedGroups() {
+        return managedGroups;
+    }
+
+    public void setManagedGroups(Set<UserGroup> managedGroups) {
+        this.managedGroups = managedGroups;
+    }
+
+    public Set<UserGroup> getMembershipGroups() {
+        return membershipGroups;
+    }
+
+    public void setMembershipGroups(Set<UserGroup> membershipGroups) {
+        this.membershipGroups = membershipGroups;
     }
 }

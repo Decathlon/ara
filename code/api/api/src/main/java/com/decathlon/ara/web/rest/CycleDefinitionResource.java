@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.CycleDefinitionService;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.dto.cycledefinition.CycleDefinitionDTO;
@@ -31,18 +30,19 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import static com.decathlon.ara.Entities.CYCLE_DEFINITION;
+import static com.decathlon.ara.web.rest.CycleDefinitionResource.CYCLE_DEFINITION_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_BASE_API_PATH;
 
 /**
  * REST controller for managing Cycle Definitions.
  */
 @RestController
-@RequestMapping(CycleDefinitionResource.PATH)
+@RequestMapping(CYCLE_DEFINITION_BASE_API_PATH)
 public class CycleDefinitionResource {
 
-    private static final String NAME = Entities.CYCLE_DEFINITION;
-    static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
-    public static final String PATHS = PATH + "/**";
+    public static final String CYCLE_DEFINITION_BASE_API_PATH = PROJECT_CODE_BASE_API_PATH + "/cycle-definitions";
+    public static final String CYCLE_DEFINITION_ALL_API_PATHS = CYCLE_DEFINITION_BASE_API_PATH + "/**";
 
     private final CycleDefinitionService service;
 
@@ -65,13 +65,13 @@ public class CycleDefinitionResource {
     public ResponseEntity<CycleDefinitionDTO> create(@PathVariable String projectCode, @Valid @RequestBody CycleDefinitionDTO dtoToCreate) {
 
         if (dtoToCreate.getId() != null) {
-            return ResponseEntity.badRequest().headers(HeaderUtil.idMustBeEmpty(NAME)).build();
+            return ResponseEntity.badRequest().headers(HeaderUtil.idMustBeEmpty(CYCLE_DEFINITION)).build();
         }
 
         try {
             CycleDefinitionDTO createdDto = service.create(projectService.toId(projectCode), dtoToCreate);
-            return ResponseEntity.created(HeaderUtil.uri(PATH + "/" + createdDto.getId(), projectCode))
-                    .headers(HeaderUtil.entityCreated(NAME, createdDto.getId()))
+            return ResponseEntity.created(HeaderUtil.uri(String.format("%s/%d", CYCLE_DEFINITION_BASE_API_PATH, createdDto.getId()), projectCode))
+                    .headers(HeaderUtil.entityCreated(CYCLE_DEFINITION, createdDto.getId()))
                     .body(createdDto);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
@@ -94,7 +94,7 @@ public class CycleDefinitionResource {
         try {
             CycleDefinitionDTO updatedDto = service.update(projectService.toId(projectCode), dtoToUpdate);
             return ResponseEntity.ok()
-                    .headers(HeaderUtil.entityUpdated(NAME, updatedDto.getId()))
+                    .headers(HeaderUtil.entityUpdated(CYCLE_DEFINITION, updatedDto.getId()))
                     .body(updatedDto);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
@@ -127,7 +127,7 @@ public class CycleDefinitionResource {
     public ResponseEntity<Void> delete(@PathVariable String projectCode, @PathVariable long id) {
         try {
             service.delete(projectService.toId(projectCode), id);
-            return ResponseUtil.deleted(NAME, id);
+            return ResponseUtil.deleted(CYCLE_DEFINITION, id);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
         }

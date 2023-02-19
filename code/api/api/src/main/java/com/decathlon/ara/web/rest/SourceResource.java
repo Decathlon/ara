@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.SourceService;
 import com.decathlon.ara.service.dto.source.SourceDTO;
@@ -34,25 +33,26 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import static com.decathlon.ara.Entities.SOURCE;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.SourceResource.SOURCE_BASE_API_PATH;
 
 /**
  * REST controller for managing Sources.
  */
 @RestController
-@RequestMapping(SourceResource.PATH)
+@RequestMapping(SOURCE_BASE_API_PATH)
 public class SourceResource {
 
-    private static final String NAME = Entities.SOURCE;
-    static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
-    public static final String PATHS = PATH + "/**";
+    public static final String SOURCE_BASE_API_PATH = PROJECT_CODE_BASE_API_PATH + "/sources";
+    public static final String SOURCE_ALL_API_PATHS = SOURCE_BASE_API_PATH + "/**";
 
-    private final SourceService service;
+    private final SourceService sourceService;
 
     private final ProjectService projectService;
 
-    public SourceResource(SourceService service, ProjectService projectService) {
-        this.service = service;
+    public SourceResource(SourceService sourceService, ProjectService projectService) {
+        this.sourceService = sourceService;
         this.projectService = projectService;
     }
 
@@ -65,7 +65,7 @@ public class SourceResource {
     @GetMapping
     public ResponseEntity<List<SourceDTO>> getAll(@PathVariable String projectCode) {
         try {
-            return ResponseEntity.ok().body(service.findAll(projectService.toId(projectCode)));
+            return ResponseEntity.ok().body(sourceService.findAll(projectService.toId(projectCode)));
         } catch (NotFoundException e) {
             return ResponseUtil.handle(e);
         }
@@ -82,9 +82,9 @@ public class SourceResource {
     @PostMapping
     public ResponseEntity<SourceDTO> create(@PathVariable String projectCode, @Valid @RequestBody SourceDTO dtoToCreate) {
         try {
-            SourceDTO createdDto = service.create(projectService.toId(projectCode), dtoToCreate);
-            return ResponseEntity.created(HeaderUtil.uri(PATH + "/" + createdDto.getCode(), projectCode))
-                    .headers(HeaderUtil.entityCreated(NAME, createdDto.getCode()))
+            SourceDTO createdDto = sourceService.create(projectService.toId(projectCode), dtoToCreate);
+            return ResponseEntity.created(HeaderUtil.uri(String.format("%s/%s", SOURCE_BASE_API_PATH, createdDto.getCode()), projectCode))
+                    .headers(HeaderUtil.entityCreated(SOURCE, createdDto.getCode()))
                     .body(createdDto);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
@@ -104,13 +104,13 @@ public class SourceResource {
     public ResponseEntity<SourceDTO> createOrUpdate(@PathVariable String projectCode, @PathVariable String code, @Valid @RequestBody SourceDTO dtoToUpdate) {
         dtoToUpdate.setCode(code); // HTTP PUT requires the URL to be the URL of the entity
         try {
-            final UpsertResultDTO<SourceDTO> result = service.createOrUpdate(projectService.toId(projectCode), dtoToUpdate);
+            final UpsertResultDTO<SourceDTO> result = sourceService.createOrUpdate(projectService.toId(projectCode), dtoToUpdate);
             final boolean isNew = result.getOperation() == Upsert.INSERT;
             final String newCode = result.getUpsertedDto().getCode();
 
             return ResponseEntity
                     .status(isNew ? HttpStatus.CREATED : HttpStatus.OK)
-                    .headers(isNew ? HeaderUtil.entityCreated(NAME, newCode) : HeaderUtil.entityUpdated(NAME, newCode))
+                    .headers(isNew ? HeaderUtil.entityCreated(SOURCE, newCode) : HeaderUtil.entityUpdated(SOURCE, newCode))
                     .body(result.getUpsertedDto());
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
@@ -127,8 +127,8 @@ public class SourceResource {
     @DeleteMapping("/{code}")
     public ResponseEntity<Void> delete(@PathVariable String projectCode, @PathVariable String code) {
         try {
-            service.delete(projectService.toId(projectCode), code);
-            return ResponseUtil.deleted(NAME, code);
+            sourceService.delete(projectService.toId(projectCode), code);
+            return ResponseUtil.deleted(SOURCE, code);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
         }

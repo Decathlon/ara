@@ -1,15 +1,7 @@
 package com.decathlon.ara.security.configuration;
 
-import com.decathlon.ara.scenario.cucumber.resource.CucumberResource;
-import com.decathlon.ara.scenario.cypress.resource.CypressResource;
-import com.decathlon.ara.scenario.generic.resource.GenericResource;
-import com.decathlon.ara.scenario.postman.resource.PostmanResource;
 import com.decathlon.ara.security.service.login.OAuth2UserLoginService;
 import com.decathlon.ara.security.service.login.OidcUserLoginService;
-import com.decathlon.ara.web.rest.*;
-import com.decathlon.ara.web.rest.authentication.AuthenticationResource;
-import com.decathlon.ara.web.rest.authentication.UserResource;
-import com.decathlon.ara.web.rest.util.RestConstants;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -18,8 +10,41 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
-import static com.decathlon.ara.security.service.UserSessionService.AUDITOR_PROFILE_AUTHORITY;
-import static com.decathlon.ara.security.service.UserSessionService.SUPER_ADMIN_PROFILE_AUTHORITY;
+import static com.decathlon.ara.scenario.cucumber.resource.CucumberResource.CUCUMBER_SCENARIO_ALL_API_PATHS;
+import static com.decathlon.ara.scenario.cypress.resource.CypressResource.CYPRESS_SCENARIO_ALL_API_PATHS;
+import static com.decathlon.ara.scenario.generic.resource.GenericResource.GENERIC_SCENARIO_ALL_API_PATHS;
+import static com.decathlon.ara.scenario.postman.resource.PostmanResource.POSTMAN_SCENARIO_ALL_API_PATHS;
+import static com.decathlon.ara.security.mapper.AuthorityMapper.AUTHORITY_USER_PROFILE_AUDITOR;
+import static com.decathlon.ara.security.mapper.AuthorityMapper.AUTHORITY_USER_PROFILE_SUPER_ADMIN;
+import static com.decathlon.ara.web.rest.CommunicationResource.COMMUNICATION_ALL_API_PATHS;
+import static com.decathlon.ara.web.rest.CountryResource.COUNTRY_ALL_API_PATHS;
+import static com.decathlon.ara.web.rest.CycleDefinitionResource.CYCLE_DEFINITION_ALL_API_PATHS;
+import static com.decathlon.ara.web.rest.DemoResource.DEMO_ALL_API_PATHS;
+import static com.decathlon.ara.web.rest.ErrorResource.ERROR_ALL_API_PATHS;
+import static com.decathlon.ara.web.rest.ErrorResource.ERROR_MATCHING_API_PATH;
+import static com.decathlon.ara.web.rest.ExecutedScenarioResource.EXECUTED_SCENARIO_ALL_API_PATHS;
+import static com.decathlon.ara.web.rest.ExecutedScenarioResource.EXECUTED_SCENARIO_HISTORY_API_PATH;
+import static com.decathlon.ara.web.rest.ExecutionResource.EXECUTION_ALL_API_PATHS;
+import static com.decathlon.ara.web.rest.ExecutionResource.EXECUTION_FILTER_API_PATH;
+import static com.decathlon.ara.web.rest.FeatureResource.FEATURE_ALL_API_PATHS;
+import static com.decathlon.ara.web.rest.FunctionalityResource.FUNCTIONALITY_ALL_API_PATHS;
+import static com.decathlon.ara.web.rest.FunctionalityResource.FUNCTIONALITY_EXPORT_API_PATH;
+import static com.decathlon.ara.web.rest.ProblemPatternResource.PROBLEM_PATTERN_ALL_API_PATHS;
+import static com.decathlon.ara.web.rest.ProblemResource.PROBLEM_ALL_API_PATHS;
+import static com.decathlon.ara.web.rest.ProblemResource.PROBLEM_FILTER_API_PATH;
+import static com.decathlon.ara.web.rest.ProjectResource.*;
+import static com.decathlon.ara.web.rest.PurgeResource.PURGE_FORCE_API_PATH;
+import static com.decathlon.ara.web.rest.RootCauseResource.ROOT_CAUSE_ALL_API_PATHS;
+import static com.decathlon.ara.web.rest.ScenarioResource.SCENARIO_ALL_API_PATHS;
+import static com.decathlon.ara.web.rest.SettingResource.SETTING_ALL_API_PATHS;
+import static com.decathlon.ara.web.rest.SeverityResource.SEVERITY_ALL_API_PATHS;
+import static com.decathlon.ara.web.rest.SourceResource.SOURCE_ALL_API_PATHS;
+import static com.decathlon.ara.web.rest.TeamResource.TEAM_ALL_API_PATHS;
+import static com.decathlon.ara.web.rest.TemplateResource.TEMPLATE_ALL_API_PATHS;
+import static com.decathlon.ara.web.rest.TypeResource.TYPE_ALL_API_PATHS;
+import static com.decathlon.ara.web.rest.authentication.AuthenticationResource.OAUTH_ALL_API_PATHS;
+import static com.decathlon.ara.web.rest.member.user.UserAccountResource.*;
+import static com.decathlon.ara.web.rest.member.user.UserGroupResource.*;
 
 @Configuration
 public class SecurityConfiguration {
@@ -33,7 +58,16 @@ public class SecurityConfiguration {
     private static final String PROJECT_SCOPE_FETCH_PERMISSION = "@projectScope.isEnabled(#projectCode, T(com.decathlon.ara.security.dto.permission.ResourcePermission).FETCH)";
     private static final String PROJECT_SCOPE_ALTER_PERMISSION = "@projectScope.isEnabled(#projectCode, T(com.decathlon.ara.security.dto.permission.ResourcePermission).ALTER)";
 
-    private static final String[] PROJECT_DEMO_PATHS = {DemoResource.PATHS, ProjectResource.DEMO_PATHS};
+    private static final String MEMBER_USER_GROUP_MANAGEMENT_PERMISSION = "@userSessionService.canManageGroup(#groupId)";
+
+    private static final String[] ALL_DEMO_RELATED_API_PATHS = {DEMO_ALL_API_PATHS, PROJECT_DEMO_ALL_API_PATHS};
+
+    private static final String ACTUATOR_ALL_API_PATHS = "/actuator/**";
+
+    public static final String BASE_API_PATH = "/api";
+
+    public static final String MEMBER_BASE_API_PATH = BASE_API_PATH + "/member";
+    public static final String MEMBER_USER_BASE_API_PATH = MEMBER_BASE_API_PATH + "/user";
 
     @Value("${ara.clientBaseUrl}")
     private String clientBaseUrl;
@@ -72,124 +106,134 @@ public class SecurityConfiguration {
         http
                 .csrf().disable() //NOSONAR
                 .authorizeRequests() //NOSONAR
-                .antMatchers(AuthenticationResource.PATHS, RestConstants.ACTUATOR_PATHS).permitAll()
-                // user > accounts
-                .antMatchers(HttpMethod.GET, UserResource.ALL_ACCOUNTS_PATH).hasAnyAuthority(SUPER_ADMIN_PROFILE_AUTHORITY, AUDITOR_PROFILE_AUTHORITY)
-                .antMatchers(HttpMethod.GET, UserResource.SCOPED_ACCOUNTS_PATH).authenticated()
-                .antMatchers(HttpMethod.GET, UserResource.SCOPED_ACCOUNTS_BY_PROJECT_PATH).access(PROJECT_SCOPE_FETCH_PERMISSION)
-                // user > accounts > scopes
-                .antMatchers(HttpMethod.PUT, UserResource.ACCOUNT_PROJECT_SCOPE_PATH).access(PROJECT_SCOPE_ALTER_PERMISSION)
-                .antMatchers(HttpMethod.DELETE, UserResource.ACCOUNT_PROJECT_SCOPE_PATH).access(PROJECT_SCOPE_ALTER_PERMISSION)
-                // user > accounts > profile
-                .antMatchers(HttpMethod.PUT, UserResource.ACCOUNT_PROFILE_PATH).hasAuthority(SUPER_ADMIN_PROFILE_AUTHORITY)
-                // user > accounts > current > default project
-                .antMatchers(HttpMethod.DELETE, UserResource.CLEAR_DEFAULT_PROJECT_PATH).authenticated()
-                .antMatchers(HttpMethod.PUT, UserResource.UPDATE_DEFAULT_PROJECT_BY_CODE_PATH).access(PROJECT_INSTANCE_FETCH_PERMISSION)
-                // user > accounts > current
-                .antMatchers(HttpMethod.GET, UserResource.CURRENT_ACCOUNT_PATH).authenticated()
+                .antMatchers(OAUTH_ALL_API_PATHS, ACTUATOR_ALL_API_PATHS).permitAll()
+                // member > user > accounts
+                .antMatchers(HttpMethod.GET, MEMBER_USER_ACCOUNT_ALL_ACCOUNTS_API_PATH).hasAnyAuthority(AUTHORITY_USER_PROFILE_SUPER_ADMIN, AUTHORITY_USER_PROFILE_AUDITOR)
+                .antMatchers(HttpMethod.GET, MEMBER_USER_ACCOUNT_SCOPED_ACCOUNTS_API_PATH).authenticated()
+                .antMatchers(HttpMethod.GET, MEMBER_USER_ACCOUNT_SCOPED_ACCOUNTS_BY_PROJECT_API_PATH).access(PROJECT_SCOPE_FETCH_PERMISSION)
+                // member > user > accounts > scopes
+                .antMatchers(HttpMethod.PUT, MEMBER_USER_ACCOUNT_PROJECT_SCOPE_API_PATH).access(PROJECT_SCOPE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.DELETE, MEMBER_USER_ACCOUNT_PROJECT_SCOPE_API_PATH).access(PROJECT_SCOPE_ALTER_PERMISSION)
+                // member > user > accounts > profile
+                .antMatchers(HttpMethod.PUT, MEMBER_USER_ACCOUNT_PROFILE_API_PATH).hasAuthority(AUTHORITY_USER_PROFILE_SUPER_ADMIN)
+                // member > user > accounts > current > default project
+                .antMatchers(HttpMethod.DELETE, MEMBER_USER_ACCOUNT_CLEAR_DEFAULT_PROJECT_API_PATH).authenticated()
+                .antMatchers(HttpMethod.PUT, MEMBER_USER_ACCOUNT_UPDATE_DEFAULT_PROJECT_BY_CODE_API_PATH).access(PROJECT_INSTANCE_FETCH_PERMISSION)
+                // member > user > accounts > current
+                .antMatchers(HttpMethod.GET, MEMBER_USER_ACCOUNT_CURRENT_ACCOUNT_API_PATH).authenticated()
+
+                // member > group
+                .antMatchers(HttpMethod.GET, MEMBER_USER_GROUP_ALL_GROUPS_API_PATH).authenticated()
+                .antMatchers(HttpMethod.GET, MEMBER_USER_GROUPS_CONTAINING_USER_FROM_LOGIN_API_PATH).authenticated()
+                .antMatchers(HttpMethod.GET, MEMBER_USER_GROUP_MANAGED_GROUPS_FROM_USER_LOGIN_API_PATH).authenticated()
+                .antMatchers(HttpMethod.GET, MEMBER_USER_GROUPS_CONTAINING_CURRENT_USER_API_PATH).authenticated()
+                .antMatchers(HttpMethod.GET, MEMBER_USER_GROUP_MANAGED_GROUPS_BY_CURRENT_USER_API_PATH).authenticated()
+                .antMatchers(HttpMethod.POST, MEMBER_USER_GROUP_BASE_API_PATH).authenticated()
+                .antMatchers(HttpMethod.PUT, MEMBER_USER_GROUP_BY_ID_API_PATH).access(MEMBER_USER_GROUP_MANAGEMENT_PERMISSION)
+                .antMatchers(HttpMethod.DELETE, MEMBER_USER_GROUP_BY_ID_API_PATH).access(MEMBER_USER_GROUP_MANAGEMENT_PERMISSION)
 
                 // projects > demo
-                .antMatchers(PROJECT_DEMO_PATHS).authenticated()
+                .antMatchers(ALL_DEMO_RELATED_API_PATHS).authenticated()
 
                 // projects [data] > execution
-                .antMatchers(HttpMethod.GET, ExecutionResource.PATHS).access(PROJECT_DATA_FETCH_PERMISSION)
-                .antMatchers(HttpMethod.POST, ExecutionResource.FILTER_PATH).access(PROJECT_DATA_FETCH_PERMISSION)
-                .antMatchers(HttpMethod.POST, ExecutionResource.PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
-                .antMatchers(HttpMethod.PUT, ExecutionResource.PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.GET, EXECUTION_ALL_API_PATHS).access(PROJECT_DATA_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.POST, EXECUTION_FILTER_API_PATH).access(PROJECT_DATA_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.POST, EXECUTION_ALL_API_PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.PUT, EXECUTION_ALL_API_PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
                 // projects [data] > executed scenario
-                .antMatchers(HttpMethod.GET, ExecutedScenarioResource.PATHS).access(PROJECT_DATA_FETCH_PERMISSION)
-                .antMatchers(HttpMethod.POST, ExecutedScenarioResource.HISTORY_PATH).access(PROJECT_DATA_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.GET, EXECUTED_SCENARIO_ALL_API_PATHS).access(PROJECT_DATA_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.POST, EXECUTED_SCENARIO_HISTORY_API_PATH).access(PROJECT_DATA_FETCH_PERMISSION)
                 // projects [data] > error
-                .antMatchers(HttpMethod.GET, ErrorResource.PATHS).access(PROJECT_DATA_FETCH_PERMISSION)
-                .antMatchers(HttpMethod.POST, ErrorResource.MATCHING_PATH).access(PROJECT_DATA_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.GET, ERROR_ALL_API_PATHS).access(PROJECT_DATA_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.POST, ERROR_MATCHING_API_PATH).access(PROJECT_DATA_FETCH_PERMISSION)
 
                 // projects [data] > scenario
-                .antMatchers(HttpMethod.GET, ScenarioResource.PATHS).access(PROJECT_DATA_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.GET, SCENARIO_ALL_API_PATHS).access(PROJECT_DATA_FETCH_PERMISSION)
                 // projects [data] > scenario > cucumber
-                .antMatchers(HttpMethod.POST, CucumberResource.PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.POST, CUCUMBER_SCENARIO_ALL_API_PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
                 // projects [data] > scenario > postman
-                .antMatchers(HttpMethod.POST, PostmanResource.PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.POST, POSTMAN_SCENARIO_ALL_API_PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
                 // projects [data] > scenario > cypress
-                .antMatchers(HttpMethod.POST, CypressResource.PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.POST, CYPRESS_SCENARIO_ALL_API_PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
                 // projects [data] > scenario > generic
-                .antMatchers(HttpMethod.POST, GenericResource.PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.POST, GENERIC_SCENARIO_ALL_API_PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
 
                 // projects [data] > functionality
-                .antMatchers(HttpMethod.GET, FunctionalityResource.PATHS).access(PROJECT_DATA_FETCH_PERMISSION)
-                .antMatchers(HttpMethod.OPTIONS, FunctionalityResource.EXPORT_PATH).access(PROJECT_DATA_FETCH_PERMISSION)
-                .antMatchers(HttpMethod.POST, FunctionalityResource.PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
-                .antMatchers(HttpMethod.PUT, FunctionalityResource.PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
-                .antMatchers(HttpMethod.DELETE, FunctionalityResource.PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.GET, FUNCTIONALITY_ALL_API_PATHS).access(PROJECT_DATA_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.OPTIONS, FUNCTIONALITY_EXPORT_API_PATH).access(PROJECT_DATA_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.POST, FUNCTIONALITY_ALL_API_PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.PUT, FUNCTIONALITY_ALL_API_PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.DELETE, FUNCTIONALITY_ALL_API_PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
 
                 // projects [data] > problem
-                .antMatchers(HttpMethod.GET, ProblemResource.PATHS).access(PROJECT_DATA_FETCH_PERMISSION)
-                .antMatchers(HttpMethod.POST, ProblemResource.FILTER_PATH).access(PROJECT_DATA_FETCH_PERMISSION)
-                .antMatchers(HttpMethod.POST, ProblemResource.PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
-                .antMatchers(HttpMethod.PUT, ProblemResource.PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
-                .antMatchers(HttpMethod.DELETE, ProblemResource.PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.GET, PROBLEM_ALL_API_PATHS).access(PROJECT_DATA_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.POST, PROBLEM_FILTER_API_PATH).access(PROJECT_DATA_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.POST, PROBLEM_ALL_API_PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.PUT, PROBLEM_ALL_API_PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.DELETE, PROBLEM_ALL_API_PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
                 // projects [data] > problem patterns
-                .antMatchers(HttpMethod.GET, ProblemPatternResource.PATHS).access(PROJECT_DATA_FETCH_PERMISSION)
-                .antMatchers(HttpMethod.PUT, ProblemPatternResource.PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
-                .antMatchers(HttpMethod.DELETE, ProblemPatternResource.PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.GET, PROBLEM_PATTERN_ALL_API_PATHS).access(PROJECT_DATA_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.PUT, PROBLEM_PATTERN_ALL_API_PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.DELETE, PROBLEM_PATTERN_ALL_API_PATHS).access(PROJECT_DATA_ALTER_PERMISSION)
 
                 // projects [data] > template
-                .antMatchers(HttpMethod.GET, TemplateResource.PATHS).access(PROJECT_DATA_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.GET, TEMPLATE_ALL_API_PATHS).access(PROJECT_DATA_FETCH_PERMISSION)
 
                 // projects [settings]
-                .antMatchers(HttpMethod.GET, SettingResource.PATHS).access(PROJECT_SETTINGS_FETCH_PERMISSION)
-                .antMatchers(HttpMethod.PUT, SettingResource.PATHS).access(PROJECT_SETTINGS_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.GET, SETTING_ALL_API_PATHS).access(PROJECT_SETTINGS_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.PUT, SETTING_ALL_API_PATHS).access(PROJECT_SETTINGS_ALTER_PERMISSION)
 
                 // projects [instance] > purge
-                .antMatchers(HttpMethod.DELETE, PurgeResource.FORCE_PATH).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.DELETE, PURGE_FORCE_API_PATH).access(PROJECT_INSTANCE_ALTER_PERMISSION)
                 // projects [instance] > communication
-                .antMatchers(HttpMethod.GET, CommunicationResource.PATHS).access(PROJECT_INSTANCE_FETCH_PERMISSION)
-                .antMatchers(HttpMethod.PUT, CommunicationResource.PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.GET, COMMUNICATION_ALL_API_PATHS).access(PROJECT_INSTANCE_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.PUT, COMMUNICATION_ALL_API_PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
                 // projects [instance] > country
-                .antMatchers(HttpMethod.GET, CountryResource.PATHS).access(PROJECT_INSTANCE_FETCH_PERMISSION)
-                .antMatchers(HttpMethod.POST, CountryResource.PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
-                .antMatchers(HttpMethod.PUT, CountryResource.PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
-                .antMatchers(HttpMethod.DELETE, CountryResource.PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.GET, COUNTRY_ALL_API_PATHS).access(PROJECT_INSTANCE_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.POST, COUNTRY_ALL_API_PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.PUT, COUNTRY_ALL_API_PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.DELETE, COUNTRY_ALL_API_PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
                 // projects [instance] > cycle definition
-                .antMatchers(HttpMethod.GET, CycleDefinitionResource.PATHS).access(PROJECT_INSTANCE_FETCH_PERMISSION)
-                .antMatchers(HttpMethod.POST, CycleDefinitionResource.PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
-                .antMatchers(HttpMethod.PUT, CycleDefinitionResource.PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
-                .antMatchers(HttpMethod.DELETE, CycleDefinitionResource.PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.GET, CYCLE_DEFINITION_ALL_API_PATHS).access(PROJECT_INSTANCE_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.POST, CYCLE_DEFINITION_ALL_API_PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.PUT, CYCLE_DEFINITION_ALL_API_PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.DELETE, CYCLE_DEFINITION_ALL_API_PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
                 // projects [instance] > root cause
-                .antMatchers(HttpMethod.GET, RootCauseResource.PATHS).access(PROJECT_INSTANCE_FETCH_PERMISSION)
-                .antMatchers(HttpMethod.POST, RootCauseResource.PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
-                .antMatchers(HttpMethod.PUT, RootCauseResource.PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
-                .antMatchers(HttpMethod.DELETE, RootCauseResource.PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.GET, ROOT_CAUSE_ALL_API_PATHS).access(PROJECT_INSTANCE_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.POST, ROOT_CAUSE_ALL_API_PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.PUT, ROOT_CAUSE_ALL_API_PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.DELETE, ROOT_CAUSE_ALL_API_PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
                 // projects [instance] > severity
-                .antMatchers(HttpMethod.GET, SeverityResource.PATHS).access(PROJECT_INSTANCE_FETCH_PERMISSION)
-                .antMatchers(HttpMethod.POST, SeverityResource.PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
-                .antMatchers(HttpMethod.PUT, SeverityResource.PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
-                .antMatchers(HttpMethod.DELETE, SeverityResource.PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.GET, SEVERITY_ALL_API_PATHS).access(PROJECT_INSTANCE_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.POST, SEVERITY_ALL_API_PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.PUT, SEVERITY_ALL_API_PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.DELETE, SEVERITY_ALL_API_PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
                 // projects [instance] > team
-                .antMatchers(HttpMethod.GET, TeamResource.PATHS).access(PROJECT_INSTANCE_FETCH_PERMISSION)
-                .antMatchers(HttpMethod.POST, TeamResource.PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
-                .antMatchers(HttpMethod.PUT, TeamResource.PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
-                .antMatchers(HttpMethod.DELETE, TeamResource.PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.GET, TEAM_ALL_API_PATHS).access(PROJECT_INSTANCE_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.POST, TEAM_ALL_API_PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.PUT, TEAM_ALL_API_PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.DELETE, TEAM_ALL_API_PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
                 // projects [instance] > source
-                .antMatchers(HttpMethod.GET, SourceResource.PATHS).access(PROJECT_INSTANCE_FETCH_PERMISSION)
-                .antMatchers(HttpMethod.POST, SourceResource.PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
-                .antMatchers(HttpMethod.PUT, SourceResource.PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
-                .antMatchers(HttpMethod.DELETE, SourceResource.PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.GET, SOURCE_ALL_API_PATHS).access(PROJECT_INSTANCE_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.POST, SOURCE_ALL_API_PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.PUT, SOURCE_ALL_API_PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.DELETE, SOURCE_ALL_API_PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
                 // projects [instance] > type
-                .antMatchers(HttpMethod.GET, TypeResource.PATHS).access(PROJECT_INSTANCE_FETCH_PERMISSION)
-                .antMatchers(HttpMethod.POST, TypeResource.PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
-                .antMatchers(HttpMethod.PUT, TypeResource.PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
-                .antMatchers(HttpMethod.DELETE, TypeResource.PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.GET, TYPE_ALL_API_PATHS).access(PROJECT_INSTANCE_FETCH_PERMISSION)
+                .antMatchers(HttpMethod.POST, TYPE_ALL_API_PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.PUT, TYPE_ALL_API_PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.DELETE, TYPE_ALL_API_PATHS).access(PROJECT_INSTANCE_ALTER_PERMISSION)
 
                 // projects [instance]
-                .antMatchers(HttpMethod.GET, ProjectResource.PATH).authenticated()
-                .antMatchers(HttpMethod.POST, ProjectResource.PATH).authenticated()
-                .antMatchers(HttpMethod.PUT, ProjectResource.CODE_PATH).access(PROJECT_INSTANCE_ALTER_PERMISSION)
-                .antMatchers(HttpMethod.DELETE, ProjectResource.CODE_PATH).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.GET, PROJECT_BASE_API_PATH).authenticated()
+                .antMatchers(HttpMethod.POST, PROJECT_BASE_API_PATH).authenticated()
+                .antMatchers(HttpMethod.PUT, PROJECT_CODE_BASE_API_PATH).access(PROJECT_INSTANCE_ALTER_PERMISSION)
+                .antMatchers(HttpMethod.DELETE, PROJECT_CODE_BASE_API_PATH).access(PROJECT_INSTANCE_ALTER_PERMISSION)
 
                 // feature flipping
-                .antMatchers(HttpMethod.GET, FeatureResource.PATHS).authenticated()
-                .antMatchers(HttpMethod.PATCH, FeatureResource.PATHS).hasAuthority(SUPER_ADMIN_PROFILE_AUTHORITY)
-                .antMatchers(HttpMethod.DELETE, FeatureResource.PATHS).hasAuthority(SUPER_ADMIN_PROFILE_AUTHORITY)
+                .antMatchers(HttpMethod.GET, FEATURE_ALL_API_PATHS).authenticated()
+                .antMatchers(HttpMethod.PATCH, FEATURE_ALL_API_PATHS).hasAuthority(AUTHORITY_USER_PROFILE_SUPER_ADMIN)
+                .antMatchers(HttpMethod.DELETE, FEATURE_ALL_API_PATHS).hasAuthority(AUTHORITY_USER_PROFILE_SUPER_ADMIN)
 
                 .anyRequest().denyAll()
                 .and()

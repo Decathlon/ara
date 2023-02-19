@@ -17,8 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.Entities;
-import com.decathlon.ara.loader.DemoLoaderConstants;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
 import com.decathlon.ara.security.service.user.UserAccountService;
 import com.decathlon.ara.service.ProjectService;
@@ -34,20 +32,24 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.*;
+import static com.decathlon.ara.Entities.PROJECT;
+import static com.decathlon.ara.loader.DemoLoaderConstants.DEMO_PROJECT_CODE;
+import static com.decathlon.ara.security.configuration.SecurityConfiguration.BASE_API_PATH;
+import static com.decathlon.ara.service.support.DtoConstants.CODE_PATTERN;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_BASE_API_PATH;
 
 /**
  * REST controller for managing Projects.
  */
 @RestController
-@RequestMapping(ProjectResource.PATH)
+@RequestMapping(PROJECT_BASE_API_PATH)
 public class ProjectResource {
 
-    private static final String NAME = Entities.PROJECT;
-    public static final String PATH = API_PATH + "/" + NAME + "s";
-    public static final String CODE_PATH = PROJECT_API_PATH;
+    public static final String PROJECT_BASE_API_PATH = BASE_API_PATH + "/projects";
+    public static final String PROJECT_CODE_REQUEST_PARAMETER = "{projectCode:" + CODE_PATTERN + "}";
+    public static final String PROJECT_CODE_BASE_API_PATH = PROJECT_BASE_API_PATH + "/" + PROJECT_CODE_REQUEST_PARAMETER;
 
-    public static final String DEMO_PATHS = PATH + "/" + DemoLoaderConstants.DEMO_PROJECT_CODE + "/**";
+    public static final String PROJECT_DEMO_ALL_API_PATHS = PROJECT_BASE_API_PATH + "/" + DEMO_PROJECT_CODE + "/**";
 
     private final ProjectService projectService;
 
@@ -69,15 +71,15 @@ public class ProjectResource {
     @PostMapping
     public ResponseEntity<ProjectDTO> create(@Valid @RequestBody ProjectDTO dtoToCreate) {
         if (dtoToCreate.getId() != null) {
-            return ResponseEntity.badRequest().headers(HeaderUtil.idMustBeEmpty(NAME)).build();
+            return ResponseEntity.badRequest().headers(HeaderUtil.idMustBeEmpty(PROJECT)).build();
         }
         try {
-            var creationUser = userAccountService.getCurrentUser().orElseThrow(() -> new ForbiddenException(Entities.PROJECT, "project creation"));
+            var creationUser = userAccountService.getCurrentUser().orElseThrow(() -> new ForbiddenException(PROJECT, "project creation"));
             ProjectDTO createdDto = projectService.create(dtoToCreate, creationUser);
             userAccountService.updateCurrentUserProjectScope(createdDto.getCode(), UserAccountScopeRole.ADMIN);
             return ResponseEntity
-                    .created(HeaderUtil.uri(PATH + "/" + createdDto.getId()))
-                    .headers(HeaderUtil.entityCreated(NAME, createdDto.getId()))
+                    .created(HeaderUtil.uri(PROJECT_BASE_API_PATH + "/" + createdDto.getId()))
+                    .headers(HeaderUtil.entityCreated(PROJECT, createdDto.getId()))
                     .body(createdDto);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
@@ -95,10 +97,10 @@ public class ProjectResource {
     @PutMapping(PROJECT_CODE_REQUEST_PARAMETER)
     public ResponseEntity<ProjectDTO> update(@PathVariable String projectCode, @Valid @RequestBody ProjectDTO projectToUpdate) {
         try {
-            var updateUser = userAccountService.getCurrentUser().orElseThrow(() -> new ForbiddenException(Entities.PROJECT, "project update", Pair.of("code", projectCode)));
+            var updateUser = userAccountService.getCurrentUser().orElseThrow(() -> new ForbiddenException(PROJECT, "project update", Pair.of("code", projectCode)));
             ProjectDTO updatedProject = projectService.update(projectToUpdate, updateUser);
             return ResponseEntity.ok()
-                    .headers(HeaderUtil.entityUpdated(NAME, updatedProject.getId()))
+                    .headers(HeaderUtil.entityUpdated(PROJECT, updatedProject.getId()))
                     .body(updatedProject);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
@@ -132,7 +134,7 @@ public class ProjectResource {
         } catch (ForbiddenException e) {
             return ResponseUtil.handle(e);
         }
-        return ResponseUtil.deleted(NAME, projectCode);
+        return ResponseUtil.deleted(PROJECT, projectCode);
     }
 
 }

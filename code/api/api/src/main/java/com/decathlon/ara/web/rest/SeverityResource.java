@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-import com.decathlon.ara.Entities;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.SeverityService;
 import com.decathlon.ara.service.dto.severity.SeverityDTO;
@@ -34,18 +33,19 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import static com.decathlon.ara.Entities.SEVERITY;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.SeverityResource.SEVERITY_BASE_API_PATH;
 
 /**
  * REST controller for managing Severity.
  */
 @RestController
-@RequestMapping(SeverityResource.PATH)
+@RequestMapping(SEVERITY_BASE_API_PATH)
 public class SeverityResource {
 
-    static final String PATH = PROJECT_API_PATH + "/severities";
-    public static final String PATHS = PATH + "/**";
-    private static final String NAME = Entities.SEVERITY;
+    public static final String SEVERITY_BASE_API_PATH = PROJECT_CODE_BASE_API_PATH + "/severities";
+    public static final String SEVERITY_ALL_API_PATHS = SEVERITY_BASE_API_PATH + "/**";
 
     private final SeverityService service;
 
@@ -68,8 +68,8 @@ public class SeverityResource {
     public ResponseEntity<SeverityDTO> create(@PathVariable String projectCode, @Valid @RequestBody SeverityDTO dtoToCreate) {
         try {
             SeverityDTO createdDto = service.create(projectService.toId(projectCode), dtoToCreate);
-            return ResponseEntity.created(HeaderUtil.uri(PATH + "/" + createdDto.getCode(), projectCode))
-                    .headers(HeaderUtil.entityCreated(NAME, createdDto.getCode()))
+            return ResponseEntity.created(HeaderUtil.uri(String.format("%s/%s", SEVERITY_BASE_API_PATH, createdDto.getCode()), projectCode))
+                    .headers(HeaderUtil.entityCreated(SEVERITY, createdDto.getCode()))
                     .body(createdDto);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
@@ -96,7 +96,7 @@ public class SeverityResource {
             final String newCode = result.getUpsertedDto().getCode();
             return ResponseEntity
                     .status(isNew ? HttpStatus.CREATED : HttpStatus.OK)
-                    .headers(isNew ? HeaderUtil.entityCreated(NAME, newCode) : HeaderUtil.entityUpdated(NAME, newCode))
+                    .headers(isNew ? HeaderUtil.entityCreated(SEVERITY, newCode) : HeaderUtil.entityUpdated(SEVERITY, newCode))
                     .body(result.getUpsertedDto());
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
@@ -129,7 +129,7 @@ public class SeverityResource {
     public ResponseEntity<Void> delete(@PathVariable String projectCode, @PathVariable String code) {
         try {
             service.delete(projectService.toId(projectCode), code);
-            return ResponseUtil.deleted(NAME, code);
+            return ResponseUtil.deleted(SEVERITY, code);
         } catch (BadRequestException e) {
             return ResponseUtil.handle(e);
         }

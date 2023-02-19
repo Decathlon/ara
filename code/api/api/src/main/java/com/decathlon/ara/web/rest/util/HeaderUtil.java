@@ -25,6 +25,8 @@ import org.springframework.http.HttpHeaders;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_REQUEST_PARAMETER;
+
 /**
  * Utility class for HTTP headers creation.
  */
@@ -117,7 +119,7 @@ public final class HeaderUtil {
     }
 
     public static URI uri(String str, String projectCode) {
-        return uri(str.replace(RestConstants.PROJECT_CODE_REQUEST_PARAMETER, projectCode));
+        return uri(str.replace(PROJECT_CODE_REQUEST_PARAMETER, projectCode));
     }
 
     private static HttpHeaders createAlert(String message, String param) {
