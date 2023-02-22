@@ -251,7 +251,7 @@
       },
 
       openProjectDetails (projectInfo) {
-        this.$router.push({ name: 'admin-project-details', params: { projectCode: projectInfo.code, projectName: projectInfo.name, userRole: projectInfo.currentUserRole } })
+        this.$router.push({ name: 'admin-project-details', params: { projectCode: projectInfo.code, projectName: projectInfo.name, userRole: this.user.profile } })
       },
 
       async initProjects () {

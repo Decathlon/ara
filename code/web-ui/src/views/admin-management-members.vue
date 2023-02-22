@@ -41,7 +41,6 @@
           </div>
         </div>
 
-
         <table class="adminTable" aria-label="Users with their roles and projects">
           <thead>
             <tr v-if="memberType === 'Members'">
@@ -203,7 +202,8 @@
                 this.members.push(user)
               }
             }
-            return this.members
+
+            return this.members.sort((a, b) => a.login.localeCompare(b.login))
           })
       },
 
@@ -256,12 +256,18 @@
       isManagerOf (scopes) {
         const adminProject = this.currentUser.scopes.filter(project => project.role === 'ADMIN')
 
-        return scopes.some(admin => adminProject.find(project => project.project === admin.project))
+        if (this.isAdmin) {
+          return true
+        } else {
+          return scopes.some(admin => adminProject.find(project => project.project === admin.project))
+        }
       },
 
       isMe (user) {
         if (user === this.currentUser.login) {
           return true
+        } else {
+          return false
         }
       }
     },
@@ -271,17 +277,16 @@
     },
 
     computed: {
-      sortedMembers () {
-        this.$store.dispatch('admin/showSubMenuMembers', false)
-        return this.members.map(item => item).sort((a, b) => a.id - b.id)
-      },
-
       currentUser () {
         return AuthenticationService.getDetails().user
       },
 
       manageProject () {
         return this.currentUser.scopes.some(({ role }) => role === 'ADMIN')
+      },
+
+      isAdmin () {
+        return this.currentUser.profile === 'SUPER_ADMIN'
       },
 
       isNotAuditor () {

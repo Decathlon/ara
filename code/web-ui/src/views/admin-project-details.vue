@@ -34,7 +34,7 @@
       <div class="projectCTA">
         <h2 v-if="!emptyProject">Project's members</h2>
 
-        <span :class="isMember ? 'hidden' : ''">
+        <span :class="isMember ? 'hidden' : isAuditor ? 'hidden' : ''">
           <Alert v-if="emptyProject" type="warning" class="btn-group-right">There are no members to show in this projects</Alert>
           <Button title="Add" type="primary" ghost class="btn-group-right" @click="memberToAdd = true">Add member</Button>
           <Button title="Edit" type="primary" class="btn-group-right" ghost>Edit project</Button>
@@ -56,8 +56,8 @@
             <td >{{ isMe(member.login) }}</td>
             <td>{{ getUserRole(member.scopes) }}</td>
             <td class="table-cta">
-              <Icon v-if="!isMember" type="md-close-circle" class="crossIcon" size="24" @click="removeUserFromProject(member)" />
-              <Icon v-if="!isMember" type="md-create" size="24" @click="openProjectDetails(project)" />
+              <Icon v-if="!isMember && !isAuditor" type="md-close-circle" class="crossIcon" size="24" @click="removeUserFromProject(member)" />
+              <Icon v-if="!isMember && !isAuditor" type="md-create" size="24" @click="openProjectDetails(project)" />
             </td>
           </tr>
         </tbody>
@@ -230,6 +230,10 @@
 
       isMember () {
         return this.$route.params.userRole === USER.ROLE_ON_PROJECT.MEMBER
+      },
+
+      isAuditor () {
+        return this.$route.params.userRole === USER.PROFILE.AUDITOR
       }
     },
 

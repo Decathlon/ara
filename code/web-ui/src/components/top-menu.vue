@@ -422,14 +422,11 @@
       }
     },
 
-    beforeUpdate () {
+    mounted () {
+      this.loadLocalParameters()
       if (localStorage.adminRight === 'true' || this.adminActivated) {
         this.$store.dispatch('admin/enableAdmin', 'projects-list')
       }
-    },
-
-    mounted () {
-      this.loadLocalParameters()
       Vue.http
         .get(api.paths.info, api.REQUEST_OPTIONS)
         .then((response) => {

@@ -22,59 +22,70 @@
     </div>
 
     <div>
-      <div v-if="isSuperAdmin || isAdmin" class="projectCTA">
-        <h2>Project's roles</h2>
+      <div v-if="this.getMemberInfo.scopes.length > 0">
+        <div v-if="isSuperAdmin || isAdmin" class="projectCTA">
+          <h2>Project's roles</h2>
 
-        <Button type="primary" class="btn-group-right" @click="userToProject = true">
-          Affect to a new project
-        </Button>
+          <Button type="primary" class="btn-group-right" @click="userToProject = true">
+            Affect to a new project
+          </Button>
+        </div>
+        <table class="adminTable" aria-label="User's project and his role for each of them">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Role</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody v-if="members">
+            <tr v-for="(scope, index) in (isAdmin ? sortedProjects : this.getMemberInfo.scopes)" :key="index" :class="index %2 !== 0 ? 'lightGrey' : 'darkGrey'">
+              <td class="userType">
+                {{ scope.project }}
+              </td>
+
+              <td class="userType">
+                <ul class="user-project-roles">
+                  <li class="user-role-chip" 
+                      @click="changeProfile({ member: getMemberInfo, project: scope.project, role: 'MEMBER'})" 
+                      :class="scope.role === 'MEMBER' ? ' active' : ''">
+                      <span v-if="scope.role === 'MEMBER'"><Icon type="md-checkmark" /></span>
+                      Member
+                  </li>
+                  <li class="user-role-chip"
+                      @click="changeProfile({ member: getMemberInfo, project: scope.project, role: 'MAINTAINER'})"
+                      :class="scope.role === 'MAINTAINER' ? ' active' : ''">
+                      <span v-if="scope.role === 'MAINTAINER'"><Icon type="md-checkmark" /></span>
+                      Maintainer
+                  </li>
+                  <li class="user-role-chip"
+                      @click="changeProfile({ member: getMemberInfo, project: scope.project, role: 'ADMIN'})" 
+                      :class="scope.role === 'ADMIN' ? ' active' : ''">
+                      <span v-if="scope.role === 'ADMIN'"><Icon type="md-checkmark" /></span>
+                      Admin
+                  </li>
+                </ul>
+              </td>
+
+              <td class="remove-member-project-btn">
+                  <Icon type="md-close-circle" size="32" @click="changeProfile({
+                    remove: true,
+                    project: scope.project
+                  })" />
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <table class="adminTable" aria-label="User's project and his role for each of them">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Role</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody v-if="members">
-          <tr v-for="(scope, index) in (isAdmin ? sortedProjects : this.getMemberInfo.scopes)" :key="index" :class="index %2 !== 0 ? 'lightGrey' : 'darkGrey'">
-            <td class="userType">
-              {{ scope.project }}
-            </td>
 
-            <td class="userType">
-              <ul class="user-project-roles">
-                <li class="user-role-chip" 
-                    @click="changeProfile({ member: getMemberInfo, project: scope.project, role: 'MEMBER'})" 
-                    :class="scope.role === 'MEMBER' ? ' active' : ''">
-                    <span v-if="scope.role === 'MEMBER'"><Icon type="md-checkmark" /></span>
-                    Member
-                </li>
-                <li class="user-role-chip"
-                    @click="changeProfile({ member: getMemberInfo, project: scope.project, role: 'MAINTAINER'})"
-                    :class="scope.role === 'MAINTAINER' ? ' active' : ''">
-                    <span v-if="scope.role === 'MAINTAINER'"><Icon type="md-checkmark" /></span>
-                    Maintainer
-                </li>
-                <li class="user-role-chip"
-                    @click="changeProfile({ member: getMemberInfo, project: scope.project, role: 'ADMIN'})" 
-                    :class="scope.role === 'ADMIN' ? ' active' : ''">
-                    <span v-if="scope.role === 'ADMIN'"><Icon type="md-checkmark" /></span>
-                    Admin
-                </li>
-              </ul>
-            </td>
-
-            <td class="remove-member-project-btn">
-                <Icon type="md-close-circle" size="32" @click="changeProfile({
-                  remove: true,
-                  project: scope.project
-                })" />
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div v-else class="projectCTA">
+        <span>
+          <Alert type="warning">This member is not affected to any project yet. Click the button below:</Alert>
+          <Button type="primary" @click="userToProject = true" >
+            Affect to a new project
+          </Button>
+        </span>
+      </div>
     </div>
 
     <Modal v-model="userToProject" title="Affect to a new project" okText="Add" footer-hide @on-ok="changeProfile" @close="userToProject = false" :width="900"
