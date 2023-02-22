@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static com.decathlon.ara.Entities.PROJECT;
 import static com.decathlon.ara.loader.DemoLoaderConstants.DEMO_PROJECT_CODE;
-import static com.decathlon.ara.security.configuration.SecurityConfiguration.BASE_API_PATH;
+import static com.decathlon.ara.security.access.SecurityConfiguration.BASE_API_PATH;
 import static com.decathlon.ara.web.rest.DemoResource.DEMO_BASE_API_PATH;
 import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_BASE_API_PATH;
 

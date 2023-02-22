@@ -98,6 +98,24 @@ public class User {
         this.profile = profile;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+
+        if (!providerName.equals(user.providerName)) return false;
+        return login.equals(user.login);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = providerName.hashCode();
+        result = 31 * result + login.hashCode();
+        return result;
+    }
+
     public String getProviderName() {
         return providerName;
     }

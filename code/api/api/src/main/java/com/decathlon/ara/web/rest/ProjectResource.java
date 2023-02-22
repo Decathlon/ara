@@ -18,7 +18,7 @@
 package com.decathlon.ara.web.rest;
 
 import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
-import com.decathlon.ara.security.service.user.UserAccountService;
+import com.decathlon.ara.security.service.member.user.account.UserAccountService;
 import com.decathlon.ara.service.ProjectService;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
@@ -34,7 +34,7 @@ import java.util.List;
 
 import static com.decathlon.ara.Entities.PROJECT;
 import static com.decathlon.ara.loader.DemoLoaderConstants.DEMO_PROJECT_CODE;
-import static com.decathlon.ara.security.configuration.SecurityConfiguration.BASE_API_PATH;
+import static com.decathlon.ara.security.access.SecurityConfiguration.BASE_API_PATH;
 import static com.decathlon.ara.service.support.DtoConstants.CODE_PATTERN;
 import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_BASE_API_PATH;
 

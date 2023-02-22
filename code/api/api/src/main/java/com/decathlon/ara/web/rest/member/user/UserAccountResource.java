@@ -3,7 +3,7 @@ package com.decathlon.ara.web.rest.member.user;
 import com.decathlon.ara.security.dto.user.UserAccount;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScope;
 import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
-import com.decathlon.ara.security.service.user.UserAccountService;
+import com.decathlon.ara.security.service.member.user.account.UserAccountService;
 import com.decathlon.ara.service.exception.ForbiddenException;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -16,7 +16,7 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
-import static com.decathlon.ara.security.configuration.SecurityConfiguration.MEMBER_USER_BASE_API_PATH;
+import static com.decathlon.ara.security.access.SecurityConfiguration.MEMBER_USER_BASE_API_PATH;
 import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_REQUEST_PARAMETER;
 import static com.decathlon.ara.web.rest.member.user.UserAccountResource.MEMBER_USER_ACCOUNT_BASE_API_PATH;
 import static com.decathlon.ara.web.rest.util.HeaderUtil.MESSAGE;

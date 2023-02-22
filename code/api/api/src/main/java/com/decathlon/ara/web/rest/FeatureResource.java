@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collections;
 import java.util.List;
 
-import static com.decathlon.ara.security.configuration.SecurityConfiguration.BASE_API_PATH;
+import static com.decathlon.ara.security.access.SecurityConfiguration.BASE_API_PATH;
 import static com.decathlon.ara.web.rest.FeatureResource.FEATURE_BASE_API_PATH;
 
 /**

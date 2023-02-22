@@ -5,7 +5,7 @@ import com.decathlon.ara.domain.RootCause;
 import com.decathlon.ara.domain.security.member.user.account.User;
 import com.decathlon.ara.repository.ProjectRepository;
 import com.decathlon.ara.repository.RootCauseRepository;
-import com.decathlon.ara.security.service.UserSessionService;
+import com.decathlon.ara.security.service.member.user.account.UserSessionService;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.ForbiddenException;

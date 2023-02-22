@@ -21,7 +21,7 @@ import com.decathlon.ara.domain.Communication;
 import com.decathlon.ara.domain.RootCause;
 import com.decathlon.ara.repository.CommunicationRepository;
 import com.decathlon.ara.repository.RootCauseRepository;
-import com.decathlon.ara.security.service.user.UserAccountService;
+import com.decathlon.ara.security.service.member.user.account.UserAccountService;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.exception.ForbiddenException;
 import com.decathlon.ara.web.rest.util.HeaderUtil;

@@ -1,7 +1,7 @@
 package com.decathlon.ara.web.rest.member.user;
 
 import com.decathlon.ara.security.dto.user.group.UserAccountGroup;
-import com.decathlon.ara.security.service.user.group.UserAccountGroupService;
+import com.decathlon.ara.security.service.member.user.group.UserAccountGroupService;
 import com.decathlon.ara.service.exception.ForbiddenException;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.decathlon.ara.Entities.GROUP;
-import static com.decathlon.ara.security.configuration.SecurityConfiguration.MEMBER_USER_BASE_API_PATH;
+import static com.decathlon.ara.security.access.SecurityConfiguration.MEMBER_USER_BASE_API_PATH;
 import static com.decathlon.ara.web.rest.member.user.UserGroupResource.MEMBER_USER_GROUP_BASE_API_PATH;
 
 @RestController
@@ -36,14 +36,18 @@ public class UserGroupResource {
     private static final String GROUPS_CONTAINING_USER = "/containing";
     private static final String GROUPS_CONTAINING_USER_FROM_LOGIN = GROUPS_CONTAINING_USER + USER_LOGIN;
     private static final String GROUPS_CONTAINING_CURRENT_USER = GROUPS_CONTAINING_USER + CURRENT;
+    private static final String GROUPS_MEMBERS_MANAGEMENT = GROUPS_CONTAINING_USER_FROM_LOGIN + "/groups" + GROUP_ID;
     public static final String MEMBER_USER_GROUPS_CONTAINING_USER_FROM_LOGIN_API_PATH = MEMBER_USER_GROUP_BASE_API_PATH + GROUPS_CONTAINING_USER_FROM_LOGIN;
     public static final String MEMBER_USER_GROUPS_CONTAINING_CURRENT_USER_API_PATH = MEMBER_USER_GROUP_BASE_API_PATH + GROUPS_CONTAINING_CURRENT_USER;
+    public static final String MEMBER_USER_GROUPS_MEMBERS_MANAGEMENT_API_PATH = MEMBER_USER_GROUP_BASE_API_PATH + GROUPS_MEMBERS_MANAGEMENT;
 
     private static final String MANAGED_GROUPS = "/managed";
     private static final String MANAGED_GROUPS_FROM_USER_LOGIN = MANAGED_GROUPS + USER_LOGIN;
     private static final String MANAGED_GROUPS_BY_CURRENT_USER = MANAGED_GROUPS + CURRENT;
+    private static final String GROUPS_MANAGERS_MANAGEMENT = MANAGED_GROUPS_FROM_USER_LOGIN + "/groups" + GROUP_ID;
     public static final String MEMBER_USER_GROUP_MANAGED_GROUPS_FROM_USER_LOGIN_API_PATH = MEMBER_USER_GROUP_BASE_API_PATH + MANAGED_GROUPS_FROM_USER_LOGIN;
     public static final String MEMBER_USER_GROUP_MANAGED_GROUPS_BY_CURRENT_USER_API_PATH = MEMBER_USER_GROUP_BASE_API_PATH + MANAGED_GROUPS_BY_CURRENT_USER;
+    public static final String MEMBER_USER_GROUPS_MANAGERS_MANAGEMENT_API_PATH = MEMBER_USER_GROUP_BASE_API_PATH + GROUPS_MANAGERS_MANAGEMENT;
 
     public UserGroupResource(UserAccountGroupService userAccountGroupService) {
         this.userAccountGroupService = userAccountGroupService;
@@ -128,6 +132,46 @@ public class UserGroupResource {
         try {
             var groups = userAccountGroupService.getGroupsManagedByCurrentUser();
             return ResponseEntity.ok(groups);
+        } catch (ForbiddenException e) {
+            return ResponseUtil.handle(e);
+        }
+    }
+
+    @PutMapping(GROUPS_MEMBERS_MANAGEMENT)
+    public ResponseEntity<UserAccountGroup> addMemberToGroup(@PathVariable String userLogin, @PathVariable Long groupId) {
+        try {
+            var updatedGroup = userAccountGroupService.addMemberToGroup(userLogin, groupId);
+            return ResponseEntity.ok(updatedGroup);
+        } catch (ForbiddenException e) {
+            return ResponseUtil.handle(e);
+        }
+    }
+
+    @DeleteMapping(GROUPS_MEMBERS_MANAGEMENT)
+    public ResponseEntity<Void> removeMemberFromGroup(@PathVariable String userLogin, @PathVariable Long groupId) {
+        try {
+            userAccountGroupService.removeMemberFromGroup(userLogin, groupId);
+            return ResponseEntity.ok().build();
+        } catch (ForbiddenException e) {
+            return ResponseUtil.handle(e);
+        }
+    }
+
+    @PutMapping(GROUPS_MANAGERS_MANAGEMENT)
+    public ResponseEntity<UserAccountGroup> addManagerToGroup(@PathVariable String userLogin, @PathVariable Long groupId) {
+        try {
+            var updatedGroup = userAccountGroupService.addManagerToGroup(userLogin, groupId);
+            return ResponseEntity.ok(updatedGroup);
+        } catch (ForbiddenException e) {
+            return ResponseUtil.handle(e);
+        }
+    }
+
+    @DeleteMapping(GROUPS_MANAGERS_MANAGEMENT)
+    public ResponseEntity<Void> removeManagerFromGroup(@PathVariable String userLogin, @PathVariable Long groupId) {
+        try {
+            userAccountGroupService.removeManagerFromGroup(userLogin, groupId);
+            return ResponseEntity.ok().build();
         } catch (ForbiddenException e) {
             return ResponseUtil.handle(e);
         }

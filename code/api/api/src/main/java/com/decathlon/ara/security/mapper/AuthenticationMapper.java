@@ -1,7 +1,7 @@
 package com.decathlon.ara.security.mapper;
 
 import com.decathlon.ara.security.dto.authentication.user.AuthenticatedOAuth2User;
-import com.decathlon.ara.security.service.user.strategy.select.UserStrategySelector;
+import com.decathlon.ara.security.service.member.user.account.login.strategy.select.UserStrategySelector;
 import com.decathlon.ara.service.exception.ForbiddenException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;

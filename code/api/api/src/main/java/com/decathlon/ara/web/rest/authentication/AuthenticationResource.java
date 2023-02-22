@@ -18,7 +18,7 @@
 package com.decathlon.ara.web.rest.authentication;
 
 import com.decathlon.ara.security.dto.authentication.provider.AuthenticationProviders;
-import com.decathlon.ara.security.service.AuthenticationService;
+import com.decathlon.ara.security.service.member.user.account.AuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;

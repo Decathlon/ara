@@ -1,7 +1,7 @@
 package com.decathlon.ara.security.mapper;
 
-import com.decathlon.ara.security.service.user.strategy.UserAccountStrategy;
-import com.decathlon.ara.security.service.user.strategy.select.UserStrategySelector;
+import com.decathlon.ara.security.service.member.user.account.login.strategy.UserAccountStrategy;
+import com.decathlon.ara.security.service.member.user.account.login.strategy.select.UserStrategySelector;
 import com.decathlon.ara.service.exception.ForbiddenException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

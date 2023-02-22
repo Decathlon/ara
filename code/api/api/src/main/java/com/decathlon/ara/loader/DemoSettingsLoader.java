@@ -20,7 +20,7 @@ package com.decathlon.ara.loader;
 import com.decathlon.ara.domain.Communication;
 import com.decathlon.ara.domain.enumeration.CommunicationType;
 import com.decathlon.ara.domain.enumeration.Technology;
-import com.decathlon.ara.security.service.user.UserAccountService;
+import com.decathlon.ara.security.service.member.user.account.UserAccountService;
 import com.decathlon.ara.service.*;
 import com.decathlon.ara.service.dto.communication.CommunicationDTO;
 import com.decathlon.ara.service.dto.country.CountryDTO;
