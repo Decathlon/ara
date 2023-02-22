@@ -32,16 +32,17 @@
       </span>
 
       <div class="projectCTA">
-        <h2>Project's members</h2>
+        <h2 v-if="!emptyProject">Project's members</h2>
 
         <span :class="isMember ? 'hidden' : ''">
+          <Alert v-if="emptyProject" type="warning" class="btn-group-right">There are no members to show in this projects</Alert>
           <Button title="Add" type="primary" ghost class="btn-group-right" @click="memberToAdd = true">Add member</Button>
           <Button title="Edit" type="primary" class="btn-group-right" ghost>Edit project</Button>
           <Button title="Delete project" class="btn-group-right" type="error">Remove project</Button>
         </span>
       </div>
 
-      <table class="adminTable" aria-label="Project's members name and role">
+      <table v-if="!emptyProject" class="adminTable" aria-label="Project's members name and role">
         <thead>
           <tr>
             <th>Name</th>
@@ -52,11 +53,11 @@
 
         <tbody>
           <tr v-for="(member, index) in usersList" :key="index" :class="index %2 !== 0 ? 'lightGrey' : 'darkGrey'">
-            <td >{{ member.login }}</td>
+            <td >{{ isMe(member.login) }}</td>
             <td>{{ getUserRole(member.scopes) }}</td>
             <td class="table-cta">
-              <Icon type="md-close-circle" class="crossIcon" size="24" @click="removeUserFromProject()" :class="isMember ? 'hidden' : ''"/>
-              <Icon type="md-create" size="24" @click="openProjectDetails(project)" :class="isMember ? 'hidden' : ''"/>
+              <Icon v-if="!isMember" type="md-close-circle" class="crossIcon" size="24" @click="removeUserFromProject(member)" />
+              <Icon v-if="!isMember" type="md-create" size="24" @click="openProjectDetails(project)" />
             </td>
           </tr>
         </tbody>
@@ -75,13 +76,14 @@
           </RadioGroup>
         </FormItem>
         <FormItem label="Users" prop="scope">
+          <span v-if="!isAlreadyMember.length"><strong>No members to add</strong></span>
           <RadioGroup v-model="formValidate.scope">
             <Radio v-for="user in isAlreadyMember" class="ivu-radio-border" :label="user"></Radio>
           </RadioGroup>
         </FormItem>
         <Form-item class="modal-cta">
           <Button @click="memberToAdd = false">Cancel</Button>
-          <Button type="primary" @click="handleSubmit('formValidate')">Add</Button>
+          <Button type="primary" @click="handleSubmit('formValidate')" :disabled="!isAlreadyMember.length">Add</Button>
         </Form-item>
       </Form>
     </Modal>
@@ -101,6 +103,7 @@
     components: {
       formField
     },
+
     data () {
       return {
         projectInfo: [],
@@ -108,7 +111,8 @@
         projectCode: '',
         memberToAdd: false,
         usersList: [],
-        users: [],
+        members: [],
+        emptyProject: false,
         userRole: ['Member', 'Maintainer', 'Admin'],
         formValidate: {
           role: '',
@@ -125,26 +129,26 @@
         projectRole: ''
       }
     },
+
     methods: {
-      newRowData () {
-        let row = {}
-        for (let field of this.fields) {
-          row[field.code] = field.newValue
-        }
-        return row
-      },
+      getScopedUsers () {
+        this.usersList = []
 
-      async getAllUsers () {
-        await Vue.http
-          .get(api.paths.allUsers, api.REQUEST_OPTIONS)
-          .then((response) => { this.usersList = response.body })
-      },
+        Vue.http
+          .get(api.paths.scopedUsers, api.REQUEST_OPTIONS)
+          .then((response) => {
+            this.members = response.body
+          })
 
-      async getScopedUsers () {
-        await Vue.http
+        Vue.http
           .get(api.paths.scopedUsersByProject(this.projectCode), api.REQUEST_OPTIONS)
           .then((response) => {
-            this.usersList = response.body
+            if (response.body.length > 0) {
+              this.emptyProject = false
+              this.usersList = response.body
+            } else {
+              this.emptyProject = true
+            }
           })
       },
 
@@ -165,14 +169,49 @@
               role: this.formValidate.role.toUpperCase(),
               project: this.projectCode
             }
-
             Vue.http
               .put(api.paths.userProjectScopeManagement(this.formValidate.scope, this.projectCode), scopeInfo, api.REQUEST_OPTIONS)
-              .then(() => this.$Message.success('User successfully added to ' + this.projectCode))
+              .then(() => {
+                this.getScopedUsers()
+                this.$refs[name].resetFields()
+                this.memberToAdd = false
+                this.$Message.success({
+                  content: 'User successfully added to ' + this.projectCode,
+                  duration: 2
+                })
+              })
           } else {
-            this.$Message.error('Something went wrong, please contact an admin')
+            this.$Message.error({
+              content: 'Please fill all required fields',
+              duration: 2
+            })
           }
         })
+      },
+
+      removeUserFromProject (member) {
+        const scopeInfo = {
+          role: this.getUserRole(member.scopes),
+          project: this.projectCode
+        }
+
+        Vue.http
+          .delete(api.paths.userProjectScopeManagement(member.login, this.projectCode), scopeInfo, api.REQUEST_OPTIONS)
+          .then(() => {
+            this.getScopedUsers()
+            this.$Message.success({
+              content: 'User successfully removed from ' + this.projectCode,
+              duration: 2
+            })
+          })
+      },
+
+      isMe (user) {
+        if (user === this.user.login) {
+          return 'Me'
+        } else {
+          return user
+        }
       }
     },
 
@@ -180,37 +219,25 @@
       ...mapState('users', ['user']),
 
       isAlreadyMember () {
-        const newUser = this.users?.map(item => item.login)
-        return this.usersList.filter(item => newUser.some(itemToBeRemoved => itemToBeRemoved !== item))
-      },
+        const newUser = this.members?.map(item => item.login)
 
-      isSuperAdmin () {
-        if (this.user.profile === USER.PROFILE.SUPER_ADMIN) {
-          return true
+        if (this.usersList.length > 0) {
+          return newUser.filter(val => !JSON.stringify(this.usersList).includes(val))
+        } else {
+          return newUser
         }
       },
 
       isMember () {
-        if (this.$route.params.role === USER.ROLE_ON_PROJECT.MEMBER) {
-          return true
-        }
+        return this.$route.params.userRole === USER.ROLE_ON_PROJECT.MEMBER
       }
     },
 
     mounted () {
+      this.projectCode = this.$route.params.projectCode
+      this.getScopedUsers()
       this.$store.dispatch('users/getUserInfo', AuthenticationService.getDetails().user)
       this.projectName = this.$route.params.projectName
-      this.projectCode = this.$route.params.projectCode
-      if (this.isSuperAdmin) {
-        this.getAllUsers()
-      } else {
-        this.getScopedUsers()
-      }
-      Vue.http
-        .get(api.paths.scopedUsersByProject(this.projectCode), api.REQUEST_OPTIONS)
-        .then((response) => {
-          this.users = response.body
-        })
     },
 
     beforeDestroy () {

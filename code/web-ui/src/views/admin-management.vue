@@ -24,12 +24,12 @@
           <Option v-for="(filter, index) in filterType" :value="index" :key="index" :label="filter" />
         </Select>
         <Input v-if="filterSelected === 'Name' || filterSelected === 'Created By'" class="filterSearch" v-model="searchElement" search placeholder="Enter something..." />
-        <DatePicker v-else class="dateSelect" type="datetimerange" placement="bottom-right" placeholder="Select date range" format="yyyy-MM-dd HH:mm:ss" :start-date="new Date(2020, 4, 14)" @on-change="dateSelected" />
-        <Button v-if="user.default_project" type="error" class="deleteBtn" @click="clearDefaultProject()" ghost>
+        <DatePicker v-else class="dateSelect" type="datetimerange" placement="bottom-right" placeholder="Select date range" format="yyyy-MM-dd HH:mm:ss" :start-date="new Date(2023, 1, 1)" @on-change="dateSelected" />
+        <Button v-if="user.default_project" type="error" class="deleteBtn btn-group-right" @click="clearDefaultProject()" ghost>
           Clear default project
         </Button>
         <Button v-if="demoProjectNotFound" type="warning" class="demoProjectButton" data-nrt="createDemo" :loading="loadingDemoProject" @click="createDemoProject">Create the demo project</Button>
-        <Button type="primary" :class="demoProjectNotFound ? 'addBtn' : 'addBtn align-right'" @click="openProjectCreationModal()">
+        <Button type="primary" :class="demoProjectNotFound ? 'addBtn btn-group-right' : 'addBtn align-right'" @click="openProjectCreationModal()">
           Add project
         </Button>
       </div>
@@ -251,8 +251,9 @@
       },
 
       openProjectDetails (projectInfo) {
-        this.$router.push({ name: 'admin-project-details', params: { projectCode: projectInfo.code, projectName: projectInfo.name, role: projectInfo.currentUserRole } })
+        this.$router.push({ name: 'admin-project-details', params: { projectCode: projectInfo.code, projectName: projectInfo.name, userRole: projectInfo.currentUserRole } })
       },
+
       async initProjects () {
         await Vue.http
           .get(api.paths.projects, api.REQUEST_OPTIONS)

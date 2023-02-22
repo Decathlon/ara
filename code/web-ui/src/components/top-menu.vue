@@ -72,6 +72,9 @@
             <span v-if="isAdmin">
               <img src="../assets/super_admin.png" width="20" height="20" alt="User role">
             </span>
+            <span v-if="isAuditor">
+              <img src="../assets/auditor.png" width="20" height="20" alt="User role">
+            </span>
           </div>
           <div slot="content">
             <p v-if="providerName">Connected via <strong>{{providerName}}</strong></p>
@@ -282,8 +285,16 @@
         return 1 // Show a red badge dot
       },
 
+      adminActivated () {
+        return this.$route.path.includes('admin')
+      },
+
       isAdmin () {
         return this.user.profile === USER.PROFILE.SUPER_ADMIN
+      },
+
+      isAuditor () {
+        return this.user.profile === USER.PROFILE.AUDITOR
       }
     },
 
@@ -412,7 +423,7 @@
     },
 
     beforeUpdate () {
-      if (localStorage.adminRight === 'true') {
+      if (localStorage.adminRight === 'true' || this.adminActivated) {
         this.$store.dispatch('admin/enableAdmin', 'projects-list')
       }
     },
@@ -599,8 +610,8 @@
 
   .user-avatar span {
     position: absolute;
-    left: 20px;
-    top: 15px;
+    left: 21px;
+    top: 18px;
   }
 
   .user-avatar span img {
