@@ -104,7 +104,7 @@ public class UserAccountResource {
     }
 
     @PutMapping(ACCOUNT_PROJECT_SCOPE)
-    public ResponseEntity<Void> updateUserScope(@PathVariable String userLogin, @PathVariable String projectCode, @Valid @RequestBody UserAccountScope scope) {
+    public ResponseEntity<UserAccount> updateUserScope(@PathVariable String userLogin, @PathVariable String projectCode, @Valid @RequestBody UserAccountScope scope) {
         return getUpdateUserScopeBadRequestMessage(projectCode, scope)
                 .map(this::getBadRequestResponseEntityFromErrorMessage)
                 .orElseGet(() -> getUpdateUserScopeResponseEntity(userLogin, projectCode, scope));
@@ -125,29 +125,29 @@ public class UserAccountResource {
         return Optional.empty();
     }
 
-    private ResponseEntity<Void> getBadRequestResponseEntityFromErrorMessage(String errorMessage) {
+    private ResponseEntity<UserAccount> getBadRequestResponseEntityFromErrorMessage(String errorMessage) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(MESSAGE, errorMessage);
         return ResponseEntity.badRequest().headers(headers).build();
     }
 
-    private ResponseEntity<Void> getUpdateUserScopeResponseEntity(String userLogin, String projectCode, UserAccountScope scope) {
+    private ResponseEntity<UserAccount> getUpdateUserScopeResponseEntity(String userLogin, String projectCode, UserAccountScope scope) {
         try {
-            userAccountService.updateUserProjectScope(userLogin, projectCode, scope.getRole());
+            var updatedUser = userAccountService.updateUserProjectScope(userLogin, projectCode, scope.getRole());
+            return ResponseEntity.ok(updatedUser);
         } catch (ForbiddenException e) {
             return ResponseUtil.handle(e);
         }
-        return ResponseEntity.ok().build();
     }
 
     @PutMapping(ACCOUNT_PROFILE)
-    public ResponseEntity<Void> updateUserProfile(@PathVariable String userLogin, @RequestBody UserAccount account) {
+    public ResponseEntity<UserAccount> updateUserProfile(@PathVariable String userLogin, @RequestBody UserAccount account) {
         try {
-            userAccountService.updateUserProfile(userLogin, account.getProfile());
+            var updatedUser = userAccountService.updateUserProfile(userLogin, account.getProfile());
+            return ResponseEntity.ok(updatedUser);
         } catch (ForbiddenException e) {
             return ResponseUtil.handle(e);
         }
-        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping(DEFAULT_PROJECT)

@@ -141,16 +141,17 @@ class UserAccountResourceTest {
         var scope = mock(UserAccountScope.class);
         var role = mock(UserAccountScopeRole.class);
 
+        var updatedUser = mock(UserAccount.class);
+
         // When
         when(scope.getRole()).thenReturn(role);
         when(scope.getProject()).thenReturn(projectCode);
+        when(userAccountService.updateUserProjectScope(userLogin, projectCode, role)).thenReturn(updatedUser);
 
         // Then
         var response = userAccountResource.updateUserScope(userLogin, projectCode, scope);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isNull();
+        assertThat(response.getBody()).isSameAs(updatedUser);
         assertThat(response.getHeaders()).isEmpty();
-
-        verify(userAccountService).updateUserProjectScope(userLogin, projectCode, role);
     }
 }

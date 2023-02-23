@@ -320,23 +320,25 @@ public class UserAccountService {
      * Otherwise, a new scope is added containing the project and the role
      * @param projectCode the project code
      * @param accountRole the new role
+     * @return the updated {@link UserAccount}
      * @throws ForbiddenException thrown if this operation failed
      */
-    public void updateCurrentUserProjectScope(@NonNull String projectCode, @NonNull UserAccountScopeRole accountRole) throws ForbiddenException {
+    public UserAccount updateCurrentUserProjectScope(@NonNull String projectCode, @NonNull UserAccountScopeRole accountRole) throws ForbiddenException {
         var projectCodeContext = getProjectCodeExceptionContext(projectCode);
         var exception = new ForbiddenException(PROJECT, "update current user project scope", projectCodeContext);
 
         var currentUser = getCurrentUser().orElseThrow(() -> exception);
-        updateUserProjectScope(currentUser, projectCode, accountRole, exception);
+        var updatedUser = updateUserProjectScope(currentUser, projectCode, accountRole, exception);
         
         userSessionService.refreshCurrentUserAuthorities();
+        return userMapper.getFullScopeAccessUserAccountFromUser(updatedUser);
     }
 
-    private void updateUserProjectScope(User targetUser, String projectCode, UserAccountScopeRole targetAccountRole, ForbiddenException exception) throws ForbiddenException {
+    private User updateUserProjectScope(User targetUser, String projectCode, UserAccountScopeRole targetAccountRole, ForbiddenException exception) throws ForbiddenException {
         var targetProject = getProjectFromCode(projectCode).orElseThrow(() -> exception);
         var targetRole = getProjectRoleFromUserAccountScopeRole(targetAccountRole);
         updateScopedUserProjectRole(targetUser, targetProject, targetRole);
-        userRepository.save(targetUser);
+        return userRepository.save(targetUser);
     }
 
     private static ProjectRole getProjectRoleFromUserAccountScopeRole(@NonNull UserAccountScopeRole userAccountScopeRole) {
@@ -369,30 +371,35 @@ public class UserAccountService {
      * @param userLogin the user login
      * @param projectCode the project code
      * @param accountRole the new role
+     * @return the updated {@link UserAccount}
      * @throws ForbiddenException thrown if this operation failed
      */
-    public void updateUserProjectScope(@NonNull String userLogin, @NonNull String projectCode, @NonNull UserAccountScopeRole accountRole) throws ForbiddenException {
+    public UserAccount updateUserProjectScope(@NonNull String userLogin, @NonNull String projectCode, @NonNull UserAccountScopeRole accountRole) throws ForbiddenException {
         var projectCodeContext = getProjectCodeExceptionContext(projectCode);
         var exception = new ForbiddenException(PROJECT, "update user project scope", projectCodeContext);
 
+        var currentUser = getCurrentUser().orElseThrow(() -> exception);
         var targetUser = getUserFromLogin(userLogin).orElseThrow(() -> exception);
-        updateUserProjectScope(targetUser, projectCode, accountRole, exception);
+        var updatedUser = updateUserProjectScope(targetUser, projectCode, accountRole, exception);
+        return userMapper.getPartialScopeAccessUserAccountFromUser(updatedUser, currentUser);
     }
 
     /**
      * Update the user profile.
      * @param userLogin the user login
      * @param profile the new profile
+     * @return the updated {@link UserAccount}
      * @throws ForbiddenException thrown if this operation failed
      */
-    public void updateUserProfile(@NonNull String userLogin, @NonNull UserAccountProfile profile) throws ForbiddenException {
+    public UserAccount updateUserProfile(@NonNull String userLogin, @NonNull UserAccountProfile profile) throws ForbiddenException {
         var projectCodeContext = getProjectCodeExceptionContext(userLogin);
         var exception = new ForbiddenException(USER, "update user profile", projectCodeContext);
 
         var targetUser = getUserFromLogin(userLogin).orElseThrow(() -> exception);
         var targetProfile = getUserProfileFromUserAccountProfile(profile);
         targetUser.setProfile(targetProfile);
-        userRepository.save(targetUser);
+        var updatedUser = userRepository.save(targetUser);
+        return userMapper.getFullScopeAccessUserAccountFromUser(updatedUser);
     }
 
     private static UserProfile getUserProfileFromUserAccountProfile(@NonNull UserAccountProfile userAccountProfile) {

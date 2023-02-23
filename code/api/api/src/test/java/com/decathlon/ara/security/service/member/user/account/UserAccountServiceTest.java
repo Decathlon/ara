@@ -1021,7 +1021,7 @@ class UserAccountServiceTest {
     }
 
     @Test
-    void updateCurrentUserProjectScope_throwForbiddenException_whenUserNotFoundInSession() throws ForbiddenException {
+    void updateCurrentUserProjectScope_throwForbiddenException_whenCurrentUserNotFoundInSession() throws ForbiddenException {
         // Given
         var projectCode = "project-code";
         var roleToUpdate = UserAccountScopeRole.ADMIN;
@@ -1036,20 +1036,20 @@ class UserAccountServiceTest {
     }
 
     @Test
-    void updateCurrentUserProjectScope_throwForbiddenException_whenUserNotFoundInDatabase() throws ForbiddenException {
+    void updateCurrentUserProjectScope_throwForbiddenException_whenCurrentUserNotFoundInDatabase() throws ForbiddenException {
         // Given
         var projectCode = "project-code";
         var roleToUpdate = UserAccountScopeRole.ADMIN;
 
-        var userLogin = "user-login";
+        var currentUserLogin = "current-user-login";
         var providerName = "provider-name";
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
-        when(authenticatedUser.getLogin()).thenReturn(userLogin);
+        when(authenticatedUser.getLogin()).thenReturn(currentUserLogin);
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.empty());
+        when(userRepository.findById(new User.UserId(providerName, currentUserLogin))).thenReturn(Optional.empty());
 
         // Then
         assertThrows(ForbiddenException.class, () -> userAccountService.updateCurrentUserProjectScope(projectCode, roleToUpdate));
@@ -1064,16 +1064,16 @@ class UserAccountServiceTest {
         // Given
         var roleToUpdate = UserAccountScopeRole.ADMIN;
 
-        var userLogin = "user-login";
+        var currentUserLogin = "current-user-login";
         var providerName = "provider-name";
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
-        var user = mock(User.class);
+        var currentUser = mock(User.class);
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
-        when(authenticatedUser.getLogin()).thenReturn(userLogin);
+        when(authenticatedUser.getLogin()).thenReturn(currentUserLogin);
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
+        when(userRepository.findById(new User.UserId(providerName, currentUserLogin))).thenReturn(Optional.of(currentUser));
 
         // Then
         assertThrows(ForbiddenException.class, () -> userAccountService.updateCurrentUserProjectScope(projectCode, roleToUpdate));
@@ -1087,16 +1087,16 @@ class UserAccountServiceTest {
         var projectCode = "project-code";
         var roleToUpdate = UserAccountScopeRole.ADMIN;
 
-        var userLogin = "user-login";
+        var currentUserLogin = "current-user-login";
         var providerName = "provider-name";
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
-        var user = mock(User.class);
+        var currentUser = mock(User.class);
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
-        when(authenticatedUser.getLogin()).thenReturn(userLogin);
+        when(authenticatedUser.getLogin()).thenReturn(currentUserLogin);
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
+        when(userRepository.findById(new User.UserId(providerName, currentUserLogin))).thenReturn(Optional.of(currentUser));
         when(projectRepository.findByCode(projectCode)).thenReturn(Optional.empty());
 
         // Then
@@ -1107,36 +1107,39 @@ class UserAccountServiceTest {
 
     @ParameterizedTest
     @EnumSource(value = UserAccountScopeRole.class)
-    void updateCurrentUserProjectScope_updateProjectScope_whenProjectFoundInUserScope(UserAccountScopeRole roleToUpdate) throws ForbiddenException {
+    void updateCurrentUserProjectScope_updateProjectScopeAndReturnUpdatedUserAccount_whenProjectFoundInCurrentUserScope(UserAccountScopeRole roleToUpdate) throws ForbiddenException {
         // Given
         var projectCode = "project-code";
 
-        var userLogin = "user-login";
+        var currentUserLogin = "current-user-login";
         var providerName = "provider-name";
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
-        var user = mock(User.class);
+        var currentUser = mock(User.class);
 
         var project1 = mock(Project.class);
         var projectCode1 = "project-code1";
         var role1 = mock(ProjectRole.class);
-        var scope1 = new UserProjectScope(user, project1, role1);
+        var scope1 = new UserProjectScope(currentUser, project1, role1);
         var project2 = mock(Project.class);
         var projectCode2 = "project-code2";
         var role2 = mock(ProjectRole.class);
-        var scope2 = new UserProjectScope(user, project2, role2);
+        var scope2 = new UserProjectScope(currentUser, project2, role2);
         var project3 = mock(Project.class);
         var role3 = mock(ProjectRole.class);
-        var scope3 = new UserProjectScope(user, project3, role3);
+        var scope3 = new UserProjectScope(currentUser, project3, role3);
         var scopes = Set.of(scope1, scope2, scope3);
 
         var project = mock(Project.class);
 
+        var savedUser = mock(User.class);
+        var mappedSavedUser = mock(UserAccount.class);
+
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
-        when(authenticatedUser.getLogin()).thenReturn(userLogin);
+        when(authenticatedUser.getLogin()).thenReturn(currentUserLogin);
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
-        when(user.getScopes()).thenReturn(scopes);
+        when(userRepository.findById(new User.UserId(providerName, currentUserLogin))).thenReturn(Optional.of(currentUser));
+        when(currentUser.getScopes()).thenReturn(scopes);
         when(project1.getCode()).thenReturn(projectCode1);
         when(project2.getCode()).thenReturn(projectCode2);
         when(project3.getCode()).thenReturn(projectCode);
@@ -1144,8 +1147,12 @@ class UserAccountServiceTest {
         when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(project));
         when(project.getCode()).thenReturn(projectCode);
 
+        when(userRepository.save(currentUser)).thenReturn(savedUser);
+        when(userMapper.getFullScopeAccessUserAccountFromUser(savedUser)).thenReturn(mappedSavedUser);
+
         // Then
-        userAccountService.updateCurrentUserProjectScope(projectCode, roleToUpdate);
+        var updatedUser = userAccountService.updateCurrentUserProjectScope(projectCode, roleToUpdate);
+        assertThat(updatedUser).isSameAs(mappedSavedUser);
 
         var userToSaveArgumentCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository, times(1)).save(userToSaveArgumentCaptor.capture());
@@ -1154,9 +1161,9 @@ class UserAccountServiceTest {
         assertThat(capturedUserToSave.getScopes())
                 .extracting("role", "project", "user")
                 .containsExactlyInAnyOrder(
-                        tuple(role1, project1, user),
-                        tuple(role2, project2, user),
-                        tuple(expectedRole, project3, user)
+                        tuple(role1, project1, currentUser),
+                        tuple(role2, project2, currentUser),
+                        tuple(expectedRole, project3, currentUser)
                 )
                 .hasSize(3);
 
@@ -1165,37 +1172,40 @@ class UserAccountServiceTest {
 
     @ParameterizedTest
     @EnumSource(value = UserAccountScopeRole.class)
-    void updateCurrentUserProjectScope_addProjectScope_whenProjectNotFoundInUserScope(UserAccountScopeRole roleToUpdate) throws ForbiddenException {
+    void updateCurrentUserProjectScope_addProjectScopeAndReturnUpdatedUserAccount_whenProjectNotFoundInCurrentUserScope(UserAccountScopeRole roleToUpdate) throws ForbiddenException {
         // Given
         var projectCode = "project-code";
 
-        var userLogin = "user-login";
+        var currentUserLogin = "current-user-login";
         var providerName = "provider-name";
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
-        var user = mock(User.class);
+        var currentUser = mock(User.class);
 
         var project1 = mock(Project.class);
         var projectCode1 = "project-code1";
         var role1 = mock(ProjectRole.class);
-        var scope1 = new UserProjectScope(user, project1, role1);
+        var scope1 = new UserProjectScope(currentUser, project1, role1);
         var project2 = mock(Project.class);
         var projectCode2 = "project-code2";
         var role2 = mock(ProjectRole.class);
-        var scope2 = new UserProjectScope(user, project2, role2);
+        var scope2 = new UserProjectScope(currentUser, project2, role2);
         var project3 = mock(Project.class);
         var projectCode3 = "project-code3";
         var role3 = mock(ProjectRole.class);
-        var scope3 = new UserProjectScope(user, project3, role3);
+        var scope3 = new UserProjectScope(currentUser, project3, role3);
         var scopes = new HashSet<UserProjectScope>() {{add(scope1); add(scope2); add(scope3);}};
 
         var project = mock(Project.class);
 
+        var savedUser = mock(User.class);
+        var mappedSavedUser = mock(UserAccount.class);
+
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
-        when(authenticatedUser.getLogin()).thenReturn(userLogin);
+        when(authenticatedUser.getLogin()).thenReturn(currentUserLogin);
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
-        when(user.getScopes()).thenReturn(scopes);
+        when(userRepository.findById(new User.UserId(providerName, currentUserLogin))).thenReturn(Optional.of(currentUser));
+        when(currentUser.getScopes()).thenReturn(scopes);
         when(project1.getCode()).thenReturn(projectCode1);
         when(project2.getCode()).thenReturn(projectCode2);
         when(project3.getCode()).thenReturn(projectCode3);
@@ -1203,8 +1213,12 @@ class UserAccountServiceTest {
         when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(project));
         when(project.getCode()).thenReturn(projectCode);
 
+        when(userRepository.save(currentUser)).thenReturn(savedUser);
+        when(userMapper.getFullScopeAccessUserAccountFromUser(savedUser)).thenReturn(mappedSavedUser);
+
         // Then
-        userAccountService.updateCurrentUserProjectScope(projectCode, roleToUpdate);
+        var updatedUser = userAccountService.updateCurrentUserProjectScope(projectCode, roleToUpdate);
+        assertThat(updatedUser).isSameAs(mappedSavedUser);
 
         var userToSaveArgumentCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository, times(1)).save(userToSaveArgumentCaptor.capture());
@@ -1213,10 +1227,10 @@ class UserAccountServiceTest {
         assertThat(capturedUserToSave.getScopes())
                 .extracting("role", "project", "user")
                 .containsExactlyInAnyOrder(
-                        tuple(role1, project1, user),
-                        tuple(role2, project2, user),
-                        tuple(role3, project3, user),
-                        tuple(expectedRole, project, user)
+                        tuple(role1, project1, currentUser),
+                        tuple(role2, project2, currentUser),
+                        tuple(role3, project3, currentUser),
+                        tuple(expectedRole, project, currentUser)
                 )
                 .hasSize(4);
 
@@ -1536,25 +1550,10 @@ class UserAccountServiceTest {
         assertThat(accounts).containsExactlyInAnyOrder(matchingUserAccount1, matchingUserAccount2, matchingUserAccount3);
     }
 
-    @ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = {" ", "\t", "\n"})
-    void updateUserProjectScope_throwForbiddenException_whenUserLoginIsBlank(String userLogin) {
-        // Given
-        var projectCode = "project-code";
-        var roleToUpdate = UserAccountScopeRole.ADMIN;
-
-        // When
-
-        // Then
-        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProjectScope(userLogin, projectCode, roleToUpdate));
-        verify(userRepository, never()).save(any(User.class));
-    }
-
     @Test
-    void updateUserProjectScope_throwForbiddenException_whenUserNotFoundInSession() {
+    void updateUserProjectScope_throwForbiddenException_whenCurrentUserNotFound() {
         // Given
-        var userLogin = "user-login";
+        var targetUserLogin = "target-user-login";
         var projectCode = "project-code";
         var roleToUpdate = UserAccountScopeRole.ADMIN;
 
@@ -1562,27 +1561,55 @@ class UserAccountServiceTest {
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.empty());
 
         // Then
-        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProjectScope(userLogin, projectCode, roleToUpdate));
+        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProjectScope(targetUserLogin, projectCode, roleToUpdate));
         verify(userRepository, never()).save(any(User.class));
     }
 
-    @Test
-    void updateUserProjectScope_throwForbiddenException_whenUserNotFoundInDatabase() {
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "\t", "\n"})
+    void updateUserProjectScope_throwForbiddenException_whenTargetUserLoginIsBlank(String targetUserLogin) {
         // Given
-        var userLogin = "user-login";
         var projectCode = "project-code";
         var roleToUpdate = UserAccountScopeRole.ADMIN;
 
         var providerName = "provider-name";
+        var currentUserLogin = "current-user-login";
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
+        var currentUser = mock(User.class);
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.empty());
+        when(authenticatedUser.getLogin()).thenReturn(currentUserLogin);
+        when(userRepository.findById(new User.UserId(providerName, currentUserLogin))).thenReturn(Optional.of(currentUser));
 
         // Then
-        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProjectScope(userLogin, projectCode, roleToUpdate));
+        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProjectScope(targetUserLogin, projectCode, roleToUpdate));
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void updateUserProjectScope_throwForbiddenException_whenTargetUserNotFound() {
+        // Given
+        var targetUserLogin = "target-user-login";
+        var projectCode = "project-code";
+        var roleToUpdate = UserAccountScopeRole.ADMIN;
+
+        var providerName = "provider-name";
+        var currentUserLogin = "current-user-login";
+        var authenticatedUser = mock(AuthenticatedOAuth2User.class);
+        var currentUser = mock(User.class);
+
+        // When
+        when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
+        when(authenticatedUser.getProviderName()).thenReturn(providerName);
+        when(authenticatedUser.getLogin()).thenReturn(currentUserLogin);
+        when(userRepository.findById(new User.UserId(providerName, currentUserLogin))).thenReturn(Optional.of(currentUser));
+        when(userRepository.findById(new User.UserId(providerName, targetUserLogin))).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProjectScope(targetUserLogin, projectCode, roleToUpdate));
         verify(userRepository, never()).save(any(User.class));
     }
 
@@ -1591,76 +1618,91 @@ class UserAccountServiceTest {
     @ValueSource(strings = {" ", "\t", "\n"})
     void updateUserProjectScope_throwForbiddenException_whenProjectCodeIsBlank(String projectCode) {
         // Given
-        var userLogin = "user-login";
+        var targetUserLogin = "target-user-login";
         var roleToUpdate = UserAccountScopeRole.ADMIN;
 
         var providerName = "provider-name";
+        var currentUserLogin = "current-user-login";
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
-        var user = mock(User.class);
+        var currentUser = mock(User.class);
+        var targetUser = mock(User.class);
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
+        when(authenticatedUser.getLogin()).thenReturn(currentUserLogin);
+        when(userRepository.findById(new User.UserId(providerName, currentUserLogin))).thenReturn(Optional.of(currentUser));
+        when(userRepository.findById(new User.UserId(providerName, targetUserLogin))).thenReturn(Optional.of(targetUser));
 
         // Then
-        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProjectScope(userLogin, projectCode, roleToUpdate));
+        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProjectScope(targetUserLogin, projectCode, roleToUpdate));
         verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
     void updateUserProjectScope_throwForbiddenException_whenProjectNotFound() {
         // Given
-        var userLogin = "user-login";
+        var targetUserLogin = "target-user-login";
         var projectCode = "project-code";
         var roleToUpdate = UserAccountScopeRole.ADMIN;
 
         var providerName = "provider-name";
+        var currentUserLogin = "current-user-login";
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
-        var user = mock(User.class);
+        var currentUser = mock(User.class);
+        var targetUser = mock(User.class);
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
+        when(authenticatedUser.getLogin()).thenReturn(currentUserLogin);
+        when(userRepository.findById(new User.UserId(providerName, currentUserLogin))).thenReturn(Optional.of(currentUser));
+        when(userRepository.findById(new User.UserId(providerName, targetUserLogin))).thenReturn(Optional.of(targetUser));
         when(projectRepository.findByCode(projectCode)).thenReturn(Optional.empty());
 
         // Then
-        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProjectScope(userLogin, projectCode, roleToUpdate));
+        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProjectScope(targetUserLogin, projectCode, roleToUpdate));
         verify(userRepository, never()).save(any(User.class));
     }
 
     @ParameterizedTest
     @EnumSource(value = UserAccountScopeRole.class)
-    void updateUserProjectScope_updateProjectScope_whenProjectFoundInUserScope(UserAccountScopeRole roleToUpdate) throws ForbiddenException {
+    void updateUserProjectScope_updateProjectScopeAndReturnUpdatedUserAccount_whenProjectFoundInTargetUserScope(UserAccountScopeRole roleToUpdate) throws ForbiddenException {
         // Given
-        var userLogin = "user-login";
+        var targetUserLogin = "target-user-login";
         var projectCode = "project-code";
 
         var providerName = "provider-name";
+        var currentUserLogin = "current-user-login";
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
-        var user = mock(User.class);
+        var currentUser = mock(User.class);
+        var targetUser = mock(User.class);
 
         var project1 = mock(Project.class);
         var projectCode1 = "project-code1";
         var role1 = mock(ProjectRole.class);
-        var scope1 = new UserProjectScope(user, project1, role1);
+        var scope1 = new UserProjectScope(targetUser, project1, role1);
         var project2 = mock(Project.class);
         var projectCode2 = "project-code2";
         var role2 = mock(ProjectRole.class);
-        var scope2 = new UserProjectScope(user, project2, role2);
+        var scope2 = new UserProjectScope(targetUser, project2, role2);
         var project3 = mock(Project.class);
         var role3 = mock(ProjectRole.class);
-        var scope3 = new UserProjectScope(user, project3, role3);
+        var scope3 = new UserProjectScope(targetUser, project3, role3);
         var scopes = Set.of(scope1, scope2, scope3);
 
         var project = mock(Project.class);
 
+        var savedUser = mock(User.class);
+        var mappedSavedUser = mock(UserAccount.class);
+
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
-        when(user.getScopes()).thenReturn(scopes);
+        when(authenticatedUser.getLogin()).thenReturn(currentUserLogin);
+        when(userRepository.findById(new User.UserId(providerName, currentUserLogin))).thenReturn(Optional.of(currentUser));
+        when(userRepository.findById(new User.UserId(providerName, targetUserLogin))).thenReturn(Optional.of(targetUser));
+        when(targetUser.getScopes()).thenReturn(scopes);
         when(project1.getCode()).thenReturn(projectCode1);
         when(project2.getCode()).thenReturn(projectCode2);
         when(project3.getCode()).thenReturn(projectCode);
@@ -1668,8 +1710,12 @@ class UserAccountServiceTest {
         when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(project));
         when(project.getCode()).thenReturn(projectCode);
 
+        when(userRepository.save(targetUser)).thenReturn(savedUser);
+        when(userMapper.getPartialScopeAccessUserAccountFromUser(savedUser, currentUser)).thenReturn(mappedSavedUser);
+
         // Then
-        userAccountService.updateUserProjectScope(userLogin, projectCode, roleToUpdate);
+        var updatedUser = userAccountService.updateUserProjectScope(targetUserLogin, projectCode, roleToUpdate);
+        assertThat(updatedUser).isSameAs(mappedSavedUser);
 
         var userToSaveArgumentCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository, times(1)).save(userToSaveArgumentCaptor.capture());
@@ -1678,45 +1724,52 @@ class UserAccountServiceTest {
         assertThat(capturedUserToSave.getScopes())
                 .extracting("role", "project", "user")
                 .containsExactlyInAnyOrder(
-                        tuple(role1, project1, user),
-                        tuple(role2, project2, user),
-                        tuple(expectedRole, project3, user)
+                        tuple(role1, project1, targetUser),
+                        tuple(role2, project2, targetUser),
+                        tuple(expectedRole, project3, targetUser)
                 )
                 .hasSize(3);
     }
 
     @ParameterizedTest
     @EnumSource(value = UserAccountScopeRole.class)
-    void updateUserProjectScope_addProjectScope_whenProjectNotFoundInUserScope(UserAccountScopeRole roleToUpdate) throws ForbiddenException {
+    void updateUserProjectScope_addProjectScopeAndReturnUpdatedUserAccount_whenProjectNotFoundInTargetUserScope(UserAccountScopeRole roleToUpdate) throws ForbiddenException {
         // Given
-        var userLogin = "user-login";
+        var targetUserLogin = "target-user-login";
         var projectCode = "project-code";
 
         var providerName = "provider-name";
+        var currentUserLogin = "current-user-login";
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
-        var user = mock(User.class);
+        var currentUser = mock(User.class);
+        var targetUser = mock(User.class);
 
         var project1 = mock(Project.class);
         var projectCode1 = "project-code1";
         var role1 = mock(ProjectRole.class);
-        var scope1 = new UserProjectScope(user, project1, role1);
+        var scope1 = new UserProjectScope(targetUser, project1, role1);
         var project2 = mock(Project.class);
         var projectCode2 = "project-code2";
         var role2 = mock(ProjectRole.class);
-        var scope2 = new UserProjectScope(user, project2, role2);
+        var scope2 = new UserProjectScope(targetUser, project2, role2);
         var project3 = mock(Project.class);
         var projectCode3 = "project-code3";
         var role3 = mock(ProjectRole.class);
-        var scope3 = new UserProjectScope(user, project3, role3);
+        var scope3 = new UserProjectScope(targetUser, project3, role3);
         var scopes = new HashSet<UserProjectScope>() {{add(scope1); add(scope2); add(scope3);}};
 
         var project = mock(Project.class);
 
+        var savedUser = mock(User.class);
+        var mappedSavedUser = mock(UserAccount.class);
+
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
-        when(user.getScopes()).thenReturn(scopes);
+        when(authenticatedUser.getLogin()).thenReturn(currentUserLogin);
+        when(userRepository.findById(new User.UserId(providerName, currentUserLogin))).thenReturn(Optional.of(currentUser));
+        when(userRepository.findById(new User.UserId(providerName, targetUserLogin))).thenReturn(Optional.of(targetUser));
+        when(targetUser.getScopes()).thenReturn(scopes);
         when(project1.getCode()).thenReturn(projectCode1);
         when(project2.getCode()).thenReturn(projectCode2);
         when(project3.getCode()).thenReturn(projectCode3);
@@ -1724,8 +1777,12 @@ class UserAccountServiceTest {
         when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(project));
         when(project.getCode()).thenReturn(projectCode);
 
+        when(userRepository.save(targetUser)).thenReturn(savedUser);
+        when(userMapper.getPartialScopeAccessUserAccountFromUser(savedUser, currentUser)).thenReturn(mappedSavedUser);
+
         // Then
-        userAccountService.updateUserProjectScope(userLogin, projectCode, roleToUpdate);
+        var updatedUser = userAccountService.updateUserProjectScope(targetUserLogin, projectCode, roleToUpdate);
+        assertThat(updatedUser).isSameAs(mappedSavedUser);
 
         var userToSaveArgumentCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository, times(1)).save(userToSaveArgumentCaptor.capture());
@@ -1734,10 +1791,10 @@ class UserAccountServiceTest {
         assertThat(capturedUserToSave.getScopes())
                 .extracting("role", "project", "user")
                 .containsExactlyInAnyOrder(
-                        tuple(role1, project1, user),
-                        tuple(role2, project2, user),
-                        tuple(role3, project3, user),
-                        tuple(expectedRole, project, user)
+                        tuple(role1, project1, targetUser),
+                        tuple(role2, project2, targetUser),
+                        tuple(role3, project3, targetUser),
+                        tuple(expectedRole, project, targetUser)
                 )
                 .hasSize(4);
     }
@@ -1878,36 +1935,36 @@ class UserAccountServiceTest {
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = {" ", "\t", "\n"})
-    void updateUserProfile_throwForbiddenException_whenUserLoginIsBlank(String userLogin) {
+    void updateUserProfile_throwForbiddenException_whenTargetUserLoginIsBlank(String targetUserLogin) {
         // Given
         var profile = UserAccountProfile.SUPER_ADMIN;
 
         // When
 
         // Then
-        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProfile(userLogin, profile));
+        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProfile(targetUserLogin, profile));
         verify(userRepository, never()).save(any());
     }
 
     @Test
-    void updateUserProfile_throwForbiddenException_whenUserNotFoundInSession() {
+    void updateUserProfile_throwForbiddenException_whenCurrentUserNotFoundInSession() {
         // Given
-        var userLogin = "user-login";
+        var targetUserLogin = "target-user-login";
         var profile = UserAccountProfile.SUPER_ADMIN;
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.empty());
 
         // Then
-        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProfile(userLogin, profile));
+        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProfile(targetUserLogin, profile));
         verify(userRepository, never()).save(any());
     }
 
     @Test
-    void updateUserProfile_throwForbiddenException_whenUserNotFoundInDatabase() {
+    void updateUserProfile_throwForbiddenException_whenTargetUserNotFoundInDatabase() {
         // Given
         var profile = UserAccountProfile.SUPER_ADMIN;
-        var userLogin = "user-login";
+        var targetUserLogin = "target-user-login";
         var providerName = "provider-name";
 
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
@@ -1915,30 +1972,37 @@ class UserAccountServiceTest {
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.empty());
+        when(userRepository.findById(new User.UserId(providerName, targetUserLogin))).thenReturn(Optional.empty());
 
         // Then
-        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProfile(userLogin, profile));
+        assertThrows(ForbiddenException.class, () -> userAccountService.updateUserProfile(targetUserLogin, profile));
         verify(userRepository, never()).save(any());
     }
 
     @ParameterizedTest
     @EnumSource(value = UserAccountProfile.class)
-    void updateUserProfile_updateUserProfile_whenUserFound(UserAccountProfile profile) throws ForbiddenException {
+    void updateUserProfile_updateUserProfileAndReturnUpdatedUserAccount_whenTargetUserFound(UserAccountProfile profile) throws ForbiddenException {
         // Given
         var providerName = "provider-name";
-        var userLogin = "user-login";
+        var targetUserLogin = "target-user-login";
 
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
-        var user = new User(providerName, userLogin);
+        var targetUser = new User(providerName, targetUserLogin);
+
+        var savedUser = mock(User.class);
+        var mappedSavedUser = mock(UserAccount.class);
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
+        when(userRepository.findById(new User.UserId(providerName, targetUserLogin))).thenReturn(Optional.of(targetUser));
+        when(userRepository.save(targetUser)).thenReturn(savedUser);
+        when(userMapper.getFullScopeAccessUserAccountFromUser(savedUser)).thenReturn(mappedSavedUser);
 
         // Then
-        userAccountService.updateUserProfile(userLogin, profile);
+        var updatedUser = userAccountService.updateUserProfile(targetUserLogin, profile);
+        assertThat(updatedUser).isSameAs(mappedSavedUser);
+
         var userToSaveArgumentCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userToSaveArgumentCaptor.capture());
         assertThat(userToSaveArgumentCaptor.getValue().getProfile()).isEqualTo(UserProfile.valueOf(profile.name()));
