@@ -21,7 +21,7 @@
     "cy:report:html": "npm run cy:report:merge; npx marge test/cypress/outputs/reports/json/merged/final-report.json --overwrite=true --charts=true --reportDir=test/cypress/outputs/reports/html"
   },
   "dependencies": {
-    "@braintree/sanitize-url": "^5.0.2",
+    "@braintree/sanitize-url": "^6.0.1",
     "downloadjs": "^1.4.7",
     "eslint-plugin-html": "^3.1.1",
     "html-to-image": "^1.6.2",
