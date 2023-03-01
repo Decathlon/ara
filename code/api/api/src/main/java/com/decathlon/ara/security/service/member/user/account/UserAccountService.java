@@ -346,21 +346,21 @@ public class UserAccountService {
     }
 
     private void updateScopedUserProjectRole(User targetUser, Project targetProject, ProjectRole targetRole) {
-        var projectCode = targetProject.getCode();
-        var userRoles = targetUser.getScopes();
-        for (var userRole : userRoles) {
-            var roleProject = userRole.getProject();
-            var roleProjectCode = roleProject.getCode();
-            if (projectCode.equals(roleProjectCode)) {
-                userRole.setRole(targetRole);
+        var targetProjectCode = targetProject.getCode();
+        var userScopes = targetUser.getScopes();
+        for (var userScope : userScopes) {
+            var projectInScope = userScope.getProject();
+            var projectCodeInScope = projectInScope.getCode();
+            if (targetProjectCode.equals(projectCodeInScope)) {
+                userScope.setRole(targetRole);
             }
         }
-        var projectScopeNotFound = userRoles.stream()
+        var targetProjectScopeNotFound = userScopes.stream()
                 .map(UserProjectScope::getProject)
                 .map(Project::getCode)
-                .noneMatch(projectCode::equals);
-        if (projectScopeNotFound) {
-            userRoles.add(new UserProjectScope(targetUser, targetProject, targetRole));
+                .noneMatch(targetProjectCode::equals);
+        if (targetProjectScopeNotFound) {
+            userScopes.add(new UserProjectScope(targetUser, targetProject, targetRole));
         }
     }
 

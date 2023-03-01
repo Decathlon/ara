@@ -27,7 +27,7 @@ public class UserProjectScope extends ProjectScope {
 
     public UserProjectScope(@NonNull User user, @NonNull Project project, @NonNull ProjectRole role) {
         super(project, role);
-        this.scopeId = new UserProjectScopeId(user.getProviderName(), user.getLogin(), project.getId());
+        this.scopeId = new UserProjectScopeId(user, project);
         this.user = user;
     }
 
@@ -47,11 +47,6 @@ public class UserProjectScope extends ProjectScope {
         public UserProjectScopeId(@NonNull User user, @NonNull Project project) {
             this.userId = new User.UserId(user.getProviderName(), user.getLogin());
             this.projectId = project.getId();
-        }
-
-        public UserProjectScopeId(@NonNull String providerName, @NonNull String login, @NonNull Long projectId) {
-            this.userId = new User.UserId(providerName, login);
-            this.projectId = projectId;
         }
 
         public User.UserId getUserId() {

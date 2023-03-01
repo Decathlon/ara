@@ -109,7 +109,7 @@ public class UserSessionService {
      * @param groupId the group id
      * @return true iff the current user can manage this group
      */
-    public boolean canManageGroup(@NonNull long groupId) {
+    public boolean canManageGroup(long groupId) {
         try {
             var profile = getCurrentUserProfile();
             if (!UserAccountProfile.SCOPED_USER.equals(profile)) {
@@ -118,6 +118,32 @@ public class UserSessionService {
 
             var authorities = getCurrentAuthorities();
             return authorityMapper.getManagedUserAccountGroupIdsFromAuthorities(authorities).contains(groupId);
+        } catch (ForbiddenException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Show if the current user can manage a user group scope.
+     * To do so, he must be either:
+     * - a super admin, or
+     * - a scoped user who is also admin of the project AND a manager of the group
+     * @param groupId the group id
+     * @param projectCode the project code
+     * @return true iff the current user can manage this group scope
+     */
+    public boolean canManageGroupScope(long groupId, @NonNull String projectCode) {
+        try {
+            var profile = getCurrentUserProfile();
+            if (!UserAccountProfile.SCOPED_USER.equals(profile)) {
+                return UserAccountProfile.SUPER_ADMIN.equals(profile);
+            }
+            var isAdminOnProject = getCurrentUserAccountScopeRoleFromProjectCode(projectCode)
+                    .map(UserAccountScopeRole.ADMIN::equals)
+                    .orElse(false);
+            var authorities = getCurrentAuthorities();
+            var containsGroupId = authorityMapper.getManagedUserAccountGroupIdsFromAuthorities(authorities).contains(groupId);
+            return isAdminOnProject && containsGroupId;
         } catch (ForbiddenException e) {
             return false;
         }

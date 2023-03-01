@@ -35,6 +35,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -791,5 +792,314 @@ class UserSessionServiceTest {
         // Then
         var canManageGroup = userSessionService.canManageGroup(groupId);
         assertThat(canManageGroup).isFalse();
+    }
+
+    @Test
+    void canManageGroupScope_returnFalse_whenAuthenticationIsNull() {
+        // Given
+        var groupId = 1L;
+        var projectCode = "project-code";
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(null);
+
+        // Then
+        var canManageGroupScope = userSessionService.canManageGroupScope(groupId, projectCode);
+        assertThat(canManageGroupScope).isFalse();
+    }
+
+    @Test
+    void canManageGroupScope_returnFalse_whenUserIsNotAuthenticated() {
+        // Given
+        var groupId = 1L;
+        var projectCode = "project-code";
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(false);
+
+        // Then
+        var canManageGroupScope = userSessionService.canManageGroupScope(groupId, projectCode);
+        assertThat(canManageGroupScope).isFalse();
+    }
+
+    @Test
+    void canManageGroupScope_returnFalse_whenAuthenticationIsNotAnInstanceOfOAuth2AuthenticationToken() {
+        // Given
+        var groupId = 1L;
+        var projectCode = "project-code";
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(UsernamePasswordAuthenticationToken.class);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+
+        // Then
+        var canManageGroupScope = userSessionService.canManageGroupScope(groupId, projectCode);
+        assertThat(canManageGroupScope).isFalse();
+    }
+
+    @Test
+    void canManageGroupScope_returnFalse_whenNoAuthorityFound() {
+        // Given
+        var groupId = 1L;
+        var projectCode = "project-code";
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getAuthorities()).thenReturn(null);
+
+        // Then
+        var canManageGroupScope = userSessionService.canManageGroupScope(groupId, projectCode);
+        assertThat(canManageGroupScope).isFalse();
+    }
+
+    @Test
+    void canManageGroupScope_returnFalse_whenProfileNotFound() {
+        // Given
+        var groupId = 1L;
+        var projectCode = "project-code";
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var authority = mock(GrantedAuthority.class);
+        var authorities = Set.of(authority);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getAuthorities()).thenReturn(authorities);
+        when(authorityMapper.getUserAccountProfileFromAuthorities(authorities)).thenReturn(Optional.empty());
+
+        // Then
+        var canManageGroupScope = userSessionService.canManageGroupScope(groupId, projectCode);
+        assertThat(canManageGroupScope).isFalse();
+    }
+
+    @Test
+    void canManageGroupScope_returnTrue_whenProfileIsSuperAdmin() {
+        // Given
+        var groupId = 1L;
+        var projectCode = "project-code";
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var authority = mock(GrantedAuthority.class);
+        var authorities = Set.of(authority);
+
+        var profile = UserAccountProfile.SUPER_ADMIN;
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getAuthorities()).thenReturn(authorities);
+        when(authorityMapper.getUserAccountProfileFromAuthorities(authorities)).thenReturn(Optional.of(profile));
+
+        // Then
+        var canManageGroupScope = userSessionService.canManageGroupScope(groupId, projectCode);
+        assertThat(canManageGroupScope).isTrue();
+    }
+
+    @Test
+    void canManageGroupScope_returnFalse_whenProfileIsAuditor() {
+        // Given
+        var groupId = 1L;
+        var projectCode = "project-code";
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var authority = mock(GrantedAuthority.class);
+        var authorities = Set.of(authority);
+
+        var profile = UserAccountProfile.AUDITOR;
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getAuthorities()).thenReturn(authorities);
+        when(authorityMapper.getUserAccountProfileFromAuthorities(authorities)).thenReturn(Optional.of(profile));
+
+        // Then
+        var canManageGroupScope = userSessionService.canManageGroupScope(groupId, projectCode);
+        assertThat(canManageGroupScope).isFalse();
+    }
+
+    @Test
+    void canManageGroupScope_returnFalse_whenProfileIsScopedUserAndProjectScopeNotFoundInSession() {
+        // Given
+        var groupId = 3L;
+        var projectCode = "project-code";
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var authorities = mock(Set.class);
+
+        var profile = UserAccountProfile.SCOPED_USER;
+
+        var projectCode1 = "project-code-1";
+        var projectCode2 = "project-code-2";
+        var projectCode3 = "project-code-3";
+
+        var scope1 = mock(UserAccountScope.class);
+        var scope2 = mock(UserAccountScope.class);
+        var scope3 = mock(UserAccountScope.class);
+        var scopes = List.of(scope1, scope2, scope3);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getAuthorities()).thenReturn(authorities);
+        when(authorityMapper.getUserAccountProfileFromAuthorities(authorities)).thenReturn(Optional.of(profile));
+        when(authorityMapper.getUserAccountScopesFromAuthorities(authorities)).thenReturn(scopes);
+        when(scope1.getProject()).thenReturn(projectCode1);
+        when(scope2.getProject()).thenReturn(projectCode2);
+        when(scope3.getProject()).thenReturn(projectCode3);
+
+        // Then
+        var canManageGroupScope = userSessionService.canManageGroupScope(groupId, projectCode);
+        assertThat(canManageGroupScope).isFalse();
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = UserAccountScopeRole.class, mode = EXCLUDE, names = "ADMIN")
+    void canManageGroupScope_returnFalse_whenProfileIsScopedUserAndProjectScopeFoundButHadNoAdminRole(UserAccountScopeRole role) {
+        // Given
+        var groupId = 3L;
+        var projectCode = "project-code";
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var authorities = mock(Set.class);
+
+        var profile = UserAccountProfile.SCOPED_USER;
+
+        var projectCode1 = "project-code-1";
+        var projectCode2 = "project-code-2";
+
+        var scope1 = mock(UserAccountScope.class);
+        var scope2 = mock(UserAccountScope.class);
+        var scope3 = mock(UserAccountScope.class);
+        var scopes = List.of(scope1, scope2, scope3);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getAuthorities()).thenReturn(authorities);
+        when(authorityMapper.getUserAccountProfileFromAuthorities(authorities)).thenReturn(Optional.of(profile));
+        when(authorityMapper.getUserAccountScopesFromAuthorities(authorities)).thenReturn(scopes);
+        when(scope1.getProject()).thenReturn(projectCode1);
+        when(scope2.getProject()).thenReturn(projectCode2);
+        when(scope3.getProject()).thenReturn(projectCode);
+        when(scope3.getRole()).thenReturn(role);
+
+        // Then
+        var canManageGroupScope = userSessionService.canManageGroupScope(groupId, projectCode);
+        assertThat(canManageGroupScope).isFalse();
+    }
+
+    @Test
+    void canManageGroupScope_returnFalse_whenProfileIsScopedUserAndProjectScopeFoundAsAdminButGroupIdNotFound() {
+        // Given
+        var groupId = 4L;
+        var projectCode = "project-code";
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var authorities = mock(Set.class);
+
+        var profile = UserAccountProfile.SCOPED_USER;
+
+        var projectCode1 = "project-code-1";
+        var projectCode2 = "project-code-2";
+
+        var scope1 = mock(UserAccountScope.class);
+        var scope2 = mock(UserAccountScope.class);
+        var scope3 = mock(UserAccountScope.class);
+        var scopes = List.of(scope1, scope2, scope3);
+
+        var managedGroupId1 = 1L;
+        var managedGroupId2 = 2L;
+        var managedGroupId3 = 3L;
+        var managedGroupIds = List.of(managedGroupId1, managedGroupId2, managedGroupId3);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getAuthorities()).thenReturn(authorities);
+        when(authorityMapper.getUserAccountProfileFromAuthorities(authorities)).thenReturn(Optional.of(profile));
+        when(authorityMapper.getUserAccountScopesFromAuthorities(authorities)).thenReturn(scopes);
+        when(scope1.getProject()).thenReturn(projectCode1);
+        when(scope2.getProject()).thenReturn(projectCode2);
+        when(scope3.getProject()).thenReturn(projectCode);
+        when(scope3.getRole()).thenReturn(UserAccountScopeRole.ADMIN);
+        when(authorityMapper.getManagedUserAccountGroupIdsFromAuthorities(authorities)).thenReturn(managedGroupIds);
+
+        // Then
+        var canManageGroupScope = userSessionService.canManageGroupScope(groupId, projectCode);
+        assertThat(canManageGroupScope).isFalse();
+    }
+
+    @Test
+    void canManageGroupScope_returnTrue_whenProfileIsScopedUserAndProjectScopeFoundAsAdminAndGroupIdIsFound() {
+        // Given
+        var groupId = 3L;
+        var projectCode = "project-code";
+
+        var securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        var authentication = mock(OAuth2AuthenticationToken.class);
+        var authorities = mock(Set.class);
+
+        var profile = UserAccountProfile.SCOPED_USER;
+
+        var projectCode1 = "project-code-1";
+        var projectCode2 = "project-code-2";
+
+        var scope1 = mock(UserAccountScope.class);
+        var scope2 = mock(UserAccountScope.class);
+        var scope3 = mock(UserAccountScope.class);
+        var scopes = List.of(scope1, scope2, scope3);
+
+        var managedGroupId1 = 1L;
+        var managedGroupId2 = 2L;
+        var managedGroupId3 = 3L;
+        var managedGroupIds = List.of(managedGroupId1, managedGroupId2, managedGroupId3);
+
+        // When
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getAuthorities()).thenReturn(authorities);
+        when(authorityMapper.getUserAccountProfileFromAuthorities(authorities)).thenReturn(Optional.of(profile));
+        when(authorityMapper.getUserAccountScopesFromAuthorities(authorities)).thenReturn(scopes);
+        when(scope1.getProject()).thenReturn(projectCode1);
+        when(scope2.getProject()).thenReturn(projectCode2);
+        when(scope3.getProject()).thenReturn(projectCode);
+        when(scope3.getRole()).thenReturn(UserAccountScopeRole.ADMIN);
+        when(authorityMapper.getManagedUserAccountGroupIdsFromAuthorities(authorities)).thenReturn(managedGroupIds);
+
+        // Then
+        var canManageGroupScope = userSessionService.canManageGroupScope(groupId, projectCode);
+        assertThat(canManageGroupScope).isTrue();
     }
 }

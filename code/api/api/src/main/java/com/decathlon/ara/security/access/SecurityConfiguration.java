@@ -59,6 +59,7 @@ public class SecurityConfiguration {
     private static final String PROJECT_SCOPE_ALTER_PERMISSION = "@projectScope.isEnabled(#projectCode, T(com.decathlon.ara.security.dto.permission.ResourcePermission).ALTER)";
 
     private static final String MEMBER_USER_GROUP_MANAGEMENT_PERMISSION = "@userSessionService.canManageGroup(#groupId)";
+    private static final String MEMBER_USER_GROUP_SCOPE_MANAGEMENT_PERMISSION = "@userSessionService.canManageGroupScope(#groupId, #projectCode)";
 
     private static final String[] ALL_DEMO_RELATED_API_PATHS = {DEMO_ALL_API_PATHS, PROJECT_DEMO_ALL_API_PATHS};
 
@@ -137,6 +138,9 @@ public class SecurityConfiguration {
                 .antMatchers(HttpMethod.GET, MEMBER_USER_GROUP_MANAGED_GROUPS_BY_CURRENT_USER_API_PATH).authenticated()
                 .antMatchers(HttpMethod.PUT, MEMBER_USER_GROUPS_MANAGERS_MANAGEMENT_API_PATH).access(MEMBER_USER_GROUP_MANAGEMENT_PERMISSION)
                 .antMatchers(HttpMethod.DELETE, MEMBER_USER_GROUPS_MANAGERS_MANAGEMENT_API_PATH).access(MEMBER_USER_GROUP_MANAGEMENT_PERMISSION)
+                // member > group > scopes
+                .antMatchers(HttpMethod.PUT, MEMBER_USER_GROUP_SCOPE_API_PATH).access(MEMBER_USER_GROUP_SCOPE_MANAGEMENT_PERMISSION)
+                .antMatchers(HttpMethod.DELETE, MEMBER_USER_GROUP_SCOPE_API_PATH).access(MEMBER_USER_GROUP_SCOPE_MANAGEMENT_PERMISSION)
 
                 // projects > demo
                 .antMatchers(ALL_DEMO_RELATED_API_PATHS).authenticated()

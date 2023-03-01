@@ -1,10 +1,16 @@
 package com.decathlon.ara.security.service.member.user.group;
 
+import com.decathlon.ara.domain.Project;
+import com.decathlon.ara.domain.security.member.user.ProjectRole;
 import com.decathlon.ara.domain.security.member.user.account.User;
 import com.decathlon.ara.domain.security.member.user.account.UserProfile;
 import com.decathlon.ara.domain.security.member.user.group.UserGroup;
+import com.decathlon.ara.domain.security.member.user.group.UserGroupProjectScope;
+import com.decathlon.ara.repository.ProjectRepository;
+import com.decathlon.ara.repository.security.member.user.group.UserGroupProjectScopeRepository;
 import com.decathlon.ara.repository.security.member.user.group.UserGroupRepository;
 import com.decathlon.ara.security.dto.user.group.UserAccountGroup;
+import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
 import com.decathlon.ara.security.mapper.UserGroupMapper;
 import com.decathlon.ara.security.service.member.user.account.UserAccountService;
 import com.decathlon.ara.security.service.member.user.account.UserSessionService;
@@ -27,6 +33,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -42,6 +49,12 @@ class UserAccountGroupServiceTest {
 
     @Mock
     private UserGroupRepository groupRepository;
+
+    @Mock
+    private UserGroupProjectScopeRepository userGroupProjectScopeRepository;
+
+    @Mock
+    private ProjectRepository projectRepository;
 
     @Mock
     private UserGroupMapper groupMapper;
@@ -1005,6 +1018,282 @@ class UserAccountGroupServiceTest {
         // Then
         userAccountGroupService.removeManagerFromGroup(userLogin, groupId);
         verify(groupRepository, never()).save(any());
+    }
+
+    @Test
+    void updateProjectScopeFromGroup_throwForbiddenException_whenCurrentUserNotFound() throws ForbiddenException {
+        // Given
+        var targetGroupId = 1L;
+        var targetProjectCode = "target-project-code";
+        var roleToUpdate = UserAccountScopeRole.ADMIN;
+
+        // When
+        when(userAccountService.getCurrentUser()).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountGroupService.updateProjectScopeFromGroup(targetGroupId, targetProjectCode, roleToUpdate));
+        verify(groupRepository, never()).save(any(UserGroup.class));
+        verify(userSessionService, never()).refreshCurrentUserAuthorities();
+    }
+
+    @Test
+    void updateProjectScopeFromGroup_throwForbiddenException_whenTargetGroupNotFound() throws ForbiddenException {
+        // Given
+        var targetGroupId = 1L;
+        var targetProjectCode = "target-project-code";
+        var roleToUpdate = UserAccountScopeRole.ADMIN;
+
+        var currentUser = mock(User.class);
+
+        // When
+        when(userAccountService.getCurrentUser()).thenReturn(Optional.of(currentUser));
+        when(groupRepository.findById(targetGroupId)).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountGroupService.updateProjectScopeFromGroup(targetGroupId, targetProjectCode, roleToUpdate));
+        verify(groupRepository, never()).save(any(UserGroup.class));
+        verify(userSessionService, never()).refreshCurrentUserAuthorities();
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "\t", "\n"})
+    void updateProjectScopeFromGroup_throwForbiddenException_whenTargetProjectCodeIsBlank(String targetProjectCode) throws ForbiddenException {
+        // Given
+        var targetGroupId = 1L;
+        var roleToUpdate = UserAccountScopeRole.ADMIN;
+
+        var currentUser = mock(User.class);
+        var targetGroup = mock(UserGroup.class);
+
+        // When
+        when(userAccountService.getCurrentUser()).thenReturn(Optional.of(currentUser));
+        when(groupRepository.findById(targetGroupId)).thenReturn(Optional.of(targetGroup));
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountGroupService.updateProjectScopeFromGroup(targetGroupId, targetProjectCode, roleToUpdate));
+        verify(groupRepository, never()).save(any(UserGroup.class));
+        verify(userSessionService, never()).refreshCurrentUserAuthorities();
+    }
+
+    @Test
+    void updateProjectScopeFromGroup_throwForbiddenException_whenTargetProjectNotFound() throws ForbiddenException {
+        // Given
+        var targetGroupId = 1L;
+        var targetProjectCode = "target-project-code";
+        var roleToUpdate = UserAccountScopeRole.ADMIN;
+
+        var currentUser = mock(User.class);
+        var targetGroup = mock(UserGroup.class);
+
+        // When
+        when(userAccountService.getCurrentUser()).thenReturn(Optional.of(currentUser));
+        when(groupRepository.findById(targetGroupId)).thenReturn(Optional.of(targetGroup));
+        when(projectRepository.findByCode(targetProjectCode)).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountGroupService.updateProjectScopeFromGroup(targetGroupId, targetProjectCode, roleToUpdate));
+        verify(groupRepository, never()).save(any(UserGroup.class));
+        verify(userSessionService, never()).refreshCurrentUserAuthorities();
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = UserAccountScopeRole.class)
+    void updateProjectScopeFromGroup_updateProjectScopeAndReturnUpdatedGroup_whenTargetProjectFoundInTargetGroupScope(UserAccountScopeRole roleToUpdate) throws ForbiddenException {
+        // Given
+        var targetGroupId = 1L;
+        var targetProjectCode = "target-project-code";
+
+        var currentUser = mock(User.class);
+        var targetGroup = mock(UserGroup.class);
+
+        var project1 = mock(Project.class);
+        var projectCode1 = "project-code1";
+        var role1 = mock(ProjectRole.class);
+        var scope1 = new UserGroupProjectScope(targetGroup, project1, role1);
+        var project2 = mock(Project.class);
+        var projectCode2 = "project-code2";
+        var role2 = mock(ProjectRole.class);
+        var scope2 = new UserGroupProjectScope(targetGroup, project2, role2);
+        var project3 = mock(Project.class);
+        var role3 = mock(ProjectRole.class);
+        var scope3 = new UserGroupProjectScope(targetGroup, project3, role3);
+        var scopes = Set.of(scope1, scope2, scope3);
+
+        var targetProject = mock(Project.class);
+
+        var savedGroup = mock(UserGroup.class);
+        var mappedSavedGroup = mock(UserAccountGroup.class);
+
+        // When
+        when(userAccountService.getCurrentUser()).thenReturn(Optional.of(currentUser));
+        when(groupRepository.findById(targetGroupId)).thenReturn(Optional.of(targetGroup));
+        when(targetGroup.getScopes()).thenReturn(scopes);
+        when(project1.getCode()).thenReturn(projectCode1);
+        when(project2.getCode()).thenReturn(projectCode2);
+        when(project3.getCode()).thenReturn(targetProjectCode);
+
+        when(projectRepository.findByCode(targetProjectCode)).thenReturn(Optional.of(targetProject));
+
+        when(groupRepository.save(targetGroup)).thenReturn(savedGroup);
+        when(groupMapper.getUserAccountGroupFromUserGroup(savedGroup, currentUser)).thenReturn(mappedSavedGroup);
+
+        // Then
+        var updatedGroup = userAccountGroupService.updateProjectScopeFromGroup(targetGroupId, targetProjectCode, roleToUpdate);
+        assertThat(updatedGroup).isSameAs(mappedSavedGroup);
+
+        var groupToSaveArgumentCaptor = ArgumentCaptor.forClass(UserGroup.class);
+        verify(groupRepository, times(1)).save(groupToSaveArgumentCaptor.capture());
+        var capturedGroupToSave = groupToSaveArgumentCaptor.getValue();
+        var expectedRole = ProjectRole.valueOf(roleToUpdate.name());
+        assertThat(capturedGroupToSave.getScopes())
+                .extracting("role", "project", "group")
+                .containsExactlyInAnyOrder(
+                        tuple(role1, project1, targetGroup),
+                        tuple(role2, project2, targetGroup),
+                        tuple(expectedRole, project3, targetGroup)
+                )
+                .hasSize(3);
+
+        verify(userSessionService).refreshCurrentUserAuthorities();
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = UserAccountScopeRole.class)
+    void updateProjectScopeFromGroup_addProjectScopeAndReturnUpdatedGroup_whenTargetProjectNotFoundInTargetGroupScope(UserAccountScopeRole roleToUpdate) throws ForbiddenException {
+        // Given
+        var targetGroupId = 1L;
+        var targetProjectCode = "target-project-code";
+
+        var currentUser = mock(User.class);
+        var targetGroup = mock(UserGroup.class);
+
+        var project1 = mock(Project.class);
+        var projectCode1 = "project-code1";
+        var role1 = mock(ProjectRole.class);
+        var scope1 = new UserGroupProjectScope(targetGroup, project1, role1);
+        var project2 = mock(Project.class);
+        var projectCode2 = "project-code2";
+        var role2 = mock(ProjectRole.class);
+        var scope2 = new UserGroupProjectScope(targetGroup, project2, role2);
+        var project3 = mock(Project.class);
+        var projectCode3 = "project-code3";
+        var role3 = mock(ProjectRole.class);
+        var scope3 = new UserGroupProjectScope(targetGroup, project3, role3);
+        var scopes = new HashSet<UserGroupProjectScope>() {{add(scope1); add(scope2); add(scope3);}};
+
+        var targetProject = mock(Project.class);
+
+        var savedGroup = mock(UserGroup.class);
+        var mappedSavedGroup = mock(UserAccountGroup.class);
+
+        // When
+        when(userAccountService.getCurrentUser()).thenReturn(Optional.of(currentUser));
+        when(groupRepository.findById(targetGroupId)).thenReturn(Optional.of(targetGroup));
+        when(targetGroup.getScopes()).thenReturn(scopes);
+        when(project1.getCode()).thenReturn(projectCode1);
+        when(project2.getCode()).thenReturn(projectCode2);
+        when(project3.getCode()).thenReturn(projectCode3);
+
+        when(projectRepository.findByCode(targetProjectCode)).thenReturn(Optional.of(targetProject));
+
+        when(groupRepository.save(targetGroup)).thenReturn(savedGroup);
+        when(groupMapper.getUserAccountGroupFromUserGroup(savedGroup, currentUser)).thenReturn(mappedSavedGroup);
+
+        // Then
+        var updatedGroup = userAccountGroupService.updateProjectScopeFromGroup(targetGroupId, targetProjectCode, roleToUpdate);
+        assertThat(updatedGroup).isSameAs(mappedSavedGroup);
+
+        var groupToSaveArgumentCaptor = ArgumentCaptor.forClass(UserGroup.class);
+        verify(groupRepository, times(1)).save(groupToSaveArgumentCaptor.capture());
+        var capturedGroupToSave = groupToSaveArgumentCaptor.getValue();
+        var expectedRole = ProjectRole.valueOf(roleToUpdate.name());
+        assertThat(capturedGroupToSave.getScopes())
+                .extracting("role", "project", "group")
+                .containsExactlyInAnyOrder(
+                        tuple(role1, project1, targetGroup),
+                        tuple(role2, project2, targetGroup),
+                        tuple(role3, project3, targetGroup),
+                        tuple(expectedRole, targetProject, targetGroup)
+                )
+                .hasSize(4);
+
+        verify(userSessionService).refreshCurrentUserAuthorities();
+    }
+
+    @Test
+    void removeProjectScopeFromGroup_throwForbiddenException_whenTargetGroupNotFound() throws ForbiddenException {
+        // Given
+        var targetProjectCode = "target-project-code";
+
+        var targetGroupId = 1L;
+
+        // When
+        when(groupRepository.findById(targetGroupId)).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountGroupService.removeProjectScopeFromGroup(targetGroupId, targetProjectCode));
+        verify(userGroupProjectScopeRepository, never()).deleteById(any(UserGroupProjectScope.UserGroupProjectScopeId.class));
+        verify(userSessionService, never()).refreshCurrentUserAuthorities();
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "\t", "\n"})
+    void removeProjectScopeFromGroup_throwForbiddenException_whenTargetProjectCodeIsBlank(String targetProjectCode) throws ForbiddenException {
+        // Given
+        var targetGroupId = 1L;
+        var targetGroup = mock(UserGroup.class);
+
+        // When
+        when(groupRepository.findById(targetGroupId)).thenReturn(Optional.of(targetGroup));
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountGroupService.removeProjectScopeFromGroup(targetGroupId, targetProjectCode));
+        verify(userGroupProjectScopeRepository, never()).deleteById(any(UserGroupProjectScope.UserGroupProjectScopeId.class));
+        verify(userSessionService, never()).refreshCurrentUserAuthorities();
+    }
+
+    @Test
+    void removeProjectScopeFromGroup_throwForbiddenException_whenTargetProjectIsNotFound() throws ForbiddenException {
+        // Given
+        var targetGroupId = 1L;
+        var targetGroup = mock(UserGroup.class);
+
+        var targetProjectCode = "target-project-code";
+
+        // When
+        when(groupRepository.findById(targetGroupId)).thenReturn(Optional.of(targetGroup));
+        when(projectRepository.findByCode(targetProjectCode)).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountGroupService.removeProjectScopeFromGroup(targetGroupId, targetProjectCode));
+        verify(userGroupProjectScopeRepository, never()).deleteById(any(UserGroupProjectScope.UserGroupProjectScopeId.class));
+        verify(userSessionService, never()).refreshCurrentUserAuthorities();
+    }
+
+    @Test
+    void removeProjectScopeFromGroup_deleteUserScopeAndRefreshAuthorities_whenTargetGroupAndTargetProjectFound() throws ForbiddenException {
+        // Given
+        var targetGroupId = 1L;
+        var targetGroup = mock(UserGroup.class);
+
+        var targetProject = mock(Project.class);
+        var targetProjectCode = "target-project-code";
+        var targetProjectId = 1L;
+
+        // When
+        when(groupRepository.findById(targetGroupId)).thenReturn(Optional.of(targetGroup));
+        when(projectRepository.findByCode(targetProjectCode)).thenReturn(Optional.of(targetProject));
+        when(targetProject.getId()).thenReturn(targetProjectId);
+
+        // Then
+        userAccountGroupService.removeProjectScopeFromGroup(targetGroupId, targetProjectCode);
+        var scopeToDeleteArgumentCaptor = ArgumentCaptor.forClass(UserGroupProjectScope.UserGroupProjectScopeId.class);
+        verify(userGroupProjectScopeRepository).deleteById(scopeToDeleteArgumentCaptor.capture());
+        assertThat(scopeToDeleteArgumentCaptor.getValue()).extracting("projectId", "groupId").contains(targetProjectId, targetGroupId);
+
+        verify(userSessionService).refreshCurrentUserAuthorities();
     }
 
 }

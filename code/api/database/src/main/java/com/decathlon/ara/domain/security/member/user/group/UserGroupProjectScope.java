@@ -26,6 +26,7 @@ public class UserGroupProjectScope extends ProjectScope {
 
     public UserGroupProjectScope(UserGroup group, Project project, ProjectRole role) {
         super(project, role);
+        this.scopeId = new UserGroupProjectScopeId(group, project);
         this.group = group;
     }
 
@@ -41,11 +42,6 @@ public class UserGroupProjectScope extends ProjectScope {
         public UserGroupProjectScopeId(@NonNull UserGroup userGroup, @NonNull Project project) {
             this.groupId = userGroup.getId();
             this.projectId = project.getId();
-        }
-
-        public UserGroupProjectScopeId(@NonNull Long groupId, @NonNull Long projectId) {
-            this.groupId = groupId;
-            this.projectId = projectId;
         }
 
         public Long getGroupId() {

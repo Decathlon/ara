@@ -1,10 +1,16 @@
 package com.decathlon.ara.security.service.member.user.group;
 
+import com.decathlon.ara.domain.Project;
+import com.decathlon.ara.domain.security.member.user.ProjectRole;
 import com.decathlon.ara.domain.security.member.user.account.User;
 import com.decathlon.ara.domain.security.member.user.account.UserProfile;
 import com.decathlon.ara.domain.security.member.user.group.UserGroup;
+import com.decathlon.ara.domain.security.member.user.group.UserGroupProjectScope;
+import com.decathlon.ara.repository.ProjectRepository;
+import com.decathlon.ara.repository.security.member.user.group.UserGroupProjectScopeRepository;
 import com.decathlon.ara.repository.security.member.user.group.UserGroupRepository;
 import com.decathlon.ara.security.dto.user.group.UserAccountGroup;
+import com.decathlon.ara.security.dto.user.scope.UserAccountScopeRole;
 import com.decathlon.ara.security.mapper.UserGroupMapper;
 import com.decathlon.ara.security.service.member.user.account.UserAccountService;
 import com.decathlon.ara.security.service.member.user.account.UserSessionService;
@@ -18,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.decathlon.ara.Entities.GROUP;
+import static com.decathlon.ara.Entities.PROJECT;
 
 @Service
 public class UserAccountGroupService {
@@ -28,17 +35,25 @@ public class UserAccountGroupService {
 
     private final UserGroupRepository groupRepository;
 
+    private final UserGroupProjectScopeRepository groupScopeRepository;
+
+    private final ProjectRepository projectRepository;
+
     private final UserGroupMapper groupMapper;
 
     public UserAccountGroupService(
             UserAccountService userAccountService,
             UserSessionService userSessionService,
             UserGroupRepository groupRepository,
+            UserGroupProjectScopeRepository groupScopeRepository,
+            ProjectRepository projectRepository,
             UserGroupMapper groupMapper
     ) {
         this.userAccountService = userAccountService;
         this.userSessionService = userSessionService;
         this.groupRepository = groupRepository;
+        this.groupScopeRepository = groupScopeRepository;
+        this.projectRepository = projectRepository;
         this.groupMapper = groupMapper;
     }
 
@@ -293,5 +308,67 @@ public class UserAccountGroupService {
         if (userWasRemoved) {
             groupRepository.save(targetGroup);
         }
+    }
+
+    /**
+     * Update a group project scope ({@link UserGroupProjectScope})
+     * @param targetGroupId the target group id
+     * @param targetProjectCode the target project code
+     * @param targetAccountRole the target account role
+     * @return the updated {@link UserAccountGroup}
+     * @throws ForbiddenException thrown if this operation failed
+     */
+    public UserAccountGroup updateProjectScopeFromGroup(long targetGroupId, @NonNull String targetProjectCode, @NonNull UserAccountScopeRole targetAccountRole) throws ForbiddenException {
+        var exception = new ForbiddenException(PROJECT, "update user group project scope");
+
+        var currentUser = userAccountService.getCurrentUser().orElseThrow(() -> exception);
+        var targetGroup = groupRepository.findById(targetGroupId).orElseThrow(() -> exception);
+        if (StringUtils.isBlank(targetProjectCode)) {
+            throw exception;
+        }
+        var targetProject = projectRepository.findByCode(targetProjectCode).orElseThrow(() -> exception);
+        var targetRole = ProjectRole.valueOf(targetAccountRole.name());
+
+        var groupScopes = targetGroup.getScopes();
+        for (var groupScope : groupScopes) {
+            var projectInScope = groupScope.getProject();
+            var projectCodeInScope = projectInScope.getCode();
+            if (targetProjectCode.equals(projectCodeInScope)) {
+                groupScope.setRole(targetRole);
+            }
+        }
+        var targetProjectScopeNotFound = groupScopes.stream()
+                .map(UserGroupProjectScope::getProject)
+                .map(Project::getCode)
+                .noneMatch(targetProjectCode::equals);
+        if (targetProjectScopeNotFound) {
+            groupScopes.add(new UserGroupProjectScope(targetGroup, targetProject, targetRole));
+        }
+
+        var updatedGroup = groupRepository.save(targetGroup);
+
+        userSessionService.refreshCurrentUserAuthorities();
+
+        return groupMapper.getUserAccountGroupFromUserGroup(updatedGroup, currentUser);
+    }
+
+    /**
+     * Remove a group project scope ({@link UserGroupProjectScope})
+     * @param targetGroupId the target group id
+     * @param targetProjectCode the target project code
+     * @throws ForbiddenException thrown if this operation failed
+     */
+    public void removeProjectScopeFromGroup(long targetGroupId, @NonNull String targetProjectCode) throws ForbiddenException {
+        var exception = new ForbiddenException(PROJECT, "remove user group project scope");
+
+        var targetGroup = groupRepository.findById(targetGroupId).orElseThrow(() -> exception);
+        if (StringUtils.isBlank(targetProjectCode)) {
+            throw exception;
+        }
+        var targetProject = projectRepository.findByCode(targetProjectCode).orElseThrow(() -> exception);
+
+        groupScopeRepository.deleteById(new UserGroupProjectScope.UserGroupProjectScopeId(targetGroup, targetProject));
+
+        userSessionService.refreshCurrentUserAuthorities();
     }
 }

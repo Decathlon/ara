@@ -1,18 +1,22 @@
 package com.decathlon.ara.web.rest.member.user;
 
 import com.decathlon.ara.security.dto.user.group.UserAccountGroup;
+import com.decathlon.ara.security.dto.user.scope.UserAccountScope;
 import com.decathlon.ara.security.service.member.user.group.UserAccountGroupService;
 import com.decathlon.ara.service.exception.ForbiddenException;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Objects;
 
 import static com.decathlon.ara.Entities.GROUP;
 import static com.decathlon.ara.security.access.SecurityConfiguration.MEMBER_USER_BASE_API_PATH;
+import static com.decathlon.ara.web.rest.ProjectResource.PROJECT_CODE_REQUEST_PARAMETER;
 import static com.decathlon.ara.web.rest.member.user.UserGroupResource.MEMBER_USER_GROUP_BASE_API_PATH;
 
 @RestController
@@ -48,6 +52,9 @@ public class UserGroupResource {
     public static final String MEMBER_USER_GROUP_MANAGED_GROUPS_FROM_USER_LOGIN_API_PATH = MEMBER_USER_GROUP_BASE_API_PATH + MANAGED_GROUPS_FROM_USER_LOGIN;
     public static final String MEMBER_USER_GROUP_MANAGED_GROUPS_BY_CURRENT_USER_API_PATH = MEMBER_USER_GROUP_BASE_API_PATH + MANAGED_GROUPS_BY_CURRENT_USER;
     public static final String MEMBER_USER_GROUPS_MANAGERS_MANAGEMENT_API_PATH = MEMBER_USER_GROUP_BASE_API_PATH + GROUPS_MANAGERS_MANAGEMENT;
+
+    private static final String GROUP_SCOPE = GROUP_ID + "/scopes/project/" + PROJECT_CODE_REQUEST_PARAMETER;
+    public static final String MEMBER_USER_GROUP_SCOPE_API_PATH = MEMBER_USER_GROUP_BASE_API_PATH + GROUP_SCOPE;
 
     public UserGroupResource(UserAccountGroupService userAccountGroupService) {
         this.userAccountGroupService = userAccountGroupService;
@@ -171,6 +178,33 @@ public class UserGroupResource {
     public ResponseEntity<Void> removeManagerFromGroup(@PathVariable String userLogin, @PathVariable Long groupId) {
         try {
             userAccountGroupService.removeManagerFromGroup(userLogin, groupId);
+            return ResponseEntity.ok().build();
+        } catch (ForbiddenException e) {
+            return ResponseUtil.handle(e);
+        }
+    }
+
+    @PutMapping(GROUP_SCOPE)
+    public ResponseEntity<UserAccountGroup> updateGroupProjectScope(
+            @PathVariable Long groupId,
+            @PathVariable String projectCode,
+            @Valid @RequestBody UserAccountScope scope
+    ) {
+        try {
+            if (!projectCode.equals(scope.getProject())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+            var updatedGroup = userAccountGroupService.updateProjectScopeFromGroup(groupId, projectCode, scope.getRole());
+            return ResponseEntity.ok(updatedGroup);
+        } catch (ForbiddenException e) {
+            return ResponseUtil.handle(e);
+        }
+    }
+
+    @DeleteMapping(GROUP_SCOPE)
+    public ResponseEntity<Void> removeGroupProjectScope(@PathVariable Long groupId, @PathVariable String projectCode) {
+        try {
+            userAccountGroupService.removeProjectScopeFromGroup(groupId, projectCode);
             return ResponseEntity.ok().build();
         } catch (ForbiddenException e) {
             return ResponseUtil.handle(e);

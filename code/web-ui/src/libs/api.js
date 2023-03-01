@@ -67,6 +67,7 @@ api.paths = {
   groupsManagedByUser: (userLogin) => `${USER_GROUP_API_PATH}/managed/account/login/${userLogin}`,
   groupsManagedByCurrentUser: `${USER_GROUP_API_PATH}/managed/account/current`,
   groupsManagersManagement: (userLogin, groupId) => `${USER_GROUP_API_PATH}/managed/account/login/${userLogin}/groups/${groupId}`,
+  groupScopeManagement: (groupId, projectCode) => `${USER_GROUP_API_PATH}/${groupId}/scopes/project/${projectCode}`,
 
   communications: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/communications',
   countries: (viewOrProjectCode) => projectPath(viewOrProjectCode) + '/countries',
