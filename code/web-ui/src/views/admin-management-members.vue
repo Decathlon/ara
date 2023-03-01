@@ -24,8 +24,8 @@
 
       <h1 class="adminTitle">{{ memberType }}</h1>
 
-      <div v-if="manageProject || !isNotAuditor">
-        <div class="array-filters">
+      <div v-if="manageProject || isNotAuditor">
+        <div v-if="searchedUser.length" class="array-filters">
           <div class="member-type-select">
             <Select placeholder="Members" @on-change="changeMemberView" :label-in-value="true">
               <Option v-for="item in memberValues" :value="item.value" :key="item.value">{{ item.label }}</Option>
@@ -35,13 +35,13 @@
             <Input class="filterSearch" v-model="searchElement" search placeholder="Enter something..." />
           </div>
           <div class="member-cta" :class="memberType === 'Members' ? 'hidden' : ''">
-            <Button type="primary" class="addBtn" @click="openProjectCreationModal()">
+            <Button type="primary" class="addBtn" @click="memberToAdd = true">
               Add group
             </Button>
           </div>
         </div>
 
-        <table class="adminTable" aria-label="Users with their roles and projects">
+        <table v-if="searchedUser.length" class="adminTable" aria-label="Users with their roles and projects">
           <thead>
             <tr v-if="memberType === 'Members'">
               <th v-for="header in memberHeader">
@@ -57,18 +57,26 @@
 
           <tbody>
             <tr v-for="(member, index) in searchedUser" :key="index" :class="index %2 !== 0 ? 'lightGrey' : 'darkGrey'">
-              <td class="userType">
-                <p v-if="memberType === 'Members'">{{ getProjectUserNameDisplay(member.login) }}</p>
-                <p v-else> Group {{ index }} </p>
+              <td>
+                <div>
+                  <div v-if="memberType !== 'Groups'" class="user-avatar">
+                    <span v-if="member.pictureUrl" :style="getAvatar(member)" class="user-picture"></span>
+                    <Avatar v-else class="user-picture">{{ getAvatar(member)  }}</Avatar>
+                    <p>{{ member.login }}</p>
+                  </div>
+                  <div v-else>
+                    <p>{{ member.name }}</p>
+                  </div>
+                </div>
               </td>
 
-              <td class="userType">
+              <td>
                 <p v-if="memberType === 'Members'">{{ member.profile }}</p>
-                <p v-else>Manager {{ index }}</p>
+                <p v-else>{{  member.managers[0].login }}</p>
               </td>
 
               <td v-if="memberType === 'Groups'">
-                User {{ index }}
+                {{  member.users }}
               </td>
 
               <td class="member-projects-list">
@@ -88,6 +96,13 @@
             </tr>
           </tbody>
         </table>
+
+        <div v-else-if="showError" class="no-values">
+          <h2>There are no groups to display. Contact an admin or create a new group by clicking the button below.</h2>
+          <Button type="primary" class="addBtn" @click="memberToAdd = true" >
+            Add group
+          </Button>
+        </div>
       </div>
 
       <div class="adminTable" v-else>
@@ -95,20 +110,24 @@
       </div>
     </div>
 
-    <Modal v-model="memberToAdd" title="Add Group" okText="Add" @on-ok="createMember" @close="memberToAdd = false" :width="900"
-      :loading="loadingSaving" ref="editPopup">
-      <Form :label-width="128">
-        <Form-item v-for="field in fields"
-                   :key="field.code"
-                   :label="(field.type === 'boolean' ? '' : field.name + ':')"
-                   :required="field.required && (editingNew || (!field.primaryKey && !field.createOnly))">
-          <form-field :field="field" v-model="editingData[field.code]" :editingNew="editingNew" :ref="field.code" v-on:enter="createMember"/>
+    <Modal v-model="memberToAdd" title="Add Group" :width="900"
+      :loading="loadingSaving" :footer-hide="true">
+      <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="128">
+        <Form-item label="Code" prop="code">
+          <Input v-model="formValidate.code" />
+        </Form-item>
+        <Form-item label="Description" prop="code">
+          <Input v-model="formValidate.description" type="textarea" placeholder="Group's decription..." />
+        </Form-item>
+        <Form-item class="modal-cta">
+          <Button @click="memberToAdd = false">Cancel</Button>
+          <Button type="primary" @click="handleSubmit()">Submit</Button>
         </Form-item>
       </Form>
     </Modal>
 
-    <Modal v-model="blockPopup" title="Block user" okText="Block user" @on-ok="confirmBlockUser" @close="memberToAdd = false" :width="900"
-      :loading="loadingSaving" :footer-hide="!selectedBlockOption" ref="editPopup">
+    <Modal v-model="blockPopup" title="Block user" okText="Block user" @on-ok="confirmBlockUser" :width="900"
+      :loading="loadingSaving" :footer-hide="!selectedBlockOption">
       <p>Select what the user will be banned from:</p>
 
       <div class="banOptions">
@@ -125,40 +144,26 @@
 <script>
   import Vue from 'vue'
   import api from '../libs/api'
-  import formField from '../components/form-field'
   import { AuthenticationService } from '../service/authentication.service'
   import { USER } from '../libs/constants'
 
   export default {
     name: 'admin-management-members',
-    components: {
-      formField
-    },
 
     data () {
       return {
         members: [],
         memberToAdd: false,
-        fields: [
-          {
-            code: 'name',
-            name: 'Group name',
-            columnTitle: 'Name',
-            type: 'string',
-            required: true,
-            newValue: '',
-            width: undefined,
-            businessKey: true
-          }
-        ],
         memberHeader: ['Name', 'Profile', 'Projects', ''],
         groupHeader: ['Name', 'Management', 'Users', 'Projects', ''],
-        editingData: {},
-        editingNew: false,
-        editing: false,
-        showGroup: false,
-        userRole: '',
         blockPopup: false,
+        formValidate: {
+          code: '',
+          description: ''
+        },
+        ruleValidate: {
+          code: { required: true, message: 'The code cannot be empty', trigger: 'blur' }
+        },
         memberToBlock: {
           'member': '',
           'index': '',
@@ -176,15 +181,27 @@
         ],
         selectedBlockOption: '',
         memberType: 'Members',
-        searchElement: ''
+        searchElement: '',
+        showError: false
       }
     },
 
     methods: {
-      createMember () {
+      getGroups () {
+        this.members = []
         Vue.http
-          .post('/api/groups', this.editingData, api.REQUEST_OPTIONS)
-          .then(() => { return this.members })
+          .get(api.paths.allGroups, api.REQUEST_OPTIONS)
+          .then((groups) => {
+            if (groups.body.length > 0) {
+              for (let group of groups.body) {
+                this.members.push(group)
+              }
+            } else {
+              this.showError = true
+            }
+
+            return this.members.sort((a, b) => a.name.localeCompare(b.name))
+          })
       },
 
       async getMember () {
@@ -203,6 +220,15 @@
               }
             }
 
+            this.members.push({
+              login: 'John Doe',
+              profile: 'SCOPED_USER',
+              scopes: []
+            }, {
+              login: 'Bryan',
+              profile: 'SCOPED_USER',
+              scopes: []
+            })
             return this.members.sort((a, b) => a.login.localeCompare(b.login))
           })
       },
@@ -239,7 +265,11 @@
 
       navTo (user) {
         localStorage.setItem('user', JSON.stringify(user))
-        this.$router.push({ name: 'member-projects', params: { user: user.login } })
+        if (this.memberType === 'Members') {
+          this.$router.push({ name: 'member-projects', params: { user: user.login } })
+        } else {
+          this.$router.push({ name: 'group-details', params: { groupName: user.name } })
+        }
       },
 
       getProjectUserNameDisplay (login) {
@@ -251,6 +281,11 @@
 
       changeMemberView (type) {
         this.memberType = type.label
+        if (type.label === 'Members') {
+          this.getMember()
+        } else {
+          this.getGroups()
+        }
       },
 
       isManagerOf (scopes) {
@@ -268,6 +303,29 @@
           return true
         } else {
           return false
+        }
+      },
+
+      handleSubmit () {
+        this.$refs['formValidate'].validate((valid) => {
+          if (valid) {
+            const group = {
+              name: this.formValidate.code,
+              description: this.formValidate.description
+            }
+
+            Vue.http
+              .post(api.paths.groupBasePath, group, api.REQUEST_OPTIONS)
+              .then(() => { return this.members })
+          }
+        })
+      },
+
+      getAvatar (member) {
+        if (member.pictureUrl) {
+          return `backgroundImage: url("` + member.pictureUrl + `")`
+        } else if (member.login) {
+          return member.login.substring(0, 1)
         }
       }
     },
@@ -294,7 +352,7 @@
       },
 
       searchedUser () {
-        return this.members.filter(member => member.login.toLowerCase().includes(this.searchElement.toLowerCase()))
+        return this.members.filter(member => member.login ? member.login.toLowerCase().includes(this.searchElement.toLowerCase()) : member.name.toLowerCase().includes(this.searchElement.toLowerCase()))
       }
     }
   }
@@ -345,5 +403,25 @@
 
   .ivu-tag:hover {
     opacity: 1;
+  }
+
+  .user-avatar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+
+  .user-avatar .user-picture {
+    background-size: cover;
+    width: 35px;
+    height: 35px;
+    border-radius: 100px;
+    margin: 0 15px 0 0;
+  }
+
+  .user-avatar span {
+    position: absolute;
+    left: 25px;
   }
 </style>

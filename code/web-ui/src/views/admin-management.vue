@@ -83,7 +83,7 @@
       </table>
     </div>
 
-    <div v-else class="no-project">
+    <div v-else class="no-values">
       <h2>No projects to display. Contact an admin or create a new project by clicking the button below.</h2>
       <Button type="primary" class="addBtn" @click="openProjectCreationModal()" >
         Add project
@@ -127,16 +127,13 @@
 <script>
   import Vue from 'vue'
   import api from '../libs/api'
-  import formField from '../components/form-field'
   import { DEMO_PROJECT_CODE, USER } from '../libs/constants'
   import { AuthenticationService } from '../service/authentication.service'
   import { mapState } from 'vuex'
 
   export default {
     name: 'admin-management',
-    components: {
-      formField
-    },
+
     data () {
       return {
         projects: [],

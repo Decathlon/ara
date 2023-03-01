@@ -58,7 +58,7 @@ const routes = [
 
   // Executions & Errors
   {
-    path: '/projects/:projectCode/executions',
+    path: '/projects/:projectCode?/executions',
     name: 'executions',
     meta: {
       title: 'Executions'
@@ -194,6 +194,14 @@ const routes = [
     component: (resolve) => require(['./views/admin-management-members.vue'], resolve)
   },
   {
+    path: '/admin/members-list/group/:groupName',
+    name: 'group-details',
+    meta: {
+      title: 'Group details'
+    },
+    component: (resolve) => require(['./views/admin-management-groups.vue'], resolve)
+  },
+  {
     path: '/admin/members-list/:user/projects',
     name: 'member-projects',
     meta: {
@@ -202,9 +210,9 @@ const routes = [
     component: (resolve) => require(['./views/admin-management-members-projects.vue'], resolve)
   },
   {
-    path: '/projects/:projectCode/dashboard',
+    path: '/projects/:projectCode?/dashboard',
     name: 'dashboard',
-    redirect: '/projects/:projectCode/executions'
+    redirect: '/projects/:projectCode?/executions'
   },
   {
     path: '/admin/projects-list/:projectCode/:projectName/:userRole?',
@@ -215,20 +223,15 @@ const routes = [
     component: (resolve) => require(['./views/admin-project-details.vue'], resolve)
   },
   {
-    path: '/admin/configuration',
+    path: '/settings/:projectCode?/management-communications',
     name: 'settings',
-    redirect: '/:projectCode/settings/management-communications'
-  },
-  {
-    path: '/:projectCode/settings/management-communications',
-    name: 'management-communications',
     meta: {
       title: 'Communications'
     },
     component: (resolve) => require(['./views/management-communications.vue'], resolve)
   },
   {
-    path: '/:projectCode/settings/management-teams',
+    path: '/settings/:projectCode?/management-teams',
     name: 'management-teams',
     meta: {
       title: 'Teams'
@@ -236,7 +239,7 @@ const routes = [
     component: (resolve) => require(['./views/management-teams.vue'], resolve)
   },
   {
-    path: '/:projectCode/settings/management-root-causes',
+    path: '/settings/:projectCode?/management-root-causes',
     name: 'management-root-causes',
     meta: {
       title: 'Root Causes'
@@ -244,7 +247,7 @@ const routes = [
     component: (resolve) => require(['./views/management-root-causes.vue'], resolve)
   },
   {
-    path: '/:projectCode/settings/management-countries',
+    path: '/settings/:projectCode?/management-countries',
     name: 'management-countries',
     meta: {
       title: 'Countries'
@@ -252,7 +255,7 @@ const routes = [
     component: (resolve) => require(['./views/management-countries.vue'], resolve)
   },
   {
-    path: '/:projectCode/settings/management-cycle-definitions',
+    path: '/settings/:projectCode?/management-cycle-definitions',
     name: 'management-cycle-definitions',
     meta: {
       title: 'Cycles'
@@ -260,7 +263,7 @@ const routes = [
     component: (resolve) => require(['./views/management-cycle-definitions.vue'], resolve)
   },
   {
-    path: '/:projectCode/settings/management-severities',
+    path: '/settings/:projectCode?/management-severities',
     name: 'management-severities',
     meta: {
       title: 'Severities'
@@ -268,7 +271,7 @@ const routes = [
     component: (resolve) => require(['./views/management-severities.vue'], resolve)
   },
   {
-    path: '/:projectCode/settings/management-sources',
+    path: '/settings/:projectCode?/management-sources',
     name: 'management-sources',
     meta: {
       title: 'Sources'
@@ -276,7 +279,7 @@ const routes = [
     component: (resolve) => require(['./views/management-sources.vue'], resolve)
   },
   {
-    path: '/:projectCode/settings/management-types',
+    path: '/settings/:projectCode?/management-types',
     name: 'management-types',
     meta: {
       title: 'Types'
@@ -292,7 +295,7 @@ const routes = [
     component: (resolve) => require(['./views/admin-management.vue'], resolve)
   },
   {
-    path: '/:projectCode/settings/management-technologies',
+    path: '/settings/:projectCode?/management-technologies',
     name: 'management-technologies',
     beforeEnter: requireAuth,
     meta: {
@@ -302,7 +305,7 @@ const routes = [
     component: (resolve) => require(['./views/management-technologies.vue'], resolve)
   },
   {
-    path: '/:projectCode/settings/management-settings',
+    path: '/settings/:projectCode?/management-settings',
     name: 'management-settings',
     beforeEnter: requireAuth,
     meta: {

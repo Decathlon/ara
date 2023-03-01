@@ -47,9 +47,9 @@
           </router-link>
         </ul>
 
-        <ul v-else-if="projectCode && projects && projects.length && savedSingleUserConnections" class="ivu-menu ivu-menu-primary ivu-menu-horizontal dashboardHeader">
+        <ul v-else-if="savedSingleUserConnections" class="ivu-menu ivu-menu-primary ivu-menu-horizontal dashboardHeader">
           <li v-for="link, index in adminMenu" class="top-nav" :key="index">
-            <router-link v-if="link.name !== 'MEMBERS'" class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected" @click.native="changeAdminState(link.routeName)" :key="link.name" :to="to(link)" :class="$route.path.includes(link.routeName) ? 'ivu-menu-item-active ivu-menu-item-selected' : ''">
+            <router-link v-if="link.name !== 'MEMBERS'" class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected" @click.native="changeAdminState(link.routeName)" :key="link.name" :to="to(link)">
               {{ link.name }}
             </router-link>
 

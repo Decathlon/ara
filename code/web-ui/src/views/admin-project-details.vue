@@ -20,7 +20,7 @@
       <div>
         <h1 class="adminTitle">
           {{ projectName }}
-          <p class="projectCode ivu-text-center"><strong>{{ projectCode }}</strong></p>
+          <p class="title-description"><strong>{{ projectCode }}</strong></p>
         </h1>
       </div>
     </div>

@@ -447,13 +447,13 @@ pre code {
 
 /* Tables */
 
-.no-project {
+.no-values {
   text-align: center;
   height: 100%;
   transform: translateY(10rem);
 }
 
-.no-project > * {
+.no-values > * {
   margin: 12px;
 }
 
@@ -586,7 +586,7 @@ pre code {
   color: rgb(188, 188, 188);
 }
 
-.adminTable .ivu-icon-md-create, .projectCode {
+.adminTable .ivu-icon-md-create, .title-description {
   color: #ef8854;
   font-size: 16px;
 }

@@ -49,7 +49,8 @@
         }
         if (!this.defaultProjectCode) {
           // No project: go to project management screen
-          this.$router.replace({ name: 'management-projects' })
+          this.$store.dispatch('admin/enableAdmin', 'projects-list')
+          this.$router.replace({ name: 'projects-list' })
         } else if (this.$route.path === '/') {
           // Home screen => go to the default project's home screen
           this.$router.replace({ name: 'executions', params: { projectCode: this.defaultProjectCode } })
