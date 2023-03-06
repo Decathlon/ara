@@ -1,6 +1,5 @@
 package com.decathlon.ara.security.mapper;
 
-import com.decathlon.ara.domain.security.member.user.ProjectScope;
 import com.decathlon.ara.domain.security.member.user.account.User;
 import com.decathlon.ara.domain.security.member.user.group.UserGroup;
 import com.decathlon.ara.security.dto.user.group.UserAccountGroup;
@@ -8,7 +7,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.stream.Collectors;
 
 @Component
 public class UserGroupMapper {
@@ -27,12 +25,12 @@ public class UserGroupMapper {
 
     /**
      * Convert a {@link UserGroup} into a {@link UserAccountGroup}.
-     * Note that the scopes displayed depends on the read user profile.
+     * Note that the scopes displayed depends on the current user profile.
      * @param userGroup the {@link UserGroup} to convert
-     * @param readUser the read {@link User}
+     * @param currentUser the current {@link User}
      * @return the converted {@link UserAccountGroup}
      */
-    public UserAccountGroup getUserAccountGroupFromUserGroup(@NonNull UserGroup userGroup, @NonNull User readUser) {
+    public UserAccountGroup getUserAccountGroupFromUserGroup(@NonNull UserGroup userGroup, @NonNull User currentUser) {
         var groupId = userGroup.getId();
         var groupName = userGroup.getName();
 
@@ -52,22 +50,18 @@ public class UserGroupMapper {
             convertedGroup.setUpdateDate(Date.from(updateDate.toInstant()));
         }
 
-        var memberScopes = userGroup.getScopes()
-                .stream()
-                .map(ProjectScope.class::cast)
-                .collect(Collectors.toSet());
-        var convertedScopes = projectScopeMapper.getUserAccountScopesFromProjectScopes(memberScopes);
+        var convertedScopes = projectScopeMapper.getUserAccountScopesFromUserGroup(userGroup, currentUser);
         convertedGroup.setScopes(convertedScopes);
 
         var convertedMembers = userGroup.getMembers()
                 .stream()
-                .map(member -> userMapper.getPartialScopeAccessUserAccountFromUser(member, readUser))
+                .map(member -> userMapper.getUserAccountFromAnotherUser(member, currentUser))
                 .toList();
         convertedGroup.setMembers(convertedMembers);
 
         var convertedManagers = userGroup.getManagers()
                 .stream()
-                .map(manager -> userMapper.getPartialScopeAccessUserAccountFromUser(manager, readUser))
+                .map(manager -> userMapper.getUserAccountFromAnotherUser(manager, currentUser))
                 .toList();
         convertedGroup.setManagers(convertedManagers);
 

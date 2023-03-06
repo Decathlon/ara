@@ -61,9 +61,13 @@ public class UserAccountResource {
     }
 
     @GetMapping(ALL_ACCOUNTS)
-    public ResponseEntity<List<UserAccount>> getAllUserAccounts(OAuth2AuthenticationToken authentication) {
-        var accounts = userAccountService.getAllUserAccounts(authentication);
-        return ResponseEntity.ok(accounts);
+    public ResponseEntity<List<UserAccount>> getAllUserAccounts() {
+        try {
+            var accounts = userAccountService.getAllUserAccounts();
+            return ResponseEntity.ok(accounts);
+        } catch (ForbiddenException e) {
+            return ResponseUtil.handle(e);
+        }
     }
 
     @GetMapping(SCOPED_ACCOUNTS)

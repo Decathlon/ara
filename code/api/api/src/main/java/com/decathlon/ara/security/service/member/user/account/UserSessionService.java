@@ -164,7 +164,7 @@ public class UserSessionService {
         var userLogin = authenticatedUser.getLogin();
 
         var currentUser = userRepository.findById(new User.UserId(providerName, userLogin)).orElseThrow(() -> exception);
-        var currentUserAccount = userMapper.getFullScopeAccessUserAccountFromUser(currentUser);
+        var currentUserAccount = userMapper.getCurrentUserAccountFromCurrentUser(currentUser);
 
         var oauth2User = oauth2Authentication.getPrincipal();
         var authorities = authorityMapper.getGrantedAuthoritiesFromUserAccount(currentUserAccount);

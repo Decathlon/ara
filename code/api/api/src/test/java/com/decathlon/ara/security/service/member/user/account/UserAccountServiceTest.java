@@ -138,17 +138,17 @@ class UserAccountServiceTest {
 
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
 
-        var user = mock(User.class);
+        var currentUser = mock(User.class);
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getLogin()).thenReturn(userLogin);
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
+        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(currentUser));
 
         // Then
         var fetchedUser = userAccountService.getCurrentUser();
-        assertThat(fetchedUser).containsSame(user);
+        assertThat(fetchedUser).containsSame(currentUser);
     }
 
     @ParameterizedTest
@@ -203,12 +203,12 @@ class UserAccountServiceTest {
 
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
 
-        var user = mock(User.class);
+        var targetUser = mock(User.class);
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
+        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(targetUser));
 
         // Then
         var fetchedUser = userAccountService.getUserFromLogin(userLogin);
@@ -241,14 +241,14 @@ class UserAccountServiceTest {
 
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
 
-        var user = mock(User.class);
+        var currentUser = mock(User.class);
         var matchingUserAccount = mock(UserAccount.class);
 
         // When
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
         when(authenticatedUser.getLogin()).thenReturn(userLogin);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
-        when(userMapper.getFullScopeAccessUserAccountFromUser(user)).thenReturn(matchingUserAccount);
+        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(currentUser));
+        when(userMapper.getCurrentUserAccountFromCurrentUser(currentUser)).thenReturn(matchingUserAccount);
 
         // Then
         var fetchedUserAccount = userAccountService.getCurrentUserAccountFromAuthenticatedOAuth2User(authenticatedUser);
@@ -299,15 +299,15 @@ class UserAccountServiceTest {
 
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
 
-        var user = mock(User.class);
+        var currentUser = mock(User.class);
         var matchingUserAccount = mock(UserAccount.class);
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2UserFromAuthentication(authentication)).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getLogin()).thenReturn(userLogin);
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
-        when(userMapper.getFullScopeAccessUserAccountFromUser(user)).thenReturn(matchingUserAccount);
+        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(currentUser));
+        when(userMapper.getCurrentUserAccountFromCurrentUser(currentUser)).thenReturn(matchingUserAccount);
 
         // Then
         var fetchedUserAccount = userAccountService.getCurrentUserAccountFromAuthentication(authentication);
@@ -353,15 +353,15 @@ class UserAccountServiceTest {
 
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
 
-        var user = mock(User.class);
+        var currentUser = mock(User.class);
         var matchingUserAccount = mock(UserAccount.class);
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getLogin()).thenReturn(userLogin);
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
-        when(userMapper.getFullScopeAccessUserAccountFromUser(user)).thenReturn(matchingUserAccount);
+        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(currentUser));
+        when(userMapper.getCurrentUserAccountFromCurrentUser(currentUser)).thenReturn(matchingUserAccount);
 
         // Then
         var fetchedUserAccount = userAccountService.getCurrentUserAccount();
@@ -400,8 +400,8 @@ class UserAccountServiceTest {
 
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
 
-        var savedUser = mock(User.class);
-        var matchingUserAccount = mock(UserAccount.class);
+        var savedCurrentUser = mock(User.class);
+        var matchingCurrentUserAccount = mock(UserAccount.class);
 
         // When
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
@@ -413,12 +413,12 @@ class UserAccountServiceTest {
         when(authenticatedUser.getPictureUrl()).thenReturn(Optional.of(userPictureUrl));
 
         when(providersConfiguration.getUserProfileConfiguration(providerName, userLogin)).thenReturn(Optional.empty());
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
-        when(userMapper.getFullScopeAccessUserAccountFromUser(savedUser)).thenReturn(matchingUserAccount);
+        when(userRepository.save(any(User.class))).thenReturn(savedCurrentUser);
+        when(userMapper.getCurrentUserAccountFromCurrentUser(savedCurrentUser)).thenReturn(matchingCurrentUserAccount);
 
         // Then
         var savedUserAccount = userAccountService.createUserAccountFromAuthenticatedOAuth2User(authenticatedUser);
-        assertThat(savedUserAccount).isSameAs(matchingUserAccount);
+        assertThat(savedUserAccount).isSameAs(matchingCurrentUserAccount);
 
         var userToSaveArgumentCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userToSaveArgumentCaptor.capture());
@@ -488,12 +488,12 @@ class UserAccountServiceTest {
         var projectCodes3 = List.of(unknownProjectCode3);
         var scopes = List.of(scope1, scope2, scope3);
 
-        var savedUser = mock(User.class);
+        var savedCurrentUser = mock(User.class);
         var savedScope1 = mock(UserProjectScope.class);
         var savedScope2 = mock(UserProjectScope.class);
         var savedScope3 = mock(UserProjectScope.class);
         var savedScopes = List.of(savedScope1, savedScope2, savedScope3);
-        var matchingUserAccount = mock(UserAccount.class);
+        var matchingCurrentUserAccount = mock(UserAccount.class);
 
         // When
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
@@ -522,13 +522,13 @@ class UserAccountServiceTest {
         when(projectRepository.findByCode(unknownProjectCode2)).thenReturn(Optional.empty());
         when(projectRepository.findByCode(unknownProjectCode3)).thenReturn(Optional.empty());
 
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(userRepository.save(any(User.class))).thenReturn(savedCurrentUser);
         when(userProjectScopeRepository.saveAll(any())).thenReturn(savedScopes);
-        when(userMapper.getFullScopeAccessUserAccountFromUser(savedUser)).thenReturn(matchingUserAccount);
+        when(userMapper.getCurrentUserAccountFromCurrentUser(savedCurrentUser)).thenReturn(matchingCurrentUserAccount);
 
         // Then
         var savedUserAccount = userAccountService.createUserAccountFromAuthenticatedOAuth2User(authenticatedUser);
-        assertThat(savedUserAccount).isSameAs(matchingUserAccount);
+        assertThat(savedUserAccount).isSameAs(matchingCurrentUserAccount);
 
         var userToSaveArgumentCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userToSaveArgumentCaptor.capture());
@@ -557,14 +557,14 @@ class UserAccountServiceTest {
         assertThat(userRolesArgumentCaptor.getValue())
                 .extracting("user", "project", "role")
                 .containsExactlyInAnyOrder(
-                        tuple(savedUser, existingProject1, ProjectRole.ADMIN),
-                        tuple(savedUser, existingProject2, ProjectRole.ADMIN),
-                        tuple(savedUser, existingProject3, ProjectRole.MAINTAINER)
+                        tuple(savedCurrentUser, existingProject1, ProjectRole.ADMIN),
+                        tuple(savedCurrentUser, existingProject2, ProjectRole.ADMIN),
+                        tuple(savedCurrentUser, existingProject3, ProjectRole.MAINTAINER)
                 );
         verify(projectService, never()).createFromCode(anyString(), any());
 
         ArgumentCaptor<Set<UserProjectScope>> savedUserProjectScopeArgumentCaptor = ArgumentCaptor.forClass(Set.class);
-        verify(savedUser).setScopes(savedUserProjectScopeArgumentCaptor.capture());
+        verify(savedCurrentUser).setScopes(savedUserProjectScopeArgumentCaptor.capture());
         assertThat(savedUserProjectScopeArgumentCaptor.getValue()).containsExactlyInAnyOrder(savedScope1, savedScope2, savedScope3);
     }
 
@@ -611,12 +611,12 @@ class UserAccountServiceTest {
         var projectCodes3 = List.of(unknownProjectCode3);
         var scopes = List.of(scope1, scope2, scope3);
 
-        var savedUser = mock(User.class);
+        var savedCurrentUser = mock(User.class);
         var savedScope1 = mock(UserProjectScope.class);
         var savedScope2 = mock(UserProjectScope.class);
         var savedScope3 = mock(UserProjectScope.class);
         var savedScopes = List.of(savedScope1, savedScope2, savedScope3);
-        var matchingUserAccount = mock(UserAccount.class);
+        var matchingCurrentUserAccount = mock(UserAccount.class);
 
         // When
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
@@ -645,13 +645,13 @@ class UserAccountServiceTest {
         when(projectRepository.findByCode(unknownProjectCode2)).thenReturn(Optional.empty(), Optional.of(unknownProject2));
         when(projectRepository.findByCode(unknownProjectCode3)).thenReturn(Optional.empty(), Optional.of(unknownProject3));
 
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(userRepository.save(any(User.class))).thenReturn(savedCurrentUser);
         when(userProjectScopeRepository.saveAll(any())).thenReturn(savedScopes);
-        when(userMapper.getFullScopeAccessUserAccountFromUser(savedUser)).thenReturn(matchingUserAccount);
+        when(userMapper.getCurrentUserAccountFromCurrentUser(savedCurrentUser)).thenReturn(matchingCurrentUserAccount);
 
         // Then
         var savedUserAccount = userAccountService.createUserAccountFromAuthenticatedOAuth2User(authenticatedUser);
-        assertThat(savedUserAccount).isSameAs(matchingUserAccount);
+        assertThat(savedUserAccount).isSameAs(matchingCurrentUserAccount);
 
         var userToSaveArgumentCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userToSaveArgumentCaptor.capture());
@@ -680,19 +680,19 @@ class UserAccountServiceTest {
         assertThat(userRolesArgumentCaptor.getValue())
                 .extracting("user", "project", "role")
                 .containsExactlyInAnyOrder(
-                        tuple(savedUser, existingProject1, ProjectRole.ADMIN),
-                        tuple(savedUser, existingProject2, ProjectRole.ADMIN),
-                        tuple(savedUser, unknownProject1, ProjectRole.ADMIN),
-                        tuple(savedUser, existingProject3, ProjectRole.MAINTAINER),
-                        tuple(savedUser, unknownProject2, ProjectRole.MAINTAINER),
-                        tuple(savedUser, unknownProject3, ProjectRole.MEMBER)
+                        tuple(savedCurrentUser, existingProject1, ProjectRole.ADMIN),
+                        tuple(savedCurrentUser, existingProject2, ProjectRole.ADMIN),
+                        tuple(savedCurrentUser, unknownProject1, ProjectRole.ADMIN),
+                        tuple(savedCurrentUser, existingProject3, ProjectRole.MAINTAINER),
+                        tuple(savedCurrentUser, unknownProject2, ProjectRole.MAINTAINER),
+                        tuple(savedCurrentUser, unknownProject3, ProjectRole.MEMBER)
                 );
         var unknownProjectCodeArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(projectService, times(3)).createFromCode(unknownProjectCodeArgumentCaptor.capture(), eq(savedUser));
+        verify(projectService, times(3)).createFromCode(unknownProjectCodeArgumentCaptor.capture(), eq(savedCurrentUser));
         assertThat(unknownProjectCodeArgumentCaptor.getAllValues()).containsExactlyInAnyOrder(unknownProjectCode1, unknownProjectCode2, unknownProjectCode3);
 
         ArgumentCaptor<Set<UserProjectScope>> savedUserProjectScopeArgumentCaptor = ArgumentCaptor.forClass(Set.class);
-        verify(savedUser).setScopes(savedUserProjectScopeArgumentCaptor.capture());
+        verify(savedCurrentUser).setScopes(savedUserProjectScopeArgumentCaptor.capture());
         assertThat(savedUserProjectScopeArgumentCaptor.getValue()).containsExactlyInAnyOrder(savedScope1, savedScope2, savedScope3);
     }
 
@@ -722,14 +722,14 @@ class UserAccountServiceTest {
         var providerName = "provider-name";
 
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
-        var user = mock(User.class);
+        var currentUser = mock(User.class);
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getLogin()).thenReturn(userLogin);
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
-        when(user.getProfile()).thenReturn(null);
+        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(currentUser));
+        when(currentUser.getProfile()).thenReturn(null);
 
         // Then
         assertThrows(ForbiddenException.class, () -> userAccountService.getCurrentUserProjects());
@@ -747,7 +747,7 @@ class UserAccountServiceTest {
         var providerName = "provider-name";
 
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
-        var user = mock(User.class);
+        var currentUser = mock(User.class);
 
         var project1 = mock(Project.class);
         var project2 = mock(Project.class);
@@ -762,8 +762,8 @@ class UserAccountServiceTest {
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getLogin()).thenReturn(userLogin);
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
-        when(user.getProfile()).thenReturn(profile);
+        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(currentUser));
+        when(currentUser.getProfile()).thenReturn(profile);
         when(projectRepository.findAllByOrderByName()).thenReturn(allProjects);
         when(projectMapper.getProjectDTOFromProject(project1)).thenReturn(mappedProject1);
         when(projectMapper.getProjectDTOFromProject(project2)).thenReturn(mappedProject2);
@@ -785,7 +785,7 @@ class UserAccountServiceTest {
         var providerName = "provider-name";
 
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
-        var user = mock(User.class);
+        var currentUser = mock(User.class);
         var profile = UserProfile.SCOPED_USER;
 
         var userScope1 = mock(UserProjectScope.class);
@@ -809,9 +809,9 @@ class UserAccountServiceTest {
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getLogin()).thenReturn(userLogin);
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
-        when(user.getProfile()).thenReturn(profile);
-        when(user.getScopes()).thenReturn(userScopes);
+        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(currentUser));
+        when(currentUser.getProfile()).thenReturn(profile);
+        when(currentUser.getScopes()).thenReturn(userScopes);
         when(userScope1.getProject()).thenReturn(project1);
         when(project1.getName()).thenReturn(projectName1);
         when(userScope2.getProject()).thenReturn(project2);
@@ -839,7 +839,7 @@ class UserAccountServiceTest {
         var providerName = "provider-name";
 
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
-        var user = mock(User.class);
+        var currentUser = mock(User.class);
         var profile = UserProfile.SCOPED_USER;
 
         var userScope1 = mock(UserProjectScope.class);
@@ -865,9 +865,9 @@ class UserAccountServiceTest {
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getLogin()).thenReturn(userLogin);
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
-        when(user.getProfile()).thenReturn(profile);
-        when(user.getScopes()).thenReturn(userScopes);
+        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(currentUser));
+        when(currentUser.getProfile()).thenReturn(profile);
+        when(currentUser.getScopes()).thenReturn(userScopes);
         when(userScope1.getProject()).thenReturn(project1);
         when(project1.getName()).thenReturn(projectName1);
         when(userScope2.getProject()).thenReturn(project2);
@@ -937,13 +937,13 @@ class UserAccountServiceTest {
         var providerName = "provider-name";
 
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
-        var user = mock(User.class);
+        var currentUser = mock(User.class);
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getLogin()).thenReturn(userLogin);
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
+        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(currentUser));
 
         // Then
         assertThrows(ForbiddenException.class, () -> userAccountService.removeCurrentUserScope(projectCode));
@@ -960,13 +960,13 @@ class UserAccountServiceTest {
         var providerName = "provider-name";
 
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
-        var user = mock(User.class);
+        var currentUser = mock(User.class);
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getLogin()).thenReturn(userLogin);
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
+        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(currentUser));
         when(projectRepository.findByCode(projectCode)).thenReturn(Optional.empty());
 
         // Then
@@ -987,16 +987,16 @@ class UserAccountServiceTest {
         var projectId = 1L;
 
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
-        var user = mock(User.class);
+        var currentUser = mock(User.class);
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getLogin()).thenReturn(userLogin);
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
+        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(currentUser));
 
-        when(user.getLogin()).thenReturn(userLogin);
-        when(user.getProviderName()).thenReturn(providerName);
+        when(currentUser.getLogin()).thenReturn(userLogin);
+        when(currentUser.getProviderName()).thenReturn(providerName);
         when(project.getId()).thenReturn(projectId);
 
         when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(project));
@@ -1131,8 +1131,8 @@ class UserAccountServiceTest {
 
         var project = mock(Project.class);
 
-        var savedUser = mock(User.class);
-        var mappedSavedUser = mock(UserAccount.class);
+        var savedCurrentUser = mock(User.class);
+        var mappedSavedCurrentUser = mock(UserAccount.class);
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
@@ -1147,12 +1147,12 @@ class UserAccountServiceTest {
         when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(project));
         when(project.getCode()).thenReturn(projectCode);
 
-        when(userRepository.save(currentUser)).thenReturn(savedUser);
-        when(userMapper.getFullScopeAccessUserAccountFromUser(savedUser)).thenReturn(mappedSavedUser);
+        when(userRepository.save(currentUser)).thenReturn(savedCurrentUser);
+        when(userMapper.getCurrentUserAccountFromCurrentUser(savedCurrentUser)).thenReturn(mappedSavedCurrentUser);
 
         // Then
         var updatedUser = userAccountService.updateCurrentUserProjectScope(projectCode, roleToUpdate);
-        assertThat(updatedUser).isSameAs(mappedSavedUser);
+        assertThat(updatedUser).isSameAs(mappedSavedCurrentUser);
 
         var userToSaveArgumentCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository, times(1)).save(userToSaveArgumentCaptor.capture());
@@ -1197,8 +1197,8 @@ class UserAccountServiceTest {
 
         var project = mock(Project.class);
 
-        var savedUser = mock(User.class);
-        var mappedSavedUser = mock(UserAccount.class);
+        var savedCurrentUser = mock(User.class);
+        var mappedSavedCurrentUser = mock(UserAccount.class);
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
@@ -1213,12 +1213,12 @@ class UserAccountServiceTest {
         when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(project));
         when(project.getCode()).thenReturn(projectCode);
 
-        when(userRepository.save(currentUser)).thenReturn(savedUser);
-        when(userMapper.getFullScopeAccessUserAccountFromUser(savedUser)).thenReturn(mappedSavedUser);
+        when(userRepository.save(currentUser)).thenReturn(savedCurrentUser);
+        when(userMapper.getCurrentUserAccountFromCurrentUser(savedCurrentUser)).thenReturn(mappedSavedCurrentUser);
 
         // Then
         var updatedUser = userAccountService.updateCurrentUserProjectScope(projectCode, roleToUpdate);
-        assertThat(updatedUser).isSameAs(mappedSavedUser);
+        assertThat(updatedUser).isSameAs(mappedSavedCurrentUser);
 
         var userToSaveArgumentCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository, times(1)).save(userToSaveArgumentCaptor.capture());
@@ -1265,28 +1265,28 @@ class UserAccountServiceTest {
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
 
         var defaultProjectToReplace = mock(Project.class);
-        var existingUser = new User(providerName, userLogin);
-        existingUser.setDefaultProject(defaultProjectToReplace);
+        var currentUser = new User(providerName, userLogin);
+        currentUser.setDefaultProject(defaultProjectToReplace);
 
-        var updatedUser = mock(User.class);
-        var updatedAccount = mock(UserAccount.class);
+        var updatedCurrentUser = mock(User.class);
+        var updatedCurrentUserAccount = mock(UserAccount.class);
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getLogin()).thenReturn(userLogin);
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(existingUser));
-        when(userRepository.save(existingUser)).thenReturn(updatedUser);
-        when(userMapper.getFullScopeAccessUserAccountFromUser(updatedUser)).thenReturn(updatedAccount);
+        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(currentUser));
+        when(userRepository.save(currentUser)).thenReturn(updatedCurrentUser);
+        when(userMapper.getCurrentUserAccountFromCurrentUser(updatedCurrentUser)).thenReturn(updatedCurrentUserAccount);
 
         // Then
         var actualAccount = userAccountService.clearDefaultProject();
-        assertThat(actualAccount).isSameAs(updatedAccount);
+        assertThat(actualAccount).isSameAs(updatedCurrentUserAccount);
 
         var userToUpdateArgumentCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userToUpdateArgumentCaptor.capture());
         var capturedUser = userToUpdateArgumentCaptor.getValue();
-        assertThat(capturedUser).isSameAs(existingUser);
+        assertThat(capturedUser).isSameAs(currentUser);
         assertThat(capturedUser.getDefaultProject()).isNotPresent();
     }
 
@@ -1351,56 +1351,74 @@ class UserAccountServiceTest {
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
 
         var defaultProjectToReplace = mock(Project.class);
-        var existingUser = new User(providerName, userLogin);
-        existingUser.setDefaultProject(defaultProjectToReplace);
+        var currentUser = new User(providerName, userLogin);
+        currentUser.setDefaultProject(defaultProjectToReplace);
 
-        var updatedUser = mock(User.class);
-        var updatedAccount = mock(UserAccount.class);
+        var updatedCurrentUser = mock(User.class);
+        var updatedCurrentUserAccount = mock(UserAccount.class);
 
         // When
         when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(newDefaultProject));
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getLogin()).thenReturn(userLogin);
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(existingUser));
-        when(userRepository.save(existingUser)).thenReturn(updatedUser);
-        when(userMapper.getFullScopeAccessUserAccountFromUser(updatedUser)).thenReturn(updatedAccount);
+        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(currentUser));
+        when(userRepository.save(currentUser)).thenReturn(updatedCurrentUser);
+        when(userMapper.getCurrentUserAccountFromCurrentUser(updatedCurrentUser)).thenReturn(updatedCurrentUserAccount);
 
         // Then
         var actualAccount = userAccountService.updateDefaultProject(projectCode);
-        assertThat(actualAccount).isSameAs(updatedAccount);
+        assertThat(actualAccount).isSameAs(updatedCurrentUserAccount);
 
         var userToUpdateArgumentCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userToUpdateArgumentCaptor.capture());
         var capturedUser = userToUpdateArgumentCaptor.getValue();
-        assertThat(capturedUser).isSameAs(existingUser);
+        assertThat(capturedUser).isSameAs(currentUser);
         assertThat(capturedUser.getDefaultProject()).containsSame(newDefaultProject);
     }
 
     @Test
-    void getAllUserAccounts_returnAllUserAccountsForTheCurrentProviderName() {
+    void getAllUserAccounts_throwForbiddenException_whenCurrentUserNotFoundInSession() {
         // Given
-        var authentication = mock(OAuth2AuthenticationToken.class);
-        var providerName = "provider-name";
 
-        var user1 = mock(User.class);
-        var user2 = mock(User.class);
-        var user3 = mock(User.class);
-        var users = List.of(user1, user2, user3);
+        // When
+        when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(ForbiddenException.class, () -> userAccountService.getAllUserAccounts());
+    }
+
+    @Test
+    void getAllUserAccounts_returnAllUserAccountsForTheCurrentProviderName_whenCurrentUserFound() throws ForbiddenException {
+        // Given
+        var providerName = "provider-name";
+        var currentUserLogin = "current-user-login";
+
+        var authenticatedUser = mock(AuthenticatedOAuth2User.class);
+        var currentUser = mock(User.class);
+
+        var fetchedUser1 = mock(User.class);
+        var fetchedUser2 = mock(User.class);
+        var fetchedUser3 = mock(User.class);
+        var fetchedUsers = List.of(fetchedUser1, fetchedUser2, fetchedUser3);
 
         var matchingUserAccount1 = mock(UserAccount.class);
         var matchingUserAccount2 = mock(UserAccount.class);
         var matchingUserAccount3 = mock(UserAccount.class);
 
         // When
-        when(authentication.getAuthorizedClientRegistrationId()).thenReturn(providerName);
-        when(userRepository.findAllByProviderName(providerName)).thenReturn(users);
-        when(userMapper.getFullScopeAccessUserAccountFromUser(user1)).thenReturn(matchingUserAccount1);
-        when(userMapper.getFullScopeAccessUserAccountFromUser(user2)).thenReturn(matchingUserAccount2);
-        when(userMapper.getFullScopeAccessUserAccountFromUser(user3)).thenReturn(matchingUserAccount3);
+        when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
+        when(authenticatedUser.getProviderName()).thenReturn(providerName);
+        when(authenticatedUser.getLogin()).thenReturn(currentUserLogin);
+        when(userRepository.findById(new User.UserId(providerName, currentUserLogin))).thenReturn(Optional.of(currentUser));
+        when(currentUser.getProviderName()).thenReturn(providerName);
+        when(userRepository.findAllByProviderName(providerName)).thenReturn(fetchedUsers);
+        when(userMapper.getUserAccountFromAnotherUser(fetchedUser1, currentUser)).thenReturn(matchingUserAccount1);
+        when(userMapper.getUserAccountFromAnotherUser(fetchedUser2, currentUser)).thenReturn(matchingUserAccount2);
+        when(userMapper.getUserAccountFromAnotherUser(fetchedUser3, currentUser)).thenReturn(matchingUserAccount3);
 
         // Then
-        var accounts = userAccountService.getAllUserAccounts(authentication);
+        var accounts = userAccountService.getAllUserAccounts();
         assertThat(accounts).containsExactlyInAnyOrder(matchingUserAccount1, matchingUserAccount2, matchingUserAccount3);
     }
 
@@ -1416,10 +1434,10 @@ class UserAccountServiceTest {
 
         var matchingUserRole = ProjectRole.valueOf(role.name());
 
-        var user1 = mock(User.class);
-        var user2 = mock(User.class);
-        var user3 = mock(User.class);
-        var users = List.of(user1, user2, user3);
+        var fetchedUser1 = mock(User.class);
+        var fetchedUser2 = mock(User.class);
+        var fetchedUser3 = mock(User.class);
+        var fetchedUsers = List.of(fetchedUser1, fetchedUser2, fetchedUser3);
 
         var matchingUserAccount1 = mock(UserAccount.class);
         var matchingUserAccount2 = mock(UserAccount.class);
@@ -1431,10 +1449,10 @@ class UserAccountServiceTest {
         when(authenticatedUser.getLogin()).thenReturn(userLogin);
         when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(currentUser));
         when(currentUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findAllScopedUsersByProviderName(providerName, null, matchingUserRole)).thenReturn(users);
-        when(userMapper.getPartialScopeAccessUserAccountFromUser(user1, currentUser)).thenReturn(matchingUserAccount1);
-        when(userMapper.getPartialScopeAccessUserAccountFromUser(user2, currentUser)).thenReturn(matchingUserAccount2);
-        when(userMapper.getPartialScopeAccessUserAccountFromUser(user3, currentUser)).thenReturn(matchingUserAccount3);
+        when(userRepository.findAllScopedUsersByProviderName(providerName, null, matchingUserRole)).thenReturn(fetchedUsers);
+        when(userMapper.getUserAccountFromAnotherUser(fetchedUser1, currentUser)).thenReturn(matchingUserAccount1);
+        when(userMapper.getUserAccountFromAnotherUser(fetchedUser2, currentUser)).thenReturn(matchingUserAccount2);
+        when(userMapper.getUserAccountFromAnotherUser(fetchedUser3, currentUser)).thenReturn(matchingUserAccount3);
 
         // Then
         var accounts = userAccountService.getAllScopedUserAccounts(Optional.of(role));
@@ -1450,10 +1468,10 @@ class UserAccountServiceTest {
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
         var currentUser = mock(User.class);
 
-        var user1 = mock(User.class);
-        var user2 = mock(User.class);
-        var user3 = mock(User.class);
-        var users = List.of(user1, user2, user3);
+        var fetchedUser1 = mock(User.class);
+        var fetchedUser2 = mock(User.class);
+        var fetchedUser3 = mock(User.class);
+        var fetchedUsers = List.of(fetchedUser1, fetchedUser2, fetchedUser3);
 
         var matchingUserAccount1 = mock(UserAccount.class);
         var matchingUserAccount2 = mock(UserAccount.class);
@@ -1465,10 +1483,10 @@ class UserAccountServiceTest {
         when(authenticatedUser.getLogin()).thenReturn(userLogin);
         when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(currentUser));
         when(currentUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findAllScopedUsersByProviderName(providerName, null, null)).thenReturn(users);
-        when(userMapper.getPartialScopeAccessUserAccountFromUser(user1, currentUser)).thenReturn(matchingUserAccount1);
-        when(userMapper.getPartialScopeAccessUserAccountFromUser(user2, currentUser)).thenReturn(matchingUserAccount2);
-        when(userMapper.getPartialScopeAccessUserAccountFromUser(user3, currentUser)).thenReturn(matchingUserAccount3);
+        when(userRepository.findAllScopedUsersByProviderName(providerName, null, null)).thenReturn(fetchedUsers);
+        when(userMapper.getUserAccountFromAnotherUser(fetchedUser1, currentUser)).thenReturn(matchingUserAccount1);
+        when(userMapper.getUserAccountFromAnotherUser(fetchedUser2, currentUser)).thenReturn(matchingUserAccount2);
+        when(userMapper.getUserAccountFromAnotherUser(fetchedUser3, currentUser)).thenReturn(matchingUserAccount3);
 
         // Then
         var accounts = userAccountService.getAllScopedUserAccounts(Optional.empty());
@@ -1489,10 +1507,10 @@ class UserAccountServiceTest {
 
         var matchingUserRole = ProjectRole.valueOf(role.name());
 
-        var user1 = mock(User.class);
-        var user2 = mock(User.class);
-        var user3 = mock(User.class);
-        var users = List.of(user1, user2, user3);
+        var fetchedUser1 = mock(User.class);
+        var fetchedUser2 = mock(User.class);
+        var fetchedUser3 = mock(User.class);
+        var fetchedUsers = List.of(fetchedUser1, fetchedUser2, fetchedUser3);
 
         var matchingUserAccount1 = mock(UserAccount.class);
         var matchingUserAccount2 = mock(UserAccount.class);
@@ -1504,10 +1522,10 @@ class UserAccountServiceTest {
         when(authenticatedUser.getLogin()).thenReturn(userLogin);
         when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(currentUser));
         when(currentUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findAllScopedUsersByProviderName(providerName, projectCode, matchingUserRole)).thenReturn(users);
-        when(userMapper.getPartialScopeAccessUserAccountFromUser(user1, currentUser)).thenReturn(matchingUserAccount1);
-        when(userMapper.getPartialScopeAccessUserAccountFromUser(user2, currentUser)).thenReturn(matchingUserAccount2);
-        when(userMapper.getPartialScopeAccessUserAccountFromUser(user3, currentUser)).thenReturn(matchingUserAccount3);
+        when(userRepository.findAllScopedUsersByProviderName(providerName, projectCode, matchingUserRole)).thenReturn(fetchedUsers);
+        when(userMapper.getUserAccountFromAnotherUser(fetchedUser1, currentUser)).thenReturn(matchingUserAccount1);
+        when(userMapper.getUserAccountFromAnotherUser(fetchedUser2, currentUser)).thenReturn(matchingUserAccount2);
+        when(userMapper.getUserAccountFromAnotherUser(fetchedUser3, currentUser)).thenReturn(matchingUserAccount3);
 
         // Then
         var accounts = userAccountService.getAllScopedUserAccountsOnProject(projectCode, Optional.of(role));
@@ -1525,10 +1543,10 @@ class UserAccountServiceTest {
 
         var projectCode = "project-code";
 
-        var user1 = mock(User.class);
-        var user2 = mock(User.class);
-        var user3 = mock(User.class);
-        var users = List.of(user1, user2, user3);
+        var fetchedUser1 = mock(User.class);
+        var fetchedUser2 = mock(User.class);
+        var fetchedUser3 = mock(User.class);
+        var fetchedUsers = List.of(fetchedUser1, fetchedUser2, fetchedUser3);
 
         var matchingUserAccount1 = mock(UserAccount.class);
         var matchingUserAccount2 = mock(UserAccount.class);
@@ -1540,10 +1558,10 @@ class UserAccountServiceTest {
         when(authenticatedUser.getLogin()).thenReturn(userLogin);
         when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(currentUser));
         when(currentUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findAllScopedUsersByProviderName(providerName, projectCode, null)).thenReturn(users);
-        when(userMapper.getPartialScopeAccessUserAccountFromUser(user1, currentUser)).thenReturn(matchingUserAccount1);
-        when(userMapper.getPartialScopeAccessUserAccountFromUser(user2, currentUser)).thenReturn(matchingUserAccount2);
-        when(userMapper.getPartialScopeAccessUserAccountFromUser(user3, currentUser)).thenReturn(matchingUserAccount3);
+        when(userRepository.findAllScopedUsersByProviderName(providerName, projectCode, null)).thenReturn(fetchedUsers);
+        when(userMapper.getUserAccountFromAnotherUser(fetchedUser1, currentUser)).thenReturn(matchingUserAccount1);
+        when(userMapper.getUserAccountFromAnotherUser(fetchedUser2, currentUser)).thenReturn(matchingUserAccount2);
+        when(userMapper.getUserAccountFromAnotherUser(fetchedUser3, currentUser)).thenReturn(matchingUserAccount3);
 
         // Then
         var accounts = userAccountService.getAllScopedUserAccountsOnProject(projectCode, Optional.empty());
@@ -1693,8 +1711,8 @@ class UserAccountServiceTest {
 
         var project = mock(Project.class);
 
-        var savedUser = mock(User.class);
-        var mappedSavedUser = mock(UserAccount.class);
+        var savedTargetUser = mock(User.class);
+        var mappedSavedTargetUser = mock(UserAccount.class);
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
@@ -1710,12 +1728,12 @@ class UserAccountServiceTest {
         when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(project));
         when(project.getCode()).thenReturn(projectCode);
 
-        when(userRepository.save(targetUser)).thenReturn(savedUser);
-        when(userMapper.getPartialScopeAccessUserAccountFromUser(savedUser, currentUser)).thenReturn(mappedSavedUser);
+        when(userRepository.save(targetUser)).thenReturn(savedTargetUser);
+        when(userMapper.getUserAccountFromAnotherUser(savedTargetUser, currentUser)).thenReturn(mappedSavedTargetUser);
 
         // Then
         var updatedUser = userAccountService.updateUserProjectScope(targetUserLogin, projectCode, roleToUpdate);
-        assertThat(updatedUser).isSameAs(mappedSavedUser);
+        assertThat(updatedUser).isSameAs(mappedSavedTargetUser);
 
         var userToSaveArgumentCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository, times(1)).save(userToSaveArgumentCaptor.capture());
@@ -1760,8 +1778,8 @@ class UserAccountServiceTest {
 
         var project = mock(Project.class);
 
-        var savedUser = mock(User.class);
-        var mappedSavedUser = mock(UserAccount.class);
+        var savedTargetUser = mock(User.class);
+        var mappedSavedTargetUser = mock(UserAccount.class);
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
@@ -1777,12 +1795,12 @@ class UserAccountServiceTest {
         when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(project));
         when(project.getCode()).thenReturn(projectCode);
 
-        when(userRepository.save(targetUser)).thenReturn(savedUser);
-        when(userMapper.getPartialScopeAccessUserAccountFromUser(savedUser, currentUser)).thenReturn(mappedSavedUser);
+        when(userRepository.save(targetUser)).thenReturn(savedTargetUser);
+        when(userMapper.getUserAccountFromAnotherUser(savedTargetUser, currentUser)).thenReturn(mappedSavedTargetUser);
 
         // Then
         var updatedUser = userAccountService.updateUserProjectScope(targetUserLogin, projectCode, roleToUpdate);
-        assertThat(updatedUser).isSameAs(mappedSavedUser);
+        assertThat(updatedUser).isSameAs(mappedSavedTargetUser);
 
         var userToSaveArgumentCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository, times(1)).save(userToSaveArgumentCaptor.capture());
@@ -1857,12 +1875,12 @@ class UserAccountServiceTest {
         var providerName = "provider-name";
 
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
-        var user = mock(User.class);
+        var targetUser = mock(User.class);
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
+        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(targetUser));
 
         // Then
         assertThrows(ForbiddenException.class, () -> userAccountService.removeUserScope(userLogin, projectCode));
@@ -1876,14 +1894,14 @@ class UserAccountServiceTest {
         var providerName = "provider-name";
 
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
-        var user = mock(User.class);
+        var targetUser = mock(User.class);
 
         var projectCode = "project-code";
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
+        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(targetUser));
         when(projectRepository.findByCode(projectCode)).thenReturn(Optional.empty());
 
         // Then
@@ -1898,7 +1916,7 @@ class UserAccountServiceTest {
         var providerName = "provider-name";
 
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
-        var user = mock(User.class);
+        var targetUser = mock(User.class);
 
         var project = mock(Project.class);
         var projectCode = "project-code";
@@ -1907,10 +1925,10 @@ class UserAccountServiceTest {
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
-        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(user));
+        when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(targetUser));
 
-        when(user.getLogin()).thenReturn(userLogin);
-        when(user.getProviderName()).thenReturn(providerName);
+        when(targetUser.getLogin()).thenReturn(userLogin);
+        when(targetUser.getProviderName()).thenReturn(providerName);
         when(project.getId()).thenReturn(projectId);
 
         when(projectRepository.findByCode(projectCode)).thenReturn(Optional.of(project));
@@ -1964,14 +1982,18 @@ class UserAccountServiceTest {
     void updateUserProfile_throwForbiddenException_whenTargetUserNotFoundInDatabase() {
         // Given
         var profile = UserAccountProfile.SUPER_ADMIN;
-        var targetUserLogin = "target-user-login";
         var providerName = "provider-name";
+        var targetUserLogin = "target-user-login";
+        var currentUserLogin = "current-user-login";
 
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
+        var currentUser = mock(User.class);
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
+        when(authenticatedUser.getLogin()).thenReturn(currentUserLogin);
+        when(userRepository.findById(new User.UserId(providerName, currentUserLogin))).thenReturn(Optional.of(currentUser));
         when(userRepository.findById(new User.UserId(providerName, targetUserLogin))).thenReturn(Optional.empty());
 
         // Then
@@ -1985,23 +2007,27 @@ class UserAccountServiceTest {
         // Given
         var providerName = "provider-name";
         var targetUserLogin = "target-user-login";
+        var currentUserLogin = "current-user-login";
 
         var authenticatedUser = mock(AuthenticatedOAuth2User.class);
+        var currentUser = mock(User.class);
         var targetUser = new User(providerName, targetUserLogin);
 
-        var savedUser = mock(User.class);
-        var mappedSavedUser = mock(UserAccount.class);
+        var savedTargetUser = mock(User.class);
+        var mappedSavedTargetUser = mock(UserAccount.class);
 
         // When
         when(userSessionService.getCurrentAuthenticatedOAuth2User()).thenReturn(Optional.of(authenticatedUser));
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
+        when(authenticatedUser.getLogin()).thenReturn(currentUserLogin);
+        when(userRepository.findById(new User.UserId(providerName, currentUserLogin))).thenReturn(Optional.of(currentUser));
         when(userRepository.findById(new User.UserId(providerName, targetUserLogin))).thenReturn(Optional.of(targetUser));
-        when(userRepository.save(targetUser)).thenReturn(savedUser);
-        when(userMapper.getFullScopeAccessUserAccountFromUser(savedUser)).thenReturn(mappedSavedUser);
+        when(userRepository.save(targetUser)).thenReturn(savedTargetUser);
+        when(userMapper.getUserAccountFromAnotherUser(savedTargetUser, currentUser)).thenReturn(mappedSavedTargetUser);
 
         // Then
         var updatedUser = userAccountService.updateUserProfile(targetUserLogin, profile);
-        assertThat(updatedUser).isSameAs(mappedSavedUser);
+        assertThat(updatedUser).isSameAs(mappedSavedTargetUser);
 
         var userToSaveArgumentCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userToSaveArgumentCaptor.capture());

@@ -93,7 +93,7 @@ public class UserAccountService {
      * @return the current {@link UserAccount}
      */
     public Optional<UserAccount> getCurrentUserAccount() {
-        return getCurrentUser().map(userMapper::getFullScopeAccessUserAccountFromUser);
+        return getCurrentUser().map(userMapper::getCurrentUserAccountFromCurrentUser);
     }
 
     /**
@@ -104,7 +104,7 @@ public class UserAccountService {
     public Optional<UserAccount> getCurrentUserAccountFromAuthentication(@NonNull OAuth2AuthenticationToken authentication) {
         return userSessionService.getCurrentAuthenticatedOAuth2UserFromAuthentication(authentication)
                 .flatMap(authenticatedUser -> getUserFromProviderNameAndUserLogin(authenticatedUser.getProviderName(), authenticatedUser.getLogin()))
-                .map(userMapper::getFullScopeAccessUserAccountFromUser);
+                .map(userMapper::getCurrentUserAccountFromCurrentUser);
     }
 
     /**
@@ -113,7 +113,7 @@ public class UserAccountService {
      * @return the current {@link UserAccount}
      */
     public Optional<UserAccount> getCurrentUserAccountFromAuthenticatedOAuth2User(@NonNull AuthenticatedOAuth2User authenticatedUser) {
-        return getUserFromProviderNameAndUserLogin(authenticatedUser.getProviderName(), authenticatedUser.getLogin()).map(userMapper::getFullScopeAccessUserAccountFromUser);
+        return getUserFromProviderNameAndUserLogin(authenticatedUser.getProviderName(), authenticatedUser.getLogin()).map(userMapper::getCurrentUserAccountFromCurrentUser);
     }
 
     private Optional<User> getUserFromProviderNameAndUserLogin(@NonNull String providerName, @NonNull String userLogin) {
@@ -161,30 +161,30 @@ public class UserAccountService {
             throw exception;
         }
 
-        var userToSave = new User(providerName, userLogin);
+        var unsavedCurrentUser = new User(providerName, userLogin);
 
         var firstName = authenticatedUser.getFirstName();
-        firstName.ifPresent(userToSave::setFirstName);
+        firstName.ifPresent(unsavedCurrentUser::setFirstName);
 
         var lastName = authenticatedUser.getLastName();
-        lastName.ifPresent(userToSave::setLastName);
+        lastName.ifPresent(unsavedCurrentUser::setLastName);
 
         var email = authenticatedUser.getEmail();
-        email.ifPresent(userToSave::setEmail);
+        email.ifPresent(unsavedCurrentUser::setEmail);
 
         var pictureUrl = authenticatedUser.getPictureUrl();
-        pictureUrl.ifPresent(userToSave::setPictureUrl);
+        pictureUrl.ifPresent(unsavedCurrentUser::setPictureUrl);
 
         var profileConfiguration = providersConfiguration.getUserProfileConfiguration(providerName, userLogin);
         var userProfile = profileConfiguration.flatMap(UserAccountService::getUserProfileFromConfiguration);
-        userProfile.ifPresent(userToSave::setProfile);
+        userProfile.ifPresent(unsavedCurrentUser::setProfile);
 
-        var savedUser = userRepository.save(userToSave);
+        var savedCurrentUser = userRepository.save(unsavedCurrentUser);
 
-        var userScopes = profileConfiguration.map(configuration -> getUserProjectRolesFromConfiguration(configuration, providerName, savedUser));
+        var userScopes = profileConfiguration.map(configuration -> getUserProjectRolesFromConfiguration(configuration, providerName, savedCurrentUser));
         var savedScopes = userScopes.map(userProjectScopeRepository::saveAll).map(HashSet::new).orElse(new HashSet<>());
-        savedUser.setScopes(savedScopes);
-        return userMapper.getFullScopeAccessUserAccountFromUser(savedUser);
+        savedCurrentUser.setScopes(savedScopes);
+        return userMapper.getCurrentUserAccountFromCurrentUser(savedCurrentUser);
     }
 
     private static Optional<UserProfile> getUserProfileFromConfiguration(UserProfileConfiguration profileConfiguration) {
@@ -328,10 +328,10 @@ public class UserAccountService {
         var exception = new ForbiddenException(PROJECT, "update current user project scope", projectCodeContext);
 
         var currentUser = getCurrentUser().orElseThrow(() -> exception);
-        var updatedUser = updateUserProjectScope(currentUser, projectCode, accountRole, exception);
+        var updatedCurrentUser = updateUserProjectScope(currentUser, projectCode, accountRole, exception);
         
         userSessionService.refreshCurrentUserAuthorities();
-        return userMapper.getFullScopeAccessUserAccountFromUser(updatedUser);
+        return userMapper.getCurrentUserAccountFromCurrentUser(updatedCurrentUser);
     }
 
     private User updateUserProjectScope(User targetUser, String projectCode, UserAccountScopeRole targetAccountRole, ForbiddenException exception) throws ForbiddenException {
@@ -380,8 +380,8 @@ public class UserAccountService {
 
         var currentUser = getCurrentUser().orElseThrow(() -> exception);
         var targetUser = getUserFromLogin(userLogin).orElseThrow(() -> exception);
-        var updatedUser = updateUserProjectScope(targetUser, projectCode, accountRole, exception);
-        return userMapper.getPartialScopeAccessUserAccountFromUser(updatedUser, currentUser);
+        var updatedTargetUser = updateUserProjectScope(targetUser, projectCode, accountRole, exception);
+        return userMapper.getUserAccountFromAnotherUser(updatedTargetUser, currentUser);
     }
 
     /**
@@ -395,11 +395,12 @@ public class UserAccountService {
         var projectCodeContext = getProjectCodeExceptionContext(userLogin);
         var exception = new ForbiddenException(USER, "update user profile", projectCodeContext);
 
+        var currentUser = getCurrentUser().orElseThrow(() -> exception);
         var targetUser = getUserFromLogin(userLogin).orElseThrow(() -> exception);
         var targetProfile = getUserProfileFromUserAccountProfile(profile);
         targetUser.setProfile(targetProfile);
-        var updatedUser = userRepository.save(targetUser);
-        return userMapper.getFullScopeAccessUserAccountFromUser(updatedUser);
+        var updatedTargetUser = userRepository.save(targetUser);
+        return userMapper.getUserAccountFromAnotherUser(updatedTargetUser, currentUser);
     }
 
     private static UserProfile getUserProfileFromUserAccountProfile(@NonNull UserAccountProfile userAccountProfile) {
@@ -412,10 +413,10 @@ public class UserAccountService {
      * @throws ForbiddenException thrown if the operation failed
      */
     public UserAccount clearDefaultProject() throws ForbiddenException {
-        var userToUpdate = getCurrentUser().orElseThrow(() -> new ForbiddenException(PROJECT, "clear default project"));
-        userToUpdate.setDefaultProject(null);
-        var updatedUser = userRepository.save(userToUpdate);
-        return userMapper.getFullScopeAccessUserAccountFromUser(updatedUser);
+        var currentUser = getCurrentUser().orElseThrow(() -> new ForbiddenException(PROJECT, "clear default project"));
+        currentUser.setDefaultProject(null);
+        var updatedCurrentUser = userRepository.save(currentUser);
+        return userMapper.getCurrentUserAccountFromCurrentUser(updatedCurrentUser);
     }
 
     /**
@@ -433,22 +434,23 @@ public class UserAccountService {
         }
 
         var defaultProject = projectRepository.findByCode(projectCode).orElseThrow(() -> exception);
-        var userToUpdate = getCurrentUser().orElseThrow(() -> exception);
-        userToUpdate.setDefaultProject(defaultProject);
-        var updatedUser = userRepository.save(userToUpdate);
-        return userMapper.getFullScopeAccessUserAccountFromUser(updatedUser);
+        var currentUser = getCurrentUser().orElseThrow(() -> exception);
+        currentUser.setDefaultProject(defaultProject);
+        var updatedCurrentUser = userRepository.save(currentUser);
+        return userMapper.getCurrentUserAccountFromCurrentUser(updatedCurrentUser);
     }
 
     /**
      * Get all user accounts (only for the current OAuth2 provider)
-     * @param authentication the current {@link OAuth2AuthenticationToken}
      * @return the user accounts
+     * @throws ForbiddenException thrown if the operation failed
      */
-    public List<UserAccount> getAllUserAccounts(@NonNull OAuth2AuthenticationToken authentication) {
-        var providerName = authentication.getAuthorizedClientRegistrationId();
+    public List<UserAccount> getAllUserAccounts() throws ForbiddenException {
+        var exception = new ForbiddenException(PROJECT, "fetch all user accounts (for current provider)");
 
-        var users = userRepository.findAllByProviderName(providerName);
-        return users.stream().map(userMapper::getFullScopeAccessUserAccountFromUser).toList();
+        var currentUser = getCurrentUser().orElseThrow(() -> exception);
+        var targetUsers = userRepository.findAllByProviderName(currentUser.getProviderName());
+        return targetUsers.stream().map(targetUser -> userMapper.getUserAccountFromAnotherUser(targetUser, currentUser)).toList();
     }
 
     /**
@@ -470,7 +472,7 @@ public class UserAccountService {
         var actualUserRole = roleFilter.map(UserAccountService::getProjectRoleFromUserAccountScopeRole).orElse(null);
 
         var users = userRepository.findAllScopedUsersByProviderName(providerName, projectCodeFilter.orElse(null), actualUserRole);
-        return users.stream().map(targetUser -> userMapper.getPartialScopeAccessUserAccountFromUser(targetUser, currentUser)).toList();
+        return users.stream().map(targetUser -> userMapper.getUserAccountFromAnotherUser(targetUser, currentUser)).toList();
     }
 
     /**

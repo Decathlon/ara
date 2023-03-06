@@ -1,22 +1,17 @@
 package com.decathlon.ara.security.mapper;
 
 import com.decathlon.ara.domain.Project;
-import com.decathlon.ara.domain.security.member.user.ProjectScope;
 import com.decathlon.ara.domain.security.member.user.account.User;
 import com.decathlon.ara.domain.security.member.user.account.UserProfile;
-import com.decathlon.ara.domain.security.member.user.account.UserProjectScope;
 import com.decathlon.ara.domain.security.member.user.group.UserGroup;
 import com.decathlon.ara.security.dto.user.UserAccount;
 import com.decathlon.ara.security.dto.user.UserAccountProfile;
-import com.decathlon.ara.security.dto.user.scope.UserAccountScope;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class UserMapper {
@@ -28,14 +23,14 @@ public class UserMapper {
     }
 
     /**
-     * Convert a ({@link User}) into a ({@link UserAccount}).
-     * @param targetUser the {@link User} to convert
+     * Convert the current ({@link User}) into a ({@link UserAccount}).
+     * @param currentUser the (current) {@link User} to convert
      * @return the converted {@link UserAccount}
      */
-    public UserAccount getFullScopeAccessUserAccountFromUser(@NonNull User targetUser) {
-        var userAccount = getUserAccountWithoutScope(targetUser);
+    public UserAccount getCurrentUserAccountFromCurrentUser(@NonNull User currentUser) {
+        var userAccount = getUserAccountWithoutScope(currentUser);
 
-        var convertedScopes = getUserAccountScopesFromUserProjectScopes(targetUser.getScopes());
+        var convertedScopes = projectScopeMapper.getCurrentUserAccountScopesFromCurrentUser(currentUser);
         userAccount.setScopes(convertedScopes);
 
         return userAccount;
@@ -82,49 +77,21 @@ public class UserMapper {
         return userAccount;
     }
 
-    private List<UserAccountScope> getUserAccountScopesFromUserProjectScopes(Collection<UserProjectScope> userProjectScopes) {
-        var projectScopes = userProjectScopes.stream()
-                .map(ProjectScope.class::cast)
-                .collect(Collectors.toSet());
-        return projectScopeMapper.getUserAccountScopesFromProjectScopes(projectScopes);
-    }
-
     /**
-     * Convert a ({@link User}) into a ({@link UserAccount}).
-     * Note that depending on its profile, the readUser can fully or only partially access the targetUser scopes:
+     * Convert a ({@link User}) (other than the current user) into a ({@link UserAccount}).
+     * Note that depending on its profile, the current user can fully or only partially access the targetUser scopes:
      * - A super admin or an auditor can access all the targetUser scopes
-     * - A scoped readUser can only access scopes sharing the same project with the targetUser
+     * - A scoped user can only access scopes sharing the same project with the targetUser
      * @param targetUser the {@link User} to convert
-     * @param readUser the {@link User} accessing the target {@link User}
+     * @param currentUser the current {@link User} (accessing the target {@link User})
      * @return the converted {@link UserAccount}
      */
-    public UserAccount getPartialScopeAccessUserAccountFromUser(@NonNull User targetUser, @NonNull User readUser) {
+    public UserAccount getUserAccountFromAnotherUser(@NonNull User targetUser, @NonNull User currentUser) {
         var userAccount = getUserAccountWithoutScope(targetUser);
 
-        var readProfile = readUser.getProfile();
-
-        if (UserProfile.SCOPED_USER.equals(readProfile)) {
-
-            var allowedScopeProjectCodes = readUser.getScopes().stream().map(ProjectScope::getProject).map(Project::getCode).toList();
-            var convertedScopes = getUserAccountScopesFromUserProjectScopesAndAllowedScopeProjectCodes(targetUser.getScopes(), allowedScopeProjectCodes);
-            userAccount.setScopes(convertedScopes);
-
-            return userAccount;
-        }
-        var convertedScopes = getUserAccountScopesFromUserProjectScopes(targetUser.getScopes());
+        var convertedScopes = projectScopeMapper.getUserAccountScopesFromAnotherUser(targetUser, currentUser);
         userAccount.setScopes(convertedScopes);
 
         return userAccount;
-    }
-
-    private List<UserAccountScope> getUserAccountScopesFromUserProjectScopesAndAllowedScopeProjectCodes(
-            Collection<UserProjectScope> userProjectScopes,
-            Collection<String> allowedScopeProjectCodes
-    ) {
-        var projectScopes = userProjectScopes.stream()
-                .map(ProjectScope.class::cast)
-                .filter(scope -> allowedScopeProjectCodes.contains(scope.getProject().getCode()))
-                .collect(Collectors.toSet());
-        return projectScopeMapper.getUserAccountScopesFromProjectScopes(projectScopes);
     }
 }

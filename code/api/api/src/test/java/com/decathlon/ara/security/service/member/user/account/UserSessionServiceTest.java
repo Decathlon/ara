@@ -469,7 +469,7 @@ class UserSessionServiceTest {
         when(authenticatedUser.getLogin()).thenReturn(userLogin);
         when(authenticatedUser.getProviderName()).thenReturn(providerName);
         when(userRepository.findById(new User.UserId(providerName, userLogin))).thenReturn(Optional.of(currentUser));
-        when(userMapper.getFullScopeAccessUserAccountFromUser(currentUser)).thenReturn(currentUserAccount);
+        when(userMapper.getCurrentUserAccountFromCurrentUser(currentUser)).thenReturn(currentUserAccount);
         when(authorityMapper.getGrantedAuthoritiesFromUserAccount(currentUserAccount)).thenReturn(updatedAuthorities);
 
         // Then
