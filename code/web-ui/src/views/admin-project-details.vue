@@ -26,11 +26,6 @@
     </div>
 
     <div class="tableContent">
-      <span class="breadcrumbLink" @click="$router.go(-1)">
-        <Icon type="md-home" />
-        Project list
-      </span>
-
       <div class="projectCTA">
         <h2 v-if="!emptyProject">Project's members</h2>
 
@@ -54,10 +49,10 @@
         <tbody>
           <tr v-for="(member, index) in usersList" :key="index" :class="index %2 !== 0 ? 'lightGrey' : 'darkGrey'">
             <td >{{ isMe(member.login) }}</td>
-            <td>{{ getUserRole(member.scopes) }}</td>
-            <td class="table-cta">
-              <Icon v-if="!isMember && !isAuditor" type="md-close-circle" class="crossIcon" size="24" @click="removeUserFromProject(member)" />
+            <td>{{ $t('role.' + getUserRole(member.scopes)) }}</td>
+            <td class="table-cta" align="right">
               <Icon v-if="!isMember && !isAuditor" type="md-create" size="24" @click="openProjectDetails(project)" />
+              <Icon v-if="!isMember && !isAuditor" type="md-close-circle" class="crossIcon" size="24" @click="removeUserFromProject(member)" />
             </td>
           </tr>
         </tbody>
@@ -100,6 +95,7 @@
 
   export default {
     name: 'admin-project-details',
+
     components: {
       formField
     },

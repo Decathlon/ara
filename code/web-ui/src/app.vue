@@ -18,6 +18,7 @@
   <div id="app" :class="isFramed ? 'isFramed' : ''">
     <top-menu data-nrt="topMenu" v-if='!isFramed && isLoggedInPage' style="position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;"></top-menu>
     <div class="layout-content">
+      <breadcrumb />
       <router-view></router-view>
     </div>
   </div>
@@ -25,12 +26,14 @@
 
 <script>
   import topMenu from './components/top-menu.vue'
+  import breadcrumb from './components/breadcrumb.vue'
 
   export default {
     name: 'app',
 
     components: {
-      topMenu
+      topMenu,
+      breadcrumb
     },
 
     computed: {

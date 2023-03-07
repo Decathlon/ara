@@ -181,7 +181,7 @@ const routes = [
     path: '/admin/projects-list',
     name: 'projects-list',
     meta: {
-      title: 'Admin Management'
+      title: 'Project list'
     },
     component: (resolve) => require(['./views/admin-management.vue'], resolve)
   },
@@ -218,7 +218,7 @@ const routes = [
     path: '/admin/projects-list/:projectCode/:projectName/:userRole?',
     name: 'admin-project-details',
     meta: {
-      title: 'Admin project details'
+      title: 'Project details'
     },
     component: (resolve) => require(['./views/admin-project-details.vue'], resolve)
   },
@@ -313,6 +313,15 @@ const routes = [
       denied: 'MEMBER'
     },
     component: (resolve) => require(['./views/management-settings.vue'], resolve)
+  },
+  {
+    path: '/profile/:myProfile',
+    name: 'management-profile',
+    beforeEnter: requireAuth,
+    meta: {
+      title: 'Profile'
+    },
+    component: (resolve) => require(['./views/management-profile.vue'], resolve)
   },
 
   // 403 redirect

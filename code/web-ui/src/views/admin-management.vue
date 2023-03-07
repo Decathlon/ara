@@ -69,14 +69,14 @@
             <td>{{ project.creation_user }}</td>
             <td>{{ project.update_date }}</td>
             <td>{{ project.update_user }}</td>
-            <td v-if="isScopedUser">{{ project.currentUserRole }}</td>
+            <td v-if="isScopedUser">{{ $t('role.' + project.currentUserRole) }}</td>
             <td>
               <input type="radio" name="defaultProject" @change="changeDefaultProject(project)" :checked="(user.default_project && user.default_project === project.code)">
             </td>
-            <td class="table-cta">
-              <Icon type="md-close-circle" size="24" @click="deleteProject(project.code)" :class="isAdminOnProject(project) ? '' : 'hidden'"/>
-              <Icon type="md-create" size="24" @click="openProjectUpdateModal(project)" :class="isAdminOnProject(project) ? '' : 'hidden'"/>
+            <td class="table-cta" align="right">
               <Icon type="md-eye" size="24" @click="openProjectDetails(project)" :class="isDemoProject(project.code) ? 'hidden' : ''"/>
+              <Icon type="md-create" size="24" @click="openProjectUpdateModal(project)" :class="isAdminOnProject(project) ? '' : 'hidden'"/>
+              <Icon type="md-close-circle" size="24" @click="deleteProject(project.code)" :class="isAdminOnProject(project) ? '' : 'hidden'"/>
             </td>
           </tr>
         </tbody>

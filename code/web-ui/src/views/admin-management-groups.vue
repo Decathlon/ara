@@ -16,17 +16,12 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
   <div class="tableContent">
-    <span class="breadcrumbLink" @click="$router.go(-1)">
-      <Icon type="md-home" />
-      list
-    </span>
-
     <h1 v-if="this.groupInfo[0]" class="adminTitle">
       {{ this.groupInfo[0].name }}
       <p class="title-description"><strong>{{ this.groupInfo[0].description }}</strong></p>
     </h1>
     
-    <Tabs class="adminTable" type="card" v-model="tab">
+    <Tabs class="adminTable" type="card" v-model="activeTab" :animated="false">
       <TabPane label="Managers">
         <table class="tab-content" aria-label="Group's management">
           <thead>
@@ -58,7 +53,7 @@
 
           <tbody v-for="member in groupInfo" :key="member.id">
             <tr
-              v-for="(user, index) in member.users"
+              v-for="(user, index) in member.members"
               :key="index"
               :class="index % 2 !== 0 ? 'lightGrey' : 'darkGrey'"
             >
@@ -95,12 +90,8 @@
         </table>
       </TabPane>
 
-      <template #extra>
-        <Button @click="handleTabsAdd" size="small">增加</Button>
-      </template>
+      <Button @click="addToGroup" size="small" slot="extra">Add {{ groupTabs[activeTab] }}</Button>
     </Tabs>
-
-    <Button @click="handleTabsAdd" size="small">{{ groupTabs[this.tab] }}</Button>
 
     <Modal
       v-model="memberToAdd"
@@ -189,7 +180,7 @@
         searchElement: '',
         showError: false,
         groupInfo: [],
-        tab: ''
+        activeTab: 0
       }
     },
 
@@ -200,6 +191,22 @@
           .then((groups) => {
             this.groupInfo = groups.body.filter(item => item.name === this.$route.params.groupName)
           })
+      },
+
+      addToGroup () {
+        const update = this.groupTabs[this.activeTab]
+
+        switch (update) {
+          case 'Managers':
+            Vue.http
+              .put(api.paths.groupsMembersManagement('user1', this.groupInfo[0].id), api.REQUEST_OPTIONS)
+              .then(response => console.log(response))
+            break
+          case 'Users':
+            break
+          case 'Projects':
+            break
+        }
       }
     },
 

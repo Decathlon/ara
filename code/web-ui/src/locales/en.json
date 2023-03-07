@@ -1,0 +1,13 @@
+{
+    "profile": {
+        "SCOPED_USER": "Scoped user",
+        "SUPER_ADMIN": "Super admin",
+        "AUDITOR": "Auditor"
+    },
+
+    "role": {
+        "MEMBER": "Member",
+        "ADMIN": "Admin",
+        "MAINTAINER": "Maintainer"
+    }
+}

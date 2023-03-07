@@ -16,7 +16,6 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
   <div>
-    <span class="breadcrumbLink" @click="$router.go(-1)">Members list</span>
     <div>
       <h1 class="adminTitle">{{ getMemberInfo.login }}'s projects</h1>
     </div>

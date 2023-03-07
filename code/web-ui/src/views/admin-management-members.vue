@@ -17,11 +17,6 @@
 <template>
   <div>
     <div class="tableContent">
-      <span class="breadcrumbLink" @click="$router.go(-1)">
-        <Icon type="md-home" />
-        list
-      </span>
-
       <h1 class="adminTitle">{{ memberType }}</h1>
 
       <div v-if="manageProject || isNotAuditor">
@@ -61,7 +56,7 @@
                 <div>
                   <div v-if="memberType !== 'Groups'" class="user-avatar">
                     <span v-if="member.pictureUrl" :style="getAvatar(member)" class="user-picture"></span>
-                    <Avatar v-else class="user-picture">{{ getAvatar(member)  }}</Avatar>
+                    <Avatar v-else :style="generateRandomColor()">{{ getAvatar(member)  }}</Avatar>
                     <p>{{ member.login }}</p>
                   </div>
                   <div v-else>
@@ -71,7 +66,7 @@
               </td>
 
               <td>
-                <p v-if="memberType === 'Members'">{{ member.profile }}</p>
+                <p v-if="memberType === 'Members'">{{ $t('profile.' + member.profile) }}</p>
                 <p v-else>{{  member.managers[0].login }}</p>
               </td>
 
@@ -90,7 +85,7 @@
                 </span>
               </td>
 
-              <td class="table-cta">
+              <td class="table-cta" align="right">
                 <Icon v-if="!isMe(member.login) && isNotAuditor && isManagerOf(member.scopes)" type="md-eye" size="24" @click="navTo(member)" />
               </td>
             </tr>
@@ -325,8 +320,13 @@
         if (member.pictureUrl) {
           return `backgroundImage: url("` + member.pictureUrl + `")`
         } else if (member.login) {
-          return member.login.substring(0, 1)
+          return member.login.match(/(\b\S)?/g).join('').toUpperCase()
         }
+      },
+
+      generateRandomColor () {
+        const randomColor = Math.floor(Math.random() * 16777215).toString(16)
+        return 'background-color: #' + randomColor + ';'
       }
     },
 

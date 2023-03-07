@@ -35,6 +35,7 @@ import configurationPlugin from '@/config'
 import VueCookies from 'vue-cookies'
 
 import { sanitizeUrl } from '@braintree/sanitize-url'
+import VueI18n from 'vue-i18n'
 
 Vue.config.devtools = true
 Vue.use(Vue2Filters)
@@ -44,6 +45,7 @@ Vue.use(iView, { locale })
 Vue.use(VueVirtualScroller)
 Vue.use(configurationPlugin)
 Vue.use(VueCookies)
+Vue.use(VueI18n)
 iView.LoadingBar.config({
   color: '#FFEA28', // Yellowish
   height: 3
@@ -57,6 +59,14 @@ iView.Message.config({
 
 const router = new VueRouter({
   routes: routes
+})
+
+const i18n = new VueI18n({
+  locale: 'en',
+  fallbackLocale: 'en',
+  messages: {
+    en: require('./locales/en.json')
+  }
 })
 
 router.beforeEach(async (to, from, next) => {
@@ -85,6 +95,7 @@ new Vue({
   el: '#app',
   router,
   store,
+  i18n,
   beforeCreate () { this.$store.commit('initialiseStore') },
   render: h => h(app)
 })

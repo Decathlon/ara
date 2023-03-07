@@ -75,9 +75,6 @@ h2 {
   position: absolute;
   top: 30px;
   left: 110px;
-  cursor: pointer;
-  font-weight: 800;
-  color: #747474;
 }
 
 /* DROPDOWNS */
@@ -568,7 +565,6 @@ pre code {
 }
 
 .adminTable .table-cta i {
-  float: right;
   margin-right: 1rem;
   cursor: pointer;
 }

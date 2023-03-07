@@ -67,23 +67,23 @@
       </div>
 
       <div id="helps">
-        <Tooltip v-if="isLoggedIn" class="user-avatar top-right-nav" placement="bottom">
-          <div class="user-picture" :style="{ backgroundImage: `url(${user.pictureUrl})` }">
+        <div v-if="isLoggedIn" class="top-right-nav" placement="bottom" @click="$router.push({ name: 'management-profile', params: { myProfile: 'me'} })">
+          <div class="user-avatar" :style="{ backgroundImage: `url(${user.pictureUrl})` }">
             <span v-if="isAdmin">
-              <img src="../assets/super_admin.png" width="20" height="20" alt="User role">
+              <img src="../assets/super_admin.png" width="23" height="22" alt="User role">
             </span>
             <span v-if="isAuditor">
-              <img src="../assets/auditor.png" width="20" height="20" alt="User role">
+              <img src="../assets/auditor.png" width="23" height="22" alt="User role">
             </span>
           </div>
-          <div slot="content">
+          <!-- <div slot="content">
             <p v-if="providerName">Connected via <strong>{{providerName}}</strong></p>
             <p v-if="user && user.profile">> Profile: <strong>{{user.profile}}</strong></p>
             <p v-if="user && user.login">> Login: <strong>{{user.login}}</strong></p>
             <p v-if="user && user.firstName && user.lastName">> Name: <strong>{{user.firstName + " " + user.lastName}}</strong></p>
             <p v-if="user && user.email">> Email: <strong>{{user.email}}</strong></p>
-          </div>
-        </Tooltip>
+          </div> -->
+        </div>
         <!-- Keep the same width as logo+select: this is to center the menu when space is available -->
         <!-- No space between items -->
         <Dropdown trigger="click" class="top-right-nav" placement="bottom-end">
@@ -592,16 +592,12 @@
     margin-right: 4px;
   }
 
-  .user-avatar .user-picture {
+  .user-avatar {
     background-size: cover;
     width: 35px;
     height: 35px;
     border-radius: 100px;
-  }
-
-  .user-avatar img {
     margin-right: 15px;
-    border-radius: 100px;
     position: relative;
   }
 
@@ -609,10 +605,5 @@
     position: absolute;
     left: 21px;
     top: 18px;
-  }
-
-  .user-avatar span img {
-    background-color: #ffffff;
-    padding: 2px;
   }
 </style>
