@@ -455,7 +455,7 @@ pre code {
 }
 
 .projectCTA {
-  width: 90%;
+  width: 100%;
   display: flex;
   margin: 0 auto;
   justify-content: center;
@@ -520,13 +520,15 @@ pre code {
 }
 
 .tableContent {
+  width: 90%;
+  margin: auto;
+  position: relative;
   margin-top: 3rem;
   text-align: center;
 }
 
 .adminTable {
-  width: 90%;
-  margin: 0 auto;
+  width: 100%;
   margin-top: 1rem;
   border-collapse: collapse;
   position: relative;
@@ -572,6 +574,7 @@ pre code {
 .adminTable .ivu-icon-md-close-circle, .ivu-icon-md-remove-circle {
   opacity: 50%;
   color: #E3262F !important;
+  cursor: pointer;
 }
 
 .adminTable .ivu-icon-md-eye {

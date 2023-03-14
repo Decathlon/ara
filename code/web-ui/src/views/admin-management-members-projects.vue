@@ -21,7 +21,7 @@
     </div>
 
     <div>
-      <div v-if="this.getMemberInfo.scopes.length > 0">
+      <div class="tableContent" v-if="this.getMemberInfo.scopes.length > 0">
         <div v-if="isSuperAdmin || isAdmin" class="projectCTA">
           <h2>Project's roles</h2>
 
@@ -46,21 +46,21 @@
               <td class="userType">
                 <ul class="user-project-roles">
                   <li class="user-role-chip" 
-                      @click="changeProfile({ member: getMemberInfo, project: scope.project, role: 'MEMBER'})" 
-                      :class="scope.role === 'MEMBER' ? ' active' : ''">
-                      <span v-if="scope.role === 'MEMBER'"><Icon type="md-checkmark" /></span>
+                      @click="changeProfile({ member: getMemberInfo, project: scope.project, role: isUser.MEMBER})" 
+                      :class="scope.role === isUser.MEMBER ? ' active' : ''">
+                      <span v-if="scope.role === isUser.MEMBER"><Icon type="md-checkmark" /></span>
                       Member
                   </li>
                   <li class="user-role-chip"
-                      @click="changeProfile({ member: getMemberInfo, project: scope.project, role: 'MAINTAINER'})"
-                      :class="scope.role === 'MAINTAINER' ? ' active' : ''">
-                      <span v-if="scope.role === 'MAINTAINER'"><Icon type="md-checkmark" /></span>
+                      @click="changeProfile({ member: getMemberInfo, project: scope.project, role: isUser.MAINTAINER})"
+                      :class="scope.role === isUser.MAINTAINER ? ' active' : ''">
+                      <span v-if="scope.role === isUser.MAINTAINER"><Icon type="md-checkmark" /></span>
                       Maintainer
                   </li>
                   <li class="user-role-chip"
-                      @click="changeProfile({ member: getMemberInfo, project: scope.project, role: 'ADMIN'})" 
-                      :class="scope.role === 'ADMIN' ? ' active' : ''">
-                      <span v-if="scope.role === 'ADMIN'"><Icon type="md-checkmark" /></span>
+                      @click="changeProfile({ member: getMemberInfo, project: scope.project, role: isUser.ADMIN})" 
+                      :class="scope.role === isUser.ADMIN ? ' active' : ''">
+                      <span v-if="scope.role === isUser.ADMIN"><Icon type="md-checkmark" /></span>
                       Admin
                   </li>
                 </ul>
@@ -95,12 +95,12 @@
         </FormItem>
         <FormItem label="Project" prop="project">
           <Select v-model="formValidate.project" filterable>
-            <Option v-for="item in projectAvailable" :value="item.project" :key="item.project">{{ item.project }}</Option>
+            <Option v-for="(item, index) in projectAvailable" :value="item.project" :key="index">{{ item.project }}</Option>
           </Select>
         </FormItem>
         <FormItem label="Role" prop="role">
           <RadioGroup v-model="formValidate.role">
-            <Radio v-for="role in userRole" class="ivu-radio-border" :label="role"></Radio>
+            <Radio v-for="(role, index) in userRole" class="ivu-radio-border" :key="index" :label="role"></Radio>
           </RadioGroup>
         </FormItem>
         <Form-item class="modal-cta">
@@ -222,6 +222,10 @@
 
       isAdmin () {
         return this.currentProfile.profile === USER.PROFILE.SCOPED_USER
+      },
+
+      isUser () {
+        return USER.ROLE_ON_PROJECT
       }
     }
   }

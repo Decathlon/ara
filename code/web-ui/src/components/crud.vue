@@ -51,6 +51,7 @@
   import util from '../libs/util'
   import _ from 'lodash'
   import { AuthenticationService } from '../service/authentication.service'
+  import { USER } from '../libs/constants'
 
   export default {
     name: 'crud',
@@ -253,7 +254,7 @@
         const user = AuthenticationService.getDetails().user
         const project = this.$route.params.projectCode
         const userProject = user?.scopes.find((item) => item.project === project)
-        if (userProject?.role === 'MEMBER') {
+        if (userProject?.role === USER.ROLE_ON_PROJECT.MEMBER) {
           this.btnVisibility = 'btn-hidden'
         } else this.btnVisibility = 'btn-visible'
 

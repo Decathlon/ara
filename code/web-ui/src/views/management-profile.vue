@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="tableContent">
     <h1 class="adminTitle">Profile management</h1>
 
     <div v-for="user in userInfo" class="profile-infos">

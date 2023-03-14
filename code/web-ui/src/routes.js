@@ -17,9 +17,10 @@
 
 import Login from './views/login.vue'
 import store from './store/index'
+import { USER } from './libs/constants'
 
 function requireAuth (to, from, next) {
-  if (store.state.users.userRole !== 'MEMBER') {
+  if (store.state.users.userRole !== USER.ROLE_ON_PROJECT.MEMBER) {
     next()
   } else {
     next('/access-denied')
@@ -300,7 +301,7 @@ const routes = [
     beforeEnter: requireAuth,
     meta: {
       title: 'Technologies',
-      denied: 'MEMBER'
+      denied: USER.ROLE_ON_PROJECT.MEMBER
     },
     component: (resolve) => require(['./views/management-technologies.vue'], resolve)
   },
@@ -310,7 +311,7 @@ const routes = [
     beforeEnter: requireAuth,
     meta: {
       title: 'Project Settings',
-      denied: 'MEMBER'
+      denied: USER.ROLE_ON_PROJECT.MEMBER
     },
     component: (resolve) => require(['./views/management-settings.vue'], resolve)
   },

@@ -37,6 +37,7 @@
 <script>
   import { mapState } from 'vuex'
   import { AuthenticationService } from '../service/authentication.service'
+  import { USER } from '../libs/constants'
 
   export default {
     name: 'management-menu',
@@ -90,7 +91,7 @@
 
       userAuthorization () {
         const user = this.userRole.scopes.find((item) => item.project === this.projectSelected)
-        if (user?.role === 'MEMBER') {
+        if (user?.role === USER.ROLE_ON_PROJECT.MEMBER) {
           return true
         }
       }

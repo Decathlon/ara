@@ -67,13 +67,13 @@
         </FormItem>
         <FormItem label="Role" prop="role">
           <RadioGroup v-model="formValidate.role">
-            <Radio v-for="role in userRole" class="ivu-radio-border" :label="role"></Radio>
+            <Radio v-for="(role, index) in userRole" class="ivu-radio-border" :key="index" :label="role"></Radio>
           </RadioGroup>
         </FormItem>
         <FormItem label="Users" prop="scope">
           <span v-if="!isAlreadyMember.length"><strong>No members to add</strong></span>
           <RadioGroup v-model="formValidate.scope">
-            <Radio v-for="user in isAlreadyMember" class="ivu-radio-border" :label="user"></Radio>
+            <Radio v-for="(user, index) in isAlreadyMember" class="ivu-radio-border" :key="index" :label="user"></Radio>
           </RadioGroup>
         </FormItem>
         <Form-item class="modal-cta">

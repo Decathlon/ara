@@ -76,13 +76,6 @@
               <img src="../assets/auditor.png" width="23" height="22" alt="User role">
             </span>
           </div>
-          <!-- <div slot="content">
-            <p v-if="providerName">Connected via <strong>{{providerName}}</strong></p>
-            <p v-if="user && user.profile">> Profile: <strong>{{user.profile}}</strong></p>
-            <p v-if="user && user.login">> Login: <strong>{{user.login}}</strong></p>
-            <p v-if="user && user.firstName && user.lastName">> Name: <strong>{{user.firstName + " " + user.lastName}}</strong></p>
-            <p v-if="user && user.email">> Email: <strong>{{user.email}}</strong></p>
-          </div> -->
         </div>
         <!-- Keep the same width as logo+select: this is to center the menu when space is available -->
         <!-- No space between items -->

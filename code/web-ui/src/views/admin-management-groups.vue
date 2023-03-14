@@ -16,10 +16,12 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
   <div class="tableContent">
-    <h1 v-if="this.groupInfo[0]" class="adminTitle">
-      {{ this.groupInfo[0].name }}
-      <p class="title-description"><strong>{{ this.groupInfo[0].description }}</strong></p>
+    <h1 v-if="filteredGroups" class="adminTitle">
+      {{ filteredGroups[0].name }}
+      <p class="title-description"><strong>{{ filteredGroups[0].description }}</strong></p>
     </h1>
+
+    <Button class="top-right-btn" type="error" size="medium" ghost @click="deleteGroup()">Delete group</Button>
     
     <Tabs class="adminTable" type="card" v-model="activeTab" :animated="false">
       <TabPane label="Managers">
@@ -27,10 +29,11 @@
           <thead>
             <tr>
               <th>Name</th>
+              <th></th>
             </tr>
           </thead>
 
-          <tbody v-for="member in groupInfo" :key="member.id">
+          <tbody v-for="member in filteredGroups" :key="member.id">
             <tr
               v-for="(managers, index) in member.managers"
               :key="index"
@@ -39,19 +42,23 @@
               <td>
                 <p>{{ managers.login }}</p>
               </td>
+              <td align="right">
+                <Icon v-if="member.managers.length > 1" type="md-close-circle" size="24" @click="removeManager(managers.login)"/>
+              </td>
             </tr>
           </tbody>
         </table>
       </TabPane>
       <TabPane label="Users">
-        <table class="tab-content" aria-label="Group's management">
+        <table v-if="filteredGroups && filteredGroups[0].members.length" class="tab-content" aria-label="Group's management">
           <thead>
             <tr>
               <th>Name</th>
+              <th></th>
             </tr>
           </thead>
 
-          <tbody v-for="member in groupInfo" :key="member.id">
+          <tbody v-for="member in filteredGroups" :key="member.id">
             <tr
               v-for="(user, index) in member.members"
               :key="index"
@@ -60,37 +67,48 @@
               <td>
                 <p>{{ user.login }}</p>
               </td>
+              <td align="right">
+                <Icon type="md-close-circle" size="24" @click="removeUser(user.login)"/>
+              </td>
             </tr>
           </tbody>
         </table>
+
+        <p v-else>There are no users in this group yet.</p>
       </TabPane>
       <TabPane label="Projects">
-        <table class="tab-content" aria-label="Group's management">
+        <table v-if="filteredGroups && filteredGroups[0].scopes.length" class="tab-content" aria-label="Group's management">
           <thead>
             <tr>
               <th>Name</th>
               <th>Role</th>
+              <th></th>
             </tr>
           </thead>
 
-          <tbody v-for="member in groupInfo" :key="member.id">
+          <tbody v-for="member in filteredGroups" :key="member.id">
             <tr
-              v-for="(projects, index) in member.scopes"
+              v-for="(scopes, index) in member.scopes"
               :key="index"
               :class="index % 2 !== 0 ? 'lightGrey' : 'darkGrey'"
             >
               <td>
-                <p>{{ projects.name }}</p>
+                <p>{{ scopes.project }}</p>
               </td>
               <td>
-                <p>{{ projects.role }}</p>
+                <p>{{ scopes.role }}</p>
+              </td>
+              <td align="right">
+                <Icon type="md-close-circle" size="24" @click="removeScope(scopes.project)"/>
               </td>
             </tr>
           </tbody>
         </table>
+
+        <p v-else>There are no projects associated to this group yet.</p>
       </TabPane>
 
-      <Button @click="addToGroup" size="small" slot="extra">Add {{ groupTabs[activeTab] }}</Button>
+      <Button @click="addUserToGroup = true" type="primary" size="medium" slot="extra">Add {{ groupTabs[activeTab] }}</Button>
     </Tabs>
 
     <Modal
@@ -116,25 +134,36 @@
       </Form>
     </Modal>
 
-    <Modal
-      v-model="blockPopup"
-      title="Block user"
-      okText="Block user"
-      @on-ok="confirmBlockUser"
-      @close="memberToAdd = false"
-      :width="900"
-      :loading="loadingSaving"
-      :footer-hide="!selectedBlockOption"
-    >
-      <p>Select what the user will be banned from:</p>
-
-      <div class="banOptions">
-        <RadioGroup v-model="selectedBlockOption" type="button">
-          <Radio label="ARA"></Radio>
-          <Radio label="Projects creation"></Radio>
-          <Radio label="Groups creation"></Radio>
-        </RadioGroup>
-      </div>
+    <Modal v-model="addUserToGroup" ok-text="Ajouter" :title='"Add " + selectedTab' footer-hide :width="900" :loading="loadingSaving">
+      <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="128">
+        <Form-item label="Search">
+          <Input v-model="userSearch" icon="md-search" placeholder="Enter something..." />
+        </Form-item>
+        <Form-item v-if="selectedTab === 'Managers'" :label="selectedTab" prop="user">``
+          <RadioGroup v-model="formValidate.user">
+            <Radio v-for="(manager, index) in searchedUser" :key="index" :label="manager"></Radio>
+          </RadioGroup>
+        </Form-item>
+        <Form-item v-if="selectedTab === 'Users'" :label="selectedTab" prop="user">``
+          <RadioGroup v-model="formValidate.user">
+            <Radio v-for="(user, index) in searchedUser" :key="index" :label="user"></Radio>
+          </RadioGroup>
+        </Form-item>
+        <Form-item v-else :label="selectedTab" prop="projectCode">
+          <RadioGroup v-model="formValidate.projectCode">
+            <Radio v-for="(project, index) in searchedUser" :key="index" :label="project"></Radio>
+          </RadioGroup>
+        </Form-item>
+        <Form-item v-if="selectedTab === 'Projects'" label="Role" prop="projectRole">
+          <RadioGroup v-model="formValidate.projectRole">
+            <Radio v-for="(role, index) in userRole" class="ivu-radio-border" :key="index" :label="role"></Radio>
+          </RadioGroup>
+        </Form-item>
+        <Form-item class="modal-cta">
+          <Button @click="memberToAdd = false">Cancel</Button>
+          <Button type="primary" @click="addToGroup('formValidate')">Add</Button>
+        </Form-item>
+      </Form>
     </Modal>
   </div>
 </template>
@@ -150,37 +179,27 @@
       return {
         members: [],
         memberToAdd: false,
-        memberHeader: ['Name', 'Profile', 'Projects', ''],
-        groupHeader: ['Name', 'Management', 'Users', 'Projects', ''],
         blockPopup: false,
         formValidate: {
-          code: ''
+          user: '',
+          projectCode: '',
+          projectRole: ''
         },
         ruleValidate: {
-          code: { required: true, message: 'The code cannot be empty', trigger: 'blur' }
+          user: { required: true, message: 'You need to choose one user', trigger: 'blur' },
+          projectCode: { required: true, message: 'You need to choose a project', trigger: 'blur' },
+          projectRole: { required: true, message: 'You need to choose a role', trigger: 'blur' }
         },
-        memberToBlock: {
-          member: '',
-          index: '',
-          blockReason: ''
-        },
-        memberValues: [
-          {
-            value: 'member',
-            label: 'Members'
-          },
-          {
-            value: 'group',
-            label: 'Groups'
-          }
-        ],
         groupTabs: ['Managers', 'Users', 'Projects'],
+        userRole: ['Member', 'Maintainer', 'Admin'],
         selectedBlockOption: '',
         memberType: 'Members',
-        searchElement: '',
-        showError: false,
         groupInfo: [],
-        activeTab: 0
+        activeTab: 0,
+        addUserToGroup: false,
+        userSearch: '',
+        usersList: [],
+        scopesList: []
       }
     },
 
@@ -189,29 +208,114 @@
         Vue.http
           .get(api.paths.allGroups, api.REQUEST_OPTIONS)
           .then((groups) => {
-            this.groupInfo = groups.body.filter(item => item.name === this.$route.params.groupName)
+            if (groups.body.length > 1) {
+              this.groupInfo = groups.body
+            } else {
+              this.groupInfo.push(groups.body)
+            }
           })
       },
 
-      addToGroup () {
-        const update = this.groupTabs[this.activeTab]
+      getGroupElements () {
+        Vue.http
+          .get(api.paths.scopedUsers, api.REQUEST_OPTIONS)
+          .then((users) => {
+            this.usersList = users.body.map(user => user.login)
 
-        switch (update) {
-          case 'Managers':
             Vue.http
-              .put(api.paths.groupsMembersManagement('user1', this.groupInfo[0].id), api.REQUEST_OPTIONS)
-              .then(response => console.log(response))
-            break
-          case 'Users':
-            break
-          case 'Projects':
-            break
+              .get(api.paths.projects, api.REQUEST_OPTIONS)
+              .then((projects) => { this.scopesList = projects.body.map(project => project.code) })
+          })
+      },
+
+      addToGroup (form) {
+        this.$refs[form].validate((valid) => {
+          if (valid) {
+            switch (this.selectedTab) {
+              case 'Managers':
+                Vue.http
+                  .put(api.paths.groupsManagersManagement(this.formValidate.user, this.groupInfo[0].id), api.REQUEST_OPTIONS)
+                  .then(response => { this.groupInfo = response.body })
+                break
+              case 'Users':
+                Vue.http
+                  .put(api.paths.groupsMembersManagement(this.formValidate.user, this.groupInfo[0].id), api.REQUEST_OPTIONS)
+                  .then(response => {
+                    this.groupInfo = response.body
+                  })
+                break
+              case 'Projects':
+                const newProject = {
+                  project: this.formValidate.projectCode,
+                  role: this.formValidate.projectRole.toUpperCase()
+                }
+
+                Vue.http
+                  .put(api.paths.groupScopeManagement(this.groupInfo[0].id, this.formValidate.projectCode), newProject, api.REQUEST_OPTIONS)
+                  .then(response => { this.groupInfo = response.body })
+                break
+            }
+          } else {
+            this.$Message.error({
+              content: 'Please fill all required fields',
+              duration: 2
+            })
+          }
+        })
+      },
+
+      removeUser (user) {
+        Vue.http
+          .delete(api.paths.groupsMembersManagement(user, this.groupInfo[0].id), api.REQUEST_OPTIONS)
+          .then(() => { this.getGroupInfo() })
+      },
+
+      removeManager (manager) {
+        Vue.http
+          .delete(api.paths.groupsManagersManagement(manager, this.groupInfo[0].id), api.REQUEST_OPTIONS)
+          .then(() => { this.getGroupInfo() })
+      },
+
+      removeScope (scope) {
+        Vue.http
+          .delete(api.paths.groupScopeManagement(this.groupInfo[0].id, scope), api.REQUEST_OPTIONS)
+          .then(() => { this.getGroupInfo() })
+      },
+
+      deleteGroup () {
+        Vue.http
+          .delete(api.paths.groupById(this.groupInfo[0].id), api.REQUEST_OPTIONS)
+          .then(() => this.$router.go(-1))
+      }
+    },
+
+    computed: {
+      filteredGroups () {
+        if (this.groupInfo.length > 0) {
+          return this.groupInfo.filter(item => item.name === this.$route.params.groupName)
         }
+      },
+
+      availableUsers () {
+        return this.usersList.filter((item) => !(this.filteredGroups[0].managers.map(i => i.login)).includes(item))
+      },
+
+      searchedUser () {
+        if (this.selectedTab === 'Users') {
+          return this.usersList.filter(user => user.includes(this.userSearch))
+        } else {
+          return this.scopesList.filter(scope => scope.includes(this.userSearch))
+        }
+      },
+
+      selectedTab () {
+        return this.groupTabs[this.activeTab]
       }
     },
 
     created () {
       this.getGroupInfo()
+      this.getGroupElements()
     }
   }
 </script>
@@ -232,5 +336,11 @@
 
 .tab-content th:first-child {
   border-radius: 4px 0 0 0;
+}
+
+.top-right-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 </style>

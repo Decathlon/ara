@@ -16,7 +16,7 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
   <div>
-    <div v-if="projects.length">
+    <div class="tableContent" v-if="projects.length">
       <h1 class="adminTitle">Projects management</h1>
 
       <div class="projectCTA">
@@ -90,7 +90,7 @@
       </Button>
     </div>
 
-    <Modal v-for="modalConfiguration in Object.entries(projectModalConfigurations)"
+    <Modal v-for="(modalConfiguration, index) in Object.entries(projectModalConfigurations)" :key="index"
            v-model="modalConfiguration[1].open"
            :title="modalConfiguration[1].display.title"
            :okText="modalConfiguration[1].display.okButton"

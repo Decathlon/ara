@@ -22,7 +22,7 @@
       <div v-if="manageProject || isNotAuditor">
         <div v-if="searchedUser.length" class="array-filters">
           <div class="member-type-select">
-            <Select placeholder="Members" @on-change="changeMemberView" :label-in-value="true">
+            <Select :placeholder="memberType" @on-change="changeMemberView" :label-in-value="true">
               <Option v-for="item in memberValues" :value="item.value" :key="item.value">{{ item.label }}</Option>
             </Select>
           </div>
@@ -71,7 +71,7 @@
               </td>
 
               <td v-if="memberType === 'Groups'">
-                {{  member.users }}
+                <span v-for="user in member.members">{{ user.login }}</span>
               </td>
 
               <td class="member-projects-list">
@@ -85,14 +85,18 @@
                 </span>
               </td>
 
-              <td class="table-cta" align="right">
+              <td v-if="memberType === 'Members'" class="table-cta" align="right">
                 <Icon v-if="!isMe(member.login) && isNotAuditor && isManagerOf(member.scopes)" type="md-eye" size="24" @click="navTo(member)" />
+              </td>
+              <td v-else class="table-cta" align="right">
+                <Icon type="md-eye" size="24" @click="navTo(member)" :class="manageGroup(member) ? '' : 'hidden'" />
+                <Icon type="md-close-circle" size="24" @click="deleteGroup(member.id)" :class="manageGroup(member) ? '' : 'hidden'" />
               </td>
             </tr>
           </tbody>
         </table>
 
-        <div v-else-if="showError" class="no-values">
+        <div v-else-if="memberType === 'Groups' && isEmpty" class="no-values">
           <h2>There are no groups to display. Contact an admin or create a new group by clicking the button below.</h2>
           <Button type="primary" class="addBtn" @click="memberToAdd = true" >
             Add group
@@ -111,7 +115,7 @@
         <Form-item label="Code" prop="code">
           <Input v-model="formValidate.code" />
         </Form-item>
-        <Form-item label="Description" prop="code">
+        <Form-item label="Description" prop="description">
           <Input v-model="formValidate.description" type="textarea" placeholder="Group's decription..." />
         </Form-item>
         <Form-item class="modal-cta">
@@ -176,8 +180,7 @@
         ],
         selectedBlockOption: '',
         memberType: 'Members',
-        searchElement: '',
-        showError: false
+        searchElement: ''
       }
     },
 
@@ -191,8 +194,6 @@
               for (let group of groups.body) {
                 this.members.push(group)
               }
-            } else {
-              this.showError = true
             }
 
             return this.members.sort((a, b) => a.name.localeCompare(b.name))
@@ -215,15 +216,6 @@
               }
             }
 
-            this.members.push({
-              login: 'John Doe',
-              profile: 'SCOPED_USER',
-              scopes: []
-            }, {
-              login: 'Bryan',
-              profile: 'SCOPED_USER',
-              scopes: []
-            })
             return this.members.sort((a, b) => a.login.localeCompare(b.login))
           })
       },
@@ -242,20 +234,6 @@
       confirmBlockUser () {
         this.memberToBlock.blockReason = 'Banned from ' + this.selectedBlockOption
         this.members[this.memberToBlock.index].blockReason = this.memberToBlock.blockReason
-      },
-
-      removeGroup (member) {
-        if (confirm('Do you really want to delete this member?')) {
-          Vue.http
-            .delete('/api/groups/' + member.name, api.REQUEST_OPTIONS)
-            .then(() => {
-              for (let k = 0; k < this.members.length; k++) {
-                if (this.members[k].name === member.name) {
-                  this.members.splice(k, 1)
-                }
-              }
-            })
-        }
       },
 
       navTo (user) {
@@ -284,7 +262,7 @@
       },
 
       isManagerOf (scopes) {
-        const adminProject = this.currentUser.scopes.filter(project => project.role === 'ADMIN')
+        const adminProject = this.currentUser.scopes.filter(project => project.role === USER.ROLE_ON_PROJECT.ADMIN)
 
         if (this.isAdmin) {
           return true
@@ -311,7 +289,10 @@
 
             Vue.http
               .post(api.paths.groupBasePath, group, api.REQUEST_OPTIONS)
-              .then(() => { return this.members })
+              .then((resp) => {
+                this.members.push(resp.body)
+                this.memberToAdd = false
+              })
           }
         })
       },
@@ -327,6 +308,24 @@
       generateRandomColor () {
         const randomColor = Math.floor(Math.random() * 16777215).toString(16)
         return 'background-color: #' + randomColor + ';'
+      },
+
+      manageGroup (group) {
+        if (this.memberType === 'Groups') {
+          if (this.currentUser.profile === USER.PROFILE.SUPER_ADMIN) {
+            return true
+          } else if (group.creation_user === this.currentUser.login) {
+            return true
+          }
+        } else {
+          return false
+        }
+      },
+
+      deleteGroup (groupID) {
+        Vue.http
+          .delete(api.paths.groupById(groupID), api.REQUEST_OPTIONS)
+          .then((resp) => { this.members = [] })
       }
     },
 
@@ -340,15 +339,19 @@
       },
 
       manageProject () {
-        return this.currentUser.scopes.some(({ role }) => role === 'ADMIN')
+        return this.currentUser.scopes.some(({ role }) => role === USER.ROLE_ON_PROJECT.ADMIN)
       },
 
       isAdmin () {
-        return this.currentUser.profile === 'SUPER_ADMIN'
+        return this.currentUser.profile === USER.PROFILE.SUPER_ADMIN
       },
 
       isNotAuditor () {
-        return this.currentUser.profile !== 'AUDITOR'
+        return this.currentUser.profile !== USER.PROFILE.AUDITOR
+      },
+
+      isEmpty () {
+        return this.members.length === 0
       },
 
       searchedUser () {
@@ -378,7 +381,7 @@
   }
 
   .array-filters {
-    width: 90%;
+    width: 100%;
     margin: 0 auto;
     display: flex;
   }
