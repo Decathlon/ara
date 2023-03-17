@@ -16,9 +16,9 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <template>
   <div class="tableContent">
-    <h1 v-if="filteredGroups" class="adminTitle">
-      {{ filteredGroups[0].name }}
-      <p class="title-description"><strong>{{ filteredGroups[0].description }}</strong></p>
+    <h1 v-if="this.groupInfo" class="adminTitle">
+      {{ this.groupInfo.name }}
+      <p class="title-description"><strong>{{ this.groupInfo.description }}</strong></p>
     </h1>
 
     <Button class="top-right-btn" type="error" size="medium" ghost @click="deleteGroup()">Delete group</Button>
@@ -33,9 +33,9 @@
             </tr>
           </thead>
 
-          <tbody v-for="member in filteredGroups" :key="member.id">
+          <tbody>
             <tr
-              v-for="(managers, index) in member.managers"
+              v-for="(managers, index) in this.groupInfo.managers"
               :key="index"
               :class="index % 2 !== 0 ? 'lightGrey' : 'darkGrey'"
             >
@@ -43,14 +43,14 @@
                 <p>{{ managers.login }}</p>
               </td>
               <td align="right">
-                <Icon v-if="member.managers.length > 1" type="md-close-circle" size="24" @click="removeManager(managers.login)"/>
+                <Icon type="md-close-circle" size="24" @click="removeManager(managers.login)"/>
               </td>
             </tr>
           </tbody>
         </table>
       </TabPane>
       <TabPane label="Users">
-        <table v-if="filteredGroups && filteredGroups[0].members.length" class="tab-content" aria-label="Group's management">
+        <table v-if="this.groupInfo.members[0]" class="tab-content" aria-label="Group's management">
           <thead>
             <tr>
               <th>Name</th>
@@ -58,9 +58,9 @@
             </tr>
           </thead>
 
-          <tbody v-for="member in filteredGroups" :key="member.id">
+          <tbody>
             <tr
-              v-for="(user, index) in member.members"
+              v-for="(user, index) in this.groupInfo.members"
               :key="index"
               :class="index % 2 !== 0 ? 'lightGrey' : 'darkGrey'"
             >
@@ -77,7 +77,7 @@
         <p v-else>There are no users in this group yet.</p>
       </TabPane>
       <TabPane label="Projects">
-        <table v-if="filteredGroups && filteredGroups[0].scopes.length" class="tab-content" aria-label="Group's management">
+        <table v-if="this.groupInfo.scopes[0]" class="tab-content" aria-label="Group's management">
           <thead>
             <tr>
               <th>Name</th>
@@ -86,9 +86,9 @@
             </tr>
           </thead>
 
-          <tbody v-for="member in filteredGroups" :key="member.id">
+          <tbody>
             <tr
-              v-for="(scopes, index) in member.scopes"
+              v-for="(scopes, index) in this.groupInfo.scopes"
               :key="index"
               :class="index % 2 !== 0 ? 'lightGrey' : 'darkGrey'"
             >
@@ -108,50 +108,29 @@
         <p v-else>There are no projects associated to this group yet.</p>
       </TabPane>
 
-      <Button @click="addUserToGroup = true" type="primary" size="medium" slot="extra">Add {{ groupTabs[activeTab] }}</Button>
+      <Button @click="addElementToGroup = true" type="primary" size="medium" slot="extra">Add {{ groupTabs[activeTab] }}</Button>
     </Tabs>
 
-    <Modal
-      v-model="memberToAdd"
-      title="Add Group"
-      :width="900"
-      :loading="loadingSaving"
-      :footer-hide="true"
-    >
-      <Form
-        ref="formValidate"
-        :model="formValidate"
-        :rules="ruleValidate"
-        :label-width="128"
-      >
-        <Form-item label="Code" prop="code">
-          <Input v-model="formValidate.code" />
-        </Form-item>
-        <Form-item class="modal-cta">
-          <Button @click="closeModal(modalConfiguration[0])">Cancel</Button>
-          <Button type="primary" @click="handleSubmit()">Submit</Button>
-        </Form-item>
-      </Form>
-    </Modal>
-
-    <Modal v-model="addUserToGroup" ok-text="Ajouter" :title='"Add " + selectedTab' footer-hide :width="900" :loading="loadingSaving">
+    <Modal v-model="addElementToGroup" ok-text="Ajouter" :title='"Add " + selectedTab' footer-hide :width="900" :loading="loadingSaving">
       <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="128">
         <Form-item label="Search">
           <Input v-model="userSearch" icon="md-search" placeholder="Enter something..." />
         </Form-item>
-        <Form-item v-if="selectedTab === 'Managers'" :label="selectedTab" prop="user">``
-          <RadioGroup v-model="formValidate.user">
-            <Radio v-for="(manager, index) in searchedUser" :key="index" :label="manager"></Radio>
+        <Form-item v-if="selectedTab === 'Managers'" :label="selectedTab" prop="user">
+          <RadioGroup v-if="availableUsers && availableUsers.length > 0" v-model="formValidate.user">
+            <Radio v-for="(manager, index) in availableUsers" :key="index" :label="manager"></Radio>
           </RadioGroup>
+          <p v-else>There are no {{ selectedTab }} to add to this group</p>
         </Form-item>
-        <Form-item v-if="selectedTab === 'Users'" :label="selectedTab" prop="user">``
-          <RadioGroup v-model="formValidate.user">
-            <Radio v-for="(user, index) in searchedUser" :key="index" :label="user"></Radio>
+        <Form-item v-if="selectedTab === 'Users'" :label="selectedTab" prop="user">
+          <RadioGroup v-if="availableUsers && availableUsers.length > 0" v-model="formValidate.user">
+            <Radio v-for="(user, index) in availableUsers" :key="index" :label="user"></Radio>
           </RadioGroup>
+          <p v-else>There are no {{ selectedTab }} to add to this group</p>
         </Form-item>
-        <Form-item v-else :label="selectedTab" prop="projectCode">
+        <Form-item v-if="selectedTab === 'Projects'" :label="selectedTab" prop="projectCode">
           <RadioGroup v-model="formValidate.projectCode">
-            <Radio v-for="(project, index) in searchedUser" :key="index" :label="project"></Radio>
+            <Radio v-for="(project, index) in searchProjects" :key="index" :label="project"></Radio>
           </RadioGroup>
         </Form-item>
         <Form-item v-if="selectedTab === 'Projects'" label="Role" prop="projectRole">
@@ -160,7 +139,7 @@
           </RadioGroup>
         </Form-item>
         <Form-item class="modal-cta">
-          <Button @click="memberToAdd = false">Cancel</Button>
+          <Button @click="addElementToGroup = false">Cancel</Button>
           <Button type="primary" @click="addToGroup('formValidate')">Add</Button>
         </Form-item>
       </Form>
@@ -196,7 +175,7 @@
         memberType: 'Members',
         groupInfo: [],
         activeTab: 0,
-        addUserToGroup: false,
+        addElementToGroup: false,
         userSearch: '',
         usersList: [],
         scopesList: []
@@ -208,11 +187,11 @@
         Vue.http
           .get(api.paths.allGroups, api.REQUEST_OPTIONS)
           .then((groups) => {
-            if (groups.body.length > 1) {
-              this.groupInfo = groups.body
-            } else {
-              this.groupInfo.push(groups.body)
-            }
+            groups.body.filter(group => {
+              if (group.name === this.$route.params.groupName) {
+                this.groupInfo = group
+              }
+            })
           })
       },
 
@@ -240,9 +219,7 @@
               case 'Users':
                 Vue.http
                   .put(api.paths.groupsMembersManagement(this.formValidate.user, this.groupInfo[0].id), api.REQUEST_OPTIONS)
-                  .then(response => {
-                    this.groupInfo = response.body
-                  })
+                  .then(response => { this.groupInfo = response.body })
                 break
               case 'Projects':
                 const newProject = {
@@ -251,7 +228,7 @@
                 }
 
                 Vue.http
-                  .put(api.paths.groupScopeManagement(this.groupInfo[0].id, this.formValidate.projectCode), newProject, api.REQUEST_OPTIONS)
+                  .put(api.paths.groupScopeManagement(this.groupInfo.id, this.formValidate.projectCode), newProject, api.REQUEST_OPTIONS)
                   .then(response => { this.groupInfo = response.body })
                 break
             }
@@ -267,19 +244,19 @@
       removeUser (user) {
         Vue.http
           .delete(api.paths.groupsMembersManagement(user, this.groupInfo[0].id), api.REQUEST_OPTIONS)
-          .then(() => { this.getGroupInfo() })
+          .then(() => { return this.groupInfo })
       },
 
       removeManager (manager) {
         Vue.http
           .delete(api.paths.groupsManagersManagement(manager, this.groupInfo[0].id), api.REQUEST_OPTIONS)
-          .then(() => { this.getGroupInfo() })
+          .then(() => { return this.groupInfo })
       },
 
       removeScope (scope) {
         Vue.http
           .delete(api.paths.groupScopeManagement(this.groupInfo[0].id, scope), api.REQUEST_OPTIONS)
-          .then(() => { this.getGroupInfo() })
+          .then(() => { return this.groupInfo })
       },
 
       deleteGroup () {
@@ -290,22 +267,20 @@
     },
 
     computed: {
-      filteredGroups () {
-        if (this.groupInfo.length > 0) {
-          return this.groupInfo.filter(item => item.name === this.$route.params.groupName)
-        }
-      },
-
       availableUsers () {
-        return this.usersList.filter((item) => !(this.filteredGroups[0].managers.map(i => i.login)).includes(item))
+        if (this.groupInfo[0]) {
+          const alreadyPartOf = (this.groupInfo[0].managers.concat(this.groupInfo[0].members)).map(i => i.login)
+
+          return this.usersList.filter((user) => !alreadyPartOf.includes(user))
+        }
       },
 
       searchedUser () {
-        if (this.selectedTab === 'Users') {
-          return this.usersList.filter(user => user.includes(this.userSearch))
-        } else {
-          return this.scopesList.filter(scope => scope.includes(this.userSearch))
-        }
+        return this.usersList.filter(user => user.includes(this.userSearch))
+      },
+
+      searchProjects () {
+        return this.scopesList.filter(scope => scope.includes(this.userSearch))
       },
 
       selectedTab () {
@@ -313,7 +288,7 @@
       }
     },
 
-    created () {
+    mounted () {
       this.getGroupInfo()
       this.getGroupElements()
     }
