@@ -1,5 +1,5 @@
 <template>
-  <Breadcrumb class="breadcrumbLink">
+  <Breadcrumb v-if="savedSingleUserConnections" class="breadcrumbLink">
     <BreadcrumbItem to="/">Home</BreadcrumbItem>
     <BreadcrumbItem v-if="previousPath.path" :to="previousPath.path">{{ previousPath.meta.title }}</BreadcrumbItem>
     <BreadcrumbItem v-if="actualPath.path">{{ actualPath.meta.title }}</BreadcrumbItem>
@@ -7,6 +7,8 @@
 </template>
 
 <script>
+  import { mapState } from 'vuex'
+
   export default {
     data () {
       return {
@@ -16,6 +18,8 @@
     },
 
     computed: {
+      ...mapState('admin', ['savedSingleUserConnections']),
+
       prevPath () {
         const backupPath = JSON.parse(localStorage.getItem('previousPath'))
         return backupPath

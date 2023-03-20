@@ -74,9 +74,9 @@
           </tbody>
         </table>
 
-        <p v-else>There are no users in this group yet.</p>
+        <p v-else>There are no users in this group.</p>
       </TabPane>
-      <TabPane label="Projects">
+      <TabPane label="Scopes">
         <table v-if="this.groupInfo.scopes[0]" class="tab-content" aria-label="Group's management">
           <thead>
             <tr>
@@ -117,8 +117,8 @@
           <Input v-model="userSearch" icon="md-search" placeholder="Enter something..." />
         </Form-item>
         <Form-item v-if="selectedTab === 'Managers'" :label="selectedTab" prop="user">
-          <RadioGroup v-if="availableUsers && availableUsers.length > 0" v-model="formValidate.user">
-            <Radio v-for="(manager, index) in availableUsers" :key="index" :label="manager"></Radio>
+          <RadioGroup v-if="availableManagers && availableManagers.length > 0" v-model="formValidate.user">
+            <Radio v-for="(manager, index) in availableManagers" :key="index" :label="manager"></Radio>
           </RadioGroup>
           <p v-else>There are no {{ selectedTab }} to add to this group</p>
         </Form-item>
@@ -157,8 +157,6 @@
     data () {
       return {
         members: [],
-        memberToAdd: false,
-        blockPopup: false,
         formValidate: {
           user: '',
           projectCode: '',
@@ -169,10 +167,8 @@
           projectCode: { required: true, message: 'You need to choose a project', trigger: 'blur' },
           projectRole: { required: true, message: 'You need to choose a role', trigger: 'blur' }
         },
-        groupTabs: ['Managers', 'Users', 'Projects'],
+        groupTabs: ['Managers', 'Users', 'Scopes'],
         userRole: ['Member', 'Maintainer', 'Admin'],
-        selectedBlockOption: '',
-        memberType: 'Members',
         groupInfo: [],
         activeTab: 0,
         addElementToGroup: false,
@@ -202,8 +198,8 @@
             this.usersList = users.body.map(user => user.login)
 
             Vue.http
-              .get(api.paths.projects, api.REQUEST_OPTIONS)
-              .then((projects) => { this.scopesList = projects.body.map(project => project.code) })
+              .get(api.paths.currentUser, api.REQUEST_OPTIONS)
+              .then((user) => { this.scopesList = user.body.scopes.map(scope => scope.project) })
           })
       },
 
@@ -213,13 +209,19 @@
             switch (this.selectedTab) {
               case 'Managers':
                 Vue.http
-                  .put(api.paths.groupsManagersManagement(this.formValidate.user, this.groupInfo[0].id), api.REQUEST_OPTIONS)
-                  .then(response => { this.groupInfo = response.body })
+                  .put(api.paths.groupsManagersManagement(this.formValidate.user, this.groupInfo.id), api.REQUEST_OPTIONS)
+                  .then(response => {
+                    this.addElementToGroup = false
+                    this.groupInfo = response.body
+                  })
                 break
               case 'Users':
                 Vue.http
-                  .put(api.paths.groupsMembersManagement(this.formValidate.user, this.groupInfo[0].id), api.REQUEST_OPTIONS)
-                  .then(response => { this.groupInfo = response.body })
+                  .put(api.paths.groupsMembersManagement(this.formValidate.user, this.groupInfo.id), api.REQUEST_OPTIONS)
+                  .then(response => {
+                    this.addElementToGroup = false
+                    this.groupInfo = response.body
+                  })
                 break
               case 'Projects':
                 const newProject = {
@@ -229,7 +231,10 @@
 
                 Vue.http
                   .put(api.paths.groupScopeManagement(this.groupInfo.id, this.formValidate.projectCode), newProject, api.REQUEST_OPTIONS)
-                  .then(response => { this.groupInfo = response.body })
+                  .then(response => {
+                    this.addElementToGroup = false
+                    this.groupInfo = response.body
+                  })
                 break
             }
           } else {
@@ -243,33 +248,41 @@
 
       removeUser (user) {
         Vue.http
-          .delete(api.paths.groupsMembersManagement(user, this.groupInfo[0].id), api.REQUEST_OPTIONS)
+          .delete(api.paths.groupsMembersManagement(user, this.groupInfo.id), api.REQUEST_OPTIONS)
           .then(() => { return this.groupInfo })
       },
 
       removeManager (manager) {
         Vue.http
-          .delete(api.paths.groupsManagersManagement(manager, this.groupInfo[0].id), api.REQUEST_OPTIONS)
+          .delete(api.paths.groupsManagersManagement(manager, this.groupInfo.id), api.REQUEST_OPTIONS)
           .then(() => { return this.groupInfo })
       },
 
       removeScope (scope) {
         Vue.http
-          .delete(api.paths.groupScopeManagement(this.groupInfo[0].id, scope), api.REQUEST_OPTIONS)
+          .delete(api.paths.groupScopeManagement(this.groupInfo.id, scope), api.REQUEST_OPTIONS)
           .then(() => { return this.groupInfo })
       },
 
       deleteGroup () {
         Vue.http
-          .delete(api.paths.groupById(this.groupInfo[0].id), api.REQUEST_OPTIONS)
+          .delete(api.paths.groupById(this.groupInfo.id), api.REQUEST_OPTIONS)
           .then(() => this.$router.go(-1))
       }
     },
 
     computed: {
       availableUsers () {
-        if (this.groupInfo[0]) {
-          const alreadyPartOf = (this.groupInfo[0].managers.concat(this.groupInfo[0].members)).map(i => i.login)
+        if (this.groupInfo) {
+          const alreadyPartOf = this.groupInfo.members.map(i => i.login)
+
+          return this.usersList.filter((user) => !alreadyPartOf.includes(user))
+        }
+      },
+
+      availableManagers () {
+        if (this.groupInfo) {
+          const alreadyPartOf = this.groupInfo.managers.map(i => i.login)
 
           return this.usersList.filter((user) => !alreadyPartOf.includes(user))
         }
