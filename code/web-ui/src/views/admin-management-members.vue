@@ -89,7 +89,7 @@
                 <Icon v-if="!isMe(member.login) && isNotAuditor && isManagerOf(member.scopes)" type="md-eye" size="24" @click="navTo(member)" />
               </td>
               <td v-else class="table-cta" align="right">
-                <Icon type="md-eye" size="24" @click="navTo(member)" :class="manageGroup(member) ? '' : 'hidden'" />
+                <Icon type="md-eye" size="24" @click="navTo(member)" />
                 <Icon type="md-close-circle" size="24" @click="deleteGroup(member.id)" :class="manageGroup(member) ? '' : 'hidden'" />
               </td>
             </tr>

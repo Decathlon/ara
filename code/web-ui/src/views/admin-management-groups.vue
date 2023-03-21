@@ -77,7 +77,7 @@
         <p v-else>There are no users in this group.</p>
       </TabPane>
       <TabPane label="Scopes">
-        <table v-if="this.groupInfo.scopes[0]" class="tab-content" aria-label="Group's management">
+        <table v-if="this.groupInfo.scopes.length > 0" class="tab-content" aria-label="Group's management">
           <thead>
             <tr>
               <th>Name</th>
@@ -128,12 +128,12 @@
           </RadioGroup>
           <p v-else>There are no {{ selectedTab }} to add to this group</p>
         </Form-item>
-        <Form-item v-if="selectedTab === 'Projects'" :label="selectedTab" prop="projectCode">
+        <Form-item v-if="selectedTab === 'Scopes'" :label="selectedTab" prop="projectCode">
           <RadioGroup v-model="formValidate.projectCode">
             <Radio v-for="(project, index) in searchProjects" :key="index" :label="project"></Radio>
           </RadioGroup>
         </Form-item>
-        <Form-item v-if="selectedTab === 'Projects'" label="Role" prop="projectRole">
+        <Form-item v-if="selectedTab === 'Scopes'" label="Role" prop="projectRole">
           <RadioGroup v-model="formValidate.projectRole">
             <Radio v-for="(role, index) in userRole" class="ivu-radio-border" :key="index" :label="role"></Radio>
           </RadioGroup>
@@ -150,12 +150,14 @@
 <script>
   import Vue from 'vue'
   import api from '../libs/api'
+  import { USER } from '../libs/constants'
 
   export default {
     name: 'admin-management-groups',
 
     data () {
       return {
+        actualUser: [],
         members: [],
         formValidate: {
           user: '',
@@ -179,7 +181,15 @@
     },
 
     methods: {
-      getGroupInfo () {
+      getUserInfo () {
+        Vue.http
+          .get(api.paths.currentUser, api.REQUEST_OPTIONS)
+          .then((user) => {
+            this.actualUser = user.body
+          })
+      },
+
+      getGroups () {
         Vue.http
           .get(api.paths.allGroups, api.REQUEST_OPTIONS)
           .then((groups) => {
@@ -191,16 +201,18 @@
           })
       },
 
-      getGroupElements () {
+      getGroupUsers () {
         Vue.http
           .get(api.paths.scopedUsers, api.REQUEST_OPTIONS)
           .then((users) => {
             this.usersList = users.body.map(user => user.login)
-
-            Vue.http
-              .get(api.paths.currentUser, api.REQUEST_OPTIONS)
-              .then((user) => { this.scopesList = user.body.scopes.map(scope => scope.project) })
           })
+      },
+
+      getProjects () {
+        Vue.http
+          .get(api.paths.projects, api.REQUEST_OPTIONS)
+          .then((projects) => { this.scopesList = projects.body.map(project => project.code) })
       },
 
       addToGroup (form) {
@@ -223,7 +235,7 @@
                     this.groupInfo = response.body
                   })
                 break
-              case 'Projects':
+              case 'Scopes':
                 const newProject = {
                   project: this.formValidate.projectCode,
                   role: this.formValidate.projectRole.toUpperCase()
@@ -293,17 +305,27 @@
       },
 
       searchProjects () {
-        return this.scopesList.filter(scope => scope.includes(this.userSearch))
+        if (!this.isAdmin) {
+          return this.scopesList.filter(scope => scope.includes(this.userSearch) && scope !== 'the-demo-project')
+        } else {
+          return this.scopesList.filter(scope => scope !== 'the-demo-project')
+        }
       },
 
       selectedTab () {
         return this.groupTabs[this.activeTab]
+      },
+
+      isAdmin () {
+        return this.actualUser.profile === USER.PROFILE.SUPER_ADMIN
       }
     },
 
     mounted () {
-      this.getGroupInfo()
-      this.getGroupElements()
+      this.getUserInfo()
+      this.getGroups()
+      this.getGroupUsers()
+      this.getProjects()
     }
   }
 </script>
