@@ -22,7 +22,7 @@
       So we use Menu classes with router-links.
     -->
     <ul class="subMenu ivu-menu ivu-menu-light ivu-menu-horizontal">
-      <router-link v-for="(link,index) in links" :key="link.name" :to="to(link)"
+      <router-link v-for="(link, index) in links" :key="index" :to="to(link)"
                   class="ivu-menu-item" :class="$route.path.includes([link.routeName]) ? 'ivu-menu-item-active ivu-menu-item-selected' 
                   : userAuthorization && link.name === 'SETTINGS' ? 'hidden' 
                   : userAuthorization && link.name === 'TECHNOLOGIES' ? 'hidden'

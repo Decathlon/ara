@@ -215,7 +215,7 @@
 
     computed: {
       ...mapState('admin', ['savedSingleUserConnections', 'showSubMenuMembers', 'typeSelected']),
-      ...mapState('projects', ['projects', 'defaultProjectCode']),
+      ...mapState('projects', ['projects', 'projectsCode', 'defaultProjectCode']),
 
       executedScenariosHistoryDurationIsApplied () {
         return this.duration.applied && this.duration.value && this.duration.type
@@ -265,7 +265,7 @@
         return [
           { params: { projectCode: this.projectCode }, name: 'PROJECTS', routeName: 'projects-list' },
           { params: { projectCode: this.projectCode }, name: 'MEMBERS', routeName: 'members' },
-          { params: { projectCode: this.projectCode }, name: 'CONFIGURATION', routeName: 'settings' },
+          { params: { projectCode: this.projectCode }, name: 'CONFIGURATION', routeName: 'management-communications' },
           { params: { projectCode: this.projectCode }, name: 'DASHBOARD', routeName: 'dashboard' }
         ]
       },
@@ -323,7 +323,11 @@
       },
 
       projectSelection (projectCode) {
-        this.projectCode = projectCode
+        if (this.projectsCode.includes(projectCode)) {
+          this.projectCode = projectCode
+        } else {
+          this.$router.replace({ name: 'Unknown project' })
+        }
       },
 
       to (link) {

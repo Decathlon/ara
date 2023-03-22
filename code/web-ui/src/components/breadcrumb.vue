@@ -33,7 +33,7 @@
     watch: {
       '$route' (to, from) {
         this.actualPath = to
-        if (from.name) {
+        if (from.name && !from.path.includes('settings')) {
           this.previousPath = from
           localStorage.setItem('previousPath', JSON.stringify(from))
         }

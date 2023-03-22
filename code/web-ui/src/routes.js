@@ -225,7 +225,7 @@ const routes = [
   },
   {
     path: '/settings/:projectCode?/management-communications',
-    name: 'settings',
+    name: 'management-communications',
     meta: {
       title: 'Communications'
     },
@@ -323,6 +323,13 @@ const routes = [
       title: 'Profile'
     },
     component: (resolve) => require(['./views/management-profile.vue'], resolve)
+  },
+
+  // Project not found
+  {
+    path: '/unknown-project',
+    name: 'Unknown project',
+    component: (resolve) => require(['./views/project-unknown.vue'], resolve)
   },
 
   // 403 redirect

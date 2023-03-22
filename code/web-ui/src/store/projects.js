@@ -25,6 +25,7 @@ export default {
     loading: false,
     loaded: false,
     projects: [],
+    projectsCode: [],
     defaultProjectCode: undefined
   },
 
@@ -35,6 +36,8 @@ export default {
 
     setProjects (state, projects) {
       state.projects = projects
+
+      state.projectsCode = projects.map((project) => project.code)
 
       // Compute the default project code: either the one set as default,
       // or the first one (or undefined if no projects exist)
