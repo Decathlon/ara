@@ -15,8 +15,8 @@
  *                                                                            *
  ******************************************************************************/
 
-INSERT INTO `project` (`id`, `code`, `name`, `default_at_startup`)
-VALUES (1,'the-demo-project','The Demo Project', 0);
+INSERT INTO `project` (`id`, `code`, `name`)
+VALUES (1,'the-demo-project','The Demo Project');
 
 INSERT INTO `country` (`code`, `name`, `id`, `project_id`)
 VALUES

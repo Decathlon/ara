@@ -52,7 +52,7 @@
            timeToIdleSeconds="300" timeToLiveSeconds="3600"/>
 
     <cache name="com.decathlon.ara.domain.Project" maxEntriesLocalHeap="200" eternal="true"/>
-
+    
     <cache name="com.decathlon.ara.domain.Run" maxEntriesLocalHeap="100" eternal="false" timeToIdleSeconds="300"
            timeToLiveSeconds="3600"/>
 
@@ -79,4 +79,23 @@
            timeToIdleSeconds="300" timeToLiveSeconds="3600"/>
 
     <cache name="com.decathlon.ara.domain.ProblemOccurrence" maxEntriesLocalHeap="2000" eternal="true"/>
+
+    <cache name="com.decathlon.ara.domain.ProjectGroupMember" maxEntriesLocalHeap="2000" timeToIdleSeconds="10800"/>
+
+    <cache name="com.decathlon.ara.domain.ProjectUserMember" maxEntriesLocalHeap="2000" timeToIdleSeconds="10800"/>
+
+    <cache name="com.decathlon.ara.domain.User" maxEntriesLocalHeap="200" timeToIdleSeconds="10800"/>
+
+    <cache name="com.decathlon.ara.domain.UserRole" maxEntriesLocalHeap="2000" timeToIdleSeconds="10800"/>
+
+    <cache name="com.decathlon.ara.domain.UserPreference" maxEntriesLocalHeap="2000" timeToIdleSeconds="10800"/>
+
+    <cache name="com.decathlon.ara.domain.Group" maxEntriesLocalHeap="200" timeToIdleSeconds="10800"/>
+
+    <cache name="com.decathlon.ara.domain.GroupMember" maxEntriesLocalHeap="2000" timeToIdleSeconds="10800"/>
+
+    <cache name="security.user.project.roles" maxEntriesLocalHeap="2000" timeToIdleSeconds="10800"/>
+
+    <cache name="security.user.projects" maxEntriesLocalHeap="200" timeToIdleSeconds="10800"/>
+
 </ehcache>

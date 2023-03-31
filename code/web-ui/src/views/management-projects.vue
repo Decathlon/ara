@@ -73,12 +73,6 @@
         introduction: 'Projects are isolated areas in ARA to manage test reports of several applications or standalone components.',
         fields: [
           {
-            code: 'id',
-            type: 'hidden',
-            newValue: -1,
-            primaryKey: true
-          },
-          {
             code: 'code',
             name: 'Code',
             columnTitle: 'Code',
@@ -88,7 +82,8 @@
             createOnlyBecause: 'the code ends-up in URLs of ARA, and people should be allowed to bookmark fixed URLs or copy/past them in other services (defect tracking system, wiki, etc.)',
             newValue: '',
             width: undefined,
-            help: 'The technical code of the project, to use in ARA URLs (as well as API URLs used by continuous integration to push data to ARA). Eg. "phoenix-front".'
+            help: 'The technical code of the project, to use in ARA URLs (as well as API URLs used by continuous integration to push data to ARA). Eg. "phoenix-front".',
+            primaryKey: true
           },
           {
             code: 'name',
@@ -157,6 +152,7 @@
       },
 
       projectsLoaded (data) {
+        localStorage.setItem('adminRight', false)
         this.$store.commit('projects/setProjects', data)
       }
     }

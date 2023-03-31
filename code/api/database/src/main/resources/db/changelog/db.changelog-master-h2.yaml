@@ -13,3 +13,5 @@ databaseChangeLog:
       file: classpath*:db/changelog/changes/h2/20220126152954-missing_changes.yaml
   - include:
       file: classpath*:db/changelog/changes/h2/20220126171337-not_null_constraints.yaml
+  - include:
+      file: classpath*:db/changelog/changes/h2/20220504165317-rbac.yaml

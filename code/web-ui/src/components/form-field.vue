@@ -34,6 +34,14 @@
             @on-change="value => $emit('input', value)">
       <Option v-for="option in field.options" :value="option.value" :key="option.value">{{!option.label || option.label === ' ' ? '\u00A0' : option.label}}</Option>
     </Select>
+    <AutoComplete v-else-if="field.type === 'autocomplete'"
+           :type="field.type === 'textarea' ? 'textarea' : field.type === 'password' ? 'password' : 'text'"
+           :autosize="{ minRows: 2, maxRows: 15 }"
+           :value="value"
+           :data="data"
+           :filter-method="filterMethod"
+           @on-change="value => $emit('input', value)"
+           ref="fieldInput"/>
     <InputNumber v-else-if="field.type === 'int'"
                  :value="value"
                  @on-change="value => $emit('input', value)"
@@ -70,6 +78,13 @@
       }
     },
 
+    data () {
+      return {
+        data: ['Vincent Pierin', 'Romain Chabaud', 'Quentin Dengreville']
+        // data: this.$store.state.users.usersList
+      }
+    },
+
     methods: {
       focus () {
         // No ref for Checkbox & Select (not focusable)
@@ -84,6 +99,10 @@
 
       escape () {
         this.$emit('escape')
+      },
+
+      filterMethod (value, option) {
+        return option.toUpperCase().indexOf(value.toUpperCase()) !== -1
       }
     }
   }

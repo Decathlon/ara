@@ -21,6 +21,8 @@ import projects from './projects'
 import rootCauses from './root-causes'
 import severities from './severities'
 import teams from './teams'
+import admin from './admin'
+import users from './users'
 
 Vue.use(Vuex)
 
@@ -29,6 +31,8 @@ export default new Vuex.Store({
     projects,
     rootCauses,
     severities,
-    teams
+    teams,
+    admin,
+    users
   }
 })

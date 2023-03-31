@@ -18,18 +18,30 @@
 package com.decathlon.ara.service;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
+import com.decathlon.ara.cache.CacheService;
 import com.decathlon.ara.domain.Project;
+import com.decathlon.ara.domain.ProjectUserMember;
 import com.decathlon.ara.domain.RootCause;
+import com.decathlon.ara.domain.enumeration.MemberRole;
+import com.decathlon.ara.repository.ProjectGroupMemberRepository;
 import com.decathlon.ara.repository.ProjectRepository;
+import com.decathlon.ara.repository.ProjectUserMemberRepository;
 import com.decathlon.ara.repository.RootCauseRepository;
+import com.decathlon.ara.repository.UserRepository;
 import com.decathlon.ara.service.dto.project.ProjectDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
@@ -47,16 +59,31 @@ public class ProjectService {
 
     private final RootCauseRepository rootCauseRepository;
 
+    private final UserRepository userRepository;
+
+    private final ProjectUserMemberRepository projectUserMemberRepository;
+
+    private final ProjectGroupMemberRepository projectGroupMemberRepository;
+
     private final GenericMapper mapper;
 
     private final CommunicationService communicationService;
 
-    public ProjectService(ProjectRepository repository, RootCauseRepository rootCauseRepository, GenericMapper mapper,
-            CommunicationService communicationService) {
+    private final UserPreferenceService userPreferenceService;
+
+    private final CacheService cacheService;
+
+    @Autowired
+    public ProjectService(ProjectRepository repository, RootCauseRepository rootCauseRepository, UserRepository userRepository, ProjectUserMemberRepository projectUserMemberRepository, ProjectGroupMemberRepository projectGroupMemberRepository, GenericMapper mapper, CommunicationService communicationService, UserPreferenceService userPreferenceService, CacheService cacheService) {
         this.repository = repository;
         this.rootCauseRepository = rootCauseRepository;
+        this.userRepository = userRepository;
+        this.projectUserMemberRepository = projectUserMemberRepository;
+        this.projectGroupMemberRepository = projectGroupMemberRepository;
         this.mapper = mapper;
         this.communicationService = communicationService;
+        this.userPreferenceService = userPreferenceService;
+        this.cacheService = cacheService;
     }
 
     /**
@@ -70,16 +97,24 @@ public class ProjectService {
         validateBusinessRules(dtoToCreate);
         final Project entity = mapper.map(dtoToCreate, Project.class);
         communicationService.initializeProject(entity);
-        final ProjectDTO createdProject = mapper.map(repository.save(entity), ProjectDTO.class);
+        Project createdProject = repository.save(entity);
+        final ProjectDTO createdProjectDTO = mapper.map(createdProject, ProjectDTO.class);
 
-        final long projectId = createdProject.getId().longValue();
+        final long projectId = createdProjectDTO.getId().longValue();
         rootCauseRepository.saveAll(Arrays.asList(
                 new RootCause(projectId, "Fragile test"),
                 new RootCause(projectId, "Network issue"),
                 new RootCause(projectId, "Regression"),
                 new RootCause(projectId, "Test to update")));
 
-        return createdProject;
+        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+        ProjectUserMember projectUserMember = new ProjectUserMember(entity, userRepository.findByMemberName(userName));
+        projectUserMember.setRole(MemberRole.ADMIN);
+        projectUserMemberRepository.save(projectUserMember);
+        updateDefaultProject(dtoToCreate);
+        cacheService.evictCaches(createdProject, userName);
+
+        return createdProjectDTO;
     }
 
     /**
@@ -90,18 +125,23 @@ public class ProjectService {
      * @throws NotFoundException  when the given entity ID is not present in database
      * @throws NotUniqueException when the given code or name is already used by another entity
      */
-    public ProjectDTO update(ProjectDTO dtoToUpdate) throws BadRequestException {
+    public ProjectDTO update(String projectCode, ProjectDTO dtoToUpdate) throws BadRequestException {
         // Must update an existing entity
-        Optional<Project> dataBaseEntity = repository.findById(dtoToUpdate.getId());
-        if (!dataBaseEntity.isPresent()) {
+        Project dataBaseEntity = repository.findOneByCode(projectCode);
+        if (dataBaseEntity == null) {
             throw new NotFoundException(Messages.NOT_FOUND_PROJECT, Entities.PROJECT);
         }
+        dtoToUpdate.setId(dataBaseEntity.getId());
 
         validateBusinessRules(dtoToUpdate);
 
         final Project entity = mapper.map(dtoToUpdate, Project.class);
-        entity.setCommunications(dataBaseEntity.get().getCommunications());
-        return mapper.map(repository.save(entity), ProjectDTO.class);
+        entity.setCommunications(dataBaseEntity.getCommunications());
+        ProjectDTO updatedProject = mapper.map(repository.save(entity), ProjectDTO.class);
+        if (updateDefaultProject(dtoToUpdate)) {
+            cacheService.evictsUserProjectsCache(SecurityContextHolder.getContext().getAuthentication().getName());
+        }
+        return updatedProject;
     }
 
     /**
@@ -112,6 +152,28 @@ public class ProjectService {
     @Transactional(readOnly = true)
     public List<ProjectDTO> findAll() {
         return mapper.mapCollection(repository.findAllByOrderByName(), ProjectDTO.class);
+    }
+
+    /**
+     * Get all the entities.
+     *
+     * @return the list of entities
+     */
+    @Transactional(readOnly = true)
+    @Cacheable(value = "security.user.projects", key = "#userId")
+    public List<ProjectDTO> findAll(String userId) {
+        Set<Project> projects = new TreeSet<>(Comparator.comparing(Project::getName));
+        projects.addAll(projectUserMemberRepository.findAllProjectByUserName(userId));
+        projects.addAll(projectGroupMemberRepository.findAllProjectByUserName(userId));
+        String defaultProjectCode = userPreferenceService.getValue(UserPreferenceService.DEFAULT_PROJECT);
+        List<ProjectDTO> projectDTOList = mapper.mapCollection(projects, ProjectDTO.class);
+        if (defaultProjectCode != null) {
+            Optional<ProjectDTO> findFirst = projectDTOList.stream().filter(project -> defaultProjectCode.equals(project.getCode())).findFirst();
+            if (findFirst.isPresent()) {
+                findFirst.get().setDefaultAtStartup(true);
+            }
+        }
+        return projectDTOList;
     }
 
     /**
@@ -144,7 +206,6 @@ public class ProjectService {
     private void validateBusinessRules(ProjectDTO dto) throws NotUniqueException {
         validateUniqueCode(dto);
         validateUniqueName(dto);
-        switchProjectAsDefault(dto);
     }
 
     private void validateUniqueCode(ProjectDTO dto) throws NotUniqueException {
@@ -161,13 +222,26 @@ public class ProjectService {
         }
     }
 
-    private void switchProjectAsDefault(ProjectDTO dto) {
+    private boolean updateDefaultProject(ProjectDTO dto) {
         if (dto.isDefaultAtStartup()) {
-            Project entityDataBaseWithDefaultAtStartup = repository.findByDefaultAtStartup(true);
-            if (entityDataBaseWithDefaultAtStartup != null && !entityDataBaseWithDefaultAtStartup.getCode().equals(dto.getCode())) {
-                entityDataBaseWithDefaultAtStartup.setDefaultAtStartup(false);
-            }
+            userPreferenceService.setValue(UserPreferenceService.DEFAULT_PROJECT, dto.getCode());
+            return true;
+        } else if (dto.getCode().equals(userPreferenceService.getValue(UserPreferenceService.DEFAULT_PROJECT))) {
+            userPreferenceService.setValue(UserPreferenceService.DEFAULT_PROJECT, null);
+            return true;
         }
+        return false;
+    }
+
+    public void delete(String code) throws NotFoundException {
+        final Project project = repository.findOneByCode(code);
+        if (project == null) {
+            throw new NotFoundException(Messages.NOT_FOUND_PROJECT, Entities.PROJECT);
+        }
+        projectGroupMemberRepository.deleteByProjectCode(code);
+        projectUserMemberRepository.deleteByProjectCode(code);
+        repository.delete(project);
+        cacheService.evictCaches(project);
     }
 
 }

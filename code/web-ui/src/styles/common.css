@@ -64,6 +64,20 @@ h1 {
 h2 {
   margin-top: 16px;
 }
+.alert-msg {
+  text-align: center;
+}
+.layout-content {
+  position: relative;
+}
+.breadcrumbLink {
+  position: absolute;
+  top: 30px;
+  left: 110px;
+  cursor: pointer;
+  font-weight: 800;
+  color: #747474;
+}
 
 /* DROPDOWNS */
 
@@ -275,4 +289,265 @@ pre code {
   color: gray;
   line-height: 1.2;
   margin-top: 4px;
+}
+
+.darkGrey {
+  background-color: #D9DDE1;
+}
+
+.lightGrey {
+  background-color: #F7F8F9;
+}
+
+/****  ADMIN RIGHTS STYLESHEET  ****/
+
+/* General */
+
+.adminTitle {
+  margin-bottom: 3rem;
+  text-align: center;
+  font-weight: bold;
+  margin-top: 3rem;
+}
+
+/* CTA */
+
+.demoProjectButton {
+  position: absolute;
+  left: 7rem;
+}
+
+.editBtn {
+  position: absolute;
+  right: 245px;
+  top: 65px;
+}
+
+.removeBtn {
+  position: absolute;
+  right: 115px;
+  top: 65px;
+}
+
+.projectMemberFilter {
+  display: flex;
+  margin-left: 100px;
+  margin-bottom: 5px;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.projectMemberFilter * {
+  align-self: center;
+}
+
+.projectMemberFilter button {
+  background-color: #ad8daf;
+  border-color: #ad8daf;
+  color: #ffffff;
+  margin: 5px 5px;
+}
+
+.saveProjectChange {
+  margin-top: 2rem; 
+}
+
+.membersTypeChoice {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+}
+
+.membersTypeChoice div {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  background-color: #ffffff;
+  box-shadow: 2px 3px 7px -2px #c5c5c5;
+  border-radius: 5px;
+  margin: 0 30px;
+  cursor: pointer;
+  transform: scale(95%);
+  transition: 300ms;
+}
+
+.membersTypeChoice div:hover {
+  background-color: #3780be;
+  color: #ffffff;
+  transform: scale(100%);
+  transition: 300ms;
+}
+
+.membersTypeChoice p {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  height: inherit;
+}
+
+.membersTypeChoice p span i {
+  font-size: 21px;
+  justify-content: center;
+  display: flex;
+}
+
+.banOptions {
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.banOptions .ivu-radio-group label {
+  padding: 0 30px;
+  margin: 10px 25px;
+  border: 1px solid #d1d1d1;
+  border-radius: 100px!important;
+  cursor: pointer;
+}
+
+.banOptions .ivu-radio-group label::before, .banOptions .ivu-radio-group label::after {
+  content: none;
+}
+
+.banOptions .ivu-radio-group .ivu-radio-wrapper-checked {
+  background-color: #2d8cf0;
+  color: #ffffff;
+}
+
+/* Tables */
+
+.tableContent {
+  margin-top: 3rem;
+  text-align: center;
+}
+
+.adminTable {
+  width: 90%;
+  margin: 0 auto;
+  margin-top: 1rem;
+  border-collapse: collapse;
+  position: relative;
+}
+
+.adminTable h3 {
+  text-align: left;
+  top: 0;
+}
+
+.adminTable thead tr {
+  background-color: #3880BE;
+}
+
+.adminTable thead tr th {
+  padding: 10px;
+  text-align: center;
+  color: #ffffff;
+}
+
+.adminTable thead tr th:first-child {
+  border-radius: 10px 0 0 0;
+}
+
+.adminTable thead tr th:last-child {
+  border-radius: 0 10px 0 0;
+}
+
+.adminTable tbody {
+  text-align: center;
+  font-weight: bold;
+}
+
+.adminTable tbody tr td {
+  padding: 10px;
+}
+
+.adminTable tbody tr td i {
+  float: right;
+  margin-right: 1rem;
+  cursor: pointer;
+}
+
+.adminTable .ivu-icon-md-close-circle, .ivu-icon-md-remove-circle {
+  opacity: 50%;
+  color: #E3262F !important;
+}
+
+.adminTable .ivu-icon-md-eye {
+  color: #AC8DAF;
+}
+
+.adminTable .ivu-icon-md-close-circle {
+  color: rgb(188, 188, 188);
+}
+
+.adminTable .ivu-icon-md-create, .projectCode {
+  color: #AC8DAF;
+}
+
+.ivu-icon-ios-checkmark-circle {
+  color: #23a9427d;
+}
+
+.adminTable .filterSelect {
+  width: 150px;
+  position: absolute;
+  top: -45px;
+}
+
+.adminTable .addBtn, .adminTable .showBtn {
+  position: absolute;
+  background-color: #ffffff;
+  padding: 8px;
+  border-radius: 100px;
+  border: 2px solid #3780be;
+  cursor: pointer;
+}
+
+.adminTable .addBtn {
+  top: -20px;
+  right: 20px;
+  color: #ff5600;
+}
+
+.adminTable .showBtn {
+  top: -20px;
+  right: 80px;
+  color: #ad8daf;
+}
+
+/* Modal  */
+
+.ivu-modal-wrap {
+  align-items: center;
+  display: flex;
+}
+
+.ivu-modal-wrap .ivu-modal {
+  top: auto;
+}
+
+
+.memberType {
+  text-align: center;
+}
+
+.memberType * {
+  padding: 30px 50px;
+  border: 2px solid #3780be;
+  color: #3780be;
+  margin: 0 12px;
+  line-height: 14;
+}
+
+.memberType *:hover {
+  background-color: #3780be;
+  border: 2px solid #3780be;
+  color: #ffffff;
+  cursor: pointer;
 }

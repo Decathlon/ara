@@ -174,6 +174,43 @@ const routes = [
     redirect: '/projects/:projectCode/management/communications' // First tab
   },
   {
+    path: '/projects/:projectCode/active-admin',
+    name: 'active-admin',
+    meta: {
+      title: 'Admin Management'
+    },
+    component: (resolve) => require(['./views/admin-management.vue'], resolve)
+  },
+  {
+    path: '/projects/:projectCode/members',
+    name: 'members',
+    meta: {
+      title: 'Members'
+    },
+    component: (resolve) => require(['./views/admin-management-members.vue'], resolve)
+  },
+  {
+    path: '/projects/:projectCode/members/memberDetails',
+    name: 'member-details',
+    meta: {
+      title: 'Member details'
+    },
+    component: (resolve) => require(['./views/admin-management-members-details.vue'], resolve)
+  },
+  {
+    path: '/projects/:projectCode/dashboard',
+    name: 'dashboard',
+    redirect: '/projects/:projectCode/executions'
+  },
+  {
+    path: '/projects/:projectCode/active-admin/admin-project-details',
+    name: 'admin-project-details',
+    meta: {
+      title: 'Admin project details'
+    },
+    component: (resolve) => require(['./views/admin-project-details.vue'], resolve)
+  },
+  {
     path: '/projects/:projectCode/management/communications',
     name: 'management-communications',
     meta: {

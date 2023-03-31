@@ -1462,4 +1462,3 @@ databaseChangeLog:
         referencedColumnNames: ID
         referencedTableName: COUNTRY
         validate: true
-

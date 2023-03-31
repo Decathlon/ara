@@ -32,7 +32,7 @@ public class TemplateResource {
         this.projectService = projectService;
     }
 
-    @GetMapping("cycle-execution")
+    @GetMapping("/cycle-execution")
     public String nrtCycle(@RequestParam("project") String projectCode,
                            @RequestParam String branch,
                            @RequestParam String cycle,
