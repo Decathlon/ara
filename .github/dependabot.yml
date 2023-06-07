@@ -9,7 +9,7 @@ updates:
 
   # Maintain dependencies for npm
   - package-ecosystem: "npm"
-    directory: "/code/web-ux"
+    directory: "/code/web-ui"
     target-branch: "main"
     schedule:
       interval: "daily"
