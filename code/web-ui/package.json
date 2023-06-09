@@ -97,7 +97,7 @@
     "mochawesome": "^6.1.1",
     "mochawesome-merge": "^4.1.0",
     "mochawesome-report-generator": "^5.1.0",
-    "nightwatch": "^1.0.2",
+    "nightwatch": "^1.5.1",
     "opn": "^5.4.0",
     "optimize-css-assets-webpack-plugin": "^2.0.0",
     "ora": "^1.2.0",
