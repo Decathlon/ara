@@ -77,8 +77,8 @@ jobs:
           extends: |
             semantic-release-monorepo
         env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
       - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).webui.should_skip }}
         name: Semantic Release web-ui
         id: semantic_web-ui
@@ -96,8 +96,8 @@ jobs:
           extends: |
             semantic-release-monorepo
         env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
   build-api:
     needs: prepare
     if: ${{ needs.prepare.outputs.should_skip != 'true' || !fromJSON(needs.prepare.outputs.paths_result).api.should_skip || needs.prepare.outputs.api_new_release_published == 'true' }}
@@ -139,7 +139,7 @@ jobs:
       - name: Build and analyze
         run: mvn -f code/api -B clean install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - name: stop oauth2-dev-server
         run: docker-compose -f code/docker-compose.dev.yaml down
@@ -220,7 +220,7 @@ jobs:
           args: >
             -Dsonar.projectVersion=${{ steps.getVersion.outputs.projectVersion }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - name: Prepare
         id: prep
@@ -274,7 +274,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          token: ${{ secrets.PAT_TOKEN }}
+          token: ${{ secrets.ACCESS_TOKEN }}
           ref: ${{ github.ref }}
       - uses: actions/setup-python@v2
         with:
@@ -326,8 +326,8 @@ jobs:
             @semantic-release/changelog@6.0.1
             @semantic-release/git@10.0.1
         env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
       - name: Configure Git
         run: |
           git config user.name "$GITHUB_ACTOR"
@@ -339,4 +339,4 @@ jobs:
           version: v1.3.0
           charts_dir: charts/candidate
         env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_TOKEN: "${{ secrets.ACCESS_TOKEN }}"
