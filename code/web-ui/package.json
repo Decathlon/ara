@@ -60,7 +60,7 @@
     "cross-spawn": "^5.0.1",
     "css-loader": "^2.1.1",
     "cssnano": "^4.0.0",
-    "cypress": "^4.10.0",
+    "cypress": "^13.2.0",
     "cypress-cucumber-preprocessor": "^1.16.2",
     "eslint": "^5.16.0",
     "eslint-config-standard": "^12.0.0",
