@@ -20,7 +20,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          token: ${{ secrets.PAT_TOKEN }}
+          token: ${{ secrets.ACCESS_TOKEN }}
       - name: Copy candidate to stable version
         working-directory: code
         run: make copy-candidate-to-stable
@@ -63,7 +63,7 @@ jobs:
           tag_name: ara-stable-v${{ steps.version.outputs.stable }}
           previous_tag_name: ${{ steps.version.outputs.fromTag }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
       - name: Create Changelog file
         working-directory: charts/stable
         run: |
@@ -81,4 +81,4 @@ jobs:
           version: v1.3.0
           charts_dir: charts/stable
         env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_TOKEN: "${{ secrets.ACCESS_TOKEN }}"
