@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.decathlon.ara.domain.Source;
@@ -48,11 +49,11 @@ import com.decathlon.ara.service.dto.ignore.ScenarioIgnoreSourceDTO;
 import com.decathlon.ara.service.dto.scenario.ScenarioSummaryDTO;
 import com.decathlon.ara.service.dto.severity.SeverityDTO;
 import com.decathlon.ara.service.dto.source.SourceDTO;
-import com.decathlon.ara.service.mapper.ScenarioSummaryMapper;
-import com.decathlon.ara.service.mapper.SourceMapper;
+import com.decathlon.ara.service.mapper.GenericMapper;
+import com.decathlon.ara.util.TestUtil;
 
 @ExtendWith(MockitoExtension.class)
-public class ScenarioServiceTest {
+class ScenarioServiceTest {
 
     private static final long PROJECT_ID = 1;
 
@@ -66,10 +67,7 @@ public class ScenarioServiceTest {
     private SourceRepository sourceRepository;
 
     @Mock
-    private SourceMapper sourceMapper;
-
-    @Mock
-    private ScenarioSummaryMapper scenarioSummaryMapper;
+    private GenericMapper mapper;
 
     @Mock
     private EntityManager entityManager;
@@ -90,12 +88,12 @@ public class ScenarioServiceTest {
     private ScenarioService cut;
 
     @Test
-    public void findAllWithFunctionalityErrors_ShouldReturnMappedDataFromScenarioRepositoryFindAllWithFunctionalityErrors_WhenCalled() {
+    void findAllWithFunctionalityErrors_ShouldReturnMappedDataFromScenarioRepositoryFindAllWithFunctionalityErrors_WhenCalled() {
         // GIVEN
         List<ScenarioSummary> functionalities = Collections.emptyList();
         when(scenarioRepository.findAllWithFunctionalityErrors(PROJECT_ID)).thenReturn(functionalities);
         List<ScenarioSummaryDTO> functionalitiesDTOs = Collections.emptyList();
-        when(scenarioSummaryMapper.toDto(same(functionalities))).thenReturn(functionalitiesDTOs);
+        when(mapper.mapCollection(same(functionalities), Mockito.eq(ScenarioSummaryDTO.class))).thenReturn(functionalitiesDTOs);
 
         // WHEN
         final List<ScenarioSummaryDTO> result = cut.findAllWithFunctionalityErrors(PROJECT_ID);
@@ -105,28 +103,34 @@ public class ScenarioServiceTest {
     }
 
     @Test
-    public void getIgnoredScenarioCounts_ShouldComputeAndAggregateIgnoredScenarioCounts_WhenCalled() {
+    void getIgnoredScenarioCounts_ShouldComputeAndAggregateIgnoredScenarioCounts_WhenCalled() {
         // GIVEN
         final List<SeverityDTO> severities = Arrays.asList(
-                new SeverityDTO().withCode("high").withPosition(Integer.valueOf(1)),
-                new SeverityDTO().withCode("medium").withPosition(Integer.valueOf(2)).withDefaultOnMissing(true),
-                new SeverityDTO().withCode("*").withPosition(Integer.valueOf(3)));
+                new SeverityDTO("high", Integer.valueOf(1), null, null, null, false),
+                new SeverityDTO("medium", Integer.valueOf(2), null, null, null, true),
+                new SeverityDTO("*", Integer.valueOf(3), null, null, null, false));
         when(severityService.getSeveritiesWithAll(PROJECT_ID)).thenReturn(severities);
         when(severityService.getDefaultSeverityCode(severities)).thenReturn("medium");
-        final Source sourceA = new Source().withCode("A");
-        final Source sourceB = new Source().withCode("B");
+        final Source sourceA = new Source();
+        sourceA.setCode("A");
+        final Source sourceB = new Source();
+        sourceB.setCode("B");
         when(scenarioRepository.findIgnoreCounts(PROJECT_ID)).thenReturn(Arrays.asList(
-                new ScenarioIgnoreCount().withSource(sourceA).withSeverityCode("high").withIgnored(true).withCount(2),
-                new ScenarioIgnoreCount().withSource(sourceA).withSeverityCode("medium").withIgnored(true).withCount(1),
-                new ScenarioIgnoreCount().withSource(sourceA).withSeverityCode("medium").withIgnored(false).withCount(1),
-                new ScenarioIgnoreCount().withSource(sourceB).withSeverityCode("").withIgnored(false).withCount(1)));
+                scenarioIgnoreCount(sourceA, "high", true, 2),
+                scenarioIgnoreCount(sourceA, "medium", true, 1),
+                scenarioIgnoreCount(sourceA, "medium", false, 1),
+                scenarioIgnoreCount(sourceB, "", false, 1)));
         when(scenarioRepository.findIgnoredScenarios(PROJECT_ID)).thenReturn(Arrays.asList(
-                new IgnoredScenario(sourceA, "f1", "F 1", "high", "Name 1"),
-                new IgnoredScenario(sourceA, "f1", "F 1", "high", "Name 2"),
-                new IgnoredScenario(sourceA, "f2", "F 2", "medium", "Name 3"),
-                new IgnoredScenario(sourceB, "f1", "F 1", "", "Name 4")));
-        when(sourceMapper.toDto(same(sourceA))).thenReturn(new SourceDTO().withCode("A"));
-        when(sourceMapper.toDto(same(sourceB))).thenReturn(new SourceDTO().withCode("B"));
+                ignoredScenario(sourceA, "f1", "F 1", "high", "Name 1"),
+                ignoredScenario(sourceA, "f1", "F 1", "high", "Name 2"),
+                ignoredScenario(sourceA, "f2", "F 2", "medium", "Name 3"),
+                ignoredScenario(sourceB, "f1", "F 1", "", "Name 4")));
+        final SourceDTO sourceDTOA = new SourceDTO();
+        sourceDTOA.setCode("A");
+        final SourceDTO sourceDTOB = new SourceDTO();
+        sourceDTOB.setCode("B");
+        when(mapper.map(same(sourceA), Mockito.eq(SourceDTO.class))).thenReturn(sourceDTOA);
+        when(mapper.map(same(sourceB), Mockito.eq(SourceDTO.class))).thenReturn(sourceDTOB);
 
         // WHEN
         final List<ScenarioIgnoreSourceDTO> result = cut.getIgnoredScenarioCounts(PROJECT_ID);
@@ -182,6 +186,25 @@ public class ScenarioServiceTest {
 
         assertThat(result.get(2).getSource().getCode()).isEqualTo("B");
         assertThat(result.get(2).getSeverities()).hasSize(2);
+    }
+
+    private IgnoredScenario ignoredScenario(Source source, String featureFile, String featureName, String severity, String name) {
+        IgnoredScenario ignoredScenario = new IgnoredScenario();
+        TestUtil.setField(ignoredScenario, "source", source);
+        TestUtil.setField(ignoredScenario, "featureFile", featureFile);
+        TestUtil.setField(ignoredScenario, "featureName", featureName);
+        TestUtil.setField(ignoredScenario, "severity", severity);
+        TestUtil.setField(ignoredScenario, "name", name);
+        return ignoredScenario;
+    }
+
+    private ScenarioIgnoreCount scenarioIgnoreCount(Source source, String severityCode, boolean ignored, long count) {
+        ScenarioIgnoreCount scenarioIgnoreCount = new ScenarioIgnoreCount();
+        TestUtil.setField(scenarioIgnoreCount, "source", source);
+        TestUtil.setField(scenarioIgnoreCount, "severityCode", severityCode);
+        TestUtil.setField(scenarioIgnoreCount, "ignored", ignored);
+        TestUtil.setField(scenarioIgnoreCount, "count", count);
+        return scenarioIgnoreCount;
     }
 
 }

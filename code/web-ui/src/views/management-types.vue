@@ -77,7 +77,7 @@
             columnTitle: 'Source',
             type: 'select',
             options: undefined, // Will be populated at mount time by getAllSource()
-            required: false,
+            required: true,
             newValue: '', // Same code as the empty first option added by getAllSource()
             width: 256,
             help: '' +

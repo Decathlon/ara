@@ -37,10 +37,9 @@ import com.decathlon.ara.scenario.common.strategy.ScenariosIndexerStrategy;
 import com.decathlon.ara.service.support.Settings;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
@@ -49,40 +48,47 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Slf4j
 public class ExecutionFilesProcessorService {
 
-    @NonNull
+    private static final Logger LOG = LoggerFactory.getLogger(ExecutionFilesProcessorService.class);
+
     private final SettingService settingService;
 
-    @NonNull
     private final ObjectMapper objectMapper;
 
-    @NonNull
     private final ExecutionCompletionRequestRepository executionCompletionRequestRepository;
 
-    @NonNull
     private final ExecutionRepository executionRepository;
 
-    @NonNull
     private final CountryRepository countryRepository;
 
-    @NonNull
     private final TypeRepository typeRepository;
 
-    @NonNull
     private final QualityService qualityService;
 
-    @NonNull
     private final ScenariosIndexerStrategy scenariosIndexerStrategy;
 
-    @NonNull
     private final FileProcessorService fileProcessorService;
+
+    @Autowired
+    public ExecutionFilesProcessorService(SettingService settingService, ObjectMapper objectMapper,
+            ExecutionCompletionRequestRepository executionCompletionRequestRepository,
+            ExecutionRepository executionRepository, CountryRepository countryRepository, TypeRepository typeRepository,
+            QualityService qualityService, ScenariosIndexerStrategy scenariosIndexerStrategy,
+            FileProcessorService fileProcessorService) {
+        this.settingService = settingService;
+        this.objectMapper = objectMapper;
+        this.executionCompletionRequestRepository = executionCompletionRequestRepository;
+        this.executionRepository = executionRepository;
+        this.countryRepository = countryRepository;
+        this.typeRepository = typeRepository;
+        this.qualityService = qualityService;
+        this.scenariosIndexerStrategy = scenariosIndexerStrategy;
+        this.fileProcessorService = fileProcessorService;
+    }
 
     /**
      * Create an execution from the planned indexation
@@ -108,7 +114,7 @@ public class ExecutionFilesProcessorService {
         String buildInformationFilePath = settingService.get(projectId, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH);
         Optional<Build> build = getBuildFromFile(rawExecutionFile, buildInformationFilePath);
         if (!build.isPresent()) {
-            log.info("The build information file ({}) in [{}] couldn't be processed", buildInformationFilePath, rawExecutionFile.getAbsolutePath());
+            LOG.warn("EXECUTION|The build information file ({}) in [{}] couldn't be processed", buildInformationFilePath, rawExecutionFile.getAbsolutePath());
             return Optional.empty();
         }
 
@@ -126,11 +132,11 @@ public class ExecutionFilesProcessorService {
         Optional<CycleDef> cycleDef = fileProcessorService.getMappedObjectFromFile(rawExecutionFile, cycleDefinitionFilePath, CycleDef.class);
         if (!cycleDef.isPresent()) {
             if (JobStatus.DONE.equals(execution.get().getStatus()) || completionRequest.isPresent()) {
-                log.info("Cycle-run's cycle-definition JSON not found in done job (cycle deeply broken): indexing it as failed");
+                LOG.warn("EXECUTION|Cycle-run's cycle-definition JSON not found in done job (cycle deeply broken): indexing it as failed");
                 execution.get().setBlockingValidation(false);
                 return execution;
             }
-            log.info("Cycle-run's cycle-definition JSON not found (too soon?): not indexing it yet");
+            LOG.warn("EXECUTION|Cycle-run's cycle-definition JSON not found (too soon?): not indexing it yet");
             return Optional.empty();
         }
         execution.get().setBlockingValidation(cycleDef.get().isBlockingValidation());
@@ -147,8 +153,7 @@ public class ExecutionFilesProcessorService {
 
         qualityService.computeQuality(execution.get());
 
-        Boolean executionIsIncomplete = !executionIsComplete(execution.get(), cycleDef.get());
-        if (executionIsIncomplete) {
+        if (!executionIsComplete(execution.get(), cycleDef.get())) {
             execution.get().setQualityStatus(QualityStatus.INCOMPLETE);
         }
 
@@ -182,7 +187,7 @@ public class ExecutionFilesProcessorService {
                 build.getLink());
         if (previousExecution.isPresent()) {
             if (JobStatus.DONE.equals(previousExecution.get().getStatus())) {
-                log.info("Cycle-run is already DONE (requested to be indexed several times?): no further indexing");
+                LOG.warn("EXECUTION|Cycle-run is already DONE (requested to be indexed several times?): no further indexing");
                 return Optional.empty();
             }
             Long executionId = previousExecution.get().getId();
@@ -217,7 +222,7 @@ public class ExecutionFilesProcessorService {
      * @param cycleDef the cycleDef
      * @return the quality threshold
      */
-    private String getQualityThresholdsFromCycleDefinition(CycleDef cycleDef){
+    private String getQualityThresholdsFromCycleDefinition(CycleDef cycleDef) {
         try {
             return objectMapper.writeValueAsString(cycleDef.getQualityThresholds());
         } catch (JsonProcessingException e) {
@@ -242,10 +247,7 @@ public class ExecutionFilesProcessorService {
             return JobStatus.RUNNING;
         }
         switch (build.getResult()) {
-            case ABORTED:
-            case FAILURE:
-            case SUCCESS:
-            case UNSTABLE:
+            case ABORTED, FAILURE, SUCCESS, UNSTABLE:
                 return JobStatus.DONE;
             case NOT_BUILT:
                 return JobStatus.UNAVAILABLE;
@@ -270,25 +272,25 @@ public class ExecutionFilesProcessorService {
         final File[] countryJobDirectories = Arrays.stream(allExecutionFolderContents).filter(File::isDirectory).toArray(File[]::new);
 
         if (countryJobDirectories == null || countryJobDirectories.length == 0) {
-            log.info("The folder {} doesn't contain any country", rawExecutionFile.getAbsolutePath());
+            LOG.warn("EXECUTION|The folder {} doesn't contain any country", rawExecutionFile.getAbsolutePath());
         }
 
         final List<Country> allCountries = countryRepository.findAllByProjectIdOrderByCode(projectId);
         final List<Type> allTypes = typeRepository.findAllByProjectIdOrderByCode(projectId);
 
         final Map<String, List<PlatformRule>> platformsRules = cycleDef.getPlatformsRules();
-        for (final Entry<String, List<PlatformRule>> entry: platformsRules.entrySet()) {
+        for (final Entry<String, List<PlatformRule>> entry : platformsRules.entrySet()) {
             final String platformName = entry.getKey();
             final List<PlatformRule> enabledRules = entry.getValue()
                     .stream()
                     .filter(PlatformRule::isEnabled)
-                    .collect(Collectors.toList());
+                    .toList();
             for (final PlatformRule rule : enabledRules) {
                 final String countryCode = rule.getCountry().toLowerCase();
                 final Optional<Country> country = getCountryFromCodeAndCountries(countryCode, allCountries);
 
                 if (!country.isPresent()) {
-                    log.info("The country {} is not known. Please check your database", countryCode);
+                    LOG.warn("EXECUTION|The country {} is unknown. Please check your database", countryCode);
                     continue;
                 }
 
@@ -305,7 +307,7 @@ public class ExecutionFilesProcessorService {
                 } else {
                     countryDeployment = getUnavailableCountryDeployment(country.get(), platformName);
                     allCountryJobFolderContents = new File[0];
-                    log.info("Although the country {} is defined in the cycle definition file, no matching folder was found. Please check the execution zip again", countryCode);
+                    LOG.warn("EXECUTION|Although the country {} is defined in the cycle definition file, no matching folder was found. Please check the execution zip again", countryCode);
                 }
 
                 countryDeployments.add(countryDeployment);
@@ -317,20 +319,20 @@ public class ExecutionFilesProcessorService {
                     final Optional<Type> type = getTypeFromCodeAndTypes(typeCode, allTypes);
 
                     if (!type.isPresent()) {
-                        log.info("The type {} is unknown. It maybe needs to inserted into the ARA database", typeCode);
+                        LOG.warn("EXECUTION|The type {} is unknown. It maybe needs to inserted into the ARA database", typeCode);
                         continue;
                     }
 
                     final Source source = type.get().getSource();
                     if (source != null) {
                         final Optional<File> typeJobFolder = Arrays.stream(typeJobFolders)
-                                .filter(file -> typeCode.toLowerCase().equals(file.getName().toLowerCase()))
+                                .filter(file -> typeCode.equalsIgnoreCase(file.getName()))
                                 .findFirst();
 
                         if (!typeJobFolder.isPresent()) {
                             Run run = getUnavailableRun(country.get(), type.get(), platformName, rule);
                             runs.add(run);
-                            log.info("The type {} was not found in the execution zip", typeCode);
+                            LOG.warn("EXECUTION|The type {} was not found in the execution zip", typeCode);
                             continue;
                         }
 
@@ -372,7 +374,7 @@ public class ExecutionFilesProcessorService {
      * @param cycleDef the {@link CycleDef} containing the platform rules
      * @return
      */
-    private Boolean executionIsComplete(Execution execution, CycleDef cycleDef) {
+    private boolean executionIsComplete(Execution execution, CycleDef cycleDef) {
         final Map<String, List<PlatformRule>> platformsRules = cycleDef.getPlatformsRules();
         return platformsRules.entrySet()
                 .stream()
@@ -383,23 +385,16 @@ public class ExecutionFilesProcessorService {
                                 .map(rule -> Pair.of(
                                         execution.getCountryDeployments().stream()
                                                 .anyMatch(
-                                                        cd -> cd.getCountry().getCode().toLowerCase().equals(rule.getCountry().toLowerCase()) &
-                                                                cd.getPlatform().toLowerCase().equals(entry.getKey().toLowerCase())
-                                                ),
+                                                        cd -> cd.getCountry().getCode().equalsIgnoreCase(rule.getCountry()) &&
+                                                                cd.getPlatform().equalsIgnoreCase(entry.getKey())),
                                         Arrays.stream(getTypeCodes(rule.getTestTypes()))
                                                 .map(type -> execution.getRuns().stream()
-                                                        .anyMatch(r ->
-                                                                r.getCountry().getCode().toLowerCase().equals(rule.getCountry().toLowerCase()) &
-                                                                        r.getType().getCode().toLowerCase().equals(type.toLowerCase()) &
-                                                                        r.getPlatform().toLowerCase().equals(entry.getKey().toLowerCase())
-                                                        )
-                                                )
-                                        )
-                                )
+                                                        .anyMatch(r -> r.getCountry().getCode().equalsIgnoreCase(rule.getCountry()) &&
+                                                                r.getType().getCode().equalsIgnoreCase(type) &&
+                                                                r.getPlatform().equalsIgnoreCase(entry.getKey())))))
                                 .map(pair -> Pair.of(pair.getFirst(), pair.getSecond().allMatch(b -> b)))
-                                .map(pair -> pair.getFirst() & pair.getSecond())
-                                .allMatch(b -> b)
-                ))
+                                .map(pair -> pair.getFirst() && pair.getSecond())
+                                .allMatch(b -> b)))
                 .map(Pair::getSecond)
                 .allMatch(b -> b);
     }
@@ -478,7 +473,7 @@ public class ExecutionFilesProcessorService {
     private Optional<Type> getTypeFromCodeAndTypes(String typeCode, List<Type> types) {
         return types.stream()
                 .filter(type -> StringUtils.isNotBlank(type.getCode()))
-                .filter(type -> typeCode.toLowerCase().equals(type.getCode().toLowerCase()))
+                .filter(type -> typeCode.equalsIgnoreCase(type.getCode()))
                 .findFirst();
     }
 

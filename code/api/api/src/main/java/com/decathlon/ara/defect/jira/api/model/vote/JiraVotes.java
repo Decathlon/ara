@@ -17,12 +17,21 @@
 
 package com.decathlon.ara.defect.jira.api.model.vote;
 
-import lombok.Data;
-
-@Data
 public class JiraVotes {
 
     private String self;
     private Integer votes;
     private Boolean hasVoted;
+
+    public String getSelf() {
+        return self;
+    }
+
+    public Integer getVotes() {
+        return votes;
+    }
+
+    public Boolean getHasVoted() {
+        return hasVoted;
+    }
 }

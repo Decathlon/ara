@@ -17,22 +17,35 @@
 
 package com.decathlon.ara.service.dto.ignore;
 
-import com.decathlon.ara.service.dto.severity.SeverityDTO;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
+import com.decathlon.ara.service.dto.severity.SeverityDTO;
+
 public class ScenarioIgnoreSeverityDTO {
 
     private final ScenarioIgnoreCountDTO counts = new ScenarioIgnoreCountDTO();
 
     private SeverityDTO severity;
     private List<ScenarioIgnoreFeatureDTO> features;
+
+    public ScenarioIgnoreCountDTO getCounts() {
+        return counts;
+    }
+
+    public SeverityDTO getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(SeverityDTO severity) {
+        this.severity = severity;
+    }
+
+    public List<ScenarioIgnoreFeatureDTO> getFeatures() {
+        return features;
+    }
+
+    public void setFeatures(List<ScenarioIgnoreFeatureDTO> features) {
+        this.features = features;
+    }
 
 }

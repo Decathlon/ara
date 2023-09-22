@@ -17,9 +17,26 @@
 
 package com.decathlon.ara.service;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
-import com.decathlon.ara.domain.*;
+import com.decathlon.ara.domain.ExecutedScenario;
+import com.decathlon.ara.domain.Execution;
+import com.decathlon.ara.domain.Problem;
+import com.decathlon.ara.domain.Run;
+import com.decathlon.ara.domain.Severity;
+import com.decathlon.ara.domain.Team;
 import com.decathlon.ara.domain.projection.ExecutedScenarioWithErrorAndProblemJoin;
 import com.decathlon.ara.repository.ExecutedScenarioRepository;
 import com.decathlon.ara.repository.ExecutionRepository;
@@ -32,36 +49,32 @@ import com.decathlon.ara.service.dto.run.RunDTO;
 import com.decathlon.ara.service.dto.run.RunWithQualitiesDTO;
 import com.decathlon.ara.service.dto.severity.SeverityDTO;
 import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.service.mapper.ExecutionHistoryPointMapper;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.stream.Collectors;
+import com.decathlon.ara.service.mapper.GenericMapper;
 
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ExecutionHistoryService {
 
-    @NonNull
     private final ExecutionRepository executionRepository;
 
-    @NonNull
-    private final ExecutionHistoryPointMapper executionHistoryPointMapper;
+    private final GenericMapper mapper;
 
-    @NonNull
     private final ExecutedScenarioRepository executedScenarioRepository;
 
-    @NonNull
     private final FunctionalityRepository functionalityRepository;
 
-    @NonNull
     private final SeverityService severityService;
+
+    public ExecutionHistoryService(ExecutionRepository executionRepository,
+            GenericMapper mapper,
+            ExecutedScenarioRepository executedScenarioRepository, FunctionalityRepository functionalityRepository,
+            SeverityService severityService) {
+        this.executionRepository = executionRepository;
+        this.mapper = mapper;
+        this.executedScenarioRepository = executedScenarioRepository;
+        this.functionalityRepository = functionalityRepository;
+        this.severityService = severityService;
+    }
 
     /**
      * Given a project, find latest DONE and not DISCARDED execution for all cycles, with previous and next IDs to be
@@ -95,7 +108,7 @@ public class ExecutionHistoryService {
     }
 
     private List<ExecutionHistoryPointDTO> computeExecutionHistoryPointDTOS(long projectId, List<Execution> executions) {
-        final List<ExecutionHistoryPointDTO> dtoList = executionHistoryPointMapper.toDto(executions);
+        final List<ExecutionHistoryPointDTO> dtoList = mapper.mapCollection(executions, ExecutionHistoryPointDTO.class);
 
         Map<Long, Long> functionalityTeamIds = functionalityRepository.getFunctionalityTeamIds(projectId);
 
@@ -105,8 +118,10 @@ public class ExecutionHistoryService {
                 .collect(Collectors.toSet());
         final List<ExecutedScenarioWithErrorAndProblemJoin> allErrorCounts = executedScenarioRepository.findAllErrorAndProblemCounts(runIds);
 
-        List<Execution> nextExecutions = executionRepository.findNextOf(executions);
-        List<Execution> previousExecutions = executionRepository.findPreviousOf(executions);
+        final List<Long> executionIds = executions.stream().map(Execution::getId).toList();
+
+        List<Execution> nextExecutions = executionRepository.findNextOf(executionIds);
+        List<Execution> previousExecutions = executionRepository.findPreviousOf(executionIds);
 
         for (ExecutionHistoryPointDTO dto : dtoList) {
             fillExecutionHistoryPoint(dto, allErrorCounts, functionalityTeamIds);
@@ -139,7 +154,7 @@ public class ExecutionHistoryService {
     private void fillExecutionHistoryPoint(ExecutionHistoryPointDTO execution, List<ExecutedScenarioWithErrorAndProblemJoin> allErrorCounts, Map<Long, Long> functionalityTeamIds) {
         List<SeverityDTO> activeSeverities = execution.getQualitySeverities().stream()
                 .map(QualitySeverityDTO::getSeverity)
-                .collect(Collectors.toList());
+                .toList();
         String defaultSeverityCode = severityService.getDefaultSeverityCode(activeSeverities);
 
         for (RunWithQualitiesDTO run : execution.getRuns()) {
@@ -165,7 +180,7 @@ public class ExecutionHistoryService {
         final List<ExecutedScenarioWithErrorAndProblemJoin> allExecutedScenarioJoinOfRun = allExecutedScenarioJoin
                 .stream()
                 .filter(e -> run.getId().longValue() == e.getRunId())
-                .collect(Collectors.toList());
+                .toList();
         for (ExecutedScenarioWithErrorAndProblemJoin executedScenarioJoin : allExecutedScenarioJoinOfRun) {
             // Count the scenario for its severity and for global
             addScenario(executedScenarioJoin, run.getQualitiesPerSeverity(), defaultSeverityCode);

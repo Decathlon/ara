@@ -49,7 +49,7 @@
         </div>
 
         <div class="balance" style="text-align: right;">
-          <a href="https://github.com/decathlon/ara/blob/master/doc/user/functionalities/CreateAndMoveFunctionalities.adoc"
+          <a href="https://github.com/Decathlon/ara/blob/main/doc/usage/functionality/CreateAndMoveFunctionalities.adoc"
              rel="noopener" target="_blank" id="helpLink">
             How to create &amp; move functionalities
             <Icon type="md-help-circle" size="16" style="padding: 0; vertical-align: -3px;"/>
@@ -226,9 +226,11 @@
             v-on:edit="startEditing"
             v-on:duplicate="startDuplicating"
             v-on:move="startMoving"
+            v-on:moveSelection="startMovingSelection"
             v-on:completeMove="completeMove"
             v-on:create="create"
             v-on:delete="deleteNode"
+            v-on:deleteSelection="deleteSelection"
             v-on:showCoverage="showCoverage"/>
         </template>
       </virtual-scroller>

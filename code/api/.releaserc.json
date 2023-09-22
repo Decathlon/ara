@@ -1,0 +1,20 @@
+{
+    "branches": [
+        {"name": "main"}
+    ],
+    "plugins": [
+        "@semantic-release/commit-analyzer",
+        "@semantic-release/release-notes-generator",
+        ["@semantic-release/exec", {
+            "verifyConditionsCmd": "git pull",
+            "prepareCmd": "make update-version VERSION=${nextRelease.version}"
+        }],
+        ["@semantic-release/git", {
+            "assets": ["**/pom.xml"],
+            "message": "chore(release): ara-api ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        }]
+    ],
+    "extends": [
+        "semantic-release-monorepo"
+    ]
+}

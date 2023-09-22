@@ -17,19 +17,12 @@
 
 package com.decathlon.ara.web.rest;
 
+import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 
-import com.decathlon.ara.Entities;
-import com.decathlon.ara.service.ProjectService;
-import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.web.rest.util.HeaderUtil;
-import com.decathlon.ara.web.rest.util.ResponseUtil;
-import com.decathlon.ara.service.CommunicationService;
-import com.decathlon.ara.service.dto.communication.CommunicationDTO;
 import java.util.List;
+
 import javax.validation.Valid;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,21 +31,29 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import com.decathlon.ara.Entities;
+import com.decathlon.ara.service.CommunicationService;
+import com.decathlon.ara.service.ProjectService;
+import com.decathlon.ara.service.dto.communication.CommunicationDTO;
+import com.decathlon.ara.service.exception.NotFoundException;
+import com.decathlon.ara.web.rest.util.HeaderUtil;
+import com.decathlon.ara.web.rest.util.ResponseUtil;
 
 @RestController
 @RequestMapping(CommunicationResource.PATH)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CommunicationResource {
 
     private static final String NAME = Entities.COMMUNICATION;
     static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
 
-    @NonNull
     private final CommunicationService service;
 
-    @NonNull
     private final ProjectService projectService;
+
+    public CommunicationResource(CommunicationService service, ProjectService projectService) {
+        this.service = service;
+        this.projectService = projectService;
+    }
 
     /**
      * GET all entities.

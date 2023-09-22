@@ -35,17 +35,15 @@ import com.decathlon.ara.repository.ExecutedScenarioRepository;
 import com.decathlon.ara.repository.ExecutionRepository;
 import com.decathlon.ara.repository.FunctionalityRepository;
 import com.decathlon.ara.service.dto.run.ExecutedScenarioHandlingCountsDTO;
+import com.decathlon.ara.service.dto.run.RunDTO;
 import com.decathlon.ara.service.dto.run.RunWithQualitiesDTO;
-import com.decathlon.ara.service.mapper.ExecutionHistoryPointMapper;
+import com.decathlon.ara.util.TestUtil;
 
 @ExtendWith(MockitoExtension.class)
-public class ExecutionHistoryServiceTest {
+class ExecutionHistoryServiceTest {
 
     @Mock
     private ExecutionRepository executionRepository;
-
-    @Mock
-    private ExecutionHistoryPointMapper executionHistoryPointMapper;
 
     @Mock
     private ExecutedScenarioRepository executedScenarioRepository;
@@ -60,11 +58,11 @@ public class ExecutionHistoryServiceTest {
     private ExecutionHistoryService cut;
 
     @Test
-    public void fillQualities_should_fill_qualitiesPerSeverity_and_qualitiesPerTeamAndSeverity() {
+    void fillQualities_should_fill_qualitiesPerSeverity_and_qualitiesPerTeamAndSeverity() {
         // GIVEN
         final Long runId = Long.valueOf(8);
         RunWithQualitiesDTO run = new RunWithQualitiesDTO();
-        run.setId(runId);
+        TestUtil.setField(run, RunDTO.class, "id", runId);
         String defaultSeverityCode = "medium";
         Map<Long, Long> functionalityTeamIds = new HashMap<>();
         functionalityTeamIds.put(Long.valueOf(1), Long.valueOf(11));
@@ -88,10 +86,9 @@ public class ExecutionHistoryServiceTest {
     }
 
     @Test
-    public void addScenario_should_increment_severity_and_global() {
+    void addScenario_should_increment_severity_and_global() {
         // GIVEN
-        ExecutedScenarioWithErrorAndProblemJoin executedScenarioJoin = new ExecutedScenarioWithErrorAndProblemJoin()
-                .withSeverity("medium");
+        ExecutedScenarioWithErrorAndProblemJoin executedScenarioJoin = new ExecutedScenarioWithErrorAndProblemJoin(0, 0, "medium", null, 0, 0);
         Map<String, ExecutedScenarioHandlingCountsDTO> qualitiesPerSeverity = new HashMap<>();
 
         // WHEN
@@ -106,10 +103,9 @@ public class ExecutionHistoryServiceTest {
     }
 
     @Test
-    public void addScenario_should_increment_severity_and_global_for_default_severity() {
+    void addScenario_should_increment_severity_and_global_for_default_severity() {
         // GIVEN
-        ExecutedScenarioWithErrorAndProblemJoin executedScenarioJoin = new ExecutedScenarioWithErrorAndProblemJoin()
-                .withSeverity("");
+        ExecutedScenarioWithErrorAndProblemJoin executedScenarioJoin = new ExecutedScenarioWithErrorAndProblemJoin(0, 0, "", null, 0, 0);
         Map<String, ExecutedScenarioHandlingCountsDTO> qualitiesPerSeverity = new HashMap<>();
 
         // WHEN
@@ -124,7 +120,7 @@ public class ExecutionHistoryServiceTest {
     }
 
     @Test
-    public void addScenarioForSeverity_should_increment_total_and_passed_for_succeed_scenario() {
+    void addScenarioForSeverity_should_increment_total_and_passed_for_succeed_scenario() {
         // GIVEN
         ExecutedScenarioWithErrorAndProblemJoin executedScenarioJoin = new ExecutedScenarioWithErrorAndProblemJoin();
         Map<String, ExecutedScenarioHandlingCountsDTO> qualitiesPerSeverity = new HashMap<>();
@@ -139,10 +135,9 @@ public class ExecutionHistoryServiceTest {
     }
 
     @Test
-    public void addScenarioForSeverity_should_increment_total_and_unhandled_for_failed_scenario_without_problem() {
+    void addScenarioForSeverity_should_increment_total_and_unhandled_for_failed_scenario_without_problem() {
         // GIVEN
-        ExecutedScenarioWithErrorAndProblemJoin executedScenarioJoin = new ExecutedScenarioWithErrorAndProblemJoin()
-                .withUnhandledCount(1);
+        ExecutedScenarioWithErrorAndProblemJoin executedScenarioJoin = new ExecutedScenarioWithErrorAndProblemJoin(0, 0, null, null, 1, 0);
         Map<String, ExecutedScenarioHandlingCountsDTO> qualitiesPerSeverity = new HashMap<>();
 
         // WHEN
@@ -155,11 +150,9 @@ public class ExecutionHistoryServiceTest {
     }
 
     @Test
-    public void addScenarioForSeverity_should_increment_total_and_handled_for_failed_scenario_with_problem() {
+    void addScenarioForSeverity_should_increment_total_and_handled_for_failed_scenario_with_problem() {
         // GIVEN
-        ExecutedScenarioWithErrorAndProblemJoin executedScenarioJoin = new ExecutedScenarioWithErrorAndProblemJoin()
-                .withUnhandledCount(2)
-                .withHandledCount(1);
+        ExecutedScenarioWithErrorAndProblemJoin executedScenarioJoin = new ExecutedScenarioWithErrorAndProblemJoin(0, 0, null, null, 2, 1);
         Map<String, ExecutedScenarioHandlingCountsDTO> qualitiesPerSeverity = new HashMap<>();
 
         // WHEN

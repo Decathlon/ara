@@ -5,25 +5,80 @@ on:
     branches:
       - main
     paths:
-      - 'charts/**'
-
+      - 'charts/stable/**'
+  workflow_dispatch:
+    inputs:
+      copy:
+        description: 'Copy candidate before running the release pipeline'     
+        required: true
+        default: 'true'
 jobs:
+  copy-candidate:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.copy == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+      - name: Copy candidate to stable version
+        working-directory: code
+        run: make copy-candidate-to-stable
+      - uses: EndBug/add-and-commit@v7
+        with:
+          add: 'charts/stable'
+          branch_mode: throw
+          message: 'chore(charts): candidate to stable [skip ci]'
+          pathspec_error_handling: exitImmediately
+          pull: '--rebase --autostash'
+          default_author: github_actions
   release:
+    needs: copy-candidate
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Configure Git
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          ref: ${{ github.ref }}
       - name: Install Helm
         uses: azure/setup-helm@v1
         with:
           version: v3.4.0
+      - id: version
+        name: Get version
+        working-directory: code
+        run: |
+          FROM_TAG=$(git describe --tags --abbrev=0  --match "ara-stable-v*")
+          CHART_VERSION=$(make -s get-chart-version TARGET_CHART=stable)
+          echo ::set-output name=stable::${CHART_VERSION}
+          echo ::set-output name=fromTag::${FROM_TAG}
+      - uses: octokit/request-action@v2.x
+        id: generate_changelog
+        with:
+          route: POST /repos/{owner}/{repo}/releases/generate-notes
+          owner: Decathlon
+          repo: ara
+          tag_name: ara-stable-v${{ steps.version.outputs.stable }}
+          previous_tag_name: ${{ steps.version.outputs.fromTag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Changelog file
+        working-directory: charts/stable
+        run: |
+          cat <<EOF >CHANGELOG.md
+          ${{ fromJson(steps.generate_changelog.outputs.data).body }}
+          EOF
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.2.1
+        uses: Thomgrus/chart-releaser-action@feat/manage-chart-by-chart-diff
+        with:
+          config: .github/cr-config.yaml
+          version: v1.3.0
+          charts_dir: charts/stable
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

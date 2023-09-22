@@ -17,39 +17,38 @@
 
 package com.decathlon.ara.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
-import com.decathlon.ara.domain.QSeverity;
+import com.decathlon.ara.domain.Severity;
+import com.decathlon.ara.repository.SeverityRepository;
 import com.decathlon.ara.service.dto.severity.SeverityDTO;
 import com.decathlon.ara.service.dto.support.Upsert;
 import com.decathlon.ara.service.dto.support.UpsertResultDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
-import com.decathlon.ara.service.mapper.SeverityMapper;
-import com.decathlon.ara.service.util.ObjectUtil;
-import com.decathlon.ara.domain.Severity;
-import com.decathlon.ara.repository.SeverityRepository;
-import java.util.List;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.decathlon.ara.service.mapper.GenericMapper;
 
 /**
  * Service for managing Severity.
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SeverityService {
 
-    @NonNull
     private final SeverityRepository repository;
 
-    @NonNull
-    private final SeverityMapper mapper;
+    private final GenericMapper mapper;
+
+    public SeverityService(SeverityRepository repository, GenericMapper mapper) {
+        this.repository = repository;
+        this.mapper = mapper;
+    }
 
     /**
      * @param projectId the ID of the project in which to work
@@ -58,7 +57,7 @@ public class SeverityService {
     public List<SeverityDTO> getSeveritiesWithAll(long projectId) {
         final List<Severity> severities = repository.findAllByProjectIdOrderByPosition(projectId);
         severities.add(Severity.ALL);
-        return mapper.toDto(severities);
+        return mapper.mapCollection(severities, SeverityDTO.class);
     }
 
     /**
@@ -84,18 +83,16 @@ public class SeverityService {
      * @throws NotUniqueException when the given code, name, short name or initials is already used by another entity
      */
     public SeverityDTO create(long projectId, SeverityDTO dtoToCreate) throws NotUniqueException {
-        ObjectUtil.trimStringValues(dtoToCreate);
-
         Severity existingEntityWithSameCode = repository.findByProjectIdAndCode(projectId, dtoToCreate.getCode());
         if (existingEntityWithSameCode != null) {
-            throw new NotUniqueException(Messages.NOT_UNIQUE_SEVERITY_CODE, Entities.SEVERITY, QSeverity.severity.code.getMetadata().getName(), existingEntityWithSameCode.getCode());
+            throw new NotUniqueException(Messages.NOT_UNIQUE_SEVERITY_CODE, Entities.SEVERITY, "code", existingEntityWithSameCode.getCode());
         }
 
         validateBusinessRules(projectId, dtoToCreate);
 
-        final Severity entity = mapper.toEntity(dtoToCreate);
+        final Severity entity = mapper.map(dtoToCreate, Severity.class);
         entity.setProjectId(projectId);
-        return mapper.toDto(repository.save(entity));
+        return mapper.map(repository.save(entity), SeverityDTO.class);
     }
 
     /**
@@ -107,16 +104,15 @@ public class SeverityService {
      * @throws NotUniqueException when the given name, short name or initials is already used
      */
     public UpsertResultDTO<SeverityDTO> createOrUpdate(long projectId, SeverityDTO dtoToCreateOrUpdate) throws NotUniqueException {
-        ObjectUtil.trimStringValues(dtoToCreateOrUpdate);
         validateBusinessRules(projectId, dtoToCreateOrUpdate);
 
         Severity dataBaseEntity = repository.findByProjectIdAndCode(projectId, dtoToCreateOrUpdate.getCode());
         final Upsert operation = (dataBaseEntity == null ? Upsert.INSERT : Upsert.UPDATE);
 
-        final Severity entity = mapper.toEntity(dtoToCreateOrUpdate);
+        final Severity entity = mapper.map(dtoToCreateOrUpdate, Severity.class);
         entity.setId(dataBaseEntity == null ? null : dataBaseEntity.getId());
         entity.setProjectId(projectId);
-        final SeverityDTO dto = mapper.toDto(repository.save(entity));
+        final SeverityDTO dto = mapper.map(repository.save(entity), SeverityDTO.class);
         return new UpsertResultDTO<>(dto, operation);
     }
 
@@ -128,7 +124,7 @@ public class SeverityService {
      */
     @Transactional(readOnly = true)
     public List<SeverityDTO> findAll(long projectId) {
-        return mapper.toDto(repository.findAllByProjectIdOrderByPosition(projectId));
+        return mapper.mapCollection(repository.findAllByProjectIdOrderByPosition(projectId), SeverityDTO.class);
     }
 
     /**
@@ -158,28 +154,28 @@ public class SeverityService {
     private void validateUniqueName(long projectId, SeverityDTO dto) throws NotUniqueException {
         Severity databaseEntityWithSameName = repository.findByProjectIdAndName(projectId, dto.getName());
         if (databaseEntityWithSameName != null && !databaseEntityWithSameName.getCode().equals(dto.getCode())) {
-            throw new NotUniqueException(Messages.NOT_UNIQUE_SEVERITY_NAME, Entities.SEVERITY, QSeverity.severity.name.getMetadata().getName(), databaseEntityWithSameName.getCode());
+            throw new NotUniqueException(Messages.NOT_UNIQUE_SEVERITY_NAME, Entities.SEVERITY, "name", databaseEntityWithSameName.getCode());
         }
     }
 
     private void validateUniqueShortName(long projectId, SeverityDTO dto) throws NotUniqueException {
         Severity entityWithSameShortName = repository.findByProjectIdAndShortName(projectId, dto.getShortName());
         if (entityWithSameShortName != null && !entityWithSameShortName.getCode().equals(dto.getCode())) {
-            throw new NotUniqueException(Messages.NOT_UNIQUE_SEVERITY_SHORT_NAME, Entities.SEVERITY, QSeverity.severity.shortName.getMetadata().getName(), entityWithSameShortName.getCode());
+            throw new NotUniqueException(Messages.NOT_UNIQUE_SEVERITY_SHORT_NAME, Entities.SEVERITY, "shortName", entityWithSameShortName.getCode());
         }
     }
 
     private void validateUniqueInitials(long projectId, SeverityDTO dto) throws NotUniqueException {
         Severity entityWithSameInitials = repository.findByProjectIdAndInitials(projectId, dto.getInitials());
         if (entityWithSameInitials != null && !entityWithSameInitials.getCode().equals(dto.getCode())) {
-            throw new NotUniqueException(Messages.NOT_UNIQUE_SEVERITY_INITIALS, Entities.SEVERITY, QSeverity.severity.initials.getMetadata().getName(), entityWithSameInitials.getCode());
+            throw new NotUniqueException(Messages.NOT_UNIQUE_SEVERITY_INITIALS, Entities.SEVERITY, "initials", entityWithSameInitials.getCode());
         }
     }
 
     private void validateUniquePosition(long projectId, SeverityDTO dto) throws NotUniqueException {
         Severity entityDataBaseWithSamePosition = repository.findByProjectIdAndPosition(projectId, dto.getPosition().intValue());
         if (entityDataBaseWithSamePosition != null && !entityDataBaseWithSamePosition.getCode().equals(dto.getCode())) {
-            throw new NotUniqueException(Messages.NOT_UNIQUE_SEVERITY_POSITION, Entities.SEVERITY, QSeverity.severity.position.getMetadata().getName(), entityDataBaseWithSamePosition.getCode());
+            throw new NotUniqueException(Messages.NOT_UNIQUE_SEVERITY_POSITION, Entities.SEVERITY, "position", entityDataBaseWithSamePosition.getCode());
         }
     }
 
@@ -187,7 +183,7 @@ public class SeverityService {
         if (dto.isDefaultOnMissing()) {
             Severity entityDataBaseWithDefaultOnMissing = repository.findByProjectIdAndDefaultOnMissing(projectId, true);
             if (entityDataBaseWithDefaultOnMissing != null && !entityDataBaseWithDefaultOnMissing.getCode().equals(dto.getCode())) {
-                throw new NotUniqueException(Messages.NOT_UNIQUE_SEVERITY_DEFAULT_ON_MISSION, Entities.SEVERITY, QSeverity.severity.defaultOnMissing.getMetadata().getName(), entityDataBaseWithDefaultOnMissing.getCode());
+                throw new NotUniqueException(Messages.NOT_UNIQUE_SEVERITY_DEFAULT_ON_MISSION, Entities.SEVERITY, "defaultOnMissing", entityDataBaseWithDefaultOnMissing.getCode());
             }
         }
     }

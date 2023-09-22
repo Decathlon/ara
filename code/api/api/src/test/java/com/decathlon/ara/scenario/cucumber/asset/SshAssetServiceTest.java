@@ -17,15 +17,9 @@
 
 package com.decathlon.ara.scenario.cucumber.asset;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
+import com.decathlon.ara.configuration.AraConfiguration;
+import com.decathlon.ara.scenario.cucumber.asset.ssh.SshClientHelper;
+import com.decathlon.ara.scenario.cucumber.asset.ssh.SshException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,12 +27,13 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.decathlon.ara.configuration.AraConfiguration;
-import com.decathlon.ara.scenario.cucumber.asset.ssh.SshClientHelper;
-import com.decathlon.ara.scenario.cucumber.asset.ssh.SshException;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class SshAssetServiceTest {
+class SshAssetServiceTest {
 
     @Mock
     private AraConfiguration araConfiguration;
@@ -54,7 +49,7 @@ public class SshAssetServiceTest {
     private SshAssetService cut;
 
     @Test
-    public void saveScreenshot_should_upload_file_and_return_correct_url() throws SshException {
+    void saveScreenshot_should_upload_file_and_return_correct_url() throws SshException {
         // GIVEN
         doReturn(sshClientHelper).when(cut).connect();
         when(araConfiguration.getSshRemoteHomeFolder()).thenReturn("/home");
@@ -72,7 +67,7 @@ public class SshAssetServiceTest {
     }
 
     @Test
-    public void saveScreenshot_should_create_directories_only_once() throws SshException {
+    void saveScreenshot_should_create_directories_only_once() throws SshException {
         // GIVEN
         doReturn(sshClientHelper).when(cut).connect();
         when(araConfiguration.getSshRemoteHomeFolder()).thenReturn("/home");
@@ -88,7 +83,7 @@ public class SshAssetServiceTest {
     }
 
     @Test
-    public void saveScreenshot_should_not_fail_but_return_null_on_upload_failure() throws SshException {
+    void saveScreenshot_should_not_fail_but_return_null_on_upload_failure() throws SshException {
         // GIVEN
         doThrow(SshException.class).when(cut).connect();
         byte[] screenshot = new byte[] { 'a', 'n', 'y' };
@@ -101,7 +96,7 @@ public class SshAssetServiceTest {
     }
 
     @Test
-    public void saveHttpLogs_should_upload_file_and_return_correct_url() throws SshException {
+    void saveHttpLogs_should_upload_file_and_return_correct_url() throws SshException {
         // GIVEN
         doReturn(sshClientHelper).when(cut).connect();
         when(araConfiguration.getSshRemoteHomeFolder()).thenReturn("/home");
@@ -119,7 +114,7 @@ public class SshAssetServiceTest {
     }
 
     @Test
-    public void saveHttpLogs_should_create_directories_only_once() throws SshException {
+    void saveHttpLogs_should_create_directories_only_once() throws SshException {
         // GIVEN
         doReturn(sshClientHelper).when(cut).connect();
         when(araConfiguration.getSshRemoteHomeFolder()).thenReturn("/home");
@@ -135,7 +130,7 @@ public class SshAssetServiceTest {
     }
 
     @Test
-    public void saveHttpLogs_should_not_fail_but_return_null_on_upload_failure() throws SshException {
+    void saveHttpLogs_should_not_fail_but_return_null_on_upload_failure() throws SshException {
         // GIVEN
         doThrow(SshException.class).when(cut).connect();
         String html = "any";

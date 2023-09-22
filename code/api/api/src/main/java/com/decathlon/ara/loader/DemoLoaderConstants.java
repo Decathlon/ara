@@ -17,10 +17,10 @@
 
 package com.decathlon.ara.loader;
 
-import lombok.experimental.UtilityClass;
-
-@UtilityClass
 public class DemoLoaderConstants {
+
+    private DemoLoaderConstants() {
+    }
 
     // Quite long code (not just "demo") and name, to not clash with a user-defined project, if they need a demo project
     public static final String PROJECT_CODE_DEMO = "the-demo-project";

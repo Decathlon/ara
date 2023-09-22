@@ -17,21 +17,13 @@
 
 package com.decathlon.ara.service.dto.cycledefinition;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-
 import static com.decathlon.ara.service.support.DtoConstants.CODE_NAME_MESSAGE;
 import static com.decathlon.ara.service.support.DtoConstants.CODE_PATTERN;
 
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
 public class CycleDefinitionDTO {
 
     private Long id;
@@ -47,5 +39,38 @@ public class CycleDefinitionDTO {
 
     @NotNull(message = "The branch position is required.")
     private Integer branchPosition;
+
+    public CycleDefinitionDTO() {
+    }
+
+    public CycleDefinitionDTO(Long id,
+            String branch,
+            String name,
+            Integer branchPosition) {
+        this.id = id;
+        this.branch = branch;
+        this.name = name;
+        this.branchPosition = branchPosition;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getBranch() {
+        return branch;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Integer getBranchPosition() {
+        return branchPosition;
+    }
 
 }

@@ -17,18 +17,13 @@
 
 package com.decathlon.ara.service.dto.problem;
 
-import com.decathlon.ara.service.dto.stability.CycleStabilityDTO;
-import com.decathlon.ara.service.dto.country.CountryDTO;
-import com.decathlon.ara.service.dto.type.TypeWithSourceDTO;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+import com.decathlon.ara.service.dto.country.CountryDTO;
+import com.decathlon.ara.service.dto.stability.CycleStabilityDTO;
+import com.decathlon.ara.service.dto.type.TypeWithSourceDTO;
+
 public class ProblemAggregateDTO {
 
     private long patternCount;
@@ -57,5 +52,73 @@ public class ProblemAggregateDTO {
     private String firstPlatform;
 
     private List<CycleStabilityDTO> cycleStabilities = new ArrayList<>();
+
+    public long getPatternCount() {
+        return patternCount;
+    }
+
+    public long getErrorCount() {
+        return errorCount;
+    }
+
+    public long getScenarioCount() {
+        return scenarioCount;
+    }
+
+    public String getFirstScenarioName() {
+        return firstScenarioName;
+    }
+
+    public long getBranchCount() {
+        return branchCount;
+    }
+
+    public String getFirstBranch() {
+        return firstBranch;
+    }
+
+    public long getReleaseCount() {
+        return releaseCount;
+    }
+
+    public String getFirstRelease() {
+        return firstRelease;
+    }
+
+    public long getVersionCount() {
+        return versionCount;
+    }
+
+    public String getFirstVersion() {
+        return firstVersion;
+    }
+
+    public long getCountryCount() {
+        return countryCount;
+    }
+
+    public CountryDTO getFirstCountry() {
+        return firstCountry;
+    }
+
+    public long getTypeCount() {
+        return typeCount;
+    }
+
+    public TypeWithSourceDTO getFirstType() {
+        return firstType;
+    }
+
+    public long getPlatformCount() {
+        return platformCount;
+    }
+
+    public String getFirstPlatform() {
+        return firstPlatform;
+    }
+
+    public List<CycleStabilityDTO> getCycleStabilities() {
+        return cycleStabilities;
+    }
 
 }

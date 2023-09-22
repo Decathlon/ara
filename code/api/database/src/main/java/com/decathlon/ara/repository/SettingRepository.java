@@ -17,17 +17,27 @@
 
 package com.decathlon.ara.repository;
 
-import com.decathlon.ara.repository.custom.SettingRepositoryCustom;
-import com.decathlon.ara.domain.Setting;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import com.decathlon.ara.domain.Setting;
 
 /**
  * Spring Data JPA repository for the Setting entity.
  */
 @Repository
-public interface SettingRepository extends JpaRepository<Setting, Long>, SettingRepositoryCustom {
+public interface SettingRepository extends JpaRepository<Setting, Long> {
 
     Setting findByProjectIdAndCode(long projectId, String code);
+
+    List<Setting> findByProjectId(long projectId);
+
+    default Map<String, String> getProjectSettings(long projectId) {
+        return findByProjectId(projectId).stream().collect(Collectors.toMap(Setting::getCode, setting -> setting.getValue() == null ? "" : setting.getValue()));
+    }
 
 }

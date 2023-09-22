@@ -18,17 +18,7 @@
 package com.decathlon.ara.domain.projection;
 
 import com.decathlon.ara.domain.Source;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
-@With
 public class IgnoredScenario {
 
     private Source source;
@@ -36,5 +26,36 @@ public class IgnoredScenario {
     private String featureName;
     private String severity;
     private String name;
+
+    public IgnoredScenario() {
+    }
+
+    public IgnoredScenario(Source source, String featureFile, String featureName, String severity, String name) {
+        this.source = source;
+        this.featureFile = featureFile;
+        this.featureName = featureName;
+        this.severity = severity;
+        this.name = name;
+    }
+
+    public Source getSource() {
+        return source;
+    }
+
+    public String getFeatureFile() {
+        return featureFile;
+    }
+
+    public String getFeatureName() {
+        return featureName;
+    }
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public String getName() {
+        return name;
+    }
 
 }

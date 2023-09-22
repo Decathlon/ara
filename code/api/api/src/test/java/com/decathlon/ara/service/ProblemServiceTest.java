@@ -21,38 +21,39 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
 
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
-import com.decathlon.ara.ci.service.DateService;
 import com.decathlon.ara.ci.util.FetchException;
 import com.decathlon.ara.defect.DefectAdapter;
 import com.decathlon.ara.defect.bean.Defect;
-import com.decathlon.ara.domain.Error;
 import com.decathlon.ara.domain.Problem;
 import com.decathlon.ara.domain.ProblemPattern;
 import com.decathlon.ara.domain.enumeration.DefectExistence;
 import com.decathlon.ara.domain.enumeration.ProblemStatus;
 import com.decathlon.ara.repository.CycleDefinitionRepository;
-import com.decathlon.ara.repository.ErrorRepository;
 import com.decathlon.ara.repository.ExecutionRepository;
 import com.decathlon.ara.repository.ProblemPatternRepository;
 import com.decathlon.ara.repository.ProblemRepository;
@@ -63,25 +64,17 @@ import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExe
 import com.decathlon.ara.service.dto.problem.ProblemDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.service.mapper.ErrorWithExecutedScenarioAndRunAndExecutionMapper;
-import com.decathlon.ara.service.mapper.ProblemAggregateMapper;
-import com.decathlon.ara.service.mapper.ProblemFilterMapper;
-import com.decathlon.ara.service.mapper.ProblemMapper;
-import com.decathlon.ara.service.mapper.ProblemPatternMapper;
-import com.decathlon.ara.service.mapper.ProblemWithAggregateMapper;
-import com.decathlon.ara.service.mapper.ProblemWithPatternsAndAggregateMapper;
-import com.decathlon.ara.service.mapper.ProblemWithPatternsMapper;
-import com.decathlon.ara.service.mapper.RootCauseMapper;
-import com.decathlon.ara.service.mapper.TeamMapper;
+import com.decathlon.ara.service.mapper.GenericMapper;
+import com.decathlon.ara.service.util.DateService;
 
 @ExtendWith(MockitoExtension.class)
-public class ProblemServiceTest {
+class ProblemServiceTest {
 
     @Mock
     private ProblemRepository problemRepository;
 
     @Mock
-    private ErrorRepository errorRepository;
+    private ErrorService errorService;
 
     @Mock
     private ProblemPatternRepository problemPatternRepository;
@@ -117,34 +110,7 @@ public class ProblemServiceTest {
     private DefectAdapter defectAdapter;
 
     @Mock
-    private ProblemMapper problemMapper;
-
-    @Mock
-    private ProblemFilterMapper problemFilterMapper;
-
-    @Mock
-    private ProblemWithAggregateMapper problemWithAggregateMapper;
-
-    @Mock
-    private ProblemWithPatternsMapper problemWithPatternsMapper;
-
-    @Mock
-    private ProblemPatternMapper problemPatternMapper;
-
-    @Mock
-    private ErrorWithExecutedScenarioAndRunAndExecutionMapper errorWithExecutedScenarioAndRunAndExecutionMapper;
-
-    @Mock
-    private ProblemAggregateMapper problemAggregateMapper;
-
-    @Mock
-    private TeamMapper teamMapper;
-
-    @Mock
-    private RootCauseMapper rootCauseMapper;
-
-    @Mock
-    private ProblemWithPatternsAndAggregateMapper problemWithPatternsAndAggregateMapper;
+    private GenericMapper mapper;
 
     @Mock
     private JpaCacheManager jpaCacheManager;
@@ -156,16 +122,12 @@ public class ProblemServiceTest {
     private ProblemService cut;
 
     @Test
-    public void handleDefectIdChange_should_do_nothing_if_defect_did_not_change() throws BadRequestException {
+    void handleDefectIdChange_should_do_nothing_if_defect_did_not_change() throws BadRequestException {
         // GIVEN
         long aProjectId = 42;
         Date oldDate = new Date();
         String oldDefectId = "old";
-        ProblemDTO problemDto = new ProblemDTO()
-                .withDefectId(oldDefectId)
-                .withDefectExistence(DefectExistence.EXISTS)
-                .withStatus(ProblemStatus.CLOSED)
-                .withClosingDateTime(oldDate);
+        ProblemDTO problemDto = problemDTO(oldDefectId, DefectExistence.EXISTS, ProblemStatus.CLOSED, oldDate);
 
         // WHEN
         cut.handleDefectIdChange(aProjectId, problemDto, oldDefectId);
@@ -178,16 +140,13 @@ public class ProblemServiceTest {
     }
 
     @Test
-    public void handleDefectIdChange_should_remove_defect_traces_when_unsetting_it() throws BadRequestException {
+    void handleDefectIdChange_should_remove_defect_traces_when_unsetting_it() throws BadRequestException {
         // GIVEN
         long aProjectId = 42;
         Date oldDate = new Date();
         String oldDefectId = "old";
-        ProblemDTO problemDto = new ProblemDTO()
-                .withDefectId("")
-                .withDefectExistence(DefectExistence.EXISTS)
-                .withStatus(ProblemStatus.CLOSED)
-                .withClosingDateTime(oldDate);
+        ProblemDTO problemDto = problemDTO("", DefectExistence.EXISTS, ProblemStatus.CLOSED, oldDate);
+        ;
         when(defectService.getAdapter(aProjectId)).thenReturn(Optional.of(defectAdapter));
 
         // WHEN
@@ -201,16 +160,12 @@ public class ProblemServiceTest {
     }
 
     @Test
-    public void handleDefectIdChange_should_throw_BadRequestException_on_bad_defect_id_format() {
+    void handleDefectIdChange_should_throw_BadRequestException_on_bad_defect_id_format() {
         // GIVEN
         long aProjectId = 42;
         Date oldDate = new Date();
         String oldDefectId = "old";
-        ProblemDTO problemDto = new ProblemDTO()
-                .withDefectId("bad")
-                .withDefectExistence(DefectExistence.EXISTS)
-                .withStatus(ProblemStatus.CLOSED)
-                .withClosingDateTime(oldDate);
+        ProblemDTO problemDto = problemDTO("bad", DefectExistence.EXISTS, ProblemStatus.CLOSED, oldDate);
         when(defectService.getAdapter(aProjectId)).thenReturn(Optional.of(defectAdapter));
         when(Boolean.valueOf(defectAdapter.isValidId("bad"))).thenReturn(Boolean.FALSE);
         when(defectAdapter.getIdFormatHint(aProjectId)).thenReturn("HINT");
@@ -228,16 +183,12 @@ public class ProblemServiceTest {
     }
 
     @Test
-    public void handleDefectIdChange_should_set_existence_UNKNOWN_and_status_OPEN_when_defect_tracking_system_do_not_respond() throws BadRequestException, FetchException {
+    void handleDefectIdChange_should_set_existence_UNKNOWN_and_status_OPEN_when_defect_tracking_system_do_not_respond() throws BadRequestException, FetchException {
         // GIVEN
         long aProjectId = 42;
         Date oldDate = new Date();
         String oldDefectId = "old";
-        ProblemDTO problemDto = new ProblemDTO()
-                .withDefectId("new")
-                .withDefectExistence(DefectExistence.EXISTS)
-                .withStatus(ProblemStatus.CLOSED)
-                .withClosingDateTime(oldDate);
+        ProblemDTO problemDto = problemDTO("new", DefectExistence.EXISTS, ProblemStatus.CLOSED, oldDate);
         when(defectService.getAdapter(aProjectId)).thenReturn(Optional.of(defectAdapter));
         when(Boolean.valueOf(defectAdapter.isValidId("new"))).thenReturn(Boolean.TRUE);
         when(defectAdapter.getStatuses(aProjectId, Collections.singletonList("new")))
@@ -254,16 +205,12 @@ public class ProblemServiceTest {
     }
 
     @Test
-    public void handleDefectIdChange_should_throw_NotFoundException_on_unknown_defect_id() throws BadRequestException, FetchException {
+    void handleDefectIdChange_should_throw_NotFoundException_on_unknown_defect_id() throws BadRequestException, FetchException {
         // GIVEN
         long aProjectId = 42;
         Date oldDate = new Date();
         String oldDefectId = "old";
-        ProblemDTO problemDto = new ProblemDTO()
-                .withDefectId("unknown")
-                .withDefectExistence(DefectExistence.EXISTS)
-                .withStatus(ProblemStatus.CLOSED)
-                .withClosingDateTime(oldDate);
+        ProblemDTO problemDto = problemDTO("unknown", DefectExistence.EXISTS, ProblemStatus.CLOSED, oldDate);
         when(defectService.getAdapter(aProjectId)).thenReturn(Optional.of(defectAdapter));
         when(Boolean.valueOf(defectAdapter.isValidId("unknown"))).thenReturn(Boolean.TRUE);
         when(defectAdapter.getStatuses(aProjectId, Collections.singletonList("unknown"))).thenReturn(Collections.emptyList());
@@ -281,16 +228,12 @@ public class ProblemServiceTest {
     }
 
     @Test
-    public void handleDefectIdChange_should_set_EXISTS_and_status_OPEN_when_defect_is_open_in_tracking_system() throws BadRequestException, FetchException {
+    void handleDefectIdChange_should_set_EXISTS_and_status_OPEN_when_defect_is_open_in_tracking_system() throws BadRequestException, FetchException {
         // GIVEN
         long aProjectId = 42;
         Date oldDate = new Date();
         String oldDefectId = "old";
-        ProblemDTO problemDto = new ProblemDTO()
-                .withDefectId("new")
-                .withDefectExistence(DefectExistence.NONEXISTENT)
-                .withStatus(ProblemStatus.CLOSED)
-                .withClosingDateTime(oldDate);
+        ProblemDTO problemDto = problemDTO("new", DefectExistence.NONEXISTENT, ProblemStatus.CLOSED, oldDate);
         when(defectService.getAdapter(aProjectId)).thenReturn(Optional.of(defectAdapter));
         when(Boolean.valueOf(defectAdapter.isValidId("new"))).thenReturn(Boolean.TRUE);
         when(defectAdapter.getStatuses(aProjectId, Collections.singletonList("new"))).thenReturn(Collections.singletonList(
@@ -307,16 +250,12 @@ public class ProblemServiceTest {
     }
 
     @Test
-    public void handleDefectIdChange_should_set_EXISTS_and_status_CLOSED_when_defect_is_closed_in_tracking_system() throws BadRequestException, FetchException {
+    void handleDefectIdChange_should_set_EXISTS_and_status_CLOSED_when_defect_is_closed_in_tracking_system() throws BadRequestException, FetchException {
         // GIVEN
         long aProjectId = 42;
         Date newDate = new Date();
         String oldDefectId = "old";
-        ProblemDTO problemDto = new ProblemDTO()
-                .withDefectId("new")
-                .withDefectExistence(null)
-                .withStatus(ProblemStatus.OPEN)
-                .withClosingDateTime(null);
+        ProblemDTO problemDto = problemDTO("new", null, ProblemStatus.OPEN, null);
         when(defectService.getAdapter(aProjectId)).thenReturn(Optional.of(defectAdapter));
         when(Boolean.valueOf(defectAdapter.isValidId("new"))).thenReturn(Boolean.TRUE);
         when(defectAdapter.getStatuses(aProjectId, Collections.singletonList("new"))).thenReturn(Collections.singletonList(
@@ -333,7 +272,7 @@ public class ProblemServiceTest {
     }
 
     @Test
-    public void getProblemErrors_throwsNotFoundException_whenNoProblemFound() {
+    void getProblemErrors_throwsNotFoundException_whenNoProblemFound() {
         // GIVEN
         Pageable pageable = mock(Pageable.class);
 
@@ -348,48 +287,91 @@ public class ProblemServiceTest {
     }
 
     @Test
-    public void getProblemErrors_returnNoErrors_whenNoErrorFound() throws NotFoundException {
+    void getProblemErrors_shouldUseIdDescOrdering_whenNoOrdering() throws NotFoundException {
         // GIVEN
         Problem problem = mock(Problem.class);
-        Pageable pageable = mock(Pageable.class);
+        Pageable pageable = PageRequest.of(0, 1);
 
         ProblemPattern problemPattern1 = mock(ProblemPattern.class);
         ProblemPattern problemPattern2 = mock(ProblemPattern.class);
         ProblemPattern problemPattern3 = mock(ProblemPattern.class);
 
+        List<ProblemPattern> problemPatterns = Arrays.asList(problemPattern1, problemPattern2, problemPattern3);
+
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+
         // WHEN
         when(problemRepository.findByProjectIdAndId(1, 2)).thenReturn(problem);
-        when(problem.getPatterns()).thenReturn(Arrays.asList(problemPattern1, problemPattern2, problemPattern3));
-        when(errorRepository.findDistinctByProblemPatternsInOrderByIdDesc(anyList(), any(Pageable.class))).thenReturn(null);
+        when(problem.getPatterns()).thenReturn(problemPatterns);
+        when(errorService.getErrors(eq(problemPatterns), pageableCaptor.capture())).thenReturn(null);
 
         // THEN
         Page<ErrorWithExecutedScenarioAndRunAndExecutionDTO> errors = cut.getProblemErrors(1, 2, pageable);
-        verify(errorRepository).findDistinctByProblemPatternsInOrderByIdDesc(Arrays.asList(problemPattern1, problemPattern2, problemPattern3), pageable);
         assertThat(errors).isNull();
+        Pageable usedPageable = pageableCaptor.getValue();
+        assertThat(usedPageable.getPageNumber()).isEqualTo(pageable.getPageNumber());
+        assertThat(usedPageable.getPageSize()).isEqualTo(pageable.getPageSize());
+        assertThat(usedPageable.getSort()).isEqualTo(Sort.by(Direction.DESC, "id"));
     }
 
     @Test
-    public void getProblemErrors_returnErrors_whenErrorsFound() throws NotFoundException {
+    void getProblemErrors_shouldAddIdDescOrderingAsFirstOrdering_whenOrderingFilledInPageable() throws NotFoundException {
         // GIVEN
         Problem problem = mock(Problem.class);
-        Pageable pageable = mock(Pageable.class);
-        Page<Error> errorPage = mock(Page.class);
-        Page<ErrorWithExecutedScenarioAndRunAndExecutionDTO> convertedErrorPage = mock(Page.class);
+        Order order = new Order(Direction.ASC, "test");
+        Pageable pageable = PageRequest.of(0, 1, Sort.by(order));
 
         ProblemPattern problemPattern1 = mock(ProblemPattern.class);
         ProblemPattern problemPattern2 = mock(ProblemPattern.class);
         ProblemPattern problemPattern3 = mock(ProblemPattern.class);
 
+        List<ProblemPattern> problemPatterns = Arrays.asList(problemPattern1, problemPattern2, problemPattern3);
+
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+
         // WHEN
         when(problemRepository.findByProjectIdAndId(1, 2)).thenReturn(problem);
-        when(problem.getPatterns()).thenReturn(Arrays.asList(problemPattern1, problemPattern2, problemPattern3));
-        when(errorRepository.findDistinctByProblemPatternsInOrderByIdDesc(anyList(), any(Pageable.class))).thenReturn(errorPage);
-        when(errorPage.map(any(Function.class))).thenReturn(convertedErrorPage);
+        when(problem.getPatterns()).thenReturn(problemPatterns);
+        when(errorService.getErrors(eq(problemPatterns), pageableCaptor.capture())).thenReturn(null);
 
         // THEN
         Page<ErrorWithExecutedScenarioAndRunAndExecutionDTO> errors = cut.getProblemErrors(1, 2, pageable);
-        verify(errorRepository).findDistinctByProblemPatternsInOrderByIdDesc(Arrays.asList(problemPattern1, problemPattern2, problemPattern3), pageable);
-        assertThat(errors).isEqualTo(convertedErrorPage);
+        assertThat(errors).isNull();
+        Pageable usedPageable = pageableCaptor.getValue();
+        assertThat(usedPageable.getPageNumber()).isEqualTo(pageable.getPageNumber());
+        assertThat(usedPageable.getPageSize()).isEqualTo(pageable.getPageSize());
+        assertThat(usedPageable.getSort()).isEqualTo(Sort.by(new Order(Direction.DESC, "id"), order));
+    }
+
+    @Test
+    void getProblemErrors_returnErrorServiceGetErrorsResult() throws NotFoundException {
+        // GIVEN
+        Problem problem = mock(Problem.class);
+        Pageable pageable = PageRequest.of(0, 1);
+        Page<ErrorWithExecutedScenarioAndRunAndExecutionDTO> getErrorsResult = mock(Page.class);
+
+        ProblemPattern problemPattern1 = mock(ProblemPattern.class);
+        ProblemPattern problemPattern2 = mock(ProblemPattern.class);
+        ProblemPattern problemPattern3 = mock(ProblemPattern.class);
+
+        List<ProblemPattern> problemPatterns = Arrays.asList(problemPattern1, problemPattern2, problemPattern3);
+
+        // WHEN
+        when(problemRepository.findByProjectIdAndId(1, 2)).thenReturn(problem);
+        when(problem.getPatterns()).thenReturn(problemPatterns);
+        when(errorService.getErrors(eq(problemPatterns), any(Pageable.class))).thenReturn(getErrorsResult);
+
+        // THEN
+        Page<ErrorWithExecutedScenarioAndRunAndExecutionDTO> errors = cut.getProblemErrors(1, 2, pageable);
+        assertThat(errors).isEqualTo(getErrorsResult);
+    }
+
+    public ProblemDTO problemDTO(String defectId, DefectExistence defectExistence, ProblemStatus status, Date closingDateTime) {
+        ProblemDTO problemDTO = new ProblemDTO(null, null, null, defectId, null);
+        problemDTO.setDefectExistence(defectExistence);
+        problemDTO.setStatus(status);
+        problemDTO.setClosingDateTime(closingDateTime);
+        return problemDTO;
     }
 
 }

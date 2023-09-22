@@ -17,19 +17,19 @@
 
 package com.decathlon.ara.defect.rtc;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 import java.text.ParseException;
 import java.util.Date;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public class RtcDateTimeAdapterTest {
+class RtcDateTimeAdapterTest {
 
     private final RtcDateTimeAdapter cut = new RtcDateTimeAdapter();
 
     @Test
-    public void unmarshal_should_parse_date() throws ParseException {
+    void unmarshal_should_parse_date() throws ParseException {
         // WHEN
         final Date date = cut.unmarshal("2000-12-31T23:59:55.987+0200");
 
@@ -38,7 +38,7 @@ public class RtcDateTimeAdapterTest {
     }
 
     @Test
-    public void unmarshal_should_return_null_for_null_values() throws ParseException {
+    void unmarshal_should_return_null_for_null_values() throws ParseException {
         // WHEN
         final Date date = cut.unmarshal(null);
 
@@ -47,7 +47,7 @@ public class RtcDateTimeAdapterTest {
     }
 
     @Test
-    public void unmarshal_should_return_null_for_empty_values() throws ParseException {
+    void unmarshal_should_return_null_for_empty_values() throws ParseException {
         // WHEN
         final Date date = cut.unmarshal("");
 
@@ -56,7 +56,7 @@ public class RtcDateTimeAdapterTest {
     }
 
     @Test
-    public void marshal_should_format_date() {
+    void marshal_should_format_date() {
         // WHEN
         final String formattedDate = cut.marshal(new Date(978299995987L));
 
@@ -65,7 +65,7 @@ public class RtcDateTimeAdapterTest {
     }
 
     @Test
-    public void marshal_should_return_null_for_null_values() {
+    void marshal_should_return_null_for_null_values() {
         // WHEN
         final String formattedDate = cut.marshal(null);
 

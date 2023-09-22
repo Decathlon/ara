@@ -17,9 +17,13 @@
 
 package com.decathlon.ara.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
-import com.decathlon.ara.domain.QSource;
 import com.decathlon.ara.domain.Source;
 import com.decathlon.ara.repository.ScenarioRepository;
 import com.decathlon.ara.repository.SourceRepository;
@@ -30,34 +34,30 @@ import com.decathlon.ara.service.dto.support.UpsertResultDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
-import com.decathlon.ara.service.mapper.SourceMapper;
-import com.decathlon.ara.service.util.ObjectUtil;
-import java.util.List;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.decathlon.ara.service.mapper.GenericMapper;
 
 /**
  * Service for managing Source.
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SourceService {
 
-    @NonNull
     private final SourceRepository repository;
 
-    @NonNull
-    private final SourceMapper mapper;
+    private final GenericMapper mapper;
 
-    @NonNull
     private final TypeRepository typeRepository;
 
-    @NonNull
     private final ScenarioRepository scenarioRepository;
+
+    public SourceService(SourceRepository repository, GenericMapper mapper, TypeRepository typeRepository,
+            ScenarioRepository scenarioRepository) {
+        this.repository = repository;
+        this.mapper = mapper;
+        this.typeRepository = typeRepository;
+        this.scenarioRepository = scenarioRepository;
+    }
 
     /**
      * Create a new entity.
@@ -68,18 +68,16 @@ public class SourceService {
      * @throws NotUniqueException when the given name is already used by another entity
      */
     public SourceDTO create(long projectId, SourceDTO dtoToCreate) throws NotUniqueException {
-        ObjectUtil.trimStringValues(dtoToCreate);
-
         Source dataBaseEntity = repository.findByProjectIdAndCode(projectId, dtoToCreate.getCode());
         if (dataBaseEntity != null) {
-            throw new NotUniqueException(Messages.NOT_UNIQUE_SOURCE_CODE, Entities.SOURCE, QSource.source.code.getMetadata().getName(), dataBaseEntity.getCode());
+            throw new NotUniqueException(Messages.NOT_UNIQUE_SOURCE_CODE, Entities.SOURCE, "code", dataBaseEntity.getCode());
         }
 
         validateBusinessRules(projectId, dtoToCreate);
 
-        final Source source = mapper.toEntity(dtoToCreate);
+        final Source source = mapper.map(dtoToCreate, Source.class);
         source.setProjectId(projectId);
-        return mapper.toDto(repository.save(source));
+        return mapper.map(repository.save(source), SourceDTO.class);
     }
 
     /**
@@ -91,16 +89,15 @@ public class SourceService {
      * @throws NotUniqueException when the given code is already used
      */
     public UpsertResultDTO<SourceDTO> createOrUpdate(long projectId, SourceDTO dtoToCreateOrUpdate) throws NotUniqueException {
-        ObjectUtil.trimStringValues(dtoToCreateOrUpdate);
         validateBusinessRules(projectId, dtoToCreateOrUpdate);
 
         Source dataBaseEntity = repository.findByProjectIdAndCode(projectId, dtoToCreateOrUpdate.getCode());
         final Upsert operation = (dataBaseEntity == null ? Upsert.INSERT : Upsert.UPDATE);
 
-        final Source entity = mapper.toEntity(dtoToCreateOrUpdate);
+        final Source entity = mapper.map(dtoToCreateOrUpdate, Source.class);
         entity.setId(dataBaseEntity == null ? null : dataBaseEntity.getId());
         entity.setProjectId(projectId);
-        final SourceDTO dto = mapper.toDto(repository.save(entity));
+        final SourceDTO dto = mapper.map(repository.save(entity), SourceDTO.class);
         return new UpsertResultDTO<>(dto, operation);
     }
 
@@ -112,7 +109,7 @@ public class SourceService {
      */
     @Transactional(readOnly = true)
     public List<SourceDTO> findAll(long projectId) {
-        return mapper.toDto(repository.findAllByProjectIdOrderByName(projectId));
+        return mapper.mapCollection(repository.findAllByProjectIdOrderByName(projectId), SourceDTO.class);
     }
 
     /**
@@ -141,12 +138,12 @@ public class SourceService {
     private void validateBusinessRules(long projectId, SourceDTO dto) throws NotUniqueException {
         Source entityWithSameName = repository.findByProjectIdAndName(projectId, dto.getName());
         if (entityWithSameName != null && !entityWithSameName.getCode().equals(dto.getCode())) {
-            throw new NotUniqueException(Messages.NOT_UNIQUE_SOURCE_NAME, Entities.SOURCE, QSource.source.name.getMetadata().getName(), entityWithSameName.getCode());
+            throw new NotUniqueException(Messages.NOT_UNIQUE_SOURCE_NAME, Entities.SOURCE, "name", entityWithSameName.getCode());
         }
 
         Source entityWithSameLetter = repository.findByProjectIdAndLetter(projectId, dto.getLetter().charAt(0));
         if (entityWithSameLetter != null && !entityWithSameLetter.getCode().equals(dto.getCode())) {
-            throw new NotUniqueException(Messages.NOT_UNIQUE_SOURCE_LETTER, Entities.SOURCE, QSource.source.letter.getMetadata().getName(), entityWithSameLetter.getCode());
+            throw new NotUniqueException(Messages.NOT_UNIQUE_SOURCE_LETTER, Entities.SOURCE, "letter", entityWithSameLetter.getCode());
         }
     }
 }

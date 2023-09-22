@@ -17,21 +17,25 @@
 
 package com.decathlon.ara.domain;
 
-import com.decathlon.ara.domain.enumeration.Technology;
-import lombok.*;
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.nullsFirst;
 
-import javax.persistence.*;
 import java.util.Comparator;
+import java.util.Objects;
 
-import static java.util.Comparator.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
+import com.decathlon.ara.domain.enumeration.Technology;
+
 @Entity
-// Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
-@EqualsAndHashCode(of = { "projectId", "code" })
 public class Source implements Comparable<Source> {
 
     @Id
@@ -45,25 +49,26 @@ public class Source implements Comparable<Source> {
      * Technical and short code to be used by the build system to send Cucumber-scenarios and Postman-requests as they
      * sit on the Version Control System, for indexation purpose, and for functional coverage computation.
      */
-    @Column(length = 16)
+    @Column(length = 16, nullable = false)
     private String code;
 
     /**
      * Full name displayed in functionality cartography/coverage.
      */
-    @Column(length = 32)
+    @Column(length = 32, nullable = false)
     private String name;
 
     /**
      * Unique recognizable letter to be displayed in functionality cartography/coverage where space is very limited.
      */
+    @Column(nullable = false)
     private char letter;
 
     /**
      * The technology used for tests stored in this VCS source: Cucumber .feature files, Postman .json collections...
      */
     @Enumerated(EnumType.STRING)
-    @Column(length = 16)
+    @Column(length = 16, nullable = false)
     private Technology technology;
 
     /**
@@ -74,12 +79,13 @@ public class Source implements Comparable<Source> {
      *
      * @see #defaultBranch defaultBranch used to replace "{{branch}}" when indexing functionalities coverage
      */
+    @Column(nullable = false)
     private String vcsUrl;
 
     /**
      * The primary reference branch to use with {@link #vcsUrl} when indexing functionalities coverage.
      */
-    @Column(length = 16)
+    @Column(length = 16, nullable = false)
     private String defaultBranch;
 
     /**
@@ -96,6 +102,71 @@ public class Source implements Comparable<Source> {
         Comparator<Source> codeComparator = comparing(Source::getCode, nullsFirst(naturalOrder()));
         return nullsFirst(projectIdComparator
                 .thenComparing(codeComparator)).compare(this, other);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(code, projectId);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Source)) {
+            return false;
+        }
+        Source other = (Source) obj;
+        return Objects.equals(code, other.code) && projectId == other.projectId;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(long projectId) {
+        this.projectId = projectId;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public char getLetter() {
+        return letter;
+    }
+
+    public Technology getTechnology() {
+        return technology;
+    }
+
+    public String getVcsUrl() {
+        return vcsUrl;
+    }
+
+    public String getDefaultBranch() {
+        return defaultBranch;
+    }
+
+    public boolean isPostmanCountryRootFolders() {
+        return postmanCountryRootFolders;
     }
 
 }

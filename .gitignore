@@ -34,3 +34,10 @@ node_modules/
 *dependency-reduced-pom.xml
 client/*.vscode
 *.old
+
+### Containers Conf ###
+.env
+charts/local-values.yaml
+
+
+

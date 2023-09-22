@@ -19,8 +19,6 @@ package com.decathlon.ara.scenario.postman.util;
 
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Value;
 
 public class JavaScriptCommentRemover {
 
@@ -55,7 +53,7 @@ public class JavaScriptCommentRemover {
 
         StringBuilder builder = new StringBuilder();
         for (Section section : codeSections) {
-            builder.append(sourceCode.subSequence(section.getBegin(), section.getEnd()));
+            builder.append(sourceCode.subSequence(section.begin(), section.end()));
         }
         return builder.toString();
     }
@@ -203,13 +201,7 @@ public class JavaScriptCommentRemover {
         MAYBE_AT_BLOCK_COMMENT_END
     }
 
-    @Value
-    @AllArgsConstructor
-    private static final class Section {
-
-        private final int begin;
-        private final int end;
-
+    private static final record Section(int begin, int end) {
     }
 
 }

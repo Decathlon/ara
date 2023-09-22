@@ -1,4 +1,4 @@
-{{- $name := printf "%s-%s-%s" .Release.Name .Chart.Name "api" -}}
+{{- $name := printf "%s-%s" .Release.Name "api" -}}
 {{- $defaultImage := printf "%s:%s" "decathlon/ara-api" .Chart.Version -}}
 apiVersion: apps/v1
 kind: Deployment
@@ -51,24 +51,24 @@ spec:
               key: database_type
         - name: ARA_DATABASE_HOST
           valueFrom:
-            configMapKeyRef:
-              name: {{ include "ara.configmap.name" . }}
-              key: database_host
+            secretKeyRef:
+              name: {{ include "ara.database.secret.name" . }}
+              key: {{ .Values.database.secretConfig.hostKey }}
         - name: ARA_DATABASE_NAME
           valueFrom:
             secretKeyRef:
               name:  {{ include "ara.database.secret.name" . }}
-              key: {{ include "ara.database.secret.databasenamekey" . }}
+              key: {{ .Values.database.secretConfig.databaseNameKey }}
         - name: ARA_DATABASE_USERNAME
           valueFrom:
             secretKeyRef:
               name:  {{ include "ara.database.secret.name" . }}
-              key: {{ include "ara.database.secret.usernamekey" . }}
+              key: {{ .Values.database.secretConfig.usernameKey }}
         - name: ARA_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ include "ara.database.secret.name" .}}
-              key: {{ include "ara.database.secret.passwordkey" . }}
+              key: {{ .Values.database.secretConfig.passwordKey }}
         - name: ARA_CLIENTBASEURL
           valueFrom:
             configMapKeyRef:
@@ -84,10 +84,23 @@ spec:
             configMapKeyRef:
                 name: {{ include "ara.configmap.name" . }}
                 key: logging_mode
+        - name: ARA_OAUTH2_MODE
+          valueFrom:
+            configMapKeyRef:
+                name: {{ include "ara.configmap.name" . }}
+                key: oauth2_mode
+        {{- if eq .Values.api.authentication "oauth2-mock" }}
+        - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUERURI
+          value: {{ printf "http://%s-oauth2-mock.%s.svc.cluster.local:9000" .Release.Name .Release.Namespace }}
+        - name: SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_SPRING_ISSUERURI
+          value: {{ printf "http://%s-oauth2-mock.%s.svc.cluster.local:9000" .Release.Name .Release.Namespace }}
+        {{- end }}
         - name: SPRING_CONFIG_IMPORT
           value: optional:file:/app/config/config-custom.yaml,optional:file:/app/config/config-authentication.yaml
         - name: INFO_APP_VERSION
           value: "{{ .Chart.Version }}"
+        - name: INFO_APP_CHANNEL
+          value: {{ include "ara.channel" . | quote }}
         volumeMounts:
           - name: config
             mountPath: "/app/config"
@@ -125,9 +138,7 @@ spec:
         secret:
           secretName: {{ include "ara.api.secret.name" . }}
           items:
-            - key: {{ include "ara.api.secret.authconfigkey" . }}
-              path: "config-authentication.yaml"
-            - key: {{ include "ara.api.secret.customconfigkey" . }}
+            - key: {{ .Values.api.secretConfig.customConfigKey }}
               path: "config-custom.yaml"
       {{- if .Values.api.volumes }}
 {{ toYaml .Values.api.volumes | indent 6 }}

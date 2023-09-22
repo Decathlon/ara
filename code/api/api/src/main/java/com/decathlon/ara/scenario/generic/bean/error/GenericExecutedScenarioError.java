@@ -19,9 +19,7 @@ package com.decathlon.ara.scenario.generic.bean.error;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
 
-@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GenericExecutedScenarioError {
 
@@ -36,4 +34,20 @@ public class GenericExecutedScenarioError {
 
     @JsonProperty("scenario_line_description")
     private String rawLine;
+
+    public Long getLineNumber() {
+        return lineNumber;
+    }
+
+    public String getStackTrace() {
+        return stackTrace;
+    }
+
+    public String getCompleteLine() {
+        return completeLine;
+    }
+
+    public String getRawLine() {
+        return rawLine;
+    }
 }

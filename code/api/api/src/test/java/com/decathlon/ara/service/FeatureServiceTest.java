@@ -42,7 +42,7 @@ import com.decathlon.ara.service.exception.NotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class FeatureServiceTest {
+class FeatureServiceTest {
 
     @Mock
     private FeatureCollection featureCollectionMock;
@@ -54,7 +54,7 @@ public class FeatureServiceTest {
     private FeatureService cut;
 
     @Test
-    public void listAll_should_return_the_list_of_features() {
+    void listAll_should_return_the_list_of_features() {
         // Given
         String feature1Code = "feature-1";
         String feature2Code = "my-feature";
@@ -71,12 +71,14 @@ public class FeatureServiceTest {
         // Then
         Assertions.assertThat(featuresDTO).hasSize(features.size());
         Assertions.assertThat(featuresDTO.get(0)).isNotNull();
-        Assertions.assertThat(featuresDTO.get(0)).isEqualTo(new FeatureDTO(feature1Code, false));
-        Assertions.assertThat(featuresDTO.get(1)).isEqualTo(new FeatureDTO(feature2Code, true));
+        Assertions.assertThat(featuresDTO.get(0).getCode()).isEqualTo(feature1Code);
+        Assertions.assertThat(featuresDTO.get(0).isEnabled()).isFalse();
+        Assertions.assertThat(featuresDTO.get(1).getCode()).isEqualTo(feature2Code);
+        Assertions.assertThat(featuresDTO.get(1).isEnabled()).isTrue();
     }
 
     @Test
-    public void find_should_return_the_detailled_informations() throws NotFoundException {
+    void find_should_return_the_detailled_informations() throws NotFoundException {
         // Given
         String wantedFeatureCode = "my-feature";
         String wantedFeatureDesc = "Description of Feature";
@@ -92,12 +94,14 @@ public class FeatureServiceTest {
         DetailledFeatureDTO detailledFeatureDTO = cut.find(wantedFeatureCode);
         // Then
         Assertions.assertThat(detailledFeatureDTO).isNotNull();
-        Assertions.assertThat(detailledFeatureDTO).isEqualTo(new DetailledFeatureDTO(wantedFeatureCode, true,
-                wantedFeatureName, wantedFeatureDesc));
+        Assertions.assertThat(detailledFeatureDTO.getCode()).isEqualTo(wantedFeatureCode);
+        Assertions.assertThat(detailledFeatureDTO.isEnabled()).isTrue();
+        Assertions.assertThat(detailledFeatureDTO.getName()).isEqualTo(wantedFeatureName);
+        Assertions.assertThat(detailledFeatureDTO.getDescription()).isEqualTo(wantedFeatureDesc);
     }
 
     @Test
-    public void find_should_throw_not_found_if_code_doesnt_exists() throws NotFoundException {
+    void find_should_throw_not_found_if_code_doesnt_exists() throws NotFoundException {
         // Given
         String wantedFeatureCode = "not-existing";
         Mockito.doReturn(Optional.empty()).when(featureCollectionMock).get(wantedFeatureCode);
@@ -108,7 +112,7 @@ public class FeatureServiceTest {
     }
 
     @Test
-    public void retrieveStateOf_should_return_the_features_of_code() {
+    void retrieveStateOf_should_return_the_features_of_code() {
         // Given
         List<String> wantedCodes = new ArrayList<>();
         wantedCodes.add("my-feature");
@@ -124,13 +128,17 @@ public class FeatureServiceTest {
         List<FeatureDTO> featuresDTO = cut.retrieveStateOf(wantedCodes);
         // Then
         Assertions.assertThat(featuresDTO).hasSize(3);
-        Assertions.assertThat(featuresDTO.get(0)).isEqualTo(new FeatureDTO("my-feature", true));
-        Assertions.assertThat(featuresDTO.get(1)).isEqualTo(new FeatureDTO("test", false));
-        Assertions.assertThat(featuresDTO.get(2)).isEqualTo(new FeatureDTO("test-yep", true));
+
+        Assertions.assertThat(featuresDTO.get(0).getCode()).isEqualTo("my-feature");
+        Assertions.assertThat(featuresDTO.get(0).isEnabled()).isTrue();
+        Assertions.assertThat(featuresDTO.get(1).getCode()).isEqualTo("test");
+        Assertions.assertThat(featuresDTO.get(1).isEnabled()).isFalse();
+        Assertions.assertThat(featuresDTO.get(2).getCode()).isEqualTo("test-yep");
+        Assertions.assertThat(featuresDTO.get(2).isEnabled()).isTrue();
     }
 
     @Test
-    public void retrieveStateOf_should_return_empty_list_on_empty_params() {
+    void retrieveStateOf_should_return_empty_list_on_empty_params() {
         // Given
         List<String> wantedCodes = new ArrayList<>();
         // When
@@ -140,7 +148,7 @@ public class FeatureServiceTest {
     }
 
     @Test
-    public void retrieveStateOf_should_exclude_non_existing() {
+    void retrieveStateOf_should_exclude_non_existing() {
         // Given
         List<String> wantedCodes = new ArrayList<>();
         wantedCodes.add("my-feature");
@@ -154,12 +162,14 @@ public class FeatureServiceTest {
         List<FeatureDTO> featuresDTO = cut.retrieveStateOf(wantedCodes);
         // Then
         Assertions.assertThat(featuresDTO).hasSize(2);
-        Assertions.assertThat(featuresDTO.get(0)).isEqualTo(new FeatureDTO("my-feature", true));
-        Assertions.assertThat(featuresDTO.get(1)).isEqualTo(new FeatureDTO("test-yep", true));
+        Assertions.assertThat(featuresDTO.get(0).getCode()).isEqualTo("my-feature");
+        Assertions.assertThat(featuresDTO.get(0).isEnabled()).isTrue();
+        Assertions.assertThat(featuresDTO.get(1).getCode()).isEqualTo("test-yep");
+        Assertions.assertThat(featuresDTO.get(1).isEnabled()).isTrue();
     }
 
     @Test
-    public void update_should_update_the_features() throws NotFoundException {
+    void update_should_update_the_features() throws NotFoundException {
         // Given
         List<FeatureDTO> wantedUpdates = new ArrayList<>();
         String feature1Code = "my-feature";
@@ -182,7 +192,7 @@ public class FeatureServiceTest {
     }
 
     @Test
-    public void update_should_send_NotFound_if_one_not_exists() throws NotFoundException {
+    void update_should_send_NotFound_if_one_not_exists() throws NotFoundException {
         // Given
         List<FeatureDTO> wantedUpdates = new ArrayList<>();
         String feature1Code = "my-feature";
@@ -200,7 +210,7 @@ public class FeatureServiceTest {
     }
 
     @Test
-    public void update_should_not_update_all_if_one_not_exists() {
+    void update_should_not_update_all_if_one_not_exists() {
         // Given
         List<FeatureDTO> wantedUpdates = new ArrayList<>();
         String feature1Code = "my-feature";
@@ -231,7 +241,7 @@ public class FeatureServiceTest {
     }
 
     @Test
-    public void reset_should_reset_features() throws NotFoundException {
+    void reset_should_reset_features() throws NotFoundException {
         // Given
         List<String> wantedReset = new ArrayList<>();
         String feature1Code = "my-feature";
@@ -254,7 +264,7 @@ public class FeatureServiceTest {
     }
 
     @Test
-    public void reset_should_send_NotFound_if_one_not_exists() throws NotFoundException {
+    void reset_should_send_NotFound_if_one_not_exists() throws NotFoundException {
         // Given
         List<String> wantedReset = new ArrayList<>();
         String feature1Code = "my-feature";
@@ -272,7 +282,7 @@ public class FeatureServiceTest {
     }
 
     @Test
-    public void reset_should_not_reset_others_if_one_not_exists() {
+    void reset_should_not_reset_others_if_one_not_exists() {
         // Given
         List<String> wantedReset = new ArrayList<>();
         String feature1Code = "my-feature";

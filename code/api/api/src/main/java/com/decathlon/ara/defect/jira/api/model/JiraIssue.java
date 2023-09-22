@@ -17,11 +17,8 @@
 
 package com.decathlon.ara.defect.jira.api.model;
 
-import lombok.Data;
-
 import java.util.List;
 
-@Data
 public class JiraIssue {
 
     private String expand;
@@ -37,4 +34,32 @@ public class JiraIssue {
     private JiraIssue parent;
 
     private List<JiraIssue> subtasks;
+
+    public String getExpand() {
+        return expand;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getSelf() {
+        return self;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public JiraFields getFields() {
+        return fields;
+    }
+
+    public JiraIssue getParent() {
+        return parent;
+    }
+
+    public List<JiraIssue> getSubtasks() {
+        return subtasks;
+    }
 }

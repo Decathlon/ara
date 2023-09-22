@@ -17,6 +17,20 @@
 
 package com.decathlon.ara.scenario.cucumber.service;
 
+import static com.decathlon.ara.lib.embed.producer.StructuredEmbeddingsBuilder.HUMAN_AND_MACHINE_READABLE_TIMESTAMP_PATTERN;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.decathlon.ara.domain.ExecutedScenario;
 import com.decathlon.ara.lib.embed.consumer.StructuredEmbeddingsHolder;
 import com.decathlon.ara.scenario.cucumber.asset.AssetService;
@@ -27,28 +41,20 @@ import com.decathlon.ara.scenario.cucumber.util.CucumberReportUtil;
 import com.decathlon.ara.scenario.cucumber.util.ErrorExtractorUtil;
 import com.decathlon.ara.scenario.cucumber.util.ScenarioExtractorUtil;
 import com.google.common.collect.Sets;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import static com.decathlon.ara.lib.embed.producer.StructuredEmbeddingsBuilder.HUMAN_AND_MACHINE_READABLE_TIMESTAMP_PATTERN;
 
 /**
  * A service on top ScenarioExtractorUtil and ErrorExtractorUtil, that allow to upload screenshots to a server if they are embedded in regular Cucumber embeds, instead of StructuredEmbeddings.
  */
-@Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ExecutedScenarioExtractorService {
 
-    @NonNull
+    private static final Logger LOG = LoggerFactory.getLogger(ExecutedScenarioExtractorService.class);
+
     private final AssetService assetService;
+
+    public ExecutedScenarioExtractorService(AssetService assetService) {
+        this.assetService = assetService;
+    }
 
     /**
      * @param features        a parsed Cucumber's report.json file/stream
@@ -149,7 +155,7 @@ public class ExecutedScenarioExtractorService {
                     try {
                         return new SimpleDateFormat(HUMAN_AND_MACHINE_READABLE_TIMESTAMP_PATTERN).parse(s);
                     } catch (ParseException e) {
-                        log.error("Cannot parse start date&time: {}", s, e);
+                        LOG.error("Cannot parse start date&time: {}", s, e);
                         return null;
                     }
                 })

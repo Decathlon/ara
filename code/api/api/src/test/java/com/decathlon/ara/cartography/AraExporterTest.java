@@ -6,7 +6,6 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import java.nio.charset.StandardCharsets;
@@ -17,13 +16,13 @@ import java.util.List;
 @TestPropertySource(properties = {
         "ara.database.target=h2"
 })
-public class AraExporterTest {
+class AraExporterTest {
 
     @Autowired
     private AraExporter sut;
 
     @Test
-    public void getName_should_return_ARA() {
+    void getName_should_return_ARA() {
         // Given
         final String expected = "ARA";
         // When
@@ -33,7 +32,7 @@ public class AraExporterTest {
     }
 
     @Test
-    public void getDescription_should_return_the_ara_description() {
+    void getDescription_should_return_the_ara_description() {
         // Given
         final String expected = "Export this cartography to import it in another ARA project";
         // When
@@ -43,7 +42,7 @@ public class AraExporterTest {
     }
 
     @Test
-    public void getFormat_should_return_json() {
+    void getFormat_should_return_json() {
         // Given
         final String expected = "json";
         // When
@@ -53,7 +52,7 @@ public class AraExporterTest {
     }
 
     @Test
-    public void generate_should_use_ara_cartography_mapper() {
+    void generate_should_use_ara_cartography_mapper() {
         // Given
         final AraCartographyMapper mapper = new AraCartographyMapper();
         final List<FunctionalityDTO> functionalities = new ArrayList<>();

@@ -1,0 +1,2 @@
+release-notes-file: CHANGELOG.md
+release-name-template: "{{ .Name }}-v{{ .Version }}"

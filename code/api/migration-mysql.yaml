@@ -28,6 +28,13 @@ services:
       - MYSQL_ROOT_PASSWORD=to_change
     networks:
       - db_net
+  oauth2-dev-server:
+    image: "decathlon/ara-oads:${OADS_VERSION:-latest}"
+    restart: unless-stopped
+    networks:
+      api_net:
+        aliases:
+          - oauth2.dev.localhost
   ara-mysql-api:
     image: docker.io/decathlon/ara-api
     restart: always
@@ -42,6 +49,7 @@ services:
       - api_net
     depends_on:
       - ara-mysql-db-source
+      - oauth2-dev-server
   ara-mysql-mig-api:
     image: docker.io/decathlon/ara-api
     restart: always
@@ -58,16 +66,17 @@ services:
       - api_net
     depends_on:
       - ara-mysql-db-target
+      - oauth2-dev-server
   waiter-mysql-api:
     image: aligor/wait-for-url
-    command: ["--url", "http://ara-mysql-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
+    command: ["--url", "http://ara-mysql-api:8001/actuator/info", "--retries", "20", "--delay", "3000"]
     networks:
       - api_net
     depends_on:
       - ara-mysql-api
   waiter-mysql-mig-api:
     image: aligor/wait-for-url
-    command: ["--url", "http://ara-mysql-mig-api:8080/actuator/info", "--retries", "20", "--delay", "3000"]
+    command: ["--url", "http://ara-mysql-mig-api:8001/actuator/info", "--retries", "20", "--delay", "3000"]
     networks:
       - api_net
     depends_on:

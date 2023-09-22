@@ -17,44 +17,46 @@
 
 package com.decathlon.ara.domain;
 
-import com.querydsl.core.annotations.QueryInit;
-import lombok.*;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.nullsFirst;
 
-import javax.persistence.*;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
-import static java.util.Comparator.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 @Entity
-// Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
-@EqualsAndHashCode(of = { "executedScenarioId", "stepLine" })
 @Table(indexes = @Index(columnList = "executed_scenario_id"))
 public class Error implements Comparable<Error> {
 
-    public static final String PROBLEM_PATTERNS_COLLECTION_CACHE = "com.decathlon.ara.domain.Error.problemPatterns";
+    public static final String PROBLEM_OCCURRENCES_COLLECTION_CACHE = "com.decathlon.ara.domain.Error.problemOccurrences";
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "error_id")
     @SequenceGenerator(name = "error_id", sequenceName = "error_id", allocationSize = 1)
     private Long id;
 
-    // 1/2 for @EqualsAndHashCode to work: used when an entity is fetched by JPA
-    @Column(name = "executed_scenario_id", insertable = false, updatable = false)
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
-    private Long executedScenarioId;
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "executed_scenario_id")
-    @QueryInit("run.*.*") // Requires Q* class regeneration https://github.com/querydsl/querydsl/issues/255
     private ExecutedScenario executedScenario;
 
     @Column(length = 2048)
@@ -69,33 +71,85 @@ public class Error implements Comparable<Error> {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.TextType")
     private String exception;
 
-    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE, region = PROBLEM_PATTERNS_COLLECTION_CACHE)
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "errors")
-    private Set<ProblemPattern> problemPatterns = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "error", orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<ProblemOccurrence> problemOccurrences = new HashSet<>();
 
-    // 2/2 for @EqualsAndHashCode to work: used for entities created outside of JPA
     public void setExecutedScenario(ExecutedScenario executedScenario) {
         this.executedScenario = executedScenario;
-        this.executedScenarioId = (executedScenario == null ? null : executedScenario.getId());
-    }
-
-    public void addProblemPattern(ProblemPattern problemPattern) {
-        this.problemPatterns.add(problemPattern);
-        problemPattern.getErrors().add(this);
-    }
-
-    public void removeProblemPattern(ProblemPattern problemPattern) {
-        this.problemPatterns.remove(problemPattern);
-        problemPattern.getErrors().remove(this);
     }
 
     @Override
     public int compareTo(Error other) {
-        // Keep business key in sync with @EqualsAndHashCode
-        Comparator<Error> executedScenarioIdComparator = comparing(e -> e.executedScenarioId, nullsFirst(naturalOrder()));
+        Comparator<Error> executedScenarioIdComparator = comparing(Error::getExecutedScenarioId, nullsFirst(naturalOrder()));
         Comparator<Error> stepLineComparator = comparing(e -> Long.valueOf(e.getStepLine()), nullsFirst(naturalOrder()));
         return nullsFirst(executedScenarioIdComparator
                 .thenComparing(stepLineComparator)).compare(this, other);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getExecutedScenarioId(), stepLine);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Error)) {
+            return false;
+        }
+        Error other = (Error) obj;
+        return Objects.equals(getExecutedScenarioId(), other.getExecutedScenarioId()) && stepLine == other.stepLine;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Long getExecutedScenarioId() {
+        return executedScenario == null ? null : executedScenario.getId();
+    }
+
+    public String getStep() {
+        return step;
+    }
+
+    public void setStep(String step) {
+        this.step = step;
+    }
+
+    public String getStepDefinition() {
+        return stepDefinition;
+    }
+
+    public void setStepDefinition(String stepDefinition) {
+        this.stepDefinition = stepDefinition;
+    }
+
+    public int getStepLine() {
+        return stepLine;
+    }
+
+    public void setStepLine(int stepLine) {
+        this.stepLine = stepLine;
+    }
+
+    public String getException() {
+        return exception;
+    }
+
+    public void setException(String exception) {
+        this.exception = exception;
+    }
+
+    public Set<ProblemOccurrence> getProblemOccurrences() {
+        return problemOccurrences;
+    }
+
+    public ExecutedScenario getExecutedScenario() {
+        return executedScenario;
     }
 
 }

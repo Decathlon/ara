@@ -19,6 +19,8 @@ package com.decathlon.ara.ci.service;
 
 import static com.decathlon.ara.util.TestUtil.timestamp;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.same;
@@ -63,14 +65,17 @@ import com.decathlon.ara.service.dto.execution.ExecutionDTO;
 import com.decathlon.ara.service.dto.execution.ExecutionHistoryPointDTO;
 import com.decathlon.ara.service.dto.quality.QualitySeverityDTO;
 import com.decathlon.ara.service.dto.run.ExecutedScenarioHandlingCountsDTO;
+import com.decathlon.ara.service.dto.run.RunDTO;
 import com.decathlon.ara.service.dto.run.RunWithQualitiesDTO;
 import com.decathlon.ara.service.dto.severity.SeverityDTO;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.support.Settings;
+import com.decathlon.ara.util.TestUtil;
+import com.decathlon.ara.util.builder.ExecutionDTOBuilder;
 import com.google.common.collect.ImmutableMap;
 
 @ExtendWith(MockitoExtension.class)
-public class QualityEmailServiceTest {
+class QualityEmailServiceTest {
 
     private static final Timestamp THE_APRIL_25TH_2017_AT_12_H_57_MIN_56_S = timestamp(2017, Calendar.APRIL, 25, 12, 57, 56);
 
@@ -97,7 +102,7 @@ public class QualityEmailServiceTest {
     private QualityEmailService cut;
 
     @Test
-    public void sendQualityEmail_should_not_call_sendHtmlMessage_when_no_recipient_address_configured() throws NotFoundException {
+    void sendQualityEmail_should_not_call_sendHtmlMessage_when_no_recipient_address_configured() throws NotFoundException {
         // GIVEN
         long anyProjectId = -42;
         long executionId = 1;
@@ -113,27 +118,21 @@ public class QualityEmailServiceTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void sendQualityEmail_should_call_sendHtmlMessage_with_the_expected_parameters() throws NotFoundException {
+    void sendQualityEmail_should_call_sendHtmlMessage_with_the_expected_parameters() throws NotFoundException {
         // GIVEN
         long projectId = 42;
         long executionId = 1;
         Date buildDateTime = new Date();
         Date testDateTime = new Date();
-        ExecutionHistoryPointDTO execution = new ExecutionHistoryPointDTO()
-                .withRuns(Collections.emptyList());
-        execution.setId(Long.valueOf(1));
-        execution.setBuildDateTime(buildDateTime);
-        execution.setTestDateTime(testDateTime);
+        ExecutionHistoryPointDTO execution = executionHistoryPointDTO(Long.valueOf(1), buildDateTime, testDateTime, Collections.emptyList());
         when(executionHistoryService.getExecution(projectId, executionId)).thenReturn(execution);
         when(settingService.get(projectId, Settings.EMAIL_FROM)).thenReturn("from");
         when(settingService.get(projectId, Settings.EMAIL_TO_EXECUTION_CRASHED)).thenReturn("to");
         List<Team> teams = Arrays.asList(
-                new Team().withId(Long.valueOf(1)).withAssignableToProblems(true),
-                new Team().withId(Long.valueOf(2)).withAssignableToProblems(false));
+                team(Long.valueOf(1), true),
+                team(Long.valueOf(2), false));
         when(teamRepository.findAllByProjectIdOrderByName(projectId)).thenReturn(teams);
-        when(projectRepository.findById(Long.valueOf(projectId))).thenReturn(Optional.of(new Project()
-                .withCode("projectCode")
-                .withName("theProjectName")));
+        when(projectRepository.findById(Long.valueOf(projectId))).thenReturn(Optional.of(new Project("projectCode", "theProjectName")));
         Map<String, Map<String, ExecutedScenarioHandlingCountsDTO>> quality = new HashMap<>();
         doReturn(quality).when(cut).aggregateQualitiesPerTeamAndSeverity(execution);
         doReturn("subject").when(cut).getSubject("theProjectName", execution);
@@ -181,19 +180,17 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void addInlineResource_should_do_nothing_and_not_crash_when_resource_not_found() {
+    void addInlineResource_should_do_nothing_and_not_crash_when_resource_not_found() {
         // GIVEN
         Map<String, Resource> inlineResources = ImmutableMap.of();
 
-        // WHEN
-        cut.addInlineResource(inlineResources, "any", "unexisting");
-
-        // THEN
+        // WHEN / THEN
         // inlineResources is an immutable map: if it didn't crash, it didn't attempt to put any value in the map
+        assertDoesNotThrow(() -> cut.addInlineResource(inlineResources, "any", "unexisting"));
     }
 
     @Test
-    public void addInlineResource_should_add_the_found_resource() {
+    void addInlineResource_should_add_the_found_resource() {
         // GIVEN
         Map<String, Resource> inlineResources = new HashMap<>();
 
@@ -206,7 +203,7 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void formatDate_should_return_empty_string_when_date_is_null() {
+    void formatDate_should_return_empty_string_when_date_is_null() {
         // WHEN
         final String formattedDate = cut.formatDate(null);
 
@@ -215,7 +212,7 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void formatDate_should_return_formatted_date() {
+    void formatDate_should_return_formatted_date() {
         // GIVEN
         final Locale initialDefaultLocale = Locale.getDefault();
         try {
@@ -232,7 +229,7 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void formatDate_should_return_formatted_date_in_english_locale() {
+    void formatDate_should_return_formatted_date_in_english_locale() {
         // GIVEN
         final Locale initialDefaultLocale = Locale.getDefault();
         try {
@@ -249,13 +246,13 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void getSubject_should_work_when_incomplete_and_not_blocking() {
+    void getSubject_should_work_when_incomplete_and_not_blocking() {
         // GIVEN
         ExecutionDTO execution = validExecution()
                 .withBranch("branch")
                 .withName("name")
                 .withRelease("release")
-                .withQualityStatus(QualityStatus.INCOMPLETE);
+                .withQualityStatus(QualityStatus.INCOMPLETE).build();
 
         // WHEN
         final String subject = cut.getSubject("project", execution);
@@ -264,15 +261,15 @@ public class QualityEmailServiceTest {
         assertThat(subject).isEqualTo("PROJECT BRANCH/NAME NRT FOR RELEASE: RAN (INCOMPLETE) TESTED ON APR 25, 2017 - 12:57");
     }
 
-    private ExecutionDTO validExecution() {
-        return new ExecutionDTO()
-                .withQualitySeverities(Collections.singletonList(new QualitySeverityDTO().withSeverity(new SeverityDTO())))
+    private ExecutionDTOBuilder validExecution() {
+        return new ExecutionDTOBuilder()
+                .withQualitySeverities(Collections.singletonList(qualitySeverityDTO(new SeverityDTO(), 0)))
                 .withQualityThresholds(Collections.singletonMap("any", new QualityThreshold()))
                 .withTestDateTime(THE_APRIL_25TH_2017_AT_12_H_57_MIN_56_S);
     }
 
     @Test
-    public void getRecipient_should_return_crashed_email_address_for_crashed_execution() {
+    void getRecipient_should_return_crashed_email_address_for_crashed_execution() {
         // GIVEN
         long projectId = 42;
         ExecutionDTO execution = new ExecutionDTO();
@@ -286,10 +283,10 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void getRecipient_should_return_ran_email_address_for_valid_and_not_blocking_execution() {
+    void getRecipient_should_return_ran_email_address_for_valid_and_not_blocking_execution() {
         // GIVEN
         long projectId = 42;
-        ExecutionDTO execution = validExecution();
+        ExecutionDTO execution = validExecution().build();
         when(settingService.get(projectId, Settings.EMAIL_TO_EXECUTION_RAN)).thenReturn("to");
 
         // WHEN
@@ -300,12 +297,12 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void getRecipient_should_return_eligible_passed_email_address_for_blocking_and_passed_execution() {
+    void getRecipient_should_return_eligible_passed_email_address_for_blocking_and_passed_execution() {
         // GIVEN
         long projectId = 42;
         ExecutionDTO execution = validExecution()
                 .withBlockingValidation(true)
-                .withQualityStatus(QualityStatus.PASSED);
+                .withQualityStatus(QualityStatus.PASSED).build();
         when(settingService.get(projectId, Settings.EMAIL_TO_EXECUTION_ELIGIBLE_PASSED)).thenReturn("to");
 
         // WHEN
@@ -316,12 +313,12 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void getRecipient_should_return_eligible_warning_email_address_for_blocking_and_warning_execution() {
+    void getRecipient_should_return_eligible_warning_email_address_for_blocking_and_warning_execution() {
         // GIVEN
         long projectId = 42;
         ExecutionDTO execution = validExecution()
                 .withBlockingValidation(true)
-                .withQualityStatus(QualityStatus.WARNING);
+                .withQualityStatus(QualityStatus.WARNING).build();
         when(settingService.get(projectId, Settings.EMAIL_TO_EXECUTION_ELIGIBLE_WARNING)).thenReturn("to");
 
         // WHEN
@@ -332,12 +329,12 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void getRecipient_should_return_not_eligible_email_address_for_blocking_and_not_acceptable_execution() {
+    void getRecipient_should_return_not_eligible_email_address_for_blocking_and_not_acceptable_execution() {
         // GIVEN
         long projectId = 42;
         ExecutionDTO execution = validExecution()
                 .withBlockingValidation(true)
-                .withQualityStatus(QualityStatus.FAILED);
+                .withQualityStatus(QualityStatus.FAILED).build();
         when(settingService.get(projectId, Settings.EMAIL_TO_EXECUTION_NOT_ELIGIBLE)).thenReturn("to");
 
         // WHEN
@@ -348,12 +345,12 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void getRecipient_should_allow_undefined_properties() {
+    void getRecipient_should_allow_undefined_properties() {
         // GIVEN
         long projectId = 42;
         ExecutionDTO execution = validExecution()
                 .withBlockingValidation(true)
-                .withQualityStatus(QualityStatus.FAILED);
+                .withQualityStatus(QualityStatus.FAILED).build();
         when(settingService.get(projectId, Settings.EMAIL_TO_EXECUTION_NOT_ELIGIBLE)).thenReturn("");
 
         // WHEN
@@ -364,10 +361,10 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void getSubject_should_show_RAN_when_not_blocking() {
+    void getSubject_should_show_RAN_when_not_blocking() {
         // GIVEN
         ExecutionDTO execution = validExecution()
-                .withQualityStatus(QualityStatus.WARNING);
+                .withQualityStatus(QualityStatus.WARNING).build();
 
         // WHEN
         final String subject = cut.getSubject("anyProjectName", execution);
@@ -377,11 +374,11 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void getSubject_should_show_ELIGIBLE_when_blocking_and_WARNING() {
+    void getSubject_should_show_ELIGIBLE_when_blocking_and_WARNING() {
         // GIVEN
         ExecutionDTO execution = validExecution()
                 .withBlockingValidation(true)
-                .withQualityStatus(QualityStatus.WARNING);
+                .withQualityStatus(QualityStatus.WARNING).build();
 
         // WHEN
         final String subject = cut.getSubject("anyProjectName", execution);
@@ -391,11 +388,11 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void getSubject_should_show_ELIGIBLE_when_blocking_and_PASSED() {
+    void getSubject_should_show_ELIGIBLE_when_blocking_and_PASSED() {
         // GIVEN
         ExecutionDTO execution = validExecution()
                 .withBlockingValidation(true)
-                .withQualityStatus(QualityStatus.PASSED);
+                .withQualityStatus(QualityStatus.PASSED).build();
 
         // WHEN
         final String subject = cut.getSubject("anyProjectName", execution);
@@ -405,11 +402,11 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void getSubject_should_show_NOT_ELIGIBLE_when_blocking_and_FAILED() {
+    void getSubject_should_show_NOT_ELIGIBLE_when_blocking_and_FAILED() {
         // GIVEN
         ExecutionDTO execution = validExecution()
                 .withBlockingValidation(true)
-                .withQualityStatus(QualityStatus.FAILED);
+                .withQualityStatus(QualityStatus.FAILED).build();
 
         // WHEN
         final String subject = cut.getSubject("anyProjectName", execution);
@@ -419,11 +416,11 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void getSubject_should_show_NOT_ELIGIBLE_when_blocking_and_INCOMPLETE() {
+    void getSubject_should_show_NOT_ELIGIBLE_when_blocking_and_INCOMPLETE() {
         // GIVEN
         ExecutionDTO execution = validExecution()
                 .withBlockingValidation(true)
-                .withQualityStatus(QualityStatus.INCOMPLETE);
+                .withQualityStatus(QualityStatus.INCOMPLETE).build();
 
         // WHEN
         final String subject = cut.getSubject("anyProjectName", execution);
@@ -433,7 +430,7 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void getSubject_should_include_all_severity_percentages() {
+    void getSubject_should_include_all_severity_percentages() {
         // GIVEN
         ExecutionDTO execution = validExecution()
                 .withBranch("branch")
@@ -441,15 +438,9 @@ public class QualityEmailServiceTest {
                 .withRelease("release")
                 .withQualityStatus(QualityStatus.PASSED)
                 .withQualitySeverities(Arrays.asList(
-                        new QualitySeverityDTO()
-                                .withSeverity(new SeverityDTO().withInitials("S1"))
-                                .withPercent(21),
-                        new QualitySeverityDTO()
-                                .withSeverity(new SeverityDTO().withInitials("S2"))
-                                .withPercent(42),
-                        new QualitySeverityDTO()
-                                .withSeverity(new SeverityDTO().withInitials("S3"))
-                                .withPercent(84)));
+                        qualitySeverityDTO(new SeverityDTO(null, null, null, null, "S1", false), 21),
+                        qualitySeverityDTO(new SeverityDTO(null, null, null, null, "S2", false), 42),
+                        qualitySeverityDTO(new SeverityDTO(null, null, null, null, "S3", false), 84))).build();
 
         // WHEN
         final String subject = cut.getSubject("project", execution);
@@ -459,9 +450,9 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void getSubject_should_show_CRASHED_when_null_qualitySeverities() {
+    void getSubject_should_show_CRASHED_when_null_qualitySeverities() {
         // GIVEN
-        ExecutionDTO execution = validExecution().withQualitySeverities(null);
+        ExecutionDTO execution = validExecution().withQualitySeverities(null).build();
 
         // WHEN
         final String subject = cut.getSubject("anyProjectName", execution);
@@ -471,9 +462,9 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void getSubject_should_show_CRASHED_when_empty_qualitySeverities() {
+    void getSubject_should_show_CRASHED_when_empty_qualitySeverities() {
         // GIVEN
-        ExecutionDTO execution = validExecution().withQualitySeverities(Collections.emptyList());
+        ExecutionDTO execution = validExecution().withQualitySeverities(Collections.emptyList()).build();
 
         // WHEN
         final String subject = cut.getSubject("anyProjectName", execution);
@@ -483,9 +474,9 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void getSubject_should_show_CRASHED_when_null_qualityThresholds() {
+    void getSubject_should_show_CRASHED_when_null_qualityThresholds() {
         // GIVEN
-        ExecutionDTO execution = validExecution().withQualityThresholds(null);
+        ExecutionDTO execution = validExecution().withQualityThresholds(null).build();
 
         // WHEN
         final String subject = cut.getSubject("anyProjectName", execution);
@@ -495,9 +486,9 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void getSubject_should_show_CRASHED_when_empty_qualityThresholds() {
+    void getSubject_should_show_CRASHED_when_empty_qualityThresholds() {
         // GIVEN
-        ExecutionDTO execution = validExecution().withQualityThresholds(Collections.emptyMap());
+        ExecutionDTO execution = validExecution().withQualityThresholds(Collections.emptyMap()).build();
 
         // WHEN
         final String subject = cut.getSubject("anyProjectName", execution);
@@ -507,9 +498,9 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void getEligibilityMessage_should_not_include_eligibility_status_when_not_isBlockingValidation() {
+    void getEligibilityMessage_should_not_include_eligibility_status_when_not_isBlockingValidation() {
         // GIVEN
-        ExecutionDTO execution = new ExecutionDTO().withBlockingValidation(false);
+        ExecutionDTO execution = new ExecutionDTOBuilder().withBlockingValidation(false).build();
 
         // WHEN
         final String message = cut.getEligibilityMessage(execution);
@@ -519,9 +510,9 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void getEligibilityMessage_should_be_eligible_when_isBlockingValidation_and_passed() {
+    void getEligibilityMessage_should_be_eligible_when_isBlockingValidation_and_passed() {
         // GIVEN
-        ExecutionDTO execution = new ExecutionDTO().withBlockingValidation(true).withQualityStatus(QualityStatus.PASSED);
+        ExecutionDTO execution = new ExecutionDTOBuilder().withBlockingValidation(true).withQualityStatus(QualityStatus.PASSED).build();
 
         // WHEN
         final String message = cut.getEligibilityMessage(execution);
@@ -532,9 +523,9 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void getEligibilityMessage_should_be_eligible_with_warning_message_when_isBlockingValidation_and_warning() {
+    void getEligibilityMessage_should_be_eligible_with_warning_message_when_isBlockingValidation_and_warning() {
         // GIVEN
-        ExecutionDTO execution = new ExecutionDTO().withBlockingValidation(true).withQualityStatus(QualityStatus.WARNING);
+        ExecutionDTO execution = new ExecutionDTOBuilder().withBlockingValidation(true).withQualityStatus(QualityStatus.WARNING).build();
 
         // WHEN
         final String message = cut.getEligibilityMessage(execution);
@@ -545,9 +536,9 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void getEligibilityMessage_should_not_be_eligible_when_isBlockingValidation_and_failed() {
+    void getEligibilityMessage_should_not_be_eligible_when_isBlockingValidation_and_failed() {
         // GIVEN
-        ExecutionDTO execution = new ExecutionDTO().withBlockingValidation(true).withQualityStatus(QualityStatus.FAILED);
+        ExecutionDTO execution = new ExecutionDTOBuilder().withBlockingValidation(true).withQualityStatus(QualityStatus.FAILED).build();
 
         // WHEN
         final String message = cut.getEligibilityMessage(execution);
@@ -557,9 +548,9 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void getEligibilityMessage_should_not_be_eligible_when_isBlockingValidation_and_incomplete() {
+    void getEligibilityMessage_should_not_be_eligible_when_isBlockingValidation_and_incomplete() {
         // GIVEN
-        ExecutionDTO execution = new ExecutionDTO().withBlockingValidation(true).withQualityStatus(QualityStatus.INCOMPLETE);
+        ExecutionDTO execution = new ExecutionDTOBuilder().withBlockingValidation(true).withQualityStatus(QualityStatus.INCOMPLETE).build();
 
         // WHEN
         final String message = cut.getEligibilityMessage(execution);
@@ -569,7 +560,7 @@ public class QualityEmailServiceTest {
     }
 
     @Test
-    public void aggregateQualitiesPerTeamAndSeverity_should_aggregate_team_qualities() {
+    void aggregateQualitiesPerTeamAndSeverity_should_aggregate_team_qualities() {
         // GIVEN
         final String SEVERITY_1 = "severity1";
         final String SEVERITY_2 = "severity2";
@@ -579,23 +570,23 @@ public class QualityEmailServiceTest {
         Map<String, Map<String, ExecutedScenarioHandlingCountsDTO>> quality1 = new HashMap<>();
         {
             Map<String, ExecutedScenarioHandlingCountsDTO> quality1team1 = new HashMap<>();
-            quality1team1.put(SEVERITY_1, new ExecutedScenarioHandlingCountsDTO(1, 2, 3));
-            quality1team1.put(SEVERITY_2, new ExecutedScenarioHandlingCountsDTO(0, 0, 1));
-            quality1team1.put(SEVERITY_ALL, new ExecutedScenarioHandlingCountsDTO(1, 2, 4));
+            quality1team1.put(SEVERITY_1, executedScenarioHandlingCountsDTO(1, 2, 3));
+            quality1team1.put(SEVERITY_2, executedScenarioHandlingCountsDTO(0, 0, 1));
+            quality1team1.put(SEVERITY_ALL, executedScenarioHandlingCountsDTO(1, 2, 4));
             quality1.put("1", quality1team1);
         }
         {
             Map<String, ExecutedScenarioHandlingCountsDTO> quality1team2 = new HashMap<>();
-            quality1team2.put(SEVERITY_1, new ExecutedScenarioHandlingCountsDTO(3, 2, 0));
-            quality1team2.put(SEVERITY_ALL, new ExecutedScenarioHandlingCountsDTO(3, 2, 0));
+            quality1team2.put(SEVERITY_1, executedScenarioHandlingCountsDTO(3, 2, 0));
+            quality1team2.put(SEVERITY_ALL, executedScenarioHandlingCountsDTO(3, 2, 0));
             quality1.put("2", quality1team2);
         }
 
         Map<String, Map<String, ExecutedScenarioHandlingCountsDTO>> quality2 = new HashMap<>();
         {
             Map<String, ExecutedScenarioHandlingCountsDTO> quality2team1 = new HashMap<>();
-            quality2team1.put(SEVERITY_2, new ExecutedScenarioHandlingCountsDTO(0, 0, 1));
-            quality2team1.put(SEVERITY_ALL, new ExecutedScenarioHandlingCountsDTO(0, 0, 1));
+            quality2team1.put(SEVERITY_2, executedScenarioHandlingCountsDTO(0, 0, 1));
+            quality2team1.put(SEVERITY_ALL, executedScenarioHandlingCountsDTO(0, 0, 1));
             quality2.put("1", quality2team1);
         }
         {
@@ -605,16 +596,15 @@ public class QualityEmailServiceTest {
         Map<String, Map<String, ExecutedScenarioHandlingCountsDTO>> quality3 = new HashMap<>();
         {
             Map<String, ExecutedScenarioHandlingCountsDTO> quality3team1 = new HashMap<>();
-            quality3team1.put(SEVERITY_3, new ExecutedScenarioHandlingCountsDTO(0, 1, 0));
-            quality3team1.put(SEVERITY_ALL, new ExecutedScenarioHandlingCountsDTO(0, 1, 0));
+            quality3team1.put(SEVERITY_3, executedScenarioHandlingCountsDTO(0, 1, 0));
+            quality3team1.put(SEVERITY_ALL, executedScenarioHandlingCountsDTO(0, 1, 0));
             quality3.put("2", quality3team1);
         }
 
-        ExecutionHistoryPointDTO execution = new ExecutionHistoryPointDTO()
-                .withRuns(Arrays.asList(
-                        new RunWithQualitiesDTO().withQualitiesPerTeamAndSeverity(quality1),
-                        new RunWithQualitiesDTO().withQualitiesPerTeamAndSeverity(quality2),
-                        new RunWithQualitiesDTO().withQualitiesPerTeamAndSeverity(quality3)));
+        ExecutionHistoryPointDTO execution = executionHistoryPointDTO(null, null, null, Arrays.asList(
+                runWithQualitiesDTO(quality1),
+                runWithQualitiesDTO(quality2),
+                runWithQualitiesDTO(quality3)));
 
         // WHEN
         final Map<String, Map<String, ExecutedScenarioHandlingCountsDTO>> aggregatedQualities = cut.aggregateQualitiesPerTeamAndSeverity(execution);
@@ -623,14 +613,54 @@ public class QualityEmailServiceTest {
         assertThat(aggregatedQualities).containsOnlyKeys("1", "2"); // Team Ids
 
         assertThat(aggregatedQualities.get("1")).containsOnlyKeys(SEVERITY_1, SEVERITY_2, SEVERITY_ALL);
-        assertThat(aggregatedQualities.get("1").get(SEVERITY_1)).isEqualTo(new ExecutedScenarioHandlingCountsDTO(1, 2, 3));
-        assertThat(aggregatedQualities.get("1").get(SEVERITY_2)).isEqualTo(new ExecutedScenarioHandlingCountsDTO(0, 0, 2));
-        assertThat(aggregatedQualities.get("1").get(SEVERITY_ALL)).isEqualTo(new ExecutedScenarioHandlingCountsDTO(1, 2, 5));
+        assertTrue(equals(aggregatedQualities.get("1").get(SEVERITY_1), 1, 2, 3));
+        assertTrue(equals(aggregatedQualities.get("1").get(SEVERITY_2), 0, 0, 2));
+        assertTrue(equals(aggregatedQualities.get("1").get(SEVERITY_ALL), 1, 2, 5));
 
         assertThat(aggregatedQualities.get("2")).containsOnlyKeys(SEVERITY_1, SEVERITY_3, SEVERITY_ALL);
-        assertThat(aggregatedQualities.get("2").get(SEVERITY_1)).isEqualTo(new ExecutedScenarioHandlingCountsDTO(3, 2, 0));
-        assertThat(aggregatedQualities.get("2").get(SEVERITY_3)).isEqualTo(new ExecutedScenarioHandlingCountsDTO(0, 1, 0));
-        assertThat(aggregatedQualities.get("2").get(SEVERITY_ALL)).isEqualTo(new ExecutedScenarioHandlingCountsDTO(3, 3, 0));
+        assertTrue(equals(aggregatedQualities.get("2").get(SEVERITY_1), 3, 2, 0));
+        assertTrue(equals(aggregatedQualities.get("2").get(SEVERITY_3), 0, 1, 0));
+        assertTrue(equals(aggregatedQualities.get("2").get(SEVERITY_ALL), 3, 3, 0));
+    }
+
+    private ExecutedScenarioHandlingCountsDTO executedScenarioHandlingCountsDTO(int passed, int unhandled, int handled) {
+        ExecutedScenarioHandlingCountsDTO executedScenarioHandlingCountsDTO = new ExecutedScenarioHandlingCountsDTO();
+        executedScenarioHandlingCountsDTO.setPassed(passed);
+        executedScenarioHandlingCountsDTO.setUnhandled(unhandled);
+        executedScenarioHandlingCountsDTO.setHandled(handled);
+        return executedScenarioHandlingCountsDTO;
+    }
+
+    private boolean equals(ExecutedScenarioHandlingCountsDTO result, int passed, int unhandled, int handled) {
+        return result.getPassed() == passed && result.getUnhandled() == unhandled && result.getHandled() == handled;
+    }
+
+    private ExecutionHistoryPointDTO executionHistoryPointDTO(Long id, Date buildDateTime, Date testDateTime, List<RunDTO> runs) {
+        ExecutionHistoryPointDTO executionHistoryPointDTO = new ExecutionHistoryPointDTO();
+        TestUtil.setField(executionHistoryPointDTO, ExecutionDTO.class, "id", id);
+        TestUtil.setField(executionHistoryPointDTO, ExecutionDTO.class, "buildDateTime", buildDateTime);
+        TestUtil.setField(executionHistoryPointDTO, ExecutionDTO.class, "testDateTime", testDateTime);
+        TestUtil.setField(executionHistoryPointDTO, "runs", runs);
+        return executionHistoryPointDTO;
+    }
+
+    private Team team(Long id, boolean assignableToProblems) {
+        Team team = new Team(id, null);
+        TestUtil.setField(team, "assignableToProblems", assignableToProblems);
+        return team;
+    }
+
+    private RunWithQualitiesDTO runWithQualitiesDTO(Map<String, Map<String, ExecutedScenarioHandlingCountsDTO>> qualitiesPerTeamAndSeverity) {
+        RunWithQualitiesDTO runWithQualitiesDTO = new RunWithQualitiesDTO();
+        runWithQualitiesDTO.setQualitiesPerTeamAndSeverity(qualitiesPerTeamAndSeverity);
+        return runWithQualitiesDTO;
+    }
+
+    private QualitySeverityDTO qualitySeverityDTO(SeverityDTO severity, int percent) {
+        QualitySeverityDTO qualitySeverityDTO = new QualitySeverityDTO();
+        qualitySeverityDTO.setSeverity(severity);
+        qualitySeverityDTO.setPercent(percent);
+        return qualitySeverityDTO;
     }
 
 }

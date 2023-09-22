@@ -14,9 +14,8 @@ jobs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
       - id: skip_check
-        uses: fkirc/skip-duplicate-actions@v3.4.0
+        uses: fkirc/skip-duplicate-actions@v3.4.1
         with:
-          github_token: ${{ github.token }}
           paths: '["charts/**"]'
           cancel_others: 'true'
   lint-chart:
@@ -45,10 +44,10 @@ jobs:
             echo "::set-output name=changed::true"
           fi
       - name: Run chart-testing (lint)
-        run: ct lint --target-branch main
+        run: ct lint --check-version-increment=false --target-branch main 
   lint-docs:
     runs-on: ubuntu-latest
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    if: ${{ needs.chart_change.outputs.should_skip != 'true' }}
     needs: lint-chart
     steps:
       - name: Checkout
@@ -57,7 +56,7 @@ jobs:
         run: .github/helm-docs.sh
   kubeval-chart:
     runs-on: ubuntu-latest
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    if: ${{ needs.chart_change.outputs.should_skip != 'true' }}
     needs:
       - lint-chart
       - lint-docs

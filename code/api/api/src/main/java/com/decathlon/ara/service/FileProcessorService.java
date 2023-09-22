@@ -18,11 +18,9 @@
 package com.decathlon.ara.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -33,15 +31,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Slf4j
 public class FileProcessorService {
 
-    @NonNull
+    private static final Logger LOG = LoggerFactory.getLogger(FileProcessorService.class);
+
     private final ObjectMapper objectMapper;
+
+    public FileProcessorService(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     /**
      * Create a mapped object from a file (if found and processed correctly)
@@ -61,7 +61,7 @@ public class FileProcessorService {
         try {
             mappedObject = objectMapper.readValue(matchingFile.get(), objectClass);
         } catch (IOException e) {
-            log.info("Unable to process the file {}", matchingFile.get().getAbsolutePath(), e);
+            LOG.warn("Unable to process the file {}", matchingFile.get().getAbsolutePath(), e);
         }
 
         return Optional.ofNullable(mappedObject);
@@ -82,7 +82,7 @@ public class FileProcessorService {
         try {
             mappedObject = objectMapper.readValue(rawFile, objectClass);
         } catch (IOException e) {
-            log.info("Unable to process the file {}", rawFile.getAbsolutePath(), e);
+            LOG.warn("Unable to process the file {}", rawFile.getAbsolutePath(), e);
         }
         return Optional.ofNullable(mappedObject);
     }
@@ -98,13 +98,13 @@ public class FileProcessorService {
     public <T> List<T> getMappedObjectListFromFile(File parentDirectory, String pathToFile, Class<T> objectClass) {
         Optional<File> matchingFile = getMatchingSimpleFile(parentDirectory, pathToFile);
         if (!matchingFile.isPresent()) {
-            log.info("The file {} was not found", pathToFile);
+            LOG.warn("The file {} was not found", pathToFile);
             return new ArrayList<>();
         }
         try (InputStream input = new FileInputStream(matchingFile.get())) {
             return objectMapper.readValue(input, objectMapper.getTypeFactory().constructCollectionType(List.class, objectClass));
         } catch (IOException e) {
-            log.info("Cannot download file in {}", matchingFile.get().getPath(), e);
+            LOG.warn("Cannot download file in {}", matchingFile.get().getPath(), e);
             return new ArrayList<>();
         }
     }
@@ -120,7 +120,7 @@ public class FileProcessorService {
     public <T> List<T> getMappedObjectsFromDirectory(File parentDirectory, String pathToDirectory, Class<T> objectClass) {
         final Optional<File> matchingDirectory = getMatchingDirectory(parentDirectory, pathToDirectory);
         if (!matchingDirectory.isPresent()) {
-            log.info("The directory {} was not found", pathToDirectory);
+            LOG.warn("The directory {} was not found", pathToDirectory);
             return new ArrayList<>();
         }
 
@@ -130,7 +130,7 @@ public class FileProcessorService {
                 .map(file -> getMappedObjectFromRawFile(file, objectClass))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -177,7 +177,7 @@ public class FileProcessorService {
         File matchingFile = new File(absoluteFilePath);
 
         if (!matchingFile.exists()) {
-            log.error("File {} not found", absoluteFilePath);
+            LOG.warn("File {} not found", absoluteFilePath);
             return Optional.empty();
         }
 

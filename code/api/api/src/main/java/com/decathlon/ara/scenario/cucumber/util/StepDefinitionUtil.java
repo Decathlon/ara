@@ -17,27 +17,31 @@
 
 package com.decathlon.ara.scenario.cucumber.util;
 
-import com.decathlon.ara.scenario.cucumber.bean.Argument;
-import com.decathlon.ara.scenario.cucumber.bean.Match;
-import com.decathlon.ara.scenario.cucumber.bean.Step;
-import com.decathlon.ara.scenario.cucumber.support.ResultsWithMatch;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.decathlon.ara.scenario.cucumber.bean.Argument;
+import com.decathlon.ara.scenario.cucumber.bean.Match;
+import com.decathlon.ara.scenario.cucumber.bean.Step;
+import com.decathlon.ara.scenario.cucumber.support.ResultsWithMatch;
+import com.decathlon.ara.util.JsonUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
+
 /**
  * A set of static functions with no dependency nor side-effect (no download, upload, database access...) that parse a stepDefinitions.json or manipulate the parsed result.
  */
-@Slf4j
-@UtilityClass
 public class StepDefinitionUtil {
+
+    private static final Logger LOG = LoggerFactory.getLogger(StepDefinitionUtil.class);
+
+    private StepDefinitionUtil() {
+    }
 
     /**
      * @param stepDefinitionsJson the JSON containing the step definitions to parse and return
@@ -45,11 +49,11 @@ public class StepDefinitionUtil {
      */
     public static List<String> parseStepDefinitionsJson(String stepDefinitionsJson) {
         try {
-            return new ObjectMapper().readValue(stepDefinitionsJson, new TypeReference<List<String>>() {
+            return JsonUtil.parse(stepDefinitionsJson, new TypeReference<List<String>>() {
                 // Nothing to override from this abstract class
             });
         } catch (IOException e) {
-            log.error("Cannot load step definitions", e);
+            LOG.error("Cannot load step definitions", e);
             return new ArrayList<>();
         }
     }
@@ -87,12 +91,12 @@ public class StepDefinitionUtil {
         }
 
         if (matchingStepDefinitions.isEmpty()) {
-            log.error("Cannot find any matching step definition for \"{}\"", stepName);
+            LOG.error("Cannot find any matching step definition for \"{}\"", stepName);
             return simulateMatchingStepDefinition(stepName, arguments);
         }
 
         if (matchingStepDefinitions.size() > 1) {
-            log.error("Found multiple matching step definition for \"{}\": taking the first one in {}", stepName, matchingStepDefinitions);
+            LOG.error("Found multiple matching step definition for \"{}\": taking the first one in {}", stepName, matchingStepDefinitions);
         }
 
         return matchingStepDefinitions.get(0);

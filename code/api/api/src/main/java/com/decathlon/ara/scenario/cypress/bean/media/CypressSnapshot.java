@@ -17,9 +17,6 @@
 
 package com.decathlon.ara.scenario.cypress.bean.media;
 
-import lombok.Data;
-
-@Data
 public class CypressSnapshot {
 
     private String id;
@@ -27,4 +24,16 @@ public class CypressSnapshot {
     private String name;
 
     private String url;
+
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
 }

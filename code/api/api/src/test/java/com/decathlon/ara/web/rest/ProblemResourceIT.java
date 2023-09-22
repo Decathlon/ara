@@ -66,13 +66,19 @@ import com.decathlon.ara.service.dto.error.ErrorDTO;
 import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
 import com.decathlon.ara.service.dto.executedscenario.ExecutedScenarioWithRunAndExecutionDTO;
 import com.decathlon.ara.service.dto.execution.ExecutionDTO;
-import com.decathlon.ara.service.dto.problem.*;
+import com.decathlon.ara.service.dto.problem.ProblemAggregateDTO;
+import com.decathlon.ara.service.dto.problem.ProblemDTO;
+import com.decathlon.ara.service.dto.problem.ProblemFilterDTO;
+import com.decathlon.ara.service.dto.problem.ProblemWithAggregateDTO;
+import com.decathlon.ara.service.dto.problem.ProblemWithPatternsAndAggregateTDO;
+import com.decathlon.ara.service.dto.problem.ProblemWithPatternsDTO;
 import com.decathlon.ara.service.dto.problempattern.ProblemPatternDTO;
 import com.decathlon.ara.service.dto.response.PickUpPatternDTO;
-import com.decathlon.ara.service.dto.rootcause.RootCauseDTO;
 import com.decathlon.ara.service.dto.run.RunWithExecutionDTO;
 import com.decathlon.ara.service.dto.stability.ExecutionStabilityDTO;
 import com.decathlon.ara.service.dto.team.TeamDTO;
+import com.decathlon.ara.util.TestUtil;
+import com.decathlon.ara.util.factory.RootCauseDTOFactory;
 import com.decathlon.ara.web.rest.util.HeaderUtil;
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
@@ -80,16 +86,16 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 @Disabled
 @SpringBootTest
 @TestExecutionListeners({
-    TransactionalTestExecutionListener.class,
-    DependencyInjectionTestExecutionListener.class,
-    DbUnitTestExecutionListener.class
+        TransactionalTestExecutionListener.class,
+        DependencyInjectionTestExecutionListener.class,
+        DbUnitTestExecutionListener.class
 })
 @TestPropertySource(
-		locations = "classpath:application-db-h2.properties")
+        locations = "classpath:application-db-h2.properties")
 @Transactional
 @DatabaseSetup("/dbunit/full-small-fake-dataset.xml")
 @DatabaseSetup("/dbunit/full-small-fake-dataset-defect-settings.xml")
-public class ProblemResourceIT {
+class ProblemResourceIT {
 
     private static final String PROJECT_CODE = "p";
 
@@ -163,7 +169,7 @@ public class ProblemResourceIT {
         assertThat(pattern.getType().getName()).isEqualTo("Desktop");
     }
 
-    public static void assertProblem1001(ProblemDTO problem) {
+    static void assertProblem1001(ProblemDTO problem) {
         assertThat(problem.getId()).isEqualTo(1001);
         assertThat(problem.getName()).isEqualTo("Step 2 needs rework");
         assertThat(problem.getComment()).isEqualTo("Not working anymore");
@@ -230,16 +236,17 @@ public class ProblemResourceIT {
     }
 
     private static TeamDTO teamNotAssignableToProblems() {
-        return new TeamDTO()
-                .withId(Long.valueOf(102)) // This one is not assignable to problems
-                .withAssignableToProblems(
-                        true); // Check the server don't use client's provided configuration but uses server's one
+        return new TeamDTO(Long.valueOf(102), // This one is not assignable to problems
+                null,
+                true, // Check the server don't use client's provided configuration but uses server's one
+                false);
     }
 
     @Test
-    public void testGetOpenProblems() {
+    void testGetOpenProblems() {
         // GIVEN
-        final ProblemFilterDTO openStatusFilter = new ProblemFilterDTO().withStatus(ProblemStatusFilter.OPEN);
+        final ProblemFilterDTO openStatusFilter = new ProblemFilterDTO();
+        TestUtil.setField(openStatusFilter, "status", ProblemStatusFilter.OPEN);
 
         // WHEN
         // There are 3 problems, and only 2 open: make sure the closed ones do not appear
@@ -266,10 +273,10 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testGetProblemsOfTeam2() {
+    void testGetProblemsOfTeam2() {
         // GIVEN
-        ProblemFilterDTO filter = new ProblemFilterDTO()
-                .withBlamedTeamId(Long.valueOf(2));
+        ProblemFilterDTO filter = new ProblemFilterDTO();
+        TestUtil.setField(filter, "blamedTeamId", Long.valueOf(2));
 
         // WHEN
         ResponseEntity<Page<ProblemWithAggregateDTO>> response = cut.getMatchingOnes(PROJECT_CODE, filter, firstPageOf10());
@@ -282,11 +289,11 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testGetProblemsWithTooRestrictiveFilters() {
+    void testGetProblemsWithTooRestrictiveFilters() {
         // GIVEN
-        ProblemFilterDTO tooRestrictiveFilter = new ProblemFilterDTO()
-                .withName("Nonexistent")
-                .withDefectId("42");
+        ProblemFilterDTO tooRestrictiveFilter = new ProblemFilterDTO();
+        TestUtil.setField(tooRestrictiveFilter, "name", "Nonexistent");
+        TestUtil.setField(tooRestrictiveFilter, "defectId", "42");
 
         // WHEN
         ResponseEntity<Page<ProblemWithAggregateDTO>> response = cut.getMatchingOnes(PROJECT_CODE, tooRestrictiveFilter, firstPageOf10());
@@ -297,7 +304,7 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testGetOneWithRootCause() {
+    void testGetOneWithRootCause() {
         ResponseEntity<ProblemWithPatternsAndAggregateTDO> response = cut.getOne(PROJECT_CODE, 1001);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertProblem1001(response.getBody());
@@ -305,7 +312,7 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testGetOneWithSeveralPatternColumns() {
+    void testGetOneWithSeveralPatternColumns() {
         ResponseEntity<ProblemWithPatternsAndAggregateTDO> response = cut.getOne(PROJECT_CODE, 1003);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertProblem1003(response.getBody());
@@ -314,13 +321,13 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testGetOneNonexistent() {
+    void testGetOneNonexistent() {
         ResponseEntity<ProblemWithPatternsAndAggregateTDO> response = cut.getOne(PROJECT_CODE, NONEXISTENT.longValue());
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
-    public void testGetProblemErrors() {
+    void testGetProblemErrors() {
         int pageIndex = 0;
         int pageSize = 2;
 
@@ -380,33 +387,29 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testGetProblemErrorsNonexistent() {
+    void testGetProblemErrorsNonexistent() {
         ResponseEntity<Page<ErrorWithExecutedScenarioAndRunAndExecutionDTO>> response = cut
                 .getProblemErrors(PROJECT_CODE, NONEXISTENT.longValue(), firstPageOf10());
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
-    public void testCreate() throws FetchException {
+    void testCreate() throws FetchException {
         // GIVEN
         Date closeDateTime = timestamp(2017, 12, 31, 23, 59, 59);
         when(Boolean.valueOf(defectAdapter.isValidId(anyString()))).thenReturn(Boolean.TRUE);
         doReturn(Collections.singletonList(new Defect("42", ProblemStatus.CLOSED, closeDateTime)))
                 .when(defectAdapter).getStatuses(anyLong(), any());
 
-        ProblemWithPatternsDTO problem = new ProblemWithPatternsDTO();
-        problem.setName("  \t  New problem  \t  ");
-        problem.setComment("  \t  Comment  \t  ");
+        ProblemPatternDTO pattern = problemPatternDTO("Scenario a", "Step 2");
+        ProblemWithPatternsDTO problem = new ProblemWithPatternsDTO("  \t  New problem  \t  ",
+                "  \t  Comment  \t  ",
+                new TeamDTO(Long.valueOf(2), null, false, false),
+                "  \t  42  \t  ",
+                null,
+                Collections.singletonList(pattern));
         problem.setStatus(ProblemStatus.OPEN); // Is ignored and set to the defect's status (OPEN if no defect)
-        problem.setBlamedTeam(new TeamDTO(Long.valueOf(2), null, false, false));
-        problem.setDefectId("  \t  42  \t  ");
         problem.setDefectUrl("USELESS: SHOULD BE AUTOMATICALLY GENERATED");
-        problem.setRootCause(null);
-
-        ProblemPatternDTO pattern = new ProblemPatternDTO();
-        pattern.setScenarioName("Scenario a");
-        pattern.setStep("Step 2");
-        problem.setPatterns(Collections.singletonList(pattern));
 
         // WHEN
         ResponseEntity<ProblemWithPatternsDTO> response = cut.create(PROJECT_CODE, problem);
@@ -447,7 +450,7 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testCreateProblemWithAnId() {
+    void testCreateProblemWithAnId() {
         ProblemWithPatternsDTO problem = new ProblemWithPatternsDTO();
         problem.setId(NONEXISTENT);
         ResponseEntity<ProblemWithPatternsDTO> response = cut.create(PROJECT_CODE, problem);
@@ -458,9 +461,8 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testCreateProblemWithExistingName() {
-        ProblemWithPatternsDTO problem = new ProblemWithPatternsDTO();
-        problem.setName("Step 2 needs rework");
+    void testCreateProblemWithExistingName() {
+        ProblemWithPatternsDTO problem = new ProblemWithPatternsDTO("Step 2 needs rework", null, null, null, null, null);
         ResponseEntity<ProblemWithPatternsDTO> response = cut.create(PROJECT_CODE, problem);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_unique");
@@ -472,7 +474,7 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testCreateProblemWithExistingDefectId() {
+    void testCreateProblemWithExistingDefectId() {
         ProblemWithPatternsDTO problem = new ProblemWithPatternsDTO();
         problem.setDefectId("1");
         ResponseEntity<ProblemWithPatternsDTO> response = cut.create(PROJECT_CODE, problem);
@@ -486,10 +488,8 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testCreateWithNonexistentTeam() {
-        ProblemWithPatternsDTO problem = new ProblemWithPatternsDTO();
-        problem.setName("Any");
-        problem.setBlamedTeam(new TeamDTO().withId(NONEXISTENT));
+    void testCreateWithNonexistentTeam() {
+        ProblemWithPatternsDTO problem = new ProblemWithPatternsDTO("Any", null, new TeamDTO(NONEXISTENT, null, false, false), null, null, null);
 
         ResponseEntity<ProblemWithPatternsDTO> response = cut.create(PROJECT_CODE, problem);
 
@@ -500,10 +500,8 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testCreateWithNonAssignableTeam() {
-        ProblemWithPatternsDTO problem = new ProblemWithPatternsDTO();
-        problem.setName("New problem");
-        problem.setBlamedTeam(teamNotAssignableToProblems());
+    void testCreateWithNonAssignableTeam() {
+        ProblemWithPatternsDTO problem = new ProblemWithPatternsDTO("New problem", null, teamNotAssignableToProblems(), null, null, null);
 
         ResponseEntity<ProblemWithPatternsDTO> response = cut.create(PROJECT_CODE, problem);
 
@@ -514,10 +512,8 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testCreateWithNonexistentRootCause() {
-        ProblemWithPatternsDTO problem = new ProblemWithPatternsDTO();
-        problem.setName("Any");
-        problem.setRootCause(new RootCauseDTO().withId(NONEXISTENT));
+    void testCreateWithNonexistentRootCause() {
+        ProblemWithPatternsDTO problem = new ProblemWithPatternsDTO("Any", null, null, null, RootCauseDTOFactory.get(NONEXISTENT), null);
 
         ResponseEntity<ProblemWithPatternsDTO> response = cut.create(PROJECT_CODE, problem);
 
@@ -528,7 +524,7 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testDeleteOk() {
+    void testDeleteOk() {
         ResponseEntity<Void> response = cut.delete(PROJECT_CODE, 1001);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(header(response, HeaderUtil.ALERT)).isEqualTo("ara.problem.deleted");
@@ -539,7 +535,7 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testDeleteNonexistent() {
+    void testDeleteNonexistent() {
         ResponseEntity<Void> response = cut.delete(PROJECT_CODE, NONEXISTENT.longValue());
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_found");
@@ -552,9 +548,9 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testAppendPattern() {
+    void testAppendPattern() {
         long problemId = 1003;
-        ProblemPatternDTO newPattern = new ProblemPatternDTO().withScenarioName("Scenario c");
+        ProblemPatternDTO newPattern = problemPatternDTO("Scenario c", null);
 
         ResponseEntity<ProblemPatternDTO> response = cut.appendPattern(PROJECT_CODE, problemId, newPattern);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -579,8 +575,8 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testAppendPatternNonexistent() {
-        ProblemPatternDTO newPattern = new ProblemPatternDTO().withScenarioName("Not used");
+    void testAppendPatternNonexistent() {
+        ProblemPatternDTO newPattern = problemPatternDTO("Not used", null);
         ResponseEntity<ProblemPatternDTO> response = cut.appendPattern(PROJECT_CODE, NONEXISTENT.longValue(), newPattern);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_found");
@@ -590,8 +586,8 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testAppendDuplicatePattern() {
-        ProblemPatternDTO newPattern = new ProblemPatternDTO().withStep("Step 2");
+    void testAppendDuplicatePattern() {
+        ProblemPatternDTO newPattern = problemPatternDTO(null, "Step 2");
         ResponseEntity<ProblemPatternDTO> response = cut.appendPattern(PROJECT_CODE, 1001, newPattern);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_unique");
@@ -601,7 +597,7 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testUpdateNonexistent() {
+    void testUpdateNonexistent() {
         ResponseEntity<ProblemDTO> response = cut.updateProperties(PROJECT_CODE, NONEXISTENT.longValue(), new ProblemDTO());
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_found");
@@ -611,10 +607,10 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testUpdateWithExistingName() {
+    void testUpdateWithExistingName() {
         // Renaming 1002 with the name of 1001 must fail
         ResponseEntity<ProblemDTO> response = cut
-                .updateProperties(PROJECT_CODE, 1002, new ProblemDTO().withName("Step 2 needs rework"));
+                .updateProperties(PROJECT_CODE, 1002, new ProblemDTO("Step 2 needs rework", null, null, null, null));
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_unique");
         assertThat(header(response, HeaderUtil.PARAMS)).isEqualTo("problem");
@@ -625,23 +621,20 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testUpdateKeepingSameNameAndDefectId() {
+    void testUpdateKeepingSameNameAndDefectId() {
         // Updating properties but keeping the same name should not throw not_unique!
         long problemId = 1001;
-        ProblemDTO problem = new ProblemDTO();
-        problem.setName("Step 2 needs rework");
-        problem.setDefectId("1");
+        ProblemDTO problem = new ProblemDTO("Step 2 needs rework", null, null, "1", null);
         ResponseEntity<ProblemDTO> response = cut.updateProperties(PROJECT_CODE, problemId, problem);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody().getId()).isEqualTo(problemId);
     }
 
     @Test
-    public void testUpdateWithoutDefectId() {
+    void testUpdateWithoutDefectId() {
         long problemId = 1001;
-        ProblemDTO problem = new ProblemDTO();
+        ProblemDTO problem = new ProblemDTO("Step 2 needs rework", null, null, null, null);
         problem.setStatus(ProblemStatus.OPEN);
-        problem.setName("Step 2 needs rework");
         problem.setCreationDateTime(timestamp(2018, Calendar.JANUARY, 1, 12, 0, 0));
 
         // Making problem 1001 AND problem 1003 having null defect ID
@@ -654,22 +647,21 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testUpdate() throws FetchException {
+    void testUpdate() throws FetchException {
         // GIVEN
         when(Boolean.valueOf(defectAdapter.isValidId(anyString()))).thenReturn(Boolean.TRUE);
         doReturn(Collections.singletonList(new Defect("42", ProblemStatus.OPEN, null)))
                 .when(defectAdapter).getStatuses(anyLong(), any());
         long problemId = 1001;
         // We update EVERY fields
-        ProblemDTO problem = new ProblemDTO();
+        ProblemDTO problem = new ProblemDTO("  \t  New name  \t  ",
+                "  \t  New comment  \t  ",
+                new TeamDTO(Long.valueOf(25), "USELESS: SHOULD BECOME Search & Choose", false, false),
+                "  \t  42  \t  ",
+                RootCauseDTOFactory.get(Long.valueOf(5), "USELESS: SHOULD BECOME Regression"));
         problem.setId(Long.valueOf(problemId));
-        problem.setName("  \t  New name  \t  ");
-        problem.setComment("  \t  New comment  \t  ");
         problem.setStatus(ProblemStatus.CLOSED); // Status change will be ignored
-        problem.setBlamedTeam(new TeamDTO(Long.valueOf(25), "USELESS: SHOULD BECOME Search & Choose", false, false));
-        problem.setDefectId("  \t  42  \t  ");
         problem.setDefectUrl("USELESS: SHOULD BE AUTOMATICALLY GENERATED");
-        problem.setRootCause(new RootCauseDTO(Long.valueOf(5), "USELESS: SHOULD BECOME Regression"));
 
         // WHEN
         ResponseEntity<ProblemDTO> response = cut.updateProperties(PROJECT_CODE, problemId, problem);
@@ -685,8 +677,8 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testUpdateWithNonexistentTeam() {
-        ProblemDTO problem = new ProblemDTO().withBlamedTeam(new TeamDTO().withId(NONEXISTENT)).withName("Any");
+    void testUpdateWithNonexistentTeam() {
+        ProblemDTO problem = new ProblemDTO(null, null, new TeamDTO(NONEXISTENT, "Any", false, false), null, null);
 
         ResponseEntity<ProblemDTO> response = cut.updateProperties(PROJECT_CODE, 1001, problem);
 
@@ -697,8 +689,8 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testUpdateWithNonAssignableTeam() {
-        ProblemDTO problem = new ProblemDTO().withBlamedTeam(teamNotAssignableToProblems()).withName("Any name");
+    void testUpdateWithNonAssignableTeam() {
+        ProblemDTO problem = new ProblemDTO("Any name", null, teamNotAssignableToProblems(), null, null);
 
         ResponseEntity<ProblemDTO> response = cut.updateProperties(PROJECT_CODE, 1001, problem);
 
@@ -708,8 +700,8 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testUpdateWithNonexistentRootCause() {
-        ProblemDTO problem = new ProblemDTO().withRootCause(new RootCauseDTO().withId(NONEXISTENT)).withName("Any");
+    void testUpdateWithNonexistentRootCause() {
+        ProblemDTO problem = new ProblemDTO("Any", null, null, null, RootCauseDTOFactory.get(NONEXISTENT));
 
         ResponseEntity<ProblemDTO> response = cut.updateProperties(PROJECT_CODE, 1001, problem);
 
@@ -720,7 +712,7 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testPickUpPattern() {
+    void testPickUpPattern() {
         // Initial state:
         // problem #1001: problem_pattern #1011
         // problem #1002: problem_pattern #1021
@@ -764,7 +756,7 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testErroneousPickUpPattern() {
+    void testErroneousPickUpPattern() {
         long destinationProblemId = 1001;
         long sourcePatternId = 1011;
         ResponseEntity<PickUpPatternDTO> response;
@@ -791,11 +783,11 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testPickUpPatternAsDuplicate() {
+    void testPickUpPatternAsDuplicate() {
         // Create data for this test
         long sourceProblemId = 1002;
         long destinationProblemId = 1001;
-        ProblemPatternDTO patternExistingInDestinationProblem = new ProblemPatternDTO().withStep("Step 2");
+        ProblemPatternDTO patternExistingInDestinationProblem = problemPatternDTO(null, "Step 2");
         long sourcePatternId = cut.appendPattern(PROJECT_CODE, sourceProblemId, patternExistingInDestinationProblem)
                 .getBody().getId().longValue();
 
@@ -808,7 +800,7 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testClose() {
+    void testClose() {
         long problemId = 1003; // It has no root cause
 
         ResponseEntity<ProblemDTO> response = cut.close(PROJECT_CODE, problemId, 5);
@@ -830,7 +822,7 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testCloseNonExistent() {
+    void testCloseNonExistent() {
         ResponseEntity<ProblemDTO> response = cut.close(PROJECT_CODE, NONEXISTENT.longValue(), 5);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_found");
@@ -840,7 +832,7 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testCloseWithoutRootCause() {
+    void testCloseWithoutRootCause() {
         long problemIdWithRootCause = 1003;
         ResponseEntity<ProblemDTO> response = cut.close(PROJECT_CODE, problemIdWithRootCause, NONEXISTENT.longValue());
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -851,7 +843,7 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testReopen() {
+    void testReopen() {
         long closedProblemId = 1002;
 
         ResponseEntity<ProblemDTO> response = cut.reopen(PROJECT_CODE, closedProblemId);
@@ -867,7 +859,7 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void testReopenNonExistent() {
+    void testReopenNonExistent() {
         ResponseEntity<ProblemDTO> response = cut.reopen(PROJECT_CODE, NONEXISTENT.longValue());
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_found");
@@ -877,7 +869,7 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void refreshDefectStatus_should_return_not_found_for_nonexistent_id() {
+    void refreshDefectStatus_should_return_not_found_for_nonexistent_id() {
         // WHEN
         ResponseEntity<ProblemDTO> response = cut.refreshDefectStatus(PROJECT_CODE, NONEXISTENT.longValue());
 
@@ -889,7 +881,7 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void refreshDefectStatus_should_not_touch_problem_if_no_defect_id() {
+    void refreshDefectStatus_should_not_touch_problem_if_no_defect_id() {
         // WHEN
         ResponseEntity<ProblemDTO> response = cut.refreshDefectStatus(PROJECT_CODE, 1002);
 
@@ -900,7 +892,7 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void refreshDefectStatus_should_set_NONEXISTENT_and_reopen_on_disappeared_defect() throws FetchException {
+    void refreshDefectStatus_should_set_NONEXISTENT_and_reopen_on_disappeared_defect() throws FetchException {
         // GIVEN
         doReturn(Collections.emptyList()).when(defectAdapter).getStatuses(anyLong(), any());
 
@@ -915,7 +907,7 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void refreshDefectStatus_should_set_EXISTS_and_status_OPEN_when_defect_is_open_in_tracking_system() throws FetchException {
+    void refreshDefectStatus_should_set_EXISTS_and_status_OPEN_when_defect_is_open_in_tracking_system() throws FetchException {
         // GIVEN
         doReturn(Collections.singletonList(new Defect("1", ProblemStatus.OPEN, null)))
                 .when(defectAdapter).getStatuses(anyLong(), any());
@@ -931,7 +923,7 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void refreshDefectStatus_should_set_EXISTS_and_status_CLOSED_when_defect_is_closed_in_tracking_system() throws FetchException {
+    void refreshDefectStatus_should_set_EXISTS_and_status_CLOSED_when_defect_is_closed_in_tracking_system() throws FetchException {
         // GIVEN
         Date newDate = new Date();
         doReturn(Collections.singletonList(new Defect("1", ProblemStatus.CLOSED, newDate)))
@@ -948,7 +940,7 @@ public class ProblemResourceIT {
     }
 
     @Test
-    public void refreshDefectStatus_should_return_bad_gateway_when_defect_tracking_system_do_not_respond() throws FetchException {
+    void refreshDefectStatus_should_return_bad_gateway_when_defect_tracking_system_do_not_respond() throws FetchException {
         // GIVEN
         doThrow(new FetchException("any")).when(defectAdapter).getStatuses(anyLong(), any());
         when(defectAdapter.getName()).thenReturn("SYSTEM");
@@ -961,6 +953,13 @@ public class ProblemResourceIT {
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.bad_gateway");
         assertThat(header(response, HeaderUtil.PARAMS)).isEqualTo("problem");
         assertThat(header(response, HeaderUtil.MESSAGE)).isEqualTo("A problem occurred while contacting SYSTEM.");
+    }
+
+    private ProblemPatternDTO problemPatternDTO(String featureFile, String step) {
+        ProblemPatternDTO problemPatternDTO = new ProblemPatternDTO();
+        TestUtil.setField(problemPatternDTO, "featureFile", featureFile);
+        TestUtil.setField(problemPatternDTO, "step", step);
+        return problemPatternDTO;
     }
 
 }

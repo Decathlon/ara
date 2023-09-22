@@ -45,14 +45,14 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 @DatabaseSetup("/dbunit/brand-new-project-dataset.xml")
 @TestPropertySource(
 		locations = "classpath:application-db-h2.properties")
-public class DbUnitImporter {
+class DbUnitImporter {
 
     // WARNING: you may need to put &sessionVariables=FOREIGN_KEY_CHECKS=0 at the end of spring.datasource.url in
     // application-dev.properties
 
     @Test
     // No @Transactional, for data to be committed
-    public void importTheDataSetConfiguredInDatabaseSetup() {
+    void importTheDataSetConfiguredInDatabaseSetup() {
         // All the work is done by @DatabaseSetup
     }
 

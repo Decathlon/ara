@@ -1,0 +1,20 @@
+{
+    "branches": [
+        {"name": "main"}
+    ],
+    "plugins": [
+        "@semantic-release/commit-analyzer",
+        "@semantic-release/release-notes-generator",
+        ["@semantic-release/exec", {
+          "verifyConditionsCmd": "git pull"
+        }],
+        "@semantic-release/npm",
+        ["@semantic-release/git", {
+          "assets": ["package.json"],
+          "message": "chore(release): ara-web-ui ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        }]
+    ],
+    "extends": [
+        "semantic-release-monorepo"
+    ]
+}

@@ -17,12 +17,9 @@
 
 package com.decathlon.ara.configuration;
 
-import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.PropertySources;
 
 /**
  * <p>ARA's application configuration options to be used by the Java code.</p>
@@ -37,7 +34,6 @@ import org.springframework.context.annotation.PropertySources;
  * Spring will embed it in the generated spring-configuration-metadata.json for IDE auto-completion.
  * </p>
  */
-@Data
 @Configuration
 @ConfigurationProperties("ara")
 @Import(DataSourceConfiguration.class)
@@ -134,5 +130,125 @@ public class AraConfiguration {
      * -1 to disable such limit.
      */
     private Integer minExecutionsToKeepPerCycle;
+
+    public String getSshHost() {
+        return sshHost;
+    }
+
+    public void setSshHost(String sshHost) {
+        this.sshHost = sshHost;
+    }
+
+    public int getSshPort() {
+        return sshPort;
+    }
+
+    public void setSshPort(int sshPort) {
+        this.sshPort = sshPort;
+    }
+
+    public String getSshUser() {
+        return sshUser;
+    }
+
+    public void setSshUser(String sshUser) {
+        this.sshUser = sshUser;
+    }
+
+    public String getSshPassword() {
+        return sshPassword;
+    }
+
+    public void setSshPassword(String sshPassword) {
+        this.sshPassword = sshPassword;
+    }
+
+    public String getSshRemoteHomeFolder() {
+        return sshRemoteHomeFolder;
+    }
+
+    public void setSshRemoteHomeFolder(String sshRemoteHomeFolder) {
+        this.sshRemoteHomeFolder = sshRemoteHomeFolder;
+    }
+
+    public String getSshHttpAccess() {
+        return sshHttpAccess;
+    }
+
+    public void setSshHttpAccess(String sshHttpAccess) {
+        this.sshHttpAccess = sshHttpAccess;
+    }
+
+    public String getSshScreenshotSubFolder() {
+        return sshScreenshotSubFolder;
+    }
+
+    public void setSshScreenshotSubFolder(String sshScreenshotSubFolder) {
+        this.sshScreenshotSubFolder = sshScreenshotSubFolder;
+    }
+
+    public String getSshHttpLogsSubFolder() {
+        return sshHttpLogsSubFolder;
+    }
+
+    public void setSshHttpLogsSubFolder(String sshHttpLogsSubFolder) {
+        this.sshHttpLogsSubFolder = sshHttpLogsSubFolder;
+    }
+
+    public String getFileHomeFolder() {
+        return fileHomeFolder;
+    }
+
+    public void setFileHomeFolder(String fileHomeFolder) {
+        this.fileHomeFolder = fileHomeFolder;
+    }
+
+    public String getFileHttpAccess() {
+        return fileHttpAccess;
+    }
+
+    public void setFileHttpAccess(String fileHttpAccess) {
+        this.fileHttpAccess = fileHttpAccess;
+    }
+
+    public String getFileScreenshotSubFolder() {
+        return fileScreenshotSubFolder;
+    }
+
+    public void setFileScreenshotSubFolder(String fileScreenshotSubFolder) {
+        this.fileScreenshotSubFolder = fileScreenshotSubFolder;
+    }
+
+    public String getFileHttpLogsSubFolder() {
+        return fileHttpLogsSubFolder;
+    }
+
+    public void setFileHttpLogsSubFolder(String fileHttpLogsSubFolder) {
+        this.fileHttpLogsSubFolder = fileHttpLogsSubFolder;
+    }
+
+    public String getClientBaseUrl() {
+        return clientBaseUrl;
+    }
+
+    public void setClientBaseUrl(String clientBaseUrl) {
+        this.clientBaseUrl = clientBaseUrl;
+    }
+
+    public Integer getMaxExecutionDaysToKeep() {
+        return maxExecutionDaysToKeep;
+    }
+
+    public void setMaxExecutionDaysToKeep(Integer maxExecutionDaysToKeep) {
+        this.maxExecutionDaysToKeep = maxExecutionDaysToKeep;
+    }
+
+    public Integer getMinExecutionsToKeepPerCycle() {
+        return minExecutionsToKeepPerCycle;
+    }
+
+    public void setMinExecutionsToKeepPerCycle(Integer minExecutionsToKeepPerCycle) {
+        this.minExecutionsToKeepPerCycle = minExecutionsToKeepPerCycle;
+    }
 
 }

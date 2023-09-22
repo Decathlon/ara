@@ -47,9 +47,10 @@ import com.decathlon.ara.domain.enumeration.ProblemStatus;
 import com.decathlon.ara.service.SettingProviderService;
 import com.decathlon.ara.service.SettingService;
 import com.decathlon.ara.service.support.Settings;
+import com.decathlon.ara.util.TestUtil;
 
 @ExtendWith(MockitoExtension.class)
-public class RtcDefectAdapterTest {
+class RtcDefectAdapterTest {
 
     @Mock
     private SettingService settingService;
@@ -69,7 +70,7 @@ public class RtcDefectAdapterTest {
     private RtcDefectAdapter cut;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         when(restTemplateBuilder.requestFactory(ArgumentMatchers.<Class<ClientHttpRequestFactory>>any()))
                 .thenReturn(restTemplateBuilder);
         when(restTemplateBuilder.build()).thenReturn(restTemplate);
@@ -78,9 +79,7 @@ public class RtcDefectAdapterTest {
     }
 
     @Test
-    public void isValidId_should_work() {
-        long anyProjectId = 42;
-
+    void isValidId_should_work() {
         assertThat(cut.isValidId("-2147483648")).isTrue();
         assertThat(cut.isValidId("-1")).isTrue();
         assertThat(cut.isValidId("0")).isTrue();
@@ -98,7 +97,7 @@ public class RtcDefectAdapterTest {
     }
 
     @Test
-    public void getIdFormatHint_should_return_must_be_a_number() {
+    void getIdFormatHint_should_return_must_be_a_number() {
         // GIVEN
         long anyProjectId = 42;
 
@@ -110,17 +109,17 @@ public class RtcDefectAdapterTest {
     }
 
     @Test
-    public void getCode_should_return_rtc() {
+    void getCode_should_return_rtc() {
         assertThat(cut.getCode()).isEqualTo("rtc");
     }
 
     @Test
-    public void getName_should_return_RTC() {
+    void getName_should_return_RTC() {
         assertThat(cut.getName()).isEqualTo("RTC (IBM Rational Team Concert)");
     }
 
     @Test
-    public void buildDefectsQueryUrl_should_work() {
+    void buildDefectsQueryUrl_should_work() {
         // GIVEN
         long aProjectId = 42;
         when(settingService.get(aProjectId, Settings.DEFECT_RTC_ROOT_URL)).thenReturn("url/");
@@ -139,7 +138,7 @@ public class RtcDefectAdapterTest {
     }
 
     @Test
-    public void toFilter_should_work() {
+    void toFilter_should_work() {
         // GIVEN
         String fieldName = "field";
         List<String> fieldValues = Arrays.asList("1", "2", "'C'");
@@ -152,14 +151,14 @@ public class RtcDefectAdapterTest {
     }
 
     @Test
-    public void toProblemStatus_should_return_OPEN_for_an_OPEN_state() {
+    void toProblemStatus_should_return_OPEN_for_an_OPEN_state() {
         // GIVEN
         long aProjectId = 42;
         when(settingService.getList(aProjectId, Settings.DEFECT_RTC_CLOSED_STATES))
                 .thenReturn(Arrays.asList("a", "b", "c"));
         when(settingService.getList(aProjectId, Settings.DEFECT_RTC_OPEN_STATES))
                 .thenReturn(Arrays.asList("d", "e", "f"));
-        final WorkItem workItemWithOpenState = new WorkItem().withState(new State().withName("e"));
+        final WorkItem workItemWithOpenState = workItem(state("e"));
 
         // WHEN
         final ProblemStatus status = cut.toProblemStatus(aProjectId, workItemWithOpenState);
@@ -169,14 +168,14 @@ public class RtcDefectAdapterTest {
     }
 
     @Test
-    public void toProblemStatus_should_return_CLOSED_for_a_CLOSED_state() {
+    void toProblemStatus_should_return_CLOSED_for_a_CLOSED_state() {
         // GIVEN
         long aProjectId = 42;
         when(settingService.getList(aProjectId, Settings.DEFECT_RTC_CLOSED_STATES))
                 .thenReturn(Arrays.asList("a", "b", "c"));
         when(settingService.getList(aProjectId, Settings.DEFECT_RTC_OPEN_STATES))
                 .thenReturn(Arrays.asList("d", "e", "f"));
-        final WorkItem workItemWithClosedState = new WorkItem().withState(new State().withName("b"));
+        final WorkItem workItemWithClosedState = workItem(state("b"));
 
         // WHEN
         final ProblemStatus status = cut.toProblemStatus(aProjectId, workItemWithClosedState);
@@ -186,14 +185,14 @@ public class RtcDefectAdapterTest {
     }
 
     @Test
-    public void toProblemStatus_should_return_CLOSED_for_a_state_configured_as_both_OPEN_and_CLOSED() {
+    void toProblemStatus_should_return_CLOSED_for_a_state_configured_as_both_OPEN_and_CLOSED() {
         // GIVEN
         long aProjectId = 42;
         when(settingService.getList(aProjectId, Settings.DEFECT_RTC_CLOSED_STATES))
                 .thenReturn(Arrays.asList("a", "b"));
         when(settingService.getList(aProjectId, Settings.DEFECT_RTC_OPEN_STATES))
                 .thenReturn(Arrays.asList("a", "c"));
-        final WorkItem workItemWithOpenAndClosedState = new WorkItem().withState(new State().withName("a"));
+        final WorkItem workItemWithOpenAndClosedState = workItem(state("a"));
 
         // WHEN
         final ProblemStatus status = cut.toProblemStatus(aProjectId, workItemWithOpenAndClosedState);
@@ -203,14 +202,14 @@ public class RtcDefectAdapterTest {
     }
 
     @Test
-    public void toProblemStatus_should_return_OPEN_for_an_unknown_state() {
+    void toProblemStatus_should_return_OPEN_for_an_unknown_state() {
         // GIVEN
         long aProjectId = 42;
         when(settingService.getList(aProjectId, Settings.DEFECT_RTC_CLOSED_STATES))
                 .thenReturn(Collections.emptyList());
         when(settingService.getList(aProjectId, Settings.DEFECT_RTC_OPEN_STATES))
                 .thenReturn(Collections.emptyList());
-        final WorkItem workItemWithUnknownState = new WorkItem().withState(new State().withName("a"));
+        final WorkItem workItemWithUnknownState = workItem(state("a"));
 
         // WHEN
         final ProblemStatus status = cut.toProblemStatus(aProjectId, workItemWithUnknownState);
@@ -220,14 +219,14 @@ public class RtcDefectAdapterTest {
     }
 
     @Test
-    public void toProblemStatus_should_compare_ignoring_case_with_OPEN() {
+    void toProblemStatus_should_compare_ignoring_case_with_OPEN() {
         // GIVEN
         long aProjectId = 42;
         when(settingService.getList(aProjectId, Settings.DEFECT_RTC_CLOSED_STATES))
                 .thenReturn(Collections.singletonList("aAa"));
         when(settingService.getList(aProjectId, Settings.DEFECT_RTC_OPEN_STATES))
                 .thenReturn(Collections.singletonList("bBb"));
-        final WorkItem workItemWithOpenUpperCasedState = new WorkItem().withState(new State().withName("Bbb"));
+        final WorkItem workItemWithOpenUpperCasedState = workItem(state("Bbb"));
 
         // WHEN
         final ProblemStatus status = cut.toProblemStatus(aProjectId, workItemWithOpenUpperCasedState);
@@ -237,14 +236,14 @@ public class RtcDefectAdapterTest {
     }
 
     @Test
-    public void toProblemStatus_should_compare_ignoring_case_with_CLOSED() {
+    void toProblemStatus_should_compare_ignoring_case_with_CLOSED() {
         // GIVEN
         long aProjectId = 42;
         when(settingService.getList(aProjectId, Settings.DEFECT_RTC_CLOSED_STATES))
                 .thenReturn(Collections.singletonList("aAa"));
         when(settingService.getList(aProjectId, Settings.DEFECT_RTC_OPEN_STATES))
                 .thenReturn(Collections.singletonList("bBb"));
-        final WorkItem workItemWithClosedUpperCasedState = new WorkItem().withState(new State().withName("Aaa"));
+        final WorkItem workItemWithClosedUpperCasedState = workItem(state("Aaa"));
 
         // WHEN
         final ProblemStatus status = cut.toProblemStatus(aProjectId, workItemWithClosedUpperCasedState);
@@ -254,7 +253,7 @@ public class RtcDefectAdapterTest {
     }
 
     @Test
-    public void addCookies_should_add_cookies() {
+    void addCookies_should_add_cookies() {
         // GIVEN
         Map<String, String> cookies = new HashMap<>();
         cookies.put("key1", "value1");
@@ -271,7 +270,7 @@ public class RtcDefectAdapterTest {
     }
 
     @Test
-    public void extractCookies_should_extract_set_cookies() {
+    void extractCookies_should_extract_set_cookies() {
         // GIVEN
         Map<String, List<String>> headers = new HashMap<>();
         headers.put("Some", Collections.singletonList("Too_be=Ignored"));
@@ -287,7 +286,7 @@ public class RtcDefectAdapterTest {
     }
 
     @Test
-    public void extractCookies_should_return_none_if_no_cookies_set() {
+    void extractCookies_should_return_none_if_no_cookies_set() {
         // GIVEN
         Map<String, List<String>> headers = new HashMap<>();
         ResponseEntity<Map<String, List<String>>> response =
@@ -298,6 +297,18 @@ public class RtcDefectAdapterTest {
 
         // THEN
         assertThat(cookies).isEmpty();
+    }
+
+    private State state(String name) {
+        State state = new State();
+        TestUtil.setField(state, "name", name);
+        return state;
+    }
+
+    private WorkItem workItem(State state) {
+        WorkItem workItem = new WorkItem();
+        TestUtil.setField(workItem, "state", state);
+        return workItem;
     }
 
 }

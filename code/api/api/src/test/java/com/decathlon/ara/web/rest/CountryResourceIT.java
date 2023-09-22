@@ -43,15 +43,15 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 @Disabled
 @SpringBootTest
 @TestExecutionListeners({
-    TransactionalTestExecutionListener.class,
-    DependencyInjectionTestExecutionListener.class,
-    DbUnitTestExecutionListener.class
+        TransactionalTestExecutionListener.class,
+        DependencyInjectionTestExecutionListener.class,
+        DbUnitTestExecutionListener.class
 })
 @TestPropertySource(
-		locations = "classpath:application-db-h2.properties")
+        locations = "classpath:application-db-h2.properties")
 @Transactional
 @DatabaseSetup("/dbunit/country.xml")
-public class CountryResourceIT {
+class CountryResourceIT {
 
     private static final String PROJECT_CODE = "p";
 
@@ -59,7 +59,7 @@ public class CountryResourceIT {
     private CountryResource cut;
 
     @Test
-    public void getAll_ShouldReturnAllCountriesOfTheProject_WhenCallingWithAnExistingProject() {
+    void getAll_ShouldReturnAllCountriesOfTheProject_WhenCallingWithAnExistingProject() {
         // WHEN
         ResponseEntity<List<CountryDTO>> response = cut.getAll(PROJECT_CODE);
 
@@ -81,11 +81,9 @@ public class CountryResourceIT {
     }
 
     @Test
-    public void create_ShouldInsertEntity_WhenAllRulesAreRespected() {
+    void create_ShouldInsertEntity_WhenAllRulesAreRespected() {
         // GIVEN
-        CountryDTO country = new CountryDTO()
-                .withCode("  cd \t ") // Should be trimmed
-                .withName(" \t some-name  "); // Should be trimmed
+        CountryDTO country = new CountryDTO("  cd \t ", " \t some-name  ");
 
         // WHEN
         ResponseEntity<CountryDTO> response = cut.create(PROJECT_CODE, country);
@@ -102,11 +100,9 @@ public class CountryResourceIT {
     }
 
     @Test
-    public void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingCode() {
+    void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingCode() {
         // GIVEN
-        CountryDTO country = new CountryDTO()
-                .withCode("be")
-                .withName("Already exists...");
+        CountryDTO country = new CountryDTO("be", "Already exists...");
 
         // WHEN
         ResponseEntity<CountryDTO> response = cut.create(PROJECT_CODE, country);
@@ -122,11 +118,9 @@ public class CountryResourceIT {
     }
 
     @Test
-    public void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingName() {
+    void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingName() {
         // GIVEN
-        CountryDTO country = new CountryDTO()
-                .withCode("xx")
-                .withName("China");
+        CountryDTO country = new CountryDTO("xx", "China");
 
         // WHEN
         ResponseEntity<CountryDTO> response = cut.create(PROJECT_CODE, country);
@@ -142,12 +136,10 @@ public class CountryResourceIT {
     }
 
     @Test
-    public void createOrUpdate_ShouldCreateANewCountry_WhenProvidingANewCode() {
+    void createOrUpdate_ShouldCreateANewCountry_WhenProvidingANewCode() {
         // GIVEN
         final String rawCode = "  cd \t "; // Should be trimmed
-        CountryDTO country = new CountryDTO()
-                .withCode("any")
-                .withName(" \t some-name  "); // Should be trimmed
+        CountryDTO country = new CountryDTO("any", " \t some-name  ");// Should be trimmed
 
         // WHEN
         ResponseEntity<CountryDTO> response = cut.createOrUpdate(PROJECT_CODE, rawCode, country);
@@ -163,12 +155,10 @@ public class CountryResourceIT {
     }
 
     @Test
-    public void createOrUpdate_ShouldUpdateACountry_WhenAllBusinessRulesAreMet() {
+    void createOrUpdate_ShouldUpdateACountry_WhenAllBusinessRulesAreMet() {
         // GIVEN
         final String rawCode = "  be \t "; // Should be trimmed
-        CountryDTO country = new CountryDTO()
-                .withCode("any")
-                .withName(" \t some-name  "); // Should be trimmed
+        CountryDTO country = new CountryDTO("any", " \t some-name  ");// Should be trimmed
 
         // WHEN
         ResponseEntity<CountryDTO> response = cut.createOrUpdate(PROJECT_CODE, rawCode, country);
@@ -184,12 +174,10 @@ public class CountryResourceIT {
     }
 
     @Test
-    public void createOrUpdate_ShouldFailAsNotUnique_WhenCreatingWithAnExistingName() {
+    void createOrUpdate_ShouldFailAsNotUnique_WhenCreatingWithAnExistingName() {
         // GIVEN
         final String rawCode = "be";
-        CountryDTO country = new CountryDTO()
-                .withCode("any")
-                .withName("China");
+        CountryDTO country = new CountryDTO("any", "China");
 
         // WHEN
         ResponseEntity<CountryDTO> response = cut.createOrUpdate(PROJECT_CODE, rawCode, country);
@@ -204,7 +192,7 @@ public class CountryResourceIT {
     }
 
     @Test
-    public void delete_ShouldRemoveCountry_WhenCountryExists() {
+    void delete_ShouldRemoveCountry_WhenCountryExists() {
         // WHEN
         ResponseEntity<Void> response = cut.delete(PROJECT_CODE, "cn");
 
@@ -217,7 +205,7 @@ public class CountryResourceIT {
     }
 
     @Test
-    public void delete_ShouldFailAsNotFound_WhenCalledWithNonexistentCode() {
+    void delete_ShouldFailAsNotFound_WhenCalledWithNonexistentCode() {
         // GIVEN
         String nonexistentCode = "xx";
 
@@ -233,7 +221,7 @@ public class CountryResourceIT {
     }
 
     @Test
-    public void delete_ShouldFailAsBadRequest_WhenCountryIsUsedByCountryDeployment() {
+    void delete_ShouldFailAsBadRequest_WhenCountryIsUsedByCountryDeployment() {
         // WHEN
         ResponseEntity<Void> response = cut.delete(PROJECT_CODE, "ud");
 
@@ -246,7 +234,7 @@ public class CountryResourceIT {
     }
 
     @Test
-    public void delete_ShouldFailAsBadRequest_WhenCountryIsUsedByRun() {
+    void delete_ShouldFailAsBadRequest_WhenCountryIsUsedByRun() {
         // WHEN
         ResponseEntity<Void> response = cut.delete(PROJECT_CODE, "ur");
 
@@ -259,7 +247,7 @@ public class CountryResourceIT {
     }
 
     @Test
-    public void delete_ShouldFailAsBadRequest_WhenCountryIsUsedByProblemPattern() {
+    void delete_ShouldFailAsBadRequest_WhenCountryIsUsedByProblemPattern() {
         // WHEN
         ResponseEntity<Void> response = cut.delete(PROJECT_CODE, "up");
 
@@ -272,7 +260,7 @@ public class CountryResourceIT {
     }
 
     @Test
-    public void delete_ShouldFailAsBadRequest_WhenCountryIsUsedByFunctionalityAtBegin() {
+    void delete_ShouldFailAsBadRequest_WhenCountryIsUsedByFunctionalityAtBegin() {
         // WHEN
         ResponseEntity<Void> response = cut.delete(PROJECT_CODE, "f1");
 
@@ -285,7 +273,7 @@ public class CountryResourceIT {
     }
 
     @Test
-    public void delete_ShouldFailAsBadRequest_WhenCountryIsUsedByFunctionalityInMiddle() {
+    void delete_ShouldFailAsBadRequest_WhenCountryIsUsedByFunctionalityInMiddle() {
         // WHEN
         ResponseEntity<Void> response = cut.delete(PROJECT_CODE, "f2");
 
@@ -298,7 +286,7 @@ public class CountryResourceIT {
     }
 
     @Test
-    public void delete_ShouldFailAsBadRequest_WhenCountryIsUsedByFunctionalityAtEnd() {
+    void delete_ShouldFailAsBadRequest_WhenCountryIsUsedByFunctionalityAtEnd() {
         // WHEN
         ResponseEntity<Void> response = cut.delete(PROJECT_CODE, "f3");
 
@@ -311,7 +299,7 @@ public class CountryResourceIT {
     }
 
     @Test
-    public void delete_ShouldFailAsBadRequest_WhenCountryIsUsedByScenarioAtBegin() {
+    void delete_ShouldFailAsBadRequest_WhenCountryIsUsedByScenarioAtBegin() {
         // WHEN
         ResponseEntity<Void> response = cut.delete(PROJECT_CODE, "s1");
 
@@ -324,7 +312,7 @@ public class CountryResourceIT {
     }
 
     @Test
-    public void delete_ShouldFailAsBadRequest_WhenCountryIsUsedByScenarioInMiddle() {
+    void delete_ShouldFailAsBadRequest_WhenCountryIsUsedByScenarioInMiddle() {
         // WHEN
         ResponseEntity<Void> response = cut.delete(PROJECT_CODE, "s2");
 
@@ -337,7 +325,7 @@ public class CountryResourceIT {
     }
 
     @Test
-    public void delete_ShouldFailAsBadRequest_WhenCountryIsUsedByScenarioAtEnd() {
+    void delete_ShouldFailAsBadRequest_WhenCountryIsUsedByScenarioAtEnd() {
         // WHEN
         ResponseEntity<Void> response = cut.delete(PROJECT_CODE, "s3");
 

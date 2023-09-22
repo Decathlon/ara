@@ -17,13 +17,11 @@
 
 package com.decathlon.ara.web.rest;
 
-import static com.decathlon.ara.util.TestUtil.header;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
-
-import javax.transaction.Transactional;
-
+import com.decathlon.ara.domain.enumeration.Technology;
+import com.decathlon.ara.service.dto.source.SourceDTO;
+import com.decathlon.ara.web.rest.util.HeaderUtil;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseSetup;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +33,11 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
-import com.decathlon.ara.domain.enumeration.Technology;
-import com.decathlon.ara.service.dto.source.SourceDTO;
-import com.decathlon.ara.web.rest.util.HeaderUtil;
-import com.github.springtestdbunit.DbUnitTestExecutionListener;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
+import javax.transaction.Transactional;
+import java.util.List;
+
+import static com.decathlon.ara.util.TestUtil.header;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Disabled
 @SpringBootTest
@@ -52,7 +50,7 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 		locations = "classpath:application-db-h2.properties")
 @Transactional
 @DatabaseSetup("/dbunit/source.xml")
-public class SourceResourceIT {
+class SourceResourceIT {
 
     private static final String PROJECT_CODE = "p";
 
@@ -60,7 +58,7 @@ public class SourceResourceIT {
     private SourceResource cut;
 
     @Test
-    public void getAll_ShouldReturnAllSourcesOfTheProject_WhenCallingWithAnExistingProject() {
+    void getAll_ShouldReturnAllSourcesOfTheProject_WhenCallingWithAnExistingProject() {
         // WHEN
         ResponseEntity<List<SourceDTO>> response = cut.getAll(PROJECT_CODE);
 
@@ -73,7 +71,7 @@ public class SourceResourceIT {
     }
 
     @Test
-    public void create_ShouldInsertNewSource_WhenAllBusinessRulesAreMet() {
+    void create_ShouldInsertNewSource_WhenAllBusinessRulesAreMet() {
         // GIVEN
         final SourceDTO newSource = new SourceDTO("code4", "New source", "l", Technology.CUCUMBER, "vcsUrl4", "develop", false);
 
@@ -93,7 +91,7 @@ public class SourceResourceIT {
     }
 
     @Test
-    public void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingCode() {
+    void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingCode() {
         // GIVEN
         final SourceDTO newSourceWithExistingCode = new SourceDTO("code2", "any", "l", Technology.CUCUMBER, "any", "any", false);
 
@@ -109,7 +107,7 @@ public class SourceResourceIT {
     }
 
     @Test
-    public void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingName() {
+    void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingName() {
         // GIVEN
         SourceDTO sourceWithExistingName = new SourceDTO("any", "Source A", "Z", Technology.POSTMAN, "any", "any", false);
 
@@ -125,7 +123,7 @@ public class SourceResourceIT {
     }
 
     @Test
-    public void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingLetter() {
+    void create_ShouldFailAsNotUnique_WhenCreatingWithAnExistingLetter() {
         // GIVEN
         SourceDTO sourceWithExistingLetter = new SourceDTO("any", "any", "A", Technology.POSTMAN, "any", "any", false);
 
@@ -141,7 +139,7 @@ public class SourceResourceIT {
     }
 
     @Test
-    public void createOrUpdate_ShouldCreateANewSource_WhenAllBusinessRulesAreMet() {
+    void createOrUpdate_ShouldCreateANewSource_WhenAllBusinessRulesAreMet() {
         // GIVEN
         final SourceDTO sourceToCreate = new SourceDTO(null, "Rename X", "X", Technology.CUCUMBER, "newUrl", "master", true);
 
@@ -162,7 +160,7 @@ public class SourceResourceIT {
     }
 
     @Test
-    public void createOrUpdate_ShouldUpdate_WhenSourceExists() {
+    void createOrUpdate_ShouldUpdate_WhenSourceExists() {
         ResponseEntity<SourceDTO> response = cut.createOrUpdate(PROJECT_CODE, "code3", new SourceDTO(null, "Rename C", "D", Technology.CUCUMBER, "updatedUrl", "master", true));
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(header(response, HeaderUtil.ALERT)).isEqualTo("ara.source.updated");
@@ -175,7 +173,7 @@ public class SourceResourceIT {
     }
 
     @Test
-    public void createOrUpdateWithSameLetter() {
+    void createOrUpdateWithSameLetter() {
         // WHEN
         ResponseEntity<SourceDTO> response = cut.createOrUpdate(PROJECT_CODE, "SEV-10", new SourceDTO("any", "any", "A", Technology.POSTMAN, "any", "master", false));
 
@@ -188,7 +186,7 @@ public class SourceResourceIT {
     }
 
     @Test
-    public void createOrUpdateWithSameName() {
+    void createOrUpdateWithSameName() {
         // WHEN
         ResponseEntity<SourceDTO> response = cut.createOrUpdate(PROJECT_CODE, "SEV-10", new SourceDTO("any", "Source A", "Y", Technology.POSTMAN, "any", "any", false));
 
@@ -201,7 +199,7 @@ public class SourceResourceIT {
     }
 
     @Test
-    public void delete_ShouldRemoveSource_WhenSourceExists() {
+    void delete_ShouldRemoveSource_WhenSourceExists() {
         // WHEN
         ResponseEntity<Void> response = cut.delete(PROJECT_CODE, "code1");
 
@@ -215,7 +213,7 @@ public class SourceResourceIT {
     }
 
     @Test
-    public void delete_ShouldFailAsNotFound_WhenCalledWithNonexistentCode() {
+    void delete_ShouldFailAsNotFound_WhenCalledWithNonexistentCode() {
         // GIVEN
         String nonexistentCode = "NONEXISTENT";
 
@@ -231,7 +229,7 @@ public class SourceResourceIT {
     }
 
     @Test
-    public void delete_ShouldFailAsBadRequest_WhenSourceIsUsedByType() {
+    void delete_ShouldFailAsBadRequest_WhenSourceIsUsedByType() {
         // GIVEN
         String codeOfSourceUsedByType = "code3";
 
@@ -247,7 +245,7 @@ public class SourceResourceIT {
     }
 
     @Test
-    public void delete_ShouldFailAsBadRequest_WhenSourceIsUsedByScenario() {
+    void delete_ShouldFailAsBadRequest_WhenSourceIsUsedByScenario() {
         // GIVEN
         String codeOfSourceUsedByScenario = "code2";
 

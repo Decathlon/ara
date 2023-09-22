@@ -17,14 +17,7 @@
 
 package com.decathlon.ara.scenario.cucumber.asset;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
+import com.decathlon.ara.configuration.AraConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,10 +25,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.decathlon.ara.configuration.AraConfiguration;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class FileAssetServiceTest {
+class FileAssetServiceTest {
 
     @Mock
     private AraConfiguration araConfiguration;
@@ -47,7 +46,7 @@ public class FileAssetServiceTest {
     private FileAssetService cut;
 
     @Test
-    public void saveScreenshot_should_save_file_and_return_correct_url() throws IOException {
+    void saveScreenshot_should_save_file_and_return_correct_url() throws IOException {
         Path tempDirectory = null;
         try {
             // GIVEN
@@ -73,7 +72,7 @@ public class FileAssetServiceTest {
     }
 
     @Test
-    public void saveScreenshot_should_not_fail_but_return_null_on_write_failure() {
+    void saveScreenshot_should_not_fail_but_return_null_on_write_failure() {
         // GIVEN
         when(araConfiguration.getFileHomeFolder()).thenReturn("/bin/mkdir/?/not-writable"); // ... on Unix nor on Windows
 
@@ -85,7 +84,7 @@ public class FileAssetServiceTest {
     }
 
     @Test
-    public void saveHttpLogs_should_save_file_and_return_correct_url() throws IOException {
+    void saveHttpLogs_should_save_file_and_return_correct_url() throws IOException {
         Path tempDirectory = null;
         try {
             // GIVEN
@@ -111,7 +110,7 @@ public class FileAssetServiceTest {
     }
 
     @Test
-    public void saveHttpLogs_should_not_fail_but_return_null_on_write_failure() {
+    void saveHttpLogs_should_not_fail_but_return_null_on_write_failure() {
         // GIVEN
         when(araConfiguration.getFileHomeFolder()).thenReturn("/bin/mkdir/?/not-writable"); // ... on Unix nor on Windows
         when(araConfiguration.getFileHttpLogsSubFolder()).thenReturn("/directory");

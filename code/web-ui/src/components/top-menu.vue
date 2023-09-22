@@ -30,14 +30,20 @@
               Fighting Against Regressions All Together
             </div>
             <img src="../assets/favicon-white.png" width="32" height="32"/></Tooltip></router-link><!-- No space between!
-     --><projects-select :ghost="true" v-on:projectSelection="projectSelection" style="flex: 1 0 auto; margin-right: 14px;"/>
+     --><projects-select :ghost="true" v-on:projectSelection="projectSelection" style="flex: 1 0 auto; margin-right: 10px;"/>
+        <router-link :to="{ name: 'management-projects' }" active-class="selected-project-management">
+          <Tooltip placement="bottom" content="Add or edit a project">
+            <div>
+              <Icon type="md-add" size="24" style="color: white;"/>
+            </div>
+          </Tooltip>
+        </router-link>
       </div>
 
       <div style="flex: 1 0 auto;">
         <!-- After deleting the demo project, if no other project exists, `projectCode` still exists but we should hide the menu anyway  -->
         <ul v-if="projectCode && projects && projects.length" class="ivu-menu ivu-menu-primary ivu-menu-horizontal">
-          <router-link v-for="link in links" :key="link.name" :to="to(link)"
-                      class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected">
+          <router-link v-for="link in links" :key="link.name" :to="to(link)" class="ivu-menu-item" active-class="ivu-menu-item-active ivu-menu-item-selected">
             {{link.name}}
           </router-link>
         </ul>
@@ -49,7 +55,7 @@
             <Avatar v-if="user && user.picture" :src="user.picture" size="large" />
             <Avatar v-else icon="md-person" style="color: #0082c3;background-color: white" size="large"/>
             <div slot="content">
-              <p v-if="provider && provider.name">Connected via <strong>{{provider.name}}</strong></p>
+              <p v-if="providerName">Connected via <strong>{{providerName}}</strong></p>
               <p v-if="user && user.login">> Login: <strong>{{user.login}}</strong></p>
               <p v-if="user && user.name">> Name: <strong>{{user.name}}</strong></p>
               <p v-if="user && user.email">> Email: <strong>{{user.email}}</strong></p>
@@ -57,7 +63,7 @@
           </Tooltip>
         </span>
         <Tooltip placement="bottom-end">
-          <span>V{{ appVersion }}</span>
+          <span id="current-version">V{{ appVersion }}</span>
           <div slot="content">
             <table aria-label="ARA versions">
               <tr v-if="webUIVersion">
@@ -73,31 +79,48 @@
         </Tooltip>
         <!-- Keep the same width as logo+select: this is to center the menu when space is available -->
         <Tooltip content="How to use ARA?" placement="bottom-end" :transfer="true">
-          <a href="https://github.com/decathlon/ara/blob/master/doc/user/main/UserDocumentation.adoc"
+          <a href="https://github.com/Decathlon/ara/blob/main/doc/usage/main/UserDocumentation.adoc"
              rel="noopener" target="_blank"><Icon type="md-help-circle" size="24" style="padding: 0;"/></a>
         </Tooltip><!-- No space between items -->
-        <Dropdown trigger="click" placement="bottom-start">
+        <Dropdown trigger="click" placement="bottom-end">
           <a><Icon type="md-settings" size="24"/></a>
           <DropdownMenu slot="list">
             <div class="parameters-box">
+              <div class="parameter-box-title">Executed Scenarios</div>
               <div class="parameter-line">
                 <div class="parameter-title">Media display</div>
                 <div class="parameter-switch">
-                  <span>Open in <strong>{{ isMediaDisplayedOnSamePage ? "the same page" : "a new tab" }}</strong></span>
+                  <Tooltip :transfer="true" placement="left">
+                    <span class="parameter-switch-description">Open in <strong>{{ isMediaDisplayedOnSamePage ? "the same page" : "a new tab" }}</strong></span>
+                    <div slot="content">
+                      <p>Sometimes videos and images can't be displayed in the same page</p>
+                      <p>(e.g. mixed content: Ara runs in a secure server (HTTPS) but media urls are not secure (HTTP)).</p>
+                      <p>You can fix this issue by switching off this option.</p>
+                    </div>
+                  </Tooltip>
                   <i-switch v-model="isMediaDisplayedOnSamePage" @on-change="saveMediaDisplayState"/>
                 </div>
-                <div class="parameter-description">
-                  <Alert closable>
-                    Sometimes videos and images can't be displayed in the same page (e.g. mixed content: Ara runs in a secure server (HTTPS) but media urls are not secure (HTTP)).
-                    You can fix this issue by switching off this option.
-                  </Alert>
+              </div>
+              <div class="parameter-line">
+                <div class="parameter-title">History</div>
+                <div class="parameter-switch">
+                  <Tooltip content="Change this if you want to load fewer executed scenarios." :transfer="true" placement="left">
+                    <span class="parameter-switch-description">{{selectedHistoryDurationDescription}}<strong></strong></span>
+                  </Tooltip>
+                  <i-switch v-model="duration.applied" @on-change="updateExecutedScenariosHistoryDuration"/>
+                </div>
+                <div class="parameter-inputs" v-if="duration.applied">
+                  <InputNumber class="parameter-inputs-input" v-model="duration.value" controls-outside min="1" @on-change="updateExecutedScenariosHistoryDuration"></InputNumber>
+                  <Select v-model="duration.type" filterable @on-change="updateExecutedScenariosHistoryDuration" :transfer="true">
+                    <Option v-for="durationType in duration.availableTypes" :value="durationType.value" :key="durationType.value">{{durationType.label + (duration.value > 1 ? 's' : '')}}</Option>
+                  </Select>
                 </div>
               </div>
             </div>
           </DropdownMenu>
         </Dropdown>
         <Tooltip content="What's new in ARA?" placement="bottom-end" :transfer="false">
-          <a :href="$sanitizeUrl('https://github.com/Decathlon/ara/releases/tag/ara-' + appVersion)"
+          <a :href="$sanitizeUrl('https://github.com/Decathlon/ara/releases/tag/ara-' + channel + '-v' + appVersion)"
              @click="setLatestChangelogVersion"
              rel="noopener" target="_blank"><Badge dot :count="changelogCount"><Icon type="md-notifications" size="24"/></Badge></a>
         </Tooltip>
@@ -123,6 +146,7 @@
 
   import { AuthenticationService } from '../service/authentication.service'
   import { LocalParameterService } from '../service/local-parameter.service'
+  import _ from 'lodash'
 
   // Will contain the latest version when the user clicked to view the CHANGELOG:
   // a red badge will appear on the CHANGELOG icon when a new version will be available
@@ -143,8 +167,33 @@
 
     data () {
       return {
+        configuration: this.$appConfig,
         isMediaDisplayedOnSamePage: true,
+        duration: {
+          applied: false,
+          value: 1,
+          type: '',
+          availableTypes: [
+            {
+              'value': 'DAY',
+              'label': 'day'
+            },
+            {
+              'value': 'WEEK',
+              'label': 'week'
+            },
+            {
+              'value': 'MONTH',
+              'label': 'month'
+            },
+            {
+              'value': 'YEAR',
+              'label': 'year'
+            }
+          ]
+        },
         appVersion: undefined,
+        channel: undefined,
         apiVersion: undefined,
         webUIVersion: process.env.VERSION,
         latestChangelogVersion: this.getCookie(LATEST_CHANGELOG_VERSION_COOKIE_NAME),
@@ -154,10 +203,31 @@
     },
 
     computed: {
-      provider () {
+      executedScenariosHistoryDurationIsApplied () {
+        return this.duration.applied && this.duration.value && this.duration.type
+      },
+
+      selectedHistoryDurationDescription () {
+        let finalDescription = 'Select'
+        let totalDurationDescription = 'all'
+        const durationType = this.duration.type
+        const durationValue = this.duration.value
+        if (this.executedScenariosHistoryDurationIsApplied) {
+          const plural = this.duration.value > 1 ? 's' : ''
+          const durationTypeDescription = _(this.duration.availableTypes)
+            .filter([ 'value', durationType ])
+            .map('label')
+            .first()
+          totalDurationDescription = `the last ${durationValue} ${durationTypeDescription}${plural}`
+        }
+        finalDescription += ` ${totalDurationDescription} history`
+        return finalDescription
+      },
+
+      providerName () {
         const authenticationDetails = this.getAuthenticationDetails()
         if (authenticationDetails) {
-          return authenticationDetails.provider
+          return authenticationDetails.providerName
         }
       },
 
@@ -178,7 +248,8 @@
           { params: { projectCode: this.projectCode }, name: 'EXECUTIONS & ERRORS', routeName: 'executions' },
           { params: { projectCode: this.projectCode }, name: 'PROBLEMS', routeName: 'problems' },
           { params: { projectCode: this.projectCode }, name: 'FUNCTIONALITIES', routeName: 'functionalities' },
-          { params: { projectCode: this.projectCode }, name: 'SCENARIOS', routeName: 'scenario-writing-helps' }
+          { params: { projectCode: this.projectCode }, name: 'SCENARIOS', routeName: 'scenario-writing-helps' },
+          { params: { projectCode: this.projectCode }, name: 'SETTINGS', routeName: 'management' }
         ]
       },
 
@@ -192,8 +263,30 @@
     },
 
     methods: {
+      loadExecutedScenariosHistoryDuration () {
+        const simplifiedDuration = LocalParameterService.getExecutedScenariosHistoryDuration()
+        this.duration.applied = !!simplifiedDuration
+        if (simplifiedDuration) {
+          this.duration.value = simplifiedDuration.value
+          this.duration.type = simplifiedDuration.type
+        }
+      },
+
+      updateExecutedScenariosHistoryDuration () {
+        if (this.executedScenariosHistoryDurationIsApplied) {
+          const simplifiedDuration = {
+            value: this.duration.value,
+            type: this.duration.type
+          }
+          LocalParameterService.saveExecutedScenariosHistoryDuration(simplifiedDuration)
+          return
+        }
+        LocalParameterService.clearExecutedScenariosHistoryDuration()
+      },
+
       loadLocalParameters () {
         this.isMediaDisplayedOnSamePage = LocalParameterService.isMediaDisplayedOnSamePage()
+        this.loadExecutedScenariosHistoryDuration()
       },
 
       saveMediaDisplayState (displayOnSamePage) {
@@ -261,8 +354,14 @@
         }
       },
 
+      extractChannel (data) {
+        if (data?.hasOwnProperty('app')) {
+          return data['app'].channel
+        }
+      },
+
       logout () {
-        AuthenticationService.logout(true)
+        AuthenticationService.logout()
       }
     },
 
@@ -273,6 +372,7 @@
         .then((response) => {
           const data = response?.data
           this.appVersion = this.extractVersion(data, 'app')
+          this.channel = this.extractChannel(data)
           this.apiVersion = this.extractVersion(data, 'api')
           // If it is the first time the user opens ARA, make sure to remember the current version for future notification badge
           if (!this.latestChangelogVersion) {
@@ -301,6 +401,12 @@
     float: none;
     display: inline-block;
   }
+
+  .selected-project-management div {
+    background-color: #135b95;
+    border-radius: 50%;
+  }
+
   #helps {
     flex: 0 1 auto;
     text-align: right;
@@ -310,7 +416,7 @@
     white-space: nowrap;
   }
 
-  #helps span {
+  #current-version {
     color: white;
   }
 
@@ -332,28 +438,35 @@
     cursor: pointer;
   }
 
+  .parameter-box-title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 15px;
+    margin-bottom: 10px;
+    border-bottom: 1px lightgrey solid;
+    padding-bottom: 5px;
+  }
+
   .parameters-box {
+    display: flex;
+    flex-direction: column;
     margin: 10px;
     width: 300px;
   }
 
   .parameter-line {
+    display: flex;
+    flex-direction: column;
     margin-bottom: 5px;
   }
 
   .parameter-title {
     text-align: center;
     font-weight: bold;
-    margin-bottom: 5px;
-  }
-
-  .parameter-description {
-    margin-top: 10px;
-
-    text-align: start;
-    white-space: initial;
-    font-size: 12px;
-    font-style: italic;
+    margin-bottom: 25px;
+    background-color: rgb(0, 130, 195);
+    color: white;
+    padding: 5px 0px 5px 0px;
   }
 
   .parameter-switch {
@@ -361,5 +474,20 @@
     flex-flow: row wrap;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .parameter-switch-description {
+    cursor: pointer;
+  }
+
+  .parameter-inputs {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .parameter-inputs .parameter-inputs-input {
+    margin-right: 5px;
   }
 </style>

@@ -17,20 +17,15 @@
 
 package com.decathlon.ara.service;
 
-import static com.decathlon.ara.loader.DemoLoaderConstants.BRANCH_MASTER;
-import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Collections;
-
-import javax.transaction.Transactional;
-
+import com.decathlon.ara.defect.DefectAdapter;
+import com.decathlon.ara.domain.Project;
+import com.decathlon.ara.repository.*;
+import com.decathlon.ara.service.dto.project.ProjectDTO;
+import com.decathlon.ara.service.exception.BadRequestException;
+import com.decathlon.ara.service.exception.NotFoundException;
+import com.decathlon.ara.service.support.Settings;
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseSetup;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -46,25 +41,18 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
-import com.decathlon.ara.defect.DefectAdapter;
-import com.decathlon.ara.domain.Project;
-import com.decathlon.ara.repository.CommunicationRepository;
-import com.decathlon.ara.repository.CountryRepository;
-import com.decathlon.ara.repository.CycleDefinitionRepository;
-import com.decathlon.ara.repository.FunctionalityRepository;
-import com.decathlon.ara.repository.ProblemRepository;
-import com.decathlon.ara.repository.ProjectRepository;
-import com.decathlon.ara.repository.RootCauseRepository;
-import com.decathlon.ara.repository.SettingRepository;
-import com.decathlon.ara.repository.SeverityRepository;
-import com.decathlon.ara.repository.SourceRepository;
-import com.decathlon.ara.repository.TypeRepository;
-import com.decathlon.ara.service.dto.project.ProjectDTO;
-import com.decathlon.ara.service.exception.BadRequestException;
-import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.service.support.Settings;
-import com.github.springtestdbunit.DbUnitTestExecutionListener;
-import com.github.springtestdbunit.annotation.DatabaseSetup;
+import javax.transaction.Transactional;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
+
+import static com.decathlon.ara.loader.DemoLoaderConstants.BRANCH_MASTER;
+import static com.decathlon.ara.loader.DemoLoaderConstants.PROJECT_CODE_DEMO;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 
 // FIXME : Should be replaced by Selenium tests on a dedicated infra.
 @Disabled
@@ -78,7 +66,7 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 		locations = "classpath:application-db-h2.properties")
 @Transactional
 @ExtendWith(MockitoExtension.class)
-public class DemoServiceIT {
+class DemoServiceIT {
 
     @Autowired
     private ProjectRepository projectRepository;
@@ -132,7 +120,7 @@ public class DemoServiceIT {
      * @throws IOException         when somethings goes wrong with temporary directory used for this test
      */
     @Test
-    public void create_ShouldPopulateTablesAndCreateExecutionFiles_WhenCreatingAProject()
+    void create_ShouldPopulateTablesAndCreateExecutionFiles_WhenCreatingAProject()
             throws BadRequestException, IOException {
         // GIVEN
         final Path tempDirectory = Files.createTempDirectory("ara_temp_integration_test_directory_");
@@ -155,7 +143,7 @@ public class DemoServiceIT {
 
     @Test
     @DatabaseSetup("/dbunit/DemoServiceIT-delete.xml")
-    public void delete_ShouldDeleteProjectAndFiles_WhenCalled() throws NotFoundException, IOException {
+    void delete_ShouldDeleteProjectAndFiles_WhenCalled() throws NotFoundException, IOException {
         // GIVEN
         final Path tempDirectory = Files.createTempDirectory("ara_temp_integration_test_directory_");
         try {

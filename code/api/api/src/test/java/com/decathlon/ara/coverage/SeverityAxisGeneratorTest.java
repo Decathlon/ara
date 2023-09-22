@@ -19,6 +19,10 @@ package com.decathlon.ara.coverage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+import java.util.Objects;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,9 +31,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.decathlon.ara.domain.Functionality;
 import com.decathlon.ara.domain.enumeration.FunctionalitySeverity;
 import com.decathlon.ara.service.dto.coverage.AxisPointDTO;
+import com.decathlon.ara.util.builder.FunctionalityBuilder;
 
 @ExtendWith(MockitoExtension.class)
-public class SeverityAxisGeneratorTest {
+class SeverityAxisGeneratorTest {
 
     private static final int ANY_PROJECT_ID = -42;
 
@@ -37,26 +42,29 @@ public class SeverityAxisGeneratorTest {
     private SeverityAxisGenerator cut;
 
     @Test
-    public void testGetCode() {
+    void testGetCode() {
         assertThat(cut.getCode()).isEqualTo("severity");
     }
 
     @Test
-    public void testGetName() {
+    void testGetName() {
         assertThat(cut.getName()).isEqualTo("Severities");
     }
 
     @Test
-    public void testGetPoints() {
-        // WHEN / THEN
-        assertThat(cut.getPoints(ANY_PROJECT_ID)).containsExactly(
-                new AxisPointDTO("HIGH", "High", null),
-                new AxisPointDTO("MEDIUM", "Medium", null),
-                new AxisPointDTO("LOW", "Low", null));
+    void testGetPoints() {
+        // WHEN
+        List<AxisPointDTO> points = cut.getPoints(ANY_PROJECT_ID).toList();
+
+        //THEN
+        Assertions.assertEquals(3, points.size());
+        Assertions.assertTrue(equals(points.get(0), "HIGH", "High", null));
+        Assertions.assertTrue(equals(points.get(1), "MEDIUM", "Medium", null));
+        Assertions.assertTrue(equals(points.get(2), "LOW", "Low", null));
     }
 
     @Test
-    public void testGetValuePoints_without_severity() {
+    void testGetValuePoints_without_severity() {
         // GIVEN
         Functionality functionality = new Functionality();
 
@@ -65,12 +73,16 @@ public class SeverityAxisGeneratorTest {
     }
 
     @Test
-    public void testGetValuePoints_with_severity() {
+    void testGetValuePoints_with_severity() {
         // GIVEN
-        Functionality functionality = new Functionality().withSeverity(FunctionalitySeverity.HIGH);
+        Functionality functionality = new FunctionalityBuilder().withSeverity(FunctionalitySeverity.HIGH).build();
 
         // WHEN / THEN
         assertThat(cut.getValuePoints(functionality)).isEqualTo(new String[] { "HIGH" });
+    }
+
+    private boolean equals(AxisPointDTO result, String id, String name, String tooltip) {
+        return Objects.equals(result.getId(), id) && Objects.equals(result.getName(), name) && Objects.equals(result.getTooltip(), tooltip);
     }
 
 }

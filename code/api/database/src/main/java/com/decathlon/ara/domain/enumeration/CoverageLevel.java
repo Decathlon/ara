@@ -17,9 +17,6 @@
 
 package com.decathlon.ara.domain.enumeration;
 
-import lombok.Getter;
-
-@Getter
 public enum CoverageLevel {
 
     COVERED("Covered (no ignored)", "Functionalities having active scenarios, none of them are ignored"),
@@ -35,6 +32,14 @@ public enum CoverageLevel {
     CoverageLevel(String label, String tooltip) {
         this.label = label;
         this.tooltip = tooltip;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public String getTooltip() {
+        return tooltip;
     }
 
 }

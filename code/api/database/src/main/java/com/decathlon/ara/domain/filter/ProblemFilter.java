@@ -19,18 +19,10 @@ package com.decathlon.ara.domain.filter;
 
 import com.decathlon.ara.domain.enumeration.DefectExistence;
 import com.decathlon.ara.domain.enumeration.ProblemStatusFilter;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
 /**
  * Input of the problem filtering repository query.<br>
  */
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
 public class ProblemFilter {
 
     private long projectId;
@@ -46,5 +38,37 @@ public class ProblemFilter {
     private DefectExistence defectExistence;
 
     private Long rootCauseId;
+
+    public long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(long projectId) {
+        this.projectId = projectId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public ProblemStatusFilter getStatus() {
+        return status;
+    }
+
+    public Long getBlamedTeamId() {
+        return blamedTeamId;
+    }
+
+    public String getDefectId() {
+        return defectId;
+    }
+
+    public DefectExistence getDefectExistence() {
+        return defectExistence;
+    }
+
+    public Long getRootCauseId() {
+        return rootCauseId;
+    }
 
 }

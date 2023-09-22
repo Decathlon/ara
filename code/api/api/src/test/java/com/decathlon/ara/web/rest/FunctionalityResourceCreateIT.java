@@ -53,14 +53,14 @@ import com.github.springtestdbunit.DbUnitTestExecutionListener;
 @Disabled
 @SpringBootTest
 @TestExecutionListeners({
-    TransactionalTestExecutionListener.class,
-    DependencyInjectionTestExecutionListener.class,
-    DbUnitTestExecutionListener.class
+        TransactionalTestExecutionListener.class,
+        DependencyInjectionTestExecutionListener.class,
+        DbUnitTestExecutionListener.class
 })
 @TestPropertySource(
-		locations = "classpath:application-db-h2.properties")
+        locations = "classpath:application-db-h2.properties")
 @Transactional
-public class FunctionalityResourceCreateIT {
+class FunctionalityResourceCreateIT {
 
     private static final String PROJECT_CODE = "p";
     private static final long CREATED_ID = -42;
@@ -77,7 +77,7 @@ public class FunctionalityResourceCreateIT {
     private int counter = 0;
 
     @Test
-    public void testCreate() {
+    void testCreate() {
         ResponseEntity<FunctionalityDTO> response = create(FunctionalityPosition.LAST_CHILD, Long.valueOf(12));
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getHeaders().getLocation().getPath()).isEqualTo("/api/projects/p/functionalities/" + response.getBody().getId());
@@ -91,7 +91,7 @@ public class FunctionalityResourceCreateIT {
     }
 
     @Test
-    public void testCreateAboveWithNullReference() {
+    void testCreateAboveWithNullReference() {
         ResponseEntity<FunctionalityDTO> response = create(FunctionalityPosition.ABOVE, null);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.no_reference");
@@ -100,31 +100,31 @@ public class FunctionalityResourceCreateIT {
     }
 
     @Test
-    public void testCreateAboveTheFirstRootReference() {
+    void testCreateAboveTheFirstRootReference() {
         ResponseEntity<FunctionalityDTO> response = create(FunctionalityPosition.ABOVE, Long.valueOf(1));
         assertCreated(response, null, 500, longs(CREATED_ID, 1, 2, 3));
     }
 
     @Test
-    public void testCreateAboveTheLastRootReference() {
+    void testCreateAboveTheLastRootReference() {
         ResponseEntity<FunctionalityDTO> response = create(FunctionalityPosition.ABOVE, Long.valueOf(3));
         assertCreated(response, null, 2500, longs(1, 2, CREATED_ID, 3));
     }
 
     @Test
-    public void testCreateAboveTheFirstLeafReference() {
+    void testCreateAboveTheFirstLeafReference() {
         ResponseEntity<FunctionalityDTO> response = create(FunctionalityPosition.ABOVE, Long.valueOf(111));
         assertCreated(response, Long.valueOf(11), 500, longs(CREATED_ID, 111, 112, 113));
     }
 
     @Test
-    public void testCreateAboveTheLastLeafReference() {
+    void testCreateAboveTheLastLeafReference() {
         ResponseEntity<FunctionalityDTO> response = create(FunctionalityPosition.ABOVE, Long.valueOf(113));
         assertCreated(response, Long.valueOf(11), 2500, longs(111, 112, CREATED_ID, 113));
     }
 
     @Test
-    public void testCreateBelowWithNullReference() {
+    void testCreateBelowWithNullReference() {
         ResponseEntity<FunctionalityDTO> response = create(FunctionalityPosition.BELOW, null);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.no_reference");
@@ -133,50 +133,50 @@ public class FunctionalityResourceCreateIT {
     }
 
     @Test
-    public void testCreateBelowTheFirstRootReference() {
+    void testCreateBelowTheFirstRootReference() {
         ResponseEntity<FunctionalityDTO> response = create(FunctionalityPosition.BELOW, Long.valueOf(1));
         assertCreated(response, null, 1500, longs(1, CREATED_ID, 2, 3));
     }
 
     @Test
-    public void testCreateBelowTheLastRootReference() {
+    void testCreateBelowTheLastRootReference() {
         ResponseEntity<FunctionalityDTO> response = create(FunctionalityPosition.BELOW, Long.valueOf(3));
         assertCreated(response, null, (3000 + Double.MAX_VALUE) / 2, longs(1, 2, 3, CREATED_ID));
     }
 
     @Test
-    public void testCreateBelowTheFirstLeafReference() {
+    void testCreateBelowTheFirstLeafReference() {
         ResponseEntity<FunctionalityDTO> response = create(FunctionalityPosition.BELOW, Long.valueOf(111));
         assertCreated(response, Long.valueOf(11), 1500, longs(111, CREATED_ID, 112, 113));
     }
 
     @Test
-    public void testCreateBelowTheLastLeafReference() {
+    void testCreateBelowTheLastLeafReference() {
         ResponseEntity<FunctionalityDTO> response = create(FunctionalityPosition.BELOW, Long.valueOf(113));
         assertCreated(response, Long.valueOf(11), (3000 + Double.MAX_VALUE) / 2, longs(111, 112, 113, CREATED_ID));
     }
 
     @Test
-    public void testCreateChildOnNodeWithExistingChildren() {
+    void testCreateChildOnNodeWithExistingChildren() {
         ResponseEntity<FunctionalityDTO> response = create(FunctionalityPosition.LAST_CHILD, Long.valueOf(11));
         assertCreated(response, Long.valueOf(11), (3000 + Double.MAX_VALUE) / 2, longs(111, 112, 113, CREATED_ID));
     }
 
     @Test
-    public void testCreateChildOnNodeWithoutAnyChildren() {
+    void testCreateChildOnNodeWithoutAnyChildren() {
         ResponseEntity<FunctionalityDTO> response = create(FunctionalityPosition.LAST_CHILD, Long.valueOf(12));
         assertCreated(response, Long.valueOf(12), Double.MAX_VALUE / 2, longs(CREATED_ID));
     }
 
     @Test
-    public void testCreateChildWithNulls() {
+    void testCreateChildWithNulls() {
         // Position null means LAST_CHILD, and referenceId null means root => BELOW last child of root
         ResponseEntity<FunctionalityDTO> response = create(null, null);
         assertCreated(response, null, (3000 + Double.MAX_VALUE) / 2, longs(1, 2, 3, CREATED_ID));
     }
 
     @Test
-    public void testCreateChildOfFunctionality() {
+    void testCreateChildOfFunctionality() {
         ResponseEntity<FunctionalityDTO> response = create(FunctionalityPosition.LAST_CHILD, Long.valueOf(22));
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.functionalities_cannot_have_children");
@@ -185,7 +185,7 @@ public class FunctionalityResourceCreateIT {
     }
 
     @Test
-    public void testCreateRelativeToNonexistentNode() {
+    void testCreateRelativeToNonexistentNode() {
         ResponseEntity<FunctionalityDTO> response = create(FunctionalityPosition.LAST_CHILD, NONEXISTENT);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.not_found");
@@ -194,8 +194,8 @@ public class FunctionalityResourceCreateIT {
     }
 
     @Test
-    public void testCreateWithUnknownType() {
-        NewFunctionalityDTO dto = new NewFunctionalityDTO().withFunctionality(new FunctionalityDTO().withType("NONEXISTENT").withName("Some"));
+    void testCreateWithUnknownType() {
+        NewFunctionalityDTO dto = new NewFunctionalityDTO(functionalityDTO(null, "NONEXISTENT", "Some"), null, null);
         ResponseEntity<FunctionalityDTO> response = cut.create(PROJECT_CODE, dto);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.unknown_type");
@@ -204,8 +204,8 @@ public class FunctionalityResourceCreateIT {
     }
 
     @Test
-    public void testCreateWithId() {
-        NewFunctionalityDTO dto = new NewFunctionalityDTO().withFunctionality(new FunctionalityDTO().withId(Long.valueOf(1)).withType("FOLDER").withName("Some"));
+    void testCreateWithId() {
+        NewFunctionalityDTO dto = new NewFunctionalityDTO(functionalityDTO(Long.valueOf(1), "FOLDER", "Some"), null, null);
         ResponseEntity<FunctionalityDTO> response = cut.create(PROJECT_CODE, dto);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(header(response, HeaderUtil.ERROR)).isEqualTo("error.id_exists");
@@ -214,7 +214,7 @@ public class FunctionalityResourceCreateIT {
     }
 
     @Test
-    public void testCreateShouldNotGenerateInfinity() {
+    void testCreateShouldNotGenerateInfinity() {
         // This folder is empty
         Long parentId = Long.valueOf(12);
 
@@ -235,8 +235,10 @@ public class FunctionalityResourceCreateIT {
     }
 
     @Test
-    public void testCreateWithNonexistentTeam() {
-        final NewFunctionalityDTO newFunctionalityDTO = new NewFunctionalityDTO().withFunctionality(functionality().withTeamId(NONEXISTENT));
+    void testCreateWithNonexistentTeam() {
+        FunctionalityDTO functionality = functionality();
+        functionality.setTeamId(NONEXISTENT);
+        final NewFunctionalityDTO newFunctionalityDTO = new NewFunctionalityDTO(functionality, null, null);
 
         ResponseEntity<FunctionalityDTO> response = cut.create(PROJECT_CODE, newFunctionalityDTO);
 
@@ -247,8 +249,10 @@ public class FunctionalityResourceCreateIT {
     }
 
     @Test
-    public void testCreateWithNonAssignableTeam() {
-        final NewFunctionalityDTO newFunctionalityDTO = new NewFunctionalityDTO().withFunctionality(functionality().withTeamId(TEAM_ID_NOT_ASSIGNABLE_TO_FUNCTIONALITIES));
+    void testCreateWithNonAssignableTeam() {
+        FunctionalityDTO functionality = functionality();
+        functionality.setTeamId(TEAM_ID_NOT_ASSIGNABLE_TO_FUNCTIONALITIES);
+        final NewFunctionalityDTO newFunctionalityDTO = new NewFunctionalityDTO(functionality, null, null);
 
         ResponseEntity<FunctionalityDTO> response = cut.create(PROJECT_CODE, newFunctionalityDTO);
 
@@ -259,11 +263,11 @@ public class FunctionalityResourceCreateIT {
     }
 
     @Test
-    public void testCreateFolderWithZeroCoveredAndIgnoredScenarios() {
-        final FunctionalityDTO folder = folder("Name")
-                .withCoveredScenarios(Integer.valueOf(0))
-                .withIgnoredScenarios(Integer.valueOf(0));
-        final NewFunctionalityDTO newFunctionalityDTO = new NewFunctionalityDTO().withFunctionality(folder);
+    void testCreateFolderWithZeroCoveredAndIgnoredScenarios() {
+        final FunctionalityDTO folder = folder("Name");
+        folder.setCoveredScenarios(Integer.valueOf(0));
+        folder.setIgnoredScenarios(Integer.valueOf(0));
+        final NewFunctionalityDTO newFunctionalityDTO = new NewFunctionalityDTO(folder, null, null);
 
         ResponseEntity<FunctionalityDTO> response = cut.create(PROJECT_CODE, newFunctionalityDTO);
 
@@ -271,7 +275,7 @@ public class FunctionalityResourceCreateIT {
     }
 
     @Test
-    public void testCreateShouldSetCreationAndUpdateDateTime() {
+    void testCreateShouldSetCreationAndUpdateDateTime() {
         // GIVEN
         Date startDate = new Date();
 
@@ -286,10 +290,10 @@ public class FunctionalityResourceCreateIT {
     }
 
     private ResponseEntity<FunctionalityDTO> create(FunctionalityPosition position, Long referenceId) {
-        NewFunctionalityDTO dto = new NewFunctionalityDTO();
-        dto.setFunctionality(functionality().withName("New one " + (counter++)).withComment("Comment"));
-        dto.setReferenceId(referenceId);
-        dto.setRelativePosition(position);
+        FunctionalityDTO functionality = functionality();
+        functionality.setName("New one " + (counter++));
+        functionality.setComment("Comment");
+        NewFunctionalityDTO dto = new NewFunctionalityDTO(functionality, referenceId, position);
         return cut.create(PROJECT_CODE, dto);
     }
 
@@ -313,6 +317,14 @@ public class FunctionalityResourceCreateIT {
 
         List<Functionality> siblings = functionalityRepository.findAllByProjectIdAndParentIdOrderByOrder(1, parentId);
         assertThat(siblings.stream().map(Functionality::getId)).containsExactly(expectedSiblings);
+    }
+
+    private FunctionalityDTO functionalityDTO(Long id, String type, String name) {
+        FunctionalityDTO functionalityDTO = new FunctionalityDTO();
+        functionalityDTO.setId(id);
+        functionalityDTO.setType(type);
+        functionalityDTO.setName(name);
+        return functionalityDTO;
     }
 
 }

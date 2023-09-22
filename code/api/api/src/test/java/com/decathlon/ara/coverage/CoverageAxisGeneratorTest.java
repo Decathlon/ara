@@ -22,7 +22,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,98 +35,108 @@ import com.decathlon.ara.domain.Functionality;
 import com.decathlon.ara.domain.Scenario;
 import com.decathlon.ara.domain.enumeration.CoverageLevel;
 import com.decathlon.ara.service.dto.coverage.AxisPointDTO;
+import com.decathlon.ara.util.builder.FunctionalityBuilder;
 
 @ExtendWith(MockitoExtension.class)
-public class CoverageAxisGeneratorTest {
+class CoverageAxisGeneratorTest {
 
     private static final int ANY_PROJECT_ID = -42;
 
     @InjectMocks
     private CoverageAxisGenerator cut;
 
-    private static AxisPointDTO axisPointOf(CoverageLevel level) {
-        return new AxisPointDTO(level.name(), level.getLabel(), level.getTooltip());
-    }
-
     @Test
-    public void testGetCode() {
+    void testGetCode() {
         assertThat(cut.getCode()).isEqualTo("coverage");
     }
 
     @Test
-    public void testGetName() {
+    void testGetName() {
         assertThat(cut.getName()).isEqualTo("Coverage level");
     }
 
     @Test
-    public void testGetPoints() {
-        // WHEN / THEN
-        assertThat(cut.getPoints(ANY_PROJECT_ID)).containsExactly(
-                axisPointOf(CoverageLevel.COVERED),
-                axisPointOf(CoverageLevel.PARTIALLY_COVERED),
-                axisPointOf(CoverageLevel.IGNORED_COVERAGE),
-                axisPointOf(CoverageLevel.STARTED),
-                axisPointOf(CoverageLevel.NOT_AUTOMATABLE),
-                axisPointOf(CoverageLevel.NOT_COVERED));
+    void testGetPoints() {
+        // WHEN 
+        List<AxisPointDTO> points = cut.getPoints(ANY_PROJECT_ID).toList();
+        // THEN
+        Assertions.assertEquals(6, points.size());
+        Assertions.assertTrue(equals(points.get(0), CoverageLevel.COVERED));
+        Assertions.assertTrue(equals(points.get(1), CoverageLevel.PARTIALLY_COVERED));
+        Assertions.assertTrue(equals(points.get(2), CoverageLevel.IGNORED_COVERAGE));
+        Assertions.assertTrue(equals(points.get(3), CoverageLevel.STARTED));
+        Assertions.assertTrue(equals(points.get(4), CoverageLevel.NOT_AUTOMATABLE));
+        Assertions.assertTrue(equals(points.get(5), CoverageLevel.NOT_COVERED));
     }
 
     @Test
-    public void testGetValuePoints_COVERED() {
+    void testGetValuePoints_COVERED() {
         // GIVEN
-        Functionality functionality = new Functionality()
-                .withScenarios(Collections.singleton(new Scenario()));
+        Functionality functionality = new FunctionalityBuilder()
+                .withScenarios(Collections.singleton(new Scenario())).build();
 
         // WHEN / THEN
         assertThat(cut.getValuePoints(functionality)).isEqualTo(new String[] { "COVERED" });
     }
 
     @Test
-    public void testGetValuePoints_PARTIALLY_COVERED() {
+    void testGetValuePoints_PARTIALLY_COVERED() {
         // GIVEN
-        Functionality functionality = new Functionality()
+        Functionality functionality = new FunctionalityBuilder()
                 .withScenarios(new HashSet<>(Arrays.asList(
-                        new Scenario().withLine(1),
-                        new Scenario().withLine(2).withIgnored(true))));
+                        scenario(false, 1),
+                        scenario(true, 2)))).build();
 
         // WHEN / THEN
         assertThat(cut.getValuePoints(functionality)).isEqualTo(new String[] { "PARTIALLY_COVERED" });
     }
 
     @Test
-    public void testGetValuePoints_IGNORED_COVERAGE() {
+    void testGetValuePoints_IGNORED_COVERAGE() {
         // GIVEN
-        Functionality functionality = new Functionality()
-                .withScenarios(Collections.singleton(new Scenario().withIgnored(true)));
+        Functionality functionality = new FunctionalityBuilder()
+                .withScenarios(Collections.singleton(scenario(true, 0))).build();
 
         // WHEN / THEN
         assertThat(cut.getValuePoints(functionality)).isEqualTo(new String[] { "IGNORED_COVERAGE" });
     }
 
     @Test
-    public void testGetValuePoints_STARTED() {
+    void testGetValuePoints_STARTED() {
         // GIVEN
-        Functionality functionality = new Functionality().withStarted(Boolean.TRUE);
+        Functionality functionality = new FunctionalityBuilder().withStarted(Boolean.TRUE).build();
 
         // WHEN / THEN
         assertThat(cut.getValuePoints(functionality)).isEqualTo(new String[] { "STARTED" });
     }
 
     @Test
-    public void testGetValuePoints_NOT_AUTOMATABLE() {
+    void testGetValuePoints_NOT_AUTOMATABLE() {
         // GIVEN
-        Functionality functionality = new Functionality().withNotAutomatable(Boolean.TRUE);
+        Functionality functionality = new FunctionalityBuilder().withNotAutomatable(Boolean.TRUE).build();
 
         // WHEN / THEN
         assertThat(cut.getValuePoints(functionality)).isEqualTo(new String[] { "NOT_AUTOMATABLE" });
     }
 
     @Test
-    public void testGetValuePoints_NOT_COVERED() {
+    void testGetValuePoints_NOT_COVERED() {
         // GIVEN
         Functionality functionality = new Functionality();
 
         // WHEN / THEN
         assertThat(cut.getValuePoints(functionality)).isEqualTo(new String[] { "NOT_COVERED" });
+    }
+
+    private Scenario scenario(boolean ignored, int line) {
+        Scenario scenario = new Scenario();
+        scenario.setIgnored(ignored);
+        scenario.setLine(line);
+        return scenario;
+    }
+
+    private boolean equals(AxisPointDTO result, CoverageLevel coverageLevel) {
+        return Objects.equals(result.getId(), coverageLevel.name()) && Objects.equals(result.getName(), coverageLevel.getLabel()) && Objects.equals(result.getTooltip(), coverageLevel.getTooltip());
     }
 
 }

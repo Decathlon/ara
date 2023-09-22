@@ -17,35 +17,38 @@
 
 package com.decathlon.ara.domain;
 
-import com.decathlon.ara.domain.enumeration.JobStatus;
-import com.decathlon.ara.domain.enumeration.Result;
-import lombok.*;
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.nullsFirst;
 
-import javax.persistence.*;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Objects;
 
-import static java.util.Comparator.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
+import com.decathlon.ara.domain.enumeration.JobStatus;
+import com.decathlon.ara.domain.enumeration.Result;
+
 @Entity
-// Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
-@EqualsAndHashCode(of = { "executionId", "country" })
 public class CountryDeployment implements Comparable<CountryDeployment> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "country_deployment_id")
     @SequenceGenerator(name = "country_deployment_id", sequenceName = "country_deployment_id", allocationSize = 1)
     private Long id;
-
-    // 1/2 for @EqualsAndHashCode to work: used when an entity is fetched by JPA
-    @Column(name = "execution_id", insertable = false, updatable = false)
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
-    private Long executionId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "execution_id")
@@ -99,19 +102,117 @@ public class CountryDeployment implements Comparable<CountryDeployment> {
      */
     private Long duration;
 
-    // 2/2 for @EqualsAndHashCode to work: used for entities created outside of JPA
-    public void setExecution(Execution execution) {
-        this.execution = execution;
-        this.executionId = (execution == null ? null : execution.getId());
-    }
-
     @Override
     public int compareTo(CountryDeployment other) {
-        // Keep business key in sync with @EqualsAndHashCode
-        Comparator<CountryDeployment> executionIdComparator = comparing(d -> d.executionId, nullsFirst(naturalOrder()));
+        Comparator<CountryDeployment> executionIdComparator = comparing(CountryDeployment::getExecutionId, nullsFirst(naturalOrder()));
         Comparator<CountryDeployment> countryComparator = comparing(CountryDeployment::getCountry, nullsFirst(naturalOrder()));
         return nullsFirst(executionIdComparator
                 .thenComparing(countryComparator)).compare(this, other);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(country, getExecutionId());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof CountryDeployment)) {
+            return false;
+        }
+        CountryDeployment other = (CountryDeployment) obj;
+        return Objects.equals(country, other.country) && Objects.equals(getExecutionId(), other.getExecutionId());
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Long getExecutionId() {
+        return execution == null ? null : execution.getId();
+    }
+
+    public Country getCountry() {
+        return country;
+    }
+
+    public void setCountry(Country country) {
+        this.country = country;
+    }
+
+    public String getPlatform() {
+        return platform;
+    }
+
+    public void setPlatform(String platform) {
+        this.platform = platform;
+    }
+
+    public String getJobUrl() {
+        return jobUrl;
+    }
+
+    public void setJobUrl(String jobUrl) {
+        this.jobUrl = jobUrl;
+    }
+
+    public String getJobLink() {
+        return jobLink;
+    }
+
+    public void setJobLink(String jobLink) {
+        this.jobLink = jobLink;
+    }
+
+    public JobStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(JobStatus status) {
+        this.status = status;
+    }
+
+    public Result getResult() {
+        return result;
+    }
+
+    public void setResult(Result result) {
+        this.result = result;
+    }
+
+    public Date getStartDateTime() {
+        return startDateTime;
+    }
+
+    public void setStartDateTime(Date startDateTime) {
+        this.startDateTime = startDateTime;
+    }
+
+    public Long getEstimatedDuration() {
+        return estimatedDuration;
+    }
+
+    public void setEstimatedDuration(Long estimatedDuration) {
+        this.estimatedDuration = estimatedDuration;
+    }
+
+    public Long getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Long duration) {
+        this.duration = duration;
+    }
+
+    public Execution getExecution() {
+        return execution;
+    }
+
+    public void setExecution(Execution execution) {
+        this.execution = execution;
     }
 
 }

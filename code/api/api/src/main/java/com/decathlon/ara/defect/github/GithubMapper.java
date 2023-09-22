@@ -17,17 +17,17 @@
 
 package com.decathlon.ara.defect.github;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Map the Github API Json responses to Java POJO in this project.
@@ -36,18 +36,22 @@ import java.util.Optional;
  * @since 3.1.0
  */
 @Service
-@Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 class GithubMapper {
+
+    private static final Logger LOG = LoggerFactory.getLogger(GithubMapper.class);
+
     static final TypeReference<GithubIssue> TYPE_REFERENCE_TO_GITHUB_ISSUE =
-            new TypeReference<GithubIssue>() {
+            new TypeReference<>() {
             };
     static final TypeReference<List<GithubIssue>> TYPE_REFERENCE_TO_LIST_GITHUB_ISSUE =
-            new TypeReference<List<GithubIssue>>() {
+            new TypeReference<>() {
             };
 
-    @Autowired
     private final ObjectMapper objectMapper;
+
+    public GithubMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     /**
      * Map the given json String to a GithubIssue.
@@ -59,7 +63,7 @@ class GithubMapper {
         try {
             return Optional.of(this.objectMapper.readValue(json, TYPE_REFERENCE_TO_GITHUB_ISSUE));
         } catch (IOException ex) {
-            log.warn("Unable to cast this json to a github issue : " + json, ex);
+            LOG.error("DEFECT|Unable to cast this json to a Github issue : " + json, ex);
             return Optional.empty();
         }
     }
@@ -74,7 +78,7 @@ class GithubMapper {
         try {
             return this.objectMapper.readValue(json, TYPE_REFERENCE_TO_LIST_GITHUB_ISSUE);
         } catch (IOException ex) {
-            log.warn("Unable to cast this json to a list of github issues : " + json, ex);
+            LOG.error("DEFECT|Unable to cast this json to a list of Github issues : " + json, ex);
             return new ArrayList<>();
         }
     }

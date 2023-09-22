@@ -17,13 +17,6 @@
 
 package com.decathlon.ara.service.dto.error;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class ErrorDTO {
 
     private Long id;
@@ -35,5 +28,25 @@ public class ErrorDTO {
     private int stepLine;
 
     private String exception;
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getStep() {
+        return step;
+    }
+
+    public String getStepDefinition() {
+        return stepDefinition;
+    }
+
+    public int getStepLine() {
+        return stepLine;
+    }
+
+    public String getException() {
+        return exception;
+    }
 
 }

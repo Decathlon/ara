@@ -17,6 +17,21 @@
 
 package com.decathlon.ara.ci.service;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.decathlon.ara.ci.bean.QualityThreshold;
 import com.decathlon.ara.common.NotGonnaHappenException;
 import com.decathlon.ara.domain.ExecutedScenario;
@@ -28,39 +43,33 @@ import com.decathlon.ara.domain.enumeration.QualityStatus;
 import com.decathlon.ara.repository.SeverityRepository;
 import com.decathlon.ara.service.dto.quality.QualitySeverityDTO;
 import com.decathlon.ara.service.dto.quality.ScenarioCountDTO;
-import com.decathlon.ara.service.mapper.SeverityMapper;
+import com.decathlon.ara.service.dto.severity.SeverityDTO;
+import com.decathlon.ara.service.mapper.GenericMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Slf4j
 public class QualityService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(QualityService.class);
 
     static final TypeReference<Map<String, QualityThreshold>> TYPE_REFERENCE_TO_MAP_STRING_QUALITY_THRESHOLD = new TypeReference<Map<String, QualityThreshold>>() {
     };
 
-    @NonNull
     private final ObjectMapper objectMapper;
 
-    @NonNull
     private final SeverityRepository severityRepository;
 
-    @NonNull
-    private final SeverityMapper severityMapper;
+    private final GenericMapper mapper;
+
+    public QualityService(ObjectMapper objectMapper, SeverityRepository severityRepository,
+            GenericMapper mapper) {
+        this.objectMapper = objectMapper;
+        this.severityRepository = severityRepository;
+        this.mapper = mapper;
+    }
 
     /**
      * Compute and set {@link Execution#qualityStatus} (the global quality status from which to make the execution eligible or not) and {@link Execution#qualitySeverities} (the status and details of each individual + the Global severities).
@@ -75,7 +84,7 @@ public class QualityService {
         try {
             qualityThresholds = objectMapper.readValue(execution.getQualityThresholds(), TYPE_REFERENCE_TO_MAP_STRING_QUALITY_THRESHOLD);
         } catch (IOException e) {
-            log.error("Cannot parse qualityThresholds, doing without them but marking the execution as incomplete: {}", execution.getQualityThresholds(), e);
+            LOG.warn("EXECUTION|Cannot parse qualityThresholds, doing without them but marking the execution as incomplete: {}", execution.getQualityThresholds(), e);
             qualityThresholds = null;
             globalQualityStatus = QualityStatus.INCOMPLETE;
         }
@@ -90,7 +99,7 @@ public class QualityService {
             qualitySeverities.add(qualitySeverity);
 
             if (threshold == null) {
-                log.error("No qualityThresholds for {}: doing without them but marking the severity and execution as incomplete", severity.getCode());
+                LOG.warn("EXECUTION|No qualityThresholds for {}: doing without them but marking the severity and execution as incomplete", severity.getCode());
                 qualitySeverity.setStatus(QualityStatus.INCOMPLETE);
                 globalQualityStatus = QualityStatus.INCOMPLETE;
             }
@@ -161,7 +170,7 @@ public class QualityService {
         QualityStatus severityQualityStatus = (threshold == null ? null : threshold.toStatus(percent));
 
         QualitySeverityDTO qualitySeverity = new QualitySeverityDTO();
-        qualitySeverity.setSeverity(severityMapper.toDto(severity));
+        qualitySeverity.setSeverity(mapper.map(severity, SeverityDTO.class));
         qualitySeverity.setScenarioCounts(scenarioCounts);
         qualitySeverity.setPercent(percent);
         qualitySeverity.setStatus(severityQualityStatus);

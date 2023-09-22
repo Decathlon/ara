@@ -1,0 +1,45 @@
+version: "3"
+
+services:
+  back:
+    image: maven:3-openjdk-17
+    working_dir: /app
+    volumes:
+      - ./api:/app
+      - m2_home:/root/.m2
+    networks:
+      ara-dev: {}
+    environment:
+      - INFO_APP_VERSION=DEV
+      #- ARA_OAUTH2_MODE=oauth2
+    command: ['/bin/bash', '-c', '${OPTIONAL_COMMAND:-echo with-no-optional-command} && mvn -Pdev spring-boot:run -pl api']
+  front:
+    image: node:12
+    working_dir: /app
+    volumes:
+      - ./web-ui:/app
+    command: ['/bin/bash','-c','npm install && npm run start']
+    networks:
+      ara-dev: {}
+    ports:
+      - 7000:7000
+    environment:
+      - ARA_API_HOST=back
+  oauth2-dev-server:
+    image: maven:3-openjdk-17
+    working_dir: /app
+    volumes:
+      - ./oauth2-dev-server:/app
+      - m2_home:/root/.m2
+    command: ['/bin/bash', '-c', 'mvn spring-boot:run']
+    networks:
+      ara-dev:
+        aliases:
+          - oauth2.dev.localhost
+    ports:
+      - 9000:9000
+      - 9001:9001
+volumes: 
+  m2_home:
+networks:
+  ara-dev: {}

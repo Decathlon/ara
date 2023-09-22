@@ -17,13 +17,13 @@
 
 package com.decathlon.ara;
 
-import lombok.experimental.UtilityClass;
-
 /**
  * This utility class contains the name of all the entities used in Ara.
  */
-@UtilityClass
 public final class Entities {
+
+    private Entities() {
+    }
 
     public static final String COMMUNICATION = "communication";
     public static final String COUNTRY = "country";

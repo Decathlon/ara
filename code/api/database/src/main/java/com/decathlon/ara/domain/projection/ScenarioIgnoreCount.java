@@ -18,20 +18,10 @@
 package com.decathlon.ara.domain.projection;
 
 import com.decathlon.ara.domain.Source;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
 /**
  * This object holds key+value data: it holds the count (the value) of scenarios for a given triple [ sourceCode, severityCode, ignoredOrNot ] "key".
  */
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
-@With
 public class ScenarioIgnoreCount {
 
     /**
@@ -53,5 +43,31 @@ public class ScenarioIgnoreCount {
      * Value-part: the count of scenarios matching the key-part criteria.
      */
     private long count;
+
+    public ScenarioIgnoreCount() {
+    }
+
+    public ScenarioIgnoreCount(Source source, String severityCode, boolean ignored, long count) {
+        this.source = source;
+        this.severityCode = severityCode;
+        this.ignored = ignored;
+        this.count = count;
+    }
+
+    public Source getSource() {
+        return source;
+    }
+
+    public String getSeverityCode() {
+        return severityCode;
+    }
+
+    public boolean isIgnored() {
+        return ignored;
+    }
+
+    public long getCount() {
+        return count;
+    }
 
 }

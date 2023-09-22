@@ -105,7 +105,12 @@
             </DropdownItem>
             <DropdownItem divided>
               <div @click="emitMove">
-                <Icon type="md-move"/> MOVE TO...
+                <Icon type="md-move"/> MOVE LINE TO...
+              </div>
+            </DropdownItem>
+            <DropdownItem :disabled="!node.isSelected">
+              <div @click="emitMoveSelection">
+                <Icon type="md-move"/> MOVE SELECTION TO...
               </div>
             </DropdownItem>
             <DropdownItem v-if="node.row.type === 'FUNCTIONALITY'" divided>
@@ -148,12 +153,16 @@
 
             <DropdownItem divided>
               <div @click="emitDelete">
-                <Icon type="md-trash"/> DELETE
+                <Icon type="md-trash"/> DELETE LINE
+              </div>
+            </DropdownItem>
+            <DropdownItem :disabled="!node.isSelected">
+              <div @click="emitDeleteSelection">
+                <Icon type="md-trash"/> DELETE SELECTION
               </div>
             </DropdownItem>
           </DropdownMenu>
         </Dropdown>
-        <Checkbox @on-change="emitSelection()" v-model="node.isSelected"></Checkbox>
       </ButtonGroup>
 
       <ButtonGroup v-else-if="isAvailableMoveTarget">
@@ -374,6 +383,10 @@
         this.dropDownVisible = false
       },
 
+      emitMoveSelection () {
+        this.$emit('moveSelection')
+      },
+
       emitCompleteMove (position) {
         this.$emit('completeMove', this.node, position)
         // Buggy here, so we do it manually :-(
@@ -387,6 +400,11 @@
       emitDelete () {
         this.loadingDelete = true
         this.$emit('delete', this.node)
+      },
+
+      emitDeleteSelection () {
+        this.loadingDelete = true
+        this.$emit('deleteSelection')
       },
 
       emitShowCoverage () {
@@ -491,7 +509,6 @@
     background-color: #EBF7FF;
     box-shadow: 0 0 6px -2px gray;
     z-index: 1;
-    background: #EBF7FF;
     line-height: 30px;
   }
   .hoverSummary {

@@ -1,0 +1,10 @@
+provider:
+  url: http://oauth2.dev.localhost:9000
+server:
+  port: 9000
+management:
+  server:
+    port: 9001
+
+client:
+  url: http://127.0.0.1:7000

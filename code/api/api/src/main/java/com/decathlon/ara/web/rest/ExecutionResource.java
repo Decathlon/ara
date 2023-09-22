@@ -17,7 +17,6 @@
 
 package com.decathlon.ara.web.rest;
 
-
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.domain.enumeration.QualityStatus;
 import com.decathlon.ara.service.ExecutionHistoryService;
@@ -27,10 +26,8 @@ import com.decathlon.ara.service.dto.execution.*;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.web.rest.util.ResponseUtil;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -46,23 +43,27 @@ import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 /**
  * REST controller for managing Cycle Runs.
  */
-@Slf4j
 @RestController
 @RequestMapping(ExecutionResource.PATH)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ExecutionResource {
 
-    static final String PATH = PROJECT_API_PATH + "/" + Entities.EXECUTION + "s";
-    private static final String VALIDATION_ERRROR = "validation";
+    private static final Logger LOG = LoggerFactory.getLogger(ExecutionResource.class);
 
-    @NonNull
+    static final String PATH = PROJECT_API_PATH + "/" + Entities.EXECUTION + "s";
+    private static final String VALIDATION_ERROR = "validation";
+
     private final ExecutionService service;
 
-    @NonNull
     private final ExecutionHistoryService executionHistoryService;
 
-    @NonNull
     private final ProjectService projectService;
+
+    public ExecutionResource(ExecutionService service, ExecutionHistoryService executionHistoryService,
+            ProjectService projectService) {
+        this.service = service;
+        this.executionHistoryService = executionHistoryService;
+        this.projectService = projectService;
+    }
 
     /**
      * GET a paginated list of all entities.
@@ -243,21 +244,20 @@ public class ExecutionResource {
                                        @RequestParam("cycle") String cycle,
                                        @RequestParam("zip") MultipartFile zipFile) {
         ResponseEntity<Void> result = ResponseEntity.status(HttpStatus.ACCEPTED).build();
-        log.info("Receiving new zip report for project {}...", projectCode);
+        LOG.info("EXECUTION|Receiving new zip report for project {}...", projectCode);
         try {
             long projectId = projectService.toId(projectCode);
             service.uploadExecutionReport(projectId, projectCode, branch, cycle, zipFile);
         } catch (NotFoundException | IllegalArgumentException e) {
-            log.error("Some parameters may not be correct");
-            log.error("Please check your logs, or the stacktrace below:", e);
-            result = ResponseUtil.handle(new BadRequestException(e.getMessage(), Entities.EXECUTION, VALIDATION_ERRROR));
+            LOG.error("EXECUTION|Some parameters may not be correct");
+            result = ResponseUtil.handle(new BadRequestException(e.getMessage(), Entities.EXECUTION, VALIDATION_ERROR));
         } catch (IOException ex) {
-            log.error("Unable to index the uploaded execution.", ex);
+            LOG.error("EXECUTION|Unable to index the uploaded execution.", ex);
             result = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 
-        log.info("Freeing the /upload resource...");
-        log.info("ARA is still uploading executions");
+        LOG.debug("EXECUTION|Freeing the /upload resource...");
+        LOG.info("EXECUTION|ARA is still uploading executions");
         return result;
     }
 

@@ -1,11 +1,13 @@
 = image:code/web-ui/src/assets/favicon.png[Logo,64,64] ARA - Agile Regression Analyzer
-image:https://circleci.com/gh/Decathlon/ara.svg?style=svg["CircleCI", link="https://circleci.com/gh/Decathlon/ara"]
 
-ARA image by https://github.com/slaout[Sébastien Laout], licensed under https://creativecommons.org/licenses/by-nc-sa/4.0/[Creative Commons 4.0 Attributions license]
+image:https://github.com/Decathlon/ara/actions/workflows/build.yaml/badge.svg?branch=main&event=push[BUILD] image:https://github.com/Decathlon/ara/actions/workflows/charts-release.yaml/badge.svg?branch=main&event=push[CHARTS]
+
+image:https://img.shields.io/badge/commitizen-friendly-brightgreen.svg[link="http://commitizen.github.io/cz-cli/"] image:https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release[link="https://github.com/semantic-release/semantic-release"]
+
+ARA icon by https://github.com/slaout[Sébastien Laout], licensed under https://creativecommons.org/licenses/by-nc-sa/4.0/[Creative Commons 4.0 Attributions license]
 [#img-by-nc-sa]
 [caption="Creative commons by-nc-sa logo: ",link=https://creativecommons.org/licenses/by-nc-sa/4.0/]
 image::https://mirrors.creativecommons.org/presskit/buttons/88x31/png/by-nc-sa.png[Creative commons by-nc-sa logo,83,31]
-
 
 == What is ARA?
 
@@ -16,24 +18,25 @@ met.
 == How to locally install it
 
 If you just want to install it locally to give it a try, you can !
-Also, after this installation, you can follow up the <<doc/demo/DemoWalkthrough.adoc#head, Demo walkthrough>>
+Also, after this installation, you can follow up the <<doc/usage/demo/DemoWalkthrough.adoc#head, Demo walkthrough>>
 to explore ARA features !!
 
 Please note the following :
 
 * You'll need https://docs.docker.com/install/[Docker]
 * All the datas that you import in ARA won't be persisted.
-* The port 8081 must be available locally.
+* The port 7000, 9000, 5432 must be available locally.
+* Add to `/etc/hosts` (Linux OS) or to `/private/etc/hosts` (MacOS) or to `c:\Windows\System32\drivers\etc\` (Windows) `127.0.0.1 oauth2.dev.localhost`
 
 === I've got a Windows PC !
 
 1. Open a Powershell Command Prompt
 2. Run the command `Invoke-WebRequest -OutFile docker compose.yml https://raw.githubusercontent.com/Decathlon/ara/main/code/docker-compose.yaml`
 3. Run the command `docker compose up`
-4. Open up a browser on `http://localhost:8081`
-5. Enjoy !
-6. To stop it, in the command line, just do a `docker compose down` in the same directory as the `docker compose.yaml`
-7. To restart it, in the command line do a `docker compose up` in the same directory as the `docker compose.yaml`
+4. Open up a browser on `http://127.0.0.1:7000`
+5. Enjoy ! You can sign in with `admin`/`admin`
+6. To stop it, in the command line, just do a `docker compose down` in the same directory as the `docker-compose.yaml`
+7. To restart it, in the command line do a `docker compose up` in the same directory as the `docker-compose.yaml`
 
 
 === I've got a Mac !
@@ -41,10 +44,10 @@ Please note the following :
 1. Open a Terminal
 2. Run the command `wget https://raw.githubusercontent.com/Decathlon/ara/main/code/docker-compose.yaml`
 3. Run the command `docker compose up`
-4. Open up a browser on `http://localhost:8081`
-5. Enjoy !
-6. To stop it, in the command line, just do a `docker compose down` in the same directory as the `docker compose.yaml`
-7. To restart it, in the command line do a `docker compose up` in the same directory as the `docker compose.yaml`
+4. Open up a browser on `http://127.0.0.1:7000`
+5. Enjoy ! You can sign in with `admin`/`admin`
+6. To stop it, in the command line, just do a `docker compose down` in the same directory as the `docker-compose.yaml`
+7. To restart it, in the command line do a `docker compose up` in the same directory as the `docker-compose.yaml`
 
 
 === I've got a GNU/Linux PC !
@@ -52,37 +55,117 @@ Please note the following :
 1. Open a Terminal
 2. Run the command `wget https://raw.githubusercontent.com/Decathlon/ara/main/code/docker-compose.yaml`
 3. Run the command `docker compose up`
-4. Open up a browser on `http://localhost:8081`
-5. Enjoy !
-6. To stop it, in the command line, just do a `docker compose down` in the same directory as the `docker compose.yaml`
-7. To restart it, in the command line do a `docker compose up` in the same directory as the `docker compose.yaml`
+4. Open up a browser on `http://127.0.0.1:7000`
+5. Enjoy ! You can sign in with `admin`/`admin`
+6. To stop it, in the command line, just do a `docker compose down` in the same directory as the `docker-compose.yaml`
+7. To restart it, in the command line do a `docker compose up` in the same directory as the `docker-compose.yaml`
 
 == How to install it on my Infrastructure
 
-This kind of install is recommanded if you want a Production environment for ARA and your projects.
-Unfortunatelly for now, we only support GNU/Linux based machine for this kind of installation
-(but if you want to contribute, be our guest ! :D ).
+ARA has a Helm chart to easily install it in a Kubernetes Cluster.
 
-The limitation is due to the fact that volume mounting with Docker on Windows can be quite buggy from a machine to
-another, and the mounting is necessary to persist ARA datas and recover them on server restart.
+* Add the ara repository if not already added:
 
-You can find the full installation procedure <<doc/integrator/main/IntegratorDocumentation.adoc#head, here, in the
-Integrator Documentation>>
+```shell
+helm repo add ara https://decathlon.github.io/ara/
+```
+
+* Update repositories
+
+```shell
+helm repo update
+```
+
+* Install it with custom values
+
+```shell
+helm install -f values.yaml --create-namespace --namespace ara my-ara ara/ara-stable
+```
+
+A sample `values.yaml` could be like this one:
+
+```yaml
+api:
+  authentication: oauth2-github # Put a friendly value to disable default authentication
+  customConfig:
+    # Active providers
+    # provider-type has to be one of custom / github / google
+    # code refers to the provider key ( spring.security.oauth2.client.registration.<code>)
+    oauth2providers:
+      conf:
+      - display-name: Github
+        provider-type: github
+        code: github
+
+    # Oauth
+    spring:
+      security:
+        oauth2:
+          client:
+            registration:
+              github:
+                clientId: YOUR_OAUTH2_CLIENT_ID
+                clientSecret: YOUR_OAUTH2_CLIENT_SECRET
+                redirect-uri: "${ara.clientBaseUrl}/${ara.loginProcessingUrl}/{registrationId}"
+
+```
+
+You can use any other OAuth2 provider supported by Spring Security (e.g. Facebook, Google, custom, etc.).
+
+To install and ARA version on the candidate channel:
+```shell
+helm install -f values.yaml --create-namespace --namespace ara my-ara ara/ara-candidate
+```
+
 
 == How to Use ARA?
 
-You can go through the <<doc/demo/DemoWalkthrough.adoc#head, Demo Walkthrough>> to quickly learn how to
+You can go through the <<doc/usage/demo/DemoWalkthrough.adoc#head, Demo Walkthrough>> to quickly learn how to
 use ARA.
 
-You can also read the <<doc/user/main/UserDocumentation.adoc#head, User Documentation>> to learn everything
+You can also read the <<doc/usage/main/UserDocumentation.adoc#head, User Documentation>> to learn everything
 you need to know about the utilization of ARA (don't hesitate to pass those doc to the rest of your teams ;) ).
 
 == How to Develop on ARA?
 
-Please read the <<doc/developer/DeveloperDocumentation.adoc#head, Developer Documentation>>
+Please read the <<doc/development/install/DeveloperDocumentation.adoc#head, Developer Documentation>>
 to learn how the project is structured and how to develop new features in ARA and/or contribute.
 To start a development environment:
 ----
 > cd code
-> docker compose -f docker compose.dev.yml up
+> docker compose -f code/docker-compose.dev.yml up -d
+> docker compose -f code/docker-compose.dev.yml logs -f --tail 200
 ----
+
+=== Commit convention
+
+ARA use https://github.com/angular/angular/blob/master/CONTRIBUTING.md#-commit-message-format[Angular Commit Message Conventions] in order to generate nice changelog and increase maintenability and lisibility.
+
+In local environment, you can use git hooks configured for developer.
+
+To enable this tools, `node` is required. You can follow this step to use it:
+
+```
+npm install
+```
+
+Then `git commit` command will trigger a prompt to build a proper commit message.
+
+And that's all !
+
+You can now use the standard `git commit` to interact with a prompt to build your conventional commits.
+
+In order to disable the commitizen hook if needed, you can fill a specific environment variable:
+
+```
+export COMMITIZEN_HOOK_DISABLED=true
+```
+
+With this, commitizen promp will be skiped.
+
+[NOTE]
+.Tools used
+====
+* https://github.com/commitizen/cz-cli[commitizen]
+* https://github.com/typicode/husky[husky]
+====

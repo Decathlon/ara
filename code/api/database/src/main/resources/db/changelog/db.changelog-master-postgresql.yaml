@@ -13,3 +13,11 @@ databaseChangeLog:
       file: classpath*:db/changelog/changes/postgresql/20210618085646-change_id.yaml
   - include:
       file: classpath*:db/changelog/changes/postgresql/20210715155609-fix-pattern-seq.yaml
+  - include:
+      file: classpath*:db/changelog/changes/postgresql/20211129100011-delete_cascade_on_problem_occurrences.yaml
+  - include:
+      file: classpath*:db/changelog/changes/postgresql/20211125164648-not_null_constraints.yaml
+  - include:
+      file: classpath*:db/changelog/changes/postgresql/20220125164557-remove-unexpected-index.yaml
+  - include:
+      file: classpath*:db/changelog/changes/postgresql/20220318151922-not_null_constraints.yaml

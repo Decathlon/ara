@@ -17,14 +17,12 @@
 
 package com.decathlon.ara.scenario.generic.bean.feature;
 
+import java.util.List;
+
 import com.decathlon.ara.scenario.generic.bean.GenericExecutedScenarioReport;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
 
-import java.util.List;
-
-@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GenericExecutedScenarioFeature {
 
@@ -41,5 +39,17 @@ public class GenericExecutedScenarioFeature {
      */
     public String getTagsAsString() {
         return GenericExecutedScenarioReport.convertTagsToString(tags);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public List<String> getTags() {
+        return tags;
     }
 }

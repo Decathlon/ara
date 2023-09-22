@@ -17,16 +17,11 @@
 
 package com.decathlon.ara.service.dto.response;
 
+import java.util.List;
+
 import com.decathlon.ara.service.dto.country.CountryDTO;
 import com.decathlon.ara.service.dto.type.TypeWithSourceDTO;
-import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class DistinctStatisticsDTO {
 
     private List<String> releases;
@@ -38,5 +33,77 @@ public class DistinctStatisticsDTO {
     private List<String> scenarioNames;
     private List<String> steps;
     private List<String> stepDefinitions;
+
+    public List<String> getReleases() {
+        return releases;
+    }
+
+    public void setReleases(List<String> releases) {
+        this.releases = releases;
+    }
+
+    public List<CountryDTO> getCountries() {
+        return countries;
+    }
+
+    public void setCountries(List<CountryDTO> countries) {
+        this.countries = countries;
+    }
+
+    public List<TypeWithSourceDTO> getTypes() {
+        return types;
+    }
+
+    public void setTypes(List<TypeWithSourceDTO> types) {
+        this.types = types;
+    }
+
+    public List<String> getPlatforms() {
+        return platforms;
+    }
+
+    public void setPlatforms(List<String> platforms) {
+        this.platforms = platforms;
+    }
+
+    public List<String> getFeatureNames() {
+        return featureNames;
+    }
+
+    public void setFeatureNames(List<String> featureNames) {
+        this.featureNames = featureNames;
+    }
+
+    public List<String> getFeatureFiles() {
+        return featureFiles;
+    }
+
+    public void setFeatureFiles(List<String> featureFiles) {
+        this.featureFiles = featureFiles;
+    }
+
+    public List<String> getScenarioNames() {
+        return scenarioNames;
+    }
+
+    public void setScenarioNames(List<String> scenarioNames) {
+        this.scenarioNames = scenarioNames;
+    }
+
+    public List<String> getSteps() {
+        return steps;
+    }
+
+    public void setSteps(List<String> steps) {
+        this.steps = steps;
+    }
+
+    public List<String> getStepDefinitions() {
+        return stepDefinitions;
+    }
+
+    public void setStepDefinitions(List<String> stepDefinitions) {
+        this.stepDefinitions = stepDefinitions;
+    }
 
 }

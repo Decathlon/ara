@@ -17,15 +17,6 @@
 
 package com.decathlon.ara.service.dto.coverage;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
 public class AxisPointDTO {
 
     public static final AxisPointDTO ALL = new AxisPointDTO("", "All", null);
@@ -33,5 +24,26 @@ public class AxisPointDTO {
     private String id;
     private String name;
     private String tooltip;
+
+    public AxisPointDTO() {
+    }
+
+    public AxisPointDTO(String id, String name, String tooltip) {
+        this.id = id;
+        this.name = name;
+        this.tooltip = tooltip;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getTooltip() {
+        return tooltip;
+    }
 
 }

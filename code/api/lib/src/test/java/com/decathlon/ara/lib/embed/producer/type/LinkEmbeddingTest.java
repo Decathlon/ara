@@ -17,14 +17,14 @@
 
 package com.decathlon.ara.lib.embed.producer.type;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.Test;
 
-public class LinkEmbeddingTest {
+import static org.assertj.core.api.Assertions.assertThat;
+
+class LinkEmbeddingTest {
 
     @Test
-    public void toHtml_ShouldReturnEmpty_WhenUrlIsNull() {
+    void toHtml_ShouldReturnEmpty_WhenUrlIsNull() {
         // GIVEN
         final String nullUrl = null;
         final LinkEmbedding cut = new LinkEmbedding(null, null, nullUrl, null);
@@ -37,7 +37,7 @@ public class LinkEmbeddingTest {
     }
 
     @Test
-    public void toHtml_ShouldEscapeHtmlCharacters_WhenUrlContainsHtmlCharacters() {
+    void toHtml_ShouldEscapeHtmlCharacters_WhenUrlContainsHtmlCharacters() {
         // GIVEN
         final String urlWithHtml = "Escaping<test> &amp; \"checked'";
         final LinkEmbedding cut = new LinkEmbedding(null, null, urlWithHtml, null);

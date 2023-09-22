@@ -17,17 +17,12 @@
 
 package com.decathlon.ara.service.dto.run;
 
+import java.util.Date;
+
+import com.decathlon.ara.domain.enumeration.JobStatus;
 import com.decathlon.ara.service.dto.country.CountryDTO;
 import com.decathlon.ara.service.dto.type.TypeWithSourceDTO;
-import com.decathlon.ara.domain.enumeration.JobStatus;
-import java.util.Date;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class RunDTO {
 
     private Long id;
@@ -55,5 +50,57 @@ public class RunDTO {
     private Long estimatedDuration;
 
     private Long duration;
+
+    public Long getId() {
+        return id;
+    }
+
+    public CountryDTO getCountry() {
+        return country;
+    }
+
+    public TypeWithSourceDTO getType() {
+        return type;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public String getPlatform() {
+        return platform;
+    }
+
+    public String getJobUrl() {
+        return jobUrl;
+    }
+
+    public JobStatus getStatus() {
+        return status;
+    }
+
+    public String getCountryTags() {
+        return countryTags;
+    }
+
+    public String getSeverityTags() {
+        return severityTags;
+    }
+
+    public Boolean getIncludeInThresholds() {
+        return includeInThresholds;
+    }
+
+    public Date getStartDateTime() {
+        return startDateTime;
+    }
+
+    public Long getEstimatedDuration() {
+        return estimatedDuration;
+    }
+
+    public Long getDuration() {
+        return duration;
+    }
 
 }

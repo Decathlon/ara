@@ -17,22 +17,30 @@
 
 package com.decathlon.ara.ci.bean;
 
-import com.decathlon.ara.domain.CycleDefinition;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-
 import java.io.File;
 
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
+import com.decathlon.ara.domain.CycleDefinition;
+
 public class PlannedIndexation {
 
     private CycleDefinition cycleDefinition;
 
     private File executionFolder;
+
+    public PlannedIndexation() {
+    }
+
+    public PlannedIndexation(CycleDefinition cycleDefinition, File executionFolder) {
+        this.cycleDefinition = cycleDefinition;
+        this.executionFolder = executionFolder;
+    }
+
+    public CycleDefinition getCycleDefinition() {
+        return cycleDefinition;
+    }
+
+    public File getExecutionFolder() {
+        return executionFolder;
+    }
 
 }

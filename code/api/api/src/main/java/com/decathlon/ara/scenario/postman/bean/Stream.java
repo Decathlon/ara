@@ -17,17 +17,10 @@
 
 package com.decathlon.ara.scenario.postman.bean;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.File;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Stream {
 
@@ -44,5 +37,21 @@ public class Stream {
      * @see #data data for more detailed documentation of the process
      */
     private File tempFile;
+
+    public byte[] getData() {
+        return data;
+    }
+
+    public void setData(byte[] data) {
+        this.data = data;
+    }
+
+    public File getTempFile() {
+        return tempFile;
+    }
+
+    public void setTempFile(File tempFile) {
+        this.tempFile = tempFile;
+    }
 
 }

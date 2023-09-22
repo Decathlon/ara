@@ -20,9 +20,9 @@ package com.decathlon.ara.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -50,7 +50,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.decathlon.ara.ci.bean.PlannedIndexation;
 import com.decathlon.ara.ci.service.ExecutionIndexerService;
 import com.decathlon.ara.domain.CycleDefinition;
 import com.decathlon.ara.domain.Execution;
@@ -61,13 +60,13 @@ import com.decathlon.ara.repository.CycleDefinitionRepository;
 import com.decathlon.ara.repository.ExecutionCompletionRequestRepository;
 import com.decathlon.ara.repository.ExecutionRepository;
 import com.decathlon.ara.repository.FunctionalityRepository;
-import com.decathlon.ara.service.mapper.ExecutionMapper;
-import com.decathlon.ara.service.mapper.ExecutionWithHandlingCountsMapper;
+import com.decathlon.ara.service.mapper.GenericMapper;
 import com.decathlon.ara.service.support.Settings;
-import com.decathlon.ara.service.transformer.ExecutionTransformer;
+import com.decathlon.ara.util.factory.CycleDefinitionFactory;
+import com.decathlon.ara.util.factory.ExecutionBuilder;
 
 @ExtendWith(MockitoExtension.class)
-public class ExecutionServiceTest {
+class ExecutionServiceTest {
 
     @Mock
     private ExecutionRepository executionRepository;
@@ -79,13 +78,7 @@ public class ExecutionServiceTest {
     private FunctionalityRepository functionalityRepository;
 
     @Mock
-    private ExecutionMapper executionMapper;
-
-    @Mock
-    private ExecutionWithHandlingCountsMapper executionWithHandlingCountsMapper;
-
-    @Mock
-    private ExecutionTransformer executionTransformer;
+    private GenericMapper mapper;
 
     @Mock
     private ExecutionHistoryService executionHistoryService;
@@ -113,7 +106,7 @@ public class ExecutionServiceTest {
     private ExecutionService cut;
 
     @Test
-    public void requestCompletion_should_register_request_when_execution_not_crawled_yet() {
+    void requestCompletion_should_register_request_when_execution_not_crawled_yet() {
         // GIVEN
         long projectId = 1;
         when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(null);
@@ -128,7 +121,7 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void requestCompletion_should_register_request_when_execution_status_is_not_DONE_yet() {
+    void requestCompletion_should_register_request_when_execution_status_is_not_DONE_yet() {
         // GIVEN
         long projectId = 1;
         when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new Execution());
@@ -143,10 +136,10 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void requestCompletion_should_not_register_request_when_execution_status_is_DONE() {
+    void requestCompletion_should_not_register_request_when_execution_status_is_DONE() {
         // GIVEN
         long projectId = 1;
-        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new Execution().withStatus(JobStatus.DONE));
+        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new ExecutionBuilder().withStatus(JobStatus.DONE).build());
 
         // WHEN
         cut.requestCompletion(projectId, "url");
@@ -156,7 +149,7 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void getQualityStatus_should_return_SILL_COMPUTING_when_execution_not_found() {
+    void getQualityStatus_should_return_SILL_COMPUTING_when_execution_not_found() {
         // GIVEN
         long projectId = 1;
         when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(null);
@@ -169,10 +162,10 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void getQualityStatus_should_return_SILL_COMPUTING_when_running_execution_has_completion_request() {
+    void getQualityStatus_should_return_SILL_COMPUTING_when_running_execution_has_completion_request() {
         // GIVEN
         long projectId = 1;
-        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new Execution().withStatus(JobStatus.RUNNING));
+        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new ExecutionBuilder().withStatus(JobStatus.RUNNING).build());
         when(executionCompletionRequestRepository.findById(eq("url"))).thenReturn(Optional.of(new ExecutionCompletionRequest()));
 
         // WHEN
@@ -183,15 +176,15 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void getQualityStatus_should_return_quality_status_when_running_execution_has_no_completion_request() {
+    void getQualityStatus_should_return_quality_status_when_running_execution_has_no_completion_request() {
         // GIVEN
         long projectId = 1;
-        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new Execution()
+        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new ExecutionBuilder()
                 .withStatus(JobStatus.RUNNING)
                 .withBlockingValidation(Boolean.TRUE)
                 .withQualitySeverities("any")
                 .withQualityThresholds("any")
-                .withQualityStatus(QualityStatus.WARNING));
+                .withQualityStatus(QualityStatus.WARNING).build());
         when(executionCompletionRequestRepository.findById(eq("url"))).thenReturn(Optional.empty());
 
         // WHEN
@@ -202,15 +195,15 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void getQualityStatus_should_return_quality_status_when_execution_is_DONE() {
+    void getQualityStatus_should_return_quality_status_when_execution_is_DONE() {
         // GIVEN
         long projectId = 1;
-        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new Execution()
+        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new ExecutionBuilder()
                 .withStatus(JobStatus.DONE)
                 .withBlockingValidation(Boolean.TRUE)
                 .withQualitySeverities("any")
                 .withQualityThresholds("any")
-                .withQualityStatus(QualityStatus.WARNING));
+                .withQualityStatus(QualityStatus.WARNING).build());
 
         // WHEN
         String status = cut.getQualityStatus(projectId, "url");
@@ -220,15 +213,15 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void getQualityStatus_should_return_INCOMPLETE_when_execution_is_DONE_and_has_no_quality_status() {
+    void getQualityStatus_should_return_INCOMPLETE_when_execution_is_DONE_and_has_no_quality_status() {
         // GIVEN
         long projectId = 1;
-        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new Execution()
+        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new ExecutionBuilder()
                 .withStatus(JobStatus.DONE)
                 .withBlockingValidation(Boolean.TRUE)
                 .withQualitySeverities("any")
                 .withQualityThresholds("any")
-                .withQualityStatus(null));
+                .withQualityStatus(null).build());
 
         // WHEN
         String status = cut.getQualityStatus(projectId, "url");
@@ -238,11 +231,11 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void getQualityStatus_should_not_retrieve_completion_request_when_execution_is_DONE() {
+    void getQualityStatus_should_not_retrieve_completion_request_when_execution_is_DONE() {
         // GIVEN
         long projectId = 1;
-        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new Execution()
-                .withStatus(JobStatus.DONE));
+        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new ExecutionBuilder()
+                .withStatus(JobStatus.DONE).build());
 
         // WHEN
         cut.getQualityStatus(projectId, "url");
@@ -252,15 +245,15 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void getQualityStatus_should_return_CRASHED_when_DONE_execution_has_null_qualitySeverity() {
+    void getQualityStatus_should_return_CRASHED_when_DONE_execution_has_null_qualitySeverity() {
         // GIVEN
         long projectId = 1;
-        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new Execution()
+        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new ExecutionBuilder()
                 .withStatus(JobStatus.DONE)
                 .withBlockingValidation(Boolean.TRUE)
                 .withQualitySeverities(null)
                 .withQualityThresholds("any")
-                .withQualityStatus(QualityStatus.WARNING));
+                .withQualityStatus(QualityStatus.WARNING).build());
 
         // WHEN
         String status = cut.getQualityStatus(projectId, "url");
@@ -270,15 +263,15 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void getQualityStatus_should_return_CRASHED_when_DONE_execution_has_empty_qualitySeverity() {
+    void getQualityStatus_should_return_CRASHED_when_DONE_execution_has_empty_qualitySeverity() {
         // GIVEN
         long projectId = 1;
-        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new Execution()
+        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new ExecutionBuilder()
                 .withStatus(JobStatus.DONE)
                 .withBlockingValidation(Boolean.TRUE)
                 .withQualitySeverities("")
                 .withQualityThresholds("any")
-                .withQualityStatus(QualityStatus.WARNING));
+                .withQualityStatus(QualityStatus.WARNING).build());
 
         // WHEN
         String status = cut.getQualityStatus(projectId, "url");
@@ -288,15 +281,15 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void getQualityStatus_should_return_CRASHED_when_DONE_execution_has_null_qualityThresholds() {
+    void getQualityStatus_should_return_CRASHED_when_DONE_execution_has_null_qualityThresholds() {
         // GIVEN
         long projectId = 1;
-        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new Execution()
+        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new ExecutionBuilder()
                 .withStatus(JobStatus.DONE)
                 .withBlockingValidation(Boolean.TRUE)
                 .withQualitySeverities("any")
                 .withQualityThresholds(null)
-                .withQualityStatus(QualityStatus.WARNING));
+                .withQualityStatus(QualityStatus.WARNING).build());
 
         // WHEN
         String status = cut.getQualityStatus(projectId, "url");
@@ -306,15 +299,15 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void getQualityStatus_should_return_CRASHED_when_DONE_execution_has_empty_qualityThresholds() {
+    void getQualityStatus_should_return_CRASHED_when_DONE_execution_has_empty_qualityThresholds() {
         // GIVEN
         long projectId = 1;
-        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new Execution()
+        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new ExecutionBuilder()
                 .withStatus(JobStatus.DONE)
                 .withBlockingValidation(Boolean.TRUE)
                 .withQualitySeverities("any")
                 .withQualityThresholds("")
-                .withQualityStatus(QualityStatus.WARNING));
+                .withQualityStatus(QualityStatus.WARNING).build());
 
         // WHEN
         String status = cut.getQualityStatus(projectId, "url");
@@ -324,15 +317,15 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void getQualityStatus_should_return_NOT_BLOCKING_when_DONE_execution_is_not_blocking() {
+    void getQualityStatus_should_return_NOT_BLOCKING_when_DONE_execution_is_not_blocking() {
         // GIVEN
         long projectId = 1;
-        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new Execution()
+        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new ExecutionBuilder()
                 .withStatus(JobStatus.DONE)
                 .withBlockingValidation(Boolean.FALSE)
                 .withQualitySeverities("any")
                 .withQualityThresholds("any")
-                .withQualityStatus(QualityStatus.WARNING));
+                .withQualityStatus(QualityStatus.WARNING).build());
 
         // WHEN
         String status = cut.getQualityStatus(projectId, "url");
@@ -342,15 +335,15 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void getQualityStatus_should_return_NOT_BLOCKING_when_DONE_execution_has_null_blocking() {
+    void getQualityStatus_should_return_NOT_BLOCKING_when_DONE_execution_has_null_blocking() {
         // GIVEN
         long projectId = 1;
-        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new Execution()
+        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new ExecutionBuilder()
                 .withStatus(JobStatus.DONE)
                 .withBlockingValidation(null)
                 .withQualitySeverities("any")
                 .withQualityThresholds("any")
-                .withQualityStatus(QualityStatus.WARNING));
+                .withQualityStatus(QualityStatus.WARNING).build());
 
         // WHEN
         String status = cut.getQualityStatus(projectId, "url");
@@ -360,16 +353,16 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void getQualityStatus_should_return_DISCARDED_when_execution_has_discard_reason() {
+    void getQualityStatus_should_return_DISCARDED_when_execution_has_discard_reason() {
         // GIVEN
         long projectId = 1;
-        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new Execution()
+        when(executionRepository.findByProjectIdAndJobUrl(projectId, "url")).thenReturn(new ExecutionBuilder()
                 .withStatus(JobStatus.DONE)
                 .withBlockingValidation(Boolean.TRUE)
                 .withQualitySeverities("any")
                 .withQualityThresholds("any")
                 .withDiscardReason("some reason")
-                .withQualityStatus(QualityStatus.WARNING));
+                .withQualityStatus(QualityStatus.WARNING).build());
 
         // WHEN
         String status = cut.getQualityStatus(projectId, "url");
@@ -379,16 +372,15 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void uploadExecutionReport_should_call_the_indexer() throws IOException {
+    void uploadExecutionReport_should_call_the_indexer() throws IOException {
         // Given
         long projectId = 23L;
         String projectCode = "prj";
         String branch = "master";
         String cycle = "day";
         MultipartFile zip = new MockMultipartFile("zip", "test.zip", "application/zip", new byte[0]);
-        CycleDefinition cycleDefinition = new CycleDefinition(1L, projectId, branch, cycle, 1);
+        CycleDefinition cycleDefinition = CycleDefinitionFactory.get(1L, projectId, branch, cycle, 1);
         File executionPath = new File("/opt/executions/123");
-        PlannedIndexation plannedIndexation = new PlannedIndexation().withCycleDefinition(cycleDefinition).withExecutionFolder(executionPath);
         List<File> unzipMock = Collections.singletonList(executionPath);
 
         // When
@@ -402,7 +394,7 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void uploadExecutionReport_should_throw_IllegalArgumentException_if_cycle_doesnt_exists() throws IOException {
+    void uploadExecutionReport_should_throw_IllegalArgumentException_if_cycle_doesnt_exists() throws IOException {
         // Given
         long projectId = 23L;
         String projectCode = "prj";
@@ -415,9 +407,9 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void unzipExecutions_should_call_unzip_and_return_result() throws IOException {
+    void unzipExecutions_should_call_unzip_and_return_result() throws IOException {
         // GIVEN
-        File target = new File(System.getProperty("java.io.tmpdir"),"ara-unzipExecutions-" +
+        File target = new File(System.getProperty("java.io.tmpdir"), "ara-unzipExecutions-" +
                 new Date().getTime());
         target.mkdir(); // Will log in warning level due to the fact that cut will try to recreate it.
         new File(target, "tmp").createNewFile(); // To make the directory not empty.
@@ -439,9 +431,9 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void unzipExecutions_should_propagate_ioexception_from_archiveservice() throws IOException {
+    void unzipExecutions_should_propagate_ioexception_from_archiveservice() throws IOException {
         // GIVEN
-        File target = new File(System.getProperty("java.io.tmpdir"),"ara-unzipExecutions-" +
+        File target = new File(System.getProperty("java.io.tmpdir"), "ara-unzipExecutions-" +
                 new Date().getTime());
         MultipartFile file = new MockMultipartFile("zip", "test.zip", "application/zip", new byte[0]);
         doThrow(new IOException("Unable to write")).when(archiveService).unzip(file, target);
@@ -455,7 +447,7 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void retrieveAllExecutionDirectories_should_return_the_current_directory() {
+    void retrieveAllExecutionDirectories_should_return_the_current_directory() {
         // GIVEN
         File directory = new File(System.getProperty("java.io.tmpdir"), "ara-retrieveAllExeDir-" +
                 new Date().getTime());
@@ -472,7 +464,7 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void retrieveAllExecutionDirectories_should_return_sub_directories() {
+    void retrieveAllExecutionDirectories_should_return_sub_directories() {
         // GIVEN
         File directory = new File(System.getProperty("java.io.tmpdir"), "ara-retrieveAllExeDirSubDir-" +
                 new Date().getTime());
@@ -496,7 +488,7 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void retrieveAllExecutionDirectories_should_return_empty_if_not_an_execution_directory() {
+    void retrieveAllExecutionDirectories_should_return_empty_if_not_an_execution_directory() {
         // GIVEN
         File directory = new File(System.getProperty("java.io.tmpdir"), "ara-retrieveAllExeDir-" +
                 new Date().getTime());
@@ -516,7 +508,7 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void retrieveAllExecutionDirectories_should_return_empty_if_is_empty() {
+    void retrieveAllExecutionDirectories_should_return_empty_if_is_empty() {
         // GIVEN
         File directory = new File(System.getProperty("java.io.tmpdir"), "ara-retrieveAllExeDir-" +
                 new Date().getTime());
@@ -529,7 +521,7 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void isExecutionDirectory_should_return_true() throws IOException {
+    void isExecutionDirectory_should_return_true() throws IOException {
         // Given
         String timestamp = String.valueOf(new Date().getTime());
         File directory = new File(System.getProperty("java.io.tmpdir"), timestamp);
@@ -546,7 +538,7 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void isExecutionDirectory_should_return_false_if_its_not_a_directory() throws IOException {
+    void isExecutionDirectory_should_return_false_if_its_not_a_directory() throws IOException {
         File test = new File(System.getProperty("java.io.tmpdir"), "buildInformation.json");
         try {
             test.createNewFile();
@@ -560,7 +552,7 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void isExecutionDirectory_should_return_false_if_name_is_not_a_timestamp() throws IOException {
+    void isExecutionDirectory_should_return_false_if_name_is_not_a_timestamp() throws IOException {
         // Given
         File directory = new File(System.getProperty("java.io.tmpdir"), "not_a_timestamp");
         directory.mkdirs();
@@ -576,7 +568,7 @@ public class ExecutionServiceTest {
     }
 
     @Test
-    public void isExecutionDirectory_should_return_false_if_dont_contains_buildInformation() {
+    void isExecutionDirectory_should_return_false_if_dont_contains_buildInformation() {
         // Given
         String timestamp = String.valueOf(new Date().getTime());
         File directory = new File(System.getProperty("java.io.tmpdir"), timestamp);

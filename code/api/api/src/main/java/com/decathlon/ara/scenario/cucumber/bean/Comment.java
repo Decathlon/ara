@@ -18,13 +18,19 @@
 package com.decathlon.ara.scenario.cucumber.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Data;
 
-@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Comment {
 
     private Integer line;
     private String value;
+
+    public Integer getLine() {
+        return line;
+    }
+
+    public String getValue() {
+        return value;
+    }
 
 }

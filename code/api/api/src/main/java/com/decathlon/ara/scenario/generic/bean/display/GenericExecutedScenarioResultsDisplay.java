@@ -19,9 +19,7 @@ package com.decathlon.ara.scenario.generic.bean.display;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
 
-@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GenericExecutedScenarioResultsDisplay {
 
@@ -33,4 +31,16 @@ public class GenericExecutedScenarioResultsDisplay {
 
     @JsonProperty("other")
     private String otherResultsDisplayUrl;
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public String getScreenshotUrl() {
+        return screenshotUrl;
+    }
+
+    public String getOtherResultsDisplayUrl() {
+        return otherResultsDisplayUrl;
+    }
 }

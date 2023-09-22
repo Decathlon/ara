@@ -19,9 +19,7 @@ package com.decathlon.ara.defect.jira.api.model.project;
 
 import com.decathlon.ara.defect.jira.api.model.avatar.JiraAvatar;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
 
-@Data
 public class JiraProject {
 
     private String self;
@@ -38,4 +36,32 @@ public class JiraProject {
 
     @JsonProperty("avatarUrls")
     private JiraAvatar avatar;
+
+    public String getSelf() {
+        return self;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getProjectTypeKey() {
+        return projectTypeKey;
+    }
+
+    public Boolean getSimplified() {
+        return simplified;
+    }
+
+    public JiraAvatar getAvatar() {
+        return avatar;
+    }
 }

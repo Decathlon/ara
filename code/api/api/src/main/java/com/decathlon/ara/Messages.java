@@ -17,9 +17,6 @@
 
 package com.decathlon.ara;
 
-import lombok.experimental.UtilityClass;
-
-@UtilityClass
 public final class Messages {
 
     public static final String PARAMETER_IS_MISSING = "One or more parameters is missing or null";

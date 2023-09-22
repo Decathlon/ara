@@ -20,13 +20,16 @@
 info:
   app:
     version: version
+    channel: main
   api:
     version: @project.version@
+
+# Srping custom conf
 spring:
   profiles:
-    include: @spring.profiles.active@,${ara.logging.mode}
+    include: @profiles.from.maven@,${ara.oauth2.mode},${ara.logging.mode}
   config:
-    import: config-database.yaml,optional:config-custom.yaml,optional:config-authentication.yaml
+    import: config-database.yaml
   jackson:
     date-format: "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"
     default-property-inclusion: NON_NULL
@@ -42,6 +45,8 @@ spring:
     #host: please-configure-spring.mail.host
 
 springdoc:
+  swagger-ui:
+    disable-swagger-default-url: true
   packagesToScan: com.decathlon.ara
   pathsToMatch: /api/**
   use-management-port: true
@@ -54,8 +59,12 @@ springdoc:
 ara:
   logging:
     mode: logging-console
+  oauth2:
+    mode: oauth2-mock
   maxExecutionDaysToKeep: 14
   minExecutionsToKeepPerCycle: 20
+  purge:
+    schedule: "0 0 0 * * *" # every day at midnight
 
   # Enabled every minutes, starting 40 seconds after startup to be EXACTLY BETWEEN two execution indexing schedules
   defectSyncSchedulingDelayInMilliseconds: 60000
@@ -66,7 +75,7 @@ ara:
     asset:
       name: file
   fileHomeFolder: /opt/ara/data/assets
-  fileHttpAccess: http://localhost:8080
+  fileHttpAccess: http://localhost:8000
   fileScreenshotSubFolder: /screenshots
   fileHttpLogsSubFolder: /http-logs
 
@@ -81,11 +90,31 @@ ara:
     xprt-mprt-crtg: true
 
   # Local front
-  clientBaseUrl: http://localhost:8081/
+  clientBaseUrl: http://127.0.0.1:7000/
+
+  ### Urls customization:
+  # entrypoint to initialize oauth processing
+  loginStartingUrl: "/oauth/login"
+  # path to redirect to from auth server
+  loginProcessingUrl: "/oauth/logincomplete"
+  # logout entrypoint
+  logoutProcessingUrl: "/oauth/logout"
+
+server:
+  port: 8000
+  # Session management
+  servlet:
+    session:
+      timeout: 14400s
+      cookie:
+        max-age: 43200
 
 management:
+  info:
+    env:
+      enabled: true
   server:
-    port: 9090
+    port: 8001
   endpoints:
     web:
       exposure:
@@ -95,3 +124,4 @@ management:
     export:
       influx:
         enabled: false
+

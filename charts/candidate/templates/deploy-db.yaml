@@ -1,5 +1,5 @@
-{{- if and (not .Values.database.external) (not .Values.database.embedded) }}
-{{- $name := printf "%s-%s-%s" .Release.Name .Chart.Name "db" -}}
+{{- if eq .Values.database.mode "cluster" }}
+{{- $name := printf "%s-%s" .Release.Name "db" -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -34,23 +34,19 @@ spec:
           valueFrom:
             secretKeyRef:
               name: {{ include "ara.database.secret.name" . }}
-              key: {{ include "ara.database.secret.databasenamekey" . }}
+              key: {{ .Values.database.secretConfig.databaseNameKey }}
         - name: POSTGRES_USER
           valueFrom:
             secretKeyRef:
               name: {{ include "ara.database.secret.name" . }}
-              key: {{ include "ara.database.secret.usernamekey" . }}
+              key: {{ .Values.database.secretConfig.usernameKey }}
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ include "ara.database.secret.name" . }}
-              key: {{ include "ara.database.secret.passwordkey" . }}
+              key: {{ .Values.database.secretConfig.passwordKey }}
         ports:
-        - containerPort: {{ .Values.db.port }}
-        {{- if .Values.db.resources }}
-        resources:
-{{ toYaml .Values.db.resources | indent 10 }}
-        {{- end }}
+        - containerPort: 5432
 
 ---
 apiVersion: v1
@@ -59,7 +55,7 @@ metadata:
   name: {{ $name }}
 spec:
   ports:
-  - port: {{ .Values.db.port }}
+  - port: 5432
   selector:
     app.kubernetes.io/name: {{ include "ara.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

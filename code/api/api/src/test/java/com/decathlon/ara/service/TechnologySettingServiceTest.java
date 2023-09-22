@@ -17,28 +17,6 @@
 
 package com.decathlon.ara.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.junit.Assert.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import com.decathlon.ara.domain.TechnologySetting;
 import com.decathlon.ara.domain.enumeration.Technology;
 import com.decathlon.ara.repository.TechnologySettingRepository;
@@ -49,9 +27,26 @@ import com.decathlon.ara.service.dto.setting.SettingType;
 import com.decathlon.ara.service.dto.setting.TechnologySettingGroupDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class TechnologySettingServiceTest {
+class TechnologySettingServiceTest {
 
     @Mock
     private TechnologySettingRepository technologySettingRepository;
@@ -63,7 +58,7 @@ public class TechnologySettingServiceTest {
     private TechnologySettingService technologySettingService;
 
     @Test
-    public void getAllGroups_returnAllGroups() {
+    void getAllGroups_returnAllGroups() {
         // Given
         Long projectId = 1L;
 
@@ -167,7 +162,7 @@ public class TechnologySettingServiceTest {
     }
 
     @Test
-    public void getSettingValue_returnValue_whenFound() {
+    void getSettingValue_returnValue_whenFound() {
         // Given
         Long projectId = 1L;
 
@@ -184,7 +179,7 @@ public class TechnologySettingServiceTest {
     }
 
     @Test
-    public void getSettingValue_returnDefaultValue_whenNotFound() {
+    void getSettingValue_returnDefaultValue_whenNotFound() {
         // Given
         Long projectId = 1L;
 
@@ -200,7 +195,7 @@ public class TechnologySettingServiceTest {
     }
 
     @Test
-    public void update_throwNotFoundException_whenCodeIsUnknown() throws BadRequestException {
+    void update_throwNotFoundException_whenCodeIsUnknown() throws BadRequestException {
         // Given
         Long projectId = 1L;
         String unknownCode = "unknown.code";
@@ -217,7 +212,7 @@ public class TechnologySettingServiceTest {
     }
 
     @Test
-    public void update_throwBadRequestException_whenValueIsInvalidated() throws BadRequestException {
+    void update_throwBadRequestException_whenValueIsInvalidated() throws BadRequestException {
         // Given
         Long projectId = 1L;
         String code = "report.path";
@@ -234,7 +229,7 @@ public class TechnologySettingServiceTest {
     }
 
     @Test
-    public void update_insertNewSetting_whenSettingNotFound() throws BadRequestException {
+    void update_insertNewSetting_whenSettingNotFound() throws BadRequestException {
         // Given
         Long projectId = 1L;
         String code = "report.path";
@@ -292,7 +287,7 @@ public class TechnologySettingServiceTest {
     }
 
     @Test
-    public void update_updateSetting_whenSettingFound() throws BadRequestException {
+    void update_updateSetting_whenSettingFound() throws BadRequestException {
         // Given
         Long projectId = 1L;
         String code = "report.path";

@@ -23,45 +23,52 @@ import com.decathlon.ara.domain.Error;
 import com.decathlon.ara.domain.Execution;
 import com.decathlon.ara.domain.Problem;
 import com.decathlon.ara.domain.enumeration.JobStatus;
-import com.decathlon.ara.repository.ErrorRepository;
 import com.decathlon.ara.repository.ExecutionRepository;
 import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
+import com.decathlon.ara.service.ErrorService;
 import com.decathlon.ara.service.ExecutionFilesProcessorService;
 import com.decathlon.ara.service.ProblemDenormalizationService;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Slf4j
 public class ExecutionIndexerService {
 
-    @NonNull
+    private static final Logger LOG = LoggerFactory.getLogger(ExecutionIndexerService.class);
+
     private final ExecutionRepository executionRepository;
 
-    @NonNull
     private final ExecutionFilesProcessorService executionFilesProcessorService;
 
-    @NonNull
-    private final ErrorRepository errorRepository;
+    private final ErrorService errorService;
 
-    @NonNull
     private final QualityEmailService qualityEmailService;
 
-    @NonNull
     private final ProblemDenormalizationService problemDenormalizationService;
 
-    @NonNull
     private final TransactionAppenderUtil transactionAppenderUtil;
+
+    public ExecutionIndexerService(ExecutionRepository executionRepository,
+            ExecutionFilesProcessorService executionFilesProcessorService, ErrorService errorService,
+            QualityEmailService qualityEmailService, ProblemDenormalizationService problemDenormalizationService,
+            TransactionAppenderUtil transactionAppenderUtil) {
+        this.executionRepository = executionRepository;
+        this.executionFilesProcessorService = executionFilesProcessorService;
+        this.errorService = errorService;
+        this.qualityEmailService = qualityEmailService;
+        this.problemDenormalizationService = problemDenormalizationService;
+        this.transactionAppenderUtil = transactionAppenderUtil;
+    }
 
     /**
      * Index the execution of a test cycle.<br>
@@ -74,19 +81,19 @@ public class ExecutionIndexerService {
     @Transactional
     public void indexExecution(PlannedIndexation plannedIndexation) {
         if (plannedIndexation == null) {
-            log.info("No execution indexation found");
+            LOG.warn("EXECUTION|No execution indexation found");
             return;
         }
 
         File rawExecutionFolder = plannedIndexation.getExecutionFolder();
         if (rawExecutionFolder == null) {
-            log.info("No execution folder found");
+            LOG.warn("EXECUTION|No execution folder found");
             return;
         }
 
         CycleDefinition cycleDefinition = plannedIndexation.getCycleDefinition();
         if (cycleDefinition == null) {
-            log.info("No cycle definition found");
+            LOG.warn("EXECUTION|No cycle definition found");
             return;
         }
         String branch = cycleDefinition.getBranch();
@@ -94,7 +101,7 @@ public class ExecutionIndexerService {
         final Long projectId = cycleDefinition.getProjectId();
 
         String link = rawExecutionFolder.getAbsolutePath() + File.separator;
-        log.info("Began execution indexing {}/{} for link {}", branch, cycle, link);
+        LOG.info("EXECUTION|Began execution indexing {}/{} for link {}", branch, cycle, link);
 
         Optional<Execution> previousExecution = executionRepository.findByCycleDefinitionProjectIdAndJobLinkAndJobLinkNotNull(projectId, link);
         List<Long> existingErrorIds = getErrorIds(previousExecution);
@@ -102,8 +109,8 @@ public class ExecutionIndexerService {
         Optional<Execution> processedExecution = executionFilesProcessorService.getExecution(plannedIndexation);
 
         if (!processedExecution.isPresent()) {
-            log.info("Could not extract any execution from the directory {}", link);
-            log.info("Some of the files may be incorrect, please check again");
+            LOG.warn("EXECUTION|Could not extract any execution from the directory {}", link);
+            LOG.warn("EXECUTION|Some of the files may be incorrect, please check again");
             return;
         }
 
@@ -112,7 +119,7 @@ public class ExecutionIndexerService {
         List<Long> newErrorIds = getErrorIds(Optional.of(savedExecution));
         newErrorIds.removeAll(existingErrorIds);
         if (!newErrorIds.isEmpty()) {
-            final Set<Problem> updatedProblems = errorRepository.autoAssignProblemsToNewErrors(projectId, newErrorIds);
+            final Set<Problem> updatedProblems = errorService.autoAssignProblemsToNewErrors(projectId, newErrorIds);
             problemDenormalizationService.updateFirstAndLastSeenDateTimes(updatedProblems);
         }
 
@@ -121,7 +128,7 @@ public class ExecutionIndexerService {
         }
 
         String url = processedExecution.get().getJobUrl();
-        log.info("Ended indexing execution {}/{} job URL {} and link {}", branch, cycle, url, link);
+        LOG.info("EXECUTION|Ended indexing execution {}/{} job URL {} and link {}", branch, cycle, url, link);
     }
 
     /**
@@ -132,7 +139,7 @@ public class ExecutionIndexerService {
         try {
             qualityEmailService.sendQualityEmail(execution.getCycleDefinition().getProjectId(), execution.getId());
         } catch (Exception e) {
-            log.error("Uncaught exception while sending quality email (continuing normally)", e);
+            LOG.warn("EXECUTION|Uncaught exception while sending quality email (continuing normally)", e);
         }
     }
 
@@ -144,7 +151,7 @@ public class ExecutionIndexerService {
                 .flatMap(run -> run.getExecutedScenarios().stream())
                 .flatMap(executedScenario -> executedScenario.getErrors().stream())
                 .map(Error::getId)
-                .collect(Collectors.toList());
+                .toList();
     }
 
 }

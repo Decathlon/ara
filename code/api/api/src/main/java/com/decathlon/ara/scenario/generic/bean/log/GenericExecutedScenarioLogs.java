@@ -19,9 +19,7 @@ package com.decathlon.ara.scenario.generic.bean.log;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
 
-@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GenericExecutedScenarioLogs {
 
@@ -36,4 +34,20 @@ public class GenericExecutedScenarioLogs {
 
     @JsonProperty("trace")
     private String executionTraceUrl;
+
+    public String getErrorStacktraceUrl() {
+        return errorStacktraceUrl;
+    }
+
+    public String getExecutedScenarioUrl() {
+        return executedScenarioUrl;
+    }
+
+    public String getDiffReportUrl() {
+        return diffReportUrl;
+    }
+
+    public String getExecutionTraceUrl() {
+        return executionTraceUrl;
+    }
 }

@@ -18,9 +18,7 @@
 package com.decathlon.ara.scenario.cucumber.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Data;
 
-@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Feature {
 
@@ -40,6 +38,42 @@ public class Feature {
         // * no support for multiple report.json files (we do not use that)
         // * nor for parallel execution by official Maven plugin (we use our Cucumber fork managing parallelism more efficiently and effectively)
         return uri.replaceAll("[^\\d\\w]", "-") + ".html";
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getKeyword() {
+        return keyword;
+    }
+
+    public Integer getLine() {
+        return line;
+    }
+
+    public Comment[] getComments() {
+        return comments;
+    }
+
+    public Element[] getElements() {
+        return elements;
+    }
+
+    public Tag[] getTags() {
+        return tags;
     }
 
 }

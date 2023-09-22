@@ -17,6 +17,11 @@
 
 package com.decathlon.ara.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.features.FeatureActivator;
 import com.decathlon.ara.features.FeatureCollection;
@@ -24,11 +29,6 @@ import com.decathlon.ara.features.IFeature;
 import com.decathlon.ara.service.dto.feature.DetailledFeatureDTO;
 import com.decathlon.ara.service.dto.feature.FeatureDTO;
 import com.decathlon.ara.service.exception.NotFoundException;
-import java.util.List;
-import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * The FeatureService will manage CRUD operations on the Feature Flipping settings.
@@ -36,14 +36,16 @@ import org.springframework.stereotype.Service;
  * @author Sylvain Nieuwlandt
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FeatureService {
 
-    @Autowired
-    private FeatureCollection featureCollection;
+    private final FeatureCollection featureCollection;
 
-    @Autowired
-    private FeatureActivator featureActivator;
+    private final FeatureActivator featureActivator;
+
+    public FeatureService(FeatureCollection featureCollection, FeatureActivator featureActivator) {
+        this.featureCollection = featureCollection;
+        this.featureActivator = featureActivator;
+    }
 
     private static NotFoundException throwFeatureDontExists(String code) {
         return new NotFoundException("The feature '" + code + "' doesn't exists.", Entities.FEATURE);
@@ -57,7 +59,7 @@ public class FeatureService {
     public List<FeatureDTO> listAll() {
         return this.featureCollection.list().stream()
                 .map(feature -> new FeatureDTO(feature.getCode(), this.featureActivator.getState(feature.getCode())))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -101,7 +103,7 @@ public class FeatureService {
         return codes.stream()
                 .filter(code -> this.featureCollection.get(code).isPresent())
                 .map(code -> new FeatureDTO(code, this.featureActivator.getState(code)))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

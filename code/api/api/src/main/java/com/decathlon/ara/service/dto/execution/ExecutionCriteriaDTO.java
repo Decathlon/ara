@@ -17,13 +17,6 @@
 
 package com.decathlon.ara.service.dto.execution;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class ExecutionCriteriaDTO {
 
     String country;
@@ -38,4 +31,56 @@ public class ExecutionCriteriaDTO {
     Long team;
     String type;
     boolean withSucceed;
+
+    public String getCountry() {
+        return country;
+    }
+
+    public String getException() {
+        return exception;
+    }
+
+    public String getFeature() {
+        return feature;
+    }
+
+    public String getHandling() {
+        return handling;
+    }
+
+    public Long getProblem() {
+        return problem;
+    }
+
+    public String getScenario() {
+        return scenario;
+    }
+
+    public boolean isScenarioDetails() {
+        return scenarioDetails;
+    }
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public String getStep() {
+        return step;
+    }
+
+    public Long getTeam() {
+        return team;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public boolean isWithSucceed() {
+        return withSucceed;
+    }
+
+    public void setWithSucceed(boolean withSucceed) {
+        this.withSucceed = withSucceed;
+    }
 }

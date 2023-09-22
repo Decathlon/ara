@@ -17,12 +17,6 @@
 
 package com.decathlon.ara.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -31,14 +25,19 @@ import java.nio.file.Files;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 /**
  * This service provide operation to easily manipulate Archives files (for now only ZIP files).
  *
  */
-@Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ArchiveService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ArchiveService.class);
 
     /**
      * Unzip the given file to the given destination.
@@ -53,7 +52,7 @@ public class ArchiveService {
      */
     public void unzip(MultipartFile file, File destination) throws IOException {
         if (file.isEmpty()) {
-            log.warn("The given ZIP file is empty !");
+            LOG.warn("The given ZIP file is empty !");
         }
         this.unzip(file.getInputStream(), destination);
     }
@@ -75,7 +74,7 @@ public class ArchiveService {
                 if (!canonicalPath.startsWith(destination.getCanonicalPath())) {
                     throw new IOException("Entry is outside of the target directory");
                 }
-                log.debug("Unzipping : {}", target.getAbsolutePath());
+                LOG.debug("Unzipping : {}", target.getAbsolutePath());
                 if (!entry.isDirectory()) {
                     this.writeEntry(zis, target);
                 }

@@ -25,24 +25,20 @@ import com.decathlon.ara.scenario.generic.bean.GenericExecutedScenarioReport;
 import com.decathlon.ara.scenario.generic.bean.description.GenericExecutedScenarioDescription;
 import com.decathlon.ara.scenario.generic.bean.feature.GenericExecutedScenarioFeature;
 import com.decathlon.ara.service.exception.BadRequestException;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Slf4j
 public class GenericScenarioUploader {
 
-    @NonNull
     private final ScenarioUploader uploader;
+
+    public GenericScenarioUploader(ScenarioUploader uploader) {
+        this.uploader = uploader;
+    }
 
     public void upload(Long projectId, String sourceCode, List<GenericExecutedScenarioReport> genericReports) throws BadRequestException {
         uploader.processUploadedContent(projectId, sourceCode, Technology.GENERIC, source -> {
@@ -51,7 +47,7 @@ public class GenericScenarioUploader {
             }
             return genericReports.stream()
                     .map(report -> convertGenericReportToScenario(report, source))
-                    .collect(Collectors.toList());
+                    .toList();
         });
     }
 

@@ -17,68 +17,43 @@
 
 package com.decathlon.ara.web.rest.authentication;
 
-
-import com.decathlon.ara.configuration.security.jwt.JwtTokenAuthenticationService;
-import com.decathlon.ara.service.authentication.AuthenticationService;
-import com.decathlon.ara.service.authentication.exception.AuthenticationException;
-import com.decathlon.ara.service.dto.authentication.request.AppAuthenticationRequestDTO;
-import com.decathlon.ara.service.dto.authentication.request.UserAuthenticationRequestDTO;
-import com.decathlon.ara.service.dto.authentication.response.app.AppAuthenticationDetailsDTO;
-import com.decathlon.ara.service.dto.authentication.response.configuration.AuthenticationConfigurationDTO;
-import com.decathlon.ara.service.dto.authentication.response.user.UserAuthenticationDetailsDTO;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-
 import static com.decathlon.ara.web.rest.util.RestConstants.AUTH_PATH;
 
-@Slf4j
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.decathlon.ara.service.authentication.AuthenticationService;
+import com.decathlon.ara.service.authentication.AuthenticationService.AuthenticationConf;
+
 @RestController
 @RequestMapping(AUTH_PATH)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AuthenticationResource {
 
-    @NonNull
+    private static final Logger LOG = LoggerFactory.getLogger(AuthenticationResource.class);
+
     private final AuthenticationService authenticationService;
 
-    @NonNull
-    private final JwtTokenAuthenticationService jwtTokenAuthenticationService;
-
-    @PostMapping("/login")
-    public ResponseEntity<UserAuthenticationDetailsDTO> authenticate(@Valid @RequestBody UserAuthenticationRequestDTO request) {
-        try {
-            return authenticationService.authenticate(request);
-        } catch (AuthenticationException e) {
-            log.error(String.format("Error while authenticating to ARA (via %s)", request.getProvider()), e);
-            return ResponseEntity.badRequest().build();
-        }
+    public AuthenticationResource(AuthenticationService authenticationService) {
+        this.authenticationService = authenticationService;
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<Void> logout() {
-        HttpHeaders headers = jwtTokenAuthenticationService.deleteAuthenticationCookie();
-        return ResponseEntity.ok().headers(headers).build();
-    }
+    @GetMapping("/status")
+    public Boolean getStatus() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAuthenticated = authentication != null &&
+                authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getName());
 
-    @PostMapping
-    public ResponseEntity<AppAuthenticationDetailsDTO> authenticate(@Valid @RequestBody AppAuthenticationRequestDTO request) {
-        try {
-            return authenticationService.authenticate(request);
-        } catch (AuthenticationException e) {
-            log.error(String.format("Error while authenticating your application to ARA (via %s)", request.getProvider()), e);
-            return ResponseEntity.badRequest().build();
-        }
+        LOG.debug("Is logged ? {}", isAuthenticated);
+        return isAuthenticated;
     }
 
     @GetMapping("/configuration")
-    public ResponseEntity<AuthenticationConfigurationDTO> getAuthenticationConfiguration() {
-        AuthenticationConfigurationDTO configuration = authenticationService.getAuthenticationConfiguration();
-        return ResponseEntity.ok(configuration);
+    public AuthenticationConf getAuthenticationConfiguration() {
+        return this.authenticationService.getAuthenticationConf();
     }
 }

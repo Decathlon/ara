@@ -18,17 +18,27 @@
 package com.decathlon.ara.scenario.cucumber.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Argument {
 
     private String val;
     private int offset;
+
+    public Argument() {
+    }
+
+    public Argument(String val, int offset) {
+        this.val = val;
+        this.offset = offset;
+    }
+
+    public String getVal() {
+        return val;
+    }
+
+    public int getOffset() {
+        return offset;
+    }
 
 }

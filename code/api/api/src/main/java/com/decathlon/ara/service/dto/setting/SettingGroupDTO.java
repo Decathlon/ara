@@ -17,17 +17,8 @@
 
 package com.decathlon.ara.service.dto.setting;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-
 import java.util.List;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 public class SettingGroupDTO {
 
     /**
@@ -39,5 +30,21 @@ public class SettingGroupDTO {
      * The list of settings for the current project and group.
      */
     protected List<SettingDTO> settings;
+
+    public SettingGroupDTO() {
+    }
+
+    public SettingGroupDTO(String name, List<SettingDTO> settings) {
+        this.name = name;
+        this.settings = settings;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public List<SettingDTO> getSettings() {
+        return settings;
+    }
 
 }

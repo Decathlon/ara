@@ -17,14 +17,14 @@
 
 package com.decathlon.ara.lib.embed.producer.type;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.Test;
 
-public class TextEmbeddingTest {
+import static org.assertj.core.api.Assertions.assertThat;
+
+class TextEmbeddingTest {
 
     @Test
-    public void toHtml_ShouldReturnEmpty_WhenDataIsNull() {
+    void toHtml_ShouldReturnEmpty_WhenDataIsNull() {
         // GIVEN
         final String nullText = null;
         final TextEmbedding cut = new TextEmbedding(null, null, nullText, null);
@@ -37,7 +37,7 @@ public class TextEmbeddingTest {
     }
 
     @Test
-    public void toHtml_ShouldEscapeHtmlCharacters_WhenDataContainsHtmlCharacters() {
+    void toHtml_ShouldEscapeHtmlCharacters_WhenDataContainsHtmlCharacters() {
         // GIVEN
         final String textWithHtml = "Escaping<test> &amp; \"checked'";
         final TextEmbedding cut = new TextEmbedding(null, null, textWithHtml, null);

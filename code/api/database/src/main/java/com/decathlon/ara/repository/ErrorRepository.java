@@ -17,36 +17,32 @@
 
 package com.decathlon.ara.repository;
 
-import com.decathlon.ara.domain.Error;
-import com.decathlon.ara.domain.ProblemPattern;
-import com.decathlon.ara.repository.custom.ErrorRepositoryCustom;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.decathlon.ara.domain.Error;
+import com.decathlon.ara.domain.Problem;
+import com.decathlon.ara.domain.ProblemPattern;
+import com.decathlon.ara.repository.util.SpecificationUtil;
 
 /**
  * Spring Data JPA repository for the Error entity.
  */
 @Repository
-public interface ErrorRepository extends JpaRepository<Error, Long>, JpaSpecificationExecutor<Error>, ErrorRepositoryCustom,
-        QuerydslPredicateExecutor<Error> {
+public interface ErrorRepository extends JpaRepository<Error, Long>, JpaSpecificationExecutor<Error> {
 
     // NO projectId: patterns is already restrained to the correct project
-    Page<Error> findDistinctByProblemPatternsInOrderById(List<ProblemPattern> patterns, Pageable pageable);
-
-    /**
-     * Find errors problems paginated and ordered by their date time (descending)
-     * @param patterns the problem patterns, should not be null
-     * @param pageable the pagination details, must not be null
-     * @return the errors. If none found, an empty page is returned
-     */
-    Page<Error> findDistinctByProblemPatternsInOrderByIdDesc(List<ProblemPattern> patterns, Pageable pageable);
+    Page<Error> findDistinctByProblemOccurrencesProblemPatternIn(List<ProblemPattern> patterns, Pageable pageable);
 
     @Query("SELECT error " +
             "FROM Error error " +
@@ -64,5 +60,33 @@ public interface ErrorRepository extends JpaRepository<Error, Long>, JpaSpecific
             "WHERE error.executedScenario.run.execution.cycleDefinition.projectId = ?1 " +
             "ORDER BY error.stepDefinition")
     List<String> findDistinctStepDefinitionByProjectId(long projectId);
+
+    default Page<Error> findByProjectIdAndProblemPattern(@Param("projectId") long projectId, @Param("pattern") ProblemPattern problemPattern, Pageable pageable) {
+        return findAll(SpecificationUtil.toErrorSpecification(projectId, problemPattern, null), pageable);
+    }
+
+    default List<Error> findByProjectIdAndProblemPatternAndErrorIds(@Param("projectId") long projectId, @Param("pattern") ProblemPattern problemPattern, @Param("errorIds") List<Long> errorIds) {
+        return findAll(SpecificationUtil.toErrorSpecification(projectId, problemPattern, errorIds));
+    }
+
+    @Query("""
+            select problemOccurrence.error, problem from Problem problem
+            join problem.patterns pattern
+            join pattern.problemOccurrences problemOccurrence
+            where problemOccurrence.error.id in (:errorIds)
+            """)
+    List<Object[]> getErrorsProblemsNotFormated(@Param("errorIds") List<Long> errorIds);
+
+    default Map<Error, List<Problem>> getErrorsProblems(List<Error> errors) {
+        List<Object[]> errorProblemsNotFormated = getErrorsProblemsNotFormated(errors.stream().map(Error::getId).toList());
+        Map<Error, List<Problem>> errorProblems = new HashMap<>();
+        for (Object[] errorProblem : errorProblemsNotFormated) {
+            Error error = (Error) errorProblem[0];
+            Problem problem = (Problem) errorProblem[1];
+            List<Problem> problemList = errorProblems.computeIfAbsent(error, key -> new ArrayList<>());
+            problemList.add(problem);
+        }
+        return errorProblems;
+    }
 
 }

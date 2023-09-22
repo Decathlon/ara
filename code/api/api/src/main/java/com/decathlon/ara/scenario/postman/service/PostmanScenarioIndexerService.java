@@ -17,22 +17,6 @@
 
 package com.decathlon.ara.scenario.postman.service;
 
-import com.decathlon.ara.domain.Scenario;
-import com.decathlon.ara.domain.Source;
-import com.decathlon.ara.scenario.cucumber.bean.Tag;
-import com.decathlon.ara.scenario.postman.bean.*;
-import com.decathlon.ara.scenario.postman.util.JavaScriptCommentRemover;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.ListUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StringEscapeUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,25 +24,53 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Slf4j
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import com.decathlon.ara.domain.Scenario;
+import com.decathlon.ara.domain.Source;
+import com.decathlon.ara.scenario.cucumber.bean.Tag;
+import com.decathlon.ara.scenario.postman.bean.Assertion;
+import com.decathlon.ara.scenario.postman.bean.CollectionWithScripts;
+import com.decathlon.ara.scenario.postman.bean.Event;
+import com.decathlon.ara.scenario.postman.bean.Info;
+import com.decathlon.ara.scenario.postman.bean.ItemWithScripts;
+import com.decathlon.ara.scenario.postman.bean.Listen;
+import com.decathlon.ara.scenario.postman.util.JavaScriptCommentRemover;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PostmanScenarioIndexerService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PostmanScenarioIndexerService.class);
 
     private static final Pattern POSTMAN_TEST_START_PATTERN = Pattern.compile("(pm|postman)\\s*.\\s*test\\s*\\(\\s*[\"']");
 
-    @NonNull
     private final ObjectMapper objectMapper;
 
-    @NonNull
     private final PostmanService postmanService;
+
+    public PostmanScenarioIndexerService(ObjectMapper objectMapper, PostmanService postmanService) {
+        this.objectMapper = objectMapper;
+        this.postmanService = postmanService;
+    }
 
     /**
      * Extract all Postman requests in JSON collection files in a ZIP archive, and return them as Cucumber-scenarios
@@ -76,13 +88,14 @@ public class PostmanScenarioIndexerService {
         final FileSystem zip = FileSystems.newFileSystem(zipFile.toPath(), this.getClass().getClassLoader());
 
         for (Path jsonFilePath : listJsonFilePaths(zip)) {
+            LOG.debug("SCENARIO|postman|Processing the file {}", jsonFilePath.toString());
             try {
                 InputStream input = Files.newInputStream(jsonFilePath);
                 final CollectionWithScripts collection = objectMapper.readValue(input, CollectionWithScripts.class);
                 final String pathToStore = jsonFilePath.toString().substring(1); // Remove leading slash
                 scenarios.addAll(collectCollectionScenarios(collection, source, pathToStore));
             } catch (IOException e) {
-                log.error("The file {} was ignored...", jsonFilePath, e);
+                LOG.warn("SCENARIO|postman|The file {} was ignored...", jsonFilePath, e);
             }
         }
 
@@ -327,7 +340,7 @@ public class PostmanScenarioIndexerService {
                 jsonFilePaths.addAll(walker
                         .filter(path -> path.toString().endsWith(".json"))
                         .sorted()
-                        .collect(Collectors.toList()));
+                        .toList());
             }
         }
 

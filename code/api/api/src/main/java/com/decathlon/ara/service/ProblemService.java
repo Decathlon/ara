@@ -17,23 +17,66 @@
 
 package com.decathlon.ara.service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.SpringApplicationContext;
-import com.decathlon.ara.ci.service.DateService;
 import com.decathlon.ara.ci.util.FetchException;
 import com.decathlon.ara.defect.DefectAdapter;
 import com.decathlon.ara.defect.bean.Defect;
+import com.decathlon.ara.domain.CycleDefinition;
 import com.decathlon.ara.domain.Error;
-import com.decathlon.ara.domain.*;
+import com.decathlon.ara.domain.Execution;
+import com.decathlon.ara.domain.Problem;
+import com.decathlon.ara.domain.ProblemOccurrence;
+import com.decathlon.ara.domain.ProblemPattern;
+import com.decathlon.ara.domain.RootCause;
+import com.decathlon.ara.domain.Team;
 import com.decathlon.ara.domain.enumeration.DefectExistence;
 import com.decathlon.ara.domain.enumeration.ProblemStatus;
+import com.decathlon.ara.domain.filter.ProblemFilter;
 import com.decathlon.ara.domain.projection.ProblemAggregate;
-import com.decathlon.ara.repository.*;
+import com.decathlon.ara.repository.CountryRepository;
+import com.decathlon.ara.repository.CycleDefinitionRepository;
+import com.decathlon.ara.repository.ExecutionRepository;
+import com.decathlon.ara.repository.ProblemPatternRepository;
+import com.decathlon.ara.repository.ProblemRepository;
+import com.decathlon.ara.repository.RootCauseRepository;
+import com.decathlon.ara.repository.TypeRepository;
 import com.decathlon.ara.repository.custom.util.JpaCacheManager;
 import com.decathlon.ara.repository.custom.util.TransactionAppenderUtil;
 import com.decathlon.ara.service.dto.error.ErrorWithExecutedScenarioAndRunAndExecutionDTO;
-import com.decathlon.ara.service.dto.problem.*;
+import com.decathlon.ara.service.dto.problem.ProblemAggregateDTO;
+import com.decathlon.ara.service.dto.problem.ProblemDTO;
+import com.decathlon.ara.service.dto.problem.ProblemFilterDTO;
+import com.decathlon.ara.service.dto.problem.ProblemWithAggregateDTO;
+import com.decathlon.ara.service.dto.problem.ProblemWithPatternsAndAggregateTDO;
+import com.decathlon.ara.service.dto.problem.ProblemWithPatternsDTO;
 import com.decathlon.ara.service.dto.problempattern.ProblemPatternDTO;
 import com.decathlon.ara.service.dto.response.PickUpPatternDTO;
 import com.decathlon.ara.service.dto.rootcause.RootCauseDTO;
@@ -44,106 +87,88 @@ import com.decathlon.ara.service.exception.BadGatewayException;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
-import com.decathlon.ara.service.mapper.*;
+import com.decathlon.ara.service.mapper.GenericMapper;
 import com.decathlon.ara.service.support.Settings;
-import com.decathlon.ara.service.util.ObjectUtil;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.stream.Collectors;
+import com.decathlon.ara.service.util.DateService;
 
 /**
  * Service for managing Problem.
  */
-@Slf4j
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ProblemService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ProblemService.class);
+
+    private static final Sort PROBLEM_CREATION_DATE_TIME_DESC =
+            Sort.by(Sort.Direction.DESC, "creationDateTime");
 
     private static final String STABILITY_NOT_RUN = "-";
     private static final String STABILITY_ERROR = "E";
     private static final String STABILITY_OK = "O";
 
-    @NonNull
     private final ProblemRepository problemRepository;
 
-    @NonNull
-    private final ErrorRepository errorRepository;
+    private final CountryRepository countryRepository;
 
-    @NonNull
+    private final TypeRepository typeRepository;
+
+    private final ErrorService errorService;
+
     private final ProblemPatternRepository problemPatternRepository;
 
-    @NonNull
     private final ExecutionRepository executionRepository;
 
-    @NonNull
     private final CycleDefinitionRepository cycleDefinitionRepository;
 
-    @NonNull
     private final RootCauseRepository rootCauseRepository;
 
-    @NonNull
     private final ProblemPatternService problemPatternService;
 
-    @NonNull
     private final ProblemDenormalizationService problemDenormalizationService;
 
-    @NonNull
     private final RootCauseService rootCauseService;
 
-    @NonNull
     private final TeamService teamService;
 
-    @NonNull
     private final DateService dateService;
 
-    @NonNull
     private final DefectService defectService;
 
-    @NonNull
-    private final ProblemMapper problemMapper;
+    private final GenericMapper mapper;
 
-    @NonNull
-    private final ProblemFilterMapper problemFilterMapper;
-
-    @NonNull
-    private final ProblemWithAggregateMapper problemWithAggregateMapper;
-
-    @NonNull
-    private final ProblemWithPatternsMapper problemWithPatternsMapper;
-
-    @NonNull
-    private final ProblemPatternMapper problemPatternMapper;
-
-    @NonNull
-    private final ErrorWithExecutedScenarioAndRunAndExecutionMapper errorWithExecutedScenarioAndRunAndExecutionMapper;
-
-    @NonNull
-    private final ProblemAggregateMapper problemAggregateMapper;
-
-    @NonNull
-    private final TeamMapper teamMapper;
-
-    @NonNull
-    private final RootCauseMapper rootCauseMapper;
-
-    @NonNull
-    private final ProblemWithPatternsAndAggregateMapper problemWithPatternsAndAggregateMapper;
-
-    @NonNull
     private final JpaCacheManager jpaCacheManager;
 
-    @NonNull
     private final TransactionAppenderUtil transactionService;
+
+    @Autowired
+    public ProblemService(ProblemRepository problemRepository, CountryRepository countryRepository,
+            TypeRepository typeRepository, @Lazy ErrorService errorService,
+            ProblemPatternRepository problemPatternRepository, ExecutionRepository executionRepository,
+            CycleDefinitionRepository cycleDefinitionRepository, RootCauseRepository rootCauseRepository,
+            ProblemPatternService problemPatternService, ProblemDenormalizationService problemDenormalizationService,
+            RootCauseService rootCauseService, TeamService teamService, DateService dateService,
+            DefectService defectService,
+            GenericMapper mapper,
+            JpaCacheManager jpaCacheManager, TransactionAppenderUtil transactionService) {
+        this.problemRepository = problemRepository;
+        this.countryRepository = countryRepository;
+        this.typeRepository = typeRepository;
+        this.errorService = errorService;
+        this.problemPatternRepository = problemPatternRepository;
+        this.executionRepository = executionRepository;
+        this.cycleDefinitionRepository = cycleDefinitionRepository;
+        this.rootCauseRepository = rootCauseRepository;
+        this.problemPatternService = problemPatternService;
+        this.problemDenormalizationService = problemDenormalizationService;
+        this.rootCauseService = rootCauseService;
+        this.teamService = teamService;
+        this.dateService = dateService;
+        this.defectService = defectService;
+        this.mapper = mapper;
+        this.jpaCacheManager = jpaCacheManager;
+        this.transactionService = transactionService;
+    }
 
     private static void validateClosedProblemHasRootCause(ProblemDTO problemDto) throws BadRequestException {
         if (problemDto.getStatus() == ProblemStatus.CLOSED && (problemDto.getRootCause() == null ||
@@ -161,8 +186,7 @@ public class ProblemService {
         for (int i = 0; i < lastExecutionCount; i++) {
             int pos = lastExecutionCount - 1 - i;
             if (i >= lastExecutions.size()) {
-                executionStabilityDTOS[pos] = new ExecutionStabilityDTO()
-                        .withStatus(STABILITY_NOT_RUN);
+                executionStabilityDTOS[pos] = new ExecutionStabilityDTO(STABILITY_NOT_RUN);
             } else {
                 String status;
                 if (failedExecutionIds != null && failedExecutionIds.contains(lastExecutions.get(i).getId())) {
@@ -170,10 +194,7 @@ public class ProblemService {
                 } else {
                     status = STABILITY_OK;
                 }
-                executionStabilityDTOS[pos] = new ExecutionStabilityDTO()
-                        .withExecutionId(lastExecutions.get(i).getId())
-                        .withStatus(status)
-                        .withTestDate(lastExecutions.get(i).getTestDateTime());
+                executionStabilityDTOS[pos] = new ExecutionStabilityDTO(lastExecutions.get(i).getId(), lastExecutions.get(i).getTestDateTime(), status);
             }
         }
         return Arrays.asList(executionStabilityDTOS);
@@ -200,7 +221,7 @@ public class ProblemService {
                 "Consider appending the aggregation criteria to this existing problem.",
                 null);
 
-        final Problem entity = problemWithPatternsMapper.toEntity(problemDto);
+        final Problem entity = mapper.map(problemDto, Problem.class, (dtoToMap, problemEntity) -> problemEntity.getPatterns().forEach(problemPattern -> problemPattern.setProblem(problemEntity)));
         entity.setProjectId(projectId);
         if (entity.getPatterns() != null) {
             for (ProblemPattern pattern : entity.getPatterns()) {
@@ -211,13 +232,13 @@ public class ProblemService {
 
         if (problem.getPatterns() != null) {
             for (ProblemPattern pattern : problem.getPatterns()) {
-                errorRepository.assignPatternToErrors(projectId, pattern);
+                errorService.assignPatternToErrors(projectId, pattern);
             }
         }
 
         problemDenormalizationService.updateFirstAndLastSeenDateTimes(Collections.singleton(problem));
 
-        ProblemWithPatternsDTO result = problemWithPatternsMapper.toDto(problem);
+        ProblemWithPatternsDTO result = mapper.map(problem, ProblemWithPatternsDTO.class);
         result.setDefectUrl(this.retrieveDefectUrl(problem));
         return result;
     }
@@ -257,16 +278,16 @@ public class ProblemService {
         // (status update must be done via open/close methods, don't change patterns, creation timestamp is anchored...)
         dataBaseEntity.setName(dtoToUpdate.getName());
         dataBaseEntity.setComment(dtoToUpdate.getComment());
-        dataBaseEntity.setBlamedTeam(teamMapper.toEntity(dtoToUpdate.getBlamedTeam()));
+        dataBaseEntity.setBlamedTeam(mapper.map(dtoToUpdate.getBlamedTeam(), Team.class));
         dataBaseEntity.setDefectId(dtoToUpdate.getDefectId());
-        dataBaseEntity.setRootCause(rootCauseMapper.toEntity(dtoToUpdate.getRootCause()));
+        dataBaseEntity.setRootCause(mapper.map(dtoToUpdate.getRootCause(), RootCause.class));
 
         // validateBusinessRules()/handleDefectIdChange() could have changed these fields: save them too
         dataBaseEntity.setDefectExistence(dtoToUpdate.getDefectExistence());
         dataBaseEntity.setStatus(dtoToUpdate.getStatus());
         dataBaseEntity.setClosingDateTime(dtoToUpdate.getClosingDateTime());
 
-        ProblemDTO result = problemMapper.toDto(problemRepository.save(dataBaseEntity));
+        ProblemDTO result = mapper.map(problemRepository.save(dataBaseEntity), ProblemDTO.class);
         result.setDefectUrl(this.retrieveDefectUrl(projectId, result));
         return result;
     }
@@ -299,7 +320,7 @@ public class ProblemService {
                     statuses = defectAdapter.getStatuses(projectId, Collections.singletonList(newDefectId));
                 } catch (FetchException e) {
                     // Also catch RuntimeException to not impact calling code in case of a faulty DefectAdapter in a custom ARA
-                    log.error("Cannot check existence of new defect assignation to problem (defect {})", newDefectId, e);
+                    LOG.warn("PROBLEM|Cannot check existence of new defect assignation to problem (defect {})", newDefectId, e);
                     problemDto.setDefectExistence(DefectExistence.UNKNOWN); // For re-indexing when connexion to bug-tracker is back
                     problemDto.setStatus(ProblemStatus.OPEN); // In case defect was closed and removed: it should be acted on
                     problemDto.setClosingDateTime(null); // Not CLOSED anymore (if it was)
@@ -317,7 +338,6 @@ public class ProblemService {
     }
 
     private void validateBusinessRules(long projectId, ProblemDTO problemDto, String hint, String oldDefectId) throws BadRequestException {
-        ObjectUtil.trimStringValues(problemDto);
         validateUniqueName(projectId, problemDto, hint);
         validateUniqueDefectId(projectId, problemDto, hint);
         validateBlamedTeamExistsAndIsAssignable(projectId, problemDto);
@@ -332,7 +352,7 @@ public class ProblemService {
             throw new NotUniqueException(
                     Messages.NOT_UNIQUE_PROBLEM_NAME + " " + hint,
                     Entities.PROBLEM,
-                    QProblem.problem.name.getMetadata().getName(),
+                    "name",
                     existingProblemWithSameName.getId());
         }
     }
@@ -344,7 +364,7 @@ public class ProblemService {
                 throw new NotUniqueException(
                         Messages.NOT_UNIQUE_PROBLEM_DEFECT_ID + " " + hint,
                         Entities.PROBLEM,
-                        QProblem.problem.defectId.getMetadata().getName(),
+                        "defectId",
                         existingProblemWithSameDefectId.getId());
             }
         }
@@ -387,7 +407,7 @@ public class ProblemService {
         if (problem == null) {
             throw new NotFoundException(Messages.NOT_FOUND_PROBLEM, Entities.PROBLEM);
         }
-        return problemMapper.toDto(problem);
+        return mapper.map(problem, ProblemDTO.class);
     }
 
     /**
@@ -405,14 +425,14 @@ public class ProblemService {
         if (problem == null) {
             throw new NotFoundException(Messages.NOT_FOUND_PROBLEM, Entities.PROBLEM);
         }
-        ProblemWithPatternsAndAggregateTDO problemDTO = problemWithPatternsAndAggregateMapper.toDto(problem);
+        ProblemWithPatternsAndAggregateTDO problemDTO = mapper.map(problem, ProblemWithPatternsAndAggregateTDO.class);
         problemDTO.setDefectUrl(this.retrieveDefectUrl(problem));
 
         // Compute and assign aggregate to the problem
         List<Long> problemIds = Collections.singletonList(problemDTO.getId());
-        Map<Long, ProblemAggregate> aggregates = problemRepository.findProblemAggregates(projectId, problemIds);
+        Map<Long, ProblemAggregate> aggregates = findProblemAggregates(projectId, problemIds);
         ProblemAggregate aggregate = aggregates.get(problemDTO.getId());
-        problemDTO.setAggregate(aggregate == null ? new ProblemAggregateDTO() : problemAggregateMapper.toDto(aggregate));
+        problemDTO.setAggregate(aggregate == null ? new ProblemAggregateDTO() : mapper.map(aggregate, ProblemAggregateDTO.class));
 
         // Compute and assign stability of each problem into their existing aggregate
         assignProblemStabilities(projectId, Collections.singletonList(problemDTO));
@@ -448,12 +468,13 @@ public class ProblemService {
     private void evictErrorProblemPatternsCacheFor(Problem problem) {
         final Set<Long> errorIds = problem.getPatterns()
                 .stream()
-                .flatMap(p -> p.getErrors().stream())
+                .map(ProblemPattern::getProblemOccurrences)
+                .flatMap(Collection::stream)
+                .map(ProblemOccurrence::getError)
                 .map(Error::getId)
                 .collect(Collectors.toSet());
 
-        transactionService.doAfterCommit(() ->
-                jpaCacheManager.evictCollections(Error.PROBLEM_PATTERNS_COLLECTION_CACHE, errorIds));
+        transactionService.doAfterCommit(() -> jpaCacheManager.evictCollections(Error.PROBLEM_OCCURRENCES_COLLECTION_CACHE, errorIds));
     }
 
     /**
@@ -466,17 +487,28 @@ public class ProblemService {
      */
     @Transactional(readOnly = true)
     public Page<ProblemWithAggregateDTO> findMatchingProblems(long projectId, ProblemFilterDTO filter, Pageable pageable) {
+        Pageable effectivePageable;
+        if (pageable == null) {
+            effectivePageable = PageRequest.of(0, 10, PROBLEM_CREATION_DATE_TIME_DESC);
+        } else if (pageable.getSort().isUnsorted()) {
+            effectivePageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), PROBLEM_CREATION_DATE_TIME_DESC);
+        } else {
+            effectivePageable = pageable;
+        }
+
         // Find problems
+        ProblemFilter problemFilter = mapper.map(filter, ProblemFilter.class);
+        problemFilter.setProjectId(projectId);
         Page<ProblemWithAggregateDTO> page = problemRepository
-                .findMatchingProblems(problemFilterMapper.toEntity(filter).withProjectId(projectId), pageable)
+                .findMatchingProblems(problemFilter, effectivePageable)
                 .map(this::toProblemWithAggregate);
 
         // Compute and assign aggregates of each problem
-        List<Long> problemIds = page.getContent().stream().map(ProblemDTO::getId).collect(Collectors.toList());
-        Map<Long, ProblemAggregate> aggregates = problemRepository.findProblemAggregates(projectId, problemIds);
+        List<Long> problemIds = page.getContent().stream().map(ProblemDTO::getId).toList();
+        Map<Long, ProblemAggregate> aggregates = findProblemAggregates(projectId, problemIds);
         for (ProblemWithAggregateDTO problem : page.getContent()) {
             ProblemAggregate aggregate = aggregates.get(problem.getId());
-            problem.setAggregate(aggregate == null ? new ProblemAggregateDTO() : problemAggregateMapper.toDto(aggregate));
+            problem.setAggregate(aggregate == null ? new ProblemAggregateDTO() : mapper.map(aggregate, ProblemAggregateDTO.class));
         }
 
         // Compute and assign stability of each problem into their existing aggregate
@@ -486,9 +518,46 @@ public class ProblemService {
     }
 
     private ProblemWithAggregateDTO toProblemWithAggregate(Problem entity) {
-        ProblemWithAggregateDTO result = this.problemWithAggregateMapper.toDto(entity);
+        ProblemWithAggregateDTO result = mapper.map(entity, ProblemWithAggregateDTO.class);
         result.setDefectUrl(this.retrieveDefectUrl(entity));
         return result;
+    }
+
+    /**
+     * @param projectId  the ID of the project in which to work
+     * @param problemIds a list of IDs of problems
+     * @return for each problem ID, an aggregate object listing various counts and statistics about this problem
+     */
+    private Map<Long, ProblemAggregate> findProblemAggregates(long projectId, List<Long> problemIds) {
+        return problemRepository.findProblemAggregatesNotFormatted(problemIds).stream().collect(Collectors.toMap(errorAggregate -> (Long) errorAggregate[0],
+                errorAggregate -> {
+                    ProblemAggregate problemAggregate = new ProblemAggregate();
+                    problemAggregate.setPatternCount((long) errorAggregate[1]);
+                    problemAggregate.setErrorCount((long) errorAggregate[2]);
+
+                    problemAggregate.setScenarioCount((long) errorAggregate[3]);
+                    problemAggregate.setFirstScenarioName((String) errorAggregate[4]);
+
+                    problemAggregate.setBranchCount((long) errorAggregate[5]);
+                    problemAggregate.setFirstBranch((String) errorAggregate[6]);
+
+                    problemAggregate.setReleaseCount((long) errorAggregate[7]);
+                    problemAggregate.setFirstRelease((String) errorAggregate[8]);
+
+                    problemAggregate.setVersionCount((long) errorAggregate[9]);
+                    problemAggregate.setFirstVersion((String) errorAggregate[10]);
+
+                    problemAggregate.setCountryCount((long) errorAggregate[11]);
+                    problemAggregate.setFirstCountry(countryRepository.findByProjectIdAndCode(projectId, (String) errorAggregate[12]));
+
+                    problemAggregate.setTypeCount((long) errorAggregate[13]);
+                    problemAggregate.setFirstType(typeRepository.findByProjectIdAndCode(projectId, (String) errorAggregate[14]));
+
+                    problemAggregate.setPlatformCount((long) errorAggregate[15]);
+                    problemAggregate.setFirstPlatform((String) errorAggregate[16]);
+
+                    return problemAggregate;
+                }));
     }
 
     /**
@@ -508,11 +577,13 @@ public class ProblemService {
         }
 
         List<ProblemPattern> problemPatterns = problem.getPatterns();
-        Page<Error> errors = errorRepository.findDistinctByProblemPatternsInOrderByIdDesc(problemPatterns, pageable);
-        if (errors == null) {
-            return null;
+        List<Order> orders = new ArrayList<>();
+        orders.add(new Order(Direction.DESC, "id"));
+        for (Order order : pageable.getSort()) {
+            orders.add(order);
         }
-        return errors.map(errorWithExecutedScenarioAndRunAndExecutionMapper::toDto);
+
+        return errorService.getErrors(problemPatterns, PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(orders)));
     }
 
     /**
@@ -530,7 +601,7 @@ public class ProblemService {
         if (problem == null) {
             throw new NotFoundException(Messages.NOT_FOUND_PROBLEM, Entities.PROBLEM);
         }
-        ProblemPattern newPattern = problemPatternMapper.toEntity(newPatternDTO);
+        ProblemPattern newPattern = mapper.map(newPatternDTO, ProblemPattern.class);
         newPattern.setProblem(problem); // BEFORE the next Pattern.equals(...)
         problemPatternService.assignExistingEntities(projectId, newPattern);
 
@@ -539,18 +610,18 @@ public class ProblemService {
             // Here, both pattern.problemId are equal, so we check criteria equality inside the same problem
             if (existingPattern.equals(newPattern)) {
                 throw new NotUniqueException(Messages.NOT_UNIQUE_PATTERN_IN_PROBLEM, Entities.PROBLEM_PATTERN,
-                        QProblem.problem.patterns.getMetadata().getName(), existingPattern.getId());
+                        "patterns", existingPattern.getId());
             }
         }
 
         problem.addPattern(newPattern);
         newPattern = problemPatternRepository.save(newPattern);
 
-        errorRepository.assignPatternToErrors(projectId, newPattern);
+        errorService.assignPatternToErrors(projectId, newPattern);
 
         problemDenormalizationService.updateFirstAndLastSeenDateTimes(Collections.singleton(problem));
 
-        return problemPatternMapper.toDto(newPattern);
+        return mapper.map(newPattern, ProblemPatternDTO.class);
     }
 
     /**
@@ -584,9 +655,9 @@ public class ProblemService {
         for (ProblemPattern existingPattern : destinationProblem.getPatterns()) {
             // Problem.equals() compare the uniqueness of the entity:
             // we want to compare the uniqueness of criteria INSIDE a given problem, hence the withProblemId()
-            if (existingPattern.withProblemId(sourceProblem.getId()).equals(sourcePattern)) {
+            if (existingPattern.equals(sourcePattern, sourceProblem.getId())) {
                 throw new NotUniqueException(Messages.NOT_UNIQUE_PATTERN_IN_PROBLEM, Entities.PROBLEM_PATTERN,
-                        QProblem.problem.patterns.getMetadata().getName(), existingPattern.getId());
+                        "patterns", existingPattern.getId());
             }
         }
 
@@ -601,12 +672,12 @@ public class ProblemService {
 
         // Build the response the result of the work
         PickUpPatternDTO response = new PickUpPatternDTO();
-        response.setDestinationProblem(problemMapper.toDto(destinationProblem));
+        response.setDestinationProblem(mapper.map(destinationProblem, ProblemDTO.class));
 
         // Remove the source problem if it has no pattern anymore
         if (sourceProblem.getPatterns().isEmpty()) {
             problemRepository.delete(sourceProblem);
-            response.setDeletedProblem(problemMapper.toDto(sourceProblem));
+            response.setDeletedProblem(mapper.map(sourceProblem, ProblemDTO.class));
         }
 
         return response;
@@ -643,7 +714,7 @@ public class ProblemService {
         problem.setClosingDateTime(dateService.now());
         problem.setRootCause(rootCause);
         problem.setPatterns(problem.getPatterns());
-        return problemMapper.toDto(problemRepository.save(problem));
+        return mapper.map(problemRepository.save(problem), ProblemDTO.class);
     }
 
     /**
@@ -669,7 +740,7 @@ public class ProblemService {
         // Change status, but keep other properties and patterns
         problem.setStatus(ProblemStatus.OPEN);
         problem.setClosingDateTime(null);
-        return problemMapper.toDto(problemRepository.save(problem));
+        return mapper.map(problemRepository.save(problem), ProblemDTO.class);
     }
 
     /**
@@ -698,7 +769,7 @@ public class ProblemService {
         }
 
         if (StringUtils.isEmpty(problem.getDefectId())) {
-            return problemMapper.toDto(problem);
+            return mapper.map(problem, ProblemDTO.class);
         }
 
         try {
@@ -713,10 +784,10 @@ public class ProblemService {
                 problem.setStatus(statuses.get(0).getStatus());
                 problem.setClosingDateTime(statuses.get(0).getCloseDateTime());
             }
-            return problemMapper.toDto(problemRepository.save(problem));
+            return mapper.map(problemRepository.save(problem), ProblemDTO.class);
         } catch (FetchException e) {
             // Also catch RuntimeException to not impact calling code in case of a faulty DefectAdapter in a custom ARA
-            log.error("Cannot refresh defect status of problem (defect {})", problem.getDefectId(), e);
+            LOG.warn("PROBLEM|Cannot refresh defect status of problem (defect {})", problem.getDefectId(), e);
             final String message = String.format(Messages.PROCESS_ERROR_WHILE_CONTACTING_DEFECT_TRACKING_SYSTEM,
                     defectAdapter.getName());
             throw new BadGatewayException(message, Entities.PROBLEM);
@@ -732,7 +803,7 @@ public class ProblemService {
     public void recomputeFirstAndLastSeenDateTimes(long projectId) {
         final List<Problem> problems = problemRepository.findByProjectId(projectId);
         for (int i = 0; i < problems.size(); i++) {
-            log.info("Recomputing problem {}/{} ", Integer.valueOf(i + 1), Integer.valueOf(problems.size()));
+            LOG.debug("PROBLEM|Recomputing problem {}/{} ", Integer.valueOf(i + 1), Integer.valueOf(problems.size()));
             problemDenormalizationService.updateFirstAndLastSeenDateTimes(Collections.singleton(problems.get(i)));
         }
     }
@@ -741,13 +812,13 @@ public class ProblemService {
         int lastExecutionCount = 10;
 
         // Given the problem IDs
-        List<Long> problemIds = problems.stream().map(ProblemDTO::getId).collect(Collectors.toList());
+        List<Long> problemIds = problems.stream().map(ProblemDTO::getId).toList();
 
         for (CycleDefinition cycleDefinition : cycleDefinitionRepository.findAllByProjectIdOrderByBranchPositionAscBranchAscNameAsc(projectId)) {
             List<Execution> lastExecutions = executionRepository
-                    .findTop10ByProjectIdAndBranchAndNameOrderByTestDateTimeDesc(
+                    .findTop10ByCycleDefinitionProjectIdAndCycleDefinitionBranchAndCycleDefinitionNameOrderByTestDateTimeDesc(
                             cycleDefinition.getProjectId(), cycleDefinition.getBranch(), cycleDefinition.getName());
-            List<Long> lastExecutionIds = lastExecutions.stream().map(Execution::getId).collect(Collectors.toList());
+            List<Long> lastExecutionIds = lastExecutions.stream().map(Execution::getId).toList();
             Map<Long, List<Long>> problemIdsToExecutionIds = problemRepository
                     .findProblemIdsToExecutionIdsAssociations(problemIds, lastExecutionIds);
 
@@ -769,10 +840,7 @@ public class ProblemService {
      */
     private CycleStabilityDTO computeStability(CycleDefinition cycleDefinition, int lastExecutionCount,
                                                List<Execution> lastExecutions, List<Long> failedExecutionIds) {
-        return new CycleStabilityDTO()
-                .withBranchName(cycleDefinition.getBranch())
-                .withCycleName(cycleDefinition.getName())
-                .withExecutionStabilities(computeExecutionStability(lastExecutionCount, lastExecutions, failedExecutionIds));
+        return new CycleStabilityDTO(cycleDefinition.getBranch(), cycleDefinition.getName(), computeExecutionStability(lastExecutionCount, lastExecutions, failedExecutionIds));
     }
 
     public String retrieveDefectUrl(Problem entity) {
@@ -788,7 +856,6 @@ public class ProblemService {
         if (StringUtils.isNotEmpty(defectId)) {
             final DefectService defectService = SpringApplicationContext.getBean(DefectService.class);
             final SettingService settingService = SpringApplicationContext.getBean(SettingService.class);
-
 
             // Defects not managed => no URL
             if (defectService.getAdapter(projectId).isPresent()) {

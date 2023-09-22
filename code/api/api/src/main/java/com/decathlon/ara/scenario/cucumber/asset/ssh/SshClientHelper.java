@@ -17,6 +17,16 @@
 
 package com.decathlon.ara.scenario.cucumber.asset.ssh;
 
+import java.io.ByteArrayInputStream;
+import java.io.Closeable;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
+import java.util.Deque;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -24,19 +34,13 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
-import java.io.ByteArrayInputStream;
-import java.io.Closeable;
-import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Holds an SSH and SFTP connection and provide simple accesses.
  */
-@Slf4j
 public class SshClientHelper implements Closeable {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SshClientHelper.class);
 
     private static final String BECAUSE = " because: ";
 
@@ -88,7 +92,7 @@ public class SshClientHelper implements Closeable {
             } catch (final SftpException e) {
                 // Folder does not exist.
                 // We expect this error and that's the simplest and fastest way to detect it.
-                log.debug("Path {} does not exist: making a directory for it", poppedFile, e);
+                LOG.debug("SCENARIO|cucumber|Path {} does not exist: making a directory for it", poppedFile, e);
             }
 
             if (stat == null) {

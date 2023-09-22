@@ -17,26 +17,15 @@
 
 package com.decathlon.ara.web.rest;
 
+import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 
-import com.decathlon.ara.Entities;
-import com.decathlon.ara.coverage.CoverageService;
-import com.decathlon.ara.service.FunctionalityService;
-import com.decathlon.ara.service.ProjectService;
-import com.decathlon.ara.service.dto.coverage.CoverageDTO;
-import com.decathlon.ara.service.dto.functionality.ExporterInfoDTO;
-import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
-import com.decathlon.ara.service.dto.functionality.FunctionalityWithChildrenDTO;
-import com.decathlon.ara.service.dto.request.MoveFunctionalitiesDTO;
-import com.decathlon.ara.service.dto.request.MoveFunctionalityDTO;
-import com.decathlon.ara.service.dto.request.NewFunctionalityDTO;
-import com.decathlon.ara.service.dto.scenario.ScenarioDTO;
-import com.decathlon.ara.service.exception.BadRequestException;
-import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.web.rest.util.HeaderUtil;
-import com.decathlon.ara.web.rest.util.ResponseUtil;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+
+import javax.validation.Valid;
+
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -54,33 +43,45 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.Valid;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
-
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import com.decathlon.ara.Entities;
+import com.decathlon.ara.coverage.CoverageService;
+import com.decathlon.ara.service.FunctionalityService;
+import com.decathlon.ara.service.ProjectService;
+import com.decathlon.ara.service.dto.coverage.CoverageDTO;
+import com.decathlon.ara.service.dto.functionality.ExporterInfoDTO;
+import com.decathlon.ara.service.dto.functionality.FunctionalityDTO;
+import com.decathlon.ara.service.dto.functionality.FunctionalityWithChildrenDTO;
+import com.decathlon.ara.service.dto.request.MoveFunctionalitiesDTO;
+import com.decathlon.ara.service.dto.request.MoveFunctionalityDTO;
+import com.decathlon.ara.service.dto.request.NewFunctionalityDTO;
+import com.decathlon.ara.service.dto.scenario.ScenarioDTO;
+import com.decathlon.ara.service.exception.BadRequestException;
+import com.decathlon.ara.service.exception.NotFoundException;
+import com.decathlon.ara.web.rest.util.HeaderUtil;
+import com.decathlon.ara.web.rest.util.ResponseUtil;
 
 /**
  * REST controller for managing Functionalities.
  */
 @RestController
 @RequestMapping(FunctionalityResource.PATH)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FunctionalityResource {
 
     static final String PATH = PROJECT_API_PATH + "/functionalities";
     private static final String NAME = Entities.FUNCTIONALITY;
 
-    @NonNull
     private final FunctionalityService service;
 
-    @NonNull
     private final CoverageService coverageService;
 
-    @NonNull
     private final ProjectService projectService;
+
+    public FunctionalityResource(FunctionalityService service, CoverageService coverageService,
+            ProjectService projectService) {
+        this.service = service;
+        this.coverageService = coverageService;
+        this.projectService = projectService;
+    }
 
     /**
      * GET all entities.
@@ -168,9 +169,8 @@ public class FunctionalityResource {
 
     @DeleteMapping
     public ResponseEntity<List<FunctionalityWithChildrenDTO>> deleteList(
-            @PathVariable String projectCode,
-            @RequestParam("id") List<Long> ids
-    ) {
+                                                                         @PathVariable String projectCode,
+                                                                         @RequestParam("id") List<Long> ids) {
         try {
             List<FunctionalityWithChildrenDTO> updatedTree = service.deleteList(projectService.toId(projectCode), ids);
             return ResponseEntity.ok().body(updatedTree);
@@ -246,7 +246,7 @@ public class FunctionalityResource {
      * @param projectCode the current project code
      * @return the JSON of all the exporters available.
      */
-    @RequestMapping(method= RequestMethod.OPTIONS, path="/export")
+    @RequestMapping(method = RequestMethod.OPTIONS, path = "/export")
     public ResponseEntity<List<ExporterInfoDTO>> getExportOptions(@PathVariable String projectCode) {
         return ResponseEntity.ok().body(service.listAvailableExporters());
     }
@@ -260,7 +260,7 @@ public class FunctionalityResource {
      * @return a streamable byte array which represents the exported functionalities for download.
      */
     @GetMapping("/export")
-    public ResponseEntity<Resource> export(@PathVariable String projectCode, @RequestParam List<Long> functionalities, @RequestParam String exportType, @RequestParam Map<String,String> additionalParams) {
+    public ResponseEntity<Resource> export(@PathVariable String projectCode, @RequestParam List<Long> functionalities, @RequestParam String exportType, @RequestParam Map<String, String> additionalParams) {
         try {
             // Remove the already known params catched by the global mapping
             additionalParams.remove("functionalities");

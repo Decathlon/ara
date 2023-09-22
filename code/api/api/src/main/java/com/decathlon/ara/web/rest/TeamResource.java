@@ -17,20 +17,12 @@
 
 package com.decathlon.ara.web.rest;
 
+import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 
-import com.decathlon.ara.service.ProjectService;
-import com.decathlon.ara.service.TeamService;
-import com.decathlon.ara.service.dto.team.TeamDTO;
-import com.decathlon.ara.service.exception.BadRequestException;
-import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.web.rest.util.HeaderUtil;
-import com.decathlon.ara.web.rest.util.ResponseUtil;
-import com.decathlon.ara.Entities;
 import java.util.List;
+
 import javax.validation.Valid;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,24 +33,33 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import com.decathlon.ara.Entities;
+import com.decathlon.ara.service.ProjectService;
+import com.decathlon.ara.service.TeamService;
+import com.decathlon.ara.service.dto.team.TeamDTO;
+import com.decathlon.ara.service.exception.BadRequestException;
+import com.decathlon.ara.service.exception.NotFoundException;
+import com.decathlon.ara.web.rest.util.HeaderUtil;
+import com.decathlon.ara.web.rest.util.ResponseUtil;
 
 /**
  * REST controller for managing Teams.
  */
 @RestController
 @RequestMapping(TeamResource.PATH)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TeamResource {
 
     private static final String NAME = Entities.TEAM;
-    static final String PATH =  PROJECT_API_PATH + "/" + NAME + "s";
+    static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
 
-    @NonNull
     private final TeamService service;
 
-    @NonNull
     private final ProjectService projectService;
+
+    public TeamResource(TeamService service, ProjectService projectService) {
+        this.service = service;
+        this.projectService = projectService;
+    }
 
     /**
      * POST to create a new entity.

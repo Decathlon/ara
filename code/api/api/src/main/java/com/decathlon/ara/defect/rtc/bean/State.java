@@ -17,17 +17,12 @@
 
 package com.decathlon.ara.defect.rtc.bean;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
-
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
 public class State {
 
     private String name;
+
+    public String getName() {
+        return name;
+    }
 
 }

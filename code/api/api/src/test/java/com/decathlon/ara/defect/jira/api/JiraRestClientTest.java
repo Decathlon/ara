@@ -17,24 +17,11 @@
 
 package com.decathlon.ara.defect.jira.api;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
+import com.decathlon.ara.defect.jira.api.model.JiraIssue;
+import com.decathlon.ara.defect.jira.api.model.JiraIssueSearchResults;
+import com.decathlon.ara.service.SettingService;
+import com.decathlon.ara.service.exception.BadRequestException;
+import com.decathlon.ara.service.support.Settings;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -44,23 +31,22 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
-import com.decathlon.ara.defect.jira.api.model.JiraIssue;
-import com.decathlon.ara.defect.jira.api.model.JiraIssueSearchResults;
-import com.decathlon.ara.service.SettingService;
-import com.decathlon.ara.service.exception.BadRequestException;
-import com.decathlon.ara.service.support.Settings;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class JiraRestClientTest {
+class JiraRestClientTest {
 
     @Mock
     private SettingService settingService;
@@ -72,7 +58,7 @@ public class JiraRestClientTest {
     private JiraRestClient jiraRestClient;
 
     @Test
-    public void getHeader_throwBadRequestException_whenTokenNotFound() throws BadRequestException {
+    void getHeader_throwBadRequestException_whenTokenNotFound() {
         // Given
         Long projectId = 1L;
 
@@ -84,7 +70,7 @@ public class JiraRestClientTest {
     }
 
     @Test
-    public void getHeader_throwBadRequestException_whenLoginNotFound() throws BadRequestException {
+    void getHeader_throwBadRequestException_whenLoginNotFound() {
         // Given
         Long projectId = 1L;
         String token = "my_jira_token";
@@ -98,7 +84,7 @@ public class JiraRestClientTest {
     }
 
     @Test
-    public void getHeader_returnHeader_whenLoginAndTokenFound() throws BadRequestException {
+    void getHeader_returnHeader_whenLoginAndTokenFound() throws BadRequestException {
         // Given
         Long projectId = 1L;
         String token = "my_jira_token";
@@ -118,7 +104,7 @@ public class JiraRestClientTest {
     }
 
     @Test
-    public void getIssue_throwBadRequestException_whenBaseUrlNotFound() throws BadRequestException {
+    void getIssue_throwBadRequestException_whenBaseUrlNotFound() {
         // Given
         Long projectId = 1L;
         String code = "PRJ-123";
@@ -131,7 +117,7 @@ public class JiraRestClientTest {
     }
 
     @Test
-    public void getIssue_returnEmptyOptional_whenCodeUnknown() throws BadRequestException {
+    void getIssue_returnEmptyOptional_whenCodeUnknown() throws BadRequestException {
         // Given
         Long projectId = 1L;
         String code = "PRJ-123";
@@ -170,7 +156,7 @@ public class JiraRestClientTest {
     }
 
     @Test
-    public void getIssue_throwBadRequestException_whenHttpStatusCodeIsNeither404Nor200() throws BadRequestException {
+    void getIssue_throwBadRequestException_whenHttpStatusCodeIsNeither404Nor200() {
         // Given
         Long projectId = 1L;
         String code = "PRJ-123";
@@ -194,7 +180,7 @@ public class JiraRestClientTest {
     }
 
     @Test
-    public void getIssue_returnJiraIssue_whenIssueFound() throws BadRequestException {
+    void getIssue_returnJiraIssue_whenIssueFound() throws BadRequestException {
         // Given
         Long projectId = 1L;
         String code = "PRJ-123";
@@ -236,7 +222,7 @@ public class JiraRestClientTest {
     }
 
     @Test
-    public void getIssuesFromKeys_returnEmptyList_whenNoCodesGiven() throws BadRequestException {
+    void getIssuesFromKeys_returnEmptyList_whenNoCodesGiven() throws BadRequestException {
         // Given
         Long projectId = 1L;
 
@@ -250,7 +236,7 @@ public class JiraRestClientTest {
     }
 
     @Test
-    public void getIssuesFromKeys_throwBadRequestException_whenBaseUrlNotFound() throws BadRequestException {
+    void getIssuesFromKeys_throwBadRequestException_whenBaseUrlNotFound() {
         // Given
         Long projectId = 1L;
         List<String> codes = Arrays.asList("PRJ-1", "PRJ-2", "PRJ-3");
@@ -263,7 +249,7 @@ public class JiraRestClientTest {
     }
 
     @Test
-    public void getIssuesFromKeys_throwBadRequestException_whenResponseCodeStatusIsNot200() throws BadRequestException {
+    void getIssuesFromKeys_throwBadRequestException_whenResponseCodeStatusIsNot200() {
         // Given
         Long projectId = 1L;
         List<String> codes = Arrays.asList("PRJ-1", "PRJ-2", "PRJ-3");
@@ -287,7 +273,7 @@ public class JiraRestClientTest {
     }
 
     @Test
-    public void getIssuesFromKeys_returnIssues_whenResponseCodeStatusIs200AndThereIsNoPagination() throws BadRequestException {
+    void getIssuesFromKeys_returnIssues_whenResponseCodeStatusIs200AndThereIsNoPagination() throws BadRequestException {
         // Given
         Long projectId = 1L;
         List<String> codes = Arrays.asList("PRJ-1", "PRJ-2", "PRJ-3");
@@ -351,7 +337,7 @@ public class JiraRestClientTest {
     }
 
     @Test
-    public void getIssuesFromKeys_returnIssues_whenResponseCodeStatusIs200AndThereIsPaginationAndInitialMaxResultsEqualsToJiraMaxResultsThreshold() throws BadRequestException {
+    void getIssuesFromKeys_returnIssues_whenResponseCodeStatusIs200AndThereIsPaginationAndInitialMaxResultsEqualsToJiraMaxResultsThreshold() throws BadRequestException {
         // Given
         Long projectId = 1L;
         List<String> codes = Arrays.asList("PRJ-1", "PRJ-2", "PRJ-3");
@@ -480,7 +466,7 @@ public class JiraRestClientTest {
     }
 
     @Test
-    public void getIssuesFromKeys_returnIssues_whenResponseCodeStatusIs200AndThereIsPaginationAndInitialMaxResultsLesserThanJiraMaxResultsThreshold() throws BadRequestException {
+    void getIssuesFromKeys_returnIssues_whenResponseCodeStatusIs200AndThereIsPaginationAndInitialMaxResultsLesserThanJiraMaxResultsThreshold() throws BadRequestException {
         // Given
         Long projectId = 1L;
         List<String> codes = Arrays.asList("PRJ-1", "PRJ-2", "PRJ-3");
@@ -593,7 +579,7 @@ public class JiraRestClientTest {
     }
 
     @Test
-    public void getIssuesFromKeys_returnIssues_whenResponseCodeStatusIs200AndThereIsPaginationAndInitialMaxResultsGreaterThanJiraMaxResultsThreshold() throws BadRequestException {
+    void getIssuesFromKeys_returnIssues_whenResponseCodeStatusIs200AndThereIsPaginationAndInitialMaxResultsGreaterThanJiraMaxResultsThreshold() throws BadRequestException {
         // Given
         Long projectId = 1L;
         List<String> codes = Arrays.asList("PRJ-1", "PRJ-2", "PRJ-3");
@@ -766,7 +752,7 @@ public class JiraRestClientTest {
     }
 
     @Test
-    public void getUpdatedIssues_throwBadRequestException_whenBaseUrlNotFoundAndUpdateDateNotNull() throws BadRequestException {
+    void getUpdatedIssues_throwBadRequestException_whenBaseUrlNotFoundAndUpdateDateNotNull() {
         // Given
         Long projectId = 1L;
         Date updateDate = new Date();
@@ -779,7 +765,7 @@ public class JiraRestClientTest {
     }
 
     @Test
-    public void getUpdatedIssues_throwBadRequestException_whenResponseCodeStatusIsNot200AndUpdateDateNotNull() throws BadRequestException {
+    void getUpdatedIssues_throwBadRequestException_whenResponseCodeStatusIsNot200AndUpdateDateNotNull() {
         // Given
         Long projectId = 1L;
         Date updateDate = new Date();
@@ -803,7 +789,7 @@ public class JiraRestClientTest {
     }
 
     @Test
-    public void getUpdatedIssues_returnIssues_whenResponseCodeStatusIs200AndUpdateDateNotNull() throws BadRequestException, ParseException {
+    void getUpdatedIssues_returnIssues_whenResponseCodeStatusIs200AndUpdateDateNotNull() throws BadRequestException, ParseException {
         // Given
         Long projectId = 1L;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -868,7 +854,7 @@ public class JiraRestClientTest {
     }
 
     @Test
-    public void getUpdatedIssues_returnIssues_whenResponseCodeStatusIs200AndThereAreProjectsFilterAndUpdateDateNotNull() throws BadRequestException, ParseException {
+    void getUpdatedIssues_returnIssues_whenResponseCodeStatusIs200AndThereAreProjectsFilterAndUpdateDateNotNull() throws BadRequestException, ParseException {
         // Given
         Long projectId = 1L;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");

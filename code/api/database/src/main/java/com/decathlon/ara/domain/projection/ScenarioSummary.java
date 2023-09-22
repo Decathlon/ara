@@ -17,20 +17,8 @@
 
 package com.decathlon.ara.domain.projection;
 
-import com.decathlon.ara.domain.QScenario;
 import com.decathlon.ara.domain.Source;
-import com.querydsl.core.types.ConstructorExpression;
-import com.querydsl.core.types.Projections;
-import com.querydsl.jpa.JPAExpressions;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 public class ScenarioSummary {
 
     private Long id;
@@ -39,7 +27,7 @@ public class ScenarioSummary {
     private String featureName;
     private String name;
 
-    private int functionalityCount;
+    private long functionalityCount;
     private boolean hasCountryCodes;
     private boolean hasSeverity;
 
@@ -47,27 +35,67 @@ public class ScenarioSummary {
     private String wrongCountryCodes;
     private String wrongSeverityCode;
 
-    // Keep synced with fields in order
-    public static ConstructorExpression<ScenarioSummary> projectionOf(QScenario scenario) {
-        QScenario subScenario = new QScenario("sub");
+    public ScenarioSummary() {
+    }
 
-        return Projections.constructor(ScenarioSummary.class,
-                scenario.id,
-                scenario.source,
-                scenario.featureFile,
-                scenario.featureName,
-                scenario.name,
+    public ScenarioSummary(Long id, Source source, String featureFile, String featureName, String name,
+            long functionalityCount, boolean hasCountryCodes, boolean hasSeverity, String wrongFunctionalityIds,
+            String wrongCountryCodes, String wrongSeverityCode) {
+        this.id = id;
+        this.source = source;
+        this.featureFile = featureFile;
+        this.featureName = featureName;
+        this.name = name;
+        this.functionalityCount = functionalityCount;
+        this.hasCountryCodes = hasCountryCodes;
+        this.hasSeverity = hasSeverity;
+        this.wrongFunctionalityIds = wrongFunctionalityIds;
+        this.wrongCountryCodes = wrongCountryCodes;
+        this.wrongSeverityCode = wrongSeverityCode;
+    }
 
-                JPAExpressions
-                        .select(subScenario.functionalities.size())
-                        .from(subScenario)
-                        .where(subScenario.id.eq(scenario.id)),
-                scenario.countryCodes.isNotEmpty(),
-                scenario.severity.isNotEmpty(),
+    public Long getId() {
+        return id;
+    }
 
-                scenario.wrongFunctionalityIds,
-                scenario.wrongCountryCodes,
-                scenario.wrongSeverityCode);
+    public Source getSource() {
+        return source;
+    }
+
+    public String getFeatureFile() {
+        return featureFile;
+    }
+
+    public String getFeatureName() {
+        return featureName;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public long getFunctionalityCount() {
+        return functionalityCount;
+    }
+
+    public boolean isHasCountryCodes() {
+        return hasCountryCodes;
+    }
+
+    public boolean isHasSeverity() {
+        return hasSeverity;
+    }
+
+    public String getWrongFunctionalityIds() {
+        return wrongFunctionalityIds;
+    }
+
+    public String getWrongCountryCodes() {
+        return wrongCountryCodes;
+    }
+
+    public String getWrongSeverityCode() {
+        return wrongSeverityCode;
     }
 
 }

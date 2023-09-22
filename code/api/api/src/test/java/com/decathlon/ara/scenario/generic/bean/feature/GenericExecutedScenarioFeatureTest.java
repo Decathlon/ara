@@ -17,13 +17,15 @@
 
 package com.decathlon.ara.scenario.generic.bean.feature;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import com.decathlon.ara.util.TestUtil;
 
 @ExtendWith(MockitoExtension.class)
 class GenericExecutedScenarioFeatureTest {
@@ -32,7 +34,6 @@ class GenericExecutedScenarioFeatureTest {
     void getTagsAsString_returnEmptyString_whenNoTags() {
         // Given
         GenericExecutedScenarioFeature feature = new GenericExecutedScenarioFeature();
-        feature.setTags(null);
 
         // When
 
@@ -45,7 +46,7 @@ class GenericExecutedScenarioFeatureTest {
     void getTagsAsString_returnTagsAsString_whenSingleTagGiven() {
         // Given
         GenericExecutedScenarioFeature feature = new GenericExecutedScenarioFeature();
-        feature.setTags(List.of("tag"));
+        TestUtil.setField(feature, "tags", List.of("tag"));
 
         // When
 
@@ -58,7 +59,7 @@ class GenericExecutedScenarioFeatureTest {
     void getTagsAsString_returnTagsAsString_whenSeveralTagsGiven() {
         // Given
         GenericExecutedScenarioFeature feature = new GenericExecutedScenarioFeature();
-        feature.setTags(List.of("tag1", "tag2", "tag3"));
+        TestUtil.setField(feature, "tags", List.of("tag1", "tag2", "tag3"));
 
         // When
 

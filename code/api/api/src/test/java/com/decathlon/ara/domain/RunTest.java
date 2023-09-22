@@ -21,18 +21,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-public class RunTest {
+import com.decathlon.ara.util.factory.CountryFactory;
+import com.decathlon.ara.util.factory.TypeFactory;
+
+class RunTest {
 
     private static Run run(String countryCode, String typeCode) {
         Run run = new Run();
-        run.setCountry(new Country().withCode(countryCode));
-        run.setType(new Type().withCode(typeCode));
+        run.setCountry(CountryFactory.get(countryCode));
+        run.setType(TypeFactory.get(typeCode));
         return run;
     }
 
     @Test
-    @SuppressWarnings("static-method")
-    public void testCompareTo() {
+    void testCompareTo() {
         assertThat(run(null, null).compareTo(run(null, null))).isZero();
         assertThat(run(null, null).compareTo(run("A", null))).isNegative();
         assertThat(run(null, null).compareTo(run(null, "A"))).isNegative();

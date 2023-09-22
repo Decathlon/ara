@@ -10,93 +10,100 @@ import com.decathlon.ara.scenario.cucumber.bean.Tag;
 import com.decathlon.ara.scenario.cucumber.util.ScenarioExtractorUtil;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Slf4j
 public class ScenarioUploader {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ScenarioUploader.class);
     private static final String TOTAL = "*";
 
-    @NonNull
     private final ScenarioRepository scenarioRepository;
 
-    @NonNull
     private final FunctionalityRepository functionalityRepository;
 
-    @NonNull
     private final SourceRepository sourceRepository;
 
-    @NonNull
     private final EntityManager entityManager;
 
-    @NonNull
     private final SeverityRepository severityRepository;
 
-    @NonNull
     private final CountryRepository countryRepository;
 
+    public ScenarioUploader(ScenarioRepository scenarioRepository, FunctionalityRepository functionalityRepository,
+            SourceRepository sourceRepository, EntityManager entityManager, SeverityRepository severityRepository,
+            CountryRepository countryRepository) {
+        this.scenarioRepository = scenarioRepository;
+        this.functionalityRepository = functionalityRepository;
+        this.sourceRepository = sourceRepository;
+        this.entityManager = entityManager;
+        this.severityRepository = severityRepository;
+        this.countryRepository = countryRepository;
+    }
+
     public void processUploadedContent(long projectId, String sourceCode, Technology expectedTechnology, ScenarioListSupplier scenarioExtractor) throws BadRequestException {
+        LOG.info("SCENARIO|Coverage: Preparing to match scenarios and features (source: {})", sourceCode);
         Source source = sourceRepository.findByProjectIdAndCode(projectId, sourceCode);
         if (source == null) {
+            LOG.error("SCENARIO|Cannot match scenarios with features because the source {} was not found", sourceCode);
             throw new NotFoundException(Messages.NOT_FOUND_SOURCE, Entities.SOURCE);
         }
         if (source.getTechnology() != expectedTechnology) {
             final String message = String.format(Messages.RULE_SCENARIO_UPLOAD_TO_WRONG_TECHNOLOGY, expectedTechnology, source.getTechnology());
+            LOG.error("SCENARIO|Cannot match scenarios with features because the technologies don't match (source {})", sourceCode);
+            LOG.error("SCENARIO|{}", message);
             throw new BadRequestException(message, Entities.SCENARIO, "wrong_technology");
         }
-
-        // Remove the previous scenarios from the same source => the database will remove the associations between functionalities and these scenarios
-        var allScenarios = scenarioRepository.findAllBySourceId(source.getId());
-        allScenarios.forEach(this::removeScenarioAssociationSafely);
-        scenarioRepository.deleteAll(allScenarios);
-
-        // Let Hibernate make the DELETE SQL statements now, because we will add the same scenarios below: don't mess with old and new instances
-        entityManager.flush();
-        entityManager.clear();
 
         List<Scenario> newScenarios = scenarioExtractor.get(source);
 
         // Check functionality IDs
         // (first get all functionalities with their remaining scenarios eagerly-fetched)
         Set<Functionality> functionalities = functionalityRepository.findAllByProjectIdAndType(projectId, FunctionalityType.FUNCTIONALITY);
+
+        functionalities = deleteScenariosFromSameSource(source, functionalities);
+
         assignWrongFunctionalityIds(functionalities, newScenarios);
         assignWrongSeverityCode(getSeverityCodes(projectId), newScenarios);
         assignWrongCountryCodes(getCountryCodes(projectId), newScenarios);
         // Save the new scenarios
         newScenarios = scenarioRepository.saveAll(newScenarios);
-        entityManager.flush();
+        LOG.info("SCENARIO|{} scenarios updated for source {}", newScenarios.size(), sourceCode);
 
         // Re-assign new scenarios to functionalities
         assignCoverage(functionalities, newScenarios);
         computeAggregates(functionalities);
         functionalityRepository.saveAll(functionalities);
+        LOG.info("SCENARIO|{} features updated for source {}", functionalities.size(), sourceCode);
+        LOG.info("SCENARIO|Coverage complete!");
     }
 
-    public void removeScenarioAssociationSafely(Scenario scenario) {
-        var scenarioFunctionalities = scenario.getFunctionalities();
-        while (!scenarioFunctionalities.isEmpty()) {
-            var initialSize = scenarioFunctionalities.size();
-            scenarioFunctionalities.stream()
-                    .findFirst()
-                    .ifPresent(scenario::removeFunctionality);
-            if (scenarioFunctionalities.size() >= initialSize) {
-                // Check implementation of removeFunctionality decrease the size of functionalities set
-                throw new IllegalStateException(
-                        "Error during scenario-functionality link deletion: prevent infinite loop");
-            }
-        }
+    private Set<Functionality> deleteScenariosFromSameSource(Source source, Set<Functionality> functionalities) {
+        var functionalitiesWithoutSourceScenarios = functionalities.stream()
+                .map(f -> Pair.of(f, f.getScenarios().stream().filter(s -> !s.getSource().equals(source)).toList()))
+                .map(p -> Pair.of(p.getFirst(), new TreeSet<>(p.getSecond())))
+                .map(p -> {
+                    var f = p.getFirst();
+                    var s = p.getSecond();
+                    f.setScenarios(s);
+                    return f;
+                })
+                .toList();
+        functionalitiesWithoutSourceScenarios = functionalityRepository.saveAll(functionalitiesWithoutSourceScenarios);
+        scenarioRepository.deleteAllBySource(source);
+        return new HashSet<>(functionalitiesWithoutSourceScenarios);
     }
 
     @FunctionalInterface
@@ -137,7 +144,7 @@ public class ScenarioUploader {
         return severityRepository.findAllByProjectIdOrderByPosition(projectId).stream()
                 .map(Severity::getCode)
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -147,9 +154,10 @@ public class ScenarioUploader {
     public void assignWrongCountryCodes(List<String> countryCodes, List<Scenario> scenarios) {
         for (Scenario scenario : scenarios) {
             StringBuilder builder = new StringBuilder();
-            for (String countryCode : scenario.getCountryCodes().split(Scenario.COUNTRY_CODES_SEPARATOR)) {
-                if (!countryCodes.contains(countryCode)) {
-                    builder.append(builder.length() == 0 ? "" : ",").append(countryCode);
+            var scenarioCountryCodes = StringUtils.isNotBlank(scenario.getCountryCodes()) ? scenario.getCountryCodes() : "";
+            for (String scenarioCountryCode : scenarioCountryCodes.split(Scenario.COUNTRY_CODES_SEPARATOR)) {
+                if (!countryCodes.contains(scenarioCountryCode)) {
+                    builder.append(builder.length() == 0 ? "" : ",").append(scenarioCountryCode);
                 }
             }
             scenario.setWrongCountryCodes(builder.length() == 0 ? null : builder.toString());
@@ -183,96 +191,90 @@ public class ScenarioUploader {
     }
 
     /**
-     * @param functionalities for each of them, if it is not a folder, update the coverage counts (normal & ignored) and coverage per source and ignore state
+     * @param functionalities for each of them, if it is not a folder, update the coverage counts (covered & ignored) and coverage per source and ignore state
      */
     private static void computeAggregates(Collection<Functionality> functionalities) {
-        for (Functionality functionality : functionalities) {
-            final Set<Scenario> scenarios = functionality.getScenarios();
-
-            functionality.setCoveredScenarios(computeCount(scenarios, false));
-            functionality.setIgnoredScenarios(computeCount(scenarios, true));
-
-            functionality.setCoveredCountryScenarios(computeGlobalAggregate(scenarios, false));
-            functionality.setIgnoredCountryScenarios(computeGlobalAggregate(scenarios, true));
-        }
+        functionalities.forEach(ScenarioUploader::computeAggregates);
     }
 
     /**
-     * @param scenarios a list of scenarios to count for the ignore state
-     * @param ignored   the ignore state for a scenario to be counted
-     * @return the count of scenarios with the given ignore state
+     * @param functionality update the coverage counts (covered & ignored) and coverage per source and ignore state
      */
-    private static Integer computeCount(Set<Scenario> scenarios, boolean ignored) {
-        return Integer.valueOf((int) scenarios.stream().filter(s -> s.isIgnored() == ignored).count());
+    private static void computeAggregates(Functionality functionality) {
+        var coverageAggregates = getCoverageAggregatesFromFunctionality(functionality);
+        var coverAggregate = coverageAggregates.get(false);
+        var ignoreAggregate = coverageAggregates.get(true);
+        var coverageNumbers = getCoverageNumbersFromFunctionality(functionality);
+        var coverNumber = coverageNumbers.containsKey(false) ? coverageNumbers.get(false).intValue() : 0;
+        var ignoreNumber = coverageNumbers.containsKey(true) ? coverageNumbers.get(true).intValue() : 0;
+
+        functionality.setCoveredScenarios(coverNumber);
+        functionality.setIgnoredScenarios(ignoreNumber);
+
+        functionality.setCoveredCountryScenarios(coverAggregate);
+        functionality.setIgnoredCountryScenarios(ignoreAggregate);
     }
 
     /**
-     * For a given ignore state, count matching scenarios per source and country.
-     *
-     * @param scenarios a list of scenarios to count per source and country for the ignore state
-     * @param ignored   the ignore state for a scenario to match
-     * @return eg. "API:cn=3,nl=1|WEB:be=2" or null if no coverage was found for the ignore state
+     * Get aggregates displaying the scenarios distribution:
+     * - by state (ignored or covered), then
+     * - by source code, then
+     * - by country codes
+     * e.g. if map.get(true) returns "source_1:*=1,xx=1,yy=1|source_2:*=2,xx=1,yy=2", it means that:
+     * - it is an ignored state (map.get(true))
+     * - the functionality has 1 source_1 ignored scenario total (*=1) in which
+     *   - 1 concerns the country xx (xx=1)
+     *   - 1 concerns the country yy (yy=1)
+     * - it has 2 source_2 ignored scenarios total (*=2) in which
+     *   - 1 concerns the country xx (xx=1)
+     *   - 2 concerns the country yy (yy=2)
+     * If null, then there is no scenarios covered or ignored
+     * @param functionality the functionality to get the coverage aggregates from
+     * @return ignored and covered aggregates
      */
-    private static String computeGlobalAggregate(Set<Scenario> scenarios, boolean ignored) {
-        List<Source> sortedDistinctSources = scenarios.stream()
-                .map(Scenario::getSource)
-                .distinct()
+    static Map<Boolean, String> getCoverageAggregatesFromFunctionality(Functionality functionality) {
+        Function<List<Scenario>, String> partialAggregateFromScenarios = scenarios -> scenarios.stream()
+                .map(Scenario::getCountryCodes)
+                .filter(StringUtils::isNotBlank)
+                .map(s -> s.split(Scenario.COUNTRY_CODES_SEPARATOR))
+                .flatMap(Stream::of)
+                .collect(Collectors.groupingBy(s -> s, Collectors.counting()))
+                .entrySet()
+                .stream()
+                .map(e -> String.format("%s=%d", e.getKey(), e.getValue()))
                 .sorted()
-                .collect(Collectors.toList());
-
-        String coverage = null;
-        for (Source source : sortedDistinctSources) {
-            String aggregate = computeGlobalAggregate(scenarios, source, ignored);
-            if (aggregate != null) {
-                coverage = (coverage == null ? "" : coverage + "|") + aggregate;
-            }
-        }
-        return coverage;
+                .collect(Collectors.joining(","));
+        Function<Map.Entry<String, List<Scenario>>, String> aggregateForSource = entry -> {
+            var sourceCode = entry.getKey();
+            var scenarios = entry.getValue();
+            var partialScenarioAggregate = partialAggregateFromScenarios.apply(scenarios);
+            var partialAggregate = StringUtils.isNotBlank(partialScenarioAggregate) ? String.format(",%s", partialScenarioAggregate) : "";
+            return String.format("%s:%s=%d%s", sourceCode, TOTAL, scenarios.size(), partialAggregate);
+        };
+        return functionality.getScenarios()
+                .stream()
+                .collect(Collectors.groupingBy(Scenario::isIgnored))
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e1 -> e1.getValue()
+                        .stream()
+                        .collect(Collectors.groupingBy(sc -> sc.getSource().getCode()))
+                        .entrySet()
+                        .stream()
+                        .map(aggregateForSource::apply)
+                        .collect(Collectors.joining("|"))
+                ));
     }
 
     /**
-     * For a given source and an ignore state, count matching scenarios per country.
-     *
-     * @param scenarios a list of scenarios to count per source for the given ignore state
-     * @param source    the source for a scenario to match
-     * @param ignored   the ignore state for a scenario to match
-     * @return eg. "API:cn=3,nl=1" or null if no coverage was found for the source and ignore state
+     * Get coverage state distribution
+     * e.g. map.get(true) returns the total ignored scenarios number whereas map.get(false) is about covered scenarios number
+     * @param functionality the functionality
+     * @return the coverage state distribution
      */
-    private static String computeGlobalAggregate(Set<Scenario> scenarios, Source source, boolean ignored) {
-        Map<String, Integer> countryCoverage = new TreeMap<>(); // TreeMap: ordered by key alphabetically
-
-        for (Scenario scenario : scenarios) {
-            if (scenario.getSource().equals(source) && scenario.isIgnored() == ignored) {
-                increment(countryCoverage, TOTAL);
-                // Still count scenarios without country codes
-                for (String countryCode : scenario.getCountryCodes().split(Scenario.COUNTRY_CODES_SEPARATOR)) {
-                    increment(countryCoverage, countryCode);
-                }
-            }
-        }
-
-        if (countryCoverage.isEmpty()) {
-            return null;
-        }
-
-        StringBuilder aggregate = new StringBuilder(source.getCode());
-        boolean first = true;
-        for (Map.Entry<String, Integer> entry : countryCoverage.entrySet()) {
-            aggregate.append(first ? ':' : ',').append(entry.getKey()).append('=').append(entry.getValue().toString());
-            first = false;
-        }
-        return aggregate.toString();
-    }
-
-    /**
-     * Increment the <code>key</code> in the map of <code>counts</code> (the key may not exist beforehand).
-     *
-     * @param counts the map containing counts by a String key
-     * @param key    the key to increment, created before increment if not existing yet
-     */
-    private static void increment(Map<String, Integer> counts, String key) {
-        Integer oldValue = counts.get(key);
-        Integer newValue = Integer.valueOf(oldValue == null ? 1 : oldValue.intValue() + 1);
-        counts.put(key, newValue);
+    static Map<Boolean, Long> getCoverageNumbersFromFunctionality(Functionality functionality) {
+        return functionality.getScenarios()
+                .stream()
+                .collect(Collectors.groupingBy(Scenario::isIgnored, Collectors.counting()));
     }
 }

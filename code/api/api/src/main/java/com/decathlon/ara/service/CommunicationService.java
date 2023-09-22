@@ -17,6 +17,11 @@
 
 package com.decathlon.ara.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.decathlon.ara.Entities;
 import com.decathlon.ara.Messages;
 import com.decathlon.ara.domain.Communication;
@@ -25,25 +30,20 @@ import com.decathlon.ara.domain.enumeration.CommunicationType;
 import com.decathlon.ara.repository.CommunicationRepository;
 import com.decathlon.ara.service.dto.communication.CommunicationDTO;
 import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.service.mapper.CommunicationMapper;
-import com.decathlon.ara.service.util.ObjectUtil;
-import java.util.List;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.decathlon.ara.service.mapper.GenericMapper;
 
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CommunicationService {
 
-    @NonNull
     private final CommunicationRepository repository;
 
-    @NonNull
-    private final CommunicationMapper mapper;
+    private final GenericMapper mapper;
+
+    public CommunicationService(CommunicationRepository repository, GenericMapper mapper) {
+        this.repository = repository;
+        this.mapper = mapper;
+    }
 
     /**
      * Get all the entities.
@@ -53,7 +53,7 @@ public class CommunicationService {
      */
     @Transactional(readOnly = true)
     public List<CommunicationDTO> findAll(long projectId) {
-        return mapper.toDto(repository.findAllByProjectIdOrderByCode(projectId));
+        return mapper.mapCollection(repository.findAllByProjectIdOrderByCode(projectId), CommunicationDTO.class);
     }
 
     /**
@@ -70,7 +70,7 @@ public class CommunicationService {
         if (communication == null) {
             throw new NotFoundException(Messages.NOT_FOUND_COMMUNICATION, Entities.COMMUNICATION);
         }
-        return mapper.toDto(communication);
+        return mapper.map(communication, CommunicationDTO.class);
     }
 
     /**
@@ -82,8 +82,6 @@ public class CommunicationService {
      * @throws NotFoundException if the communication cannot be found
      */
     public CommunicationDTO update(long projectId, CommunicationDTO dtoToUpdate) throws NotFoundException {
-        ObjectUtil.trimStringValues(dtoToUpdate);
-
         Communication databaseEntity = repository.findByProjectIdAndCode(projectId, dtoToUpdate.getCode());
         if (databaseEntity == null) {
             throw new NotFoundException(Messages.NOT_FOUND_COMMUNICATION, Entities.COMMUNICATION);
@@ -93,28 +91,13 @@ public class CommunicationService {
         databaseEntity.setType(dtoToUpdate.getType());
         databaseEntity.setMessage(dtoToUpdate.getMessage());
 
-        return mapper.toDto(repository.save(databaseEntity));
+        return mapper.map(repository.save(databaseEntity), CommunicationDTO.class);
     }
 
     void initializeProject(Project project) {
-        project.addCommunication(new Communication()
-                .withProject(project)
-                .withCode(Communication.EXECUTIONS)
-                .withName("Executions: Top message")
-                .withType(CommunicationType.TEXT)
-                .withMessage(null));
-        project.addCommunication(new Communication()
-                .withProject(project)
-                .withCode(Communication.SCENARIO_WRITING_HELPS)
-                .withName("Scenario-Writing Helps")
-                .withType(CommunicationType.HTML)
-                .withMessage("Please configure information in Project List > MANAGE PROJECT > COMMUNICATIONS."));
-        project.addCommunication(new Communication()
-                .withProject(project)
-                .withCode(Communication.HOW_TO_ADD_SCENARIO)
-                .withName("Scenario-Writing Helps: Where to edit or add a scenario?")
-                .withType(CommunicationType.HTML)
-                .withMessage("Please configure information in Project List > MANAGE PROJECT > COMMUNICATIONS."));
+        project.addCommunication(new Communication(project, Communication.EXECUTIONS, "Executions: Top message", CommunicationType.TEXT, null));
+        project.addCommunication(new Communication(project, Communication.SCENARIO_WRITING_HELPS, "Scenario-Writing Helps", CommunicationType.HTML, "Please configure information in Project List > MANAGE PROJECT > COMMUNICATIONS."));
+        project.addCommunication(new Communication(project, Communication.HOW_TO_ADD_SCENARIO, "Scenario-Writing Helps: Where to edit or add a scenario?", CommunicationType.HTML, "Please configure information in Project List > MANAGE PROJECT > COMMUNICATIONS."));
 
     }
 

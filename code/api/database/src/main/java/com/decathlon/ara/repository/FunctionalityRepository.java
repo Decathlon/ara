@@ -17,22 +17,26 @@
 
 package com.decathlon.ara.repository;
 
-import com.decathlon.ara.domain.Functionality;
-import com.decathlon.ara.domain.enumeration.FunctionalityType;
-import com.decathlon.ara.repository.custom.FunctionalityRepositoryCustom;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.SortedSet;
+import java.util.stream.Collectors;
+
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.SortedSet;
+import com.decathlon.ara.domain.Functionality;
+import com.decathlon.ara.domain.enumeration.FunctionalityType;
+import com.decathlon.ara.domain.projection.CountryCodeCheck;
+import com.decathlon.ara.domain.projection.FunctionalityTeam;
 
 /**
  * Spring Data JPA repository for the Functionality entity.
  */
 @Repository
-public interface FunctionalityRepository extends JpaRepository<Functionality, Long>, FunctionalityRepositoryCustom {
+public interface FunctionalityRepository extends JpaRepository<Functionality, Long> {
 
     Optional<Functionality> findByProjectIdAndId(Long projectId, Long id);
 
@@ -48,5 +52,24 @@ public interface FunctionalityRepository extends JpaRepository<Functionality, Lo
     List<Functionality> findAllByProjectIdAndParentIdOrderByOrder(long projectId, Long parentId);
 
     boolean existsByProjectIdAndTeamId(long projectId, long teamId);
+
+    List<CountryCodeCheck> findDistinctByProjectIdAndCountryCodesContaining(long projectId, String countryCode);
+
+    default boolean existsByProjectIdAndCountryCode(long projectId, String countryCode) {
+        return findDistinctByProjectIdAndCountryCodesContaining(projectId, countryCode).stream().anyMatch(functionality -> {
+            for (String existingCountryCode : functionality.getCountryCodes().split(",")) {
+                if (countryCode.equals(existingCountryCode)) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
+    List<FunctionalityTeam> findAllByTypeAndProjectId(FunctionalityType type, long projectId);
+
+    default Map<Long, Long> getFunctionalityTeamIds(long projectId) {
+        return findAllByTypeAndProjectId(FunctionalityType.FUNCTIONALITY, projectId).stream().collect(Collectors.toMap(FunctionalityTeam::getId, FunctionalityTeam::getTeamId));
+    }
 
 }

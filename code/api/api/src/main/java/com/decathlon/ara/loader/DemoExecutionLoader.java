@@ -31,13 +31,11 @@ import com.decathlon.ara.service.dto.cycledefinition.CycleDefinitionDTO;
 import com.decathlon.ara.service.support.Settings;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
@@ -52,6 +50,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -68,11 +68,11 @@ import static com.decathlon.ara.loader.DemoLoaderConstants.*;
 /**
  * Service for loading executions into the Demo project.
  */
-@Slf4j
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DemoExecutionLoader {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DemoExecutionLoader.class);
 
     private static final Pattern BUILD_INFORMATION_TIMESTAMP_PATTERN = Pattern.compile("\"timestamp\":\\s[0-9]{13}");
     private static final String BUILD_INFORMATION_TIMESTAMP_REPLACEMENT = "\"timestamp\": %1s";
@@ -82,28 +82,32 @@ public class DemoExecutionLoader {
 
     private static final Pattern POSTMAN_ECHO_HOST_PATTERN = Pattern.compile("postman-echo.com");
 
-    private static final BiPredicate<Path, BasicFileAttributes> JSON_FILE_FILTER = (path, attributes) ->
-            attributes.isRegularFile() && path.getFileName().toString().endsWith(".json");
+    private static final BiPredicate<Path, BasicFileAttributes> JSON_FILE_FILTER = (path, attributes) -> attributes.isRegularFile() && path.getFileName().toString().endsWith(".json");
 
-    @NonNull
     private final SettingService settingService;
 
-    @NonNull
     private final DemoLoaderService demoLoaderService;
 
-    @NonNull
     private final ExecutionService executionService;
 
-    @NonNull
     private final EntityManager entityManager;
 
-    @NonNull
     private final ObjectMapper objectMapper;
 
-    @NonNull
     private final CycleDefinitionRepository cycleDefinitionRepository;
 
     private final AtomicInteger nextJobId = new AtomicInteger(42);
+
+    public DemoExecutionLoader(SettingService settingService, DemoLoaderService demoLoaderService,
+            ExecutionService executionService, EntityManager entityManager, ObjectMapper objectMapper,
+            CycleDefinitionRepository cycleDefinitionRepository) {
+        this.settingService = settingService;
+        this.demoLoaderService = demoLoaderService;
+        this.executionService = executionService;
+        this.entityManager = entityManager;
+        this.objectMapper = objectMapper;
+        this.cycleDefinitionRepository = cycleDefinitionRepository;
+    }
 
     /**
      * Import one demo execution for a given project, customized a little bit to appear to have run a few seconds or
@@ -223,7 +227,7 @@ public class DemoExecutionLoader {
             this.executionService.processSpecificDirectory(cycleDefinition, executionDirectory);
             // ^ Deletion of executionDirectory is made by this call
         } catch (IOException e) {
-            log.error("Cannot import executions: " + e.getMessage(), e);
+            LOG.error("DEMO|Cannot import executions: " + e.getMessage(), e);
         } finally {
             // executionDirectory has been deleted, but not its containing temporary directory yet
             FileUtils.deleteQuietly(tempDirectory);
@@ -239,13 +243,7 @@ public class DemoExecutionLoader {
                                     String testTypes) throws IOException {
         final List<PlatformRule> platformRules = new ArrayList<>();
         for (String country : countries) {
-            platformRules.add(new PlatformRule()
-                    .withBlockingValidation(true)
-                    .withCountry(country)
-                    .withCountryTags("all")
-                    .withTestTypes(testTypes)
-                    .withSeverityTags("all")
-                    .withEnabled(true));
+            platformRules.add(new PlatformRule(true, country, "all", testTypes, "all", true));
         }
 
         Map<String, QualityThreshold> qualityThresholds = new HashedMap<>();
@@ -253,36 +251,21 @@ public class DemoExecutionLoader {
         qualityThresholds.put("high", new QualityThreshold(95, 98));
         qualityThresholds.put("medium", new QualityThreshold(90, 95));
 
-        CycleDef cycleDefinition = new CycleDef()
-                .withBlockingValidation(true)
-                .withPlatformsRules(Collections.singletonMap("integ", platformRules))
-                .withQualityThresholds(qualityThresholds);
+        CycleDef cycleDefinition = new CycleDef(true, Collections.singletonMap("integ", platformRules), qualityThresholds);
 
         writeObjectToFile(cycleDefinition, new File(executionDirectory, "cycleDefinition.json"));
 
-        Build buildInformation = new Build()
-                .withUrl("https://build.company.com/demo/" + branch + "/" + cycle + "/" + nextJobId.getAndIncrement() + "/")
-                .withResult(Result.SUCCESS)
-                .withTimestamp(timestamp)
-                .withRelease(BRANCH_MASTER.equals(branch) ? "v2" : "v3")
-                .withVersion(randomGitCommitId())
-                .withVersionTimestamp(Long.valueOf(versionTimestamp));
+        Build buildInformation = new Build("https://build.company.com/demo/" + branch + "/" + cycle + "/" + nextJobId.getAndIncrement() + "/", Result.SUCCESS, timestamp, BRANCH_MASTER.equals(branch) ? "v2" : "v3", randomGitCommitId(), Long.valueOf(versionTimestamp));
         writeObjectToFile(buildInformation, new File(executionDirectory, "buildInformation.json"));
     }
 
     private void createDeploymentJob(File deploymentDirectory, String country, long timestamp) throws IOException {
-        Build buildInformation = new Build()
-                .withUrl("https://build.company.com/demo/deploy/" + country + "/" + nextJobId.getAndIncrement() + "/")
-                .withResult(Result.SUCCESS)
-                .withTimestamp(timestamp);
+        Build buildInformation = new Build("https://build.company.com/demo/deploy/" + country + "/" + nextJobId.getAndIncrement() + "/", Result.SUCCESS, timestamp);
         writeObjectToFile(buildInformation, new File(deploymentDirectory, "buildInformation.json"));
     }
 
     private File createRunJob(File runDirectory, long timestamp) throws IOException {
-        Build buildInformation = new Build()
-                .withUrl("https://build.company.com/demo/test/" + nextJobId.getAndIncrement() + "/")
-                .withResult(Result.SUCCESS)
-                .withTimestamp(timestamp);
+        Build buildInformation = new Build("https://build.company.com/demo/test/" + nextJobId.getAndIncrement() + "/", Result.SUCCESS, timestamp);
         writeObjectToFile(buildInformation, new File(runDirectory, "buildInformation.json"));
         return runDirectory;
     }
@@ -300,7 +283,7 @@ public class DemoExecutionLoader {
         final PathMatchingResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
         String parentFolder = "newman-reports-" + Math.min(failingLevel, 1) + "/";
         final String newmanReportsLocation = "classpath:demo/" + parentFolder;
-        final Resource reportsFolderResource = resourceResolver.getResource(newmanReportsLocation);
+        resourceResolver.getResource(newmanReportsLocation);
         Resource[] jsonResources = resourceResolver.getResources(newmanReportsLocation + "**/*.json");
         for (Resource resource : jsonResources) {
             final String relativePath = resource.getFilename();
@@ -323,7 +306,12 @@ public class DemoExecutionLoader {
     }
 
     private String randomGitCommitId() {
-        Random random = new Random();
+        Random random;
+        try {
+            random = SecureRandom.getInstanceStrong();
+        } catch (NoSuchAlgorithmException e) {
+            random = new SecureRandom();
+        }
         char[] id = new char[40];
         for (int i = 0; i < id.length; i++) {
             id[i] = Integer.toHexString(random.nextInt(16)).charAt(0);
@@ -383,7 +371,7 @@ public class DemoExecutionLoader {
         } catch (IOException e) {
             // Cannot rethrow the exception, as the method is called in a lambda, and it's better to have the execution
             // imported, even without the right functionalities, instead of nothing
-            log.error("Cannot replace functionality ID placeholders in file " + filePath, e);
+            LOG.error("DEMO|Cannot replace functionality ID placeholders in file " + filePath, e);
         }
     }
 

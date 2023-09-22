@@ -2,8 +2,8 @@
 var path = require('path')
 
 var araAPIHost = process.env.ARA_API_HOST || 'localhost'
-var araAPIPort = process.env.ARA_API_PORT || 8080
-var araManagementPort = process.env.ARA_MANAGEMENT_PORT || 9090
+var araAPIPort = process.env.ARA_API_PORT || 8000
+var araManagementPort = process.env.ARA_MANAGEMENT_PORT || 8001
 
 var araAPIURL = 'http://' + araAPIHost + ':' + araAPIPort
 var araManagementURL = 'http://' + araAPIHost + ':' + araManagementPort
@@ -42,7 +42,7 @@ module.exports = {
   },
   dev: {
     env: development,
-    port: 8081,
+    port: 7000,
     autoOpenBrowser: true,
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
@@ -53,7 +53,8 @@ module.exports = {
     // just be aware of this issue when enabling this option.
     cssSourceMap: false,
     proxyTable: {
-      '/auth': {
+      // oauth management helper
+      '/oauth': {
         target: araAPIURL,
         changeOrigin: true
       },

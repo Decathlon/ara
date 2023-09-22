@@ -19,15 +19,7 @@ package com.decathlon.ara.ci.bean;
 
 import com.decathlon.ara.domain.Run;
 import com.decathlon.ara.domain.enumeration.Result;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
 public class Build {
 
     /**
@@ -97,5 +89,75 @@ public class Build {
      * A comment or title or description to display just above the associated {@link Run} in the GUI.
      */
     private String comment;
+
+    public Build() {
+    }
+
+    public Build(String url, Result result, long timestamp) {
+        this.url = url;
+        this.result = result;
+        this.timestamp = timestamp;
+    }
+
+    public Build(String url, Result result, long timestamp, String release, String version, Long versionTimestamp) {
+        this.url = url;
+        this.result = result;
+        this.timestamp = timestamp;
+        this.release = release;
+        this.version = version;
+        this.versionTimestamp = versionTimestamp;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public void setLink(String link) {
+        this.link = link;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public Result getResult() {
+        return result;
+    }
+
+    public boolean isBuilding() {
+        return building;
+    }
+
+    public long getDuration() {
+        return duration;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public long getEstimatedDuration() {
+        return estimatedDuration;
+    }
+
+    public String getRelease() {
+        return release;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public Long getVersionTimestamp() {
+        return versionTimestamp;
+    }
+
+    public String getComment() {
+        return comment;
+    }
 
 }

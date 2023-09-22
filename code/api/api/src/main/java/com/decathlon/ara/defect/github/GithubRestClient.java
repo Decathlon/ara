@@ -17,17 +17,6 @@
 
 package com.decathlon.ara.defect.github;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -39,16 +28,28 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 /**
  * Provide Java implementation of the GitHub REST API.
  *
  * @author Sylvain Nieuwlandt
  * @since 3.1.0
  */
-@Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 class GithubRestClient {
+
+    private static final Logger LOG = LoggerFactory.getLogger(GithubRestClient.class);
+
     static final String PROTOCOL = "https";
     static final String BASEPATH = "api.github.com";
 
@@ -118,8 +119,8 @@ class GithubRestClient {
         } else if (200 == responseCode) {
             return this.githubMapper.jsonToIssue(this.getContentOf(response));
         } else {
-            String msg = "Error while requesting issue " + issueId + " on repo " + repoPath + " : " + responseCode;
-            log.warn(msg);
+            String msg = "DEFECT|github|Error while requesting issue " + issueId + " on repo " + repoPath + " : " + responseCode;
+            LOG.warn(msg);
             throw new IOException(msg);
         }
     }
@@ -170,8 +171,8 @@ class GithubRestClient {
         if (200 == responseCode) {
             result.addAll(this.githubMapper.jsonToIssueList(this.getContentOf(response)));
         } else if (404 != responseCode) {
-            String msg = "Error while retrieving issues updated since " + date + " on repo " + repoPath + " : " + responseCode;
-            log.warn(msg);
+            String msg = "DEFECT|github|Error while retrieving issues updated since " + date + " on repo " + repoPath + " : " + responseCode;
+            LOG.warn(msg);
             throw new IOException(msg);
         }
         return result;

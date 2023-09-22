@@ -17,16 +17,9 @@
 
 package com.decathlon.ara.service.dto.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class MoveFunctionalitiesDTO {
 
     /**
@@ -43,4 +36,16 @@ public class MoveFunctionalitiesDTO {
      * The position where to move sourceId relative to referenceId.
      */
     private FunctionalityPosition relativePosition;
+
+    public List<Long> getSourceIds() {
+        return sourceIds;
+    }
+
+    public Long getReferenceId() {
+        return referenceId;
+    }
+
+    public FunctionalityPosition getRelativePosition() {
+        return relativePosition;
+    }
 }

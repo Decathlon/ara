@@ -1,0 +1,139 @@
+= ARA's Developer Documentation
+
+Check you are agree with the terms and conditions of contributor license agreements. <<../contribution/contributing.adoc#head, Contributing>>
+
+== Getting Started
+
+What you need:
+
+* Docker
+
+Optional:
+
+* make
+* Maven & Java 14
+* Node 12
+
+Below is what you will need to set up on your development machine.
+
+```bash
+cd code
+```
+
+`code` is the directory where the code is placed.
+
+We can find 2 subdirectories:
+
+* `api`: contains the *api server* in **maven / java 14**
+* `web-ui`: contains the *web interface* in **node 12**
+
+== Start the api
+
+In `api` folder.
+
+**With Docker and make**
+
+```bash
+# Install
+make dkr-install
+# Run
+make dkr-run
+```
+
+**With maven/java 14**
+
+```bash
+# Install
+make mvn-install
+# Run
+make mvn-run
+```
+
+or
+
+```bash
+# Install
+mvn clean install
+# Run
+mvn -Pdev spring-boot:run -pl server
+```
+
+NOTE: The default database without maven profile is an h2 in memory database. Data will be lost when application will restart. By switching to `dev` profile with `-Pdev` h2 database will be persist in a file.
+
+API is available at `localhost:8080`, you can check this url http://localhost:8080/actuator/info to observe the API is up.
+
+== Start the web-ui
+
+In `web-ui` folder.
+
+**With Docker and make**
+
+```bash
+# Install
+make dkr-install
+# Run
+make dkr-run
+```
+
+**With node 12**
+
+```bash
+# Install
+make mpm-install
+# Run
+make npm-run
+```
+
+or
+
+```bash
+# Install
+npm install
+# Run
+npm run dev
+```
+
+WEB-UI is available at `localhost:8081`, you can check this url http://localhost:8081 to observe the web-ui is up.
+
+== Available for developer
+
+We have made some tools for developer with `make` command.
+
+You can find `Makefile` in this directories:
+
+* `code`: for general usage
+* `code/api`: for api usage
+* `code/web-ui`: for web-ui usage
+
+You can check available command by running:
+
+```bash
+make
+# or make help
+```
+
+== Use case
+
+=== Database modification
+
+In dev mode, modifications on a java entity model are applied with hibernate ddl `update` mode.
+
+In `code` folder.
+
+But it's for dev usage. For production, we use **liquibase**. To automatically generate a diff liquibase file from java model, you can run:
+
+```bash
+make liquibase-diff DIFF_LABEL=XXX
+```
+
+=== Update ARA version
+
+In `code` folder.
+
+You can update ARA version with this command:
+
+```bash
+make update-version VERSION=X.Y.Z
+```
+
+It will update maven version and stable helm chart.

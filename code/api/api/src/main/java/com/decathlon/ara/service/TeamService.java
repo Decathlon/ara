@@ -17,7 +17,14 @@
 
 package com.decathlon.ara.service;
 
-import com.decathlon.ara.domain.QTeam;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.decathlon.ara.Entities;
+import com.decathlon.ara.Messages;
+import com.decathlon.ara.domain.Team;
 import com.decathlon.ara.repository.FunctionalityRepository;
 import com.decathlon.ara.repository.ProblemRepository;
 import com.decathlon.ara.repository.TeamRepository;
@@ -25,37 +32,30 @@ import com.decathlon.ara.service.dto.team.TeamDTO;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
-import com.decathlon.ara.service.mapper.TeamMapper;
-import com.decathlon.ara.Entities;
-import com.decathlon.ara.Messages;
-import com.decathlon.ara.domain.Team;
-import com.decathlon.ara.service.util.ObjectUtil;
-import java.util.List;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.decathlon.ara.service.mapper.GenericMapper;
 
 /**
  * Service for managing Team.
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TeamService {
 
-    @NonNull
     private final TeamRepository repository;
 
-    @NonNull
-    private final TeamMapper mapper;
+    private final GenericMapper mapper;
 
-    @NonNull
     private final FunctionalityRepository functionalityRepository;
 
-    @NonNull
     private final ProblemRepository problemRepository;
+
+    public TeamService(TeamRepository repository, GenericMapper mapper, FunctionalityRepository functionalityRepository,
+            ProblemRepository problemRepository) {
+        this.repository = repository;
+        this.mapper = mapper;
+        this.functionalityRepository = functionalityRepository;
+        this.problemRepository = problemRepository;
+    }
 
     /**
      * Create a new entity.
@@ -66,11 +66,10 @@ public class TeamService {
      * @throws NotUniqueException when the given name is already used by another entity
      */
     public TeamDTO create(long projectId, TeamDTO dtoToCreate) throws NotUniqueException {
-        ObjectUtil.trimStringValues(dtoToCreate);
         validateBusinessRules(projectId, dtoToCreate);
-        final Team entity = mapper.toEntity(dtoToCreate);
+        final Team entity = mapper.map(dtoToCreate, Team.class);
         entity.setProjectId(projectId);
-        return mapper.toDto(repository.save(entity));
+        return mapper.map(repository.save(entity), TeamDTO.class);
     }
 
     /**
@@ -84,8 +83,6 @@ public class TeamService {
      * @throws BadRequestException when trying to forbid assignation to an entity type still having assignations
      */
     public TeamDTO update(long projectId, TeamDTO dtoToUpdate) throws BadRequestException {
-        ObjectUtil.trimStringValues(dtoToUpdate);
-
         // Must update an existing entity
         Team dataBaseEntity = repository.findByProjectIdAndId(projectId, dtoToUpdate.getId().longValue());
         if (dataBaseEntity == null) {
@@ -102,9 +99,9 @@ public class TeamService {
             throw new BadRequestException(Messages.RULE_TEAM_HAS_ASSIGNED_PROBLEMS, Entities.TEAM, "has_assigned_problems");
         }
 
-        final Team entity = mapper.toEntity(dtoToUpdate);
+        final Team entity = mapper.map(dtoToUpdate, Team.class);
         entity.setProjectId(projectId);
-        return mapper.toDto(repository.save(entity));
+        return mapper.map(repository.save(entity), TeamDTO.class);
     }
 
     /**
@@ -115,7 +112,7 @@ public class TeamService {
      */
     @Transactional(readOnly = true)
     public List<TeamDTO> findAll(long projectId) {
-        return mapper.toDto(repository.findAllByProjectIdOrderByName(projectId));
+        return mapper.mapCollection(repository.findAllByProjectIdOrderByName(projectId), TeamDTO.class);
     }
 
     /**
@@ -132,7 +129,7 @@ public class TeamService {
         if (team == null) {
             throw new NotFoundException(Messages.NOT_FOUND_TEAM, Entities.TEAM);
         }
-        return mapper.toDto(team);
+        return mapper.map(team, TeamDTO.class);
     }
 
     /**
@@ -163,7 +160,7 @@ public class TeamService {
     private void validateBusinessRules(long projectId, TeamDTO dto) throws NotUniqueException {
         Team existingEntityWithSameName = repository.findByProjectIdAndName(projectId, dto.getName());
         if (existingEntityWithSameName != null && !existingEntityWithSameName.getId().equals(dto.getId())) {
-            throw new NotUniqueException(Messages.NOT_UNIQUE_TEAM_NAME, Entities.TEAM, QTeam.team.name.getMetadata().getName(), existingEntityWithSameName.getId());
+            throw new NotUniqueException(Messages.NOT_UNIQUE_TEAM_NAME, Entities.TEAM, "name", existingEntityWithSameName.getId());
         }
     }
 

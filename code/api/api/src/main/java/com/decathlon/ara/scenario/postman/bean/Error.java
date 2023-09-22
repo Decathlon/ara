@@ -18,15 +18,7 @@
 package com.decathlon.ara.scenario.postman.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Error {
 
@@ -54,5 +46,21 @@ public class Error {
      * Eg. "AssertionError: expected false to be true\n   at Object.eval sandbox-script.js:3:23)". May be null in some error cases (like "JSONError: Unexpected token...": see name and message in this case.
      */
     private String stack;
+
+    public String getName() {
+        return name;
+    }
+
+    public Integer getIndex() {
+        return index;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public String getStack() {
+        return stack;
+    }
 
 }

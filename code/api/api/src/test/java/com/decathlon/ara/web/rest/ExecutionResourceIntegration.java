@@ -52,9 +52,7 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
 import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.decathlon.ara.domain.Country;
 import com.decathlon.ara.domain.CountryDeployment;
-import com.decathlon.ara.domain.CycleDefinition;
 import com.decathlon.ara.domain.Error;
 import com.decathlon.ara.domain.ExecutedScenario;
 import com.decathlon.ara.domain.Execution;
@@ -62,7 +60,6 @@ import com.decathlon.ara.domain.ExecutionCompletionRequest;
 import com.decathlon.ara.domain.Run;
 import com.decathlon.ara.domain.Setting;
 import com.decathlon.ara.domain.TechnologySetting;
-import com.decathlon.ara.domain.Type;
 import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
 import com.decathlon.ara.domain.enumeration.JobStatus;
 import com.decathlon.ara.domain.enumeration.QualityStatus;
@@ -80,19 +77,24 @@ import com.decathlon.ara.scenario.cucumber.settings.CucumberSettings;
 import com.decathlon.ara.scenario.postman.settings.PostmanSettings;
 import com.decathlon.ara.service.SettingService;
 import com.decathlon.ara.service.support.Settings;
+import com.decathlon.ara.util.builder.RunBuilder;
+import com.decathlon.ara.util.factory.CountryFactory;
+import com.decathlon.ara.util.factory.CycleDefinitionFactory;
+import com.decathlon.ara.util.factory.ExecutionBuilder;
+import com.decathlon.ara.util.factory.TypeFactory;
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
 
 @Disabled
 @SpringBootTest
 @TestExecutionListeners({
-    TransactionalTestExecutionListener.class,
-    DependencyInjectionTestExecutionListener.class,
-    DbUnitTestExecutionListener.class
+        TransactionalTestExecutionListener.class,
+        DependencyInjectionTestExecutionListener.class,
+        DbUnitTestExecutionListener.class
 })
 @TestPropertySource(
-		locations = "classpath:application-db-h2.properties")
+        locations = "classpath:application-db-h2.properties")
 @Transactional
-public class ExecutionResourceIntegration {
+class ExecutionResourceIntegration {
 
     @Autowired
     private CountryDeploymentRepository countryDeploymentRepository;
@@ -141,13 +143,13 @@ public class ExecutionResourceIntegration {
     private List<String> getARADataFilesAndFoldersPaths() throws IOException {
         List<String> araDataContent = Files.walk(Paths.get(ARA_DATA_BASE_FOLDER_PATH))
                 .map(Path::toString)
-                .collect(Collectors.toList());
+                .toList();
 
         return araDataContent;
     }
 
     @Test
-    public void upload_saveTheExecution_whenNoErrorFound() throws IOException {
+    void upload_saveTheExecution_whenNoErrorFound() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -169,7 +171,7 @@ public class ExecutionResourceIntegration {
         executions = executionRepository.findAll()
                 .stream()
                 .filter(execution -> "34910c9971abebce9f633920d8f8cf90853f38ea".equals(execution.getVersion()))
-                .collect(Collectors.toList());
+                .toList();
         assertThat(executions)
                 .hasSize(1)
                 .extracting(
@@ -194,8 +196,7 @@ public class ExecutionResourceIntegration {
                         "qualityStatus",
                         "qualitySeverities",
                         "duration",
-                        "estimatedDuration"
-                )
+                        "estimatedDuration")
                 .containsOnly(
                         tuple(
                                 "develop",
@@ -219,16 +220,13 @@ public class ExecutionResourceIntegration {
                                 QualityStatus.PASSED,
                                 "[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":32,\"failed\":0,\"passed\":32},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":8,\"failed\":0,\"passed\":8},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":24,\"failed\":0,\"passed\":24},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":64,\"failed\":0,\"passed\":64},\"percent\":100,\"status\":\"PASSED\"}]",
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         runs = new ArrayList<>(
                 executions.stream()
                         .findFirst()
                         .get()
-                        .getRuns()
-        );
+                        .getRuns());
 
         assertThat(runs)
                 .hasSize(6)
@@ -248,8 +246,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -267,8 +264,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -285,8 +281,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -303,8 +298,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -321,8 +315,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -339,8 +332,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -357,9 +349,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         List<ExecutedScenario> frApiExecutedScenarios = new ArrayList<>(
                 runs.stream()
@@ -367,8 +357,7 @@ public class ExecutionResourceIntegration {
                         .filter(run -> "api".equals(run.getType().getCode()))
                         .findFirst()
                         .get()
-                        .getExecutedScenarios()
-        );
+                        .getExecutedScenarios());
 
         assertThat(frApiExecutedScenarios)
                 .hasSize(4)
@@ -391,8 +380,7 @@ public class ExecutionResourceIntegration {
                         "diffReportUrl",
                         "cucumberReportUrl",
                         "apiServer",
-                        "seleniumNode"
-                )
+                        "seleniumNode")
                 .containsOnly(
                         tuple(
                                 "choose-a-product.postman_collection.json",
@@ -413,8 +401,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/56/Postman_Collection_Results/",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "pay.postman_collection.json",
                                 "Our Lovely Store - Pay",
@@ -434,8 +421,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/56/Postman_Collection_Results/",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple("pay.postman_collection.json",
                                 "Our Lovely Store - Pay",
                                 null,
@@ -454,8 +440,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/56/Postman_Collection_Results/",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "pay.postman_collection.json",
                                 "Our Lovely Store - Pay",
@@ -475,9 +460,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/56/Postman_Collection_Results/",
                                 null,
-                                null
-                        )
-                );
+                                null));
 
         List<ExecutedScenario> frDesktopExecutedScenarios = new ArrayList<>(
                 runs.stream()
@@ -485,8 +468,7 @@ public class ExecutionResourceIntegration {
                         .filter(run -> "firefox-desktop".equals(run.getType().getCode()))
                         .findFirst()
                         .get()
-                        .getExecutedScenarios()
-        );
+                        .getExecutedScenarios());
 
         assertThat(frDesktopExecutedScenarios)
                 .hasSize(14)
@@ -509,8 +491,7 @@ public class ExecutionResourceIntegration {
                         "diffReportUrl",
                         "cucumberReportUrl",
                         "apiServer",
-                        "seleniumNode"
-                )
+                        "seleniumNode")
                 .containsOnly(
                         tuple(
                                 "ara/demo/features/account.feature",
@@ -531,8 +512,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/57/cucumber-html-reports/report-feature_ara-demo-features-account-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/account.feature",
                                 "Account",
@@ -552,8 +532,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/57/cucumber-html-reports/report-feature_ara-demo-features-account-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature",
                                 "Buy a product",
@@ -573,8 +552,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/57/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature",
                                 "Buy a product",
@@ -594,8 +572,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/57/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature",
                                 "Buy a product",
@@ -615,8 +592,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/57/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature",
                                 "Buy a product",
@@ -636,8 +612,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/57/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature",
                                 "Buy a product",
@@ -657,8 +632,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/57/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/choose-a-product.feature",
                                 "Choose a product",
@@ -678,8 +652,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/57/cucumber-html-reports/report-feature_ara-demo-features-choose-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/choose-a-product.feature",
                                 "Choose a product",
@@ -699,8 +672,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/57/cucumber-html-reports/report-feature_ara-demo-features-choose-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/choose-a-product.feature",
                                 "Choose a product",
@@ -720,8 +692,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/57/cucumber-html-reports/report-feature_ara-demo-features-choose-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/choose-a-product.feature",
                                 "Choose a product",
@@ -741,8 +712,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/57/cucumber-html-reports/report-feature_ara-demo-features-choose-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/pay.feature", "Pay", "", "@country-fr @country-us @severity-sanity-check", "sanity-check", "Functionalities 2111 & 2112: Pay by Card", "pay;pay-by-card", 11,
                                 String.format("-100000:passed:7410678:@Before HooksGlue.before()%n0:element:Background:%n4:passed:13264211:Given the user has products in cart%n5:passed:11298887:And the user chosen a delivery option%n6:passed:6387066:When the user goes to the payment page%n0:element:Scenario:%n12:passed:12043564:When the user choose the payment \"Card\"%n13:passed:14463862:And the user validates the payment%n14:passed:16809330:Then the order is accepted%n100000:passed:73231:@After HooksGlue.after(Scenario)"),
@@ -755,8 +725,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/57/cucumber-html-reports/report-feature_ara-demo-features-pay-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/pay.feature", "Pay", "", "@country-all @severity-medium", "medium", "Functionalities 2111 & 2113: Pay by Gift Card", "pay;pay-by-gift-card", 18,
                                 String.format("-100000:passed:6692892:@Before HooksGlue.before()%n0:element:Background:%n4:passed:15808643:Given the user has products in cart%n5:passed:7168357:And the user chosen a delivery option%n6:passed:12572845:When the user goes to the payment page%n0:element:Scenario:%n19:passed:5140487:When the user choose the payment \"Gift Card\"%n20:passed:7758911:And the user validates the payment%n21:passed:14193785:Then the order is accepted%n100000:passed:161260:@After HooksGlue.after(Scenario)"),
@@ -769,8 +738,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/57/cucumber-html-reports/report-feature_ara-demo-features-pay-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/pay.feature",
                                 "Pay",
@@ -790,9 +758,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/57/cucumber-html-reports/report-feature_ara-demo-features-pay-feature.html",
                                 null,
-                                null
-                        )
-                );
+                                null));
 
         List<ExecutedScenario> frMobileExecutedScenarios = new ArrayList<>(
                 runs.stream()
@@ -800,8 +766,7 @@ public class ExecutionResourceIntegration {
                         .filter(run -> "firefox-mobile".equals(run.getType().getCode()))
                         .findFirst()
                         .get()
-                        .getExecutedScenarios()
-        );
+                        .getExecutedScenarios());
 
         assertThat(frMobileExecutedScenarios)
                 .hasSize(14)
@@ -824,8 +789,7 @@ public class ExecutionResourceIntegration {
                         "diffReportUrl",
                         "cucumberReportUrl",
                         "apiServer",
-                        "seleniumNode"
-                )
+                        "seleniumNode")
                 .containsOnly(
                         tuple(
                                 "ara/demo/features/account.feature",
@@ -846,8 +810,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/58/cucumber-html-reports/report-feature_ara-demo-features-account-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/account.feature",
                                 "Account",
@@ -867,8 +830,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/58/cucumber-html-reports/report-feature_ara-demo-features-account-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature",
                                 "Buy a product",
@@ -888,8 +850,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/58/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature",
                                 "Buy a product",
@@ -909,8 +870,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/58/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature",
                                 "Buy a product",
@@ -930,8 +890,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/58/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature",
                                 "Buy a product",
@@ -951,8 +910,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/58/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature", "Buy a product",
                                 "",
@@ -971,8 +929,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/58/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/choose-a-product.feature",
                                 "Choose a product",
@@ -992,8 +949,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/58/cucumber-html-reports/report-feature_ara-demo-features-choose-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/choose-a-product.feature",
                                 "Choose a product",
@@ -1013,8 +969,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/58/cucumber-html-reports/report-feature_ara-demo-features-choose-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/choose-a-product.feature",
                                 "Choose a product",
@@ -1068,8 +1023,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/58/cucumber-html-reports/report-feature_ara-demo-features-pay-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/pay.feature",
                                 "Pay",
@@ -1088,8 +1042,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/58/cucumber-html-reports/report-feature_ara-demo-features-pay-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/pay.feature",
                                 "Pay",
@@ -1109,9 +1062,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/58/cucumber-html-reports/report-feature_ara-demo-features-pay-feature.html",
                                 null,
-                                null
-                        )
-                );
+                                null));
 
         List<ExecutedScenario> usApiExecutedScenarios = new ArrayList<>(
                 runs.stream()
@@ -1119,8 +1070,7 @@ public class ExecutionResourceIntegration {
                         .filter(run -> "api".equals(run.getType().getCode()))
                         .findFirst()
                         .get()
-                        .getExecutedScenarios()
-        );
+                        .getExecutedScenarios());
 
         assertThat(usApiExecutedScenarios)
                 .hasSize(4)
@@ -1143,8 +1093,7 @@ public class ExecutionResourceIntegration {
                         "diffReportUrl",
                         "cucumberReportUrl",
                         "apiServer",
-                        "seleniumNode"
-                )
+                        "seleniumNode")
                 .containsOnly(
                         tuple(
                                 "choose-a-product.postman_collection.json",
@@ -1165,8 +1114,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/60/Postman_Collection_Results/",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "pay.postman_collection.json",
                                 "Our Lovely Store - Pay",
@@ -1186,8 +1134,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/60/Postman_Collection_Results/",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple("pay.postman_collection.json",
                                 "Our Lovely Store - Pay",
                                 null,
@@ -1206,8 +1153,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/60/Postman_Collection_Results/",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "pay.postman_collection.json", "Our Lovely Store - Pay",
                                 null,
@@ -1224,9 +1170,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/60/Postman_Collection_Results/",
                                 null,
-                                null
-                        )
-                );
+                                null));
 
         List<ExecutedScenario> usDesktopExecutedScenarios = new ArrayList<>(
                 runs.stream()
@@ -1234,8 +1178,7 @@ public class ExecutionResourceIntegration {
                         .filter(run -> "firefox-desktop".equals(run.getType().getCode()))
                         .findFirst()
                         .get()
-                        .getExecutedScenarios()
-        );
+                        .getExecutedScenarios());
 
         assertThat(usDesktopExecutedScenarios)
                 .hasSize(14)
@@ -1258,8 +1201,7 @@ public class ExecutionResourceIntegration {
                         "diffReportUrl",
                         "cucumberReportUrl",
                         "apiServer",
-                        "seleniumNode"
-                )
+                        "seleniumNode")
                 .containsOnly(
                         tuple(
                                 "ara/demo/features/account.feature",
@@ -1280,8 +1222,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/61/cucumber-html-reports/report-feature_ara-demo-features-account-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/account.feature",
                                 "Account",
@@ -1301,8 +1242,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/61/cucumber-html-reports/report-feature_ara-demo-features-account-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature",
                                 "Buy a product",
@@ -1322,8 +1262,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/61/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature",
                                 "Buy a product",
@@ -1343,8 +1282,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/61/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature",
                                 "Buy a product",
@@ -1364,8 +1302,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/61/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature",
                                 "Buy a product",
@@ -1385,8 +1322,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/61/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature",
                                 "Buy a product",
@@ -1406,8 +1342,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/61/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/choose-a-product.feature",
                                 "Choose a product",
@@ -1427,8 +1362,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/61/cucumber-html-reports/report-feature_ara-demo-features-choose-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/choose-a-product.feature",
                                 "Choose a product",
@@ -1448,8 +1382,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/61/cucumber-html-reports/report-feature_ara-demo-features-choose-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/choose-a-product.feature",
                                 "Choose a product",
@@ -1469,8 +1402,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/61/cucumber-html-reports/report-feature_ara-demo-features-choose-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/choose-a-product.feature",
                                 "Choose a product",
@@ -1490,8 +1422,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/61/cucumber-html-reports/report-feature_ara-demo-features-choose-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/pay.feature", "Pay", "", "@country-fr @country-us @severity-sanity-check", "sanity-check", "Functionalities 2111 & 2112: Pay by Card", "pay;pay-by-card", 11,
                                 String.format("-100000:passed:7410678:@Before HooksGlue.before()%n0:element:Background:%n4:passed:13264211:Given the user has products in cart%n5:passed:11298887:And the user chosen a delivery option%n6:passed:6387066:When the user goes to the payment page%n0:element:Scenario:%n12:passed:12043564:When the user choose the payment \"Card\"%n13:passed:14463862:And the user validates the payment%n14:passed:16809330:Then the order is accepted%n100000:passed:73231:@After HooksGlue.after(Scenario)"),
@@ -1504,8 +1435,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/61/cucumber-html-reports/report-feature_ara-demo-features-pay-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/pay.feature", "Pay", "", "@country-all @severity-medium", "medium", "Functionalities 2111 & 2113: Pay by Gift Card", "pay;pay-by-gift-card", 18,
                                 String.format("-100000:passed:6692892:@Before HooksGlue.before()%n0:element:Background:%n4:passed:15808643:Given the user has products in cart%n5:passed:7168357:And the user chosen a delivery option%n6:passed:12572845:When the user goes to the payment page%n0:element:Scenario:%n19:passed:5140487:When the user choose the payment \"Gift Card\"%n20:passed:7758911:And the user validates the payment%n21:passed:14193785:Then the order is accepted%n100000:passed:161260:@After HooksGlue.after(Scenario)"),
@@ -1518,8 +1448,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/61/cucumber-html-reports/report-feature_ara-demo-features-pay-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/pay.feature",
                                 "Pay",
@@ -1539,9 +1468,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/61/cucumber-html-reports/report-feature_ara-demo-features-pay-feature.html",
                                 null,
-                                null
-                        )
-                );
+                                null));
 
         List<ExecutedScenario> usMobileExecutedScenarios = new ArrayList<>(
                 runs.stream()
@@ -1549,8 +1476,7 @@ public class ExecutionResourceIntegration {
                         .filter(run -> "firefox-mobile".equals(run.getType().getCode()))
                         .findFirst()
                         .get()
-                        .getExecutedScenarios()
-        );
+                        .getExecutedScenarios());
 
         assertThat(usMobileExecutedScenarios)
                 .hasSize(14)
@@ -1573,8 +1499,7 @@ public class ExecutionResourceIntegration {
                         "diffReportUrl",
                         "cucumberReportUrl",
                         "apiServer",
-                        "seleniumNode"
-                )
+                        "seleniumNode")
                 .containsOnly(
                         tuple(
                                 "ara/demo/features/account.feature",
@@ -1595,8 +1520,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/62/cucumber-html-reports/report-feature_ara-demo-features-account-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/account.feature",
                                 "Account",
@@ -1616,8 +1540,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/62/cucumber-html-reports/report-feature_ara-demo-features-account-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature",
                                 "Buy a product",
@@ -1637,8 +1560,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/62/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature",
                                 "Buy a product",
@@ -1658,8 +1580,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/62/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature",
                                 "Buy a product",
@@ -1679,8 +1600,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/62/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature",
                                 "Buy a product",
@@ -1700,8 +1620,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/62/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature", "Buy a product",
                                 "",
@@ -1720,8 +1639,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/62/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/choose-a-product.feature",
                                 "Choose a product",
@@ -1741,8 +1659,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/62/cucumber-html-reports/report-feature_ara-demo-features-choose-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/choose-a-product.feature",
                                 "Choose a product",
@@ -1762,8 +1679,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/62/cucumber-html-reports/report-feature_ara-demo-features-choose-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/choose-a-product.feature",
                                 "Choose a product",
@@ -1817,8 +1733,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/62/cucumber-html-reports/report-feature_ara-demo-features-pay-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/pay.feature",
                                 "Pay",
@@ -1837,8 +1752,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/62/cucumber-html-reports/report-feature_ara-demo-features-pay-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/pay.feature",
                                 "Pay",
@@ -1858,16 +1772,13 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/62/cucumber-html-reports/report-feature_ara-demo-features-pay-feature.html",
                                 null,
-                                null
-                        )
-                );
+                                null));
 
         countryDeployments = new ArrayList<>(
                 executions.stream()
                         .findFirst()
                         .get()
-                        .getCountryDeployments()
-        );
+                        .getCountryDeployments());
 
         assertThat(countryDeployments)
                 .hasSize(2)
@@ -1880,8 +1791,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -1892,8 +1802,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        ),
+                                0L),
                         tuple(
                                 "us",
                                 "integ",
@@ -1903,16 +1812,14 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         errors = runs.stream()
                 .map(Run::getExecutedScenarios)
                 .flatMap(Collection::stream)
                 .map(ExecutedScenario::getErrors)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .toList();
         assertThat(errors).isEmpty();
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
@@ -1960,12 +1867,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/fr/api/reports/result.txt",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/fr/api/reports/pay.postman_collection_fr+us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/fr/api/reports/pay.postman_collection_us.json",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/fr/api/reports/choose-a-product.postman_collection_all.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400000/fr/api/reports/choose-a-product.postman_collection_all.json");
     }
 
     @Test
-    public void upload_saveTheExecutionWithErrors_whenErrorsFound() throws IOException {
+    void upload_saveTheExecutionWithErrors_whenErrorsFound() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -1986,7 +1892,7 @@ public class ExecutionResourceIntegration {
 
         executions = executionRepository.findAll().stream()
                 .filter(execution -> "e10b1c9c9a6a9f478d10dd90109c467fd0974c1c".equals(execution.getVersion()))
-                .collect(Collectors.toList());
+                .toList();
         assertThat(executions)
                 .hasSize(1)
                 .extracting(
@@ -2011,8 +1917,7 @@ public class ExecutionResourceIntegration {
                         "qualityStatus",
                         "qualitySeverities",
                         "duration",
-                        "estimatedDuration"
-                )
+                        "estimatedDuration")
                 .containsOnly(
                         tuple(
                                 "master",
@@ -2036,16 +1941,13 @@ public class ExecutionResourceIntegration {
                                 QualityStatus.FAILED,
                                 "[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":9,\"failed\":5,\"passed\":4},\"percent\":44,\"status\":\"FAILED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":2,\"failed\":1,\"passed\":1},\"percent\":50,\"status\":\"FAILED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":7,\"failed\":3,\"passed\":4},\"percent\":57,\"status\":\"FAILED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":18,\"failed\":9,\"passed\":9},\"percent\":50,\"status\":\"FAILED\"}]",
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         runs = new ArrayList<>(
                 executions.stream()
                         .findFirst()
                         .get()
-                        .getRuns()
-        );
+                        .getRuns());
 
         assertThat(runs)
                 .hasSize(2)
@@ -2065,8 +1967,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -2084,8 +1985,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -2102,9 +2002,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         List<ExecutedScenario> frApiExecutedScenarios = new ArrayList<>(
                 runs.stream()
@@ -2112,8 +2010,7 @@ public class ExecutionResourceIntegration {
                         .filter(run -> "api".equals(run.getType().getCode()))
                         .findFirst()
                         .get()
-                        .getExecutedScenarios()
-        );
+                        .getExecutedScenarios());
 
         assertThat(frApiExecutedScenarios)
                 .hasSize(4)
@@ -2135,8 +2032,7 @@ public class ExecutionResourceIntegration {
                         "diffReportUrl",
                         "cucumberReportUrl",
                         "apiServer",
-                        "seleniumNode"
-                )
+                        "seleniumNode")
                 .containsOnly(
                         tuple(
                                 "choose-a-product.postman_collection.json",
@@ -2156,8 +2052,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/52/Postman_Collection_Results/",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "pay.postman_collection.json",
                                 "Our Lovely Store - Pay",
@@ -2176,8 +2071,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/52/Postman_Collection_Results/",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple("pay.postman_collection.json",
                                 "Our Lovely Store - Pay",
                                 null,
@@ -2195,8 +2089,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/52/Postman_Collection_Results/",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "pay.postman_collection.json", "Our Lovely Store - Pay",
                                 null,
@@ -2212,9 +2105,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/52/Postman_Collection_Results/",
                                 null,
-                                null
-                        )
-                );
+                                null));
 
         List<ExecutedScenario> frDesktopExecutedScenarios = new ArrayList<>(
                 runs.stream()
@@ -2222,8 +2113,7 @@ public class ExecutionResourceIntegration {
                         .filter(run -> "firefox-desktop".equals(run.getType().getCode()))
                         .findFirst()
                         .get()
-                        .getExecutedScenarios()
-        );
+                        .getExecutedScenarios());
 
         assertThat(frDesktopExecutedScenarios)
                 .hasSize(14)
@@ -2246,8 +2136,7 @@ public class ExecutionResourceIntegration {
                         "diffReportUrl",
                         "cucumberReportUrl",
                         "apiServer",
-                        "seleniumNode"
-                )
+                        "seleniumNode")
                 .containsOnly(
                         tuple(
                                 "ara/demo/features/account.feature",
@@ -2268,8 +2157,7 @@ public class ExecutionResourceIntegration {
                                 "/demo-files/diff-report.html",
                                 "https://build.company.com/demo/test/53/cucumber-html-reports/report-feature_ara-demo-features-account-feature.html",
                                 "API02",
-                                "firefox04.nodes.selenium.project.company.com"
-                        ),
+                                "firefox04.nodes.selenium.project.company.com"),
                         tuple(
                                 "ara/demo/features/account.feature",
                                 "Account",
@@ -2289,8 +2177,7 @@ public class ExecutionResourceIntegration {
                                 "/demo-files/diff-report.html",
                                 "https://build.company.com/demo/test/53/cucumber-html-reports/report-feature_ara-demo-features-account-feature.html",
                                 "API02",
-                                "firefox07.nodes.selenium.project.company.com"
-                        ),
+                                "firefox07.nodes.selenium.project.company.com"),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature",
                                 "Buy a product",
@@ -2310,8 +2197,7 @@ public class ExecutionResourceIntegration {
                                 "/demo-files/diff-report.html",
                                 "https://build.company.com/demo/test/53/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 "API01",
-                                "firefox09.nodes.selenium.project.company.com"
-                        ),
+                                "firefox09.nodes.selenium.project.company.com"),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature",
                                 "Buy a product",
@@ -2331,8 +2217,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/53/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature", "Buy a product",
                                 "",
@@ -2351,8 +2236,7 @@ public class ExecutionResourceIntegration {
                                 "/demo-files/diff-report.html",
                                 "https://build.company.com/demo/test/53/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 "API02",
-                                "firefox02.nodes.selenium.project.company.com"
-                        ),
+                                "firefox02.nodes.selenium.project.company.com"),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature", "Buy a product",
                                 "",
@@ -2371,8 +2255,7 @@ public class ExecutionResourceIntegration {
                                 "/demo-files/diff-report.html",
                                 "https://build.company.com/demo/test/53/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 "API01",
-                                "firefox06.nodes.selenium.project.company.com"
-                        ),
+                                "firefox06.nodes.selenium.project.company.com"),
                         tuple(
                                 "ara/demo/features/buy-a-product.feature",
                                 "Buy a product",
@@ -2392,8 +2275,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/53/cucumber-html-reports/report-feature_ara-demo-features-buy-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/choose-a-product.feature",
                                 "Choose a product",
@@ -2413,8 +2295,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/53/cucumber-html-reports/report-feature_ara-demo-features-choose-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/choose-a-product.feature",
                                 "Choose a product",
@@ -2434,8 +2315,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/53/cucumber-html-reports/report-feature_ara-demo-features-choose-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/choose-a-product.feature",
                                 "Choose a product",
@@ -2455,8 +2335,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/53/cucumber-html-reports/report-feature_ara-demo-features-choose-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/choose-a-product.feature",
                                 "Choose a product",
@@ -2476,8 +2355,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/53/cucumber-html-reports/report-feature_ara-demo-features-choose-a-product-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "ara/demo/features/pay.feature",
                                 "Pay",
@@ -2497,8 +2375,7 @@ public class ExecutionResourceIntegration {
                                 "/demo-files/diff-report.html",
                                 "https://build.company.com/demo/test/53/cucumber-html-reports/report-feature_ara-demo-features-pay-feature.html",
                                 "API02",
-                                "firefox03.nodes.selenium.project.company.com"
-                        ),
+                                "firefox03.nodes.selenium.project.company.com"),
                         tuple(
                                 "ara/demo/features/pay.feature",
                                 "Pay",
@@ -2518,8 +2395,7 @@ public class ExecutionResourceIntegration {
                                 "/demo-files/diff-report.html",
                                 "https://build.company.com/demo/test/53/cucumber-html-reports/report-feature_ara-demo-features-pay-feature.html",
                                 "API02",
-                                "firefox05.nodes.selenium.project.company.com"
-                        ),
+                                "firefox05.nodes.selenium.project.company.com"),
                         tuple(
                                 "ara/demo/features/pay.feature",
                                 "Pay",
@@ -2539,16 +2415,13 @@ public class ExecutionResourceIntegration {
                                 "/demo-files/diff-report.html",
                                 "https://build.company.com/demo/test/53/cucumber-html-reports/report-feature_ara-demo-features-pay-feature.html",
                                 "API02",
-                                "firefox05.nodes.selenium.project.company.com"
-                        )
-                );
+                                "firefox05.nodes.selenium.project.company.com"));
 
         countryDeployments = new ArrayList<>(
                 executions.stream()
                         .findFirst()
                         .get()
-                        .getCountryDeployments()
-        );
+                        .getCountryDeployments());
 
         assertThat(countryDeployments)
                 .hasSize(1)
@@ -2561,8 +2434,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -2573,16 +2445,14 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1582099200000L),
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         errors = runs.stream()
                 .map(Run::getExecutedScenarios)
                 .flatMap(Collection::stream)
                 .map(ExecutedScenario::getErrors)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .toList();
         assertThat(errors)
                 .hasSize(10)
                 .extracting(
@@ -2590,80 +2460,68 @@ public class ExecutionResourceIntegration {
                         "step",
                         "stepDefinition",
                         "stepLine",
-                        "exception"
-                )
+                        "exception")
                 .containsOnly(
                         tuple(
                                 "fr+us ▶ Functionalities 2111 & 2112: Pay by Card",
                                 "Response should indicate a succeed transaction status",
                                 "Response should indicate a succeed transaction status",
                                 2,
-                                String.format("AssertionError: expected 'failed' to deeply equal 'succeed'%n   at Object.eval sandbox-script.js:3:1)")
-                        ),
+                                String.format("AssertionError: expected 'failed' to deeply equal 'succeed'%n   at Object.eval sandbox-script.js:3:1)")),
                         tuple(
                                 "Create account",
                                 "the user is connected",
                                 "^the user is connected$",
                                 11,
-                                String.format("ara.demo.WebsiteException: Website displayed an error message: Account creation failed for occult reasons.%n\tat ara.demo.AccountLogInGlue.the_user_is_connected(AccountLogInGlue.java:59)%n\tat ✽.Then the user is connected(ara/demo/features/account.feature:11)%n")
-                        ),
+                                String.format("ara.demo.WebsiteException: Website displayed an error message: Account creation failed for occult reasons.%n\tat ara.demo.AccountLogInGlue.the_user_is_connected(AccountLogInGlue.java:59)%n\tat ✽.Then the user is connected(ara/demo/features/account.feature:11)%n")),
                         tuple(
                                 "Functionalities 2118 & 3116: Log in",
                                 "the user is connected",
                                 "^the user is connected$",
                                 19,
-                                String.format("ara.demo.WebsiteException: Website displayed an error message: Log in failed for occult reasons.%n\tat ara.demo.AccountLogInGlue.the_user_is_connected(AccountLogInGlue.java:59)%n\tat ✽.Then the user is connected(ara/demo/features/account.feature:19)%n")
-                        ),
+                                String.format("ara.demo.WebsiteException: Website displayed an error message: Log in failed for occult reasons.%n\tat ara.demo.AccountLogInGlue.the_user_is_connected(AccountLogInGlue.java:59)%n\tat ✽.Then the user is connected(ara/demo/features/account.feature:19)%n")),
                         tuple(
                                 "Functionalities 2106 & 2107: Choose delivery option",
                                 "the delivery option is \"By pigeon\"",
                                 "^the delivery option is \"([^\"]*)\"$",
                                 41,
-                                String.format("java.lang.AssertionError: expected:<[By pigeon]> but was:<[3D Printing]>%n\tat ara.demo.PaymentGlue.the_delivery_option_is(PaymentGlue.java:56)%n\tat ✽.And the delivery option is \"By pigeon\"(ara/demo/features/buy-a-product.feature:41)%n")
-                        ),
+                                String.format("java.lang.AssertionError: expected:<[By pigeon]> but was:<[3D Printing]>%n\tat ara.demo.PaymentGlue.the_delivery_option_is(PaymentGlue.java:56)%n\tat ✽.And the delivery option is \"By pigeon\"(ara/demo/features/buy-a-product.feature:41)%n")),
                         tuple(
                                 "Functionalities 2106 & 2107: Choose delivery option",
                                 "the delivery price is \"1 cent\"",
                                 "^the delivery price is \"([^\"]*)\"$",
                                 42,
-                                String.format("java.lang.AssertionError: expected:<[1 cent]> but was:<[50 cents]>%n\tat ara.demo.PaymentGlue.the_delivery_price_is(PaymentGlue.java:66)%n\tat ✽.And the delivery price is \"1 cent\"(ara/demo/features/buy-a-product.feature:42)%n")
-                        ),
+                                String.format("java.lang.AssertionError: expected:<[1 cent]> but was:<[50 cents]>%n\tat ara.demo.PaymentGlue.the_delivery_price_is(PaymentGlue.java:66)%n\tat ✽.And the delivery price is \"1 cent\"(ara/demo/features/buy-a-product.feature:42)%n")),
                         tuple(
                                 "Functionality 2104: Show cart, average case",
                                 "the cart page shows 5 products",
                                 "^the cart page shows (\\d+) product[s]?$",
                                 22,
-                                String.format("java.lang.AssertionError: expected:<[5]> but was:<[1]>%n\tat ara.demo.CartGlue.the_cart_page_shows_products(CartGlue.java:44)%n\tat ✽.Then the cart page shows 5 products(ara/demo/features/buy-a-product.feature:22)%n")
-                        ),
+                                String.format("java.lang.AssertionError: expected:<[5]> but was:<[1]>%n\tat ara.demo.CartGlue.the_cart_page_shows_products(CartGlue.java:44)%n\tat ✽.Then the cart page shows 5 products(ara/demo/features/buy-a-product.feature:22)%n")),
                         tuple(
                                 "Functionality 2104: Show cart, lots of products",
                                 "the cart page shows 1000 products",
                                 "^the cart page shows (\\d+) product[s]?$",
                                 29,
-                                String.format("java.lang.AssertionError: expected:<[1000]> but was:<[1]>%n\tat ara.demo.CartGlue.the_cart_page_shows_products(CartGlue.java:44)%n\tat ✽.Then the cart page shows 1000 products(ara/demo/features/buy-a-product.feature:29)%n")
-                        ),
+                                String.format("java.lang.AssertionError: expected:<[1000]> but was:<[1]>%n\tat ara.demo.CartGlue.the_cart_page_shows_products(CartGlue.java:44)%n\tat ✽.Then the cart page shows 1000 products(ara/demo/features/buy-a-product.feature:29)%n")),
                         tuple(
                                 "Functionalities 2111 & 2112: Pay by Card",
                                 "the order is accepted",
                                 "^the order is accepted$",
                                 14,
-                                String.format("org.openqa.selenium.NoSuchElementException: Cannot locate {By.cssSelector: #order-confirmation}%n\tat ara.demo.PaymentGlue.the_order_is_accepted(PaymentGlue.java:76)%n\tat ✽.Then the order is accepted(ara/demo/features/pay.feature:14)%n")
-                        ),
+                                String.format("org.openqa.selenium.NoSuchElementException: Cannot locate {By.cssSelector: #order-confirmation}%n\tat ara.demo.PaymentGlue.the_order_is_accepted(PaymentGlue.java:76)%n\tat ✽.Then the order is accepted(ara/demo/features/pay.feature:14)%n")),
                         tuple(
                                 "Functionalities 2111 & 2113: Pay by Gift Card",
                                 "the order is accepted",
                                 "^the order is accepted$",
                                 21,
-                                String.format("org.openqa.selenium.NoSuchElementException: Cannot locate {By.cssSelector: #order-confirmation}%n\tat ara.demo.PaymentGlue.the_order_is_accepted(PaymentGlue.java:76)%n\tat ✽.Then the order is accepted(ara/demo/features/pay.feature:21)%n")
-                        ),
+                                String.format("org.openqa.selenium.NoSuchElementException: Cannot locate {By.cssSelector: #order-confirmation}%n\tat ara.demo.PaymentGlue.the_order_is_accepted(PaymentGlue.java:76)%n\tat ✽.Then the order is accepted(ara/demo/features/pay.feature:21)%n")),
                         tuple(
                                 "Functionalities 2111 & 2114: Pay by Mobile NFC",
                                 "the order is accepted",
                                 "^the order is accepted$",
                                 28,
-                                String.format("org.openqa.selenium.NoSuchElementException: Cannot locate {By.cssSelector: #order-confirmation}%n\tat ara.demo.PaymentGlue.the_order_is_accepted(PaymentGlue.java:76)%n\tat ✽.Then the order is accepted(ara/demo/features/pay.feature:28)%n")
-                        )
-                );
+                                String.format("org.openqa.selenium.NoSuchElementException: Cannot locate {By.cssSelector: #order-confirmation}%n\tat ara.demo.PaymentGlue.the_order_is_accepted(PaymentGlue.java:76)%n\tat ✽.Then the order is accepted(ara/demo/features/pay.feature:28)%n")));
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
         assertThat(generatedFilesPaths)
@@ -2691,12 +2549,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/master/day/incoming/1582099200000/fr/api/reports/pay.postman_collection_us.json",
                         "/opt/ara/data/executions/the-demo-project/master/day/incoming/1582099200000/fr/api/reports/choose-a-product.postman_collection_all.json",
                         "/opt/ara/data/assets",
-                        "/opt/ara/data/assets/http-logs"
-                );
+                        "/opt/ara/data/assets/http-logs");
     }
 
     @Test
-    public void upload_saveTheExecutionAsBlocked_whenNoExecutionFoundAndNoCycleDefinitionFileFound() throws IOException {
+    void upload_saveTheExecutionAsBlocked_whenNoExecutionFoundAndNoCycleDefinitionFileFound() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -2790,12 +2647,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1493814468000/fr/api/reports/result.txt",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1493814468000/fr/api/reports/pay.postman_collection_fr+us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1493814468000/fr/api/reports/pay.postman_collection_us.json",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1493814468000/fr/api/reports/choose-a-product.postman_collection_all.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1493814468000/fr/api/reports/choose-a-product.postman_collection_all.json");
     }
 
     @Test
-    public void upload_doNotUpdateTheExecution_whenExecutionFoundAsDone() throws IOException {
+    void upload_doNotUpdateTheExecution_whenExecutionFoundAsDone() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -2809,14 +2665,15 @@ public class ExecutionResourceIntegration {
         assertThat(runs).isEmpty();
         assertThat(countryDeployments).isEmpty();
         assertThat(executedScenarios).isEmpty();
+
         assertThat(errors).isEmpty();
 
         SortedSet<Run> runsToSave = new TreeSet<>();
         runsToSave.add(
-                new Run()
-                        .withCountry(new Country().withId(1L).withProjectId(1L).withCode("fr"))
-                        .withType(new Type().withId(1L).withProjectId(1L).withCode("api"))
-                        .withExecutionId(3L)
+                new RunBuilder()
+                        .withCountry(CountryFactory.get(1L, 1L, "fr", null))
+                        .withType(TypeFactory.get(1L, 1L, "api"))
+                        .withExecution(new ExecutionBuilder().withId(3l).build())
                         .withComment("a comment about this run")
                         .withPlatform("integration-platform")
                         .withJobUrl("https://build.company.com/demo/test/56/previous-url")
@@ -2827,13 +2684,12 @@ public class ExecutionResourceIntegration {
                         .withEstimatedDuration(150L)
                         .withDuration(100L)
                         .withSeverityTags("medium")
-                        .withIncludeInThresholds(true)
-        );
+                        .withIncludeInThresholds(true).build());
         runsToSave.add(
-                new Run()
-                        .withCountry(new Country().withId(2L).withProjectId(1L).withCode("us"))
-                        .withType(new Type().withId(2L).withProjectId(1L).withCode("firefox-desktop"))
-                        .withExecutionId(5L)
+                new RunBuilder()
+                        .withCountry(CountryFactory.get(2L, 1L, "us", null))
+                        .withType(TypeFactory.get(2L, 1L, "firefox-desktop"))
+                        .withExecution(new ExecutionBuilder().withId(5l).build())
                         .withComment("just another run")
                         .withPlatform("another-integration-platform")
                         .withJobUrl("https://build.company.com/demo/test/59/previous-url")
@@ -2844,38 +2700,36 @@ public class ExecutionResourceIntegration {
                         .withEstimatedDuration(250L)
                         .withDuration(120L)
                         .withSeverityTags("high")
-                        .withIncludeInThresholds(false)
-        );
+                        .withIncludeInThresholds(false).build());
 
         SortedSet<CountryDeployment> countryDeploymentsToSave = new TreeSet<>();
-        countryDeploymentsToSave.add(
-                new CountryDeployment()
-                        .withCountry(new Country().withId(1L).withProjectId(1L).withCode("fr"))
-                        .withExecutionId(15L)
-                        .withPlatform("integration-1")
-                        .withJobUrl("https://build.company.com/demo/deploy/fr/55/previous-url")
-                        .withJobLink("/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743962000/fr/previous-link/1")
-                        .withStatus(JobStatus.UNAVAILABLE)
-                        .withResult(Result.FAILURE)
-                        .withStartDateTime(new Date(1550108400000L))
-                        .withEstimatedDuration(100L)
-                        .withDuration(300L)
-        );
-        countryDeploymentsToSave.add(
-                new CountryDeployment()
-                        .withCountry(new Country().withId(2L).withProjectId(1L).withCode("us"))
-                        .withExecutionId(9L)
-                        .withPlatform("integration-2")
-                        .withJobUrl("https://build.company.com/demo/deploy/us/59/previous-url")
-                        .withJobLink("/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743962000/fr/previous-link/2")
-                        .withStatus(JobStatus.DONE)
-                        .withResult(Result.SUCCESS)
-                        .withStartDateTime(new Date(1550208400000L))
-                        .withEstimatedDuration(150L)
-                        .withDuration(1000L)
-        );
+        CountryDeployment countryDeployment = new CountryDeployment();
+        countryDeployment.setCountry(CountryFactory.get(1L, 1L, "fr", null));
+        countryDeployment.setExecution(new ExecutionBuilder().withId(15l).build());
+        countryDeployment.setPlatform("integration-1");
+        countryDeployment.setJobUrl("https://build.company.com/demo/deploy/fr/55/previous-url");
+        countryDeployment.setJobLink("/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743962000/fr/previous-link/1");
+        countryDeployment.setStatus(JobStatus.UNAVAILABLE);
+        countryDeployment.setResult(Result.FAILURE);
+        countryDeployment.setStartDateTime(new Date(1550108400000L));
+        countryDeployment.setEstimatedDuration(100L);
+        countryDeployment.setDuration(300L);
+        countryDeploymentsToSave.add(countryDeployment);
 
-        Execution execution = new Execution()
+        countryDeployment = new CountryDeployment();
+        countryDeployment.setCountry(CountryFactory.get(2L, 2L, "us", null));
+        countryDeployment.setExecution(new ExecutionBuilder().withId(9l).build());
+        countryDeployment.setPlatform("integration-2");
+        countryDeployment.setJobUrl("https://build.company.com/demo/deploy/us/59/previous-url");
+        countryDeployment.setJobLink("/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743962000/fr/previous-link/2");
+        countryDeployment.setStatus(JobStatus.DONE);
+        countryDeployment.setResult(Result.SUCCESS);
+        countryDeployment.setStartDateTime(new Date(1550208400000L));
+        countryDeployment.setEstimatedDuration(150L);
+        countryDeployment.setDuration(1000L);
+        countryDeploymentsToSave.add(countryDeployment);
+
+        Execution execution = new ExecutionBuilder()
                 .withBranch("develop")
                 .withName("night")
                 .withRelease("version-03")
@@ -2888,7 +2742,7 @@ public class ExecutionResourceIntegration {
                 .withResult(Result.SUCCESS)
                 .withAcceptance(ExecutionAcceptance.NEW)
                 .withDiscardReason("no discard reason")
-                .withCycleDefinition(new CycleDefinition().withId(2L).withProjectId(1L))
+                .withCycleDefinition(CycleDefinitionFactory.get(2L, 1L))
                 .withBlockingValidation(false)
                 .withQualityThresholds("{\"sanity-check\":{\"failure\":80,\"warning\":95},\"high\":{\"failure\":85,\"warning\":96},\"medium\":{\"failure\":91,\"warning\":73}}")
                 .withQualityStatus(QualityStatus.PASSED)
@@ -2896,7 +2750,7 @@ public class ExecutionResourceIntegration {
                 .withDuration(3600L)
                 .withEstimatedDuration(1500L)
                 .withRuns(runsToSave)
-                .withCountryDeployments(countryDeploymentsToSave);
+                .withCountryDeployments(countryDeploymentsToSave).build();
 
         Execution savedExecution = executionRepository.save(execution);
 
@@ -2939,8 +2793,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 1L,
@@ -2955,8 +2808,7 @@ public class ExecutionResourceIntegration {
                                 150L,
                                 100L,
                                 "medium",
-                                true
-                        ),
+                                true),
                         tuple(
                                 2L,
                                 2L,
@@ -2970,9 +2822,7 @@ public class ExecutionResourceIntegration {
                                 250L,
                                 120L,
                                 "high",
-                                false
-                        )
-                );
+                                false));
 
         assertThat(updatedExecution.getCountryDeployments())
                 .hasSize(2)
@@ -2985,8 +2835,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 1L,
@@ -2997,8 +2846,7 @@ public class ExecutionResourceIntegration {
                                 Result.FAILURE,
                                 new Date(1550108400000L),
                                 100L,
-                                300L
-                        ),
+                                300L),
                         tuple(
                                 2L,
                                 "integration-2",
@@ -3008,9 +2856,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1550208400000L),
                                 150L,
-                                1000L
-                        )
-                );
+                                1000L));
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
         assertThat(generatedFilesPaths)
@@ -3057,12 +2903,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743962000/fr/api/reports/result.txt",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743962000/fr/api/reports/pay.postman_collection_fr+us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743962000/fr/api/reports/pay.postman_collection_us.json",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743962000/fr/api/reports/choose-a-product.postman_collection_all.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743962000/fr/api/reports/choose-a-product.postman_collection_all.json");
     }
 
     @Test
-    public void upload_updateTheExecution_whenExecutionFoundButNotDoneAndDoesNotHaveRuns() throws IOException {
+    void upload_updateTheExecution_whenExecutionFoundButNotDoneAndDoesNotHaveRuns() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -3078,7 +2923,7 @@ public class ExecutionResourceIntegration {
         assertThat(executedScenarios).isEmpty();
         assertThat(errors).isEmpty();
 
-        Execution execution = new Execution()
+        Execution execution = new ExecutionBuilder()
                 .withBranch("develop")
                 .withName("night")
                 .withRelease("version-03")
@@ -3091,13 +2936,13 @@ public class ExecutionResourceIntegration {
                 .withResult(Result.FAILURE)
                 .withAcceptance(ExecutionAcceptance.NEW)
                 .withDiscardReason("no discard reason")
-                .withCycleDefinition(new CycleDefinition().withId(2L).withProjectId(1L))
+                .withCycleDefinition(CycleDefinitionFactory.get(2L, 1L))
                 .withBlockingValidation(false)
                 .withQualityThresholds("{\"sanity-check\":{\"failure\":81,\"warning\":96},\"high\":{\"failure\":86,\"warning\":97},\"medium\":{\"failure\":90,\"warning\":75}}")
                 .withQualityStatus(QualityStatus.FAILED)
                 .withQualitySeverities("[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":42,\"failed\":10,\"passed\":42},\"percent\":99,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":18,\"failed\":10,\"passed\":8},\"percent\":60,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":24,\"failed\":10,\"passed\":14},\"percent\":70,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":99,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":74,\"failed\":20,\"passed\":54},\"percent\":80,\"status\":\"PASSED\"}]")
                 .withDuration(3600L)
-                .withEstimatedDuration(1500L);
+                .withEstimatedDuration(1500L).build();
 
         Execution savedExecution = executionRepository.save(execution);
 
@@ -3143,8 +2988,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -3162,8 +3006,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -3180,8 +3023,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -3198,8 +3040,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -3216,8 +3057,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -3234,8 +3074,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -3252,9 +3091,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         assertThat(updatedExecution.getCountryDeployments())
                 .hasSize(2)
@@ -3267,8 +3104,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 1L,
@@ -3279,8 +3115,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 70L,
-                                80L
-                        ),
+                                80L),
                         tuple(
                                 2L,
                                 "integ",
@@ -3290,9 +3125,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 50L,
-                                100L
-                        )
-                );
+                                100L));
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
         assertThat(generatedFilesPaths)
@@ -3339,12 +3172,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1589198399000/fr/api/reports/result.txt",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1589198399000/fr/api/reports/pay.postman_collection_fr+us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1589198399000/fr/api/reports/pay.postman_collection_us.json",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1589198399000/fr/api/reports/choose-a-product.postman_collection_all.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1589198399000/fr/api/reports/choose-a-product.postman_collection_all.json");
     }
 
     @Test
-    public void upload_updateTheExecutionAndAddRuns_whenExecutionFoundButNotDoneAndHasSomeRuns() throws IOException {
+    void upload_updateTheExecutionAndAddRuns_whenExecutionFoundButNotDoneAndHasSomeRuns() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -3362,10 +3194,10 @@ public class ExecutionResourceIntegration {
 
         SortedSet<Run> runsToSave = new TreeSet<>();
         runsToSave.add(
-                new Run()
-                        .withCountry(new Country().withId(1L).withProjectId(1L).withCode("fr"))
-                        .withType(new Type().withId(1L).withProjectId(1L).withCode("api"))
-                        .withExecutionId(1L)
+                new RunBuilder()
+                        .withCountry(CountryFactory.get(1L, 1L, "fr", null))
+                        .withType(TypeFactory.get(1L, 1L, "api"))
+                        .withExecution(new ExecutionBuilder().withId(1L).build())
                         .withComment("a comment about this run")
                         .withPlatform("integration-platform")
                         .withJobUrl("https://build.company.com/demo/test/56/previous-url")
@@ -3376,13 +3208,12 @@ public class ExecutionResourceIntegration {
                         .withEstimatedDuration(150L)
                         .withDuration(100L)
                         .withSeverityTags("high")
-                        .withIncludeInThresholds(false)
-        );
+                        .withIncludeInThresholds(false).build());
         runsToSave.add(
-                new Run()
-                        .withCountry(new Country().withId(2L).withProjectId(1L).withCode("us"))
-                        .withType(new Type().withId(2L).withProjectId(1L).withCode("firefox-desktop"))
-                        .withExecutionId(5L)
+                new RunBuilder()
+                        .withCountry(CountryFactory.get(2L, 2L, "us", null))
+                        .withType(TypeFactory.get(2L, 1L, "firefox-desktop"))
+                        .withExecution(new ExecutionBuilder().withId(5L).build())
                         .withComment("just another run")
                         .withPlatform("another-integration-platform")
                         .withJobUrl("https://build.company.com/demo/test/59/previous-url")
@@ -3393,38 +3224,36 @@ public class ExecutionResourceIntegration {
                         .withEstimatedDuration(250L)
                         .withDuration(120L)
                         .withSeverityTags("medium")
-                        .withIncludeInThresholds(false)
-        );
+                        .withIncludeInThresholds(false).build());
 
         SortedSet<CountryDeployment> countryDeploymentsToSave = new TreeSet<>();
-        countryDeploymentsToSave.add(
-                new CountryDeployment()
-                        .withCountry(new Country().withId(1L).withProjectId(1L).withCode("fr"))
-                        .withExecutionId(1L)
-                        .withPlatform("integration-1")
-                        .withJobUrl("https://build.company.com/demo/deploy/fr/55/previous-url")
-                        .withJobLink("/opt/ara/data/executions/the-demo-project/develop/day/incoming/1590565462000/fr/previous-link/1")
-                        .withStatus(JobStatus.UNAVAILABLE)
-                        .withResult(Result.FAILURE)
-                        .withStartDateTime(new Date(1550108400000L))
-                        .withEstimatedDuration(100L)
-                        .withDuration(300L)
-        );
-        countryDeploymentsToSave.add(
-                new CountryDeployment()
-                        .withCountry(new Country().withId(2L).withProjectId(1L).withCode("us"))
-                        .withExecutionId(2L)
-                        .withPlatform("integration-2")
-                        .withJobUrl("https://build.company.com/demo/deploy/us/59/previous-url")
-                        .withJobLink("/opt/ara/data/executions/the-demo-project/develop/day/incoming/1590565462000/fr/previous-link/2")
-                        .withStatus(JobStatus.DONE)
-                        .withResult(Result.SUCCESS)
-                        .withStartDateTime(new Date(1550208400000L))
-                        .withEstimatedDuration(150L)
-                        .withDuration(1000L)
-        );
+        CountryDeployment countryDeployment = new CountryDeployment();
+        countryDeployment.setCountry(CountryFactory.get(1L, 1L, "fr", null));
+        countryDeployment.setExecution(new ExecutionBuilder().withId(1l).build());
+        countryDeployment.setPlatform("integration-1");
+        countryDeployment.setJobUrl("https://build.company.com/demo/deploy/fr/55/previous-url");
+        countryDeployment.setJobLink("/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743962000/fr/previous-link/1");
+        countryDeployment.setStatus(JobStatus.UNAVAILABLE);
+        countryDeployment.setResult(Result.FAILURE);
+        countryDeployment.setStartDateTime(new Date(1550108400000L));
+        countryDeployment.setEstimatedDuration(100L);
+        countryDeployment.setDuration(300L);
+        countryDeploymentsToSave.add(countryDeployment);
 
-        Execution execution = new Execution()
+        countryDeployment = new CountryDeployment();
+        countryDeployment.setCountry(CountryFactory.get(2L, 2L, "us", null));
+        countryDeployment.setExecution(new ExecutionBuilder().withId(2l).build());
+        countryDeployment.setPlatform("integration-2");
+        countryDeployment.setJobUrl("https://build.company.com/demo/deploy/us/59/previous-url");
+        countryDeployment.setJobLink("/opt/ara/data/executions/the-demo-project/develop/day/incoming/1590565462000/fr/previous-link/2");
+        countryDeployment.setStatus(JobStatus.DONE);
+        countryDeployment.setResult(Result.SUCCESS);
+        countryDeployment.setStartDateTime(new Date(1550208400000L));
+        countryDeployment.setEstimatedDuration(150L);
+        countryDeployment.setDuration(1000L);
+        countryDeploymentsToSave.add(countryDeployment);
+
+        Execution execution = new ExecutionBuilder()
                 .withBranch("develop")
                 .withName("night")
                 .withRelease("version-03")
@@ -3437,7 +3266,7 @@ public class ExecutionResourceIntegration {
                 .withResult(Result.FAILURE)
                 .withAcceptance(ExecutionAcceptance.NEW)
                 .withDiscardReason("no discard reason")
-                .withCycleDefinition(new CycleDefinition().withId(2L).withProjectId(1L))
+                .withCycleDefinition(CycleDefinitionFactory.get(2L, 1L))
                 .withBlockingValidation(false)
                 .withQualityThresholds("{\"sanity-check\":{\"failure\":81,\"warning\":96},\"high\":{\"failure\":86,\"warning\":97},\"medium\":{\"failure\":90,\"warning\":75}}")
                 .withQualityStatus(QualityStatus.FAILED)
@@ -3445,7 +3274,7 @@ public class ExecutionResourceIntegration {
                 .withDuration(3600L)
                 .withEstimatedDuration(1500L)
                 .withRuns(runsToSave)
-                .withCountryDeployments(countryDeploymentsToSave);
+                .withCountryDeployments(countryDeploymentsToSave).build();
 
         Execution savedExecution = executionRepository.save(execution);
 
@@ -3491,8 +3320,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -3510,8 +3338,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -3528,8 +3355,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -3546,8 +3372,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -3564,8 +3389,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -3582,8 +3406,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -3600,9 +3423,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         assertThat(updatedExecution.getCountryDeployments())
                 .hasSize(2)
@@ -3615,8 +3436,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 1L,
@@ -3627,8 +3447,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        ),
+                                0L),
                         tuple(
                                 2L,
                                 "integ",
@@ -3638,9 +3457,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
         assertThat(generatedFilesPaths)
@@ -3687,12 +3504,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/master/day/incoming/1590565462000/fr/api/reports/result.txt",
                         "/opt/ara/data/executions/the-demo-project/master/day/incoming/1590565462000/fr/api/reports/pay.postman_collection_fr+us.json",
                         "/opt/ara/data/executions/the-demo-project/master/day/incoming/1590565462000/fr/api/reports/pay.postman_collection_us.json",
-                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1590565462000/fr/api/reports/choose-a-product.postman_collection_all.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1590565462000/fr/api/reports/choose-a-product.postman_collection_all.json");
     }
 
     @Test
-    public void upload_saveTheExecutionAsBlocked_whenExecutionFoundButNotDoneAndNoCycleDefinitionFileFound() throws IOException {
+    void upload_saveTheExecutionAsBlocked_whenExecutionFoundButNotDoneAndNoCycleDefinitionFileFound() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -3708,7 +3524,7 @@ public class ExecutionResourceIntegration {
         assertThat(executedScenarios).isEmpty();
         assertThat(errors).isEmpty();
 
-        Execution execution = new Execution()
+        Execution execution = new ExecutionBuilder()
                 .withBranch("develop")
                 .withName("night")
                 .withRelease("version-03")
@@ -3721,13 +3537,13 @@ public class ExecutionResourceIntegration {
                 .withResult(Result.FAILURE)
                 .withAcceptance(ExecutionAcceptance.NEW)
                 .withDiscardReason("no discard reason")
-                .withCycleDefinition(new CycleDefinition().withId(2L).withProjectId(1L))
+                .withCycleDefinition(CycleDefinitionFactory.get(2L, 1L))
                 .withBlockingValidation(true)
                 .withQualityThresholds("{\"sanity-check\":{\"failure\":81,\"warning\":96},\"high\":{\"failure\":86,\"warning\":97},\"medium\":{\"failure\":90,\"warning\":75}}")
                 .withQualityStatus(QualityStatus.FAILED)
                 .withQualitySeverities("[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":42,\"failed\":10,\"passed\":42},\"percent\":99,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":18,\"failed\":10,\"passed\":8},\"percent\":60,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":24,\"failed\":10,\"passed\":14},\"percent\":70,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":99,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":74,\"failed\":20,\"passed\":54},\"percent\":80,\"status\":\"PASSED\"}]")
                 .withDuration(3600L)
-                .withEstimatedDuration(1500L);
+                .withEstimatedDuration(1500L).build();
 
         Execution savedExecution = executionRepository.save(execution);
 
@@ -3801,12 +3617,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/9783108610000/fr/api/reports/result.txt",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/9783108610000/fr/api/reports/pay.postman_collection_fr+us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/9783108610000/fr/api/reports/pay.postman_collection_us.json",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/9783108610000/fr/api/reports/choose-a-product.postman_collection_all.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/9783108610000/fr/api/reports/choose-a-product.postman_collection_all.json");
     }
 
     @Test
-    public void upload_deleteExecutionCompletionRequest_whenExecutionCompletionRequestUrlFound() throws IOException {
+    void upload_deleteExecutionCompletionRequest_whenExecutionCompletionRequestUrlFound() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -3835,7 +3650,7 @@ public class ExecutionResourceIntegration {
     }
 
     @Test
-    public void upload_deleteExecutionDirectory_whenIndexingSettingIsSetToTrue() throws IOException {
+    void upload_deleteExecutionDirectory_whenIndexingSettingIsSetToTrue() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -3885,12 +3700,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1591910900000/fr/api/reports/result.txt",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1591910900000/fr/api/reports/pay.postman_collection_fr+us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1591910900000/fr/api/reports/pay.postman_collection_us.json",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1591910900000/fr/api/reports/choose-a-product.postman_collection_all.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1591910900000/fr/api/reports/choose-a-product.postman_collection_all.json");
     }
 
     @Test
-    public void upload_saveTheExecutionWithRunningCountryDeploymentsAndRuns_whenNoErrorFound() throws IOException {
+    void upload_saveTheExecutionWithRunningCountryDeploymentsAndRuns_whenNoErrorFound() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -3912,7 +3726,7 @@ public class ExecutionResourceIntegration {
         executions = executionRepository.findAll()
                 .stream()
                 .filter(execution -> "34910c9971abebce9f633920d8f8cf90853f38ea".equals(execution.getVersion()))
-                .collect(Collectors.toList());
+                .toList();
         assertThat(executions)
                 .hasSize(1)
                 .extracting(
@@ -3937,8 +3751,7 @@ public class ExecutionResourceIntegration {
                         "qualityStatus",
                         "qualitySeverities",
                         "duration",
-                        "estimatedDuration"
-                )
+                        "estimatedDuration")
                 .containsOnly(
                         tuple(
                                 "develop",
@@ -3962,16 +3775,13 @@ public class ExecutionResourceIntegration {
                                 QualityStatus.PASSED,
                                 "[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":32,\"failed\":0,\"passed\":32},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":8,\"failed\":0,\"passed\":8},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":24,\"failed\":0,\"passed\":24},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":64,\"failed\":0,\"passed\":64},\"percent\":100,\"status\":\"PASSED\"}]",
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         runs = new ArrayList<>(
                 executions.stream()
                         .findFirst()
                         .get()
-                        .getRuns()
-        );
+                        .getRuns());
 
         assertThat(runs)
                 .hasSize(6)
@@ -3991,8 +3801,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -4010,8 +3819,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -4028,8 +3836,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -4046,8 +3853,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -4064,8 +3870,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -4082,8 +3887,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -4100,16 +3904,13 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         countryDeployments = new ArrayList<>(
                 executions.stream()
                         .findFirst()
                         .get()
-                        .getCountryDeployments()
-        );
+                        .getCountryDeployments());
 
         assertThat(countryDeployments)
                 .hasSize(2)
@@ -4122,8 +3923,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -4134,8 +3934,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        ),
+                                0L),
                         tuple(
                                 "us",
                                 "integ",
@@ -4145,16 +3944,14 @@ public class ExecutionResourceIntegration {
                                 null,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         errors = runs.stream()
                 .map(Run::getExecutedScenarios)
                 .flatMap(Collection::stream)
                 .map(ExecutedScenario::getErrors)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .toList();
         assertThat(errors).isEmpty();
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
@@ -4202,12 +3999,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1571509815000/fr/api/reports/result.txt",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1571509815000/fr/api/reports/pay.postman_collection_fr+us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1571509815000/fr/api/reports/pay.postman_collection_us.json",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1571509815000/fr/api/reports/choose-a-product.postman_collection_all.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1571509815000/fr/api/reports/choose-a-product.postman_collection_all.json");
     }
 
     @Test
-    public void upload_saveTheExecutionWithUnavailableCountryDeploymentsAndRuns_whenNoErrorFound() throws IOException {
+    void upload_saveTheExecutionWithUnavailableCountryDeploymentsAndRuns_whenNoErrorFound() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -4229,7 +4025,7 @@ public class ExecutionResourceIntegration {
         executions = executionRepository.findAll()
                 .stream()
                 .filter(execution -> "34910c9971abebce9f633920d8f8cf90853f38ea".equals(execution.getVersion()))
-                .collect(Collectors.toList());
+                .toList();
         assertThat(executions)
                 .hasSize(1)
                 .extracting(
@@ -4254,8 +4050,7 @@ public class ExecutionResourceIntegration {
                         "qualityStatus",
                         "qualitySeverities",
                         "duration",
-                        "estimatedDuration"
-                )
+                        "estimatedDuration")
                 .containsOnly(
                         tuple(
                                 "develop",
@@ -4279,16 +4074,13 @@ public class ExecutionResourceIntegration {
                                 QualityStatus.INCOMPLETE,
                                 "[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":32,\"failed\":0,\"passed\":32},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":8,\"failed\":0,\"passed\":8},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":24,\"failed\":0,\"passed\":24},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":64,\"failed\":0,\"passed\":64},\"percent\":100,\"status\":\"INCOMPLETE\"}]",
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         runs = new ArrayList<>(
                 executions.stream()
                         .findFirst()
                         .get()
-                        .getRuns()
-        );
+                        .getRuns());
 
         assertThat(runs)
                 .hasSize(6)
@@ -4308,8 +4100,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -4327,8 +4118,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -4345,8 +4135,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -4363,8 +4152,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -4381,8 +4169,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -4399,8 +4186,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -4417,16 +4203,13 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         countryDeployments = new ArrayList<>(
                 executions.stream()
                         .findFirst()
                         .get()
-                        .getCountryDeployments()
-        );
+                        .getCountryDeployments());
 
         assertThat(countryDeployments)
                 .hasSize(2)
@@ -4439,8 +4222,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -4451,8 +4233,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        ),
+                                0L),
                         tuple(
                                 "us",
                                 "integ",
@@ -4462,16 +4243,14 @@ public class ExecutionResourceIntegration {
                                 Result.NOT_BUILT,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         errors = runs.stream()
                 .map(Run::getExecutedScenarios)
                 .flatMap(Collection::stream)
                 .map(ExecutedScenario::getErrors)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .toList();
         assertThat(errors).isEmpty();
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
@@ -4519,12 +4298,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1577309445000/fr/api/reports/result.txt",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1577309445000/fr/api/reports/pay.postman_collection_fr+us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1577309445000/fr/api/reports/pay.postman_collection_us.json",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1577309445000/fr/api/reports/choose-a-product.postman_collection_all.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1577309445000/fr/api/reports/choose-a-product.postman_collection_all.json");
     }
 
     @Test
-    public void upload_saveTheExecutionWithPendingCountryDeploymentsAndRuns_whenNoErrorFound() throws IOException {
+    void upload_saveTheExecutionWithPendingCountryDeploymentsAndRuns_whenNoErrorFound() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -4546,7 +4324,7 @@ public class ExecutionResourceIntegration {
         executions = executionRepository.findAll()
                 .stream()
                 .filter(execution -> "34910c9971abebce9f633920d8f8cf90853f38ea".equals(execution.getVersion()))
-                .collect(Collectors.toList());
+                .toList();
         assertThat(executions)
                 .hasSize(1)
                 .extracting(
@@ -4571,8 +4349,7 @@ public class ExecutionResourceIntegration {
                         "qualityStatus",
                         "qualitySeverities",
                         "duration",
-                        "estimatedDuration"
-                )
+                        "estimatedDuration")
                 .containsOnly(
                         tuple(
                                 "develop",
@@ -4596,16 +4373,13 @@ public class ExecutionResourceIntegration {
                                 QualityStatus.INCOMPLETE,
                                 "[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":32,\"failed\":0,\"passed\":32},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":8,\"failed\":0,\"passed\":8},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":24,\"failed\":0,\"passed\":24},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":64,\"failed\":0,\"passed\":64},\"percent\":100,\"status\":\"INCOMPLETE\"}]",
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         runs = new ArrayList<>(
                 executions.stream()
                         .findFirst()
                         .get()
-                        .getRuns()
-        );
+                        .getRuns());
 
         assertThat(runs)
                 .hasSize(6)
@@ -4625,8 +4399,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -4644,8 +4417,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -4662,8 +4434,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -4680,8 +4451,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -4698,8 +4468,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -4716,8 +4485,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -4734,16 +4502,13 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         countryDeployments = new ArrayList<>(
                 executions.stream()
                         .findFirst()
                         .get()
-                        .getCountryDeployments()
-        );
+                        .getCountryDeployments());
 
         assertThat(countryDeployments)
                 .hasSize(2)
@@ -4756,8 +4521,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -4768,8 +4532,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        ),
+                                0L),
                         tuple(
                                 "us",
                                 "integ",
@@ -4779,16 +4542,14 @@ public class ExecutionResourceIntegration {
                                 null,
                                 null,
                                 null,
-                                null
-                        )
-                );
+                                null));
 
         errors = runs.stream()
                 .map(Run::getExecutedScenarios)
                 .flatMap(Collection::stream)
                 .map(ExecutedScenario::getErrors)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .toList();
         assertThat(errors).isEmpty();
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
@@ -4835,12 +4596,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1321009871000/fr/api/reports/result.txt",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1321009871000/fr/api/reports/pay.postman_collection_fr+us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1321009871000/fr/api/reports/pay.postman_collection_us.json",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1321009871000/fr/api/reports/choose-a-product.postman_collection_all.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1321009871000/fr/api/reports/choose-a-product.postman_collection_all.json");
     }
 
     @Test
-    public void upload_saveTheExecution_whenBuildInformationIsRenamedInSettings() throws IOException {
+    void upload_saveTheExecution_whenBuildInformationIsRenamedInSettings() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -4854,10 +4614,8 @@ public class ExecutionResourceIntegration {
 
         Setting setting = settingRepository.findByProjectIdAndCode(1L, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH);
         assertThat(setting).isNull();
-        setting = new Setting()
-                .withProjectId(1L)
-                .withCode(Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH)
-                .withValue("/artefact/build/info/buildInfo.json");
+        setting = new Setting(1L, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH);
+        setting.setValue("/artefact/build/info/buildInfo.json");
         settingRepository.save(setting);
 
         MultipartFile zip = readZip("src/test/resources/zip/1592156114000.zip");
@@ -4866,7 +4624,7 @@ public class ExecutionResourceIntegration {
         executions = executionRepository.findAll()
                 .stream()
                 .filter(execution -> "34910c9971abebce9f633920d8f8cf90853f38ea".equals(execution.getVersion()))
-                .collect(Collectors.toList());
+                .toList();
         assertThat(executions)
                 .hasSize(1)
                 .extracting(
@@ -4891,8 +4649,7 @@ public class ExecutionResourceIntegration {
                         "qualityStatus",
                         "qualitySeverities",
                         "duration",
-                        "estimatedDuration"
-                )
+                        "estimatedDuration")
                 .containsOnly(
                         tuple(
                                 "develop",
@@ -4916,16 +4673,13 @@ public class ExecutionResourceIntegration {
                                 QualityStatus.PASSED,
                                 "[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":32,\"failed\":0,\"passed\":32},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":8,\"failed\":0,\"passed\":8},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":24,\"failed\":0,\"passed\":24},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":64,\"failed\":0,\"passed\":64},\"percent\":100,\"status\":\"PASSED\"}]",
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         runs = new ArrayList<>(
                 executions.stream()
                         .findFirst()
                         .get()
-                        .getRuns()
-        );
+                        .getRuns());
 
         assertThat(runs)
                 .hasSize(6)
@@ -4945,8 +4699,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -4964,8 +4717,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -4982,8 +4734,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -5000,8 +4751,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -5018,8 +4768,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -5036,8 +4785,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -5054,16 +4802,13 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         countryDeployments = new ArrayList<>(
                 executions.stream()
                         .findFirst()
                         .get()
-                        .getCountryDeployments()
-        );
+                        .getCountryDeployments());
 
         assertThat(countryDeployments)
                 .hasSize(2)
@@ -5076,8 +4821,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -5088,8 +4832,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        ),
+                                0L),
                         tuple(
                                 "us",
                                 "integ",
@@ -5099,9 +4842,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
         assertThat(generatedFilesPaths)
@@ -5175,12 +4916,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/api/reports/result.txt",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/api/reports/pay.postman_collection_fr+us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/api/reports/pay.postman_collection_us.json",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/api/reports/choose-a-product.postman_collection_all.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1592156114000/fr/api/reports/choose-a-product.postman_collection_all.json");
     }
 
     @Test
-    public void upload_saveTheExecution_whenCycleDefinitionIsRenamedInSettings() throws IOException {
+    void upload_saveTheExecution_whenCycleDefinitionIsRenamedInSettings() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -5194,10 +4934,8 @@ public class ExecutionResourceIntegration {
 
         Setting setting = settingRepository.findByProjectIdAndCode(1L, Settings.EXECUTION_INDEXER_FILE_CYCLE_DEFINITION_PATH);
         assertThat(setting).isNull();
-        setting = new Setting()
-                .withProjectId(1L)
-                .withCode(Settings.EXECUTION_INDEXER_FILE_CYCLE_DEFINITION_PATH)
-                .withValue("cycleDef.json");
+        setting = new Setting(1L, Settings.EXECUTION_INDEXER_FILE_CYCLE_DEFINITION_PATH);
+        setting.setValue("cycleDef.json");
         settingRepository.save(setting);
 
         MultipartFile zip = readZip("src/test/resources/zip/1585743320000.zip");
@@ -5206,7 +4944,7 @@ public class ExecutionResourceIntegration {
         executions = executionRepository.findAll()
                 .stream()
                 .filter(execution -> "34910c9971abebce9f633920d8f8cf90853f38ea".equals(execution.getVersion()))
-                .collect(Collectors.toList());
+                .toList();
         assertThat(executions)
                 .hasSize(1)
                 .extracting(
@@ -5231,8 +4969,7 @@ public class ExecutionResourceIntegration {
                         "qualityStatus",
                         "qualitySeverities",
                         "duration",
-                        "estimatedDuration"
-                )
+                        "estimatedDuration")
                 .containsOnly(
                         tuple(
                                 "develop",
@@ -5256,16 +4993,13 @@ public class ExecutionResourceIntegration {
                                 QualityStatus.PASSED,
                                 "[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":32,\"failed\":0,\"passed\":32},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":8,\"failed\":0,\"passed\":8},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":24,\"failed\":0,\"passed\":24},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":64,\"failed\":0,\"passed\":64},\"percent\":100,\"status\":\"PASSED\"}]",
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         runs = new ArrayList<>(
                 executions.stream()
                         .findFirst()
                         .get()
-                        .getRuns()
-        );
+                        .getRuns());
 
         assertThat(runs)
                 .hasSize(6)
@@ -5285,8 +5019,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -5304,8 +5037,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -5322,8 +5054,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -5340,8 +5071,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -5358,8 +5088,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -5376,8 +5105,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -5394,16 +5122,13 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         countryDeployments = new ArrayList<>(
                 executions.stream()
                         .findFirst()
                         .get()
-                        .getCountryDeployments()
-        );
+                        .getCountryDeployments());
 
         assertThat(countryDeployments)
                 .hasSize(2)
@@ -5416,8 +5141,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -5428,8 +5152,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        ),
+                                0L),
                         tuple(
                                 "us",
                                 "integ",
@@ -5439,9 +5162,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
         assertThat(generatedFilesPaths)
@@ -5488,12 +5209,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/api/reports/result.txt",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/api/reports/pay.postman_collection_fr+us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/api/reports/pay.postman_collection_us.json",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/api/reports/choose-a-product.postman_collection_all.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1585743320000/fr/api/reports/choose-a-product.postman_collection_all.json");
     }
 
     @Test
-    public void upload_saveTheExecution_whenCucumberStepDefinitionsIsRenamedInSettings() throws IOException {
+    void upload_saveTheExecution_whenCucumberStepDefinitionsIsRenamedInSettings() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -5507,11 +5227,8 @@ public class ExecutionResourceIntegration {
 
         Optional<TechnologySetting> technologySetting = technologySettingRepository.findByProjectIdAndCodeAndTechnology(1L, CucumberSettings.STEP_DEFINITIONS_PATH.getCode(), Technology.CUCUMBER);
         assertThat(technologySetting).isNotPresent();
-        TechnologySetting setting = new TechnologySetting()
-                .withProjectId(1L)
-                .withCode(CucumberSettings.STEP_DEFINITIONS_PATH.getCode())
-                .withTechnology(Technology.CUCUMBER)
-                .withValue("stepDef.json");
+        TechnologySetting setting = new TechnologySetting(1L, CucumberSettings.STEP_DEFINITIONS_PATH.getCode(), Technology.CUCUMBER);
+        setting.setValue("stepDef.json");
         technologySettingRepository.save(setting);
 
         MultipartFile zip = readZip("src/test/resources/zip/1637539262000.zip");
@@ -5520,7 +5237,7 @@ public class ExecutionResourceIntegration {
         executions = executionRepository.findAll()
                 .stream()
                 .filter(execution -> "34910c9971abebce9f633920d8f8cf90853f38ea".equals(execution.getVersion()))
-                .collect(Collectors.toList());
+                .toList();
         assertThat(executions)
                 .hasSize(1)
                 .extracting(
@@ -5545,8 +5262,7 @@ public class ExecutionResourceIntegration {
                         "qualityStatus",
                         "qualitySeverities",
                         "duration",
-                        "estimatedDuration"
-                )
+                        "estimatedDuration")
                 .containsOnly(
                         tuple(
                                 "develop",
@@ -5570,16 +5286,13 @@ public class ExecutionResourceIntegration {
                                 QualityStatus.PASSED,
                                 "[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":32,\"failed\":0,\"passed\":32},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":8,\"failed\":0,\"passed\":8},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":24,\"failed\":0,\"passed\":24},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":64,\"failed\":0,\"passed\":64},\"percent\":100,\"status\":\"PASSED\"}]",
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         runs = new ArrayList<>(
                 executions.stream()
                         .findFirst()
                         .get()
-                        .getRuns()
-        );
+                        .getRuns());
 
         assertThat(runs)
                 .hasSize(6)
@@ -5599,8 +5312,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -5618,8 +5330,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -5636,8 +5347,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -5654,8 +5364,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -5672,8 +5381,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -5690,8 +5398,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -5708,16 +5415,13 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         countryDeployments = new ArrayList<>(
                 executions.stream()
                         .findFirst()
                         .get()
-                        .getCountryDeployments()
-        );
+                        .getCountryDeployments());
 
         assertThat(countryDeployments)
                 .hasSize(2)
@@ -5730,8 +5434,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -5742,8 +5445,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        ),
+                                0L),
                         tuple(
                                 "us",
                                 "integ",
@@ -5753,9 +5455,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
         assertThat(generatedFilesPaths)
@@ -5802,12 +5502,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1637539262000/fr/api/reports/result.txt",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1637539262000/fr/api/reports/pay.postman_collection_fr+us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1637539262000/fr/api/reports/pay.postman_collection_us.json",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1637539262000/fr/api/reports/choose-a-product.postman_collection_all.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1637539262000/fr/api/reports/choose-a-product.postman_collection_all.json");
     }
 
     @Test
-    public void upload_saveTheExecution_whenCucumberReportFileIsRenamedInSettings() throws IOException {
+    void upload_saveTheExecution_whenCucumberReportFileIsRenamedInSettings() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -5821,11 +5520,8 @@ public class ExecutionResourceIntegration {
 
         Optional<TechnologySetting> technologySetting = technologySettingRepository.findByProjectIdAndCodeAndTechnology(1L, CucumberSettings.REPORT_PATH.getCode(), Technology.CUCUMBER);
         assertThat(technologySetting).isNotPresent();
-        TechnologySetting setting = new TechnologySetting()
-                .withProjectId(1L)
-                .withCode(CucumberSettings.REPORT_PATH.getCode())
-                .withTechnology(Technology.CUCUMBER)
-                .withValue("/result.json");
+        TechnologySetting setting = new TechnologySetting(1L, CucumberSettings.REPORT_PATH.getCode(), Technology.CUCUMBER);
+        setting.setValue("/result.json");
         technologySettingRepository.save(setting);
 
         MultipartFile zip = readZip("src/test/resources/zip/1289563870000.zip");
@@ -5834,7 +5530,7 @@ public class ExecutionResourceIntegration {
         executions = executionRepository.findAll()
                 .stream()
                 .filter(execution -> "34910c9971abebce9f633920d8f8cf90853f38ea".equals(execution.getVersion()))
-                .collect(Collectors.toList());
+                .toList();
         assertThat(executions)
                 .hasSize(1)
                 .extracting(
@@ -5859,8 +5555,7 @@ public class ExecutionResourceIntegration {
                         "qualityStatus",
                         "qualitySeverities",
                         "duration",
-                        "estimatedDuration"
-                )
+                        "estimatedDuration")
                 .containsOnly(
                         tuple(
                                 "develop",
@@ -5884,16 +5579,13 @@ public class ExecutionResourceIntegration {
                                 QualityStatus.PASSED,
                                 "[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":32,\"failed\":0,\"passed\":32},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":8,\"failed\":0,\"passed\":8},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":24,\"failed\":0,\"passed\":24},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":64,\"failed\":0,\"passed\":64},\"percent\":100,\"status\":\"PASSED\"}]",
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         runs = new ArrayList<>(
                 executions.stream()
                         .findFirst()
                         .get()
-                        .getRuns()
-        );
+                        .getRuns());
 
         assertThat(runs)
                 .hasSize(6)
@@ -5913,8 +5605,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -5932,8 +5623,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -5950,8 +5640,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -5968,8 +5657,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -5986,8 +5674,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -6004,8 +5691,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -6022,16 +5708,13 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         countryDeployments = new ArrayList<>(
                 executions.stream()
                         .findFirst()
                         .get()
-                        .getCountryDeployments()
-        );
+                        .getCountryDeployments());
 
         assertThat(countryDeployments)
                 .hasSize(2)
@@ -6044,8 +5727,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -6056,8 +5738,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        ),
+                                0L),
                         tuple(
                                 "us",
                                 "integ",
@@ -6067,9 +5748,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
         assertThat(generatedFilesPaths)
@@ -6116,12 +5795,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1289563870000/fr/api/reports/result.txt",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1289563870000/fr/api/reports/pay.postman_collection_fr+us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1289563870000/fr/api/reports/pay.postman_collection_us.json",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1289563870000/fr/api/reports/choose-a-product.postman_collection_all.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1289563870000/fr/api/reports/choose-a-product.postman_collection_all.json");
     }
 
     @Test
-    public void upload_saveTheExecution_whenPostmanReportsFolderIsRenamedInSettings() throws IOException {
+    void upload_saveTheExecution_whenPostmanReportsFolderIsRenamedInSettings() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -6135,11 +5813,8 @@ public class ExecutionResourceIntegration {
 
         Optional<TechnologySetting> technologySetting = technologySettingRepository.findByProjectIdAndCodeAndTechnology(1L, PostmanSettings.REPORTS_PATH.getCode(), Technology.POSTMAN);
         assertThat(technologySetting).isNotPresent();
-        TechnologySetting setting = new TechnologySetting()
-                .withProjectId(1L)
-                .withCode(PostmanSettings.REPORTS_PATH.getCode())
-                .withTechnology(Technology.POSTMAN)
-                .withValue("results");
+        TechnologySetting setting = new TechnologySetting(1L, PostmanSettings.REPORTS_PATH.getCode(), Technology.POSTMAN);
+        setting.setValue("results");
         technologySettingRepository.save(setting);
 
         MultipartFile zip = readZip("src/test/resources/zip/1601874620000.zip");
@@ -6148,7 +5823,7 @@ public class ExecutionResourceIntegration {
         executions = executionRepository.findAll()
                 .stream()
                 .filter(execution -> "34910c9971abebce9f633920d8f8cf90853f38ea".equals(execution.getVersion()))
-                .collect(Collectors.toList());
+                .toList();
         assertThat(executions)
                 .hasSize(1)
                 .extracting(
@@ -6173,8 +5848,7 @@ public class ExecutionResourceIntegration {
                         "qualityStatus",
                         "qualitySeverities",
                         "duration",
-                        "estimatedDuration"
-                )
+                        "estimatedDuration")
                 .containsOnly(
                         tuple(
                                 "develop",
@@ -6198,16 +5872,13 @@ public class ExecutionResourceIntegration {
                                 QualityStatus.PASSED,
                                 "[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":32,\"failed\":0,\"passed\":32},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":8,\"failed\":0,\"passed\":8},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":24,\"failed\":0,\"passed\":24},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":64,\"failed\":0,\"passed\":64},\"percent\":100,\"status\":\"PASSED\"}]",
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         runs = new ArrayList<>(
                 executions.stream()
                         .findFirst()
                         .get()
-                        .getRuns()
-        );
+                        .getRuns());
 
         assertThat(runs)
                 .hasSize(6)
@@ -6227,8 +5898,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -6246,8 +5916,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -6264,8 +5933,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -6282,8 +5950,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -6300,8 +5967,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -6318,8 +5984,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -6336,16 +6001,13 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         countryDeployments = new ArrayList<>(
                 executions.stream()
                         .findFirst()
                         .get()
-                        .getCountryDeployments()
-        );
+                        .getCountryDeployments());
 
         assertThat(countryDeployments)
                 .hasSize(2)
@@ -6358,8 +6020,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -6370,8 +6031,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        ),
+                                0L),
                         tuple(
                                 "us",
                                 "integ",
@@ -6381,9 +6041,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
         assertThat(generatedFilesPaths)
@@ -6430,12 +6088,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1601874620000/fr/api/results/result.txt",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1601874620000/fr/api/results/pay.postman_collection_fr+us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1601874620000/fr/api/results/pay.postman_collection_us.json",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1601874620000/fr/api/results/choose-a-product.postman_collection_all.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1601874620000/fr/api/results/choose-a-product.postman_collection_all.json");
     }
 
     @Test
-    public void upload_saveTheExecution_whenCountryNotFoundInDB() throws IOException {
+    void upload_saveTheExecution_whenCountryNotFoundInDB() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -6479,8 +6136,7 @@ public class ExecutionResourceIntegration {
                         "qualityStatus",
                         "qualitySeverities",
                         "duration",
-                        "estimatedDuration"
-                )
+                        "estimatedDuration")
                 .contains(
                         "develop",
                         "day",
@@ -6503,8 +6159,7 @@ public class ExecutionResourceIntegration {
                         QualityStatus.INCOMPLETE,
                         "[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":16,\"failed\":0,\"passed\":16},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":4,\"failed\":0,\"passed\":4},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":12,\"failed\":0,\"passed\":12},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":32,\"failed\":0,\"passed\":32},\"percent\":100,\"status\":\"PASSED\"}]",
                         0L,
-                        0L
-                );
+                        0L);
 
         assertThat(execution.getRuns())
                 .hasSize(3)
@@ -6524,8 +6179,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "us",
@@ -6543,8 +6197,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -6561,8 +6214,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -6579,9 +6231,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         assertThat(execution.getCountryDeployments())
                 .hasSize(1)
@@ -6594,8 +6244,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 "us",
@@ -6606,9 +6255,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
         assertThat(generatedFilesPaths)
@@ -6655,12 +6302,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400001/de/api/reports/result.txt",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400001/de/api/reports/pay.postman_collection_fr+us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400001/de/api/reports/pay.postman_collection_us.json",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400001/de/api/reports/choose-a-product.postman_collection_all.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400001/de/api/reports/choose-a-product.postman_collection_all.json");
     }
 
     @Test
-    public void upload_saveTheExecution_whenCountryFolderNotFound() throws IOException {
+    void upload_saveTheExecution_whenCountryFolderNotFound() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -6704,8 +6350,7 @@ public class ExecutionResourceIntegration {
                         "qualityStatus",
                         "qualitySeverities",
                         "duration",
-                        "estimatedDuration"
-                )
+                        "estimatedDuration")
                 .contains(
                         "develop",
                         "day",
@@ -6728,8 +6373,7 @@ public class ExecutionResourceIntegration {
                         QualityStatus.INCOMPLETE,
                         "[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":16,\"failed\":0,\"passed\":16},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":4,\"failed\":0,\"passed\":4},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":12,\"failed\":0,\"passed\":12},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":32,\"failed\":0,\"passed\":32},\"percent\":100,\"status\":\"INCOMPLETE\"}]",
                         0L,
-                        0L
-                );
+                        0L);
 
         assertThat(execution.getRuns())
                 .hasSize(6)
@@ -6749,8 +6393,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -6768,8 +6411,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 null,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -6786,8 +6428,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 null,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -6804,8 +6445,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 null,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -6822,8 +6462,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -6840,8 +6479,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -6858,9 +6496,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         assertThat(execution.getCountryDeployments())
                 .hasSize(2)
@@ -6873,8 +6509,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -6885,8 +6520,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 null,
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "us",
                                 "integ",
@@ -6896,9 +6530,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
         assertThat(generatedFilesPaths)
@@ -6928,12 +6560,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400002/us/api/reports/result.txt",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400002/us/api/reports/pay.postman_collection_fr+us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400002/us/api/reports/pay.postman_collection_us.json",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400002/us/api/reports/choose-a-product.postman_collection_all.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400002/us/api/reports/choose-a-product.postman_collection_all.json");
     }
 
     @Test
-    public void upload_saveTheExecution_whenTypeNotFoundInDB() throws IOException {
+    void upload_saveTheExecution_whenTypeNotFoundInDB() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -6977,8 +6608,7 @@ public class ExecutionResourceIntegration {
                         "qualityStatus",
                         "qualitySeverities",
                         "duration",
-                        "estimatedDuration"
-                )
+                        "estimatedDuration")
                 .contains(
                         "develop",
                         "day",
@@ -7001,8 +6631,7 @@ public class ExecutionResourceIntegration {
                         QualityStatus.INCOMPLETE,
                         "[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":30,\"failed\":0,\"passed\":30},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":8,\"failed\":0,\"passed\":8},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":22,\"failed\":0,\"passed\":22},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":60,\"failed\":0,\"passed\":60},\"percent\":100,\"status\":\"PASSED\"}]",
                         0L,
-                        0L
-                );
+                        0L);
 
         assertThat(execution.getRuns())
                 .hasSize(5)
@@ -7022,8 +6651,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -7041,8 +6669,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -7059,8 +6686,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -7077,8 +6703,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -7095,8 +6720,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -7113,9 +6737,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         assertThat(execution.getCountryDeployments())
                 .hasSize(2)
@@ -7128,8 +6750,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -7140,8 +6761,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        ),
+                                0L),
                         tuple(
                                 "us",
                                 "integ",
@@ -7151,9 +6771,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
         assertThat(generatedFilesPaths)
@@ -7200,12 +6818,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400003/fr/web-service/reports/result.txt",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400003/fr/web-service/reports/pay.postman_collection_fr+us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400003/fr/web-service/reports/pay.postman_collection_us.json",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400003/fr/web-service/reports/choose-a-product.postman_collection_all.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400003/fr/web-service/reports/choose-a-product.postman_collection_all.json");
     }
 
     @Test
-    public void upload_saveTheExecution_whenTypeFolderNotFound() throws IOException {
+    void upload_saveTheExecution_whenTypeFolderNotFound() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -7249,8 +6866,7 @@ public class ExecutionResourceIntegration {
                         "qualityStatus",
                         "qualitySeverities",
                         "duration",
-                        "estimatedDuration"
-                )
+                        "estimatedDuration")
                 .contains(
                         "develop",
                         "day",
@@ -7273,8 +6889,7 @@ public class ExecutionResourceIntegration {
                         QualityStatus.INCOMPLETE,
                         "[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":30,\"failed\":0,\"passed\":30},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":8,\"failed\":0,\"passed\":8},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":22,\"failed\":0,\"passed\":22},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":60,\"failed\":0,\"passed\":60},\"percent\":100,\"status\":\"INCOMPLETE\"}]",
                         0L,
-                        0L
-                );
+                        0L);
 
         assertThat(execution.getRuns())
                 .hasSize(6)
@@ -7294,8 +6909,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -7313,8 +6927,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 null,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -7331,8 +6944,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -7349,8 +6961,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -7367,8 +6978,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -7385,8 +6995,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -7403,9 +7012,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         assertThat(execution.getCountryDeployments())
                 .hasSize(2)
@@ -7418,8 +7025,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -7430,8 +7036,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        ),
+                                0L),
                         tuple(
                                 "us",
                                 "integ",
@@ -7441,9 +7046,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
         assertThat(generatedFilesPaths)
@@ -7483,12 +7086,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400004/fr/firefox-desktop",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400004/fr/firefox-desktop/buildInformation.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400004/fr/firefox-desktop/report.json",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400004/fr/firefox-desktop/stepDefinitions.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400004/fr/firefox-desktop/stepDefinitions.json");
     }
 
     @Test
-    public void upload_saveTheExecution_whenNoRulesFound() throws IOException {
+    void upload_saveTheExecution_whenNoRulesFound() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -7532,8 +7134,7 @@ public class ExecutionResourceIntegration {
                         "qualityStatus",
                         "qualitySeverities",
                         "duration",
-                        "estimatedDuration"
-                )
+                        "estimatedDuration")
                 .contains(
                         "develop",
                         "day",
@@ -7556,8 +7157,7 @@ public class ExecutionResourceIntegration {
                         QualityStatus.PASSED,
                         "[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":0,\"failed\":0,\"passed\":0},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":0,\"failed\":0,\"passed\":0},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":0,\"failed\":0,\"passed\":0},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":0,\"failed\":0,\"passed\":0},\"percent\":100,\"status\":\"PASSED\"}]",
                         0L,
-                        0L
-                );
+                        0L);
 
         assertThat(execution.getRuns()).isEmpty();
 
@@ -7608,12 +7208,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400005/fr/api/reports/result.txt",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400005/fr/api/reports/pay.postman_collection_fr+us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400005/fr/api/reports/pay.postman_collection_us.json",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400005/fr/api/reports/choose-a-product.postman_collection_all.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400005/fr/api/reports/choose-a-product.postman_collection_all.json");
     }
 
     @Test
-    public void upload_saveTheExecution_whenATestTypesFieldIsMissingFromCycleDefinition() throws IOException {
+    void upload_saveTheExecution_whenATestTypesFieldIsMissingFromCycleDefinition() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -7657,8 +7256,7 @@ public class ExecutionResourceIntegration {
                         "qualityStatus",
                         "qualitySeverities",
                         "duration",
-                        "estimatedDuration"
-                )
+                        "estimatedDuration")
                 .contains(
                         "develop",
                         "day",
@@ -7681,8 +7279,7 @@ public class ExecutionResourceIntegration {
                         QualityStatus.PASSED,
                         "[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":16,\"failed\":0,\"passed\":16},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":4,\"failed\":0,\"passed\":4},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":12,\"failed\":0,\"passed\":12},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":32,\"failed\":0,\"passed\":32},\"percent\":100,\"status\":\"PASSED\"}]",
                         0L,
-                        0L
-                );
+                        0L);
 
         assertThat(execution.getRuns())
                 .hasSize(3)
@@ -7702,8 +7299,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "us",
@@ -7721,8 +7317,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -7739,8 +7334,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -7757,9 +7351,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         assertThat(execution.getCountryDeployments())
                 .hasSize(2)
@@ -7772,8 +7364,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -7784,8 +7375,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        ),
+                                0L),
                         tuple(
                                 "us",
                                 "integ",
@@ -7795,9 +7385,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
         assertThat(generatedFilesPaths)
@@ -7844,12 +7432,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400006/fr/api/reports/result.txt",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400006/fr/api/reports/pay.postman_collection_fr+us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400006/fr/api/reports/pay.postman_collection_us.json",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400006/fr/api/reports/choose-a-product.postman_collection_all.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400006/fr/api/reports/choose-a-product.postman_collection_all.json");
     }
 
     @Test
-    public void upload_saveTheExecution_whenCountryFolderIsEmptyButContainsBuildInformationFile() throws IOException {
+    void upload_saveTheExecution_whenCountryFolderIsEmptyButContainsBuildInformationFile() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -7893,8 +7480,7 @@ public class ExecutionResourceIntegration {
                         "qualityStatus",
                         "qualitySeverities",
                         "duration",
-                        "estimatedDuration"
-                )
+                        "estimatedDuration")
                 .contains(
                         "develop",
                         "day",
@@ -7917,8 +7503,7 @@ public class ExecutionResourceIntegration {
                         QualityStatus.INCOMPLETE,
                         "[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":16,\"failed\":0,\"passed\":16},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":4,\"failed\":0,\"passed\":4},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":12,\"failed\":0,\"passed\":12},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":32,\"failed\":0,\"passed\":32},\"percent\":100,\"status\":\"INCOMPLETE\"}]",
                         0L,
-                        0L
-                );
+                        0L);
 
         assertThat(execution.getRuns())
                 .hasSize(6)
@@ -7938,8 +7523,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -7957,8 +7541,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 null,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -7975,8 +7558,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 null,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -7993,8 +7575,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 null,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -8011,8 +7592,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -8029,8 +7609,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -8047,9 +7626,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         assertThat(execution.getCountryDeployments())
                 .hasSize(2)
@@ -8062,8 +7639,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -8074,8 +7650,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        ),
+                                0L),
                         tuple(
                                 "us",
                                 "integ",
@@ -8085,9 +7660,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
         assertThat(generatedFilesPaths)
@@ -8119,12 +7692,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400007/us/api/reports/pay.postman_collection_us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400007/us/api/reports/choose-a-product.postman_collection_all.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400007/fr",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400007/fr/buildInformation.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400007/fr/buildInformation.json");
     }
 
     @Test
-    public void upload_saveTheExecution_whenCountryFolderIsEmpty() throws IOException {
+    void upload_saveTheExecution_whenCountryFolderIsEmpty() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -8168,8 +7740,7 @@ public class ExecutionResourceIntegration {
                         "qualityStatus",
                         "qualitySeverities",
                         "duration",
-                        "estimatedDuration"
-                )
+                        "estimatedDuration")
                 .contains(
                         "develop",
                         "day",
@@ -8192,8 +7763,7 @@ public class ExecutionResourceIntegration {
                         QualityStatus.INCOMPLETE,
                         "[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":16,\"failed\":0,\"passed\":16},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":4,\"failed\":0,\"passed\":4},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":12,\"failed\":0,\"passed\":12},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":32,\"failed\":0,\"passed\":32},\"percent\":100,\"status\":\"INCOMPLETE\"}]",
                         0L,
-                        0L
-                );
+                        0L);
 
         assertThat(execution.getRuns())
                 .hasSize(6)
@@ -8213,8 +7783,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -8232,8 +7801,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 null,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -8250,8 +7818,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 null,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -8268,8 +7835,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 null,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -8286,8 +7852,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -8304,8 +7869,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -8322,9 +7886,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         assertThat(execution.getCountryDeployments())
                 .hasSize(2)
@@ -8337,8 +7899,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -8349,8 +7910,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 null,
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "us",
                                 "integ",
@@ -8360,9 +7920,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
         assertThat(generatedFilesPaths)
@@ -8393,12 +7951,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400008/us/api/reports/pay.postman_collection_fr+us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400008/us/api/reports/pay.postman_collection_us.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400008/us/api/reports/choose-a-product.postman_collection_all.json",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400008/fr"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400008/fr");
     }
 
     @Test
-    public void upload_saveTheExecution_whenNoCountryFolderFound() throws IOException {
+    void upload_saveTheExecution_whenNoCountryFolderFound() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -8442,8 +7999,7 @@ public class ExecutionResourceIntegration {
                         "qualityStatus",
                         "qualitySeverities",
                         "duration",
-                        "estimatedDuration"
-                )
+                        "estimatedDuration")
                 .contains(
                         "develop",
                         "day",
@@ -8466,8 +8022,7 @@ public class ExecutionResourceIntegration {
                         QualityStatus.INCOMPLETE,
                         "[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":0,\"failed\":0,\"passed\":0},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":0,\"failed\":0,\"passed\":0},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":0,\"failed\":0,\"passed\":0},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":0,\"failed\":0,\"passed\":0},\"percent\":100,\"status\":\"INCOMPLETE\"}]",
                         0L,
-                        0L
-                );
+                        0L);
 
         assertThat(execution.getRuns())
                 .hasSize(6)
@@ -8487,8 +8042,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -8506,8 +8060,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 null,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -8524,8 +8077,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 null,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -8542,8 +8094,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 null,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -8560,8 +8111,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 null,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -8578,8 +8128,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 null,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -8596,9 +8145,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 null,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         assertThat(execution.getCountryDeployments())
                 .hasSize(2)
@@ -8611,8 +8158,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -8623,8 +8169,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 null,
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "us",
                                 "integ",
@@ -8634,9 +8179,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 null,
                                 null,
-                                null
-                        )
-                );
+                                null));
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
         assertThat(generatedFilesPaths)
@@ -8649,12 +8192,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400009",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400009/cycleDefinition.json",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400009/buildInformation.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400009/buildInformation.json");
     }
 
     @Test
-    public void upload_saveTheExecution_whenTypeFolderEmptyWithBuildInformationFile() throws IOException {
+    void upload_saveTheExecution_whenTypeFolderEmptyWithBuildInformationFile() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -8698,8 +8240,7 @@ public class ExecutionResourceIntegration {
                         "qualityStatus",
                         "qualitySeverities",
                         "duration",
-                        "estimatedDuration"
-                )
+                        "estimatedDuration")
                 .contains(
                         "develop",
                         "day",
@@ -8722,8 +8263,7 @@ public class ExecutionResourceIntegration {
                         QualityStatus.INCOMPLETE,
                         "[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":30,\"failed\":0,\"passed\":30},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":8,\"failed\":0,\"passed\":8},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":22,\"failed\":0,\"passed\":22},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":60,\"failed\":0,\"passed\":60},\"percent\":100,\"status\":\"INCOMPLETE\"}]",
                         0L,
-                        0L
-                );
+                        0L);
 
         assertThat(execution.getRuns())
                 .hasSize(6)
@@ -8743,8 +8283,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -8762,8 +8301,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -8780,8 +8318,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -8798,8 +8335,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -8816,8 +8352,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -8834,8 +8369,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -8852,9 +8386,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         assertThat(execution.getCountryDeployments())
                 .hasSize(2)
@@ -8867,8 +8399,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -8879,8 +8410,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        ),
+                                0L),
                         tuple(
                                 "us",
                                 "integ",
@@ -8890,9 +8420,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
         assertThat(generatedFilesPaths)
@@ -8934,12 +8462,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400010/fr/firefox-desktop/report.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400010/fr/firefox-desktop/stepDefinitions.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400010/fr/api",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400010/fr/api/buildInformation.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400010/fr/api/buildInformation.json");
     }
 
     @Test
-    public void upload_saveTheExecution_whenTypeFolderIsEmpty() throws IOException {
+    void upload_saveTheExecution_whenTypeFolderIsEmpty() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -8983,8 +8510,7 @@ public class ExecutionResourceIntegration {
                         "qualityStatus",
                         "qualitySeverities",
                         "duration",
-                        "estimatedDuration"
-                )
+                        "estimatedDuration")
                 .contains(
                         "develop",
                         "day",
@@ -9007,8 +8533,7 @@ public class ExecutionResourceIntegration {
                         QualityStatus.INCOMPLETE,
                         "[{\"severity\":{\"code\":\"sanity-check\",\"position\":1,\"name\":\"Sanity Check\",\"shortName\":\"Sanity Ch.\",\"initials\":\"S.C.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":30,\"failed\":0,\"passed\":30},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"high\",\"position\":2,\"name\":\"High\",\"shortName\":\"High\",\"initials\":\"High\",\"defaultOnMissing\":true},\"scenarioCounts\":{\"total\":8,\"failed\":0,\"passed\":8},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"medium\",\"position\":3,\"name\":\"Medium\",\"shortName\":\"Medium\",\"initials\":\"Med.\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":22,\"failed\":0,\"passed\":22},\"percent\":100,\"status\":\"PASSED\"},{\"severity\":{\"code\":\"*\",\"position\":2147483647,\"name\":\"Global\",\"shortName\":\"Global\",\"initials\":\"Global\",\"defaultOnMissing\":false},\"scenarioCounts\":{\"total\":60,\"failed\":0,\"passed\":60},\"percent\":100,\"status\":\"INCOMPLETE\"}]",
                         0L,
-                        0L
-                );
+                        0L);
 
         assertThat(execution.getRuns())
                 .hasSize(6)
@@ -9028,8 +8553,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -9047,8 +8571,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 null,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -9065,8 +8588,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "fr",
                                 1L,
@@ -9083,8 +8605,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -9101,8 +8622,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -9119,8 +8639,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        ),
+                                true),
                         tuple(
                                 "us",
                                 1L,
@@ -9137,9 +8656,7 @@ public class ExecutionResourceIntegration {
                                 0L,
                                 0L,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         assertThat(execution.getCountryDeployments())
                 .hasSize(2)
@@ -9152,8 +8669,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -9164,8 +8680,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        ),
+                                0L),
                         tuple(
                                 "us",
                                 "integ",
@@ -9175,9 +8690,7 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581908400000L),
                                 0L,
-                                0L
-                        )
-                );
+                                0L));
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
         assertThat(generatedFilesPaths)
@@ -9218,12 +8731,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400011/fr/firefox-desktop/buildInformation.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400011/fr/firefox-desktop/report.json",
                         "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400011/fr/firefox-desktop/stepDefinitions.json",
-                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400011/fr/api"
-                );
+                        "/opt/ara/data/executions/the-demo-project/develop/day/incoming/1581908400011/fr/api");
     }
 
     @Test
-    public void upload_saveTheCypressExecution_whenCucumberReport() throws IOException {
+    void upload_saveTheCypressExecution_whenCucumberReport() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -9287,8 +8799,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -9306,9 +8817,7 @@ public class ExecutionResourceIntegration {
                                 50L,
                                 30L,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         executedScenarios = new ArrayList<>(runs.get(0).getExecutedScenarios());
 
@@ -9333,8 +8842,7 @@ public class ExecutionResourceIntegration {
                         "diffReportUrl",
                         "cucumberReportUrl",
                         "apiServer",
-                        "seleniumNode"
-                )
+                        "seleniumNode")
                 .containsOnly(
                         tuple(
                                 "user-journey-executions-and-errors.feature",
@@ -9346,32 +8854,31 @@ public class ExecutionResourceIntegration {
                                 "journey;check-runs",
                                 23,
                                 String.format(
-                                        "4:passed:2553000000:Given executions and errors%n"+
-                                                "25:passed:587000000:When on the executions and errors page, in the cart \"5\", the user clicks on the run \"fr_api\"%n"+
-                                                "26:failed:4545000000:Then on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"28\" is visible%n"+
-                                                "27:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"27\" is visible%n"+
-                                                "28:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"26\" is hidden%n"+
-                                                "29:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"27\" is hidden%n"+
-                                                "30:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"28\" is hidden%n"+
-                                                "31:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"29\" is hidden%n"+
-                                                "32:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"-404\" is hidden%n"+
-                                                "35:skipped:0:When on the executions and errors page, in the cart \"5\", the user clicks on the run \"fr_desktop\"%n"+
-                                                "36:skipped:0:Then on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"28\" is visible%n"+
-                                                "37:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"27\" is visible%n"+
-                                                "38:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"26\" is visible%n"+
-                                                "39:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"27\" is visible%n"+
-                                                "40:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"28\" is visible%n"+
-                                                "41:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"29\" is visible%n"+
-                                                "42:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"-404\" is visible%n"+
-                                                "45:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_api\", in the column \"sanity-check\", the number of ok is \"2\", the number of problem is \"0\", the number of ko is \"0\", the progress bar is 100%% of success, 0%% of unhandled and 0%% of failed%n"+
-                                                "50:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"sanity-check\", the quality is \"100\", the number of OK is \"9\", the number of KO is \"0\", the color is \"green\"%n"+
-                                                "51:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"high\", the quality is \"100\", the number of OK is \"2\", the number of KO is \"0\", the color is \"green\"%n"+
-                                                "52:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"medium\", the quality is \"100\", the number of OK is \"7\", the number of KO is \"0\", the color is \"green\"%n"+
-                                                "53:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"*\", the quality is \"100\", the number of OK is \"18\", the number of KO is \"0\", the color is \"none\"%n"+
-                                                "56:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"sanity-check\", the threshold is \"100\", the color is \"none\"%n"+
-                                                "57:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"high\", the threshold is \"95\", the color is \"none\"%n"+
-                                                "58:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"medium\", the threshold is \"90\", the color is \"none\""
-                                ),
+                                        "4:passed:2553000000:Given executions and errors%n" +
+                                                "25:passed:587000000:When on the executions and errors page, in the cart \"5\", the user clicks on the run \"fr_api\"%n" +
+                                                "26:failed:4545000000:Then on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"28\" is visible%n" +
+                                                "27:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"27\" is visible%n" +
+                                                "28:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"26\" is hidden%n" +
+                                                "29:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"27\" is hidden%n" +
+                                                "30:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"28\" is hidden%n" +
+                                                "31:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"29\" is hidden%n" +
+                                                "32:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"-404\" is hidden%n" +
+                                                "35:skipped:0:When on the executions and errors page, in the cart \"5\", the user clicks on the run \"fr_desktop\"%n" +
+                                                "36:skipped:0:Then on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"28\" is visible%n" +
+                                                "37:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"27\" is visible%n" +
+                                                "38:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"26\" is visible%n" +
+                                                "39:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"27\" is visible%n" +
+                                                "40:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"28\" is visible%n" +
+                                                "41:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"29\" is visible%n" +
+                                                "42:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"-404\" is visible%n" +
+                                                "45:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_api\", in the column \"sanity-check\", the number of ok is \"2\", the number of problem is \"0\", the number of ko is \"0\", the progress bar is 100%% of success, 0%% of unhandled and 0%% of failed%n" +
+                                                "50:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"sanity-check\", the quality is \"100\", the number of OK is \"9\", the number of KO is \"0\", the color is \"green\"%n" +
+                                                "51:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"high\", the quality is \"100\", the number of OK is \"2\", the number of KO is \"0\", the color is \"green\"%n" +
+                                                "52:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"medium\", the quality is \"100\", the number of OK is \"7\", the number of KO is \"0\", the color is \"green\"%n" +
+                                                "53:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"*\", the quality is \"100\", the number of OK is \"18\", the number of KO is \"0\", the color is \"none\"%n" +
+                                                "56:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"sanity-check\", the threshold is \"100\", the color is \"none\"%n" +
+                                                "57:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"high\", the threshold is \"95\", the color is \"none\"%n" +
+                                                "58:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"medium\", the threshold is \"90\", the color is \"none\""),
                                 null,
                                 "https://media.your-company.com/content/images/snapshot3.png",
                                 "https://media.your-company.com/content/videos/videos2.mp4",
@@ -9381,8 +8888,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/83/cucumber-html-reports/report-feature_user-journey-executions-and-errors-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "user-journey-executions-and-errors.feature",
                                 "Journey",
@@ -9393,21 +8899,20 @@ public class ExecutionResourceIntegration {
                                 "journey;check-the-actions-buttons",
                                 7,
                                 String.format(
-                                        "4:passed:4216000000:Given executions and errors%n"+
-                                                "8:passed:790000000:When on the executions and errors page, the user clicks on the actions and job reports button \"5\"%n"+
-                                                "9:passed:128000000:Then on the executions and errors page, in the actions and job reports list, the \"Actions\" button \"5\" is visible%n"+
-                                                "10:passed:133000000:And on the executions and errors page, in the actions and job reports list, the \"Actions\" button \"5\" is disabled%n"+
-                                                "11:passed:425000000:And on the executions and errors page, in the actions and job reports list, the \"JobReports\" button \"5\" is visible%n"+
-                                                "12:passed:143000000:And on the executions and errors page, in the actions and job reports list, the \"JobReports\" button \"5\" is disabled%n"+
-                                                "13:passed:268000000:And on the executions and errors page, in the actions and job reports list, the \"Execution\" button \"5\" is visible%n"+
-                                                "14:passed:228000000:And on the executions and errors page, in the actions and job reports list, the \"Execution\" button \"5\" is enabled%n"+
-                                                "15:passed:250000000:And on the executions and errors page, in the actions and job reports list, the \"fr_Deployment\" button \"5\" is visible%n"+
-                                                "16:passed:156000000:And on the executions and errors page, in the actions and job reports list, the \"fr_Deployment\" button \"5\" is enabled%n"+
-                                                "17:passed:249000000:And on the executions and errors page, in the actions and job reports list, the \"fr_api\" button \"5\" is visible%n"+
-                                                "18:passed:103000000:And on the executions and errors page, in the actions and job reports list, the \"fr_api\" button \"5\" is enabled%n"+
-                                                "19:passed:153000000:And on the executions and errors page, in the actions and job reports list, the \"fr_desktop\" button \"5\" is visible%n"+
-                                                "20:passed:324000000:And on the executions and errors page, in the actions and job reports list, the \"fr_desktop\" button \"5\" is enabled"
-                                ),
+                                        "4:passed:4216000000:Given executions and errors%n" +
+                                                "8:passed:790000000:When on the executions and errors page, the user clicks on the actions and job reports button \"5\"%n" +
+                                                "9:passed:128000000:Then on the executions and errors page, in the actions and job reports list, the \"Actions\" button \"5\" is visible%n" +
+                                                "10:passed:133000000:And on the executions and errors page, in the actions and job reports list, the \"Actions\" button \"5\" is disabled%n" +
+                                                "11:passed:425000000:And on the executions and errors page, in the actions and job reports list, the \"JobReports\" button \"5\" is visible%n" +
+                                                "12:passed:143000000:And on the executions and errors page, in the actions and job reports list, the \"JobReports\" button \"5\" is disabled%n" +
+                                                "13:passed:268000000:And on the executions and errors page, in the actions and job reports list, the \"Execution\" button \"5\" is visible%n" +
+                                                "14:passed:228000000:And on the executions and errors page, in the actions and job reports list, the \"Execution\" button \"5\" is enabled%n" +
+                                                "15:passed:250000000:And on the executions and errors page, in the actions and job reports list, the \"fr_Deployment\" button \"5\" is visible%n" +
+                                                "16:passed:156000000:And on the executions and errors page, in the actions and job reports list, the \"fr_Deployment\" button \"5\" is enabled%n" +
+                                                "17:passed:249000000:And on the executions and errors page, in the actions and job reports list, the \"fr_api\" button \"5\" is visible%n" +
+                                                "18:passed:103000000:And on the executions and errors page, in the actions and job reports list, the \"fr_api\" button \"5\" is enabled%n" +
+                                                "19:passed:153000000:And on the executions and errors page, in the actions and job reports list, the \"fr_desktop\" button \"5\" is visible%n" +
+                                                "20:passed:324000000:And on the executions and errors page, in the actions and job reports list, the \"fr_desktop\" button \"5\" is enabled"),
                                 null,
                                 "https://media.your-company.com/content/images/snapshot2.png",
                                 "https://media.your-company.com/content/videos/videos2.mp4",
@@ -9417,8 +8922,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/83/cucumber-html-reports/report-feature_user-journey-executions-and-errors-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "user-journey.feature",
                                 "Journey",
@@ -9429,10 +8933,9 @@ public class ExecutionResourceIntegration {
                                 "journey;check-the-status-of-a-build",
                                 4,
                                 String.format(
-                                        "5:failed:9931000000:Given an user with a demo project%n"+
-                                                "6:skipped:0:When the user goes to the home page%n"+
-                                                "7:skipped:0:Then the top menu is present"
-                                ),
+                                        "5:failed:9931000000:Given an user with a demo project%n" +
+                                                "6:skipped:0:When the user goes to the home page%n" +
+                                                "7:skipped:0:Then the top menu is present"),
                                 null,
                                 "https://media.your-company.com/content/images/snapshot1.png",
                                 "https://media.your-company.com/content/videos/videos1.mp4",
@@ -9442,9 +8945,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/83/cucumber-html-reports/report-feature_user-journey-feature.html",
                                 null,
-                                null
-                        )
-                );
+                                null));
 
         countryDeployments = new ArrayList<>(execution.getCountryDeployments());
 
@@ -9459,8 +8960,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -9471,16 +8971,14 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581926400000L),
                                 90L,
-                                170L
-                        )
-                );
+                                170L));
 
         errors = runs.stream()
                 .map(Run::getExecutedScenarios)
                 .flatMap(Collection::stream)
                 .map(ExecutedScenario::getErrors)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .toList();
         assertThat(errors)
                 .hasSize(2)
                 .extracting(
@@ -9488,8 +8986,7 @@ public class ExecutionResourceIntegration {
                         "step",
                         "stepDefinition",
                         "stepLine",
-                        "exception"
-                )
+                        "exception")
                 .containsOnly(
                         tuple(
                                 "Check Runs",
@@ -9497,28 +8994,23 @@ public class ExecutionResourceIntegration {
                                 "^on the executions and errors page, in the cart \"([^\"]*)\", on the run \"([^\"]*)\", the team \"([^\"]*)\" is visible$",
                                 26,
                                 String.format(
-                                        "AssertionError: Timed out retrying: Expected to find element: `[data-nrt='executions_CartRowSubTitle_fr_api_28_5']`, but never found it.%n"+
-                                                "    + expected - actual%n%n%n"+
-                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey-executions-and-errors.feature:65845:61)%n"+
-                                                "    at Context.resolveAndRunStepDefinition (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey-executions-and-errors.feature:24567:9)%n"+
-                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey-executions-and-errors.feature:23936:35)"
-                                )
-                        ),
+                                        "AssertionError: Timed out retrying: Expected to find element: `[data-nrt='executions_CartRowSubTitle_fr_api_28_5']`, but never found it.%n" +
+                                                "    + expected - actual%n%n%n" +
+                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey-executions-and-errors.feature:65845:61)%n" +
+                                                "    at Context.resolveAndRunStepDefinition (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey-executions-and-errors.feature:24567:9)%n" +
+                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey-executions-and-errors.feature:23936:35)")),
                         tuple(
                                 "Check the status of a build",
                                 "an user with a demo project",
                                 "^an user with a demo project$",
                                 5,
                                 String.format(
-                                        "AssertionError: Timed out retrying: Expected to find element: `[data-nrt=deleteDemo]`, but never found it.%n"+
-                                                "    + expected - actual%n%n%n"+
-                                                "    at Object.reset (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:65729:50)%n"+
-                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:65946:8)%n"+
-                                                "    at Context.resolveAndRunStepDefinition (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:24567:9)%n"+
-                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:23936:35)"
-                                )
-                        )
-                );
+                                        "AssertionError: Timed out retrying: Expected to find element: `[data-nrt=deleteDemo]`, but never found it.%n" +
+                                                "    + expected - actual%n%n%n" +
+                                                "    at Object.reset (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:65729:50)%n" +
+                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:65946:8)%n" +
+                                                "    at Context.resolveAndRunStepDefinition (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:24567:9)%n" +
+                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:23936:35)")));
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
         assertThat(generatedFilesPaths)
@@ -9542,12 +9034,11 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926400000/fr/cypress-front/reports",
                         "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926400000/fr/cypress-front/reports/cucumber",
                         "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926400000/fr/cypress-front/reports/cucumber/user-journey.cucumber.json",
-                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926400000/fr/cypress-front/reports/cucumber/user-journey-executions-and-errors.cucumber.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926400000/fr/cypress-front/reports/cucumber/user-journey-executions-and-errors.cucumber.json");
     }
 
     @Test
-    public void upload_saveTheCypressExecution_whenCucumberReportMissAStepDefinitions() throws IOException {
+    void upload_saveTheCypressExecution_whenCucumberReportMissAStepDefinitions() throws IOException {
         deleteARADataFolder();
         settingService.clearProjectsValuesCache();
 
@@ -9611,8 +9102,7 @@ public class ExecutionResourceIntegration {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -9630,9 +9120,7 @@ public class ExecutionResourceIntegration {
                                 50L,
                                 30L,
                                 "all",
-                                true
-                        )
-                );
+                                true));
 
         executedScenarios = new ArrayList<>(runs.get(0).getExecutedScenarios());
 
@@ -9657,8 +9145,7 @@ public class ExecutionResourceIntegration {
                         "diffReportUrl",
                         "cucumberReportUrl",
                         "apiServer",
-                        "seleniumNode"
-                )
+                        "seleniumNode")
                 .containsOnly(
                         tuple(
                                 "user-journey-executions-and-errors.feature",
@@ -9670,32 +9157,31 @@ public class ExecutionResourceIntegration {
                                 "journey;check-runs",
                                 23,
                                 String.format(
-                                        "4:passed:2553000000:Given executions and errors%n"+
-                                                "25:passed:587000000:When on the executions and errors page, in the cart \"5\", the user clicks on the run \"fr_api\"%n"+
-                                                "26:failed:4545000000:Then on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"28\" is visible%n"+
-                                                "27:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"27\" is visible%n"+
-                                                "28:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"26\" is hidden%n"+
-                                                "29:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"27\" is hidden%n"+
-                                                "30:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"28\" is hidden%n"+
-                                                "31:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"29\" is hidden%n"+
-                                                "32:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"-404\" is hidden%n"+
-                                                "35:skipped:0:When on the executions and errors page, in the cart \"5\", the user clicks on the run \"fr_desktop\"%n"+
-                                                "36:skipped:0:Then on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"28\" is visible%n"+
-                                                "37:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"27\" is visible%n"+
-                                                "38:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"26\" is visible%n"+
-                                                "39:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"27\" is visible%n"+
-                                                "40:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"28\" is visible%n"+
-                                                "41:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"29\" is visible%n"+
-                                                "42:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"-404\" is visible%n"+
-                                                "45:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_api\", in the column \"sanity-check\", the number of ok is \"2\", the number of problem is \"0\", the number of ko is \"0\", the progress bar is 100%% of success, 0%% of unhandled and 0%% of failed%n"+
-                                                "50:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"sanity-check\", the quality is \"100\", the number of OK is \"9\", the number of KO is \"0\", the color is \"green\"%n"+
-                                                "51:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"high\", the quality is \"100\", the number of OK is \"2\", the number of KO is \"0\", the color is \"green\"%n"+
-                                                "52:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"medium\", the quality is \"100\", the number of OK is \"7\", the number of KO is \"0\", the color is \"green\"%n"+
-                                                "53:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"*\", the quality is \"100\", the number of OK is \"18\", the number of KO is \"0\", the color is \"none\"%n"+
-                                                "56:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"sanity-check\", the threshold is \"100\", the color is \"none\"%n"+
-                                                "57:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"high\", the threshold is \"95\", the color is \"none\"%n"+
-                                                "58:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"medium\", the threshold is \"90\", the color is \"none\""
-                                ),
+                                        "4:passed:2553000000:Given executions and errors%n" +
+                                                "25:passed:587000000:When on the executions and errors page, in the cart \"5\", the user clicks on the run \"fr_api\"%n" +
+                                                "26:failed:4545000000:Then on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"28\" is visible%n" +
+                                                "27:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"27\" is visible%n" +
+                                                "28:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"26\" is hidden%n" +
+                                                "29:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"27\" is hidden%n" +
+                                                "30:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"28\" is hidden%n" +
+                                                "31:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"29\" is hidden%n" +
+                                                "32:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"-404\" is hidden%n" +
+                                                "35:skipped:0:When on the executions and errors page, in the cart \"5\", the user clicks on the run \"fr_desktop\"%n" +
+                                                "36:skipped:0:Then on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"28\" is visible%n" +
+                                                "37:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_api\", the team \"27\" is visible%n" +
+                                                "38:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"26\" is visible%n" +
+                                                "39:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"27\" is visible%n" +
+                                                "40:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"28\" is visible%n" +
+                                                "41:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"29\" is visible%n" +
+                                                "42:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_desktop\", the team \"-404\" is visible%n" +
+                                                "45:skipped:0:And on the executions and errors page, in the cart \"5\", on the run \"fr_api\", in the column \"sanity-check\", the number of ok is \"2\", the number of problem is \"0\", the number of ko is \"0\", the progress bar is 100%% of success, 0%% of unhandled and 0%% of failed%n" +
+                                                "50:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"sanity-check\", the quality is \"100\", the number of OK is \"9\", the number of KO is \"0\", the color is \"green\"%n" +
+                                                "51:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"high\", the quality is \"100\", the number of OK is \"2\", the number of KO is \"0\", the color is \"green\"%n" +
+                                                "52:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"medium\", the quality is \"100\", the number of OK is \"7\", the number of KO is \"0\", the color is \"green\"%n" +
+                                                "53:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"*\", the quality is \"100\", the number of OK is \"18\", the number of KO is \"0\", the color is \"none\"%n" +
+                                                "56:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"sanity-check\", the threshold is \"100\", the color is \"none\"%n" +
+                                                "57:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"high\", the threshold is \"95\", the color is \"none\"%n" +
+                                                "58:skipped:0:And on the executions and errors page, in the cart \"5\", on the header, in the column \"medium\", the threshold is \"90\", the color is \"none\""),
                                 null,
                                 null,
                                 null,
@@ -9705,8 +9191,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/83/cucumber-html-reports/report-feature_user-journey-executions-and-errors-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "user-journey-executions-and-errors.feature",
                                 "Journey",
@@ -9717,21 +9202,20 @@ public class ExecutionResourceIntegration {
                                 "journey;check-the-actions-buttons",
                                 7,
                                 String.format(
-                                        "4:passed:4216000000:Given executions and errors%n"+
-                                                "8:passed:790000000:When on the executions and errors page, the user clicks on the actions and job reports button \"5\"%n"+
-                                                "9:passed:128000000:Then on the executions and errors page, in the actions and job reports list, the \"Actions\" button \"5\" is visible%n"+
-                                                "10:passed:133000000:And on the executions and errors page, in the actions and job reports list, the \"Actions\" button \"5\" is disabled%n"+
-                                                "11:passed:425000000:And on the executions and errors page, in the actions and job reports list, the \"JobReports\" button \"5\" is visible%n"+
-                                                "12:passed:143000000:And on the executions and errors page, in the actions and job reports list, the \"JobReports\" button \"5\" is disabled%n"+
-                                                "13:passed:268000000:And on the executions and errors page, in the actions and job reports list, the \"Execution\" button \"5\" is visible%n"+
-                                                "14:passed:228000000:And on the executions and errors page, in the actions and job reports list, the \"Execution\" button \"5\" is enabled%n"+
-                                                "15:passed:250000000:And on the executions and errors page, in the actions and job reports list, the \"fr_Deployment\" button \"5\" is visible%n"+
-                                                "16:passed:156000000:And on the executions and errors page, in the actions and job reports list, the \"fr_Deployment\" button \"5\" is enabled%n"+
-                                                "17:passed:249000000:And on the executions and errors page, in the actions and job reports list, the \"fr_api\" button \"5\" is visible%n"+
-                                                "18:passed:103000000:And on the executions and errors page, in the actions and job reports list, the \"fr_api\" button \"5\" is enabled%n"+
-                                                "19:passed:153000000:And on the executions and errors page, in the actions and job reports list, the \"fr_desktop\" button \"5\" is visible%n"+
-                                                "20:passed:324000000:And on the executions and errors page, in the actions and job reports list, the \"fr_desktop\" button \"5\" is enabled"
-                                ),
+                                        "4:passed:4216000000:Given executions and errors%n" +
+                                                "8:passed:790000000:When on the executions and errors page, the user clicks on the actions and job reports button \"5\"%n" +
+                                                "9:passed:128000000:Then on the executions and errors page, in the actions and job reports list, the \"Actions\" button \"5\" is visible%n" +
+                                                "10:passed:133000000:And on the executions and errors page, in the actions and job reports list, the \"Actions\" button \"5\" is disabled%n" +
+                                                "11:passed:425000000:And on the executions and errors page, in the actions and job reports list, the \"JobReports\" button \"5\" is visible%n" +
+                                                "12:passed:143000000:And on the executions and errors page, in the actions and job reports list, the \"JobReports\" button \"5\" is disabled%n" +
+                                                "13:passed:268000000:And on the executions and errors page, in the actions and job reports list, the \"Execution\" button \"5\" is visible%n" +
+                                                "14:passed:228000000:And on the executions and errors page, in the actions and job reports list, the \"Execution\" button \"5\" is enabled%n" +
+                                                "15:passed:250000000:And on the executions and errors page, in the actions and job reports list, the \"fr_Deployment\" button \"5\" is visible%n" +
+                                                "16:passed:156000000:And on the executions and errors page, in the actions and job reports list, the \"fr_Deployment\" button \"5\" is enabled%n" +
+                                                "17:passed:249000000:And on the executions and errors page, in the actions and job reports list, the \"fr_api\" button \"5\" is visible%n" +
+                                                "18:passed:103000000:And on the executions and errors page, in the actions and job reports list, the \"fr_api\" button \"5\" is enabled%n" +
+                                                "19:passed:153000000:And on the executions and errors page, in the actions and job reports list, the \"fr_desktop\" button \"5\" is visible%n" +
+                                                "20:passed:324000000:And on the executions and errors page, in the actions and job reports list, the \"fr_desktop\" button \"5\" is enabled"),
                                 null,
                                 null,
                                 null,
@@ -9741,8 +9225,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/83/cucumber-html-reports/report-feature_user-journey-executions-and-errors-feature.html",
                                 null,
-                                null
-                        ),
+                                null),
                         tuple(
                                 "user-journey.feature",
                                 "Journey",
@@ -9753,10 +9236,9 @@ public class ExecutionResourceIntegration {
                                 "journey;check-the-status-of-a-build",
                                 4,
                                 String.format(
-                                        "5:failed:9931000000:Given an user with a demo project%n"+
-                                                "6:skipped:0:When the user goes to the home page%n"+
-                                                "7:skipped:0:Then the top menu is present"
-                                ),
+                                        "5:failed:9931000000:Given an user with a demo project%n" +
+                                                "6:skipped:0:When the user goes to the home page%n" +
+                                                "7:skipped:0:Then the top menu is present"),
                                 null,
                                 null,
                                 null,
@@ -9766,9 +9248,7 @@ public class ExecutionResourceIntegration {
                                 null,
                                 "https://build.company.com/demo/test/83/cucumber-html-reports/report-feature_user-journey-feature.html",
                                 null,
-                                null
-                        )
-                );
+                                null));
 
         countryDeployments = new ArrayList<>(execution.getCountryDeployments());
 
@@ -9783,8 +9263,7 @@ public class ExecutionResourceIntegration {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 "fr",
@@ -9795,16 +9274,14 @@ public class ExecutionResourceIntegration {
                                 Result.SUCCESS,
                                 new Date(1581926400000L),
                                 90L,
-                                170L
-                        )
-                );
+                                170L));
 
         errors = runs.stream()
                 .map(Run::getExecutedScenarios)
                 .flatMap(Collection::stream)
                 .map(ExecutedScenario::getErrors)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .toList();
         assertThat(errors)
                 .hasSize(2)
                 .extracting(
@@ -9812,8 +9289,7 @@ public class ExecutionResourceIntegration {
                         "step",
                         "stepDefinition",
                         "stepLine",
-                        "exception"
-                )
+                        "exception")
                 .containsOnly(
                         tuple(
                                 "Check Runs",
@@ -9821,28 +9297,23 @@ public class ExecutionResourceIntegration {
                                 "^on the executions and errors page, in the cart \"([^\"]*)\", on the run \"([^\"]*)\", the team \"([^\"]*)\" is visible$",
                                 26,
                                 String.format(
-                                        "AssertionError: Timed out retrying: Expected to find element: `[data-nrt='executions_CartRowSubTitle_fr_api_28_5']`, but never found it.%n"+
-                                                "    + expected - actual%n%n%n"+
-                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey-executions-and-errors.feature:65845:61)%n"+
-                                                "    at Context.resolveAndRunStepDefinition (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey-executions-and-errors.feature:24567:9)%n"+
-                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey-executions-and-errors.feature:23936:35)"
-                                )
-                        ),
+                                        "AssertionError: Timed out retrying: Expected to find element: `[data-nrt='executions_CartRowSubTitle_fr_api_28_5']`, but never found it.%n" +
+                                                "    + expected - actual%n%n%n" +
+                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey-executions-and-errors.feature:65845:61)%n" +
+                                                "    at Context.resolveAndRunStepDefinition (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey-executions-and-errors.feature:24567:9)%n" +
+                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey-executions-and-errors.feature:23936:35)")),
                         tuple(
                                 "Check the status of a build",
                                 "an user with a demo project",
                                 "^an user with a demo project$",
                                 5,
                                 String.format(
-                                        "AssertionError: Timed out retrying: Expected to find element: `[data-nrt=deleteDemo]`, but never found it.%n"+
-                                                "    + expected - actual%n%n%n"+
-                                                "    at Object.reset (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:65729:50)%n"+
-                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:65946:8)%n"+
-                                                "    at Context.resolveAndRunStepDefinition (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:24567:9)%n"+
-                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:23936:35)"
-                                )
-                        )
-                );
+                                        "AssertionError: Timed out retrying: Expected to find element: `[data-nrt=deleteDemo]`, but never found it.%n" +
+                                                "    + expected - actual%n%n%n" +
+                                                "    at Object.reset (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:65729:50)%n" +
+                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:65946:8)%n" +
+                                                "    at Context.resolveAndRunStepDefinition (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:24567:9)%n" +
+                                                "    at Context.eval (http://localhost:8081/__cypress/tests?p=test/cypress/scenarii/user-journey.feature:23936:35)")));
 
         List<String> generatedFilesPaths = getARADataFilesAndFoldersPaths();
         assertThat(generatedFilesPaths)
@@ -9865,10 +9336,8 @@ public class ExecutionResourceIntegration {
                         "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000/fr/cypress-front/reports",
                         "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000/fr/cypress-front/reports/cucumber",
                         "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000/fr/cypress-front/reports/cucumber/user-journey.cucumber.json",
-                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000/fr/cypress-front/reports/cucumber/user-journey-executions-and-errors.cucumber.json"
-                )
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000/fr/cypress-front/reports/cucumber/user-journey-executions-and-errors.cucumber.json")
                 .doesNotContain(
-                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000/fr/cypress-front/stepDefinitions/user-journey.stepDefinitions.json"
-                );
+                        "/opt/ara/data/executions/the-demo-project/master/day/incoming/1581926500000/fr/cypress-front/stepDefinitions/user-journey.stepDefinitions.json");
     }
 }

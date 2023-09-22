@@ -17,58 +17,67 @@
 
 package com.decathlon.ara.web.rest;
 
+import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
 
-import com.decathlon.ara.Entities;
-import com.decathlon.ara.service.ProjectService;
-import com.decathlon.ara.scenario.common.service.ScenarioService;
-import com.decathlon.ara.service.dto.ignore.ScenarioIgnoreSourceDTO;
-import com.decathlon.ara.service.dto.scenario.ScenarioSummaryDTO;
-import com.decathlon.ara.service.exception.BadRequestException;
-import com.decathlon.ara.service.exception.NotFoundException;
-import com.decathlon.ara.scenario.cucumber.upload.CucumberScenarioUploader;
-import com.decathlon.ara.scenario.postman.upload.PostmanScenarioUploader;
-import com.decathlon.ara.web.rest.util.HeaderUtil;
-import com.decathlon.ara.web.rest.util.ResponseUtil;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.validation.Valid;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import static com.decathlon.ara.web.rest.util.RestConstants.PROJECT_API_PATH;
+import javax.validation.Valid;
+
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.decathlon.ara.Entities;
+import com.decathlon.ara.scenario.common.service.ScenarioService;
+import com.decathlon.ara.scenario.cucumber.upload.CucumberScenarioUploader;
+import com.decathlon.ara.scenario.postman.upload.PostmanScenarioUploader;
+import com.decathlon.ara.service.ProjectService;
+import com.decathlon.ara.service.dto.ignore.ScenarioIgnoreSourceDTO;
+import com.decathlon.ara.service.dto.scenario.ScenarioSummaryDTO;
+import com.decathlon.ara.service.exception.BadRequestException;
+import com.decathlon.ara.service.exception.NotFoundException;
+import com.decathlon.ara.web.rest.util.HeaderUtil;
+import com.decathlon.ara.web.rest.util.ResponseUtil;
 
 /**
  * REST controller for managing Scenarios.
  */
-@Slf4j
 @RestController
 @RequestMapping(ScenarioResource.PATH)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ScenarioResource {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ScenarioResource.class);
 
     private static final String NAME = Entities.SCENARIO;
     static final String PATH = PROJECT_API_PATH + "/" + NAME + "s";
 
-    @NonNull
     private final ScenarioService scenarioService;
 
-    @NonNull
     private final PostmanScenarioUploader postmanScenarioUploader;
 
-    @NonNull
     private final CucumberScenarioUploader cucumberScenarioUploader;
 
-    @NonNull
     private final ProjectService projectService;
+
+    public ScenarioResource(ScenarioService scenarioService, PostmanScenarioUploader postmanScenarioUploader,
+            CucumberScenarioUploader cucumberScenarioUploader, ProjectService projectService) {
+        this.scenarioService = scenarioService;
+        this.postmanScenarioUploader = postmanScenarioUploader;
+        this.cucumberScenarioUploader = cucumberScenarioUploader;
+        this.projectService = projectService;
+    }
 
     /**
      * POST to move upload the scenario set of a test code.
@@ -81,13 +90,13 @@ public class ScenarioResource {
     @Deprecated
     @PostMapping("/upload/{sourceCode}")
     public ResponseEntity<Void> uploadCucumber(@PathVariable String projectCode, @PathVariable String sourceCode, @Valid @RequestBody String json) {
-        log.warn("Beware! This resource (scenarios/upload/{sourceCode}) is deprecated.");
-        log.warn("Please, call the new resource instead: cucumber/scenarios/upload/{sourceCode}");
+        LOG.warn("/!\\ Beware! This resource (/api/projects/{}/scenarios/upload/{}) is deprecated /!\\", projectCode, sourceCode);
+        LOG.warn("Please, call the new resource instead: /api/projects/{}/cucumber/scenarios/upload/{}", projectCode, sourceCode);
         try {
             cucumberScenarioUploader.uploadCucumber(projectService.toId(projectCode), sourceCode, json);
             return ResponseEntity.ok().build();
         } catch (BadRequestException e) {
-            log.error("Failed to upload Cucumber scenarios for source code {}", sourceCode, e);
+            LOG.error("SCENARIO|cucumber|Failed to upload Cucumber scenarios for project {} and source code {}", projectCode, sourceCode, e);
             return ResponseUtil.handle(e);
         }
     }
@@ -97,8 +106,8 @@ public class ScenarioResource {
     public ResponseEntity<Void> uploadPostman(@PathVariable String projectCode,
                                               @PathVariable String sourceCode,
                                               @RequestParam("file") MultipartFile file) {
-        log.warn("Beware! This resource (scenarios/upload-postman/{sourceCode}) is deprecated.");
-        log.warn("Please, call the new resource instead: postman/scenarios/upload/{sourceCode}");
+        LOG.warn("/!\\ Beware! This resource (/api/projects/{}/scenarios/upload-postman/{}) is deprecated /!\\", projectCode, sourceCode);
+        LOG.warn("Please, call the new resource instead: /api/projects/{}/postman/scenarios/upload/{}", projectCode, sourceCode);
         File tempZipFile = null;
         try {
             tempZipFile = File.createTempFile("ara_scenario_upload_", ".zip");
@@ -107,10 +116,10 @@ public class ScenarioResource {
             postmanScenarioUploader.uploadPostman(projectService.toId(projectCode), sourceCode, tempZipFile);
             return ResponseEntity.ok().build();
         } catch (BadRequestException e) {
-            log.error("Failed to upload ZIP file containing Postman requests for source code {}", sourceCode, e);
+            LOG.error("SCENARIO|postman|Failed to upload ZIP file containing Postman requests for project {} and source code {}", projectCode, sourceCode, e);
             return ResponseUtil.handle(e);
         } catch (IOException e) {
-            log.error("Failed to upload ZIP file containing Postman requests for source code {}", sourceCode, e);
+            LOG.error("SCENARIO|postman|Failed to upload ZIP file containing Postman requests for project {} and source code {}", projectCode, sourceCode, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .headers(HeaderUtil.exception(Entities.SCENARIO, e))
                     .build();

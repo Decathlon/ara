@@ -17,29 +17,42 @@
 
 package com.decathlon.ara.domain;
 
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.nullsFirst;
 
-import com.decathlon.ara.domain.enumeration.DefectExistence;
-import com.decathlon.ara.domain.enumeration.EffectiveProblemStatus;
-import com.decathlon.ara.domain.enumeration.ProblemStatus;
-import lombok.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
-import static java.util.Comparator.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import com.decathlon.ara.domain.enumeration.DefectExistence;
+import com.decathlon.ara.domain.enumeration.EffectiveProblemStatus;
+import com.decathlon.ara.domain.enumeration.ProblemStatus;
+
 @Entity
-// Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
-@EqualsAndHashCode(of = { "projectId", "name" })
 public class Problem implements Comparable<Problem> {
 
     @Id
@@ -149,11 +162,140 @@ public class Problem implements Comparable<Problem> {
                 .thenComparing(nameComparator)).compare(this, other);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, projectId);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Problem)) {
+            return false;
+        }
+        Problem other = (Problem) obj;
+        return Objects.equals(name, other.name) && projectId == other.projectId;
+    }
+
     /**
      * @return true if the status is either open, or is closed and did not reappear after the closing date
      */
     boolean isHandled() {
         return getEffectiveStatus() != EffectiveProblemStatus.REAPPEARED;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(long projectId) {
+        this.projectId = projectId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public ProblemStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ProblemStatus status) {
+        this.status = status;
+    }
+
+    public Team getBlamedTeam() {
+        return blamedTeam;
+    }
+
+    public void setBlamedTeam(Team blamedTeam) {
+        this.blamedTeam = blamedTeam;
+    }
+
+    public String getDefectId() {
+        return defectId;
+    }
+
+    public void setDefectId(String defectId) {
+        this.defectId = defectId;
+    }
+
+    public DefectExistence getDefectExistence() {
+        return defectExistence;
+    }
+
+    public void setDefectExistence(DefectExistence defectExistence) {
+        this.defectExistence = defectExistence;
+    }
+
+    public Date getClosingDateTime() {
+        return closingDateTime;
+    }
+
+    public void setClosingDateTime(Date closingDateTime) {
+        this.closingDateTime = closingDateTime;
+    }
+
+    public RootCause getRootCause() {
+        return rootCause;
+    }
+
+    public void setRootCause(RootCause rootCause) {
+        this.rootCause = rootCause;
+    }
+
+    public List<ProblemPattern> getPatterns() {
+        return patterns;
+    }
+
+    public void setPatterns(List<ProblemPattern> patterns) {
+        this.patterns = patterns;
+    }
+
+    public Date getCreationDateTime() {
+        return creationDateTime;
+    }
+
+    public void setCreationDateTime(Date creationDateTime) {
+        this.creationDateTime = creationDateTime;
+    }
+
+    public Date getFirstSeenDateTime() {
+        return firstSeenDateTime;
+    }
+
+    public void setFirstSeenDateTime(Date firstSeenDateTime) {
+        this.firstSeenDateTime = firstSeenDateTime;
+    }
+
+    public Date getLastSeenDateTime() {
+        return lastSeenDateTime;
+    }
+
+    public void setLastSeenDateTime(Date lastSeenDateTime) {
+        this.lastSeenDateTime = lastSeenDateTime;
     }
 
 }

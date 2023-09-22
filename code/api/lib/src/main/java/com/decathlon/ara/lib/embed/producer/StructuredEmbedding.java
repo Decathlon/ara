@@ -17,20 +17,11 @@
 
 package com.decathlon.ara.lib.embed.producer;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-
 /**
  * Base class for structured embeddings to attach to Cucumber scenarios.<br>
  * Implementations barely only need to implement {@link #toHtml()} and a constructor that passes a hard-coded type to
  * its parent constructor.
  */
-@Getter
-@AllArgsConstructor
-@EqualsAndHashCode
-@ToString
 public abstract class StructuredEmbedding {
 
     /**
@@ -63,9 +54,37 @@ public abstract class StructuredEmbedding {
      */
     private final EmbeddingPriority priority;
 
-    /**
+    protected StructuredEmbedding(String kind, String name, String type, Object data, EmbeddingPriority priority) {
+		this.kind = kind;
+		this.name = name;
+		this.type = type;
+		this.data = data;
+		this.priority = priority;
+	}
+
+	/**
      * @return the HTML representation of the embedding, for human display (any user data must be HTML escaped)
      */
     public abstract String toHtml();
+
+	public String getKind() {
+		return kind;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public Object getData() {
+		return data;
+	}
+
+	public EmbeddingPriority getPriority() {
+		return priority;
+	}
 
 }

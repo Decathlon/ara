@@ -70,7 +70,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
-public class ExecutionFilesProcessorServiceTest {
+class ExecutionFilesProcessorServiceTest {
 
     private final static String BUILD_INFORMATION_FILE_NAME = "buildInformation.json";
 
@@ -119,7 +119,7 @@ public class ExecutionFilesProcessorServiceTest {
     private ExecutionFilesProcessorService cut;
 
     @Test
-    public void getExecution_returnEmpty_whenPlannedIndexationIsNull(){
+    void getExecution_returnEmpty_whenPlannedIndexationIsNull() {
         // Given
 
         // When
@@ -133,7 +133,7 @@ public class ExecutionFilesProcessorServiceTest {
     }
 
     @Test
-    public void getExecution_returnEmpty_whenExecutionFolderIsNull(){
+    void getExecution_returnEmpty_whenExecutionFolderIsNull() {
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
 
@@ -149,7 +149,7 @@ public class ExecutionFilesProcessorServiceTest {
     }
 
     @Test
-    public void getExecution_returnEmpty_whenCycleDefinitionIsNull(){
+    void getExecution_returnEmpty_whenCycleDefinitionIsNull() {
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
         File executionFile = mock(File.class);
@@ -167,7 +167,7 @@ public class ExecutionFilesProcessorServiceTest {
     }
 
     @Test
-    public void getExecution_returnEmpty_whenNoExecutionBuildFound(){
+    void getExecution_returnEmpty_whenNoExecutionBuildFound() {
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
         File executionFile = mock(File.class);
@@ -190,7 +190,7 @@ public class ExecutionFilesProcessorServiceTest {
     }
 
     @Test
-    public void getExecution_returnEmpty_whenDoneExecutionFound() {
+    void getExecution_returnEmpty_whenDoneExecutionFound() {
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
         File executionFile = mock(File.class);
@@ -221,7 +221,7 @@ public class ExecutionFilesProcessorServiceTest {
     }
 
     @Test
-    public void getExecution_returnEmpty_whenNoCycleDefinitionFoundAndExecutionNotDoneAndNoExecutionCompletionRequest() {
+    void getExecution_returnEmpty_whenNoCycleDefinitionFoundAndExecutionNotDoneAndNoExecutionCompletionRequest() {
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
         File executionFile = mock(File.class);
@@ -255,7 +255,7 @@ public class ExecutionFilesProcessorServiceTest {
     }
 
     @Test
-    public void getExecution_returnBlockedExecution_whenNoCycleDefinitionFoundButExecutionDoneAndNoExecutionCompletionRequest() {
+    void getExecution_returnBlockedExecution_whenNoCycleDefinitionFoundButExecutionDoneAndNoExecutionCompletionRequest() {
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
         File executionFile = mock(File.class);
@@ -320,7 +320,7 @@ public class ExecutionFilesProcessorServiceTest {
     }
 
     @Test
-    public void getExecution_returnBlockedExecution_whenNoCycleDefinitionFoundButExecutionNotDoneButExecutionCompletionRequestFound() {
+    void getExecution_returnBlockedExecution_whenNoCycleDefinitionFoundButExecutionNotDoneButExecutionCompletionRequestFound() {
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
         File executionFile = mock(File.class);
@@ -387,7 +387,7 @@ public class ExecutionFilesProcessorServiceTest {
     }
 
     @Test
-    public void getExecution_returnExecution_whenCycleDefinitionFoundButCountryFolderEmpty() throws IOException {
+    void getExecution_returnExecution_whenCycleDefinitionFoundButCountryFolderEmpty() throws IOException {
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
         File executionFile = mock(File.class);
@@ -409,7 +409,7 @@ public class ExecutionFilesProcessorServiceTest {
         when(plannedIndexation.getExecutionFolder()).thenReturn(executionFile);
         when(settingService.get(1L, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH)).thenReturn(BUILD_INFORMATION_FILE_NAME);
         when(settingService.get(1L, Settings.EXECUTION_INDEXER_FILE_CYCLE_DEFINITION_PATH)).thenReturn(CYCLE_DEFINITION_FILE_NAME);
-        when(executionFile.listFiles()).thenReturn(new File[] {executionBuildInformationFile, cycleDefinitionFile});
+        when(executionFile.listFiles()).thenReturn(new File[] { executionBuildInformationFile, cycleDefinitionFile });
         when(plannedIndexation.getCycleDefinition()).thenReturn(cycleDefinition);
         when(cycleDefinition.getProjectId()).thenReturn(1L);
         when(cycleDefinition.getBranch()).thenReturn("develop");
@@ -464,7 +464,7 @@ public class ExecutionFilesProcessorServiceTest {
     }
 
     @Test
-    public void getExecution_returnExecution_whenCycleDefinitionFoundAndCountryFolderAndTypeFolderAreNotEmptyAndCorrect() throws IOException {
+    void getExecution_returnExecution_whenCycleDefinitionFoundAndCountryFolderAndTypeFolderAreNotEmptyAndCorrect() throws IOException {
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
         File executionFile = mock(File.class);
@@ -505,10 +505,12 @@ public class ExecutionFilesProcessorServiceTest {
         PlatformRule platformRule12 = mock(PlatformRule.class);
         PlatformRule platformRule21 = mock(PlatformRule.class);
 
-        Map<String, List<PlatformRule>> platformRules = new HashMap<String, List<PlatformRule>>(){{
-            put("integration-1", Arrays.asList(platformRule11, platformRule12));
-            put("integration-2", Arrays.asList(platformRule21));
-        }};
+        Map<String, List<PlatformRule>> platformRules = new HashMap<String, List<PlatformRule>>() {
+            {
+                put("integration-1", Arrays.asList(platformRule11, platformRule12));
+                put("integration-2", Arrays.asList(platformRule21));
+            }
+        };
 
         File esBuildFile = mock(File.class);
         File frBuildFile = mock(File.class);
@@ -608,10 +610,10 @@ public class ExecutionFilesProcessorServiceTest {
 
         when(esFolder.isDirectory()).thenReturn(true);
         when(esFolder.getName()).thenReturn("es");
-        when(esFolder.listFiles()).thenReturn(new File[]{apiTypeFolder, esBuildFile});
+        when(esFolder.listFiles()).thenReturn(new File[] { apiTypeFolder, esBuildFile });
         when(frFolder.isDirectory()).thenReturn(true);
         when(frFolder.getName()).thenReturn("fr");
-        when(frFolder.listFiles()).thenReturn(new File[]{desktopTypeFolder, mobileTypeFolder, frBuildFile});
+        when(frFolder.listFiles()).thenReturn(new File[] { desktopTypeFolder, mobileTypeFolder, frBuildFile });
 
         when(apiBuild.getLink()).thenReturn("/execution/path/to/folder/api");
         when(apiBuild.getUrl()).thenReturn("http://build.fr/execution/api");
@@ -683,8 +685,7 @@ public class ExecutionFilesProcessorServiceTest {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 esCountry,
@@ -699,8 +700,7 @@ public class ExecutionFilesProcessorServiceTest {
                                 185L,
                                 650L,
                                 "all-severities",
-                                true
-                        ),
+                                true),
                         tuple(
                                 frCountry,
                                 desktopType,
@@ -714,8 +714,7 @@ public class ExecutionFilesProcessorServiceTest {
                                 745L,
                                 350L,
                                 "sanity",
-                                false
-                        ),
+                                false),
                         tuple(
                                 frCountry,
                                 mobileType,
@@ -729,9 +728,7 @@ public class ExecutionFilesProcessorServiceTest {
                                 3050L,
                                 75L,
                                 "sanity",
-                                false
-                        )
-                );
+                                false));
         assertThat(execution.get().getCountryDeployments())
                 .hasSize(2)
                 .extracting(
@@ -743,8 +740,7 @@ public class ExecutionFilesProcessorServiceTest {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 esCountry,
@@ -755,8 +751,7 @@ public class ExecutionFilesProcessorServiceTest {
                                 Result.SUCCESS,
                                 new Date(1590200515000L),
                                 300L,
-                                200L
-                        ),
+                                200L),
                         tuple(
                                 frCountry,
                                 "integration-2",
@@ -768,8 +763,7 @@ public class ExecutionFilesProcessorServiceTest {
                                 99L,
                                 500L
 
-                        )
-                );
+                        ));
         verify(executionCompletionRequestRepository, never()).delete(any(ExecutionCompletionRequest.class));
         verify(qualityService).computeQuality(execution.get());
         verify(scenariosIndexerStrategy, times(2)).getScenariosIndexer(Technology.CUCUMBER);
@@ -777,7 +771,7 @@ public class ExecutionFilesProcessorServiceTest {
     }
 
     @Test
-    public void getExecution_returnExecution_whenCycleDefinitionFoundAndCountryIsNotInDBAndTypeFound() throws IOException {
+    void getExecution_returnExecution_whenCycleDefinitionFoundAndCountryIsNotInDBAndTypeFound() throws IOException {
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
         File executionFile = mock(File.class);
@@ -813,10 +807,12 @@ public class ExecutionFilesProcessorServiceTest {
         PlatformRule platformRule12 = mock(PlatformRule.class);
         PlatformRule platformRule21 = mock(PlatformRule.class);
 
-        Map<String, List<PlatformRule>> platformRules = new HashMap<String, List<PlatformRule>>(){{
-            put("integration-1", Arrays.asList(platformRule11, platformRule12));
-            put("integration-2", Arrays.asList(platformRule21));
-        }};
+        Map<String, List<PlatformRule>> platformRules = new HashMap<String, List<PlatformRule>>() {
+            {
+                put("integration-1", Arrays.asList(platformRule11, platformRule12));
+                put("integration-2", Arrays.asList(platformRule21));
+            }
+        };
 
         File esBuildFile = mock(File.class);
 
@@ -894,7 +890,7 @@ public class ExecutionFilesProcessorServiceTest {
 
         when(esFolder.isDirectory()).thenReturn(true);
         when(esFolder.getName()).thenReturn("es");
-        when(esFolder.listFiles()).thenReturn(new File[]{apiTypeFolder, esBuildFile});
+        when(esFolder.listFiles()).thenReturn(new File[] { apiTypeFolder, esBuildFile });
         when(frFolder.isDirectory()).thenReturn(true);
 
         when(apiBuild.getLink()).thenReturn("/execution/path/to/folder/api");
@@ -945,8 +941,7 @@ public class ExecutionFilesProcessorServiceTest {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 esCountry,
@@ -961,9 +956,7 @@ public class ExecutionFilesProcessorServiceTest {
                                 185L,
                                 650L,
                                 "all-severities",
-                                true
-                        )
-                );
+                                true));
         assertThat(execution.get().getCountryDeployments())
                 .hasSize(1)
                 .extracting(
@@ -975,8 +968,7 @@ public class ExecutionFilesProcessorServiceTest {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 esCountry,
@@ -987,9 +979,7 @@ public class ExecutionFilesProcessorServiceTest {
                                 Result.SUCCESS,
                                 new Date(1590200515000L),
                                 300L,
-                                200L
-                        )
-                );
+                                200L));
         verify(executionCompletionRequestRepository, never()).delete(any(ExecutionCompletionRequest.class));
         verify(qualityService).computeQuality(execution.get());
         verify(scenariosIndexerStrategy, never()).getScenariosIndexer(Technology.CUCUMBER);
@@ -997,7 +987,7 @@ public class ExecutionFilesProcessorServiceTest {
     }
 
     @Test
-    public void getExecution_returnExecution_whenCycleDefinitionFoundAndCountryFolderNotFoundButTypeFolderCorrect() throws IOException {
+    void getExecution_returnExecution_whenCycleDefinitionFoundAndCountryFolderNotFoundButTypeFolderCorrect() throws IOException {
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
         File executionFile = mock(File.class);
@@ -1033,10 +1023,12 @@ public class ExecutionFilesProcessorServiceTest {
         PlatformRule platformRule12 = mock(PlatformRule.class);
         PlatformRule platformRule21 = mock(PlatformRule.class);
 
-        Map<String, List<PlatformRule>> platformRules = new HashMap<String, List<PlatformRule>>(){{
-            put("integration-1", Arrays.asList(platformRule11, platformRule12));
-            put("integration-2", Arrays.asList(platformRule21));
-        }};
+        Map<String, List<PlatformRule>> platformRules = new HashMap<String, List<PlatformRule>>() {
+            {
+                put("integration-1", Arrays.asList(platformRule11, platformRule12));
+                put("integration-2", Arrays.asList(platformRule21));
+            }
+        };
 
         File esBuildFile = mock(File.class);
 
@@ -1113,7 +1105,7 @@ public class ExecutionFilesProcessorServiceTest {
 
         when(esFolder.isDirectory()).thenReturn(true);
         when(esFolder.getName()).thenReturn("es");
-        when(esFolder.listFiles()).thenReturn(new File[]{apiTypeFolder, esBuildFile});
+        when(esFolder.listFiles()).thenReturn(new File[] { apiTypeFolder, esBuildFile });
 
         when(apiBuild.getLink()).thenReturn("/execution/path/to/folder/api");
         when(apiBuild.getUrl()).thenReturn("http://build.fr/execution/api");
@@ -1163,8 +1155,7 @@ public class ExecutionFilesProcessorServiceTest {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 esCountry,
@@ -1179,9 +1170,7 @@ public class ExecutionFilesProcessorServiceTest {
                                 185L,
                                 650L,
                                 "all-severities",
-                                true
-                        )
-                );
+                                true));
         assertThat(execution.get().getCountryDeployments())
                 .hasSize(2)
                 .extracting(
@@ -1193,8 +1182,7 @@ public class ExecutionFilesProcessorServiceTest {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 esCountry,
@@ -1205,8 +1193,7 @@ public class ExecutionFilesProcessorServiceTest {
                                 Result.SUCCESS,
                                 new Date(1590200515000L),
                                 300L,
-                                200L
-                        ),
+                                200L),
                         tuple(
                                 frCountry,
                                 "integration-2",
@@ -1216,9 +1203,7 @@ public class ExecutionFilesProcessorServiceTest {
                                 null,
                                 null,
                                 null,
-                                null
-                        )
-                );
+                                null));
         verify(executionCompletionRequestRepository, never()).delete(any(ExecutionCompletionRequest.class));
         verify(qualityService).computeQuality(execution.get());
         verify(scenariosIndexerStrategy, never()).getScenariosIndexer(Technology.CUCUMBER);
@@ -1226,7 +1211,7 @@ public class ExecutionFilesProcessorServiceTest {
     }
 
     @Test
-    public void getExecution_returnExecution_whenCycleDefinitionFoundAndCountryFoundAndTypeNotInDB() throws IOException {
+    void getExecution_returnExecution_whenCycleDefinitionFoundAndCountryFoundAndTypeNotInDB() throws IOException {
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
         File executionFile = mock(File.class);
@@ -1265,10 +1250,12 @@ public class ExecutionFilesProcessorServiceTest {
         PlatformRule platformRule12 = mock(PlatformRule.class);
         PlatformRule platformRule21 = mock(PlatformRule.class);
 
-        Map<String, List<PlatformRule>> platformRules = new HashMap<String, List<PlatformRule>>(){{
-            put("integration-1", Arrays.asList(platformRule11, platformRule12));
-            put("integration-2", Arrays.asList(platformRule21));
-        }};
+        Map<String, List<PlatformRule>> platformRules = new HashMap<String, List<PlatformRule>>() {
+            {
+                put("integration-1", Arrays.asList(platformRule11, platformRule12));
+                put("integration-2", Arrays.asList(platformRule21));
+            }
+        };
 
         File esBuildFile = mock(File.class);
         File frBuildFile = mock(File.class);
@@ -1365,10 +1352,10 @@ public class ExecutionFilesProcessorServiceTest {
 
         when(esFolder.isDirectory()).thenReturn(true);
         when(esFolder.getName()).thenReturn("es");
-        when(esFolder.listFiles()).thenReturn(new File[]{apiTypeFolder, esBuildFile});
+        when(esFolder.listFiles()).thenReturn(new File[] { apiTypeFolder, esBuildFile });
         when(frFolder.isDirectory()).thenReturn(true);
         when(frFolder.getName()).thenReturn("fr");
-        when(frFolder.listFiles()).thenReturn(new File[]{desktopTypeFolder, mobileTypeFolder, frBuildFile});
+        when(frFolder.listFiles()).thenReturn(new File[] { desktopTypeFolder, mobileTypeFolder, frBuildFile });
 
         when(apiBuild.getLink()).thenReturn("/execution/path/to/folder/api");
         when(apiBuild.getUrl()).thenReturn("http://build.fr/execution/api");
@@ -1431,8 +1418,7 @@ public class ExecutionFilesProcessorServiceTest {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 esCountry,
@@ -1447,8 +1433,7 @@ public class ExecutionFilesProcessorServiceTest {
                                 185L,
                                 650L,
                                 "all-severities",
-                                true
-                        ),
+                                true),
                         tuple(
                                 frCountry,
                                 mobileType,
@@ -1462,9 +1447,7 @@ public class ExecutionFilesProcessorServiceTest {
                                 3050L,
                                 75L,
                                 "sanity",
-                                false
-                        )
-                );
+                                false));
         assertThat(execution.get().getCountryDeployments())
                 .hasSize(2)
                 .extracting(
@@ -1476,8 +1459,7 @@ public class ExecutionFilesProcessorServiceTest {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 esCountry,
@@ -1488,8 +1470,7 @@ public class ExecutionFilesProcessorServiceTest {
                                 Result.SUCCESS,
                                 new Date(1590200515000L),
                                 300L,
-                                200L
-                        ),
+                                200L),
                         tuple(
                                 frCountry,
                                 "integration-2",
@@ -1501,8 +1482,7 @@ public class ExecutionFilesProcessorServiceTest {
                                 99L,
                                 500L
 
-                        )
-                );
+                        ));
         verify(executionCompletionRequestRepository, never()).delete(any(ExecutionCompletionRequest.class));
         verify(qualityService).computeQuality(execution.get());
         verify(scenariosIndexerStrategy).getScenariosIndexer(Technology.CUCUMBER);
@@ -1510,7 +1490,7 @@ public class ExecutionFilesProcessorServiceTest {
     }
 
     @Test
-    public void getExecution_returnExecution_whenCycleDefinitionFoundAndCountryFolderFoundButTypeFolderNotFound() throws IOException {
+    void getExecution_returnExecution_whenCycleDefinitionFoundAndCountryFolderFoundButTypeFolderNotFound() throws IOException {
         // Given
         PlannedIndexation plannedIndexation = mock(PlannedIndexation.class);
         File executionFile = mock(File.class);
@@ -1550,10 +1530,12 @@ public class ExecutionFilesProcessorServiceTest {
         PlatformRule platformRule12 = mock(PlatformRule.class);
         PlatformRule platformRule21 = mock(PlatformRule.class);
 
-        Map<String, List<PlatformRule>> platformRules = new HashMap<String, List<PlatformRule>>(){{
-            put("integration-1", Arrays.asList(platformRule11, platformRule12));
-            put("integration-2", Arrays.asList(platformRule21));
-        }};
+        Map<String, List<PlatformRule>> platformRules = new HashMap<String, List<PlatformRule>>() {
+            {
+                put("integration-1", Arrays.asList(platformRule11, platformRule12));
+                put("integration-2", Arrays.asList(platformRule21));
+            }
+        };
 
         File esBuildFile = mock(File.class);
         File frBuildFile = mock(File.class);
@@ -1651,10 +1633,10 @@ public class ExecutionFilesProcessorServiceTest {
 
         when(esFolder.isDirectory()).thenReturn(true);
         when(esFolder.getName()).thenReturn("es");
-        when(esFolder.listFiles()).thenReturn(new File[]{apiTypeFolder, esBuildFile});
+        when(esFolder.listFiles()).thenReturn(new File[] { apiTypeFolder, esBuildFile });
         when(frFolder.isDirectory()).thenReturn(true);
         when(frFolder.getName()).thenReturn("fr");
-        when(frFolder.listFiles()).thenReturn(new File[]{mobileTypeFolder, frBuildFile});
+        when(frFolder.listFiles()).thenReturn(new File[] { mobileTypeFolder, frBuildFile });
 
         when(apiBuild.getLink()).thenReturn("/execution/path/to/folder/api");
         when(apiBuild.getUrl()).thenReturn("http://build.fr/execution/api");
@@ -1715,8 +1697,7 @@ public class ExecutionFilesProcessorServiceTest {
                         "estimatedDuration",
                         "duration",
                         "severityTags",
-                        "includeInThresholds"
-                )
+                        "includeInThresholds")
                 .containsOnly(
                         tuple(
                                 esCountry,
@@ -1731,8 +1712,7 @@ public class ExecutionFilesProcessorServiceTest {
                                 185L,
                                 650L,
                                 "all-severities",
-                                true
-                        ),
+                                true),
                         tuple(
                                 frCountry,
                                 mobileType,
@@ -1746,8 +1726,7 @@ public class ExecutionFilesProcessorServiceTest {
                                 3050L,
                                 75L,
                                 "sanity",
-                                false
-                        ),
+                                false),
                         tuple(
                                 frCountry,
                                 desktopType,
@@ -1761,9 +1740,7 @@ public class ExecutionFilesProcessorServiceTest {
                                 null,
                                 null,
                                 "sanity",
-                                false
-                        )
-                );
+                                false));
         assertThat(execution.get().getCountryDeployments())
                 .hasSize(2)
                 .extracting(
@@ -1775,8 +1752,7 @@ public class ExecutionFilesProcessorServiceTest {
                         "result",
                         "startDateTime",
                         "estimatedDuration",
-                        "duration"
-                )
+                        "duration")
                 .containsOnly(
                         tuple(
                                 esCountry,
@@ -1787,8 +1763,7 @@ public class ExecutionFilesProcessorServiceTest {
                                 Result.SUCCESS,
                                 new Date(1590200515000L),
                                 300L,
-                                200L
-                        ),
+                                200L),
                         tuple(
                                 frCountry,
                                 "integration-2",
@@ -1800,8 +1775,7 @@ public class ExecutionFilesProcessorServiceTest {
                                 99L,
                                 500L
 
-                        )
-                );
+                        ));
         verify(executionCompletionRequestRepository, never()).delete(any(ExecutionCompletionRequest.class));
         verify(qualityService).computeQuality(execution.get());
         verify(scenariosIndexerStrategy).getScenariosIndexer(Technology.CUCUMBER);

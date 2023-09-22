@@ -20,25 +20,15 @@ package com.decathlon.ara.domain;
 import com.decathlon.ara.domain.enumeration.CoverageLevel;
 import com.decathlon.ara.domain.enumeration.FunctionalitySeverity;
 import com.decathlon.ara.domain.enumeration.FunctionalityType;
-import lombok.*;
 import org.hibernate.annotations.SortNatural;
 
 import javax.persistence.*;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import static java.util.Comparator.*;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 @Entity
 @NamedEntityGraph(name = "Functionality.scenarios", attributeNodes = @NamedAttributeNode("scenarios"))
-// Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
-@EqualsAndHashCode(of = { "projectId", "parentId", "name" })
 public class Functionality implements Comparable<Functionality> {
 
     public static final String COUNTRY_CODES_SEPARATOR = ",";
@@ -95,8 +85,6 @@ public class Functionality implements Comparable<Functionality> {
     @Column(length = 512)
     private String ignoredCountryScenarios;
 
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
     @Transient
     private CoverageLevel lazyLoadedCoverageLevel;
 
@@ -115,8 +103,7 @@ public class Functionality implements Comparable<Functionality> {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "functionality_coverage",
             joinColumns = @JoinColumn(name = "functionality_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "scenario_id", referencedColumnName = "id")
-    )
+            inverseJoinColumns = @JoinColumn(name = "scenario_id", referencedColumnName = "id"))
     @SortNatural
     private Set<Scenario> scenarios = new TreeSet<>();
 
@@ -186,7 +173,7 @@ public class Functionality implements Comparable<Functionality> {
     @Override
     public int compareTo(Functionality other) {
         // Keep business key in sync with @EqualsAndHashCode
-        Comparator<Functionality> projectIdComparator = comparing(f -> Long.valueOf(f.getProjectId()), nullsFirst(naturalOrder()));
+        Comparator<Functionality> projectIdComparator = comparing(Functionality::getProjectId, nullsFirst(naturalOrder()));
         Comparator<Functionality> parentIdComparator = comparing(Functionality::getParentId, nullsFirst(naturalOrder()));
         Comparator<Functionality> nameComparator = comparing(Functionality::getName, nullsFirst(naturalOrder()));
         return nullsFirst(projectIdComparator
@@ -194,4 +181,153 @@ public class Functionality implements Comparable<Functionality> {
                 .thenComparing(nameComparator)).compare(this, other);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, parentId, projectId);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Functionality)) {
+            return false;
+        }
+        Functionality other = (Functionality) obj;
+        return Objects.equals(name, other.name) && Objects.equals(parentId, other.parentId)
+                && Objects.equals(projectId, other.projectId);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
+    public Double getOrder() {
+        return order;
+    }
+
+    public void setOrder(Double order) {
+        this.order = order;
+    }
+
+    public FunctionalityType getType() {
+        return type;
+    }
+
+    public void setType(FunctionalityType type) {
+        this.type = type;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getCountryCodes() {
+        return countryCodes;
+    }
+
+    public void setCountryCodes(String countryCodes) {
+        this.countryCodes = countryCodes;
+    }
+
+    public Long getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(Long teamId) {
+        this.teamId = teamId;
+    }
+
+    public FunctionalitySeverity getSeverity() {
+        return severity;
+    }
+
+    public String getCreated() {
+        return created;
+    }
+
+    public Integer getCoveredScenarios() {
+        return coveredScenarios;
+    }
+
+    public void setCoveredScenarios(Integer coveredScenarios) {
+        this.coveredScenarios = coveredScenarios;
+    }
+
+    public String getCoveredCountryScenarios() {
+        return coveredCountryScenarios;
+    }
+
+    public void setCoveredCountryScenarios(String coveredCountryScenarios) {
+        this.coveredCountryScenarios = coveredCountryScenarios;
+    }
+
+    public Integer getIgnoredScenarios() {
+        return ignoredScenarios;
+    }
+
+    public void setIgnoredScenarios(Integer ignoredScenarios) {
+        this.ignoredScenarios = ignoredScenarios;
+    }
+
+    public String getIgnoredCountryScenarios() {
+        return ignoredCountryScenarios;
+    }
+
+    public void setIgnoredCountryScenarios(String ignoredCountryScenarios) {
+        this.ignoredCountryScenarios = ignoredCountryScenarios;
+    }
+
+    public CoverageLevel getLazyLoadedCoverageLevel() {
+        return lazyLoadedCoverageLevel;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public Date getCreationDateTime() {
+        return creationDateTime;
+    }
+
+    public void setCreationDateTime(Date creationDateTime) {
+        this.creationDateTime = creationDateTime;
+    }
+
+    public Date getUpdateDateTime() {
+        return updateDateTime;
+    }
+
+    public void setUpdateDateTime(Date updateDateTime) {
+        this.updateDateTime = updateDateTime;
+    }
+
+    public Set<Scenario> getScenarios() {
+        return scenarios;
+    }
+
+    public void setScenarios(Set<Scenario> scenarios) {
+        this.scenarios = scenarios;
+    }
 }

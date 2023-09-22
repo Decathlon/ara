@@ -17,19 +17,21 @@
 
 package com.decathlon.ara.web.rest.util;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
 import com.decathlon.ara.service.exception.BadGatewayException;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
-import lombok.experimental.UtilityClass;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 /**
  * Utility class for ResponseEntity creation.
  */
-@UtilityClass
 public final class ResponseUtil {
+
+    private ResponseUtil() {
+    }
 
     public static ResponseEntity<Void> deleted(final String entityName, final long id) {
         return deleted(entityName, String.valueOf(id));

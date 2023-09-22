@@ -18,19 +18,32 @@
 package com.decathlon.ara.service.dto.stability;
 
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
 public class CycleStabilityDTO {
 
     private String cycleName;
     private String branchName;
     private List<ExecutionStabilityDTO> executionStabilities;
+
+    public CycleStabilityDTO() {
+    }
+
+    public CycleStabilityDTO(String cycleName, String branchName, List<ExecutionStabilityDTO> executionStabilities) {
+        this.cycleName = cycleName;
+        this.branchName = branchName;
+        this.executionStabilities = executionStabilities;
+    }
+
+    public String getCycleName() {
+        return cycleName;
+    }
+
+    public String getBranchName() {
+        return branchName;
+    }
+
+    public List<ExecutionStabilityDTO> getExecutionStabilities() {
+        return executionStabilities;
+    }
 
 }

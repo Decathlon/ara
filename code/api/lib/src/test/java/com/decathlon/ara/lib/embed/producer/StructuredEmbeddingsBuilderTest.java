@@ -23,10 +23,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class StructuredEmbeddingsBuilderTest {
+class StructuredEmbeddingsBuilderTest {
 
     @Test
-    public void build_ShouldReturnJsonAndHtmlEquivalents_WhenBuilderFilledWithStructuredEmbeddings() {
+    void build_ShouldReturnJsonAndHtmlEquivalents_WhenBuilderFilledWithStructuredEmbeddings() {
         // GIVEN
         StructuredEmbeddingsBuilder builder = new StructuredEmbeddingsBuilder();
         // Added out of priority order to test prioritization too
@@ -65,7 +65,7 @@ public class StructuredEmbeddingsBuilderTest {
     }
 
     @Test
-    public void build_ShouldReturnTrue_WhenNoStructuredEmbeddingsHaveBeenAdded() {
+    void build_ShouldReturnTrue_WhenNoStructuredEmbeddingsHaveBeenAdded() {
         // GIVEN
         StructuredEmbeddingsBuilder builder = new StructuredEmbeddingsBuilder();
 
@@ -77,7 +77,7 @@ public class StructuredEmbeddingsBuilderTest {
     }
 
     @Test
-    public void build_ShouldReturnFalse_WhenAStructuredEmbeddingHaveBeenAdded() {
+    void build_ShouldReturnFalse_WhenAStructuredEmbeddingHaveBeenAdded() {
         // GIVEN
         StructuredEmbeddingsBuilder builder = new StructuredEmbeddingsBuilder();
         builder.add(new TextEmbedding("any", null, "any", EmbeddingPriority.HIDDEN));

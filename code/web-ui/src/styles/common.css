@@ -186,6 +186,11 @@ pre code {
   font-weight: bold;
 }
 
+.smallStyle {
+  display: flex;
+  justify-content: center;
+}
+
 /* FIX https://github.com/iview/iview/issues/2708 */
 
 .ivu-btn-group:not(.ivu-btn-group-vertical)>.ivu-dropdown:last-child:not(:first-child)>.ivu-dropdown-rel>.ivu-btn {

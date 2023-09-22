@@ -21,20 +21,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.decathlon.ara.domain.Country;
 import com.decathlon.ara.domain.Functionality;
 import com.decathlon.ara.repository.CountryRepository;
 import com.decathlon.ara.service.dto.coverage.AxisPointDTO;
+import com.decathlon.ara.util.builder.FunctionalityBuilder;
+import com.decathlon.ara.util.factory.CountryFactory;
 
 @ExtendWith(MockitoExtension.class)
-public class CountryAxisGeneratorTest {
+class CountryAxisGeneratorTest {
 
     private static final int A_PROJECT_ID = 42;
 
@@ -45,39 +49,42 @@ public class CountryAxisGeneratorTest {
     private CountryAxisGenerator cut;
 
     @Test
-    public void testGetCode() {
+    void testGetCode() {
         assertThat(cut.getCode()).isEqualTo("countries");
     }
 
     @Test
-    public void testGetName() {
+    void testGetName() {
         assertThat(cut.getName()).isEqualTo("Countries");
     }
 
     @Test
-    public void testGetPoints() {
+    void testGetPoints() {
         // GIVEN
         when(countryRepository.findAllByProjectIdOrderByCode(A_PROJECT_ID)).thenReturn(Arrays.asList(
-                new Country().withCode("be").withName("Belgium"),
-                new Country().withCode("cn").withName("China")));
+                CountryFactory.get(0l, 0l, "be", "Belgium"),
+                CountryFactory.get(0l, 0l, "cn", "China")));
 
-        // WHEN / THEN
-        assertThat(cut.getPoints(A_PROJECT_ID)).containsExactly(
-                new AxisPointDTO("be", "BE", "Belgium"),
-                new AxisPointDTO("cn", "CN", "China"));
+        // WHEN
+        List<AxisPointDTO> points = cut.getPoints(A_PROJECT_ID).toList();
+
+        //THEN
+        Assertions.assertEquals(2, points.size());
+        Assertions.assertTrue(equals(points.get(0), "be", "BE", "Belgium"));
+        Assertions.assertTrue(equals(points.get(1), "cn", "CN", "China"));
     }
 
     @Test
-    public void testGetValuePoints_without_countryCodes() {
+    void testGetValuePoints_without_countryCodes() {
         // GIVEN
-        Functionality functionality = new Functionality().withCountryCodes("");
+        Functionality functionality = new FunctionalityBuilder().withCountryCodes("").build();
 
         // WHEN / THEN
         assertThat(cut.getValuePoints(functionality)).isNull();
     }
 
     @Test
-    public void testGetValuePoints_with_null_countryCodes() {
+    void testGetValuePoints_with_null_countryCodes() {
         // GIVEN
         Functionality functionality = new Functionality();
 
@@ -86,21 +93,25 @@ public class CountryAxisGeneratorTest {
     }
 
     @Test
-    public void testGetValuePoints_with_one_countryCode() {
+    void testGetValuePoints_with_one_countryCode() {
         // GIVEN
-        Functionality functionality = new Functionality().withCountryCodes("cn");
+        Functionality functionality = new FunctionalityBuilder().withCountryCodes("cn").build();
 
         // WHEN / THEN
         assertThat(cut.getValuePoints(functionality)).isEqualTo(new String[] { "cn" });
     }
 
     @Test
-    public void testGetValuePoints_with_two_countryCodes() {
+    void testGetValuePoints_with_two_countryCodes() {
         // GIVEN
-        Functionality functionality = new Functionality().withCountryCodes("be,cn");
+        Functionality functionality = new FunctionalityBuilder().withCountryCodes("be,cn").build();
 
         // WHEN / THEN
         assertThat(cut.getValuePoints(functionality)).isEqualTo(new String[] { "be", "cn" });
+    }
+
+    private boolean equals(AxisPointDTO result, String id, String name, String tooltip) {
+        return Objects.equals(result.getId(), id) && Objects.equals(result.getName(), name) && Objects.equals(result.getTooltip(), tooltip);
     }
 
 }

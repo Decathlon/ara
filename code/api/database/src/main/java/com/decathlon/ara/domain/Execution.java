@@ -17,29 +17,40 @@
 
 package com.decathlon.ara.domain;
 
-import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
-import com.decathlon.ara.domain.enumeration.JobStatus;
-import com.decathlon.ara.domain.enumeration.QualityStatus;
-import com.decathlon.ara.domain.enumeration.Result;
-import lombok.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-import org.hibernate.annotations.SortNatural;
-
-import javax.persistence.*;
 import java.util.Date;
 import java.util.Set;
 import java.util.TreeSet;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.SortNatural;
+
+import com.decathlon.ara.domain.enumeration.ExecutionAcceptance;
+import com.decathlon.ara.domain.enumeration.JobStatus;
+import com.decathlon.ara.domain.enumeration.QualityStatus;
+import com.decathlon.ara.domain.enumeration.Result;
+
 @Entity
-// Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
-@EqualsAndHashCode(of = { "cycleDefinition", "testDateTime" })
-@Table(uniqueConstraints={
-        @UniqueConstraint(columnNames = {"cycle_definition_id", "test_date_time"})
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "cycle_definition_id", "test_date_time" })
 })
 public class Execution {
 
@@ -200,6 +211,174 @@ public class Execution {
     public void removeCountryDeployment(CountryDeployment countryDeployment) {
         this.countryDeployments.remove(countryDeployment);
         countryDeployment.setExecution(null);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getBranch() {
+        return branch;
+    }
+
+    public void setBranch(String branch) {
+        this.branch = branch;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getRelease() {
+        return release;
+    }
+
+    public void setRelease(String release) {
+        this.release = release;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public Date getBuildDateTime() {
+        return buildDateTime;
+    }
+
+    public void setBuildDateTime(Date buildDateTime) {
+        this.buildDateTime = buildDateTime;
+    }
+
+    public Date getTestDateTime() {
+        return testDateTime;
+    }
+
+    public void setTestDateTime(Date testDateTime) {
+        this.testDateTime = testDateTime;
+    }
+
+    public String getJobUrl() {
+        return jobUrl;
+    }
+
+    public void setJobUrl(String jobUrl) {
+        this.jobUrl = jobUrl;
+    }
+
+    public String getJobLink() {
+        return jobLink;
+    }
+
+    public void setJobLink(String jobLink) {
+        this.jobLink = jobLink;
+    }
+
+    public JobStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(JobStatus status) {
+        this.status = status;
+    }
+
+    public Result getResult() {
+        return result;
+    }
+
+    public void setResult(Result result) {
+        this.result = result;
+    }
+
+    public ExecutionAcceptance getAcceptance() {
+        return acceptance;
+    }
+
+    public void setAcceptance(ExecutionAcceptance acceptance) {
+        this.acceptance = acceptance;
+    }
+
+    public String getDiscardReason() {
+        return discardReason;
+    }
+
+    public void setDiscardReason(String discardReason) {
+        this.discardReason = discardReason;
+    }
+
+    public CycleDefinition getCycleDefinition() {
+        return cycleDefinition;
+    }
+
+    public void setCycleDefinition(CycleDefinition cycleDefinition) {
+        this.cycleDefinition = cycleDefinition;
+    }
+
+    public Boolean getBlockingValidation() {
+        return blockingValidation;
+    }
+
+    public void setBlockingValidation(Boolean blockingValidation) {
+        this.blockingValidation = blockingValidation;
+    }
+
+    public String getQualityThresholds() {
+        return qualityThresholds;
+    }
+
+    public void setQualityThresholds(String qualityThresholds) {
+        this.qualityThresholds = qualityThresholds;
+    }
+
+    public QualityStatus getQualityStatus() {
+        return qualityStatus;
+    }
+
+    public void setQualityStatus(QualityStatus qualityStatus) {
+        this.qualityStatus = qualityStatus;
+    }
+
+    public String getQualitySeverities() {
+        return qualitySeverities;
+    }
+
+    public void setQualitySeverities(String qualitySeverities) {
+        this.qualitySeverities = qualitySeverities;
+    }
+
+    public Long getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Long duration) {
+        this.duration = duration;
+    }
+
+    public Long getEstimatedDuration() {
+        return estimatedDuration;
+    }
+
+    public void setEstimatedDuration(Long estimatedDuration) {
+        this.estimatedDuration = estimatedDuration;
+    }
+
+    public Set<Run> getRuns() {
+        return runs;
+    }
+
+    public Set<CountryDeployment> getCountryDeployments() {
+        return countryDeployments;
     }
 
 }

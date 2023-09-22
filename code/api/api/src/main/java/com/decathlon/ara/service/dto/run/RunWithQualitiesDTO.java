@@ -17,22 +17,11 @@
 
 package com.decathlon.ara.service.dto.run;
 
+import java.util.Map;
+
 import com.decathlon.ara.domain.Severity;
 import com.decathlon.ara.domain.Team;
-import java.util.Map;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import lombok.With;
 
-@Data
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 public class RunWithQualitiesDTO extends RunDTO {
 
     /**
@@ -47,5 +36,22 @@ public class RunWithQualitiesDTO extends RunDTO {
      * Value: the totals of scenarios for this team and severity for the run.
      */
     private Map<String, Map<String, ExecutedScenarioHandlingCountsDTO>> qualitiesPerTeamAndSeverity;
+
+    public Map<String, ExecutedScenarioHandlingCountsDTO> getQualitiesPerSeverity() {
+        return qualitiesPerSeverity;
+    }
+
+    public void setQualitiesPerSeverity(Map<String, ExecutedScenarioHandlingCountsDTO> qualitiesPerSeverity) {
+        this.qualitiesPerSeverity = qualitiesPerSeverity;
+    }
+
+    public Map<String, Map<String, ExecutedScenarioHandlingCountsDTO>> getQualitiesPerTeamAndSeverity() {
+        return qualitiesPerTeamAndSeverity;
+    }
+
+    public void setQualitiesPerTeamAndSeverity(
+                                               Map<String, Map<String, ExecutedScenarioHandlingCountsDTO>> qualitiesPerTeamAndSeverity) {
+        this.qualitiesPerTeamAndSeverity = qualitiesPerTeamAndSeverity;
+    }
 
 }

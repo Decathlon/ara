@@ -41,22 +41,22 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 
 @SpringBootTest
 @TestExecutionListeners({
-    TransactionalTestExecutionListener.class,
-    DependencyInjectionTestExecutionListener.class,
-    DbUnitTestExecutionListener.class
+        TransactionalTestExecutionListener.class,
+        DependencyInjectionTestExecutionListener.class,
+        DbUnitTestExecutionListener.class
 })
 @TestPropertySource(properties = {
         "ara.database.target=h2"
 })
 @Transactional
-public class ExecutionRepositoryIT {
+class ExecutionRepositoryIT {
 
     @Autowired
     private ExecutionRepository cut;
 
     @Test
     @DatabaseSetup({ "/dbunit/ExecutionRepositoryIT-findAllByStatusAndJobUrlIn.xml" })
-    public void findAllByStatusAndJobUrlIn() {
+    void findAllByStatusAndJobUrlIn() {
         // GIVEN
         List<String> jobUrlsToQuery = Arrays.asList(
                 "http://jobs/1/", // Status DONE
@@ -75,7 +75,7 @@ public class ExecutionRepositoryIT {
 
     @Test
     @DatabaseSetup({ "/dbunit/ExecutionRepositoryIT-findLatestOfEachCycle.xml" })
-    public void findLatestOfEachCycle() {
+    void findLatestOfEachCycle() {
         // GIVEN
         long projectId = 1;
 
@@ -89,20 +89,17 @@ public class ExecutionRepositoryIT {
     private List<Long> getIds(List<Execution> latestExecutions) {
         return latestExecutions.stream()
                 .map(Execution::getId)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Test
     @DatabaseSetup({ "/dbunit/ExecutionRepositoryIT-findPreviousOf.xml" })
-    public void findPreviousOf() {
+    void findPreviousOf() {
         // GIVEN
-        List<Execution> executions = Arrays.asList(
-                new Execution().withId(Long.valueOf(3)),
-                new Execution().withId(Long.valueOf(6)),
-                new Execution().withId(Long.valueOf(7)));
+        List<Long> executionsId = Arrays.asList(Long.valueOf(3), Long.valueOf(6), Long.valueOf(7));
 
         // WHEN
-        List<Execution> previousExecutions = cut.findPreviousOf(executions);
+        List<Execution> previousExecutions = cut.findPreviousOf(executionsId);
 
         // THEN
         assertThat(getIds(previousExecutions)).containsOnly(longs(2, 5));
@@ -110,15 +107,12 @@ public class ExecutionRepositoryIT {
 
     @Test
     @DatabaseSetup({ "/dbunit/ExecutionRepositoryIT-findNextOf.xml" })
-    public void findNextOf() {
+    void findNextOf() {
         // GIVEN
-        List<Execution> executions = Arrays.asList(
-                new Execution().withId(Long.valueOf(2)),
-                new Execution().withId(Long.valueOf(5)),
-                new Execution().withId(Long.valueOf(7)));
+        List<Long> executionsId = Arrays.asList(Long.valueOf(2), Long.valueOf(5), Long.valueOf(7));
 
         // WHEN
-        List<Execution> nextExecutions = cut.findNextOf(executions);
+        List<Execution> nextExecutions = cut.findNextOf(executionsId);
 
         // THEN
         assertThat(getIds(nextExecutions)).containsOnly(longs(3, 6));

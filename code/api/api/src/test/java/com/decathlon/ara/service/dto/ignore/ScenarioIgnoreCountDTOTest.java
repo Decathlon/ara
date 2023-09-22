@@ -21,33 +21,40 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-public class ScenarioIgnoreCountDTOTest {
+class ScenarioIgnoreCountDTOTest {
 
     @Test
-    public void getPercent_returns_0_when_no_total() {
+    void getPercent_returns_0_when_no_total() {
         // GIVEN
-        ScenarioIgnoreCountDTO count = new ScenarioIgnoreCountDTO().withTotal(0);
+        ScenarioIgnoreCountDTO count = scenarioIgnoreCountDTO(0, 0);
 
         // WHEN / THEN
         assertThat(count.getPercent()).isEqualTo(0);
     }
 
     @Test
-    public void getPercent_returns_correct_percentage() {
+    void getPercent_returns_correct_percentage() {
         // GIVEN
-        ScenarioIgnoreCountDTO count = new ScenarioIgnoreCountDTO().withIgnored(1).withTotal(4);
+        ScenarioIgnoreCountDTO count = scenarioIgnoreCountDTO(1, 4);
 
         // WHEN / THEN
         assertThat(count.getPercent()).isEqualTo(25);
     }
 
     @Test
-    public void getPercent_returns_ceiled_percentage() {
+    void getPercent_returns_ceiled_percentage() {
         // GIVEN
-        ScenarioIgnoreCountDTO count = new ScenarioIgnoreCountDTO().withIgnored(991).withTotal(1000);
+        ScenarioIgnoreCountDTO count = scenarioIgnoreCountDTO(991, 1000);
 
         // WHEN / THEN
         assertThat(count.getPercent()).isEqualTo(100);
+    }
+
+    private ScenarioIgnoreCountDTO scenarioIgnoreCountDTO(long ignored, long total) {
+        ScenarioIgnoreCountDTO scenarioIgnoreCountDTO = new ScenarioIgnoreCountDTO();
+        scenarioIgnoreCountDTO.setIgnored(ignored);
+        scenarioIgnoreCountDTO.setTotal(total);
+        return scenarioIgnoreCountDTO;
     }
 
 }

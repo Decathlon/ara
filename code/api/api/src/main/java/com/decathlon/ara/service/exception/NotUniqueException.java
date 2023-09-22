@@ -17,8 +17,6 @@
 
 package com.decathlon.ara.service.exception;
 
-import lombok.Getter;
-
 public class NotUniqueException extends BadRequestException {
 
     private static final long serialVersionUID = 2807142911588081627L;
@@ -26,13 +24,11 @@ public class NotUniqueException extends BadRequestException {
     /**
      * The name of the duplicate property between two entities, violating a unique constraint on that entity.
      */
-    @Getter
     private final String duplicatePropertyName;
 
     /**
      * The primary key of the other entity with same duplicatePropertyName value.
      */
-    @Getter
     private final String otherEntityKey;
 
     public NotUniqueException(final String message, final String resourceName, final String duplicatePropertyName, final Long otherEntityKey) {
@@ -43,6 +39,14 @@ public class NotUniqueException extends BadRequestException {
         super(message, resourceName, "not_unique");
         this.duplicatePropertyName = duplicatePropertyName;
         this.otherEntityKey = otherEntityKey;
+    }
+
+    public String getDuplicatePropertyName() {
+        return duplicatePropertyName;
+    }
+
+    public String getOtherEntityKey() {
+        return otherEntityKey;
     }
 
 }

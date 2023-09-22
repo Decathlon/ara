@@ -18,13 +18,14 @@
 package com.decathlon.ara.service.support;
 
 import com.decathlon.ara.domain.Setting;
-import lombok.experimental.UtilityClass;
 
 /**
  * Holds {@link Setting}'s codes standard in ARA core application. Other custom adapters are free to provide other ones.
  */
-@UtilityClass
 public class Settings {
+
+    private Settings() {
+    }
 
     // IMPORTANT: Once in production, do not change these IDs, as they are stored in user databases.
     // If name is really required to change, you must provide a Liquibase migration change-set.
@@ -57,6 +58,8 @@ public class Settings {
     public static final String EXECUTION_INDEXER_FILE_CYCLE_DEFINITION_PATH = "execution.indexer.file.cycleDefinitionPath";
     public static final String EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH = "execution.indexer.file.buildInformationPath";
     public static final String EXECUTION_INDEXER_FILE_DELETE_AFTER_INDEXING_AS_DONE = "execution.indexer.file.deleteAfterIndexingAsDone";
+    public static final String EXECUTION_PURGE_DURATION_VALUE = "execution.purge.duration.value";
+    public static final String EXECUTION_PURGE_DURATION_TYPE = "execution.purge.duration.type";
 
     public static final String EMAIL_FROM = "email.from";
     public static final String EMAIL_TO_EXECUTION_CRASHED = "email.to.execution.crashed";

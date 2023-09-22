@@ -17,20 +17,21 @@
 
 package com.decathlon.ara.domain;
 
-import lombok.*;
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.nullsFirst;
 
-import javax.persistence.*;
 import java.util.Comparator;
+import java.util.Objects;
 
-import static java.util.Comparator.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@With
 @Entity
-// Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
-@EqualsAndHashCode(of = { "projectId", "code" })
 public class Severity implements Comparable<Severity> {
 
     private static final String GLOBAL_NAME = "Global";
@@ -47,30 +48,31 @@ public class Severity implements Comparable<Severity> {
 
     private long projectId;
 
-    @Column(length = 32)
+    @Column(length = 32, nullable = false)
     private String code;
 
     /**
      * The order in which the severities should appear: the lowest position should be for the highest severity.
      */
+    @Column(nullable = false)
     private int position;
 
     /**
      * The full name (eg. "Sanity Check").
      */
-    @Column(length = 32)
+    @Column(length = 32, nullable = false)
     private String name;
 
     /**
      * The shorter name (but still intelligible) to display on table column headers where space is constrained (eg. "Sanity Ch.").
      */
-    @Column(length = 16)
+    @Column(length = 16, nullable = false)
     private String shortName;
 
     /**
      * The shortest name to display on email subjects to help keep it very short (eg. "S.C.").
      */
-    @Column(length = 8)
+    @Column(length = 8, nullable = false)
     private String initials;
 
     /**
@@ -79,6 +81,21 @@ public class Severity implements Comparable<Severity> {
      */
     private boolean defaultOnMissing;
 
+    public Severity() {
+    }
+
+    public Severity(Long id, long projectId, String code, int position, String name, String shortName, String initials,
+            boolean defaultOnMissing) {
+        this.id = id;
+        this.projectId = projectId;
+        this.code = code;
+        this.position = position;
+        this.name = name;
+        this.shortName = shortName;
+        this.initials = initials;
+        this.defaultOnMissing = defaultOnMissing;
+    }
+
     @Override
     public int compareTo(Severity other) {
         // Keep business key in sync with @EqualsAndHashCode
@@ -86,6 +103,63 @@ public class Severity implements Comparable<Severity> {
         Comparator<Severity> codeComparator = comparing(Severity::getCode, nullsFirst(naturalOrder()));
         return nullsFirst(projectIdComparator
                 .thenComparing(codeComparator)).compare(this, other);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(code, projectId);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Severity)) {
+            return false;
+        }
+        Severity other = (Severity) obj;
+        return Objects.equals(code, other.code) && projectId == other.projectId;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(long projectId) {
+        this.projectId = projectId;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getShortName() {
+        return shortName;
+    }
+
+    public String getInitials() {
+        return initials;
+    }
+
+    public boolean isDefaultOnMissing() {
+        return defaultOnMissing;
     }
 
     public static final class SeverityPositionComparator implements Comparator<Severity> {
@@ -97,7 +171,6 @@ public class Severity implements Comparable<Severity> {
             return nullsFirst(projectIdComparator
                     .thenComparing(positionComparator)).compare(o1, o2);
         }
-
     }
 
 }

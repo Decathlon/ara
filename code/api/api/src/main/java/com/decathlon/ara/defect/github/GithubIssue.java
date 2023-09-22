@@ -17,15 +17,8 @@
 
 package com.decathlon.ara.defect.github;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.Date;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 class GithubIssue {
 
     private String url;
@@ -35,4 +28,32 @@ class GithubIssue {
     private Date createdAt;
     private Date updatedAt;
     private Date closedAt;
+
+    public String getUrl() {
+        return url;
+    }
+
+    public long getNumber() {
+        return number;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public Date getClosedAt() {
+        return closedAt;
+    }
 }

@@ -17,24 +17,22 @@
 
 package com.decathlon.ara.repository.custom.util;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import javax.transaction.Transactional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import javax.transaction.Transactional;
-
 /**
  * Helper service for JPA transactions.
  */
-@Slf4j
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TransactionAppenderUtil {
+
+    private static final Logger LOG = LoggerFactory.getLogger(TransactionAppenderUtil.class);
 
     /**
      * Let Hibernate make the INSERT SQL statements now and make sure the commit was successful before executing the
@@ -53,7 +51,7 @@ public class TransactionAppenderUtil {
             };
             TransactionSynchronizationManager.registerSynchronization(synchronization);
         } else {
-            log.error("Transaction synchronization is not active: doAfterCommit(Runnable) is skipped " +
+            LOG.error("Transaction synchronization is not active: doAfterCommit(Runnable) is skipped " +
                     "(OK for tests, but not for production environment!)");
         }
     }

@@ -30,50 +30,43 @@ import com.decathlon.ara.service.dto.ignore.ScenarioIgnoreSourceDTO;
 import com.decathlon.ara.service.dto.scenario.ScenarioSummaryDTO;
 import com.decathlon.ara.service.dto.severity.SeverityDTO;
 import com.decathlon.ara.service.dto.source.SourceDTO;
-import com.decathlon.ara.service.mapper.ScenarioSummaryMapper;
-import com.decathlon.ara.service.mapper.SourceMapper;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import com.decathlon.ara.service.mapper.GenericMapper;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.Comparator.*;
 
 /**
  * Service for managing Scenario.
  */
-@Slf4j
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ScenarioService {
 
-    @NonNull
     private final ScenarioRepository scenarioRepository;
 
-    @NonNull
-    private final SourceMapper sourceMapper;
+    private final GenericMapper mapper;
 
-    @NonNull
-    private final ScenarioSummaryMapper scenarioSummaryMapper;
-
-    @NonNull
     private final SeverityService severityService;
+
+    public ScenarioService(ScenarioRepository scenarioRepository,
+            GenericMapper mapper, SeverityService severityService) {
+        this.scenarioRepository = scenarioRepository;
+        this.mapper = mapper;
+        this.severityService = severityService;
+    }
 
     /**
      * @param projectId the ID of the project in which to work
      * @return all scenarios that have no associated functionalities or have wrong or nonexistent functionality identifier
      */
     public List<ScenarioSummaryDTO> findAllWithFunctionalityErrors(long projectId) {
-        return scenarioSummaryMapper.toDto(scenarioRepository.findAllWithFunctionalityErrors(projectId));
+        return mapper.mapCollection(scenarioRepository.findAllWithFunctionalityErrors(projectId), ScenarioSummaryDTO.class);
     }
 
     /**
@@ -152,7 +145,7 @@ public class ScenarioService {
             // Add the counts of scenarios to the triple' severity, as well as the the ALL-SEVERITIES count
             final List<SeverityDTO> severitiesToIncrement = severitiesWithAll.stream()
                     .filter(severity -> Severity.ALL.getCode().equals(severity.getCode()) || severity.getCode().equals(effectiveSeverityCode))
-                    .collect(Collectors.toList());
+                    .toList();
             for (SeverityDTO severity : severitiesToIncrement) {
                 ScenarioIgnoreSeverityDTO result = getOrCreate(resultList, ignoreCount.getSource(), severity);
                 // Increment the count of TOTAL scenarios and the count of IGNORED scenarios (if the count is counting ignored scenarios)
@@ -221,7 +214,7 @@ public class ScenarioService {
                 .findFirst()
                 .orElseGet(() -> {
                     ScenarioIgnoreSourceDTO result = new ScenarioIgnoreSourceDTO();
-                    result.setSource(sourceMapper.toDto(source));
+                    result.setSource(mapper.map(source, SourceDTO.class));
                     list.add(result);
                     return result;
                 });

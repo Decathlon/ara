@@ -17,20 +17,12 @@
 
 package com.decathlon.ara.defect.rtc.bean;
 
-import com.decathlon.ara.defect.rtc.RtcDateTimeAdapter;
 import java.util.Date;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
-@Data
-@With
-@NoArgsConstructor
-@AllArgsConstructor
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import com.decathlon.ara.defect.rtc.RtcDateTimeAdapter;
+
 public class WorkItem {
 
     private String id;
@@ -38,7 +30,18 @@ public class WorkItem {
     private State state;
 
     @XmlJavaTypeAdapter(RtcDateTimeAdapter.class)
-    @Getter(onMethod = @__(@XmlTransient))
     private Date resolutionDate;
+
+    public String getId() {
+        return id;
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public Date getResolutionDate() {
+        return resolutionDate;
+    }
 
 }

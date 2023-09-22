@@ -17,19 +17,19 @@
 
 package com.decathlon.ara.domain;
 
-import lombok.*;
-
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+
 @Entity
-@With
-// Keep business key in sync with compareTo(): see https://developer.jboss.org/wiki/EqualsAndHashCode
-@EqualsAndHashCode(of = { "projectId", "name" })
 public class RootCause {
 
     @Id
@@ -39,11 +39,39 @@ public class RootCause {
 
     private long projectId;
 
-    @Column(length = 128)
+    @Column(length = 128, nullable = false)
     private String name;
 
     // No cascade, as this collection is only used while removing a rootCause
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "rootCause")
     private List<Problem> problems = new ArrayList<>();
+
+    public RootCause() {
+    }
+
+    public RootCause(long projectId, String name) {
+        this.projectId = projectId;
+        this.name = name;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(long projectId) {
+        this.projectId = projectId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public List<Problem> getProblems() {
+        return problems;
+    }
 
 }

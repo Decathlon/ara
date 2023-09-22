@@ -72,6 +72,7 @@
   import moment from 'moment'
 
   import runFeaturesComponent from '../components/run-features'
+  import { LocalParameterService } from '../service/local-parameter.service'
 
   export default {
     name: 'scenario-history',
@@ -117,12 +118,14 @@
 
       loadHistory () {
         this.loadingHistory = true
+        const simplifiedDuration = LocalParameterService.getExecutedScenariosHistoryDuration()
         let input = {
           cucumberId: this.executedScenario.cucumberId,
           cycleName: (this.filter.cycleName ? this.executedScenario.run.execution.name : null),
           branch: (this.filter.branch ? this.executedScenario.run.execution.branch : null),
           countryCode: (this.filter.countryCode ? this.executedScenario.run.country.code : null),
-          runTypeCode: this.executedScenario.run.type.code
+          runTypeCode: this.executedScenario.run.type.code,
+          duration: simplifiedDuration
         }
         Vue.http
           .post(api.paths.executedScenarios(this) + '/history', input, api.REQUEST_OPTIONS)

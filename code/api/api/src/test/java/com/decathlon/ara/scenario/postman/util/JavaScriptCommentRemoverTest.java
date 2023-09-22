@@ -17,21 +17,21 @@
 
 package com.decathlon.ara.scenario.postman.util;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @ExtendWith(MockitoExtension.class)
-public class JavaScriptCommentRemoverTest {
+class JavaScriptCommentRemoverTest {
 
     @InjectMocks
     private JavaScriptCommentRemover cut;
 
     @Test
-    public void removeComments_should_work() {
+    void removeComments_should_work() {
         // GIVEN
         String source = "" +
                 "var a = // Comment\n" + // Line comment
@@ -50,7 +50,7 @@ public class JavaScriptCommentRemoverTest {
     }
 
     @Test
-    public void removeComments_should_understand_line_comments_ending_at_all_operating_systems_line_separators() {
+    void removeComments_should_understand_line_comments_ending_at_all_operating_systems_line_separators() {
         // GIVEN
         String source = "" +
                 "var a; // Comment\n" +
@@ -70,7 +70,7 @@ public class JavaScriptCommentRemoverTest {
     }
 
     @Test
-    public void removeComments_should_return_line_anyway_when_ending_with_line_comment() {
+    void removeComments_should_return_line_anyway_when_ending_with_line_comment() {
         // GIVEN
         String source = "var a; // Comment";
 
@@ -82,7 +82,7 @@ public class JavaScriptCommentRemoverTest {
     }
 
     @Test
-    public void removeComments_should_return_line_anyway_when_ending_with_block_comment() {
+    void removeComments_should_return_line_anyway_when_ending_with_block_comment() {
         // GIVEN
         String source = "var a; /* Comment";
 
@@ -94,7 +94,7 @@ public class JavaScriptCommentRemoverTest {
     }
 
     @Test
-    public void removeComments_should_ignore_comments_in_strings_with_double_quotes() {
+    void removeComments_should_ignore_comments_in_strings_with_double_quotes() {
         // GIVEN
         String expected = "var s = \"/*not...*/ //...comments\";";
         String source = expected + "//comment-to-remove";
@@ -107,7 +107,7 @@ public class JavaScriptCommentRemoverTest {
     }
 
     @Test
-    public void removeComments_should_ignore_comments_in_strings_with_single_quotes() {
+    void removeComments_should_ignore_comments_in_strings_with_single_quotes() {
         // GIVEN
         String expected = "var s = '/*not...*/ //...comments';";
         String source = expected + "//comment-to-remove";
@@ -120,7 +120,7 @@ public class JavaScriptCommentRemoverTest {
     }
 
     @Test
-    public void removeComments_should_understand_escaped_characters_in_strings_with_double_quotes() {
+    void removeComments_should_understand_escaped_characters_in_strings_with_double_quotes() {
         // GIVEN
         // \" should not be understood as String ending, so comments in string should not be code comments
         // Two escapes separated by a character to check we do not just blindly ignore even nor odd characters!
@@ -135,7 +135,7 @@ public class JavaScriptCommentRemoverTest {
     }
 
     @Test
-    public void removeComments_should_understand_escaped_characters_in_strings_with_single_quotes() {
+    void removeComments_should_understand_escaped_characters_in_strings_with_single_quotes() {
         // GIVEN
         // \' should not be understood as String ending, so comments in string should not be code comments
         // Two escapes separated by a character to check we do not just blindly ignore even nor odd characters!
@@ -150,7 +150,7 @@ public class JavaScriptCommentRemoverTest {
     }
 
     @Test
-    public void removeComments_should_end_block_commands_at_correct_positions() {
+    void removeComments_should_end_block_commands_at_correct_positions() {
         // GIVEN
         String source = "var a; /* not the end:* nor this:/ nor this:// but this one yes:*/ var b;";
         // \" should not be understood as String ending, so comments in string should not be code comments
@@ -163,7 +163,7 @@ public class JavaScriptCommentRemoverTest {
     }
 
     @Test
-    public void removeComments_should_return_empty_source_when_it_is_only_a_comment() {
+    void removeComments_should_return_empty_source_when_it_is_only_a_comment() {
         // GIVEN
         String source = "// Comment";
 
@@ -175,7 +175,7 @@ public class JavaScriptCommentRemoverTest {
     }
 
     @Test
-    public void removeComments_should_return_all_source_when_there_is_no_comment_nor_strings() {
+    void removeComments_should_return_all_source_when_there_is_no_comment_nor_strings() {
         // GIVEN
         String source = "var a;";
 
@@ -187,7 +187,7 @@ public class JavaScriptCommentRemoverTest {
     }
 
     @Test
-    public void removeComments_should_work_twice_in_a_row() {
+    void removeComments_should_work_twice_in_a_row() {
         // GIVEN
         // Finish in a comment: next call should forget/reinitialize this state
         cut.removeComments("// Comment");

@@ -17,22 +17,24 @@
 
 package com.decathlon.ara.web.rest.util;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+
 import com.decathlon.ara.service.exception.BadGatewayException;
 import com.decathlon.ara.service.exception.BadRequestException;
 import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 
 /**
  * Utility class for HTTP headers creation.
  */
-@UtilityClass
-@Slf4j
 public final class HeaderUtil {
+
+    private static final Logger LOG = LoggerFactory.getLogger(HeaderUtil.class);
 
     private static final String APPLICATION_NAME = "ara";
 
@@ -47,6 +49,9 @@ public final class HeaderUtil {
     // More information about a not-unique error that occurred
     public static final String DUPLICATE_PROPERTY_NAME = "X-" + APPLICATION_NAME + "-duplicatePropertyName";
     public static final String OTHER_ENTITY_KEY = "X-" + APPLICATION_NAME + "-otherEntityKey";
+
+    private HeaderUtil() {
+    }
 
     public static HttpHeaders entityCreated(String resourceName, Long createdId) {
         return entityCreated(resourceName, createdId.toString());
@@ -123,7 +128,7 @@ public final class HeaderUtil {
     }
 
     private static HttpHeaders createError(String resourceName, String errorKey, String errorMessage) {
-        log.debug("Responding error header: {}", errorMessage);
+        LOG.debug("Responding error header: {}", errorMessage);
         HttpHeaders headers = new HttpHeaders();
         headers.add(ERROR, "error." + errorKey);
         headers.add(PARAMS, resourceName);

@@ -18,13 +18,19 @@
 package com.decathlon.ara.scenario.cucumber.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Data;
 
-@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Match {
 
     private String location;
     private Argument[] arguments = new Argument[0];
+
+    public String getLocation() {
+        return location;
+    }
+
+    public Argument[] getArguments() {
+        return arguments;
+    }
 
 }
