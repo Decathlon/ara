@@ -47,7 +47,7 @@
     "@babel/preset-env": "^7.0.0",
     "@babel/register": "^7.0.0",
     "@babel/runtime": "^7.0.0",
-    "autoprefixer": "^7.1.2",
+    "autoprefixer": "^10.4.16",
     "babel-eslint": "^9.0.0",
     "babel-loader": "^8.0.6",
     "babel-plugin-istanbul": "^5.0.0",
