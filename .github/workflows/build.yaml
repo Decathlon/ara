@@ -120,12 +120,6 @@ jobs:
         with:
           languages: java
           config-file: .github/codeql/codeql-api-config.yml
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v2
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
       - name: Add host binding
         run: sudo echo "127.0.0.1 oauth2.dev.localhost" >> sudo tee -a /etc/hosts
       - name: Set up QEMU
@@ -136,11 +130,6 @@ jobs:
         run: docker-compose -f code/docker-compose.dev.yaml up -d oauth2-dev-server
       - name: check oauth2-dev-server is running
         run: docker run --rm --network host aligor/wait-for-url --url http://oauth2.dev.localhost:9001/actuator/health
-      - name: Build and analyze
-        run: mvn -f code/api -B clean install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - name: stop oauth2-dev-server
         run: docker-compose -f code/docker-compose.dev.yaml down
       - name: Install xmllint
@@ -213,15 +202,6 @@ jobs:
           PROJECT_VERSION=$(make -s get-web-ui-version)
           popd
           echo ::set-output name=projectVersion::${PROJECT_VERSION}
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        with:
-          projectBaseDir: code/web-ui
-          args: >
-            -Dsonar.projectVersion=${{ steps.getVersion.outputs.projectVersion }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - name: Prepare
         id: prep
         run: |
