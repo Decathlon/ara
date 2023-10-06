@@ -149,7 +149,7 @@ public class ExecutionIndexerService {
                 .flatMap(run -> run.getExecutedScenarios().stream())
                 .flatMap(executedScenario -> executedScenario.getErrors().stream())
                 .map(Error::getId)
-                .collect(Collectors.toList());
+                .toList();
     }
 
 }

@@ -18,7 +18,7 @@ met.
 == How to locally install it
 
 If you just want to install it locally to give it a try, you can !
-Also, after this installation, you can follow up the <<doc/demo/DemoWalkthrough.adoc#head, Demo walkthrough>>
+Also, after this installation, you can follow up the <<doc/usage/demo/DemoWalkthrough.adoc#head, Demo walkthrough>>
 to explore ARA features !!
 
 Please note the following :
@@ -26,7 +26,7 @@ Please note the following :
 * You'll need https://docs.docker.com/install/[Docker]
 * All the datas that you import in ARA won't be persisted.
 * The port 7000, 9000, 5432 must be available locally.
-* Add to `/etc/hosts` (Linux OS) or to `/private/etc/hosts` (MacOS) `127.0.0.1 oauth2.dev.localhost`
+* Add to `/etc/hosts` (Linux OS) or to `/private/etc/hosts` (MacOS) or to `c:\Windows\System32\drivers\etc\` (Windows) `127.0.0.1 oauth2.dev.localhost`
 
 === I've got a Windows PC !
 
@@ -120,15 +120,15 @@ helm install -f values.yaml --create-namespace --namespace ara my-ara ara/ara-ca
 
 == How to Use ARA?
 
-You can go through the <<doc/demo/DemoWalkthrough.adoc#head, Demo Walkthrough>> to quickly learn how to
+You can go through the <<doc/usage/demo/DemoWalkthrough.adoc#head, Demo Walkthrough>> to quickly learn how to
 use ARA.
 
-You can also read the <<doc/user/main/UserDocumentation.adoc#head, User Documentation>> to learn everything
+You can also read the <<doc/usage/main/UserDocumentation.adoc#head, User Documentation>> to learn everything
 you need to know about the utilization of ARA (don't hesitate to pass those doc to the rest of your teams ;) ).
 
 == How to Develop on ARA?
 
-Please read the <<doc/developer/DeveloperDocumentation.adoc#head, Developer Documentation>>
+Please read the <<doc/development/install/DeveloperDocumentation.adoc#head, Developer Documentation>>
 to learn how the project is structured and how to develop new features in ARA and/or contribute.
 To start a development environment:
 ----

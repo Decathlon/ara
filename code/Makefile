@@ -48,6 +48,22 @@ stop-%: ## Stop module
 	@echo '-- Stop $* --'
 	@docker compose stop $(OPT) ara-$*
 
+# DATABASE
+
+create-postgresql: ## Create and run a postgresql database
+	@docker container run --name ara-postgresql \
+		-e POSTGRES_DB=ara \
+		-e POSTGRES_USER=changeme \
+		-e POSTGRES_PASSWORD=changeme \
+		-p 5432:5432 -d \
+		postgres:12
+
+start-postgresql: ## Start postgresql database
+	@docker container start ara-postgresql
+
+stop-postgresql: ## Stop postgresql database
+	@docker container stop ara-postgresql
+
 #####################################
 ##            BUILD APP            ##
 #####################################

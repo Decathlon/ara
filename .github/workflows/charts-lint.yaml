@@ -85,5 +85,5 @@ jobs:
           files: helm-templates-candidate,helm-templates-stable
           openshift: true
           comment: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ACCESS_TOKEN }}
           version: ${{ matrix.k8s }}
