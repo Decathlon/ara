@@ -171,7 +171,7 @@ jobs:
       - name: Build and push
         run: |
           pushd code
-          make build-api SUFFIX=${{ steps.prep.outputs.suffix }} PUBLISH=${{ steps.prep.outputs.push }} FULL=${{FULL_BUILD}}
+          make build-api SUFFIX=${{ steps.prep.outputs.suffix }} PUBLISH=${{ steps.prep.outputs.push }} FULL=${FULL_BUILD}
           popd
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v1
