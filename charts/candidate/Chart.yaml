@@ -1,18 +1,18 @@
 apiVersion: v2
 name: ara-candidate
-version: 13.0.5
+version: 13.0.6
 home: https://github.com/Decathlon/ara
 description: >
-  ARA helps you to fight against regressions by letting it preanalyze your
-  non-regression tests runs,
+  ARA helps you fight against regressions by letting it pre-analyze your
+  non-regression tests run,
 
-  tracks and follows problems, keep their history, and even break your CI build
+  tracks and follows problems, keeps their history, and even breaks your CI build
   if quality isn't
 
   met.
 keywords:
   - ara
-  - analyser
+  - analyzer
   - tests aggregator
   - regression monitoring
 icon: >-
