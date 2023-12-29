@@ -24,7 +24,7 @@ on:
       FULL_BUILD:
         description: 'Full build launch '
         required: false
-        default: 'false'
+        default: 'true'
 jobs:
   prepare:
     runs-on: ubuntu-latest
@@ -171,7 +171,7 @@ jobs:
       - name: Build and push
         run: |
           pushd code
-          make build-api SUFFIX=${{ steps.prep.outputs.suffix }} PUBLISH=${{ steps.prep.outputs.push }} FULL=${{inputs.FULL_BUILD}}
+          make build-api SUFFIX=${{ steps.prep.outputs.suffix }} PUBLISH=${{ steps.prep.outputs.push }} FULL=true
           popd
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v1
