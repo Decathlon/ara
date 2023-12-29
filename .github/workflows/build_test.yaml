@@ -156,7 +156,7 @@ jobs:
       - name: Build and push
         run: |
           pushd code
-          make update_version VERSION=${{ needs.prepare.outputs.api_new_release_version }}
+          make update-version
           make build-api SUFFIX=${{ steps.prep.outputs.suffix }} PUBLISH=true FULL=true
           popd
       - name: Perform CodeQL Analysis
