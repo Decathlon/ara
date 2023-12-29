@@ -1,0 +1,313 @@
+name: build ara v2
+
+on:
+  push:
+    branches:
+      - 'main'
+  workflow_dispatch:
+    inputs:
+      FULL_BUILD:
+        description: 'Full build launch '
+        required: false
+        default: 'false'
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    concurrency: 
+      group: ci-${{ github.ref }}
+      cancel-in-progress: false
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+      paths_result: ${{ steps.skip_check.outputs.paths_result }}
+      api_new_release_published: ${{ steps.semantic_api.outputs.new_release_published }}
+      api_new_release_version: ${{ steps.semantic_api.outputs.new_release_version }}
+      web-ui_new_release_published: ${{ steps.semantic_web-ui.outputs.new_release_published }}
+      web-ui_new_release_version: ${{ steps.semantic_web-ui.outputs.new_release_version }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@master
+        with:
+          paths_filter: |
+            api:
+              paths:
+                - 'code/api/**/*'
+                - '.github/workflows/build.yaml'
+            webui:
+              paths:
+                - 'code/web-ui/**/*'
+                - '.github/workflows/build.yaml'
+            candidate:
+              paths:
+                - 'charts/candidate/**/*'
+          skip_after_successful_duplicate: 'false'
+          cancel_others: 'true'
+      - name: Checkout
+        if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          persist-credentials: false # To use github token provide for semantic release
+      - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).api.should_skip }}
+        name: Ensure package json for semantic-release-monorepo
+        working-directory: code/api
+        run: test -e package.json || echo '{"name":"ara-api"}' > package.json
+      - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).api.should_skip }}
+        name: Semantic Release api
+        id: semantic_api
+        uses: cycjimmy/semantic-release-action@v2
+        with:
+          working_directory: code/api
+          semantic_version: 18
+          dry_run: false
+          extra_plugins: |
+            @semantic-release/commit-analyzer@9.0.2
+            @semantic-release/release-notes-generator@10.0.3
+            @semantic-release/exec@6.0.2
+            @semantic-release/git@10.0.1
+          extends: |
+            semantic-release-monorepo
+        env:
+          GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+      - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).webui.should_skip }}
+        name: Semantic Release web-ui
+        id: semantic_web-ui
+        uses: cycjimmy/semantic-release-action@v2
+        with:
+          working_directory: code/web-ui
+          semantic_version: 18
+          dry_run: false
+          extra_plugins: |
+            @semantic-release/commit-analyzer@9.0.2
+            @semantic-release/release-notes-generator@10.0.3
+            @semantic-release/exec@6.0.2
+            @semantic-release/npm@8.0.3
+            @semantic-release/git@10.0.1
+          extends: |
+            semantic-release-monorepo
+        env:
+          GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+  build-api:
+    needs: prepare
+    if: ${{ needs.prepare.outputs.should_skip != 'true' || !fromJSON(needs.prepare.outputs.paths_result).api.should_skip || needs.prepare.outputs.api_new_release_published == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - 
+        name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          ref: ${{ github.ref }}
+      - name: Set up JDK
+        uses: actions/setup-java@v2.3.1
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+          cache: 'maven'
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+        with:
+          languages: java
+          config-file: .github/codeql/codeql-api-config.yml
+      - name: Add host binding
+        run: sudo echo "127.0.0.1 oauth2.dev.localhost" >> sudo tee -a /etc/hosts
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: start oauth2-dev-server
+        run: docker-compose -f code/docker-compose.dev.yaml up -d oauth2-dev-server
+      - name: check oauth2-dev-server is running
+        run: docker run --rm --network host aligor/wait-for-url --url http://oauth2.dev.localhost:9001/actuator/health
+      - name: stop oauth2-dev-server
+        run: docker-compose -f code/docker-compose.dev.yaml down
+      - name: Install xmllint
+        run: sudo apt-get update && sudo apt-get install libxml2-utils
+      - name: Prepare
+        id: prep
+        run: |
+          PUSH=FALSE
+          pushd code
+          APP_EXISTS=$(make -s check-api-image)
+          popd
+          if [[ $GITHUB_REF == refs/heads/* ]]; then
+            BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
+            if [ "${{ github.event.repository.default_branch }}" = "$BRANCH_NAME" ] && [ "$APP_EXISTS" != 'true' ]; then
+              PUSH=TRUE
+            fi
+          elif [[ $GITHUB_REF == refs/pull/* ]]; then
+            BRANCH_NAME=$(echo ${{ github.event.pull_request.head.ref }} | sed -r 's#/+#-#g')
+            if [[ $BRANCH_NAME == release-* ]]; then
+              PUSH=TRUE
+              SUFFIX=-rc
+            else
+              SUFFIX=-pr.${{ github.event.number }}
+            fi
+          fi
+          echo ::set-output name=push::${PUSH}
+          echo ::set-output name=suffix::${SUFFIX}
+      - if: ${{ steps.prep.outputs.push == 'true' }}
+        name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        run: |
+          pushd code
+          make update_version VERSION=${{ needs.prepare.outputs.api_new_release_version }}
+          make build-api SUFFIX=${{ steps.prep.outputs.suffix }} PUBLISH=true FULL=true
+          popd
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1
+        with:
+          category: "ara_api"
+      - name: Integration tests
+        run: |
+          pushd code/tests
+          make start-local
+          make test-karate BATCH=true
+          make destroy-local
+          popd
+          cat code/tests/target/results.txt | grep SUCCESS
+  build-web-ui:
+    needs: prepare
+    if: ${{ needs.prepare.outputs.should_skip != 'true' || !fromJSON(needs.prepare.outputs.paths_result).webui.should_skip || needs.prepare.outputs.web-ui_new_release_published == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          ref: ${{ github.ref }}
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+        with:
+          languages: javascript
+          config-file: .github/codeql/codeql-web-ui-config.yml
+      - name: Get project version
+        id: getVersion
+        run: |
+          pushd code
+          PROJECT_VERSION=$(make -s get-web-ui-version)
+          popd
+          echo ::set-output name=projectVersion::${PROJECT_VERSION}
+      - name: Prepare
+        id: prep
+        run: |
+          PUSH=FALSE
+          pushd code
+          APP_EXISTS=$(make -s check-web-ui-image)
+          popd
+          if [[ $GITHUB_REF == refs/heads/* ]]; then
+            BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
+            if [ "${{ github.event.repository.default_branch }}" = "$BRANCH_NAME" ] && [ "$APP_EXISTS" != 'true' ]; then
+              PUSH=TRUE
+            fi
+          elif [[ $GITHUB_REF == refs/pull/* ]]; then
+            BRANCH_NAME=$(echo ${{ github.event.pull_request.head.ref }} | sed -r 's#/+#-#g')
+            if [[ $BRANCH_NAME == release-* ]]; then
+              PUSH=TRUE
+              SUFFIX=rc
+            else
+              SUFFIX=pr-${{ github.event.number }}
+            fi
+          fi
+          echo ::set-output name=push::${PUSH}
+          echo ::set-output name=suffix::${SUFFIX}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - if: ${{ steps.prep.outputs.push == 'true' }}
+        name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        run: |
+          pushd code
+          make build-web-ui SUFFIX=${{ steps.prep.outputs.suffix }} PUBLISH=${{ steps.prep.outputs.push }}
+          popd
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1
+        with:
+          category: "ara_web-ui"
+  bump-candidate:
+    needs: prepare
+    if: ${{ needs.prepare.outputs.api_new_release_published == 'true' || needs.prepare.outputs.web-ui_new_release_published == 'true' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    outputs:
+      bump: ${{ steps.check.outputs.bump }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}
+          ref: ${{ github.ref }}
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install xmllint
+        run: sudo apt-get update && sudo apt-get install libxml2-utils
+      - name: Bump version
+        working-directory: code
+        run: |
+          make update-ui-component TARGET_CHART=candidate
+          make update-api-component TARGET_CHART=candidate
+      - uses: EndBug/add-and-commit@v7
+        with:
+          add: 'charts/candidate'
+          branch_mode: throw
+          message: 'chore(release-candidate): bump components versions [skip ci]'
+          pathspec_error_handling: exitImmediately
+          pull: '--rebase --autostash'
+          default_author: github_actions
+      - id: check
+        run: echo ::set-output name=bump::true
+  release-candidate:
+    needs: 
+      - prepare
+      - bump-candidate
+    if: ${{ always() && github.event_name != 'pull_request' && (needs.bump-candidate.outputs.bump == 'true' || needs.prepare.outputs.should_skip != 'true' || !fromJSON(needs.prepare.outputs.paths_result).candidate.should_skip) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          persist-credentials: false # To use github token provide for semantic release
+          ref: ${{ github.ref }}
+      - name: Install Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.4.0
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v2
+        with:
+          working_directory: charts/candidate
+          semantic_version: 18
+          dry_run: false
+          extra_plugins: |
+            @semantic-release/commit-analyzer@9.0.2
+            @semantic-release/release-notes-generator@10.0.3
+            @semantic-release/exec@6.0.2
+            @semantic-release/changelog@6.0.1
+            @semantic-release/git@10.0.1
+        env:
+          GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+      - name: Run chart-releaser
+        uses: Thomgrus/chart-releaser-action@feat/manage-chart-by-chart-diff
+        with:
+          config: .github/cr-config.yaml
+          version: v1.3.0
+          charts_dir: charts/candidate
+        env:
+          CR_TOKEN: "${{ secrets.ACCESS_TOKEN }}"
