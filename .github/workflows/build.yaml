@@ -78,6 +78,8 @@ jobs:
             @semantic-release/release-notes-generator
             @semantic-release/exec
             @semantic-release/git
+          extends: |
+            semantic-release-monorepo
         env:
           GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
@@ -94,6 +96,8 @@ jobs:
             @semantic-release/exec
             @semantic-release/npm
             @semantic-release/git
+          extends: |
+            semantic-release-monorepo
         env:
           GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
