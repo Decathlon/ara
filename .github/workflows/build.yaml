@@ -69,15 +69,18 @@ jobs:
       - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).api.should_skip }}
         name: Semantic Release api
         id: semantic_api
-        uses: cycjimmy/semantic-release-action@v4
+        uses: cycjimmy/semantic-release-action@v3.4.1
         with:
+          semantic_version: 18
           working_directory: code/api
-          dry_run: false
           extra_plugins: |
+            @semantic-release/release-notes-generator@^10
             @semantic-release/commit-analyzer
             @semantic-release/release-notes-generator
+            @semantic-release/github@^8
+            conventional-changelog-conventionalcommits@^5
             @semantic-release/exec
-            @semantic-release/git
+
           extends: |
             semantic-release-monorepo
         env:
@@ -86,16 +89,16 @@ jobs:
       - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).webui.should_skip }}
         name: Semantic Release web-ui
         id: semantic_web-ui
-        uses: cycjimmy/semantic-release-action@v4
+        uses: cycjimmy/semantic-release-action@v3.4.1
         with:
           working_directory: code/web-ui
-          dry_run: false
           extra_plugins: |
+            @semantic-release/release-notes-generator@^10
             @semantic-release/commit-analyzer
             @semantic-release/release-notes-generator
+            @semantic-release/github@^8
+            conventional-changelog-conventionalcommits@^5
             @semantic-release/exec
-            @semantic-release/npm
-            @semantic-release/git
           extends: |
             semantic-release-monorepo
         env:
