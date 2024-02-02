@@ -69,37 +69,31 @@ jobs:
       - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).api.should_skip }}
         name: Semantic Release api
         id: semantic_api
-        uses: cycjimmy/semantic-release-action@v2
+        uses: cycjimmy/semantic-release-action@v4
         with:
           working_directory: code/api
-          semantic_version: 18
           dry_run: false
           extra_plugins: |
-            @semantic-release/commit-analyzer@9.0.2
-            @semantic-release/release-notes-generator@10.0.3
-            @semantic-release/exec@6.0.2
-            @semantic-release/git@10.0.1
-          extends: |
-            semantic-release-monorepo
+            @semantic-release/commit-analyzer
+            @semantic-release/release-notes-generator
+            @semantic-release/exec
+            @semantic-release/git
         env:
           GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
       - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).webui.should_skip }}
         name: Semantic Release web-ui
         id: semantic_web-ui
-        uses: cycjimmy/semantic-release-action@v2
+        uses: cycjimmy/semantic-release-action@v4
         with:
           working_directory: code/web-ui
-          semantic_version: 18
           dry_run: false
           extra_plugins: |
-            @semantic-release/commit-analyzer@9.0.2
-            @semantic-release/release-notes-generator@10.0.3
-            @semantic-release/exec@6.0.2
-            @semantic-release/npm@8.0.3
-            @semantic-release/git@10.0.1
-          extends: |
-            semantic-release-monorepo
+            @semantic-release/commit-analyzer
+            @semantic-release/release-notes-generator
+            @semantic-release/exec
+            @semantic-release/npm
+            @semantic-release/git
         env:
           GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
