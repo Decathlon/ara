@@ -24,7 +24,7 @@ on:
       FULL_BUILD:
         description: 'Full build launch '
         required: false
-        default: 'true'
+        default: 'false'
 jobs:
   prepare:
     runs-on: ubuntu-latest
@@ -32,6 +32,7 @@ jobs:
       group: ci-${{ github.ref }}
       cancel-in-progress: false
     outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
       paths_result: ${{ steps.skip_check.outputs.paths_result }}
       api_new_release_published: ${{ steps.semantic_api.outputs.new_release_published }}
       api_new_release_version: ${{ steps.semantic_api.outputs.new_release_version }}
@@ -166,7 +167,7 @@ jobs:
       - name: Build and push
         run: |
           pushd code
-          make build-api SUFFIX=${{ steps.prep.outputs.suffix }} PUBLISH=${{ steps.prep.outputs.push }} FULL=true
+          make build-api SUFFIX=${{ steps.prep.outputs.suffix }} PUBLISH=${{ steps.prep.outputs.push }} FULL=${{inputs.FULL_BUILD}}
           popd
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v1
@@ -280,7 +281,7 @@ jobs:
     needs: 
       - prepare
       - bump-candidate
-    if: ${{ always() && github.event_name != 'pull_request' && (needs.bump-candidate.outputs.bump == 'true' }}
+    if: ${{ always() && github.event_name != 'pull_request' && (needs.bump-candidate.outputs.bump == 'true') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -320,3 +321,4 @@ jobs:
           charts_dir: charts/candidate
         env:
           CR_TOKEN: "${{ secrets.ACCESS_TOKEN }}"
+          
