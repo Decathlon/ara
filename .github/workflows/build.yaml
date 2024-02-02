@@ -24,7 +24,7 @@ on:
       FULL_BUILD:
         description: 'Full build launch '
         required: false
-        default: 'false'
+        default: 'true'
 jobs:
   prepare:
     runs-on: ubuntu-latest
