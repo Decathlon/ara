@@ -57,13 +57,55 @@ jobs:
           skip_after_successful_duplicate: 'false'
           cancel_others: 'true'
       - name: Checkout
+        if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
         uses: actions/checkout@v2
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
           persist-credentials: false # To use github token provide for semantic release
+      - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).api.should_skip }}
+        name: Ensure package json for semantic-release-monorepo
+        working-directory: code/api
+        run: test -e package.json || echo '{"name":"ara-api"}' > package.json
+      - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).api.should_skip }}
+        name: Semantic Release api
+        id: semantic_api
+        uses: cycjimmy/semantic-release-action@v2
+        with:
+          working_directory: code/api
+          semantic_version: 18
+          dry_run: false
+          extra_plugins: |
+            @semantic-release/commit-analyzer@9.0.2
+            @semantic-release/release-notes-generator@10.0.3
+            @semantic-release/exec@6.0.2
+            @semantic-release/git@10.0.1
+          extends: |
+            semantic-release-monorepo
+        env:
+          GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+      - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).webui.should_skip }}
+        name: Semantic Release web-ui
+        id: semantic_web-ui
+        uses: cycjimmy/semantic-release-action@v2
+        with:
+          working_directory: code/web-ui
+          semantic_version: 18
+          dry_run: false
+          extra_plugins: |
+            @semantic-release/commit-analyzer@9.0.2
+            @semantic-release/release-notes-generator@10.0.3
+            @semantic-release/exec@6.0.2
+            @semantic-release/npm@8.0.3
+            @semantic-release/git@10.0.1
+          extends: |
+            semantic-release-monorepo
+        env:
+          GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
   build-api:
     needs: prepare
-    if: ${{ needs.prepare.outputs.api_new_release_published == 'true' }}
+    if: ${{ needs.prepare.outputs.should_skip != 'true' || !fromJSON(needs.prepare.outputs.paths_result).api.should_skip || needs.prepare.outputs.api_new_release_published == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - 
@@ -100,27 +142,35 @@ jobs:
       - name: Prepare
         id: prep
         run: |
-          PUSH=FALSE
-          pushd code
-          APP_EXISTS=$(make -s check-api-image)
-          popd
-          if [[ $GITHUB_REF == refs/heads/* ]]; then
-            BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
-            if [ "${{ github.event.repository.default_branch }}" = "$BRANCH_NAME" ] && [ "$APP_EXISTS" != 'true' ]; then
-              PUSH=TRUE
-            fi
-          elif [[ $GITHUB_REF == refs/pull/* ]]; then
-            BRANCH_NAME=$(echo ${{ github.event.pull_request.head.ref }} | sed -r 's#/+#-#g')
-            if [[ $BRANCH_NAME == release-* ]]; then
-              PUSH=TRUE
-              SUFFIX=-rc
-            else
-              SUFFIX=-pr.${{ github.event.number }}
-            fi
-          fi
-          echo ::set-output name=push::${PUSH}
-          echo ::set-output name=suffix::${SUFFIX}
-      - if: ${{ steps.prep.outputs.push == 'true' }}
+      PUSH=false
+      SUFFIX=
+      
+      pushd code
+      APP_EXISTS=$(make -s check-api-image)
+      popd
+      
+      if [[ $GITHUB_REF == refs/heads/* ]]; then
+        BRANCH_NAME=$(echo "${GITHUB_REF#refs/heads/}" | sed -r 's#/+#-#g')
+        DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
+      
+        if [ "$DEFAULT_BRANCH" = "$BRANCH_NAME" ] && [ "$APP_EXISTS" != 'true' ]; then
+          PUSH=true
+        fi
+      elif [[ $GITHUB_REF == refs/pull/* ]]; then
+        BRANCH_NAME=$(echo "${{ github.event.pull_request.head.ref }}" | sed -r 's#/+#-#g')
+      
+        if [[ $BRANCH_NAME == release-* ]]; then
+          PUSH=true
+          SUFFIX=-rc
+        else
+          SUFFIX=-pr.${{ github.event.number }}
+        fi
+      fi
+      echo "::set-output name=push::${PUSH}"
+      echo "push=${PUSH}" >> $GITHUB_ENV
+      echo "::set-output name=suffix::${SUFFIX}"
+      echo "suffix=${SUFFIX}" >> $GITHUB_ENV
+      - if: ${{ env.push == 'true' }}
         name: Login to DockerHub
         uses: docker/login-action@v1
         with:
@@ -129,7 +179,7 @@ jobs:
       - name: Build and push
         run: |
           pushd code
-          make build-api SUFFIX=${{ steps.prep.outputs.suffix }} PUBLISH=${{ steps.prep.outputs.push }} FULL=true
+          make build-api SUFFIX=${{ env.suffix }} PUBLISH=${{ env.push }} FULL=true
           popd
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v1
@@ -145,6 +195,7 @@ jobs:
           cat code/tests/target/results.txt | grep SUCCESS
   build-web-ui:
     needs: prepare
+    if: ${{ needs.prepare.outputs.should_skip != 'true' || !fromJSON(needs.prepare.outputs.paths_result).webui.should_skip || needs.prepare.outputs.web-ui_new_release_published == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -191,7 +242,7 @@ jobs:
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - if: ${{ steps.prep.outputs.push == 'true' }}
+      - if: ${{ env.push == 'true' }}
         name: Login to DockerHub
         uses: docker/login-action@v1
         with:
@@ -200,7 +251,7 @@ jobs:
       - name: Build and push
         run: |
           pushd code
-          make build-web-ui SUFFIX=${{ steps.prep.outputs.suffix }} PUBLISH=${{ steps.prep.outputs.push }}
+          make build-web-ui SUFFIX=${{ env.suffix }} PUBLISH=${{ env.push }}
           popd
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v1
@@ -242,7 +293,7 @@ jobs:
     needs: 
       - prepare
       - bump-candidate
-    if: ${{ always() && github.event_name != 'pull_request' && (needs.bump-candidate.outputs.bump == 'true') }}
+    if: ${{ always() && github.event_name != 'pull_request' && (needs.bump-candidate.outputs.bump == 'true' || needs.prepare.outputs.should_skip != 'true' || !fromJSON(needs.prepare.outputs.paths_result).candidate.should_skip) }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
