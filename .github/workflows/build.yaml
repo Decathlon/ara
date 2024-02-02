@@ -129,7 +129,7 @@ jobs:
       - name: Build and push
         run: |
           pushd code
-          make build-api SUFFIX=${{ steps.prep.outputs.suffix }} PUBLISH=${{ steps.prep.outputs.push }} FULL=${{inputs.FULL_BUILD}}
+          make build-api SUFFIX=${{ steps.prep.outputs.suffix }} PUBLISH=${{ steps.prep.outputs.push }} FULL=true
           popd
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v1
@@ -145,7 +145,6 @@ jobs:
           cat code/tests/target/results.txt | grep SUCCESS
   build-web-ui:
     needs: prepare
-    if: ${{ needs.prepare.outputs.web-ui_new_release_published == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
