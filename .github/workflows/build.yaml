@@ -69,38 +69,32 @@ jobs:
       - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).api.should_skip }}
         name: Semantic Release api
         id: semantic_api
-        uses: cycjimmy/semantic-release-action@v3.4.1
+        uses: cycjimmy/semantic-release-action@v2
         with:
           semantic_version: 18
           working_directory: code/api
           extra_plugins: |
-            @semantic-release/release-notes-generator@^10
-            @semantic-release/commit-analyzer
-            @semantic-release/release-notes-generator
-            @semantic-release/github@^8
-            conventional-changelog-conventionalcommits@^5
-            @semantic-release/exec
-
+            @semantic-release/changelog@6
+            @semantic-release/git@10
+            conventional-changelog-conventionalcommits@4.6.1
           extends: |
-            semantic-release-monorepo
+            semantic-release-monorepo		
         env:
           GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
       - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).webui.should_skip }}
         name: Semantic Release web-ui
         id: semantic_web-ui
-        uses: cycjimmy/semantic-release-action@v3.4.1
+        uses: cycjimmy/semantic-release-action@v2
         with:
+          semantic_version: 18
           working_directory: code/web-ui
           extra_plugins: |
-            @semantic-release/release-notes-generator@^10
-            @semantic-release/commit-analyzer
-            @semantic-release/release-notes-generator
-            @semantic-release/github@^8
-            conventional-changelog-conventionalcommits@^5
-            @semantic-release/exec
+            @semantic-release/changelog@6
+            @semantic-release/git@10
+            conventional-changelog-conventionalcommits@4.6.1
           extends: |
-            semantic-release-monorepo
+            semantic-release-monorepo		
         env:
           GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
@@ -304,15 +298,11 @@ jobs:
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v2
         with:
-          working_directory: charts/candidate
           semantic_version: 18
-          dry_run: false
           extra_plugins: |
-            @semantic-release/commit-analyzer@9.0.2
-            @semantic-release/release-notes-generator@10.0.3
-            @semantic-release/exec@6.0.2
-            @semantic-release/changelog@6.0.1
-            @semantic-release/git@10.0.1
+            @semantic-release/changelog@6
+            @semantic-release/git@10
+            conventional-changelog-conventionalcommits@4.6.1
         env:
           GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
