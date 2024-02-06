@@ -77,8 +77,6 @@ jobs:
             @semantic-release/changelog@6
             @semantic-release/git@10
             conventional-changelog-conventionalcommits@4.6.1
-          extends: |
-            semantic-release-monorepo		
         env:
           GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
@@ -93,8 +91,6 @@ jobs:
             @semantic-release/changelog@6
             @semantic-release/git@10
             conventional-changelog-conventionalcommits@4.6.1
-          extends: |
-            semantic-release-monorepo		
         env:
           GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
