@@ -58,7 +58,7 @@ jobs:
           cancel_others: 'true'
       - name: Checkout
         if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
           persist-credentials: false # To use github token provide for semantic release
@@ -103,7 +103,7 @@ jobs:
     steps:
       - 
         name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
           ref: ${{ github.ref }}
@@ -184,7 +184,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
           ref: ${{ github.ref }}
@@ -250,7 +250,7 @@ jobs:
       bump: ${{ steps.check.outputs.bump }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.ACCESS_TOKEN }}
           ref: ${{ github.ref }}
@@ -282,7 +282,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           persist-credentials: false # To use github token provide for semantic release
