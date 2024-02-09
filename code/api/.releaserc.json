@@ -13,8 +13,5 @@
             "assets": ["**/pom.xml"],
             "message": "chore(release): ara-api ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
         }]
-    ],
-    "extends": [
-        "semantic-release-monorepo"
     ]
 }
