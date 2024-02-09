@@ -65,7 +65,7 @@ jobs:
       - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).api.should_skip }}
         name: Ensure package json for semantic-release-monorepo
         working-directory: code/api
-#        run: test -e package.json || echo '{"name":"ara-api"}' > package.json
+        run: test -e package.json || echo '{"name":"ara-api"}' > package.json
       - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).api.should_skip }}
         name: Semantic Release api
         id: semantic_api
