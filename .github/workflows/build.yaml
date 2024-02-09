@@ -66,43 +66,43 @@ jobs:
         name: Ensure package json for semantic-release-monorepo
         working-directory: code/api
         run: test -e package.json || echo '{"name":"ara-api"}' > package.json
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).api.should_skip }}
-        name: Semantic Release api
-        id: semantic_api
-        uses: cycjimmy/semantic-release-action@v2
-        with:
-          working_directory: code/api
-          semantic_version: 18
-          dry_run: false
-          extra_plugins: |
-            @semantic-release/commit-analyzer@9.0.2
-            @semantic-release/release-notes-generator@10.0.3
-            @semantic-release/exec@6.0.2
-            @semantic-release/git@10.0.1
-          extends: |
-            semantic-release-monorepo
-        env:
-          GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-      - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).webui.should_skip }}
-        name: Semantic Release web-ui
-        id: semantic_web-ui
-        uses: cycjimmy/semantic-release-action@v2
-        with:
-          working_directory: code/web-ui
-          semantic_version: 18
-          dry_run: false
-          extra_plugins: |
-            @semantic-release/commit-analyzer@9.0.2
-            @semantic-release/release-notes-generator@10.0.3
-            @semantic-release/exec@6.0.2
-            @semantic-release/npm@8.0.3
-            @semantic-release/git@10.0.1
-          extends: |
-            semantic-release-monorepo
-        env:
-          GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+#      - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).api.should_skip }}
+#        name: Semantic Release api
+#        id: semantic_api
+#        uses: cycjimmy/semantic-release-action@v2
+#        with:
+#          working_directory: code/api
+#          semantic_version: 18
+#          dry_run: false
+#          extra_plugins: |
+#            @semantic-release/commit-analyzer@9.0.2
+#            @semantic-release/release-notes-generator@10.0.3
+#            @semantic-release/exec@6.0.2
+#            @semantic-release/git@10.0.1
+#          extends: |
+#            semantic-release-monorepo
+#        env:
+#          GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+#          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+#      - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).webui.should_skip }}
+#        name: Semantic Release web-ui
+#        id: semantic_web-ui
+#        uses: cycjimmy/semantic-release-action@v2
+#        with:
+#          working_directory: code/web-ui
+#          semantic_version: 18
+#          dry_run: false
+#          extra_plugins: |
+#            @semantic-release/commit-analyzer@9.0.2
+#            @semantic-release/release-notes-generator@10.0.3
+#            @semantic-release/exec@6.0.2
+#            @semantic-release/npm@8.0.3
+#            @semantic-release/git@10.0.1
+#          extends: |
+#            semantic-release-monorepo
+#        env:
+#          GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+#          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
   build-api:
     needs: prepare
     if: ${{ needs.prepare.outputs.should_skip != 'true' || !fromJSON(needs.prepare.outputs.paths_result).api.should_skip || needs.prepare.outputs.api_new_release_published == 'true' }}
