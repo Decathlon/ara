@@ -66,9 +66,9 @@ jobs:
         name: Ensure package json for semantic-release-monorepo
         working-directory: code/api
         run: test -e package.json || echo '{"name":"ara-api"}' > package.json
-#      - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).api.should_skip }}
-#        name: Semantic Release api
-#        id: semantic_api
+      - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).api.should_skip }}
+        name: Semantic Release api
+        id: semantic_api
 #        uses: cycjimmy/semantic-release-action@v2
 #        with:
 #          working_directory: code/api
@@ -84,9 +84,9 @@ jobs:
 #        env:
 #          GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 #          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-#      - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).webui.should_skip }}
-#        name: Semantic Release web-ui
-#        id: semantic_web-ui
+      - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).webui.should_skip }}
+        name: Semantic Release web-ui
+        id: semantic_web-ui
 #        uses: cycjimmy/semantic-release-action@v2
 #        with:
 #          working_directory: code/web-ui
