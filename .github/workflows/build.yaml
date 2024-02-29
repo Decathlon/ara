@@ -288,7 +288,7 @@ jobs:
           persist-credentials: false # To use github token provide for semantic release
           ref: ${{ github.ref }}
       - name: Install Helm
-        uses: azure/setup-helm@v1
+        uses: azure/setup-helm@v4
         with:
           version: v3.4.0
       - name: Semantic Release
