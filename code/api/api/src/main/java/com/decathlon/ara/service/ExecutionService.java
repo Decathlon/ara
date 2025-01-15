@@ -349,6 +349,7 @@ public class ExecutionService {
                 .replace(Settings.PROJECT_VARIABLE, projectCode)
                 .replace(Settings.BRANCH_VARIABLE, branch)
                 .replace(Settings.CYCLE_VARIABLE, cycle);
+        LOG.info("EXECUTION|Settings.PROJECT_VARIABLE {}, Settings.BRANCH_VARIABLE {}, Settings.CYCLE_VARIABLE {}", projectCode, branch, cycle);
         File destinationDirectory = new File(path, "incoming");
         String buildInformationFilePath = settingService.get(projectId, Settings.EXECUTION_INDEXER_FILE_BUILD_INFORMATION_PATH);
         List<File> executionDirectories = unzipExecutions(destinationDirectory, zipFile, buildInformationFilePath);

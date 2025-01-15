@@ -21,6 +21,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import com.decathlon.ara.web.rest.ExecutionResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,12 +39,15 @@ import com.decathlon.ara.service.exception.NotFoundException;
 import com.decathlon.ara.service.exception.NotUniqueException;
 import com.decathlon.ara.service.mapper.GenericMapper;
 
+
 /**
  * Service for managing Project.
  */
 @Service
 @Transactional
 public class ProjectService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ExecutionResource.class);
 
     private final ProjectRepository repository;
 
@@ -134,6 +140,7 @@ public class ProjectService {
      */
     public long toId(String code) throws NotFoundException {
         final Project project = repository.findOneByCode(code);
+        LOG.info("Project code {} is mapped to ID {}", code, project == null ? null : project.getId());
         if (project == null) {
             throw new NotFoundException(Messages.NOT_FOUND_PROJECT, Entities.PROJECT);
         }
