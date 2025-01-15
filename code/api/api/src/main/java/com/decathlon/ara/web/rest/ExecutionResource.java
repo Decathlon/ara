@@ -249,7 +249,7 @@ public class ExecutionResource {
             long projectId = projectService.toId(projectCode);
             service.uploadExecutionReport(projectId, projectCode, branch, cycle, zipFile);
         } catch (NotFoundException | IllegalArgumentException e) {
-            LOG.error("EXECUTION|Some parameters may not be correct");
+            LOG.error("EXECUTION|Some parameters may not be correct, details: {}", e.getMessage());
             result = ResponseUtil.handle(new BadRequestException(e.getMessage(), Entities.EXECUTION, VALIDATION_ERROR));
         } catch (IOException ex) {
             LOG.error("EXECUTION|Unable to index the uploaded execution.", ex);
