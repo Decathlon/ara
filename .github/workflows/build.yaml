@@ -9,15 +9,6 @@ on:
     branches:
       - main
   schedule:
-    #        ┌───────────── minute (0 - 59)
-    #        │  ┌───────────── hour (0 - 23)
-    #        │  │ ┌───────────── day of the month (1 - 31)
-    #        │  │ │ ┌───────────── month (1 - 12 or JAN-DEC)
-    #        │  │ │ │ ┌───────────── day of the week (0 - 6 or SUN-SAT)
-    #        │  │ │ │ │
-    #        │  │ │ │ │
-    #        │  │ │ │ │
-    #        *  * * * *
     - cron: '30 1 * * 0'
   workflow_dispatch:
     inputs:
@@ -25,10 +16,11 @@ on:
         description: 'Full build launch '
         required: false
         default: 'true'
+
 jobs:
   prepare:
     runs-on: ubuntu-latest
-    concurrency: 
+    concurrency:
       group: ci-${{ github.ref }}
       cancel-in-progress: false
     outputs:
@@ -40,7 +32,7 @@ jobs:
       web-ui_new_release_version: ${{ steps.semantic_web-ui.outputs.new_release_version }}
     steps:
       - id: skip_check
-        uses: fkirc/skip-duplicate-actions@master
+        uses: fkirc/skip-duplicate-actions@v4.4.0
         with:
           paths_filter: |
             api:
@@ -58,10 +50,10 @@ jobs:
           cancel_others: 'true'
       - name: Checkout
         if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-          persist-credentials: false # To use github token provide for semantic release
+          fetch-depth: 0
+          persist-credentials: false
       - if: ${{ steps.skip_check.outputs.should_skip != 'true' || !fromJSON(steps.skip_check.outputs.paths_result).api.should_skip }}
         name: Ensure package json for semantic-release-monorepo
         working-directory: code/api
@@ -73,10 +65,11 @@ jobs:
         with:
           working_directory: code/api
           extra_plugins: |
-            @semantic-release/commit-analyzer@9.0.2
-            @semantic-release/release-notes-generator@10.0.3
-            @semantic-release/exec@6.0.2
-            @semantic-release/git@10.0.1
+            @semantic-release/commit-analyzer@13.0.0
+            @semantic-release/release-notes-generator@14.0.2
+            @semantic-release/exec@6.0.3
+            @semantic-release/changelog@6.0.3
+            @semantic-release/git@11.0.1
         env:
           GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
@@ -89,46 +82,51 @@ jobs:
           semantic_version: 18
           dry_run: false
           extra_plugins: |
-            @semantic-release/commit-analyzer@9.0.2
-            @semantic-release/release-notes-generator@10.0.3
-            @semantic-release/exec@6.0.2
-            @semantic-release/git@10.0.1
+            @semantic-release/commit-analyzer@13.0.0
+            @semantic-release/release-notes-generator@14.0.2
+            @semantic-release/exec@6.0.3
+            @semantic-release/changelog@6.0.3
+            @semantic-release/git@11.0.1
         env:
           GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+
   build-api:
     needs: prepare
     if: ${{ needs.prepare.outputs.should_skip != 'true' || !fromJSON(needs.prepare.outputs.paths_result).api.should_skip || needs.prepare.outputs.api_new_release_published == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - 
-        name: Checkout
-        uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
           ref: ${{ github.ref }}
       - name: Set up JDK
-        uses: actions/setup-java@v2.3.1
+        uses: actions/setup-java@v3
         with:
-          distribution: 'adopt'
+          distribution: 'temurin'
           java-version: '17'
           cache: 'maven'
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v1
+        uses: github/codeql-action/init@v2
         with:
           languages: java
           config-file: .github/codeql/codeql-api-config.yml
       - name: Add host binding
-        run: sudo echo "127.0.0.1 oauth2.dev.localhost" >> sudo tee -a /etc/hosts
+        run: sudo echo "127.0.0.1 oauth2.dev.localhost" | sudo tee -a /etc/hosts
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      - name: start oauth2-dev-server
+        uses: docker/setup-buildx-action@v2
+      - name: Install Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+      - name: Start oauth2-dev-server
         run: docker-compose -f code/docker-compose.dev.yaml up -d oauth2-dev-server
-      - name: check oauth2-dev-server is running
+      - name: Check oauth2-dev-server is running
         run: docker run --rm --network host aligor/wait-for-url --url http://oauth2.dev.localhost:9001/actuator/health
-      - name: stop oauth2-dev-server
+      - name: Stop oauth2-dev-server
         run: docker-compose -f code/docker-compose.dev.yaml down
       - name: Install xmllint
         run: sudo apt-get update && sudo apt-get install libxml2-utils
@@ -157,7 +155,7 @@ jobs:
           echo ::set-output name=suffix::${SUFFIX}
       - if: ${{ steps.prep.outputs.push == 'true' }}
         name: Login to DockerHub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -167,7 +165,7 @@ jobs:
           make build-api SUFFIX=${{ steps.prep.outputs.suffix }} PUBLISH=${{ steps.prep.outputs.push }} FULL=true
           popd
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v1
+        uses: github/codeql-action/analyze@v2
         with:
           category: "ara_api"
       - name: Integration tests
@@ -184,12 +182,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
           ref: ${{ github.ref }}
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v1
+        uses: github/codeql-action/init@v2
         with:
           languages: javascript
           config-file: .github/codeql/codeql-web-ui-config.yml
@@ -224,12 +222,12 @@ jobs:
           echo ::set-output name=push::${PUSH}
           echo ::set-output name=suffix::${SUFFIX}
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
       - if: ${{ steps.prep.outputs.push == 'true' }}
         name: Login to DockerHub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -239,9 +237,10 @@ jobs:
           make build-web-ui SUFFIX=${{ steps.prep.outputs.suffix }} PUBLISH=${{ steps.prep.outputs.push }}
           popd
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v1
+        uses: github/codeql-action/analyze@v2
         with:
           category: "ara_web-ui"
+
   bump-candidate:
     needs: prepare
     if: ${{ needs.prepare.outputs.api_new_release_published == 'true' || needs.prepare.outputs.web-ui_new_release_published == 'true' || github.event_name == 'workflow_dispatch' }}
@@ -250,13 +249,13 @@ jobs:
       bump: ${{ steps.check.outputs.bump }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.ACCESS_TOKEN }}
           ref: ${{ github.ref }}
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
-          python-version: 3.7
+          python-version: 3.12.8
       - name: Install xmllint
         run: sudo apt-get update && sudo apt-get install libxml2-utils
       - name: Bump version
@@ -264,7 +263,7 @@ jobs:
         run: |
           make update-ui-component TARGET_CHART=candidate
           make update-api-component TARGET_CHART=candidate
-      - uses: EndBug/add-and-commit@v7
+      - uses: EndBug/add-and-commit@v9
         with:
           add: 'charts/candidate'
           branch_mode: throw
@@ -274,35 +273,36 @@ jobs:
           default_author: github_actions
       - id: check
         run: echo ::set-output name=bump::true
+
   release-candidate:
-    needs: 
+    needs:
       - prepare
       - bump-candidate
     if: ${{ always() && github.event_name != 'pull_request' && (needs.bump-candidate.outputs.bump == 'true' || needs.prepare.outputs.should_skip != 'true' || !fromJSON(needs.prepare.outputs.paths_result).candidate.should_skip) }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false # To use github token provide for semantic release
+          persist-credentials: false
           ref: ${{ github.ref }}
       - name: Install Helm
-        uses: azure/setup-helm@v1
+        uses: azure/setup-helm@v3
         with:
-          version: v3.4.0
+          version: v3.17.0
       - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@v2
+        uses: cycjimmy/semantic-release-action@v4
         with:
           working_directory: charts/candidate
           semantic_version: 18
           dry_run: false
           extra_plugins: |
-            @semantic-release/commit-analyzer@9.0.2
-            @semantic-release/release-notes-generator@10.0.3
-            @semantic-release/exec@6.0.2
-            @semantic-release/changelog@6.0.1
-            @semantic-release/git@10.0.1
+            @semantic-release/commit-analyzer@13.0.0
+            @semantic-release/release-notes-generator@14.0.2
+            @semantic-release/exec@6.0.3
+            @semantic-release/changelog@6.0.3
+            @semantic-release/git@11.0.1
         env:
           GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
