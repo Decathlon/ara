@@ -65,11 +65,11 @@ jobs:
         with:
           working_directory: code/api
           extra_plugins: |
-            @semantic-release/commit-analyzer@13.0.0
-            @semantic-release/release-notes-generator@14.0.2
-            @semantic-release/exec@6.0.3
-            @semantic-release/changelog@6.0.3
-            @semantic-release/git@11.0.1
+            @semantic-release/commit-analyzer
+            @semantic-release/release-notes-generator
+            @semantic-release/exec
+            @semantic-release/changelog
+            @semantic-release/git
         env:
           GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
@@ -82,11 +82,11 @@ jobs:
           semantic_version: 18
           dry_run: false
           extra_plugins: |
-            @semantic-release/commit-analyzer@13.0.0
-            @semantic-release/release-notes-generator@14.0.2
-            @semantic-release/exec@6.0.3
-            @semantic-release/changelog@6.0.3
-            @semantic-release/git@11.0.1
+            @semantic-release/commit-analyzer
+            @semantic-release/release-notes-generator
+            @semantic-release/exec
+            @semantic-release/changelog
+            @semantic-release/git
         env:
           GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
@@ -298,11 +298,11 @@ jobs:
           semantic_version: 18
           dry_run: false
           extra_plugins: |
-            @semantic-release/commit-analyzer@13.0.0
-            @semantic-release/release-notes-generator@14.0.2
-            @semantic-release/exec@6.0.3
-            @semantic-release/changelog@6.0.3
-            @semantic-release/git@11.0.1
+            @semantic-release/commit-analyzer
+            @semantic-release/release-notes-generator
+            @semantic-release/exec
+            @semantic-release/changelog
+            @semantic-release/git
         env:
           GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
