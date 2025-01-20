@@ -32,7 +32,7 @@ jobs:
       web-ui_new_release_version: ${{ steps.semantic_web-ui.outputs.new_release_version }}
     steps:
       - id: skip_check
-        uses: fkirc/skip-duplicate-actions@v4.4.0
+        uses: fkirc/skip-duplicate-actions@v5.3.1
         with:
           paths_filter: |
             api:

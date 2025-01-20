@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: skip_check
-        uses: fkirc/skip-duplicate-actions@v3.4.1
+        uses: fkirc/skip-duplicate-actions@v5.3.1
         with:
           paths: '["code/oauth2-dev-server/**", ".github/workflows/build-oauth2-dev-server.yaml"]'
           cancel_others: 'true'
