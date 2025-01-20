@@ -79,7 +79,6 @@ jobs:
         uses: cycjimmy/semantic-release-action@v4
         with:
           working_directory: code/web-ui
-          semantic_version: 18
           dry_run: false
           extra_plugins: |
             @semantic-release/commit-analyzer
@@ -295,7 +294,6 @@ jobs:
         uses: cycjimmy/semantic-release-action@v4
         with:
           working_directory: charts/candidate
-          semantic_version: 18
           dry_run: false
           extra_plugins: |
             @semantic-release/commit-analyzer
