@@ -7,9 +7,7 @@ on:
 
 jobs:
   chart_change:
-    # continue-on-error: true # Uncomment once integration is finished
     runs-on: ubuntu-latest
-    # Map a step output to a job output
     outputs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
@@ -17,43 +15,45 @@ jobs:
         uses: fkirc/skip-duplicate-actions@v3.4.1
         with:
           paths: '["charts/**"]'
-          cancel_others: 'true'
+          cancel_others: true
+
   lint-chart:
     runs-on: ubuntu-latest
     needs: chart_change
     if: ${{ needs.chart_change.outputs.should_skip != 'true' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Set up Helm
-        uses: azure/setup-helm@v1
+        uses: azure/setup-helm@v3
         with:
-          version: v3.4.0
-      - uses: actions/setup-python@v2
+          version: v3.17.0
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          python-version: 3.7
+          python-version: 3.12.8
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.6.1
       - name: Run chart-testing (list-changed)
         id: list-changed
         run: |
           changed=$(ct list-changed --target-branch main)
-          if [[ -n "$changed" ]]; then
-            echo "::set-output name=changed::true"
-          fi
+          echo "changed=$changed" >> $GITHUB_ENV
       - name: Run chart-testing (lint)
         run: ct lint --check-version-increment=false --target-branch main 
+
   lint-docs:
     runs-on: ubuntu-latest
     if: ${{ needs.chart_change.outputs.should_skip != 'true' }}
     needs: lint-chart
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
       - name: Run helm-docs
         run: .github/helm-docs.sh
+
   kubeval-chart:
     runs-on: ubuntu-latest
     if: ${{ needs.chart_change.outputs.should_skip != 'true' }}
@@ -69,17 +69,17 @@ jobs:
           - v1.20.1
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Set up Helm
-        uses: azure/setup-helm@v1
+        uses: azure/setup-helm@v3
         with:
-          version: v3.4.0
+          version: v3.12.0
       - name: Helm template
         run: |
-          mkdir helm-templates-candidate helm-templates-stable
+          mkdir -p helm-templates-candidate helm-templates-stable
           helm template charts/stable --output-dir helm-templates-stable
           helm template charts/candidate --output-dir helm-templates-candidate
-      - name: validate manifests
+      - name: Validate manifests
         uses: makocchi-git/actions-k8s-manifests-validate-kubeval@v1.0.1
         with:
           files: helm-templates-candidate,helm-templates-stable
