@@ -1,13 +1,15 @@
 apiVersion: v2
 name: ara-stable
-version: 13.2.4
+version: 13.2.5
 home: https://github.com/Decathlon/ara
 description: >
   ARA helps you fight against regressions by letting it pre-analyze your
   non-regression tests run,
 
   tracks and follows problems, keeps their history, and even breaks your CI build
-  if quality isn't met.
+  if quality isn't
+
+  met.
 keywords:
   - ara
   - analyzer
