@@ -7,9 +7,7 @@ description: >
   non-regression tests run,
 
   tracks and follows problems, keeps their history, and even breaks your CI build
-  if quality isn't
-
-  met.
+  if quality isn't met.
 keywords:
   - ara
   - analyzer
@@ -20,5 +18,5 @@ icon: >-
 sources:
   - https://github.com/Decathlon/ara
 maintainers:
-  - name: Thomgrus
-    email: thomas.gruson@protonmail.com
+  - name: renny
+    email: renny.vandomber@gmail.com
