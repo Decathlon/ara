@@ -2,6 +2,7 @@ package com.decathlon.ara.scenario.common.strategy;
 
 import java.util.Optional;
 
+import com.decathlon.ara.scenario.karate.indexer.KarateScenariosIndexer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -26,13 +27,16 @@ public class ScenariosIndexerStrategy {
 
     private final CypressScenariosIndexer cypressScenariosIndexer;
 
+    private final KarateScenariosIndexer karateScenariosIndexer;
+
     public ScenariosIndexerStrategy(GenericScenariosIndexer genericScenariosIndexer,
-            PostmanScenariosIndexer postmanScenariosIndexerService,
-            CucumberScenariosIndexer cucumberScenariosIndexerService, CypressScenariosIndexer cypressScenariosIndexer) {
+                                    PostmanScenariosIndexer postmanScenariosIndexerService,
+                                    CucumberScenariosIndexer cucumberScenariosIndexerService, CypressScenariosIndexer cypressScenariosIndexer, KarateScenariosIndexer karateScenariosIndexer) {
         this.genericScenariosIndexer = genericScenariosIndexer;
         this.postmanScenariosIndexerService = postmanScenariosIndexerService;
         this.cucumberScenariosIndexerService = cucumberScenariosIndexerService;
         this.cypressScenariosIndexer = cypressScenariosIndexer;
+        this.karateScenariosIndexer = karateScenariosIndexer;
     }
 
     /**
@@ -54,6 +58,8 @@ public class ScenariosIndexerStrategy {
                 return Optional.of(postmanScenariosIndexerService);
             case CYPRESS:
                 return Optional.of(cypressScenariosIndexer);
+            case KARATE:
+                return Optional.of(karateScenariosIndexer);
             default:
                 LOG.info("The technology {} is not handled yet. It may be a great feature request ;)", technology);
                 return Optional.empty();

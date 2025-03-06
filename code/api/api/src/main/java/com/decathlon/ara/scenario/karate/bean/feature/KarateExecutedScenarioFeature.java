@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2019 by the ARA Contributors                                 *
+ * Copyright (C) 2020 by the ARA Contributors                                 *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -15,37 +15,41 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.domain.enumeration;
+package com.decathlon.ara.scenario.karate.bean.feature;
 
-/**
- * Reporting technologies supported by ARA, for it to know how to index reports of a run.
- */
-public enum Technology {
+import com.decathlon.ara.scenario.karate.bean.KarateExecutedScenarioReport;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-    GENERIC,
+import java.util.List;
 
-    /**
-     * Cucumber job (no matter if it runs Selenium or other technologies like RestAssured or Karate): index its
-     * report.json result.
-     */
-    CUCUMBER,
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class KarateExecutedScenarioFeature {
 
-    /**
-     * Job running one or more Postman collection(s) using Newman: parse all its reports/*.json reports.
-     */
-    POSTMAN,
+    private String name;
+
+    @JsonProperty("file")
+    private String fileName;
+
+    private List<String> tags;
 
     /**
-     * Let ARA handle all the Cypress related report files
+     * Get tags representation as string
+     * @return tags representation as string
      */
-    CYPRESS,
+    public String getTagsAsString() {
+        return KarateExecutedScenarioReport.convertTagsToString(tags);
+    }
 
-    /**
-     * Let ARA handle all the karate related report files
-     */
-    KARATE
+    public String getName() {
+        return name;
+    }
 
+    public String getFileName() {
+        return fileName;
+    }
 
-
-
+    public List<String> getTags() {
+        return tags;
+    }
 }
