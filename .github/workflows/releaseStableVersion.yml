@@ -1,17 +1,13 @@
 name: Release Charts v2
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'charts/stable/**'
   workflow_dispatch:
     inputs:
       copy:
-        description: 'Copy candidate before running the release pipeline'     
+        description: 'Copy candidate before running the release pipeline'
         required: true
         default: 'true'
+
 jobs:
   copy-candidate:
     if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.copy == 'true' }}
@@ -32,6 +28,7 @@ jobs:
           pathspec_error_handling: exitImmediately
           pull: '--rebase --autostash'
           default_author: github_actions
+
   release:
     needs: copy-candidate
     if: ${{ always() }}
