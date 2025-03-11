@@ -2278,6 +2278,28 @@ entries:
     version: 10.0.0-rc.7
   ara-stable:
   - apiVersion: v2
+    created: "2025-03-11T10:03:42.066054571Z"
+    description: 'ARA helps you fight against regressions by letting it pre-analyze
+      your non-regression tests run, tracks and follows problems, keeps their history,
+      and even breaks your CI build if quality isn''t met. '
+    digest: cb0283b3401aa2aee81c23f5c0ee46b4d67083e1d54ad6bc734766bffe770f64
+    home: https://github.com/Decathlon/ara
+    icon: https://raw.githubusercontent.com/Decathlon/ara/main/code/web-ui/src/assets/favicon.png
+    keywords:
+    - ara
+    - analyzer
+    - tests aggregator
+    - regression monitoring
+    maintainers:
+    - email: renny.vandomber@gmail.com
+      name: renny
+    name: ara-stable
+    sources:
+    - https://github.com/Decathlon/ara
+    urls:
+    - https://github.com/Decathlon/ara/releases/download/ara-stable-v13.2.8/ara-stable-13.2.8.tgz
+    version: 13.2.8
+  - apiVersion: v2
     created: "2025-03-11T09:46:34.222656403Z"
     description: 'ARA helps you fight against regressions by letting it pre-analyze
       your non-regression tests run, tracks and follows problems, keeps their history,
@@ -2783,4 +2805,4 @@ entries:
     urls:
     - https://github.com/Decathlon/ara/releases/download/ara-stable-v9.5.0/ara-stable-9.5.0.tgz
     version: 9.5.0
-generated: "2025-03-11T09:47:22.946986637Z"
+generated: "2025-03-11T10:03:42.066902366Z"
