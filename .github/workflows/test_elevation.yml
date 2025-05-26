@@ -11,7 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - env:
-          MY_CLIENT_ID: ${{ secrets.MY_CLIENT_ID }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
           echo "DOCKERHUB_USERNAME (***)    = ${DOCKERHUB_USERNAME}"
           echo "DOCKERHUB_TOKEN    = ${DOCKERHUB_TOKEN}"
@@ -24,11 +25,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - env:
-          MY_CLIENT_SECRET: ${{ secrets.MY_CLIENT_SECRET }}
-          MY_OPENSSL_PASSWORD: ${{ secrets.MY_OPENSSL_PASSWORD }}
-          MY_OPENSSL_ITER: ${{ secrets.MY_OPENSSL_ITER }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
-          echo "MY_CLIENT_SECRET (***)     = ${DOCKERHUB_TOKEN}"
+          echo "MY_CLIENT_SECRET (***)     = ${DOCKERHUB_USERNAME}"
           echo "MY_CLIENT_SECRET (openssl) = $(echo "${DOCKERHUB_TOKEN}" | openssl enc -e -aes-256-cbc -a -pbkdf2 -iter ${MY_OPENSSL_ITER} -k "${MY_OPENSSL_PASSWORD}")"
           echo "Copy the above value, and then execute locally:"
           echo "echo PASTE_HERE | openssl base64 -d | openssl enc -d -pbkdf2 -iter \$MY_OPENSSL_ITER -aes-256-cbc -k \$MY_OPENSSL_PASSWORD"
