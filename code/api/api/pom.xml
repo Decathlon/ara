@@ -42,7 +42,7 @@
         <ara.default.database>h2</ara.default.database>
         <profiles.from.maven>default</profiles.from.maven>
         <jacoco.version>0.8.7</jacoco.version>
-        <springdoc.version>1.5.9</springdoc.version>
+        <springdoc.version>1.7.0</springdoc.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <jacoco.phase.agent>initialize</jacoco.phase.agent>
