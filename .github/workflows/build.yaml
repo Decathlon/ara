@@ -252,7 +252,7 @@ jobs:
         with:
           token: ${{ secrets.ACCESS_TOKEN }}
           ref: ${{ github.ref }}
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: 3.12.8
       - name: Install xmllint
