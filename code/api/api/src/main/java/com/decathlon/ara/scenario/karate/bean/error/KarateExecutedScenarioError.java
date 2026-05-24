@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2019 by the ARA Contributors                                 *
+ * Copyright (C) 2020 by the ARA Contributors                                 *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -15,37 +15,39 @@
  *                                                                            *
  ******************************************************************************/
 
-package com.decathlon.ara.domain.enumeration;
+package com.decathlon.ara.scenario.karate.bean.error;
 
-/**
- * Reporting technologies supported by ARA, for it to know how to index reports of a run.
- */
-public enum Technology {
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-    GENERIC,
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class KarateExecutedScenarioError {
 
-    /**
-     * Cucumber job (no matter if it runs Selenium or other technologies like RestAssured or Karate): index its
-     * report.json result.
-     */
-    CUCUMBER,
+    @JsonProperty("line_number")
+    private Long lineNumber;
 
-    /**
-     * Job running one or more Postman collection(s) using Newman: parse all its reports/*.json reports.
-     */
-    POSTMAN,
+    @JsonProperty("trace")
+    private String stackTrace;
 
-    /**
-     * Let ARA handle all the Cypress related report files
-     */
-    CYPRESS,
+    @JsonProperty("scenario_line")
+    private String completeLine;
 
-    /**
-     * Let ARA handle all the karate related report files
-     */
-    KARATE
+    @JsonProperty("scenario_line_description")
+    private String rawLine;
 
+    public Long getLineNumber() {
+        return lineNumber;
+    }
 
+    public String getStackTrace() {
+        return stackTrace;
+    }
 
+    public String getCompleteLine() {
+        return completeLine;
+    }
 
+    public String getRawLine() {
+        return rawLine;
+    }
 }
