@@ -27,7 +27,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install libxml2-utils
       - if: ${{ steps.skip_check.outputs.should_skip != 'true' }}
         name: Set up JDK
-        uses: actions/setup-java@v2.3.1
+        uses: actions/setup-java@v4.7.1
         with:
           distribution: 'adopt'
           java-version: '17'
